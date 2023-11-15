@@ -1,0 +1,11 @@
+{
+  "frontend": {
+    "apiPath": "api/v1"
+  },
+  "server": {
+    "apiPath": "/api/v1",
+    "bodyLimit": "30mb",
+    "logLevel": "http",
+    "port": "8080"
+  }
+}

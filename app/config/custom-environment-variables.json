@@ -1,0 +1,26 @@
+{
+  "frontend": {
+    "apiPath": "FRONTEND_APIPATH",
+    "notificationBanner": "FRONTEND_NOTIFICATION_BANNER",
+    "oidc": {
+      "authority": "FRONTEND_OIDC_AUTHORITY",
+      "clientId": "FRONTEND_OIDC_CLIENTID"
+    }
+  },
+  "server": {
+    "apiPath": "SERVER_APIPATH",
+    "bodyLimit": "SERVER_BODYLIMIT",
+    "oidc": {
+      "enabled": "SERVER_OIDC_ENABLED",
+      "clientId": "SERVER_OIDC_CLIENTID",
+      "clientSecret": "SERVER_OIDC_CLIENTSECRET",
+      "identityKey": "SERVER_OIDC_IDENTITYKEY",
+      "publicKey": "SERVER_OIDC_PUBLICKEY",
+      "realm": "SERVER_OIDC_REALM",
+      "serverUrl": "SERVER_OIDC_SERVERURL"
+    },
+    "logFile": "SERVER_LOGFILE",
+    "logLevel": "SERVER_LOGLEVEL",
+    "port": "SERVER_PORT"
+  }
+}

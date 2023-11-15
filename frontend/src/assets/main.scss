@@ -1,0 +1,182 @@
+@import './base.css';
+@import './primevue.scss';
+@import './variables.scss';
+
+#app {
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+// ----- links and buttons:
+a,
+a:visited {
+  color: $app-link-text;
+  text-decoration: underline;
+  &:hover {
+    color: $app-link-text-hover;
+  }
+}
+
+.p-button,
+.p-inputswitch-slider {
+  &:hover {
+    opacity: 0.8;
+  }
+}
+// underline button text
+.p-button:hover {
+  text-decoration: underline;
+}
+// don't underline button icons
+.p-button .p-button-icon:before {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.truncate {
+  max-width: 1px;
+  white-space: nowrap;
+
+  > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.no-indent {
+  text-indent: 0 !important;
+}
+
+// -------- layout
+
+.content-center {
+  text-align: center !important;
+}
+
+.content-right {
+  text-align: right !important;
+}
+
+.permissions-modal {
+  width: 800px;
+}
+
+// details page / sidebar
+.details-grid {
+  h2 {
+    margin-bottom: 1rem;
+  }
+  .col-fixed {
+    width: 150px; // label column
+  }
+  // make datatable look like grid
+  .p-datatable {
+    thead th {
+      padding-top: 0;
+    }
+    // highlight the row for the currently selected version
+    tr.selected-row {
+      background-color: $app-highlight-background !important;
+    }
+    td {
+      padding: 0.5rem;
+    }
+    th:first-child,
+    td:first-child {
+      padding-left: 0;
+    }
+  }
+}
+.details-value-column {
+  width: 40rem;
+}
+.sidebar .details-value-column {
+  width: 20rem;
+}
+// eof details page / sidebar
+
+// wrap text
+.wrap-block {
+  display: inline-block;
+  overflow-wrap: break-word;
+  width: 100%;
+}
+td .wrap-block {
+  width: inherit;
+}
+
+// --------- Info/settings dialog modals
+.app-info-dialog {
+  &.p-dialog {
+    .p-dialog-header {
+      padding-bottom: 0;
+
+      .svg-inline--fa {
+        color: $app-primary;
+        font-size: 1.8rem;
+        padding-right: 0.75rem;
+        padding-top: 0.15rem;
+      }
+
+      .p-dialog-title {
+        flex-grow: 1;
+        font-size: 1.8rem;
+        font-weight: bold;
+      }
+    }
+
+    .app-info-dialog-subhead {
+      font-weight: normal;
+      margin-bottom: 1.5rem;
+      padding-left: 3.1rem;
+      @extend .wrap-block;
+    }
+  }
+}
+
+.drop-shadow {
+  box-shadow: 0 6px 6px -1px rgb(145, 145, 145);
+}
+
+.gov-footer {
+  background-color: #003366 !important;
+  border-top: 2px solid #fcba19;
+  flex-shrink: 0;
+  min-height: 2.5rem;
+  min-width: 100%;
+  padding-bottom: 0;
+  padding-top: 0;
+
+  a {
+    color: #ffffff;
+    font-size: 1rem;
+    text-decoration: none;
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .button > span {
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: normal;
+    text-decoration: none;
+    text-transform: none;
+  }
+}
+
+// ---------- datatables
+
+.p-datatable {
+  .p-datatable-loading-overlay {
+    background: white;
+    opacity: 0.8;
+  }
+}
+
+.versions-table .p-datatable-table tbody tr:not(.selected-row) {
+  &:hover {
+    background-color: $app-highlight-background !important;
+    cursor: pointer;
+  }
+}

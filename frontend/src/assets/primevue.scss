@@ -1,0 +1,121 @@
+.header-center .p-column-header-content {
+  justify-content: center;
+}
+
+.header-right .p-column-header-content {
+  justify-content: right;
+}
+
+.p-dialog-footer {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+.p-datatable {
+  .p-datatable-thead > tr > th {
+    background-color: transparent !important;
+  }
+
+  &.p-datatable-striped .p-datatable-tbody > tr {
+    &:nth-child(even) {
+      background-color: $app-table-stripe-background;
+    }
+  }
+
+  tbody {
+    tr {
+      &.p-highlight {
+        background: $app-highlight-background !important;
+      }
+
+      &:focus {
+        outline: none !important;
+      }
+    }
+  }
+
+  .p-checkbox {
+    .p-checkbox-box.p-highlight {
+      background-color: $app-primary;
+      border-color: $app-primary !important;
+
+      &:hover {
+        background-color: darken($app-primary, 20%) !important;
+      }
+    }
+  }
+
+  .p-column-title {
+    font-weight: bold;
+  }
+
+  .p-paginator {
+    justify-content: right;
+  }
+
+  .action-buttons .p-button.p-button-lg {
+    padding: 0;
+    margin-left: 1rem;
+  }
+}
+
+// Primary color overrides for buttons and action items (checkboxes etc)
+// Note this could be eventually replaced by a custom themeing (which has JUST been introduced in Primevue)
+// once it is more settled implementation-wise
+.p-button {
+  &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
+    color: $app-primary !important;
+
+    &:not(.p-button-outlined, .p-button-text) {
+      background-color: $app-primary;
+      border-color: $app-primary;
+      color: $app-outline-on-primary !important;
+    }
+  }
+}
+
+.p-checkbox,
+.p-radiobutton {
+  &.p-checkbox-checked,
+  &.p-radiobutton-checked {
+    .p-checkbox-box,
+    .p-radiobutton-box {
+      background-color: $app-primary;
+      border-color: $app-primary !important;
+
+      &:hover {
+        background-color: darken($app-primary, 20%) !important;
+      }
+    }
+  }
+}
+
+.p-inputswitch.p-inputswitch-checked {
+  .p-inputswitch-slider {
+    background-color: $app-primary;
+  }
+
+  &:not(.p-disabled) {
+    &:hover {
+      .p-inputswitch-slider {
+        background-color: darken($app-primary, 10%) !important;
+      }
+    }
+  }
+}
+
+.p-tag {
+  background-color: $app-primary;
+  font-size: 1rem;
+  padding: 0.25rem 0.75rem;
+  font-weight: normal;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-weight: 600;
+  line-height: 1.2em;
+}

@@ -1,0 +1,17 @@
+[
+  {
+    "name": "IDIR",
+    "idp": "idir",
+    "identityKey": "idir_user_guid"
+  },
+  {
+    "name": "BCeID Basic",
+    "idp": "bceidbasic",
+    "identityKey": "bceid_user_guid"
+  },
+  {
+    "name": "BCeID Business",
+    "idp": "bceidbusiness",
+    "identityKey": "bceid_user_guid"
+  }
+]
