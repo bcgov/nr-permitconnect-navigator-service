@@ -1,6 +1,6 @@
 # Security Policies and Procedures
 
-This document outlines security procedures and general policies for the Single Housing Application Service
+This document outlines security procedures and general policies for the NR Permitting Navigator Service
 project.
 
 - [Supported Versions](#supported-versions)
@@ -10,7 +10,7 @@ project.
 
 ## Supported Versions
 
-At this time, only the latest version of Single Housing Application Service is supported.
+At this time, only the latest version of NR Permitting Navigator Service is supported.
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -19,8 +19,8 @@ At this time, only the latest version of Single Housing Application Service is s
 
 ## Reporting a Bug
 
-The `CSS` team and community take all security bugs in `Single Housing Application Service` seriously.
-Thank you for improving the security of `Single Housing Application Service`. We appreciate your efforts and
+The `CSS` team and community take all security bugs in `NR Permitting Navigator Service` seriously.
+Thank you for improving the security of `NR Permitting Navigator Service`. We appreciate your efforts and
 responsible disclosure and will make every effort to acknowledge your
 contributions.
 

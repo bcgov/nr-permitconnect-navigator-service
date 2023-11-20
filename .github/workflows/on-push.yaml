@@ -1,7 +1,7 @@
 name: Push
 
 env:
-  APP_NAME: single-housing-application-service
+  APP_NAME: nr-permitting-navigator-service
 
 on:
   push:

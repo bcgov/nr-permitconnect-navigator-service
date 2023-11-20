@@ -1,11 +1,11 @@
-# Single Housing Application Service
+# NR Permitting Navigator Service
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Lifecycle:Maturing](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-![Tests](https://github.com/bcgov/single-housing-application-service/workflows/Tests/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/c8851505a24845123966/maintainability)](https://codeclimate.com/github/bcgov/single-housing-application-service/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/c8851505a24845123966/test_coverage)](https://codeclimate.com/github/bcgov/single-housing-application-service/test_coverage)
+![Tests](https://github.com/bcgov/nr-permitting-navigator-service/workflows/Tests/badge.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/c8851505a24845123966/maintainability)](https://codeclimate.com/github/bcgov/nr-permitting-navigator-service/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/c8851505a24845123966/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitting-navigator-service/test_coverage)
 
 A clean Vue 3 frontend & backend scaffold example
 
@@ -51,8 +51,8 @@ SECURITY.md                - Security Policy and Reporting
 ## Documentation
 
 - [Application Readme](frontend/README.md)
-- [Product Roadmap](https://github.com/bcgov/single-housing-application-service/wiki/Product-Roadmap)
-- [Product Wiki](https://github.com/bcgov/single-housing-application-service/wiki)
+- [Product Roadmap](https://github.com/bcgov/nr-permitting-navigator-service/wiki/Product-Roadmap)
+- [Product Wiki](https://github.com/bcgov/nr-permitting-navigator-service/wiki)
 - [Security Reporting](SECURITY.md)
 
 ## Quick Start Dev Guide
@@ -73,7 +73,7 @@ npm run serve
 
 ## Getting Help or Reporting an Issue
 
-To report bugs/issues/features requests, please file an [issue](https://github.com/bcgov/single-housing-application-service/issues).
+To report bugs/issues/features requests, please file an [issue](https://github.com/bcgov/nr-permitting-navigator-service/issues).
 
 ## How to Contribute
 

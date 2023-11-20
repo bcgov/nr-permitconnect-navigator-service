@@ -1,11 +1,11 @@
-// This script attempts to gracefully rebuild and update single-housing-application-service-frontend if necessary
+// This script attempts to gracefully rebuild and update nr-permitting-navigator-service-frontend if necessary
 /* eslint-disable no-console */
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 
 const FRONTEND_DIR = '../frontend';
 const DIST_DIR = 'dist';
-const TITLE = 'single-housing-application-service-frontend';
+const TITLE = 'nr-permitting-navigator-service-frontend';
 
 try {
   const args = process.argv.slice(2);
@@ -47,7 +47,7 @@ try {
 
 /**
  * @function buildComponents
- * @description Rebuild `single-housing-application-service-frontend` library
+ * @description Rebuild `nr-permitting-navigator-service-frontend` library
  */
 function buildComponents() {
   if (!existsSync(`${FRONTEND_DIR}/node_modules`)) {
@@ -61,7 +61,7 @@ function buildComponents() {
 
 /**
  * @function cleanComponents
- * @description Clean `single-housing-application-service-frontend` library directory
+ * @description Clean `nr-permitting-navigator-service-frontend` library directory
  */
 function cleanComponents() {
   console.log(`Cleaning ${TITLE}...`);
@@ -71,7 +71,7 @@ function cleanComponents() {
 
 /**
  * @function deployComponents
- * @description Redeploy `single-housing-application-service-frontend` library
+ * @description Redeploy `nr-permitting-navigator-service-frontend` library
  */
 function deployComponents() {
   console.log(`Redeploying ${TITLE}...`);

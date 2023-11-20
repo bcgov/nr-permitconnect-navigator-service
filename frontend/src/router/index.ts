@@ -122,8 +122,8 @@ export default function getRouter() {
   router.afterEach((to) => {
     // Update document title
     document.title = to.meta.title
-      ? `Single Housing Application Service - ${to.meta.title}`
-      : 'Single Housing Application Service';
+      ? `NR Permitting Navigator Service - ${to.meta.title}`
+      : 'NR Permitting Navigator Service';
 
     appStore.endDeterminateLoading();
   });

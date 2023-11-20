@@ -56,7 +56,7 @@ const languagesEcosystem: Array<{ text: string; href: string }> = [
 
   <div class="flex flex-column mr-8 ml-8">
     <div class="flex justify-content-center mb-5">
-      <h1 class="font-bold">Welcome to the Single Housing Application Service!</h1>
+      <h1 class="font-bold">Welcome to the NR Permitting Navigator Service!</h1>
     </div>
     <div class="flex justify-content-center mb-5">
       <div class="text-xl text-center">

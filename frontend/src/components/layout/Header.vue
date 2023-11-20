@@ -21,7 +21,7 @@ import { LoginButton } from '@/components/layout';
             id="title-branding"
             class="justify-content-left"
           >
-            <h1>Single Housing Application Service</h1>
+            <h1>NR Permitting Navigator Service</h1>
           </div>
         </div>
         <div class="col-fixed">

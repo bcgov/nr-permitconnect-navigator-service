@@ -31,7 +31,7 @@ function initializeApp(): void {
   const pinia = createPinia();
   pinia.use(
     createPersistedState({
-      key: (id) => `single-housing-application-service.${id}`
+      key: (id) => `nr-permitting-navigator-service.${id}`
     })
   );
 
