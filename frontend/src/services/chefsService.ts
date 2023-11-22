@@ -21,8 +21,8 @@ export default {
    * @function getFormSubmissions
    * @returns {Promise} An axios response
    */
-  getFormSubmissions(formId: string, filterToUser: boolean = true) {
-    return appAxios().get(`chefs/forms/${formId}/submissions`, { params: { filterToUser } });
+  getFormSubmissions(formId: string) {
+    return appAxios().get(`chefs/forms/${formId}/submissions`);
   },
 
   /**

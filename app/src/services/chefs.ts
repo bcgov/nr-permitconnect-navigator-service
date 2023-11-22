@@ -34,7 +34,6 @@ const service = {
   exportSubmissions: async (formId: string) => {
     try {
       const response = await chefsAxios().get(`forms/${formId}/export`);
-      console.log(response);
       return response.data;
     } catch (e: unknown) {
       throw e;

@@ -13,3 +13,10 @@ export const DEFAULTCORS = Object.freeze({
   /** Set true to dynamically set Access-Control-Allow-Origin based on Origin */
   origin: true
 });
+
+/** Current user authentication type */
+export const IdentityProvider = Object.freeze({
+  IDIR: 'idir',
+  BCEID: 'bceidbasic',
+  BCEIDBUSINESS: 'bceidbusiness'
+});

@@ -15,7 +15,6 @@ import type { Ref } from 'vue';
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const filterToUser: Ref<boolean> = ref(true);
 const submissions: Ref<Array<any>> = ref([]);
 // Datatable filter(s)
 const filters = ref({
@@ -25,33 +24,12 @@ const filters = ref({
 // Actions
 onMounted(async () => {
   const chefsConfig = getConfig.value.chefs;
-  submissions.value = (await chefsService.getFormSubmissions(chefsConfig.formId, filterToUser.value)).data;
-});
-
-watch(filterToUser, async () => {
-  const chefsConfig = getConfig.value.chefs;
-  submissions.value = (await chefsService.getFormSubmissions(chefsConfig.formId, filterToUser.value)).data;
+  submissions.value = (await chefsService.getFormSubmissions(chefsConfig.formId)).data;
 });
 </script>
 
 <template>
   <h1>Submissions</h1>
-
-  <div class="justify-content-left">
-    <div class="flex align-items-center">
-      <Checkbox
-        v-model="filterToUser"
-        input-id="filterToUser"
-        :binary="true"
-      />
-      <label
-        for="filterToUser"
-        class="ml-2"
-      >
-        Filter to self
-      </label>
-    </div>
-  </div>
 
   <div class="flex">
     <div class="flex-grow-1">
@@ -67,7 +45,7 @@ watch(filterToUser, async () => {
         paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
         current-page-report-template="{first}-{last} of {totalRecords}"
         :rows-per-page-options="[10, 20, 50]"
-        :global-filter-fields="['name', 'value']"
+        :global-filter-fields="['confirmationId', 'createdBy']"
       >
         <template #empty>
           <div class="flex justify-content-center">
