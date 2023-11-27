@@ -10,6 +10,20 @@
   "server": {
     "apiPath": "SERVER_APIPATH",
     "bodyLimit": "SERVER_BODYLIMIT",
+    "chefs": {
+      "forms": {
+        "form1": {
+          "name": "FORM_1_NAME",
+          "formId": "FORM_1_ID",
+          "formApiKey": "FORM_1_APIKEY"
+        },
+        "form2": {
+          "name": "FORM_2_NAME",
+          "formId": "FORM_2_ID",
+          "formApiKey": "FORM_2_APIKEY"
+        }
+      }
+    },
     "oidc": {
       "enabled": "SERVER_OIDC_ENABLED",
       "clientId": "SERVER_OIDC_CLIENTID",

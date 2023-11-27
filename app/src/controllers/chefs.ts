@@ -1,49 +1,47 @@
+import config from 'config';
+
 import { chefsService } from '../services';
 import { isTruthy } from '../components/utils';
 import { IdentityProvider } from '../components/constants';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
+import type { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
+import type { ChefsSubmissionDataSource } from '../types/ChefsSubmissionDataSource';
 
 const controller = {
-  exportSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.exportSubmissions(req.params.formId);
-      res.status(200).send(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
+      const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
+      let formData = new Array<ChefsSubmissionDataSource>();
 
-  getFormSubmissions: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getFormSubmissions(req.params.formId);
+      await Promise.all(
+        Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
+          const data = await chefsService.getFormSubmissions(x.formId);
+          formData = formData.concat(data);
+        })
+      );
 
-      // IDIR users should be able to see all submissions
-      const filterToUser = (req.currentUser?.tokenPayload as JwtPayload).identity_provider !== IdentityProvider.IDIR;
+      /*
+       * Filter Data source
+       * IDIR users should be able to see all submissions
+       * BCeID/Business should only see their own submissions
+       */
+      const filterData = (data: Array<ChefsSubmissionDataSource>) => {
+        const filterToUser = (req.currentUser?.tokenPayload as JwtPayload).identity_provider !== IdentityProvider.IDIR;
 
-      if (isTruthy(filterToUser)) {
-        res
-          .status(200)
-          .send(
-            response.filter(
-              (x: { createdBy: string }) =>
-                x.createdBy.toUpperCase().substring(0, x.createdBy.indexOf('@idir')) ===
-                (req.currentUser?.tokenPayload as JwtPayload).idir_username.toUpperCase()
-            )
+        if (isTruthy(filterToUser)) {
+          return data.filter(
+            (x: { createdBy: string }) =>
+              x.createdBy.toUpperCase().substring(0, x.createdBy.indexOf('@')) ===
+              (req.currentUser?.tokenPayload as JwtPayload).bceid_username.toUpperCase()
           );
-      } else {
-        res.status(200).send(response);
-      }
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
+        } else {
+          return data;
+        }
+      };
 
-  getPublishedVersion: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getPublishedVersion(req.params.formId);
-      res.status(200).send(response);
+      res.status(200).send(filterData(formData));
     } catch (e: unknown) {
       next(e);
     }
@@ -51,34 +49,7 @@ const controller = {
 
   getSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.getSubmission(req.params.formSubmissionId);
-      res.status(200).send(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getVersion: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getVersion(req.params.formId, req.params.versionId);
-      res.status(200).send(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getVersionFields: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getVersionFields(req.params.formId, req.params.versionId);
-      res.status(200).send(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getVersionSubmissions: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getVersionSubmissions(req.params.formId, req.params.versionId);
+      const response = await chefsService.getSubmission(req.query.formId as string, req.params.formSubmissionId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

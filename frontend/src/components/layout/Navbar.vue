@@ -16,14 +16,11 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
           <li class="mr-2">
             <router-link :to="{ name: RouteNames.HOME }">Home</router-link>
           </li>
-          <li class="mr-2">
-            <router-link :to="{ name: RouteNames.STYLINGS }">Stylings</router-link>
-          </li>
           <li
             v-if="getIsAuthenticated"
             class="mr-2"
           >
-            <router-link :to="{ name: RouteNames.SUBMISSIONS }">Submissions</router-link>
+            <router-link :to="{ name: RouteNames.INITIATIVES }">Initiatives</router-link>
           </li>
         </ol>
       </template>

@@ -24,6 +24,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Home' }
   },
   {
+    path: '/initiatives',
+    name: RouteNames.INITIATIVES,
+    component: () => import('../views/InitiativesView.vue'),
+    meta: { title: 'Initiatives' }
+  },
+  {
     path: '/stylings',
     name: RouteNames.STYLINGS,
     component: () => import('@/views/StylingsView.vue'),
