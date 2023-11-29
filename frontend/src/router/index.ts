@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/initiatives',
     name: RouteNames.INITIATIVES,
     component: () => import('../views/InitiativesView.vue'),
-    meta: { title: 'Initiatives' }
+    meta: { requiresAuth: true, title: 'Initiatives' }
   },
   {
     path: '/stylings',

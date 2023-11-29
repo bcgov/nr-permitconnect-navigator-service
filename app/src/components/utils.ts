@@ -13,7 +13,7 @@ const log = getLogger(module.filename);
  */
 export function getChefsApiKey(formId: string): string | undefined {
   const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
-  return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.formId === formId)?.formApiKey;
+  return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
 }
 
 /**

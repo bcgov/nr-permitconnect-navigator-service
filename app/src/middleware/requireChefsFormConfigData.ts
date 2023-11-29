@@ -26,7 +26,7 @@ export const requireChefsFormConfigData = (req: Request, _res: Response, next: N
   }
 
   if (!getChefsApiKey(params.formId as string)) {
-    throw new Problem(412, {
+    throw new Problem(501, {
       detail: 'Form not present or misconfigured.',
       instance: req.originalUrl
     });

@@ -16,8 +16,8 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
   return axios.create({
     baseURL: config.get('frontend.chefs.apiPath'),
     timeout: 10000,
-    ...options,
-    auth: { username: formId, password: getChefsApiKey(formId) ?? '' }
+    auth: { username: formId, password: getChefsApiKey(formId) ?? '' },
+    ...options
   });
 }
 

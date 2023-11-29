@@ -17,7 +17,7 @@ const controller = {
 
       await Promise.all(
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
-          const data = await chefsService.getFormSubmissions(x.formId);
+          const data = await chefsService.getFormSubmissions(x.id);
           formData = formData.concat(data);
         })
       );
@@ -28,7 +28,8 @@ const controller = {
        * BCeID/Business should only see their own submissions
        */
       const filterData = (data: Array<ChefsSubmissionDataSource>) => {
-        const filterToUser = (req.currentUser?.tokenPayload as JwtPayload).identity_provider !== IdentityProvider.IDIR;
+        const tokenPayload = req.currentUser?.tokenPayload as JwtPayload;
+        const filterToUser = tokenPayload && tokenPayload.identity_provider !== IdentityProvider.IDIR;
 
         if (isTruthy(filterToUser)) {
           return data.filter(
