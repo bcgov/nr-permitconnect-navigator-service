@@ -5,12 +5,15 @@ import { Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
 
 import { chefsService } from '@/services';
 import { RouteNames } from '@/utils/constants';
-import { formatDateLong, formatJwtUsername } from '@/utils/formatters';
+import { formatDateShort, formatJwtUsername } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 
 // State
 const submissions: Ref<Array<any>> = ref([]);
+const displayRowsPerPage: Ref<number> = ref(10);
+const topTableRowEntry: Ref<number> = ref(0);
+
 // Datatable filter(s)
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -19,7 +22,35 @@ const filters = ref({
 // Actions
 onMounted(async () => {
   submissions.value = (await chefsService.getSubmissions()).data;
+  updateFormsObject();
 });
+
+// Tracks how many rows displayed
+const updateRowsPerPage = (rowNumber: number) => {
+  displayRowsPerPage.value = rowNumber;
+  updateFormsObject();
+};
+
+// Only retrieve submissions data from rows displayed in table
+const updateFormsObject = async () => {
+  for (let i = topTableRowEntry.value; i < topTableRowEntry.value+displayRowsPerPage.value; i++) {
+    if (submissions.value[i]?.retrieved) {
+      continue;
+    }
+    chefsService.getSubmission(submissions.value[i].formId, submissions.value[i].submissionId).then((res) => {
+      submissions.value[i] = {
+        retrieved: true,
+        ...submissions.value[i],
+        ...res?.data?.submission?.submission?.data
+      };
+    });
+  }
+};
+
+// Tracks the first submission entry displayed by table
+const updateFirst = (firstRow: number) => {
+  topTableRowEntry.value = firstRow;
+};
 </script>
 
 <template>
@@ -35,11 +66,13 @@ onMounted(async () => {
         class="p-datatable-sm"
         responsive-layout="scroll"
         :paginator="true"
-        :rows="10"
+        :rows="displayRowsPerPage"
         paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
         current-page-report-template="{first}-{last} of {totalRecords}"
         :rows-per-page-options="[10, 20, 50]"
         :global-filter-fields="['confirmationId', 'createdBy']"
+        @update:rows="updateRowsPerPage"
+        @update:first="updateFirst"
       >
         <template #empty>
           <div class="flex justify-content-center">
@@ -80,21 +113,67 @@ onMounted(async () => {
           :sortable="true"
         />
         <Column
+          field="projectName"
+          header="Project Name"
+          :sortable="true"
+        />
+        <Column
+          header="Contact"
+          :sortable="true"
+        >
+          <template #body="{ data }">
+            {{ data?.contactLastName }}{{ data?.contactLastName && data?.contactFirstName ? ', ' : '' }}
+            {{ data?.contactFirstName }}
+          </template>
+        </Column>
+        <Column
+          field="contactEmail"
+          header="Contact Email"
+          :sortable="true"
+        />
+        <Column
+          field="contactPhoneNumber"
+          header="Contact Phone"
+          :sortable="true"
+        />
+        <Column
+          field="assignedQueue"
+          header="Assignee"
+          :sortable="true"
+        />
+        <Column
+          header="Address"
+        >
+          <template #body="{ data }">
+            {{ data?.locationProvided?.fullAddress ?? '' }}
+          </template>
+        </Column>
+        <Column
+          field="singleFamilyUnits"
+          header="# of Units"
+          :sortable="true"
+        />
+        <Column
+          field="currentPermitStatus"
+          header="Status"
+          :sortable="true"
+        />
+        <Column
           field="createdBy"
           header="Created By"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatJwtUsername(data.createdBy) }}
+            {{ formatJwtUsername(data?.createdBy) }}
           </template>
         </Column>
         <Column
           field="createdAt"
-          header="Created At"
+          header="Submission Date"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatDateLong(data.createdAt) }}
+            {{ formatDateShort(data?.createdAt) }}
           </template>
         </Column>
       </DataTable>
