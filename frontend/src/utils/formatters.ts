@@ -1,7 +1,6 @@
 import { format, parseJSON } from 'date-fns';
 
 import { useConfigStore } from '@/store';
-import type { IdentityProvider } from '@/types';
 
 function _dateFnsFormat(value: string, formatter: string) {
   const formatted = '';

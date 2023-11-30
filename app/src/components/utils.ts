@@ -1,8 +1,20 @@
+import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import { getLogger } from './log';
+import { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
 const log = getLogger(module.filename);
+
+/**
+ * @function getChefsApiKey
+ * Search for a CHEFS form Api Key
+ * @returns {string | undefined} The CHEFS form Api Key if it exists
+ */
+export function getChefsApiKey(formId: string): string | undefined {
+  const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
+  return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
+}
 
 /**
  * @function getGitRevision
@@ -73,4 +85,20 @@ export function readIdpList(): object[] {
   }
 
   return idpList;
+}
+
+/**
+ * @function redactSecrets
+ * Sanitizes objects by replacing sensitive data with a REDACTED string value
+ * @param {object} data An arbitrary object
+ * @param {string[]} fields An array of field strings to sanitize on
+ * @returns {object} An arbitrary object with specified secret fields marked as redacted
+ */
+export function redactSecrets(data: { [key: string]: unknown }, fields: Array<string>): unknown {
+  if (fields && Array.isArray(fields) && fields.length) {
+    fields.forEach((field) => {
+      if (data[field]) data[field] = 'REDACTED';
+    });
+  }
+  return data;
 }

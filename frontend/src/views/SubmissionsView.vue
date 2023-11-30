@@ -1,18 +1,13 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
 import { Spinner } from '@/components/layout';
-import { Checkbox, Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
+import { Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
 
 import { chefsService } from '@/services';
-import { useConfigStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
 import { formatDateLong, formatJwtUsername } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const submissions: Ref<Array<any>> = ref([]);
@@ -23,8 +18,7 @@ const filters = ref({
 
 // Actions
 onMounted(async () => {
-  const chefsConfig = getConfig.value.chefs;
-  submissions.value = (await chefsService.getFormSubmissions(chefsConfig.formId)).data;
+  submissions.value = (await chefsService.getSubmissions()).data;
 });
 </script>
 
@@ -67,16 +61,14 @@ onMounted(async () => {
           </div>
         </template>
         <Column
-          selection-mode="multiple"
-          header-style="width: 3rem"
-        />
-        <Column
           header="Submission Id"
           :sortable="true"
         >
           <template #body="{ data }">
             <div>
-              <router-link :to="{ name: RouteNames.SUBMISSION, query: { submissionId: data.submissionId } }">
+              <router-link
+                :to="{ name: RouteNames.SUBMISSION, query: { formId: data.formId, submissionId: data.submissionId } }"
+              >
                 {{ data.submissionId }}
               </router-link>
             </div>
@@ -109,16 +101,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
-<style lang="scss" scoped>
-h1 {
-  padding-left: 1rem;
-}
-
-.black {
-  color: black;
-}
-.heading svg {
-  color: $app-primary;
-}
-</style>
