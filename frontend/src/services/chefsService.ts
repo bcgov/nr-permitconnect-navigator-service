@@ -2,11 +2,11 @@ import { appAxios } from './interceptors';
 
 export default {
   /**
-   * @function getSubmissions
+   * @function getFormExport
    * @returns {Promise} An axios response
    */
-  getSubmissions() {
-    return appAxios().get('chefs/submissions');
+  getFormExport() {
+    return appAxios().get('chefs/export');
   },
 
   /**

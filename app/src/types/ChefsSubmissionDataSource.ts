@@ -1,11 +1,17 @@
 export type ChefsSubmissionDataSource = {
-  confirmationId: string;
-  createdAt: string;
-  formId: string;
-  formSubmissionStatusCode: string;
-  submissionId: string;
-  deleted: boolean;
-  createdBy: string;
-  formVersionId: string;
-  lateEntry: boolean;
+  form: {
+    id: string;
+    submissionId: string;
+    confirmationId: string;
+    formName: string;
+    version: number;
+    createdAt: string;
+    fullName: string;
+    username: string;
+    email: string;
+    status: string;
+    assignee: string;
+    assigneedEmail: string;
+  };
+  // Additional form field data will be added
 };

@@ -10,9 +10,8 @@ import { formatDateShort, formatJwtUsername } from '@/utils/formatters';
 import type { Ref } from 'vue';
 
 // State
+const loading: Ref<boolean> = ref(false);
 const submissions: Ref<Array<any>> = ref([]);
-const displayRowsPerPage: Ref<number> = ref(10);
-const topTableRowEntry: Ref<number> = ref(0);
 
 // Datatable filter(s)
 const filters = ref({
@@ -21,36 +20,10 @@ const filters = ref({
 
 // Actions
 onMounted(async () => {
-  submissions.value = (await chefsService.getSubmissions()).data;
-  updateFormsObject();
+  loading.value = true;
+  submissions.value = (await chefsService.getFormExport()).data;
+  loading.value = false;
 });
-
-// Tracks how many rows displayed
-const updateRowsPerPage = (rowNumber: number) => {
-  displayRowsPerPage.value = rowNumber;
-  updateFormsObject();
-};
-
-// Only retrieve submissions data from rows displayed in table
-const updateFormsObject = async () => {
-  for (let i = topTableRowEntry.value; i < topTableRowEntry.value+displayRowsPerPage.value; i++) {
-    if (submissions.value[i]?.retrieved) {
-      continue;
-    }
-    chefsService.getSubmission(submissions.value[i].formId, submissions.value[i].submissionId).then((res) => {
-      submissions.value[i] = {
-        retrieved: true,
-        ...submissions.value[i],
-        ...res?.data?.submission?.submission?.data
-      };
-    });
-  }
-};
-
-// Tracks the first submission entry displayed by table
-const updateFirst = (firstRow: number) => {
-  topTableRowEntry.value = firstRow;
-};
 </script>
 
 <template>
@@ -60,19 +33,17 @@ const updateFirst = (firstRow: number) => {
     <div class="flex-grow-1">
       <DataTable
         v-model:filters="filters"
-        :loading="false"
+        :loading="loading"
         :value="submissions"
         data-key="id"
         class="p-datatable-sm"
         responsive-layout="scroll"
         :paginator="true"
-        :rows="displayRowsPerPage"
+        :rows="10"
         paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
         current-page-report-template="{first}-{last} of {totalRecords}"
         :rows-per-page-options="[10, 20, 50]"
-        :global-filter-fields="['confirmationId', 'createdBy']"
-        @update:rows="updateRowsPerPage"
-        @update:first="updateFirst"
+        :global-filter-fields="['form.confirmationId', 'form.username']"
       >
         <template #empty>
           <div class="flex justify-content-center">
@@ -88,30 +59,30 @@ const updateFirst = (firstRow: number) => {
               <i class="pi pi-search" />
               <InputText
                 v-model="filters['global'].value"
+                v-tooltip.bottom="'Search by confirmation ID or submitting user'"
                 placeholder="Search"
               />
             </span>
           </div>
         </template>
         <Column
-          header="Submission Id"
+          field="form.confirmationId"
+          header="Confirmation Id"
           :sortable="true"
         >
           <template #body="{ data }">
-            <div>
+            <div :data-submissionId="data.form.submissionId">
               <router-link
-                :to="{ name: RouteNames.SUBMISSION, query: { formId: data.formId, submissionId: data.submissionId } }"
+                :to="{
+                  name: RouteNames.SUBMISSION,
+                  query: { formId: data.form.id, submissionId: data.form.submissionId }
+                }"
               >
-                {{ data.submissionId }}
+                {{ data.form.confirmationId }}
               </router-link>
             </div>
           </template>
         </Column>
-        <Column
-          field="confirmationId"
-          header="Confirmation Id"
-          :sortable="true"
-        />
         <Column
           field="projectName"
           header="Project Name"
@@ -141,9 +112,7 @@ const updateFirst = (firstRow: number) => {
           header="Assignee"
           :sortable="true"
         />
-        <Column
-          header="Address"
-        >
+        <Column header="Address">
           <template #body="{ data }">
             {{ data?.locationProvided?.fullAddress ?? '' }}
           </template>
@@ -159,21 +128,21 @@ const updateFirst = (firstRow: number) => {
           :sortable="true"
         />
         <Column
-          field="createdBy"
+          field="form.username"
           header="Created By"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatJwtUsername(data?.createdBy) }}
+            {{ formatJwtUsername(data?.form.username) }}
           </template>
         </Column>
         <Column
-          field="createdAt"
+          field="form.createdAt"
           header="Submission Date"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatDateShort(data?.createdAt) }}
+            {{ formatDateShort(data?.form.createdAt) }}
           </template>
         </Column>
       </DataTable>
