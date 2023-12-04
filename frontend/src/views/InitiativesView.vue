@@ -4,7 +4,7 @@ import { RouteNames } from '@/utils/constants';
 </script>
 
 <template>
-  <h1>Submissions</h1>
+  <h1>Initiatives</h1>
 
   <router-link :to="{ name: RouteNames.SUBMISSIONS }">
     <Button>Housing</Button>

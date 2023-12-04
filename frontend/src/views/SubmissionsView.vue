@@ -108,13 +108,13 @@ onMounted(async () => {
           :sortable="true"
         />
         <Column
-          field="assignedQueue"
+          field="form.assignee"
           header="Assignee"
           :sortable="true"
         />
         <Column header="Address">
           <template #body="{ data }">
-            {{ data?.locationProvided?.fullAddress ?? '' }}
+            {{ data?.streetAddress }}
           </template>
         </Column>
         <Column
@@ -123,7 +123,7 @@ onMounted(async () => {
           :sortable="true"
         />
         <Column
-          field="currentPermitStatus"
+          field="form.status"
           header="Status"
           :sortable="true"
         />

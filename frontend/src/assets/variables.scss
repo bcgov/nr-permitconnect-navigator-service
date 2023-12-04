@@ -1,9 +1,17 @@
-// General font/etc colors
+/* --------- variable overrides for primevue--------- */
+// ref: https://primevue.org/colors/
+:root {
+  --text-color: #495057;
+  --primary-color: #036;
+}
+
+/* -------- custom css variables --------- */
+// buttons, links
 $app-primary: #036;
 $app-link-text: #1a5a96;
 $app-link-text-hover: #00f;
 $app-outline-on-primary: #fff;
 
-// Panel/row/etc backgrounds
+// highlighted sections, table rows
 $app-highlight-background: #d9e1e8;
 $app-table-stripe-background: #f2f2f2;

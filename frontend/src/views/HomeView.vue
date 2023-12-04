@@ -54,51 +54,37 @@ const languagesEcosystem: Array<{ text: string; href: string }> = [
     {{ getConfig?.notificationBanner }}
   </Message>
 
-  <div class="flex flex-column mr-8 ml-8">
-    <div class="flex justify-content-center mb-5">
-      <h1 class="font-bold">Welcome to the NR Permitting Navigator Service!</h1>
-    </div>
-    <div class="flex justify-content-center mb-5">
-      <div class="text-xl text-center">
-        <h2>Frontend Ecosystem</h2>
-        <a
-          v-for="(eco, i) in frontEcosystem"
-          :key="i"
-          :href="eco.href"
-          class="mx-3"
-          target="_blank"
-        >
-          {{ eco.text }}
-        </a>
-      </div>
-    </div>
-    <div class="flex justify-content-center mb-5">
-      <div class="text-xl text-center">
-        <h2>Backend Ecosystem</h2>
-        <a
-          v-for="(eco, i) in backEcosystem"
-          :key="i"
-          :href="eco.href"
-          class="mx-3"
-          target="_blank"
-        >
-          {{ eco.text }}
-        </a>
-      </div>
-    </div>
-    <div class="flex justify-content-center mb-5">
-      <div class="text-xl text-center">
-        <h2>Languages</h2>
-        <a
-          v-for="(eco, i) in languagesEcosystem"
-          :key="i"
-          :href="eco.href"
-          class="mx-3"
-          target="_blank"
-        >
-          {{ eco.text }}
-        </a>
-      </div>
-    </div>
+  <div class="text-center">
+    <h1 class="font-bold">Welcome to the Permitting Navigator Service!</h1>
+    <h2>Frontend Ecosystem</h2>
+    <a
+      v-for="(eco, i) in frontEcosystem"
+      :key="i"
+      :href="eco.href"
+      class="mx-3"
+      target="_blank"
+    >
+      {{ eco.text }}
+    </a>
+    <h2>Backend Ecosystem</h2>
+    <a
+      v-for="(eco, i) in backEcosystem"
+      :key="i"
+      :href="eco.href"
+      class="mx-3"
+      target="_blank"
+    >
+      {{ eco.text }}
+    </a>
+    <h2>Languages</h2>
+    <a
+      v-for="(eco, i) in languagesEcosystem"
+      :key="i"
+      :href="eco.href"
+      class="mx-3"
+      target="_blank"
+    >
+      {{ eco.text }}
+    </a>
   </div>
 </template>
