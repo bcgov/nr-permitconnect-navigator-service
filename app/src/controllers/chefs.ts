@@ -10,14 +10,16 @@ import type { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormCon
 import type { ChefsSubmissionDataSource } from '../types/ChefsSubmissionDataSource';
 
 const controller = {
-  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+  getFormExport: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
       let formData = new Array<ChefsSubmissionDataSource>();
 
+      // Get a JSON export of all form data merged into a single array
       await Promise.all(
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
-          const data = await chefsService.getFormSubmissions(x.id);
+          const data = await chefsService.getFormExport(x.id);
+          data.forEach((d: ChefsSubmissionDataSource) => (d.form.id = x.id));
           formData = formData.concat(data);
         })
       );
@@ -33,8 +35,8 @@ const controller = {
 
         if (isTruthy(filterToUser)) {
           return data.filter(
-            (x: { createdBy: string }) =>
-              x.createdBy.toUpperCase().substring(0, x.createdBy.indexOf('@')) ===
+            (x: { form: { username: string } }) =>
+              x.form.username.toUpperCase().substring(0, x.form.username.indexOf('@')) ===
               (req.currentUser?.tokenPayload as JwtPayload).bceid_username.toUpperCase()
           );
         } else {

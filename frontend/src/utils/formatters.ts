@@ -26,6 +26,16 @@ export function formatDate(value: string) {
 }
 
 /**
+ * @function formatDateShort
+ * Converts a date to an 'YYYY MMM dd, HH:mm' formatted string
+ * @param {String} value A string representation of a date
+ * @returns {String} A string representation of `value`
+ */
+export function formatDateShort(value: string) {
+  return _dateFnsFormat(value, 'yyyy MMM dd, HH:mm');
+}
+
+/**
  * @function formatDateLong
  * Converts a date to an 'MMMM D yyyy, h:mm:ss a' formatted string
  * @param {String} value A string representation of a date

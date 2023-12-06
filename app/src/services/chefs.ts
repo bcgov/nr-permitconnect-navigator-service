@@ -22,9 +22,11 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 }
 
 const service = {
-  getFormSubmissions: async (formId: string) => {
+  getFormExport: async (formId: string) => {
     try {
-      const response = await chefsAxios(formId).get(`forms/${formId}/submissions`);
+      const response = await chefsAxios(formId).get(`forms/${formId}/export`, {
+        params: { format: 'json', type: 'submissions' }
+      });
       return response.data;
     } catch (e: unknown) {
       throw e;

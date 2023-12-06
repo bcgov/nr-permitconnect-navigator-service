@@ -5,12 +5,14 @@ import { Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
 
 import { chefsService } from '@/services';
 import { RouteNames } from '@/utils/constants';
-import { formatDateLong, formatJwtUsername } from '@/utils/formatters';
+import { formatDateShort, formatJwtUsername } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 
 // State
+const loading: Ref<boolean> = ref(false);
 const submissions: Ref<Array<any>> = ref([]);
+
 // Datatable filter(s)
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
@@ -18,7 +20,9 @@ const filters = ref({
 
 // Actions
 onMounted(async () => {
-  submissions.value = (await chefsService.getSubmissions()).data;
+  loading.value = true;
+  submissions.value = (await chefsService.getFormExport()).data;
+  loading.value = false;
 });
 </script>
 
@@ -29,7 +33,7 @@ onMounted(async () => {
     <div class="flex-grow-1">
       <DataTable
         v-model:filters="filters"
-        :loading="false"
+        :loading="loading"
         :value="submissions"
         data-key="id"
         class="p-datatable-sm"
@@ -39,7 +43,7 @@ onMounted(async () => {
         paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
         current-page-report-template="{first}-{last} of {totalRecords}"
         :rows-per-page-options="[10, 20, 50]"
-        :global-filter-fields="['confirmationId', 'createdBy']"
+        :global-filter-fields="['form.confirmationId', 'form.username']"
       >
         <template #empty>
           <div class="flex justify-content-center">
@@ -55,46 +59,90 @@ onMounted(async () => {
               <i class="pi pi-search" />
               <InputText
                 v-model="filters['global'].value"
+                v-tooltip.bottom="'Search by confirmation ID or submitting user'"
                 placeholder="Search"
               />
             </span>
           </div>
         </template>
         <Column
-          header="Submission Id"
+          field="form.confirmationId"
+          header="Confirmation Id"
           :sortable="true"
         >
           <template #body="{ data }">
-            <div>
+            <div :data-submissionId="data.form.submissionId">
               <router-link
-                :to="{ name: RouteNames.SUBMISSION, query: { formId: data.formId, submissionId: data.submissionId } }"
+                :to="{
+                  name: RouteNames.SUBMISSION,
+                  query: { formId: data.form.id, submissionId: data.form.submissionId }
+                }"
               >
-                {{ data.submissionId }}
+                {{ data.form.confirmationId }}
               </router-link>
             </div>
           </template>
         </Column>
         <Column
-          field="confirmationId"
-          header="Confirmation Id"
+          field="projectName"
+          header="Project Name"
           :sortable="true"
         />
         <Column
-          field="createdBy"
+          header="Contact"
+          :sortable="true"
+        >
+          <template #body="{ data }">
+            {{ data?.contactLastName }}{{ data?.contactLastName && data?.contactFirstName ? ', ' : '' }}
+            {{ data?.contactFirstName }}
+          </template>
+        </Column>
+        <Column
+          field="contactEmail"
+          header="Contact Email"
+          :sortable="true"
+        />
+        <Column
+          field="contactPhoneNumber"
+          header="Contact Phone"
+          :sortable="true"
+        />
+        <Column
+          field="form.assignee"
+          header="Assignee"
+          :sortable="true"
+        />
+        <Column header="Address">
+          <template #body="{ data }">
+            {{ data?.streetAddress }}
+          </template>
+        </Column>
+        <Column
+          field="singleFamilyUnits"
+          header="# of Units"
+          :sortable="true"
+        />
+        <Column
+          field="form.status"
+          header="Status"
+          :sortable="true"
+        />
+        <Column
+          field="form.username"
           header="Created By"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatJwtUsername(data.createdBy) }}
+            {{ formatJwtUsername(data?.form.username) }}
           </template>
         </Column>
         <Column
-          field="createdAt"
-          header="Created At"
+          field="form.createdAt"
+          header="Submission Date"
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ formatDateLong(data.createdAt) }}
+            {{ formatDateShort(data?.form.createdAt) }}
           </template>
         </Column>
       </DataTable>

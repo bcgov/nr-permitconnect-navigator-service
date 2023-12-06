@@ -9,17 +9,14 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
 </script>
 
 <template>
-  <nav class="navigation-main">
+  <nav class="navigation-main pl-2 lg:pl-6">
     <Toolbar>
       <template #start>
         <ol class="list-none m-0 p-0 flex flex-row align-items-center font-semibold">
-          <li class="mr-2">
+          <li>
             <router-link :to="{ name: RouteNames.HOME }">Home</router-link>
           </li>
-          <li
-            v-if="getIsAuthenticated"
-            class="mr-2"
-          >
+          <li v-if="getIsAuthenticated">
             <router-link :to="{ name: RouteNames.INITIATIVES }">Initiatives</router-link>
           </li>
         </ol>
@@ -33,7 +30,6 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
   background-color: #38598a;
   color: #fcba19;
   display: flex;
-  padding: 0rem 3rem 0rem 3rem;
   width: 100%;
   box-shadow: 0 6px 8px -4px #b3b1b3;
   -webkit-box-shadow: 0 6px 8px -4px #b3b1b3;
@@ -49,12 +45,13 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
       color: #ffffff;
       list-style: none;
       li {
+        margin-right: 1em;
         a {
           display: flex;
           font-weight: normal;
           min-height: 2rem;
           color: #ffffff;
-          padding: 0.4rem 0.8rem 0.6rem 0.8rem;
+          padding: 0.5rem 0.8rem 0.7rem 0.8rem;
           text-decoration: none;
 
           &:focus {

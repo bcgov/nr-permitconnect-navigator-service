@@ -9,8 +9,8 @@ const router = express.Router();
 router.use(requireSomeAuth);
 
 // Submission endpoint
-router.get('/submissions', (req: Request, res: Response, next: NextFunction): void => {
-  chefsController.getSubmissions(req, res, next);
+router.get('/export', (req: Request, res: Response, next: NextFunction): void => {
+  chefsController.getFormExport(req, res, next);
 });
 
 // Submission endpoint
