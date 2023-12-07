@@ -2,7 +2,7 @@
 import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
-import { InputText } from '@/lib/primevue';
+import { Textarea } from '@/lib/primevue';
 
 // Props
 type Props = {
@@ -27,13 +27,14 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field col-12">
     <label :for="name">{{ label }}</label>
-    <InputText
+    <Textarea
       v-model.trim="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       :placeholder="placeholder"
       :class="'w-full ' + { 'p-invalid': errorMessage }"
       :disabled="disabled"
+      :rows="5"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <ErrorMessage :name="name" />

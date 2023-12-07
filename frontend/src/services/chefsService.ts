@@ -15,5 +15,13 @@ export default {
    */
   getSubmission(formId: string, formSubmissionId: string) {
     return appAxios().get(`chefs/submission/${formSubmissionId}`, { params: { formId } });
+  },
+
+  /**
+   * @function getSubmissionStatus
+   * @returns {Promise} An axios response
+   */
+  getSubmissionStatus(formId: string, formSubmissionId: string) {
+    return appAxios().get(`chefs/submission/${formSubmissionId}/status`, { params: { formId } });
   }
 };

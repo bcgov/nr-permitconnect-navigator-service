@@ -22,4 +22,13 @@ router.get(
   }
 );
 
+// Submission status endpoint
+router.get(
+  '/submission/:formSubmissionId/status',
+  requireChefsFormConfigData,
+  (req: Request, res: Response, next: NextFunction): void => {
+    chefsController.getSubmissionStatus(req, res, next);
+  }
+);
+
 export default router;
