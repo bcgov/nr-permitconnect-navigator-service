@@ -40,6 +40,15 @@ const service = {
     } catch (e: unknown) {
       throw e;
     }
+  },
+
+  getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
+    try {
+      const response = await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`);
+      return response.data;
+    } catch (e: unknown) {
+      throw e;
+    }
   }
 };
 
