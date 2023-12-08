@@ -23,7 +23,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field">
+  <div class="field col">
     <label :for="props.name">{{ props.label }}</label>
     <Password
       v-model.trim="value"
@@ -39,9 +39,3 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     <ErrorMessage :name="props.name" />
   </div>
 </template>
-
-<style lang="scss" scoped>
-.field * {
-  display: block;
-}
-</style>

@@ -22,6 +22,15 @@ router.get(
   }
 );
 
+// Submission endpoint
+router.put(
+  '/submission/:formSubmissionId',
+  requireChefsFormConfigData,
+  (req: Request, res: Response, next: NextFunction): void => {
+    chefsController.updateSubmission(req, res, next);
+  }
+);
+
 // Submission status endpoint
 router.get(
   '/submission/:formSubmissionId/status',

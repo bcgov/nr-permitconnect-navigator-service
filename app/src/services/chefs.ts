@@ -49,6 +49,15 @@ const service = {
     } catch (e: unknown) {
       throw e;
     }
+  },
+
+  updateSubmission: async (formId: string, formSubmissionId: string, data: any) => {
+    try {
+      console.log('updateSubmission');
+      console.log(data);
+    } catch (e: unknown) {
+      throw e;
+    }
   }
 };
 

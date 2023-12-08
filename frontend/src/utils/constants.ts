@@ -36,3 +36,9 @@ export const ToastTimeout = Object.freeze({
   SUCCESS: 3000,
   WARNING: 5000
 });
+
+/**
+ * CHEFS form constants
+ */
+export const ApplicationStatusList = ['IN PROGRESS', 'DELAYED', 'COMPLETED'];
+export const IntakeStatusList = ['SUBMITTED', 'ASSIGNED', 'COMPLETED'];

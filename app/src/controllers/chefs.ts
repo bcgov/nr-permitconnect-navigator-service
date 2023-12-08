@@ -66,6 +66,19 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
+  },
+
+  updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await chefsService.updateSubmission(
+        req.query.formId as string,
+        req.params.formSubmissionId,
+        req.body
+      );
+      res.status(200).send(response);
+    } catch (e: unknown) {
+      next(e);
+    }
   }
 };
 

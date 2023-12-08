@@ -23,5 +23,13 @@ export default {
    */
   getSubmissionStatus(formId: string, formSubmissionId: string) {
     return appAxios().get(`chefs/submission/${formSubmissionId}/status`, { params: { formId } });
+  },
+
+  /**
+   * @function updateSubmission
+   * @returns {Promise} An axios response
+   */
+  updateSubmission(formId: string, formSubmissionId: string, data: any) {
+    return appAxios().put(`chefs/submission/${formSubmissionId}`, data, { params: { formId } });
   }
 };
