@@ -2,14 +2,13 @@
 import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
-import { Textarea } from '@/lib/primevue';
+import { Calendar } from '@/lib/primevue';
 
 // Props
 type Props = {
   helpText?: string;
   label?: string;
   name: string;
-  placeholder?: string;
   disabled?: boolean;
 };
 
@@ -17,7 +16,6 @@ const props = withDefaults(defineProps<Props>(), {
   helpText: '',
   type: 'text',
   label: '',
-  placeholder: '',
   disabled: false
 });
 
@@ -27,14 +25,17 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field col">
     <label :for="name">{{ label }}</label>
-    <Textarea
+    <Calendar
       v-model.trim="value"
       :aria-describedby="`${name}-help`"
       :name="name"
-      :placeholder="placeholder"
       :class="'w-full ' + { 'p-invalid': errorMessage }"
       :disabled="disabled"
-      :rows="5"
+      show-time
+      hour-format="24"
+      show-icon
+      icon-display="input"
+      date-format="yy/mm/dd"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <ErrorMessage :name="name" />

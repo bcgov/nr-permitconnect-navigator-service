@@ -27,8 +27,10 @@ function onCancel() {
   editable.value = false;
 }
 
-function onSubmit() {
+async function onSubmit(data: any) {
+  console.log(data);
   editable.value = false;
+  await chefsService.updateSubmission(props.formId, props.submissionId, data);
   toast.success('Form saved');
 }
 
@@ -56,6 +58,4 @@ onMounted(async () => {
     @cancel="onCancel"
     @submit="onSubmit"
   />
-
-  <!-- <pre>{{ submission }}</pre> -->
 </template>

@@ -26,7 +26,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col-12">
+  <div class="field col">
     <label :for="name">{{ label }}</label>
     <Dropdown
       v-model.trim="value"

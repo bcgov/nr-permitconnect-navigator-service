@@ -1,6 +1,7 @@
 // Add imports as needed
 export { FilterMatchMode } from 'primevue/api';
 export { default as Button } from 'primevue/button';
+export { default as Calendar } from 'primevue/calendar';
 export { default as Checkbox } from 'primevue/checkbox';
 export { default as Column } from 'primevue/column';
 export { default as ConfirmDialog } from 'primevue/confirmdialog';
