@@ -15,7 +15,7 @@ router.get('/export', (req: Request, res: Response, next: NextFunction): void =>
 
 // Submission endpoint
 router.get(
-  '/submission/:formSubmissionId',
+  '/submission/:submissionId',
   requireChefsFormConfigData,
   (req: Request, res: Response, next: NextFunction): void => {
     chefsController.getSubmission(req, res, next);
@@ -23,21 +23,8 @@ router.get(
 );
 
 // Submission endpoint
-router.put(
-  '/submission/:formSubmissionId',
-  requireChefsFormConfigData,
-  (req: Request, res: Response, next: NextFunction): void => {
-    chefsController.updateSubmission(req, res, next);
-  }
-);
-
-// Submission status endpoint
-router.get(
-  '/submission/:formSubmissionId/status',
-  requireChefsFormConfigData,
-  (req: Request, res: Response, next: NextFunction): void => {
-    chefsController.getSubmissionStatus(req, res, next);
-  }
-);
+router.put('/submission/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
+  chefsController.updateSubmission(req, res, next);
+});
 
 export default router;

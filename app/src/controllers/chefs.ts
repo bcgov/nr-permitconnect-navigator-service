@@ -7,19 +7,19 @@ import { IdentityProvider } from '../components/constants';
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
 import type { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
-import type { ChefsSubmissionDataSource } from '../types/ChefsSubmissionDataSource';
+import type { ChefsSubmissionFormExport } from '../types/ChefsSubmissionFormExport';
 
 const controller = {
   getFormExport: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
-      let formData = new Array<ChefsSubmissionDataSource>();
+      let formData = new Array<ChefsSubmissionFormExport>();
 
       // Get a JSON export of all form data merged into a single array
       await Promise.all(
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           const data = await chefsService.getFormExport(x.id);
-          data.forEach((d: ChefsSubmissionDataSource) => (d.form.id = x.id));
+          data.forEach((d: ChefsSubmissionFormExport) => (d.form.id = x.id));
           formData = formData.concat(data);
         })
       );
@@ -29,7 +29,7 @@ const controller = {
        * IDIR users should be able to see all submissions
        * BCeID/Business should only see their own submissions
        */
-      const filterData = (data: Array<ChefsSubmissionDataSource>) => {
+      const filterData = (data: Array<ChefsSubmissionFormExport>) => {
         const tokenPayload = req.currentUser?.tokenPayload as JwtPayload;
         const filterToUser = tokenPayload && tokenPayload.identity_provider !== IdentityProvider.IDIR;
 
@@ -52,16 +52,7 @@ const controller = {
 
   getSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.getSubmission(req.query.formId as string, req.params.formSubmissionId);
-      res.status(200).send(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getSubmissionStatus: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await chefsService.getSubmissionStatus(req.query.formId as string, req.params.formSubmissionId);
+      const response = await chefsService.getSubmission(req.query.formId as string, req.params.submissionId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);
@@ -70,11 +61,7 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.updateSubmission(
-        req.query.formId as string,
-        req.params.formSubmissionId,
-        req.body
-      );
+      const response = await chefsService.updateSubmission(req.body);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

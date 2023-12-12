@@ -54,6 +54,7 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
 
         if (isValid) {
           currentUser.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
+          //await userService.login(currentUser.tokenPayload);
         } else {
           throw new Error('Invalid authorization token');
         }

@@ -18,7 +18,6 @@ const props = withDefaults(defineProps<Props>(), {});
 // State
 const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
-const submissionStatus: Ref<any | undefined> = ref(undefined);
 
 // Actions
 const toast = useToast();
@@ -28,15 +27,17 @@ function onCancel() {
 }
 
 async function onSubmit(data: any) {
-  console.log(data);
   editable.value = false;
-  await chefsService.updateSubmission(props.formId, props.submissionId, data);
+  delete data.assignee; // TODO: REMOVE THIS WHEN USERS WORKING
+  await chefsService.updateSubmission(props.submissionId, {
+    ...data,
+    submissionId: props.submissionId
+  });
   toast.success('Form saved');
 }
 
 onMounted(async () => {
-  submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data.submission;
-  submissionStatus.value = (await chefsService.getSubmissionStatus(props.formId, props.submissionId)).data[0];
+  submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
 });
 </script>
 
@@ -51,10 +52,9 @@ onMounted(async () => {
   </Button>
 
   <SubmissionForm
-    v-if="submission && submissionStatus"
+    v-if="submission"
     :editable="editable"
     :submission="submission"
-    :submission-status="submissionStatus"
     @cancel="onCancel"
     @submit="onSubmit"
   />

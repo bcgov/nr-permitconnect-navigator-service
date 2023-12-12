@@ -11,7 +11,6 @@ import { formatJwtUsername } from '@/utils/formatters';
 type Props = {
   editable: boolean;
   submission: any;
-  submissionStatus: any;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
@@ -21,19 +20,10 @@ const emit = defineEmits(['submit', 'cancel']);
 
 // Default form values
 const initialFormValues: any = {
-  assignee: props.submissionStatus.user?.username,
-  confirmationId: props.submission.confirmationId,
-  contactEmail: props.submission.submission.data.contactEmail,
-  contactPhoneNumber: props.submission.submission.data.contactPhoneNumber,
-  contactFirstName: props.submission.submission.data.contactFirstName,
-  contactLastName: props.submission.submission.data.contactLastName,
-  shasCreatedAt: new Date(props.submission.shasCreatedAt),
-  shasCreatedBy: formatJwtUsername(props.submission.shasCreatedBy),
-  intakeStatus: props.submissionStatus.code,
-  projectName: props.submission.submission.data.projectName,
-  queuePriority: props.submission.submission.data.queuePriority,
-  singleFamilyUnits: props.submission.submission.data.singleFamilyUnits,
-  streetAddress: props.submission.submission.data.streetAddress
+  ...props.submission,
+  bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
+  submittedAt: new Date(props.submission.submittedAt),
+  submittedBy: formatJwtUsername(props.submission.submittedBy)
 };
 
 // Form validation schema
@@ -92,13 +82,13 @@ const onSubmit = (values: any) => {
       />
       <TextInput
         class="col-4"
-        name="shasCreatedBy"
+        name="submittedBy"
         label="Submitted By"
         :disabled="true"
       />
       <Calendar
         class="col-4"
-        name="shasCreatedAt"
+        name="submittedAt"
         label="Submission Date"
         :disabled="true"
       />

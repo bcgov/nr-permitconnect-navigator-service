@@ -31,7 +31,7 @@ model knex_migrations_lock {
 
 model submission {
   submissionId         String    @id @db.Uuid
-  assigneeUserId       String    @db.Uuid
+  assignedToUserId     String?   @db.Uuid
   confirmationId       String?   @db.VarChar(255)
   contactEmail         String?   @db.VarChar(255)
   contactPhoneNumber   String?   @db.VarChar(255)
@@ -49,15 +49,15 @@ model submission {
   relatedPermits       String?   @db.VarChar(255)
   updatedAai           Boolean?
   waitingOn            String?   @db.VarChar(255)
-  shasCreatedAt        DateTime? @db.Timestamptz(6)
-  shasCreatedBy        String?   @db.VarChar(255)
+  submittedAt          DateTime? @db.Timestamptz(6)
+  submittedBy          String?   @db.VarChar(255)
   bringForwardDate     DateTime? @db.Timestamptz(6)
   notes                String?   @db.VarChar(2047)
   createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @db.VarChar(255)
   createdAt            DateTime? @default(now()) @db.Timestamptz(6)
   updatedBy            String?   @db.VarChar(255)
   updatedAt            DateTime? @db.Timestamptz(6)
-  user                 user      @relation(fields: [assigneeUserId], references: [userId], onDelete: Cascade, map: "submission_assigneeuserid_foreign")
+  user                 user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }
 
 model user {

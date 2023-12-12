@@ -10,13 +10,15 @@ type Props = {
   label?: string;
   name: string;
   disabled?: boolean;
+  showTime?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   helpText: '',
   type: 'text',
   label: '',
-  disabled: false
+  disabled: false,
+  showTime: false
 });
 
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
@@ -31,7 +33,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       :name="name"
       :class="'w-full ' + { 'p-invalid': errorMessage }"
       :disabled="disabled"
-      show-time
+      :show-time="props.showTime"
       hour-format="24"
       show-icon
       icon-display="input"

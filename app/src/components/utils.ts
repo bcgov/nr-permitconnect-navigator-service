@@ -102,3 +102,25 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
   }
   return data;
 }
+
+/**
+ * @function fromYrn
+ * Converts a YRN string to boolean
+ * @param {string | null | undefined} yrn An arbitrary string
+ * @returns {boolean | null} The converted value
+ */
+export function fromYrn(yrn: string | null | undefined): boolean | null {
+  if (!yrn) return null;
+  return yrn.toUpperCase() === 'Y' ? true : false;
+}
+
+/**
+ * @function toYrn
+ * Converts a boolean value to a YRN string
+ * @param {boolean | null | undefined} bool An arbitrary boolean
+ * @returns {sring | null} The converted value
+ */
+export function toYrn(bool: boolean | null | undefined): string | null {
+  if (bool === null || bool === undefined) return null;
+  return bool ? 'Y' : 'N';
+}

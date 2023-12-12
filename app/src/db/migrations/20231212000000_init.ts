@@ -40,13 +40,7 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.createTable('submission', (table) => {
           table.uuid('submissionId').primary();
-          table
-            .uuid('assigneeUserId')
-            .references('userId')
-            .inTable('user')
-            .notNullable()
-            .onUpdate('CASCADE')
-            .onDelete('CASCADE');
+          table.uuid('assignedToUserId').references('userId').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
           table.string('confirmationId', 255);
           table.string('contactEmail', 255);
           table.string('contactPhoneNumber', 255);
@@ -64,8 +58,8 @@ export async function up(knex: Knex): Promise<void> {
           table.string('relatedPermits', 255);
           table.boolean('updatedAai');
           table.string('waitingOn', 255);
-          table.timestamp('shasCreatedAt', { useTz: true });
-          table.string('shasCreatedBy', 255);
+          table.timestamp('submittedAt', { useTz: true });
+          table.string('submittedBy', 255);
           table.timestamp('bringForwardDate', { useTz: true });
           table.string('notes', 2047);
           stamps(knex, table);

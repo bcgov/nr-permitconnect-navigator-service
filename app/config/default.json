@@ -6,7 +6,7 @@
     "apiPath": "/api/v1",
     "bodyLimit": "30mb",
     "db": {
-      "database": "pns",
+      "database": "pcns",
       "host": "localhost",
       "port": "5432",
       "poolMin": "2",
