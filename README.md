@@ -1,11 +1,11 @@
-# NR Permitting Navigator Service
+# NR PermitConnect Navigator Service
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![Lifecycle:Maturing](https://img.shields.io/badge/Lifecycle-Maturing-007EC6)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
+[![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-![Tests](https://github.com/bcgov/nr-permitting-navigator-service/workflows/Tests/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/c8851505a24845123966/maintainability)](https://codeclimate.com/github/bcgov/nr-permitting-navigator-service/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/c8851505a24845123966/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitting-navigator-service/test_coverage)
+![Tests](https://github.com/bcgov/nr-permitconnect-navigator-service/workflows/Tests/badge.svg)
+[![Maintainability](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/maintainability)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/test_coverage)
 
 A clean Vue 3 frontend & backend scaffold example
 
@@ -51,8 +51,8 @@ SECURITY.md                - Security Policy and Reporting
 ## Documentation
 
 - [Application Readme](frontend/README.md)
-- [Product Roadmap](https://github.com/bcgov/nr-permitting-navigator-service/wiki/Product-Roadmap)
-- [Product Wiki](https://github.com/bcgov/nr-permitting-navigator-service/wiki)
+- [Product Roadmap](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki/Product-Roadmap)
+- [Product Wiki](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki)
 - [Security Reporting](SECURITY.md)
 
 ## Quick Start Dev Guide
@@ -73,7 +73,7 @@ npm run serve
 
 ## Getting Help or Reporting an Issue
 
-To report bugs/issues/features requests, please file an [issue](https://github.com/bcgov/nr-permitting-navigator-service/issues).
+To report bugs/issues/features requests, please file an [issue](https://github.com/bcgov/nr-permitconnect-navigator-service/issues).
 
 ## How to Contribute
 
@@ -84,7 +84,7 @@ Please note that this project is released with a [Contributor Code of Conduct](C
 ## License
 
 ```txt
-Copyright 2022 Province of British Columbia
+Copyright 2023 Province of British Columbia
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
