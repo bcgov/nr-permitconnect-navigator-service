@@ -27,8 +27,8 @@ const initialFormValues: any = {
   contactPhoneNumber: props.submission.submission.data.contactPhoneNumber,
   contactFirstName: props.submission.submission.data.contactFirstName,
   contactLastName: props.submission.submission.data.contactLastName,
-  createdAt: new Date(props.submission.createdAt),
-  createdBy: formatJwtUsername(props.submission.createdBy),
+  shasCreatedAt: new Date(props.submission.shasCreatedAt),
+  shasCreatedBy: formatJwtUsername(props.submission.shasCreatedBy),
   intakeStatus: props.submissionStatus.code,
   projectName: props.submission.submission.data.projectName,
   queuePriority: props.submission.submission.data.queuePriority,
@@ -92,13 +92,13 @@ const onSubmit = (values: any) => {
       />
       <TextInput
         class="col-4"
-        name="createdBy"
+        name="shasCreatedBy"
         label="Submitted By"
         :disabled="true"
       />
       <Calendar
         class="col-4"
-        name="createdAt"
+        name="shasCreatedAt"
         label="Submission Date"
         :disabled="true"
       />

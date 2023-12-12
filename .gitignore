@@ -19,6 +19,7 @@ Chart.lock
 # local env files
 *local.*
 *local-*.*
+.env
 .env.local
 .env.*.local
 
