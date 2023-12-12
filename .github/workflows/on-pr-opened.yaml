@@ -1,7 +1,7 @@
 name: Pull Request Opened
 
 env:
-  APP_NAME: nr-permitting-navigator-service
+  APP_NAME: nr-permitconnect-navigator-service
 
 on:
   pull_request:
