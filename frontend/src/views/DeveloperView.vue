@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 
 import { CopyToClipboard } from '@/components/form';
 import { useAuthStore, useConfigStore } from '@/store';
-import { ButtonMode } from '@/utils/enums';
+import { BUTTON_MODE } from '@/utils/enums';
 
 // Store
 const { getAccessToken, getProfile } = storeToRefs(useAuthStore());
@@ -16,7 +16,7 @@ const { getConfig } = storeToRefs(useConfigStore());
     <div class="flex mt-3">
       <h3>Config</h3>
       <CopyToClipboard
-        :mode="ButtonMode.ICON"
+        :mode="BUTTON_MODE.ICON"
         :to-copy="JSON.stringify(getConfig)"
       />
     </div>
@@ -25,7 +25,7 @@ const { getConfig } = storeToRefs(useConfigStore());
     <div class="flex mt-3">
       <h3>Token</h3>
       <CopyToClipboard
-        :mode="ButtonMode.ICON"
+        :mode="BUTTON_MODE.ICON"
         :to-copy="getAccessToken"
       />
     </div>
@@ -37,7 +37,7 @@ const { getConfig } = storeToRefs(useConfigStore());
     <div class="flex mt-3">
       <h3>Profile</h3>
       <CopyToClipboard
-        :mode="ButtonMode.ICON"
+        :mode="BUTTON_MODE.ICON"
         :to-copy="JSON.stringify(getProfile)"
       />
     </div>

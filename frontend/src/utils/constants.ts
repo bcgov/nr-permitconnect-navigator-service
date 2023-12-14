@@ -1,3 +1,5 @@
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '@/utils/enums';
+
 /**
  * Default string delimiter
  */
@@ -40,5 +42,14 @@ export const ToastTimeout = Object.freeze({
 /**
  * CHEFS form constants
  */
-export const ApplicationStatusList = ['IN PROGRESS', 'DELAYED', 'COMPLETED'];
-export const IntakeStatusList = ['SUBMITTED', 'ASSIGNED', 'COMPLETED'];
+export const ApplicationStatusList = [
+  APPLICATION_STATUS_LIST.IN_PROGRESS,
+  APPLICATION_STATUS_LIST.DELAYED,
+  APPLICATION_STATUS_LIST.COMPLETED
+];
+
+export const IntakeStatusList = [
+  INTAKE_STATUS_LIST.SUBMITTED,
+  INTAKE_STATUS_LIST.ASSIGNED,
+  INTAKE_STATUS_LIST.COMPLETED
+];

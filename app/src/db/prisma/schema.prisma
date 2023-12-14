@@ -8,11 +8,11 @@ datasource db {
 }
 
 model identity_provider {
-  idp       String    @id @db.VarChar(255)
+  idp       String    @id
   active    Boolean   @default(true)
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @db.VarChar(255)
+  createdBy String?   @default("00000000-0000-0000-0000-000000000000")
   createdAt DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy String?   @db.VarChar(255)
+  updatedBy String?
   updatedAt DateTime? @db.Timestamptz(6)
   user      user[]
 }
@@ -32,30 +32,30 @@ model knex_migrations_lock {
 model submission {
   submissionId         String    @id @db.Uuid
   assignedToUserId     String?   @db.Uuid
-  confirmationId       String?   @db.VarChar(255)
-  contactEmail         String?   @db.VarChar(255)
-  contactPhoneNumber   String?   @db.VarChar(255)
-  contactFirstName     String?   @db.VarChar(255)
-  contactLastName      String?   @db.VarChar(255)
-  intakeStatus         String?   @db.VarChar(255)
-  projectName          String?   @db.VarChar(255)
-  queuePriority        String?   @db.VarChar(255)
-  singleFamilyUnits    String?   @db.VarChar(255)
-  streetAddress        String?   @db.VarChar(255)
-  atsClientNumber      String?   @db.VarChar(255)
+  confirmationId       String?
+  contactEmail         String?
+  contactPhoneNumber   String?
+  contactFirstName     String?
+  contactLastName      String?
+  intakeStatus         String?
+  projectName          String?
+  queuePriority        String?
+  singleFamilyUnits    String?
+  streetAddress        String?
+  atsClientNumber      String?
   addedToATS           Boolean?
   financiallySupported Boolean?
-  applicationStatus    String?   @db.VarChar(255)
-  relatedPermits       String?   @db.VarChar(255)
+  applicationStatus    String?
+  relatedPermits       String?
   updatedAai           Boolean?
-  waitingOn            String?   @db.VarChar(255)
+  waitingOn            String?
   submittedAt          DateTime? @db.Timestamptz(6)
-  submittedBy          String?   @db.VarChar(255)
+  submittedBy          String?
   bringForwardDate     DateTime? @db.Timestamptz(6)
-  notes                String?   @db.VarChar(2047)
-  createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @db.VarChar(255)
+  notes                String?
+  createdBy            String?   @default("00000000-0000-0000-0000-000000000000")
   createdAt            DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy            String?   @db.VarChar(255)
+  updatedBy            String?
   updatedAt            DateTime? @db.Timestamptz(6)
   user                 user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }
@@ -63,16 +63,16 @@ model submission {
 model user {
   userId            String             @id @db.Uuid
   identityId        String?            @db.Uuid
-  idp               String?            @db.VarChar(255)
-  username          String             @db.VarChar(255)
-  email             String?            @db.VarChar(255)
-  firstName         String?            @db.VarChar(255)
-  fullName          String?            @db.VarChar(255)
-  lastName          String?            @db.VarChar(255)
+  idp               String?
+  username          String
+  email             String?
+  firstName         String?
+  fullName          String?
+  lastName          String?
   active            Boolean            @default(true)
-  createdBy         String?            @default("00000000-0000-0000-0000-000000000000") @db.VarChar(255)
+  createdBy         String?            @default("00000000-0000-0000-0000-000000000000")
   createdAt         DateTime?          @default(now()) @db.Timestamptz(6)
-  updatedBy         String?            @db.VarChar(255)
+  updatedBy         String?
   updatedAt         DateTime?          @db.Timestamptz(6)
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")

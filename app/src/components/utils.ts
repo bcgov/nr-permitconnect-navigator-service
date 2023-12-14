@@ -4,7 +4,19 @@ import { join } from 'path';
 
 import { getLogger } from './log';
 import { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
+import { YRN } from '../types/YRN';
 const log = getLogger(module.filename);
+
+/**
+ * @function fromYrn
+ * Converts a YRN to boolean
+ * @param {YRN} yrn An arbitrary YRN
+ * @returns {boolean | null} The converted value
+ */
+export function fromYrn(yrn: YRN | undefined): boolean | null {
+  if (!yrn) return null;
+  return yrn.toUpperCase() === 'Y' ? true : false;
+}
 
 /**
  * @function getChefsApiKey
@@ -104,23 +116,12 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
 }
 
 /**
- * @function fromYrn
- * Converts a YRN string to boolean
- * @param {string | null | undefined} yrn An arbitrary string
- * @returns {boolean | null} The converted value
- */
-export function fromYrn(yrn: string | null | undefined): boolean | null {
-  if (!yrn) return null;
-  return yrn.toUpperCase() === 'Y' ? true : false;
-}
-
-/**
  * @function toYrn
- * Converts a boolean value to a YRN string
+ * Converts a boolean to YRN
  * @param {boolean | null | undefined} bool An arbitrary boolean
- * @returns {sring | null} The converted value
+ * @returns {YRN} The converted value
  */
-export function toYrn(bool: boolean | null | undefined): string | null {
+export function toYrn(bool: boolean | null | undefined): YRN {
   if (bool === null || bool === undefined) return null;
   return bool ? 'Y' : 'N';
 }
