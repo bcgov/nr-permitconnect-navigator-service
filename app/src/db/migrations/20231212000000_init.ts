@@ -43,7 +43,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('contactLastName');
           table.text('intakeStatus');
           table.text('projectName');
-          table.text('queuePriority');
+          table.integer('queuePriority');
           table.text('singleFamilyUnits');
           table.text('streetAddress');
           table.text('atsClientNumber');

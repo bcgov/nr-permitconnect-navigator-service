@@ -13,9 +13,8 @@ const log = getLogger(module.filename);
  * @param {YRN} yrn An arbitrary YRN
  * @returns {boolean | null} The converted value
  */
-export function fromYrn(yrn: YRN | undefined): boolean | null {
-  if (!yrn) return null;
-  return yrn.toUpperCase() === 'Y' ? true : false;
+export function fromYrn(yrn: YRN): boolean | null {
+  return yrn === null ? null : yrn.toUpperCase() === 'Y';
 }
 
 /**
@@ -118,10 +117,10 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
 /**
  * @function toYrn
  * Converts a boolean to YRN
- * @param {boolean | null | undefined} bool An arbitrary boolean
+ * @param {boolean | null} bool An arbitrary boolean
  * @returns {YRN} The converted value
  */
-export function toYrn(bool: boolean | null | undefined): YRN {
-  if (bool === null || bool === undefined) return null;
+export function toYrn(bool: boolean | null): YRN {
+  if (bool === null) return null;
   return bool ? 'Y' : 'N';
 }
