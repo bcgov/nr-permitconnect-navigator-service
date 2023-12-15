@@ -128,8 +128,8 @@ export default function getRouter() {
   router.afterEach((to) => {
     // Update document title
     document.title = to.meta.title
-      ? `NR Permitting Navigator Service - ${to.meta.title}`
-      : 'NR Permitting Navigator Service';
+      ? `NR PermitConnect Navigator Service - ${to.meta.title}`
+      : 'NR PermitConnect Navigator Service';
 
     appStore.endDeterminateLoading();
   });

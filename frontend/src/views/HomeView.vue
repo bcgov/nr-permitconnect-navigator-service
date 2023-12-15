@@ -55,7 +55,7 @@ const languagesEcosystem: Array<{ text: string; href: string }> = [
   </Message>
 
   <div class="text-center">
-    <h1 class="font-bold">Welcome to the Permitting Navigator Service!</h1>
+    <h1 class="font-bold">Welcome to the PermitConnect Navigator Service!</h1>
     <h2>Frontend Ecosystem</h2>
     <a
       v-for="(eco, i) in frontEcosystem"
