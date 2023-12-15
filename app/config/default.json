@@ -13,6 +13,11 @@
       "poolMax": "10",
       "username": "app"
     },
+    "helmet": {
+      "contentSecurityPolicy": {
+        "defaultSrc": "'self'"
+      }
+    },
     "logLevel": "http",
     "port": "8080"
   }

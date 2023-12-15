@@ -11,7 +11,7 @@ import querystring from 'querystring';
 import { name as appName, version as appVersion } from './package.json';
 import { DEFAULTCORS } from './src/components/constants';
 import { getLogger, httpLogger } from './src/components/log';
-import { getGitRevision, readIdpList } from './src/components/utils';
+import { getGitRevision, parseCSV, readIdpList } from './src/components/utils';
 import v1Router from './src/routes/v1';
 
 import type { Request, Response } from 'express';
@@ -30,7 +30,15 @@ app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        'default-src': parseCSV(config.get('server.helmet.contentSecurityPolicy.defaultSrc'))
+      }
+    }
+  })
+);
 
 // Skip if running tests
 if (process.env.NODE_ENV !== 'test') {
