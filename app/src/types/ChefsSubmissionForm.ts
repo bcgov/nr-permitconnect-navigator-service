@@ -1,3 +1,4 @@
+import { YRN } from '.';
 import { IStamps } from '../interfaces/IStamps';
 
 export type ChefsSubmissionForm = {
@@ -14,11 +15,11 @@ export type ChefsSubmissionForm = {
   singleFamilyUnits?: string;
   streetAddress?: string;
   atsClientNumber?: string;
-  addedToATS?: string;
-  financiallySupported?: string;
+  addedToATS: YRN;
+  financiallySupported: YRN;
   applicationStatus?: string;
   relatedPermits?: string;
-  updatedAai?: string;
+  updatedAai: YRN;
   waitingOn?: string;
   submittedAt: string;
   submittedBy: string;
