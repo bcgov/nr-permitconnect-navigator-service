@@ -93,24 +93,6 @@ const service = {
     }
   },
 
-  updateSubmission: async (data: ChefsSubmissionForm) => {
-    try {
-      await prisma.submission.update({
-        data: {
-          ...data,
-          addedToATS: fromYrn(data.addedToATS),
-          financiallySupported: fromYrn(data.financiallySupported),
-          updatedAai: fromYrn(data.updatedAai)
-        },
-        where: {
-          submissionId: data.submissionId
-        }
-      });
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
   getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
     try {
       const response = await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`);

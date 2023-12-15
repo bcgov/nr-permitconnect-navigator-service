@@ -24,11 +24,6 @@
         }
       }
     },
-    "helmet": {
-      "contentSecurityPolicy": {
-        "defaultSrc": "SERVER_HELMET_CONTENTSECURITYPOLICY_DEFAULTSRC"
-      }
-    },
     "oidc": {
       "enabled": "SERVER_OIDC_ENABLED",
       "clientId": "SERVER_OIDC_CLIENTID",
