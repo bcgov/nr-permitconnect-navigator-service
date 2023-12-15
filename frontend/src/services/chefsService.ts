@@ -13,7 +13,15 @@ export default {
    * @function getSubmission
    * @returns {Promise} An axios response
    */
-  getSubmission(formId: string, formSubmissionId: string) {
-    return appAxios().get(`chefs/submission/${formSubmissionId}`, { params: { formId } });
+  getSubmission(formId: string, submissionId: string) {
+    return appAxios().get(`chefs/submission/${submissionId}`, { params: { formId } });
+  },
+
+  /**
+   * @function updateSubmission
+   * @returns {Promise} An axios response
+   */
+  updateSubmission(submissionId: string, data: any) {
+    return appAxios().put(`chefs/submission/${submissionId}`, data);
   }
 };

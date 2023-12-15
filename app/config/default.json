@@ -5,6 +5,14 @@
   "server": {
     "apiPath": "/api/v1",
     "bodyLimit": "30mb",
+    "db": {
+      "database": "pcns",
+      "host": "localhost",
+      "port": "5432",
+      "poolMin": "2",
+      "poolMax": "10",
+      "username": "app"
+    },
     "logLevel": "http",
     "port": "8080"
   }

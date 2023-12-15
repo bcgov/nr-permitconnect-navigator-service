@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model identity_provider {
+  idp       String    @id
+  active    Boolean   @default(true)
+  createdBy String?   @default("00000000-0000-0000-0000-000000000000")
+  createdAt DateTime? @default(now()) @db.Timestamptz(6)
+  updatedBy String?
+  updatedAt DateTime? @db.Timestamptz(6)
+  user      user[]
+}
+
+model knex_migrations {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+}
+
+model knex_migrations_lock {
+  index     Int  @id @default(autoincrement())
+  is_locked Int?
+}
+
+model submission {
+  submissionId         String    @id @db.Uuid
+  assignedToUserId     String?   @db.Uuid
+  confirmationId       String?
+  contactEmail         String?
+  contactPhoneNumber   String?
+  contactFirstName     String?
+  contactLastName      String?
+  intakeStatus         String?
+  projectName          String?
+  queuePriority        String?
+  singleFamilyUnits    String?
+  streetAddress        String?
+  atsClientNumber      String?
+  addedToATS           Boolean?
+  financiallySupported Boolean?
+  applicationStatus    String?
+  relatedPermits       String?
+  updatedAai           Boolean?
+  waitingOn            String?
+  submittedAt          DateTime? @db.Timestamptz(6)
+  submittedBy          String?
+  bringForwardDate     DateTime? @db.Timestamptz(6)
+  notes                String?
+  createdBy            String?   @default("00000000-0000-0000-0000-000000000000")
+  createdAt            DateTime? @default(now()) @db.Timestamptz(6)
+  updatedBy            String?
+  updatedAt            DateTime? @db.Timestamptz(6)
+  user                 user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
+}
+
+model user {
+  userId            String             @id @db.Uuid
+  identityId        String?            @db.Uuid
+  idp               String?
+  username          String
+  email             String?
+  firstName         String?
+  fullName          String?
+  lastName          String?
+  active            Boolean            @default(true)
+  createdBy         String?            @default("00000000-0000-0000-0000-000000000000")
+  createdAt         DateTime?          @default(now()) @db.Timestamptz(6)
+  updatedBy         String?
+  updatedAt         DateTime?          @db.Timestamptz(6)
+  submission        submission[]
+  identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
+
+  @@index([email], map: "user_email_index")
+  @@index([identityId], map: "user_identityid_index")
+  @@index([username], map: "user_username_index")
+}

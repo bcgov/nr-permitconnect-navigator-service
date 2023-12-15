@@ -2,7 +2,7 @@
 import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
-import { InputText } from '@/lib/primevue';
+import { Dropdown } from '@/lib/primevue';
 
 // Props
 type Props = {
@@ -11,6 +11,7 @@ type Props = {
   name: string;
   placeholder?: string;
   disabled?: boolean;
+  options: Array<string>;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -27,13 +28,14 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field col">
     <label :for="name">{{ label }}</label>
-    <InputText
+    <Dropdown
       v-model.trim="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       :placeholder="placeholder"
       :class="'w-full ' + { 'p-invalid': errorMessage }"
       :disabled="disabled"
+      :options="props.options"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <ErrorMessage :name="name" />

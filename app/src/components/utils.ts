@@ -4,7 +4,18 @@ import { join } from 'path';
 
 import { getLogger } from './log';
 import { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
+import { YRN } from '../types/YRN';
 const log = getLogger(module.filename);
+
+/**
+ * @function fromYrn
+ * Converts a YRN to boolean
+ * @param {YRN} yrn An arbitrary YRN
+ * @returns {boolean | null} The converted value
+ */
+export function fromYrn(yrn: YRN): boolean | null {
+  return yrn === null ? null : yrn.toUpperCase() === 'Y';
+}
 
 /**
  * @function getChefsApiKey
@@ -101,4 +112,15 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
     });
   }
   return data;
+}
+
+/**
+ * @function toYrn
+ * Converts a boolean to YRN
+ * @param {boolean | null} bool An arbitrary boolean
+ * @returns {YRN} The converted value
+ */
+export function toYrn(bool: boolean | null): YRN {
+  if (bool === null) return null;
+  return bool ? 'Y' : 'N';
 }

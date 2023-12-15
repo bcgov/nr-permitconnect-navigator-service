@@ -2,16 +2,16 @@
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 
 import { Button, useToast } from '@/lib/primevue';
-import { ButtonMode } from '@/utils/enums';
+import { BUTTON_MODE } from '@/utils/enums';
 
 // Props
 type Props = {
-  mode?: ButtonMode;
+  mode?: BUTTON_MODE;
   toCopy?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  mode: ButtonMode.BUTTON,
+  mode: BUTTON_MODE.BUTTON,
   toCopy: undefined
 });
 
@@ -28,14 +28,14 @@ const copyToClipboard = () => {
 
 <template>
   <Button
-    v-if="mode === ButtonMode.ICON"
+    v-if="mode === BUTTON_MODE.ICON"
     class="p-button-rounded p-button-secondary p-button-outlined"
     @click="copyToClipboard"
   >
     <font-awesome-icon icon="fa fa-clipboard" />
   </Button>
   <Button
-    v-if="mode === ButtonMode.BUTTON"
+    v-if="mode === BUTTON_MODE.BUTTON"
     class="p-button-outlined p-button-secondary"
     @click="copyToClipboard"
   >

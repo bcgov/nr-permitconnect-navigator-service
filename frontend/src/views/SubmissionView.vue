@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
+import SubmissionForm from '../components/submission/SubmissionForm.vue';
+import { Button, useToast } from '@/lib/primevue';
 import { chefsService } from '@/services';
 
 import type { Ref } from 'vue';
@@ -14,16 +16,46 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // State
+const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
 
 // Actions
+const toast = useToast();
+
+function onCancel() {
+  editable.value = false;
+}
+
+async function onSubmit(data: any) {
+  editable.value = false;
+  delete data.assignee; // TODO: REMOVE THIS WHEN USERS WORKING
+  await chefsService.updateSubmission(props.submissionId, {
+    ...data,
+    submissionId: props.submissionId
+  });
+  toast.success('Form saved');
+}
+
 onMounted(async () => {
-  submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data.submission;
+  submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
 });
 </script>
 
 <template>
   <h1>Submission</h1>
 
-  <pre>{{ submission }}</pre>
+  <Button
+    class="mb-3"
+    @click="editable = !editable"
+  >
+    Edit mode
+  </Button>
+
+  <SubmissionForm
+    v-if="submission"
+    :editable="editable"
+    :submission="submission"
+    @cancel="onCancel"
+    @submit="onSubmit"
+  />
 </template>
