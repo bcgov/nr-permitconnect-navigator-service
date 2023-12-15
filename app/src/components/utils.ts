@@ -3,8 +3,7 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import { getLogger } from './log';
-import { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
-import { YRN } from '../types/YRN';
+import { ChefsFormConfig, ChefsFormConfigData, YRN } from '../types';
 const log = getLogger(module.filename);
 
 /**
@@ -75,6 +74,30 @@ export function isTruthy(value: unknown) {
   const isStr = typeof value === 'string' || value instanceof String;
   const trueStrings = ['true', 't', 'yes', 'y', '1'];
   return value === true || value === 1 || (isStr && trueStrings.includes(value.toLowerCase()));
+}
+
+/**
+ * @function parseCSV
+ * Converts a comma separated value string into an array of string values
+ * @param {string} value The CSV string to parse
+ * @returns {string[]} An array of string values, or `value` if it is not a string
+ */
+export function parseCSV(value: string): Array<string> {
+  return value.split(',').map((s) => s.trim());
+}
+
+/**
+ * @function parseIdentityKeyClaims
+ * Returns an array of strings representing potential identity key claims
+ * Array will always end with the last value as 'sub'
+ * @returns {string[]} An array of string values, or `value` if it is not a string
+ */
+export function parseIdentityKeyClaims(): Array<string> {
+  const claims: Array<string> = [];
+  if (config.has('server.oidc.identityKey')) {
+    claims.push(...parseCSV(config.get('server.oidc.identityKey')));
+  }
+  return claims.concat('sub');
 }
 
 /**

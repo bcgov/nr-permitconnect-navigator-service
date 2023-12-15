@@ -40,7 +40,9 @@
     "migrate:up": "knex migrate:up",
     "postmigrate:up": "npm run prisma:sync",
     "seed": "knex seed:run",
-    "prisma:sync": "prisma db pull"
+    "prisma:sync": "prisma db pull",
+    "postprisma:sync": "npm run prisma:generate",
+    "prisma:generate": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

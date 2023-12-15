@@ -6,8 +6,7 @@ import { IdentityProvider } from '../components/constants';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
-import type { ChefsSubmissionFormExport } from '../types/ChefsSubmissionFormExport';
+import type { ChefsFormConfig, ChefsFormConfigData, ChefsSubmissionFormExport } from '../types';
 
 const controller = {
   getFormExport: async (req: Request, res: Response, next: NextFunction) => {

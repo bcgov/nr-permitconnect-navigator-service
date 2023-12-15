@@ -7,7 +7,7 @@ import { NIL } from 'uuid';
 import { fromYrn, getChefsApiKey, toYrn } from '../components/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { ChefsSubmissionForm } from '../types/ChefsSubmissionForm';
+import type { ChefsSubmissionForm } from '../types';
 
 const prisma = new PrismaClient();
 
@@ -88,6 +88,33 @@ const service = {
         financiallySupported: toYrn(result.financiallySupported),
         updatedAai: toYrn(result.updatedAai)
       };
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  updateSubmission: async (data: ChefsSubmissionForm) => {
+    try {
+      await prisma.submission.update({
+        data: {
+          ...data,
+          addedToATS: fromYrn(data.addedToATS),
+          financiallySupported: fromYrn(data.financiallySupported),
+          updatedAai: fromYrn(data.updatedAai)
+        },
+        where: {
+          submissionId: data.submissionId
+        }
+      });
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
+    try {
+      const response = await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`);
+      return response.data;
     } catch (e: unknown) {
       throw e;
     }
