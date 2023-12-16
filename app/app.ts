@@ -36,7 +36,7 @@ app.use(
       directives: {
         'default-src': [
           "'self'", // eslint-disable-line
-          new URL(config.get('server.oidc.serverUrl')).origin
+          new URL(config.get('frontend.oidc.authority')).origin
         ]
       }
     }

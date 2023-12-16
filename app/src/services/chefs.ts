@@ -1,15 +1,13 @@
 /* eslint-disable no-useless-catch */
 import axios from 'axios';
 import config from 'config';
-import { PrismaClient } from '@prisma/client';
 import { NIL } from 'uuid';
 
 import { fromYrn, getChefsApiKey, toYrn } from '../components/utils';
+import prisma from '../db/dataConnection';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { ChefsSubmissionForm } from '../types';
-
-const prisma = new PrismaClient();
 
 /**
  * @function chefsAxios
