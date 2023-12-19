@@ -51,8 +51,7 @@ const controller = {
 
   getSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.getSubmission(req.query.formId as string, req.params.submissionId);
-      res.status(200).send(response);
+      res.status(200).send(await chefsService.getSubmission(req.query.formId as string, req.params.submissionId));
     } catch (e: unknown) {
       next(e);
     }
@@ -60,8 +59,7 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.updateSubmission(req.body);
-      res.status(200).send(response);
+      res.status(200).send(await chefsService.updateSubmission(req.body));
     } catch (e: unknown) {
       next(e);
     }

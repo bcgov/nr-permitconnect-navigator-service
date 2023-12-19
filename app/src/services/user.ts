@@ -1,13 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { v4, NIL } from 'uuid';
 
+import prisma from '../db/dataConnection';
+import { identity_provider, user } from '../db/models';
 import { parseIdentityKeyClaims } from '../components/utils';
 
 import type { User, UserSearchParameters } from '../types';
 
-const prisma = new PrismaClient();
-const dbClient = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
+const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
 /**
  * The User DB Service
@@ -47,10 +48,11 @@ const service = {
   createIdp: async (idp: string, etrx: Prisma.TransactionClient | undefined = undefined) => {
     const obj = {
       idp: idp,
+      active: true,
       createdBy: NIL
     };
 
-    const response = dbClient(etrx).identity_provider.create({ data: obj });
+    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toPhysicalModel(obj) });
 
     return response;
   },
@@ -83,18 +85,20 @@ const service = {
           if (!identityProvider) await service.createIdp(data.idp, trx);
         }
 
+        const newUser = {
+          userId: v4(),
+          identityId: data.identityId,
+          username: data.username,
+          fullName: data.fullName,
+          email: data.email,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          idp: data.idp,
+          createdBy: data.userId
+        };
+
         response = await trx.user.create({
-          data: {
-            userId: v4(),
-            identityId: data.identityId,
-            username: data.username,
-            fullName: data.fullName,
-            email: data.email,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            idp: data.idp,
-            createdBy: data.userId
-          }
+          data: user.toPhysicalModel(newUser)
         });
       }
     };
@@ -181,11 +185,13 @@ const service = {
    * @throws The error encountered upon db transaction failure
    */
   readIdp: async (code: string, etrx: Prisma.TransactionClient | undefined = undefined) => {
-    return await dbClient(etrx).identity_provider.findUnique({
+    const response = await trxWrapper(etrx).identity_provider.findUnique({
       where: {
         idp: code
       }
     });
+
+    return response ? identity_provider.toLogicalModel(response) : undefined;
   },
 
   /**
@@ -217,20 +223,42 @@ const service = {
    * @param {boolean} [params.active] Optional boolean on user active status
    * @returns {Promise<object>} The result of running the find operation
    */
-  searchUsers: (params: UserSearchParameters) => {
-    return prisma.user.findMany({
+  searchUsers: async (params: UserSearchParameters) => {
+    const response = await prisma.user.findMany({
       where: {
-        userId: { in: params.userId },
-        identityId: { in: params.identityId },
-        idp: { in: params.idp },
-        username: { contains: params.username },
-        email: { contains: params.email },
-        firstName: { contains: params.firstName },
-        fullName: { contains: params.fullName },
-        lastName: { contains: params.lastName },
-        active: params.active
+        OR: [
+          {
+            userId: { in: params.userId, mode: 'insensitive' }
+          },
+          {
+            identityId: { in: params.identityId, mode: 'insensitive' }
+          },
+          {
+            idp: { in: params.idp, mode: 'insensitive' }
+          },
+          {
+            username: { contains: params.username, mode: 'insensitive' }
+          },
+          {
+            email: { contains: params.email, mode: 'insensitive' }
+          },
+          {
+            firstName: { contains: params.firstName, mode: 'insensitive' }
+          },
+          {
+            fullName: { contains: params.fullName, mode: 'insensitive' }
+          },
+          {
+            lastName: { contains: params.lastName, mode: 'insensitive' }
+          },
+          {
+            active: params.active
+          }
+        ]
       }
     });
+
+    return response.map((x) => user.toLogicalModel(x));
   },
 
   /**
@@ -270,7 +298,7 @@ const service = {
 
         // TODO: Add support for updating userId primary key in the event it changes
         response = await trx?.user.update({
-          data: obj,
+          data: user.toPhysicalModel(obj),
           where: {
             userId: userId
           }

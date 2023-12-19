@@ -1,6 +1,4 @@
-import { User } from './User';
-import { YRN } from './YRN';
-import { IStamps } from '../interfaces/IStamps';
+import type { User, YRN } from '.';
 
 export type ChefsSubmissionForm = {
   submissionId: string;
@@ -11,7 +9,7 @@ export type ChefsSubmissionForm = {
   contactLastName?: string;
   intakeStatus?: string;
   projectName?: string;
-  queuePriority?: number;
+  queuePriority?: string;
   singleFamilyUnits?: string;
   streetAddress?: string;
   atsClientNumber?: string;
@@ -26,4 +24,4 @@ export type ChefsSubmissionForm = {
   bringForwardDate?: string;
   notes?: string;
   user?: User;
-} & IStamps;
+};

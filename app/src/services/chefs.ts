@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-catch */
 import axios from 'axios';
 import config from 'config';
-import { NIL } from 'uuid';
 
-import { fromYrn, getChefsApiKey, toYrn } from '../components/utils';
+import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
+import { submission } from '../db/models';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { ChefsSubmissionForm } from '../types';
@@ -38,23 +38,21 @@ const service = {
 
   getSubmission: async (formId: string, submissionId: string) => {
     try {
-      // Try to pull data from our DB
-      let result = await prisma.submission.findUnique({
+      // Check if record exists in our db
+      const count = await prisma.submission.count({
         where: {
           submissionId: submissionId
         }
       });
 
       // Pull submission data from CHEFS and store to our DB if it doesn't exist
-      if (!result) {
+      if (!count) {
         const response = (await chefsAxios(formId).get(`submissions/${submissionId}`)).data;
         const status = (await chefsAxios(formId).get(`submissions/${submissionId}/status`)).data;
 
-        // TODO: Assigned to correct user
-        result = await prisma.submission.create({
+        await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
-            assignedToUserId: NIL, //status[0].assignedToUserId,
             confirmationId: response.submission.confirmationId,
             contactEmail: response.submission.submission.data.contactEmail,
             contactPhoneNumber: response.submission.submission.data.contactPhoneNumber,
@@ -62,30 +60,25 @@ const service = {
             contactLastName: response.submission.submission.data.contactLastName,
             intakeStatus: status[0].code,
             projectName: response.submission.submission.data.projectName,
-            queuePriority: response.submission.submission.data.queuePriority,
+            queuePriority: parseInt(response.submission.submission.data.queuePriority),
             singleFamilyUnits: response.submission.submission.data.singleFamilyUnits,
             streetAddress: response.submission.submission.data.streetAddress,
-            atsClientNumber: null,
-            addedToATS: null,
-            financiallySupported: null,
-            applicationStatus: null,
-            relatedPermits: null,
-            updatedAai: null,
-            waitingOn: null,
             submittedAt: response.submission.createdAt,
-            submittedBy: response.submission.createdBy,
-            bringForwardDate: null,
-            notes: null
+            submittedBy: response.submission.createdBy
           }
         });
       }
 
-      return {
-        ...result,
-        addedToATS: toYrn(result.addedToATS),
-        financiallySupported: toYrn(result.financiallySupported),
-        updatedAai: toYrn(result.updatedAai)
-      };
+      const result = await prisma.submission.findUnique({
+        where: {
+          submissionId: submissionId
+        },
+        include: {
+          user: true
+        }
+      });
+
+      return result ? submission.toLogicalModel(result) : undefined;
     } catch (e: unknown) {
       throw e;
     }
@@ -93,8 +86,7 @@ const service = {
 
   getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
     try {
-      const response = await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`);
-      return response.data;
+      return (await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`)).data;
     } catch (e: unknown) {
       throw e;
     }
@@ -103,12 +95,7 @@ const service = {
   updateSubmission: async (data: ChefsSubmissionForm) => {
     try {
       await prisma.submission.update({
-        data: {
-          ...data,
-          addedToATS: fromYrn(data.addedToATS),
-          financiallySupported: fromYrn(data.financiallySupported),
-          updatedAai: fromYrn(data.updatedAai)
-        },
+        data: submission.toPhysicalModel(data),
         where: {
           submissionId: data.submissionId
         }

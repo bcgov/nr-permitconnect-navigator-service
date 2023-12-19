@@ -3,8 +3,24 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import { getLogger } from './log';
-import { ChefsFormConfig, ChefsFormConfigData, YRN } from '../types';
+
+import type { ChefsFormConfig, ChefsFormConfigData, YRN } from '../types';
+
 const log = getLogger(module.filename);
+
+/**
+ * @function addDashesToUuid
+ * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
+ * @param {string} str The input string uuid
+ * @returns {string} The string `str` but with dashes inserted, or `str` if not a string.
+ */
+export function addDashesToUuid(str: string): string {
+  if (str.length === 32) {
+    return `${str.slice(0, 8)}-${str.slice(8, 12)}-${str.slice(12, 16)}-${str.slice(16, 20)}-${str.slice(
+      20
+    )}`.toLowerCase();
+  } else return str;
+}
 
 /**
  * @function fromYrn
@@ -74,6 +90,22 @@ export function isTruthy(value: unknown) {
   const isStr = typeof value === 'string' || value instanceof String;
   const trueStrings = ['true', 't', 'yes', 'y', '1'];
   return value === true || value === 1 || (isStr && trueStrings.includes(value.toLowerCase()));
+}
+
+/**
+ * @function mixedQueryToArray
+ * Standardizes query params to yield an array of unique string values
+ * @param {string|string[]} param The query param to process
+ * @returns {string[]} A unique, non-empty array of string values, or undefined if empty
+ */
+export function mixedQueryToArray(param: string | Array<string>): Array<string> | undefined {
+  // Short circuit undefined if param is falsy
+  if (!param) return undefined;
+
+  const parsed = Array.isArray(param) ? param.flatMap((p) => parseCSV(p)) : parseCSV(param);
+  const unique = [...new Set(parsed)];
+
+  return unique.length ? unique : undefined;
 }
 
 /**

@@ -1,11 +1,17 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { number, object, string } from 'yup';
+import { ref } from 'vue';
+import { mixed, number, object, string } from 'yup';
 
-import { Calendar, Dropdown, TextArea, TextInput } from '@/components/form';
+import { Calendar, Dropdown, EditableDropdown, TextArea, TextInput } from '@/components/form';
 import { Button } from '@/lib/primevue';
-import { ApplicationStatusList, IntakeStatusList } from '@/utils/constants';
+import { userService } from '@/services';
+import { ApplicationStatusList, IntakeStatusList, Regex } from '@/utils/constants';
 import { formatJwtUsername } from '@/utils/formatters';
+
+import type { IInputEvent } from '@/interfaces';
+import type { User } from '@/types';
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -17,6 +23,9 @@ const props = withDefaults(defineProps<Props>(), {});
 
 // Emits
 const emit = defineEmits(['submit', 'cancel']);
+
+// State
+const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
 
 // Default form values
 const initialFormValues: any = {
@@ -30,13 +39,6 @@ const initialFormValues: any = {
 const formSchema = object({
   addedToATS: string().oneOf(['Y', 'N']).required().label('Added to ATS'),
   applicationStatus: string().oneOf(ApplicationStatusList).label('Application Status'),
-  assignee: string()
-    .when('intakeStatus', {
-      is: (val: string) => val !== 'SUBMITTED',
-      then: (schema) => schema.required(),
-      otherwise: (schema) => schema.notRequired()
-    })
-    .label('Assignee'),
   atsClientNumber: string()
     .when('addedToATS', {
       is: 'Y',
@@ -53,10 +55,33 @@ const formSchema = object({
     .integer()
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  updatedAai: string().oneOf(['Y', 'N']).required().label('Updated AAI Spreadsheet')
+  updatedAai: string().oneOf(['Y', 'N']).required().label('Updated AAI Spreadsheet'),
+  user: mixed()
+    .when('intakeStatus', {
+      is: (val: string) => val !== 'SUBMITTED',
+      then: (schema) => schema.required(),
+      otherwise: (schema) => schema.notRequired()
+    })
+    .label('Assignee')
 });
 
 // Actions
+const getAssigneeOptionLabel = (e: any) => {
+  return `${e.fullName} [${e.email}]`;
+};
+
+const onAssigneeInput = async (e: IInputEvent) => {
+  const input = e.target.value;
+
+  if (input.length >= 3) {
+    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input, username: input })).data;
+  } else if (input.match(Regex.EMAIL)) {
+    assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
+  } else {
+    assigneeOptions.value = [];
+  }
+};
+
 const onCancel = () => {
   emit('cancel');
 };
@@ -195,11 +220,14 @@ const onSubmit = (values: any) => {
         label="Notes"
         :disabled="!props.editable"
       />
-      <TextInput
+      <EditableDropdown
         class="col-4"
-        name="assignee"
+        name="user"
         label="Assignee"
         :disabled="!props.editable"
+        :options="assigneeOptions"
+        :get-option-label="getAssigneeOptionLabel"
+        @on-input="(e) => onAssigneeInput(e)"
       />
       <Dropdown
         class="col-4"

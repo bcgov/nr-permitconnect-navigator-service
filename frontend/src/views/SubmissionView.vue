@@ -28,7 +28,6 @@ function onCancel() {
 
 async function onSubmit(data: any) {
   editable.value = false;
-  delete data.assignee; // TODO: REMOVE THIS WHEN USERS WORKING
   await chefsService.updateSubmission(props.submissionId, {
     ...data,
     submissionId: props.submissionId

@@ -5,6 +5,12 @@ import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '@/utils/enums';
  */
 export const DELIMITER = '/';
 
+export const Regex = Object.freeze({
+  // https://emailregex.com/
+  // HTML5 - Modified to require domain of at least 2 characters
+  EMAIL: '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$'
+});
+
 /**
  * Route names
  */
@@ -53,3 +59,8 @@ export const IntakeStatusList = [
   INTAKE_STATUS_LIST.ASSIGNED,
   INTAKE_STATUS_LIST.COMPLETED
 ];
+
+/**
+ * Default System User ID
+ */
+export const SYSTEM_USER = '00000000-0000-0000-0000-000000000000';
