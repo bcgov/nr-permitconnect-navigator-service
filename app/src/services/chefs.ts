@@ -78,7 +78,7 @@ const service = {
         }
       });
 
-      return result ? submission.toLogicalModel(result) : undefined;
+      return submission.fromDBModel(result);
     } catch (e: unknown) {
       throw e;
     }
@@ -95,7 +95,7 @@ const service = {
   updateSubmission: async (data: ChefsSubmissionForm) => {
     try {
       await prisma.submission.update({
-        data: submission.toPhysicalModel(data),
+        data: submission.toDBModel(data),
         where: {
           submissionId: data.submissionId
         }

@@ -33,7 +33,8 @@ const service = {
       fullName: token.name,
       lastName: token.family_name,
       email: token.email,
-      idp: token.identity_provider
+      idp: token.identity_provider,
+      active: true
     };
   },
 
@@ -52,7 +53,7 @@ const service = {
       createdBy: NIL
     };
 
-    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toPhysicalModel(obj) });
+    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toDBModel(obj) });
 
     return response;
   },
@@ -94,11 +95,12 @@ const service = {
           firstName: data.firstName,
           lastName: data.lastName,
           idp: data.idp,
-          createdBy: data.userId
+          createdBy: data.userId,
+          active: true
         };
 
         response = await trx.user.create({
-          data: user.toPhysicalModel(newUser)
+          data: user.toDBModel(newUser)
         });
       }
     };
@@ -191,7 +193,7 @@ const service = {
       }
     });
 
-    return response ? identity_provider.toLogicalModel(response) : undefined;
+    return identity_provider.fromDBModel(response);
   },
 
   /**
@@ -258,7 +260,7 @@ const service = {
       }
     });
 
-    return response.map((x) => user.toLogicalModel(x));
+    return response.map((x) => user.fromDBModel(x));
   },
 
   /**
@@ -293,12 +295,13 @@ const service = {
           firstName: data.firstName,
           lastName: data.lastName,
           idp: data.idp,
+          active: data.active,
           updatedBy: data.userId
         };
 
         // TODO: Add support for updating userId primary key in the event it changes
         response = await trx?.user.update({
-          data: user.toPhysicalModel(obj),
+          data: user.toDBModel(obj),
           where: {
             userId: userId
           }

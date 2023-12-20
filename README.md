@@ -20,7 +20,6 @@ app/                       - Application Root
 ├── config/                - configuration exposed as environment variables
 ├── src/                   - Node.js web application
 │   ├── components/        - Components Layer
-│   ├── db/                - Database Layer
 │   ├── controllers/       - Controller Layer
 │   ├── db/                - Database Layer
 │   ├── interfaces/        - Typescript interface definitions

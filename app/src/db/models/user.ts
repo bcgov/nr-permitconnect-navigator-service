@@ -1,29 +1,39 @@
 import { Prisma } from '@prisma/client';
 
+import type { IStamps } from '../../interfaces/IStamps';
 import type { User } from '../../types';
 
-// Define a type
+// Define types
 const _user = Prisma.validator<Prisma.userDefaultArgs>()({});
-type user = Prisma.userGetPayload<typeof _user>;
+type DBUser = Omit<Prisma.userGetPayload<typeof _user>, keyof IStamps>;
 
 export default {
-  toPhysicalModel(input: User) {
+  toDBModel(input: User): DBUser {
     return {
       userId: input.userId as string,
-      ...input
+      identityId: input.identityId,
+      idp: input.idp,
+      username: input.username,
+      email: input.email,
+      firstName: input.firstName,
+      fullName: input.fullName,
+      lastName: input.lastName,
+      active: input.active
     };
   },
 
-  toLogicalModel(input: user): User {
+  fromDBModel(input: DBUser | null): User | null {
+    if (!input) return null;
+
     return {
       userId: input.userId,
-      identityId: input.userId,
-      idp: input.idp ?? undefined,
+      identityId: input.identityId as string,
+      idp: input.idp,
       username: input.username,
-      email: input.email ?? undefined,
-      firstName: input.firstName ?? undefined,
-      fullName: input.fullName ?? undefined,
-      lastName: input.lastName ?? undefined,
+      email: input.email,
+      firstName: input.firstName,
+      fullName: input.fullName,
+      lastName: input.lastName,
       active: input.active
     };
   }

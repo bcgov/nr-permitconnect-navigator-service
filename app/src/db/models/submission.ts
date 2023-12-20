@@ -1,52 +1,88 @@
 import { Prisma } from '@prisma/client';
-
 import { disconnectRelation, user } from '.';
 import { fromYrn, toYrn } from '../../components/utils';
 
+import type { IStamps } from '../../interfaces/IStamps';
 import type { ChefsSubmissionForm } from '../../types';
 
-// Define a type that includes the relation to 'user'
-const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({
+// Define types
+const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
+const _submissionWithRelations = Prisma.validator<Prisma.submissionDefaultArgs>()({
   include: { user: true }
 });
-type submission = Prisma.submissionGetPayload<typeof _submission>;
+
+type UserRelation = {
+  user:
+    | {
+        connect: {
+          userId: string;
+        };
+      }
+    | {
+        disconnect: boolean;
+      };
+};
+type DBSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, 'assignedToUserId' | keyof IStamps> &
+  UserRelation;
+
+type Submission = Prisma.submissionGetPayload<typeof _submissionWithRelations>;
 
 export default {
-  toPhysicalModel(input: ChefsSubmissionForm) {
+  toDBModel(input: ChefsSubmissionForm): DBSubmission {
     return {
-      ...input,
-      user: input.user?.userId ? { connect: { userId: input.user.userId } } : disconnectRelation,
+      submissionId: input.submissionId,
+      confirmationId: input.confirmationId,
+      contactEmail: input.contactEmail,
+      contactPhoneNumber: input.contactPhoneNumber,
+      contactFirstName: input.contactFirstName,
+      contactLastName: input.contactLastName,
+      intakeStatus: input.intakeStatus,
+      projectName: input.projectName,
+      queuePriority: input.queuePriority,
+      singleFamilyUnits: input.singleFamilyUnits,
+      streetAddress: input.streetAddress,
+      atsClientNumber: input.atsClientNumber,
       addedToATS: fromYrn(input.addedToATS),
       financiallySupported: fromYrn(input.financiallySupported),
-      updatedAai: fromYrn(input.updatedAai)
+      applicationStatus: input.applicationStatus,
+      relatedPermits: input.relatedPermits,
+      updatedAai: fromYrn(input.updatedAai),
+      waitingOn: input.waitingOn,
+      submittedAt: new Date(input.submittedAt),
+      submittedBy: input.submittedBy,
+      bringForwardDate: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
+      notes: input.notes,
+      user: input.user?.userId ? { connect: { userId: input.user.userId } } : disconnectRelation
     };
   },
 
-  toLogicalModel(input: submission): ChefsSubmissionForm {
+  fromDBModel(input: Submission | null): ChefsSubmissionForm | null {
+    if (!input) return null;
+
     return {
-      submissionId: input.submissionId,
+      submissionId: input.submissionId as string,
       confirmationId: input.confirmationId as string,
-      contactEmail: input.contactEmail ?? undefined,
-      contactPhoneNumber: input.contactPhoneNumber ?? undefined,
-      contactFirstName: input.contactFirstName ?? undefined,
-      contactLastName: input.contactLastName ?? undefined,
-      intakeStatus: input.intakeStatus ?? undefined,
-      projectName: input.projectName ?? undefined,
-      queuePriority: input.queuePriority ?? undefined,
-      singleFamilyUnits: input.singleFamilyUnits ?? undefined,
-      streetAddress: input.streetAddress ?? undefined,
-      atsClientNumber: input.atsClientNumber ?? undefined,
-      addedToATS: toYrn(input.addedToATS),
-      financiallySupported: toYrn(input.financiallySupported),
-      applicationStatus: input.applicationStatus ?? undefined,
-      relatedPermits: input.relatedPermits ?? undefined,
-      updatedAai: toYrn(input.updatedAai),
-      waitingOn: input.waitingOn ?? undefined,
-      submittedAt: input.submittedAt.toISOString(),
-      submittedBy: input.submittedBy,
-      bringForwardDate: input.bringForwardDate?.toISOString() ?? undefined,
-      notes: input.notes ?? undefined,
-      user: input.user ? user.toLogicalModel(input.user) : undefined
+      contactEmail: input.contactEmail,
+      contactPhoneNumber: input.contactPhoneNumber,
+      contactFirstName: input.contactFirstName,
+      contactLastName: input.contactLastName,
+      intakeStatus: input.intakeStatus,
+      projectName: input.projectName,
+      queuePriority: input.queuePriority,
+      singleFamilyUnits: input.singleFamilyUnits,
+      streetAddress: input.streetAddress,
+      atsClientNumber: input.atsClientNumber,
+      addedToATS: toYrn(input.addedToATS as boolean | null),
+      financiallySupported: toYrn(input.financiallySupported as boolean | null),
+      applicationStatus: input.applicationStatus,
+      relatedPermits: input.relatedPermits,
+      updatedAai: toYrn(input.updatedAai as boolean | null),
+      waitingOn: input.waitingOn,
+      submittedAt: input.submittedAt?.toISOString() as string,
+      submittedBy: input.submittedBy as string,
+      bringForwardDate: input.bringForwardDate?.toISOString() ?? null,
+      notes: input.notes,
+      user: user.fromDBModel(input.user)
     };
   }
 };
