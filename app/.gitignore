@@ -9,6 +9,7 @@ dist
 files
 **/e2e/videos
 node_modules
+sbin
 
 # Ignore Helm subcharts
 charts/**/charts
