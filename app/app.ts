@@ -84,7 +84,8 @@ appRouter.get('/config', (_req: Request, res: Response, next: (err: unknown) => 
 appRouter.use(config.get('server.apiPath'), v1Router);
 
 // Host the static frontend assets
-appRouter.use('/', express.static(join(__dirname, 'dist')));
+// This route assumes being executed from '/sbin'
+appRouter.use('/', express.static(join(__dirname, '../dist')));
 
 // Root level Router
 app.use('/', appRouter);
