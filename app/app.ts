@@ -30,7 +30,18 @@ app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        'default-src': [
+          "'self'", // eslint-disable-line
+          new URL(config.get('frontend.oidc.authority')).origin
+        ]
+      }
+    }
+  })
+);
 
 // Skip if running tests
 if (process.env.NODE_ENV !== 'test') {

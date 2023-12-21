@@ -7,7 +7,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/maintainability)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/test_coverage)
 
-A clean Vue 3 frontend & backend scaffold example
+NR PermitConnect Navigator Service
 
 To learn more about the **Common Services** available visit the [Common Services Showcase](https://bcgov.github.io/common-service-showcase/) page.
 
@@ -21,6 +21,8 @@ app/                       - Application Root
 ├── src/                   - Node.js web application
 │   ├── components/        - Components Layer
 │   ├── controllers/       - Controller Layer
+│   ├── db/                - Database Layer
+│   ├── interfaces/        - Typescript interface definitions
 │   ├── middleware/        - Middleware Layer
 │   ├── routes/            - Routes Layer
 │   ├── services/          - Services Layer
@@ -39,7 +41,7 @@ frontend/                  - Frontend Root
 │   ├── types/             - Typescript type definitions
 │   ├── utils/             - Utility components
 │   └── views/             - View Layer
-└── tests/                 - Node.js web application tests
+└── tests/                 - Vitest web application tests
 CODE-OF-CONDUCT.md         - Code of Conduct
 COMPLIANCE.yaml            - BCGov PIA/STRA compliance status
 CONTRIBUTING.md            - Contributing Guidelines
@@ -50,18 +52,23 @@ SECURITY.md                - Security Policy and Reporting
 
 ## Documentation
 
-- [Application Readme](frontend/README.md)
+- [Application Readme](app/README.md)
+- [Frontend Readme](frontend/README.md)
 - [Product Roadmap](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki/Product-Roadmap)
 - [Product Wiki](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki)
 - [Security Reporting](SECURITY.md)
 
 ## Quick Start Dev Guide
 
-You can quickly run this application in development mode after cloning by opening two terminal windows and running the following commands (assuming you have already set up local configuration as well). Refer to the [Application Readme](app/README.md) and [Frontend Readme](app/frontend/README.md) for more details.
+You can quickly run this application in development mode after cloning by opening two terminal windows and running the following commands (assuming you have already set up local configuration as well). Refer to the [Application Readme](app/README.md) and [Frontend Readme](/frontend/README.md) for more details.
+
+- Create `.env` in the root directory with the following
+  - `DATABASE_URL="your_connection_string"`
 
 ```
 cd app
 npm i
+npm run prisma:migrate
 npm run serve
 ```
 

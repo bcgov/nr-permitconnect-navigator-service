@@ -1,28 +1,29 @@
+import { User } from './User';
 import { YRN } from './YRN';
 import { IStamps } from '../interfaces/IStamps';
 
 export type ChefsSubmissionForm = {
-  submissionId: string;
-  assignedToUserId?: string;
+  submissionId: string; // Primary Key
   confirmationId: string;
-  contactEmail?: string;
-  contactPhoneNumber?: string;
-  contactFirstName?: string;
-  contactLastName?: string;
-  intakeStatus?: string;
-  projectName?: string;
-  queuePriority?: string;
-  singleFamilyUnits?: string;
-  streetAddress?: string;
-  atsClientNumber?: string;
+  contactEmail: string | null;
+  contactPhoneNumber: string | null;
+  contactFirstName: string | null;
+  contactLastName: string | null;
+  intakeStatus: string | null;
+  projectName: string | null;
+  queuePriority: number | null;
+  singleFamilyUnits: string | null;
+  streetAddress: string | null;
+  atsClientNumber: string | null;
   addedToATS: YRN;
   financiallySupported: YRN;
-  applicationStatus?: string;
-  relatedPermits?: string;
+  applicationStatus: string | null;
+  relatedPermits: string | null;
   updatedAai: YRN;
-  waitingOn?: string;
+  waitingOn: string | null;
   submittedAt: string;
   submittedBy: string;
-  bringForwardDate?: string;
-  notes?: string;
-} & IStamps;
+  bringForwardDate: string | null;
+  notes: string | null;
+  user: User | null;
+} & Partial<IStamps>;

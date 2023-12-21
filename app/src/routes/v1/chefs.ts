@@ -3,7 +3,7 @@ import { chefsController } from '../../controllers';
 import { requireChefsFormConfigData } from '../../middleware/requireChefsFormConfigData';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
 
 const router = express.Router();
 router.use(requireSomeAuth);

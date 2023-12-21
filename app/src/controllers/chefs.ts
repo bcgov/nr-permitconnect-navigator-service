@@ -1,13 +1,12 @@
 import config from 'config';
 
 import { chefsService } from '../services';
-import { isTruthy } from '../components/utils';
+import { addDashesToUuid, isTruthy } from '../components/utils';
 import { IdentityProvider } from '../components/constants';
 
-import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData } from '../types/ChefsFormConfig';
-import type { ChefsSubmissionFormExport } from '../types/ChefsSubmissionFormExport';
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { ChefsFormConfig, ChefsFormConfigData, ChefsSubmissionFormExport } from '../types';
 
 const controller = {
   getFormExport: async (req: Request, res: Response, next: NextFunction) => {
@@ -50,9 +49,13 @@ const controller = {
     }
   },
 
-  getSubmission: async (req: Request, res: Response, next: NextFunction) => {
+  getSubmission: async (
+    req: Request<{ submissionId: string }, { formId: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const response = await chefsService.getSubmission(req.query.formId as string, req.params.submissionId);
+      const response = await chefsService.getSubmission(addDashesToUuid(req.query.formId), req.params.submissionId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

@@ -4,9 +4,10 @@ import config from 'config';
 import jwt from 'jsonwebtoken';
 
 import { AuthType } from '../components/constants';
+import { userService } from '../services';
 
-import type { CurrentUser } from '../types/CurrentUser';
-import type { NextFunction, Request, Response } from 'express';
+import type { CurrentUser } from '../types';
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function _spkiWrapper
@@ -54,7 +55,7 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
 
         if (isValid) {
           currentUser.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
-          //await userService.login(currentUser.tokenPayload);
+          await userService.login(currentUser.tokenPayload as jwt.JwtPayload);
         } else {
           throw new Error('Invalid authorization token');
         }
