@@ -3,7 +3,7 @@ import { YRN } from './YRN';
 import { IStamps } from '../interfaces/IStamps';
 
 export type ChefsSubmissionForm = {
-  submissionId: string;
+  submissionId: string; // Primary Key
   confirmationId: string;
   contactEmail: string | null;
   contactPhoneNumber: string | null;

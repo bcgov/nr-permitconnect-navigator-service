@@ -7,7 +7,7 @@ import { AuthType } from '../components/constants';
 import { userService } from '../services';
 
 import type { CurrentUser } from '../types';
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function _spkiWrapper

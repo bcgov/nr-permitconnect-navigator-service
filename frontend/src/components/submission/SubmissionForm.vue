@@ -66,7 +66,7 @@ const formSchema = object({
 });
 
 // Actions
-const getAssigneeOptionLabel = (e: any) => {
+const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
 

@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { disconnectRelation, user } from '.';
+import { default as user } from './user';
+import disconnectRelation from '../utils/disconnectRelation';
 import { fromYrn, toYrn } from '../../components/utils';
 
 import type { IStamps } from '../../interfaces/IStamps';

@@ -2,7 +2,7 @@
 import Problem from 'api-problem';
 import { AuthType } from '../components/constants';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function requireSomeAuth
