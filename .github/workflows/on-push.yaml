@@ -2,6 +2,8 @@ name: Push
 
 env:
   APP_NAME: nr-permitconnect-navigator-service
+  ACRONYM: pcns
+  NAMESPACE_PREFIX: d9d78e
 
 on:
   push:

@@ -17,7 +17,7 @@ import type { ChefsSubmissionForm } from '../types';
  */
 function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInstance {
   return axios.create({
-    baseURL: config.get('frontend.chefs.apiPath'),
+    baseURL: config.get('server.chefs.apiPath'),
     timeout: 10000,
     auth: { username: formId, password: getChefsApiKey(formId) ?? '' },
     ...options

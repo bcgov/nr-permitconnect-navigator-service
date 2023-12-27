@@ -1,0 +1,160 @@
+{{ $dbHostName := .Values.config.configMap.SERVER_DB_HOST }}
+{{ $dbSecretName := printf "%s-%s" (include "pcns.fullname" .) "passphrase" }}
+{{- if .Values.patroni.enabled }}
+{{ $dbHostName = include "patroni.fullname" .Subcharts.patroni }}
+{{ $dbSecretName = include "patroni.fullname" .Subcharts.patroni }}
+{{- end }}
+
+{{- define "pcns.connectsTo" -}}
+apiVersion: apps/v1
+kind: StatefulSet
+name: {{ include "patroni.fullname" .Subcharts.patroni }}
+{{- end }}
+---
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  name: {{ include "pcns.fullname" . }}
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
+  {{- if .Values.patroni.enabled }}
+  annotations:
+    app.openshift.io/connects-to: '[{{ include "pcns.connectsTo" . | fromYaml | toJson }}]'
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  revisionHistoryLimit: 10
+  selector:
+    {{- include "pcns.selectorLabels" . | nindent 4 }}
+  strategy:
+    resources:
+      {{- toYaml .Values.resources | nindent 6 }}
+    rollingParams:
+      timeoutSeconds: 600
+      pre:
+        failurePolicy: {{ .Values.failurePolicy }}
+        execNewPod:
+          command:
+            - npm
+            - run
+            - migrate
+          containerName: app
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: SERVER_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-name
+                  name: {{ $dbSecretName }}
+            - name: SERVER_DB_HOST
+              value: {{ $dbHostName }}
+            - name: SERVER_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-username
+                  name: {{ $dbSecretName }}
+            - name: SERVER_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-password
+                  name: {{ $dbSecretName }}
+    type: Rolling
+  template:
+    metadata:
+      labels: {{ include "pcns.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.serviceAccount.create }}
+      serviceAccountName: {{ include "pcns.serviceAccountName" . }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext: {{ toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: app
+          {{- with .Values.securityContext }}
+          securityContext: {{ toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.route.path }}
+              port: {{ .Values.service.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: {{ .Values.route.path }}
+              port: {{ .Values.service.port }}
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 1
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: SERVER_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-name
+                  name: {{ $dbSecretName }}
+            - name: SERVER_CHEFS_FORM1_ID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-form1
+            - name: SERVER_CHEFS_FORM1_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-form1
+            - name: SERVER_CHEFS_FORM2_ID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-form2
+            - name: SERVER_CHEFS_FORM2_APIKEY
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-form2
+            - name: SERVER_DB_HOST
+              value: {{ $dbHostName }}
+            - name: SERVER_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-username
+                  name: {{ $dbSecretName }}
+            - name: SERVER_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-password
+                  name: {{ $dbSecretName }}
+            - name: SERVER_OIDC_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-oidc
+            - name: SERVER_OIDC_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-oidc
+          envFrom:
+            - configMapRef:
+                name: {{ include "pcns.configname" . }}-config
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+    - type: ConfigChange
