@@ -57,13 +57,15 @@ COPY --from=app ${APP_ROOT}/sbin ${APP_ROOT}/sbin
 COPY --from=frontend ${APP_ROOT}/dist ${APP_ROOT}/dist
 COPY .git ${APP_ROOT}/.git
 COPY app/config ${APP_ROOT}/config
+COPY app/config ${APP_ROOT}/sbin/config
 COPY app/package.json app/package-lock.json ${APP_ROOT}
+COPY app/src/db/prisma/schema.prisma ${APP_ROOT}/src/db/prisma/schema.prisma
 WORKDIR ${APP_ROOT}
 
 # Install Application
 RUN chown -R 1001:0 ${APP_ROOT}
 USER 1001
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev && npm run prisma:generate
 
 EXPOSE ${APP_PORT}
 CMD ["node", "./sbin/bin/www"]
