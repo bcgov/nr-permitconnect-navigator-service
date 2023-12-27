@@ -9,6 +9,8 @@ export { default as DataTable } from 'primevue/datatable';
 export { default as Dialog } from 'primevue/dialog';
 export { default as Divider } from 'primevue/divider';
 export { default as Dropdown } from 'primevue/dropdown';
+export { default as InputMask } from 'primevue/inputmask';
+export { default as InputNumber } from 'primevue/inputnumber';
 export { default as InputSwitch } from 'primevue/inputswitch';
 export { default as InputText } from 'primevue/inputtext';
 export { default as Message } from 'primevue/message';

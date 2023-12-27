@@ -30,34 +30,43 @@ model knex_migrations_lock {
 }
 
 model submission {
-  submissionId         String    @id @db.Uuid
-  assignedToUserId     String?   @db.Uuid
-  confirmationId       String
-  contactEmail         String?
-  contactPhoneNumber   String?
-  contactFirstName     String?
-  contactLastName      String?
-  intakeStatus         String?
-  projectName          String?
-  queuePriority        Int?
-  singleFamilyUnits    String?
-  streetAddress        String?
-  atsClientNumber      String?
-  addedToATS           Boolean?
-  financiallySupported Boolean?
-  applicationStatus    String?
-  relatedPermits       String?
-  updatedAai           Boolean?
-  waitingOn            String?
-  submittedAt          DateTime  @db.Timestamptz(6)
-  submittedBy          String
-  bringForwardDate     DateTime? @db.Timestamptz(6)
-  notes                String?
-  createdBy            String?   @default("00000000-0000-0000-0000-000000000000")
-  createdAt            DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy            String?
-  updatedAt            DateTime? @db.Timestamptz(6)
-  user                 user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
+  submissionId                    String    @id @db.Uuid
+  assignedToUserId                String?   @db.Uuid
+  confirmationId                  String
+  submittedAt                     DateTime  @db.Timestamptz(6)
+  submittedBy                     String
+  locationPIDs                    String?
+  contactName                     String?
+  contactPhoneNumber              String?
+  contactEmail                    String?
+  projectName                     String?
+  singleFamilyUnits               String?
+  streetAddress                   String?
+  latitude                        Int?
+  longitude                       Int?
+  queuePriority                   Int?
+  relatedPermits                  String?
+  astNotes                        String?
+  astUpdated                      Boolean?
+  addedToATS                      Boolean?
+  atsClientNumber                 String?
+  ltsaCompleted                   Boolean?
+  naturalDisaster                 Boolean?
+  financiallySupported            Boolean?
+  financiallySupportedBC          Boolean?
+  financiallySupportedIndigenous  Boolean?
+  financiallySupportedNonProfit   Boolean?
+  financiallySupportedHousingCoop Boolean?
+  waitingOn                       String?
+  bringForwardDate                DateTime? @db.Timestamptz(6)
+  notes                           String?
+  intakeStatus                    String?
+  applicationStatus               String?
+  createdBy                       String?   @default("00000000-0000-0000-0000-000000000000")
+  createdAt                       DateTime? @default(now()) @db.Timestamptz(6)
+  updatedBy                       String?
+  updatedAt                       DateTime? @db.Timestamptz(6)
+  user                            user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }
 
 model user {

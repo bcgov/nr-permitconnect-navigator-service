@@ -50,19 +50,20 @@ const service = {
         const response = (await chefsAxios(formId).get(`submissions/${submissionId}`)).data;
         const status = (await chefsAxios(formId).get(`submissions/${submissionId}/status`)).data;
 
+        const submission = response.submission.submission.data;
+
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
             confirmationId: response.submission.confirmationId,
-            contactEmail: response.submission.submission.data.contactEmail,
-            contactPhoneNumber: response.submission.submission.data.contactPhoneNumber,
-            contactFirstName: response.submission.submission.data.contactFirstName,
-            contactLastName: response.submission.submission.data.contactLastName,
+            contactEmail: submission.contactEmail,
+            contactPhoneNumber: submission.contactPhoneNumber,
+            contactName: `${submission.contactFirstName} ${submission.contactLastName}`,
             intakeStatus: status[0].code,
-            projectName: response.submission.submission.data.projectName,
-            queuePriority: parseInt(response.submission.submission.data.queuePriority),
-            singleFamilyUnits: response.submission.submission.data.singleFamilyUnits,
-            streetAddress: response.submission.submission.data.streetAddress,
+            projectName: submission.projectName,
+            queuePriority: parseInt(submission.queuePriority),
+            singleFamilyUnits: submission.singleFamilyUnits,
+            streetAddress: submission.streetAddress,
             submittedAt: response.submission.createdAt,
             submittedBy: response.submission.createdBy
           }

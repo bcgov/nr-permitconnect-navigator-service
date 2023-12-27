@@ -1,29 +1,37 @@
 import { User } from './User';
-import { YRN } from './YRN';
 import { IStamps } from '../interfaces/IStamps';
 
 export type ChefsSubmissionForm = {
-  submissionId: string; // Primary Key
+  submissionId: string;
   confirmationId: string;
-  contactEmail: string | null;
-  contactPhoneNumber: string | null;
-  contactFirstName: string | null;
-  contactLastName: string | null;
-  intakeStatus: string | null;
-  projectName: string | null;
-  queuePriority: number | null;
-  singleFamilyUnits: string | null;
-  streetAddress: string | null;
-  atsClientNumber: string | null;
-  addedToATS: YRN;
-  financiallySupported: YRN;
-  applicationStatus: string | null;
-  relatedPermits: string | null;
-  updatedAai: YRN;
-  waitingOn: string | null;
   submittedAt: string;
   submittedBy: string;
+  locationPIDs: string | null;
+  contactName: string | null;
+  contactPhoneNumber: string | null;
+  contactEmail: string | null;
+  projectName: string | null;
+  singleFamilyUnits: string | null;
+  streetAddress: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  queuePriority: number | null;
+  relatedPermits: string | null;
+  astNotes: string | null;
+  astUpdated: boolean | null;
+  addedToATS: boolean | null;
+  atsClientNumber: string | null;
+  ltsaCompleted: boolean | null;
+  naturalDisaster: boolean | null;
+  financiallySupported: boolean | null;
+  financiallySupportedBC: boolean | null;
+  financiallySupportedIndigenous: boolean | null;
+  financiallySupportedNonProfit: boolean | null;
+  financiallySupportedHousingCoop: boolean | null;
+  waitingOn: string | null;
   bringForwardDate: string | null;
   notes: string | null;
-  user: User | null;
+  user: User | null; // assigned to
+  intakeStatus: string | null;
+  applicationStatus: string | null;
 } & Partial<IStamps>;

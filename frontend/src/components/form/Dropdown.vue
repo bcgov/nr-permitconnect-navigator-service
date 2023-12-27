@@ -11,7 +11,8 @@ type Props = {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  options: Array<string>;
+  options: Array<unknown>;
+  bold?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -19,7 +20,8 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   label: '',
   placeholder: '',
-  disabled: false
+  disabled: false,
+  bold: true
 });
 
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
@@ -27,17 +29,25 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 
 <template>
   <div class="field col">
-    <label :for="name">{{ label }}</label>
+    <label
+      :class="{ 'font-bold': bold }"
+      :for="name"
+    >
+      {{ label }}
+    </label>
     <Dropdown
       v-model.trim="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       :placeholder="placeholder"
-      :class="'w-full ' + { 'p-invalid': errorMessage }"
+      class="w-full"
+      :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
       :options="props.options"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
-    <ErrorMessage :name="name" />
+    <div>
+      <ErrorMessage :name="name" />
+    </div>
   </div>
 </template>

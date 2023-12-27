@@ -30,12 +30,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, title: 'Initiatives' }
   },
   {
-    path: '/stylings',
-    name: RouteNames.STYLINGS,
-    component: () => import('@/views/StylingsView.vue'),
-    meta: { requiresAuth: false, title: 'Stylings' }
-  },
-  {
     path: '/submission',
     name: RouteNames.SUBMISSION,
     component: () => import('@/views/SubmissionView.vue'),

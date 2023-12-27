@@ -41,13 +41,13 @@ onMounted(async () => {
 </script>
 
 <template>
-  <h1>Submission</h1>
+  <h1>Activity submission</h1>
 
   <Button
     class="mb-3"
     @click="editable = !editable"
   >
-    Edit mode
+    Edit
   </Button>
 
   <SubmissionForm

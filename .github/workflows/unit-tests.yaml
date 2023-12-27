@@ -48,6 +48,8 @@ jobs:
       - name: Install dependencies
         if: steps.cache-app.outputs.cache-hit != 'true'
         run: npm ci
+      - name: Generate Prisma Schema
+        run: npm run prisma:generate
       - name: Test
         run: npm run test
         env:
