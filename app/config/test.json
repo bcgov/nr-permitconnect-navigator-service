@@ -7,8 +7,8 @@
   },
   "server": {
     "keycloak": {
+      "authority": "https://some.authority",
       "clientId": "client",
-      "realm": "01234567",
       "clientSecret": "password"
     },
     "logLevel": "silent"

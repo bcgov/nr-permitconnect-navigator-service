@@ -70,6 +70,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           threshold_alert: 50
           threshold_warning: 80
+
   test-frontend:
     name: Unit Tests (Frontend)
     runs-on: ubuntu-latest

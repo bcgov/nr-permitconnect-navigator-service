@@ -43,14 +43,14 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
         const bearerToken = authorization.substring(7);
         let isValid: string | jwt.JwtPayload;
 
-        if (config.has('server.oidc.publicKey')) {
+        if (config.has('server.oidc.authority') && config.has('server.oidc.publicKey')) {
           const publicKey: string = config.get('server.oidc.publicKey');
           const pemKey = publicKey.startsWith('-----BEGIN') ? publicKey : _spkiWrapper(publicKey);
-          isValid = jwt.verify(bearerToken, pemKey, {
-            issuer: `${config.get('server.oidc.serverUrl')}/realms/${config.get('server.oidc.realm')}`
-          });
+          isValid = jwt.verify(bearerToken, pemKey, { issuer: config.get('server.oidc.authority') });
         } else {
-          throw new Error('OIDC environment variable SERVER_OIDC_PUBLICKEY or server.oidc.publicKey must be defined');
+          throw new Error(
+            'OIDC environment variables `SERVER_OIDC_AUTHORITY` and `SERVER_OIDC_PUBLICKEY` must be defined'
+          );
         }
 
         if (isValid) {
