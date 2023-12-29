@@ -2,7 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { getChefsApiKey } from '../components/utils';
+import { getChefsApiKey, isTruthy } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
 
@@ -52,6 +52,13 @@ const service = {
 
         const submission = response.submission.submission.data;
 
+        const financiallySupportedValues = {
+          financiallySupportedBC: isTruthy(submission.isBCHousingSupported),
+          financiallySupportedIndigenous: isTruthy(submission.isIndigenousHousingProviderSupported),
+          financiallySupportedNonProfit: isTruthy(submission.isNonProfitSupported),
+          financiallySupportedHousingCoop: isTruthy(submission.isHousingCooperativeSupported)
+        };
+
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
@@ -59,10 +66,15 @@ const service = {
             contactEmail: submission.contactEmail,
             contactPhoneNumber: submission.contactPhoneNumber,
             contactName: `${submission.contactFirstName} ${submission.contactLastName}`,
+            financiallySupported: Object.values(financiallySupportedValues).includes(true),
+            ...financiallySupportedValues,
             intakeStatus: status[0].code,
-            projectName: submission.projectName,
+            latitude: parseInt(submission.latitude),
+            longitude: parseInt(submission.longitude),
+            naturalDisaster: submission.naturalDisasterInd,
+            projectName: submission.companyNameRegistered,
             queuePriority: parseInt(submission.queuePriority),
-            singleFamilyUnits: submission.singleFamilyUnits,
+            singleFamilyUnits: submission.singleFamilyUnits ?? submission.multiFamilyUnits,
             streetAddress: submission.streetAddress,
             submittedAt: response.submission.createdAt,
             submittedBy: response.submission.createdBy

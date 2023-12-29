@@ -32,7 +32,7 @@ export default {
     return {
       submissionId: input.submissionId,
       confirmationId: input.confirmationId,
-      submittedAt: new Date(input.submittedAt),
+      submittedAt: new Date(input.submittedAt ?? Date.now()),
       submittedBy: input.submittedBy,
       locationPIDs: input.locationPIDs,
       contactName: input.contactName,
