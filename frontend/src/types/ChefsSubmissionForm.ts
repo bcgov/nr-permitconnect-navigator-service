@@ -1,6 +1,7 @@
 import type { User } from './User';
 
 export type ChefsSubmissionForm = {
+  formId?: string;
   submissionId: string;
   confirmationId: string;
   submittedAt: string;
