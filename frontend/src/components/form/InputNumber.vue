@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { toRef, ref } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
-import { Calendar } from '@/lib/primevue';
+import { InputNumber } from '@/lib/primevue';
+
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
   helpText?: string;
   label?: string;
   name: string;
+  placeholder?: string;
   disabled?: boolean;
-  showTime?: boolean;
   bold?: boolean;
 };
 
@@ -18,12 +20,14 @@ const props = withDefaults(defineProps<Props>(), {
   helpText: '',
   type: 'text',
   label: '',
+  placeholder: '',
   disabled: false,
-  showTime: false,
   bold: true
 });
 
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+// State
+const { errorMessage, value } = useField<number>(toRef(props, 'name'));
+const fieldActive: Ref<boolean> = ref(false);
 </script>
 
 <template>
@@ -34,20 +38,23 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     >
       {{ label }}
     </label>
-    <Calendar
+    <InputNumber
       v-model.trim="value"
       :aria-describedby="`${name}-help`"
       :name="name"
+      :placeholder="placeholder"
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
-      :show-time="props.showTime"
-      hour-format="24"
-      show-icon
-      icon-display="input"
-      date-format="yy/mm/dd"
+      @focus="fieldActive = true"
+      @blur="fieldActive = false"
     />
-    <small :id="`${name}-help`">{{ helpText }}</small>
+    <small
+      v-if="fieldActive"
+      :id="`${name}-help`"
+    >
+      {{ helpText }}
+    </small>
     <div>
       <ErrorMessage :name="name" />
     </div>

@@ -60,6 +60,8 @@ export const IntakeStatusList = [
   INTAKE_STATUS_LIST.COMPLETED
 ];
 
+export const QueuePriority = [0, 1, 2, 3, 4, 5];
+
 /**
  * Default System User ID
  */

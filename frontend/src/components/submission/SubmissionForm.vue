@@ -3,10 +3,19 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { mixed, number, object, string } from 'yup';
 
-import { Calendar, Dropdown, EditableDropdown, TextArea, TextInput } from '@/components/form';
+import {
+  Calendar,
+  Checkbox,
+  Dropdown,
+  EditableDropdown,
+  InputMask,
+  InputNumber,
+  InputText,
+  TextArea
+} from '@/components/form';
 import { Button } from '@/lib/primevue';
 import { userService } from '@/services';
-import { ApplicationStatusList, IntakeStatusList, Regex } from '@/utils/constants';
+import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
 import { formatJwtUsername } from '@/utils/formatters';
 
 import type { IInputEvent } from '@/interfaces';
@@ -37,25 +46,25 @@ const initialFormValues: any = {
 
 // Form validation schema
 const formSchema = object({
-  addedToATS: string().oneOf(['Y', 'N']).required().label('Added to ATS'),
   applicationStatus: string().oneOf(ApplicationStatusList).label('Application Status'),
   atsClientNumber: string()
     .when('addedToATS', {
-      is: 'Y',
+      is: true,
       then: (schema) => schema.required(),
       otherwise: (schema) => schema.notRequired()
     })
     .label('ATS Client Number'),
   confirmationId: string().required().label('Confirmation ID'),
-  financiallySupported: string().oneOf(['Y', 'N']).required().label('Financially Supported'),
+  contactEmail: string().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake Status'),
+  latitude: number().notRequired().min(48).max(60).label('Latitude'),
+  longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
   queuePriority: number()
     .required()
     .min(0)
     .integer()
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  updatedAai: string().oneOf(['Y', 'N']).required().label('Updated AAI Spreadsheet'),
   user: mixed()
     .when('intakeStatus', {
       is: (val: string) => val !== 'SUBMITTED',
@@ -87,131 +96,213 @@ const onCancel = () => {
 };
 
 const onSubmit = (values: any) => {
+  // Ensure child values are reset if parent not set
+  if (!values.addedToATS) {
+    values.atsClientNumber = null;
+  }
+  if (!values.financiallySupported) {
+    values.financiallySupportedBC = false;
+    values.financiallySupportedIndigenous = false;
+    values.financiallySupportedNonProfit = false;
+    values.financiallySupportedHousingCoop = false;
+  }
+
   emit('submit', values);
 };
 </script>
 
 <template>
   <Form
-    v-slot="{ handleReset }"
+    v-slot="{ handleReset, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="onSubmit"
   >
     <div class="formgrid grid">
-      <TextInput
+      <InputText
         class="col-4"
         name="confirmationId"
-        label="Confirmation ID"
-        :disabled="true"
-      />
-      <TextInput
-        class="col-4"
-        name="submittedBy"
-        label="Submitted By"
+        label="Activity"
         :disabled="true"
       />
       <Calendar
         class="col-4"
         name="submittedAt"
-        label="Submission Date"
+        label="Submission date"
         :disabled="true"
       />
-      <TextInput
-        name="projectName"
-        label="Project Name"
+      <InputText
+        class="col-4"
+        name="locationPIDs"
+        label="Location PID(s)"
         :disabled="!props.editable"
         autofocus
       />
-      <TextInput
-        class="col-2"
-        name="contactLastName"
-        label="Contact Last Name"
-        :disabled="!props.editable"
-      />
-      <TextInput
-        class="col-2"
-        name="contactFirstName"
-        label="Contact First Name"
-        :disabled="!props.editable"
-      />
-      <TextInput
+      <InputText
         class="col-4"
-        name="contactEmail"
-        label="Contact Email"
+        name="contactName"
+        label="Contact"
         :disabled="!props.editable"
       />
-      <TextInput
+      <InputMask
         class="col-4"
         name="contactPhoneNumber"
-        label="Contact Phone"
+        mask="(999) 999-9999"
+        label="Contact phone"
         :disabled="!props.editable"
       />
-      <TextInput
+      <InputText
         class="col-4"
-        name="streetAddress"
-        label="Address"
+        name="contactEmail"
+        label="Contact email"
         :disabled="!props.editable"
       />
-      <TextInput
+      <InputText
+        class="col-4"
+        name="projectName"
+        label="Company"
+        :disabled="!props.editable"
+      />
+      <InputText
         class="col-4"
         name="singleFamilyUnits"
-        label="# of Units"
+        label="Units"
         :disabled="!props.editable"
       />
-      <TextInput
+      <div class="col-4" />
+      <InputText
         class="col-4"
-        name="atsClientNumber"
-        label="ATS Client Number"
+        name="streetAddress"
+        label="Location address"
         :disabled="!props.editable"
       />
-      <TextInput
+      <InputNumber
         class="col-4"
-        name="addedToATS"
-        label="Added to ATS *"
+        name="latitude"
+        label="Location latitude"
+        help-text="Optionally provide a number between 48 and 60"
         :disabled="!props.editable"
       />
-      <TextInput
+      <InputNumber
         class="col-4"
-        name="financiallySupported"
-        label="Financially Supported *"
+        name="longitude"
+        label="Location longitude"
+        help-text="Optionally provide a number between -114 and -139"
         :disabled="!props.editable"
       />
       <Dropdown
-        class="col-4"
-        name="applicationStatus"
-        label="Application Status"
-        :disabled="!props.editable"
-        :options="ApplicationStatusList"
-      />
-      <TextInput
-        class="col-4"
+        class="col-2"
         name="queuePriority"
-        label="Queue Priority"
+        label="Priority"
         :disabled="!props.editable"
+        :options="QueuePriority"
       />
-      <TextInput
-        class="col-4"
+      <div class="col" />
+      <InputText
+        class="col-12"
         name="relatedPermits"
-        label="Related Permits"
+        label="Related permits"
         :disabled="!props.editable"
       />
-      <TextInput
-        class="col-4"
-        name="updatedAai"
-        label="Updated AAI Spreadsheet *"
+      <TextArea
+        class="col-12"
+        name="astNotes"
+        label="AST notes"
         :disabled="!props.editable"
       />
-      <TextInput
-        class="col-4"
+      <Checkbox
+        class="col-12"
+        name="astUpdated"
+        label="Automated Status Tool (AST) updated"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-12"
+        name="addedToATS"
+        label="Authorized Tracking System (ATS)"
+        :disabled="!props.editable"
+        :bold="true"
+      />
+      <div
+        v-if="values.addedToATS"
+        class="pl-4 col-12 flex"
+      >
+        <div>
+          <p
+            class="clientNumber align-items-center"
+            style="color: #38598a"
+          >
+            ATS Client #
+          </p>
+        </div>
+        <div class="col">
+          <InputText
+            class="col-4 align-items-center"
+            name="atsClientNumber"
+            :disabled="!props.editable"
+          />
+        </div>
+      </div>
+      <Checkbox
+        class="col-12"
+        name="ltsaCompleted"
+        label="Land Title Survey Authority (LTSA) completed"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-12"
+        name="naturalDisaster"
+        label="Location affeced by natural disaster"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-12"
+        name="financiallySupported"
+        label="Financially supported"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        v-if="values.financiallySupported"
+        class="pl-4 col-12"
+        name="financiallySupportedBC"
+        label="BC Housing"
+        :disabled="!props.editable"
+        :bold="false"
+      />
+      <Checkbox
+        v-if="values.financiallySupported"
+        class="pl-4 col-12"
+        name="financiallySupportedIndigenous"
+        label="Indigenous Housing Provider"
+        :disabled="!props.editable"
+        :bold="false"
+      />
+      <Checkbox
+        v-if="values.financiallySupported"
+        class="pl-4 col-12"
+        name="financiallySupportedNonProfit"
+        label="Non-profit housing society"
+        :disabled="!props.editable"
+        :bold="false"
+      />
+      <Checkbox
+        v-if="values.financiallySupported"
+        class="pl-4 col-12"
+        name="financiallySupportedHousingCoop"
+        label="Housing co-operative"
+        :disabled="!props.editable"
+        :bold="false"
+      />
+      <InputText
+        class="col-6"
         name="waitingOn"
-        label="Waiting On"
+        label="Waiting on"
         :disabled="!props.editable"
       />
       <Calendar
-        class="col-4"
+        class="col-6"
         name="bringForwardDate"
-        label="Bring Forward Date"
+        label="Bring forward date"
         :disabled="!props.editable"
       />
       <TextArea
@@ -223,7 +314,7 @@ const onSubmit = (values: any) => {
       <EditableDropdown
         class="col-4"
         name="user"
-        label="Assignee"
+        label="Assigned to"
         :disabled="!props.editable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
@@ -232,11 +323,21 @@ const onSubmit = (values: any) => {
       <Dropdown
         class="col-4"
         name="intakeStatus"
-        label="Intake Status"
+        label="Intake status"
         :disabled="!props.editable"
         :options="IntakeStatusList"
       />
-      <div class="field col-12">
+      <Dropdown
+        class="col-4"
+        name="applicationStatus"
+        label="Status"
+        :disabled="!props.editable"
+        :options="ApplicationStatusList"
+      />
+      <div
+        v-if="props.editable"
+        class="field col-12"
+      >
         <Button
           label="Save"
           type="submit"
@@ -260,3 +361,9 @@ const onSubmit = (values: any) => {
     </div>
   </Form>
 </template>
+
+<style scoped lang="scss">
+.clientNumber {
+  margin-top: 8px;
+}
+</style>

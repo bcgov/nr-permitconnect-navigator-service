@@ -2,7 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { getChefsApiKey } from '../components/utils';
+import { getChefsApiKey, isTruthy } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
 
@@ -50,19 +50,32 @@ const service = {
         const response = (await chefsAxios(formId).get(`submissions/${submissionId}`)).data;
         const status = (await chefsAxios(formId).get(`submissions/${submissionId}/status`)).data;
 
+        const submission = response.submission.submission.data;
+
+        const financiallySupportedValues = {
+          financiallySupportedBC: isTruthy(submission.isBCHousingSupported),
+          financiallySupportedIndigenous: isTruthy(submission.isIndigenousHousingProviderSupported),
+          financiallySupportedNonProfit: isTruthy(submission.isNonProfitSupported),
+          financiallySupportedHousingCoop: isTruthy(submission.isHousingCooperativeSupported)
+        };
+
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
             confirmationId: response.submission.confirmationId,
-            contactEmail: response.submission.submission.data.contactEmail,
-            contactPhoneNumber: response.submission.submission.data.contactPhoneNumber,
-            contactFirstName: response.submission.submission.data.contactFirstName,
-            contactLastName: response.submission.submission.data.contactLastName,
+            contactEmail: submission.contactEmail,
+            contactPhoneNumber: submission.contactPhoneNumber,
+            contactName: `${submission.contactFirstName} ${submission.contactLastName}`,
+            financiallySupported: Object.values(financiallySupportedValues).includes(true),
+            ...financiallySupportedValues,
             intakeStatus: status[0].code,
-            projectName: response.submission.submission.data.projectName,
-            queuePriority: parseInt(response.submission.submission.data.queuePriority),
-            singleFamilyUnits: response.submission.submission.data.singleFamilyUnits,
-            streetAddress: response.submission.submission.data.streetAddress,
+            latitude: parseInt(submission.latitude),
+            longitude: parseInt(submission.longitude),
+            naturalDisaster: submission.naturalDisasterInd,
+            projectName: submission.companyNameRegistered,
+            queuePriority: parseInt(submission.queuePriority),
+            singleFamilyUnits: submission.singleFamilyUnits ?? submission.multiFamilyUnits,
+            streetAddress: submission.streetAddress,
             submittedAt: response.submission.createdAt,
             submittedBy: response.submission.createdBy
           }
