@@ -1,17 +1,19 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { Spinner } from '@/components/layout';
-import { Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
+import { Checkbox, Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
 
 import { chefsService } from '@/services';
 import { RouteNames } from '@/utils/constants';
-import { formatDateShort, formatJwtUsername } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
+import type { ChefsSubmissionForm } from '@/types';
 
 // State
 const loading: Ref<boolean> = ref(false);
-const submissions: Ref<Array<any>> = ref([]);
+const submissions: Ref<Array<ChefsSubmissionForm>> = ref([]);
+const selection: Ref<ChefsSubmissionForm | undefined> = ref(undefined);
 
 // Datatable filter(s)
 const filters = ref({
@@ -29,123 +31,247 @@ onMounted(async () => {
 <template>
   <h1>Submissions</h1>
 
-  <div class="flex">
-    <div class="flex-grow-1">
-      <DataTable
-        v-model:filters="filters"
-        :loading="loading"
-        :value="submissions"
-        data-key="id"
-        class="p-datatable-sm"
-        responsive-layout="scroll"
-        :paginator="true"
-        :rows="10"
-        paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
-        current-page-report-template="{first}-{last} of {totalRecords}"
-        :rows-per-page-options="[10, 20, 50]"
-        :global-filter-fields="['form.confirmationId', 'form.username']"
+  <div>
+    <DataTable
+      v-model:filters="filters"
+      v-model:selection="selection"
+      :loading="loading"
+      :value="submissions"
+      data-key="submissionId"
+      class="p-datatable-sm"
+      scrollable
+      responsive-layout="scroll"
+      :paginator="true"
+      :rows="10"
+      sort-field="submittedAt"
+      :sort-order="-1"
+      paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
+      current-page-report-template="{first}-{last} of {totalRecords}"
+      :rows-per-page-options="[10, 20, 50]"
+      selection-mode="single"
+    >
+      <template #empty>
+        <div class="flex justify-content-center">
+          <h3>No items found.</h3>
+        </div>
+      </template>
+      <template #loading>
+        <Spinner />
+      </template>
+      <template #header>
+        <div class="flex justify-content-end">
+          <span class="p-input-icon-left ml-4">
+            <i class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+            />
+          </span>
+        </div>
+      </template>
+      <Column
+        field="confirmationId"
+        header="Activity"
+        :sortable="true"
       >
-        <template #empty>
-          <div class="flex justify-content-center">
-            <h3>No items found.</h3>
+        <template #body="{ data }">
+          <div :data-submissionId="data.submissionId">
+            <router-link
+              :to="{
+                name: RouteNames.SUBMISSION,
+                query: { formId: data.formId, submissionId: data.submissionId }
+              }"
+            >
+              {{ data.confirmationId }}
+            </router-link>
           </div>
         </template>
-        <template #loading>
-          <Spinner />
+      </Column>
+      <Column
+        field="contactName"
+        header="Contact"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="contactPhoneNumber"
+        header="Contact phone"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="contactEmail"
+        header="Contact email"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="submittedAt"
+        header="Submission date"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          {{ formatDate(data?.submittedAt) }}
         </template>
-        <template #header>
-          <div class="flex justify-content-end">
-            <span class="p-input-icon-left ml-4">
-              <i class="pi pi-search" />
-              <InputText
-                v-model="filters['global'].value"
-                v-tooltip.bottom="'Search by confirmation ID or submitting user'"
-                placeholder="Search"
-              />
-            </span>
-          </div>
+      </Column>
+      <Column
+        field="locationPIDs"
+        header="Location PID(s)"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="assignedTo"
+        header="Assigned to"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          {{ data.user?.lastName }}{{ data.user?.lastName && data.user?.firstName ? ', ' : '' }}
+          {{ data.user?.firstName }}
         </template>
-        <Column
-          field="form.confirmationId"
-          header="Confirmation Id"
-          :sortable="true"
-        >
-          <template #body="{ data }">
-            <div :data-submissionId="data.form.submissionId">
-              <router-link
-                :to="{
-                  name: RouteNames.SUBMISSION,
-                  query: { formId: data.form.id, submissionId: data.form.submissionId }
-                }"
-              >
-                {{ data.form.confirmationId }}
-              </router-link>
-            </div>
-          </template>
-        </Column>
-        <Column
-          field="projectName"
-          header="Project Name"
-          :sortable="true"
-        />
-        <Column
-          header="Contact"
-          :sortable="true"
-        >
-          <template #body="{ data }">
-            {{ data?.contactLastName }}{{ data?.contactLastName && data?.contactFirstName ? ', ' : '' }}
-            {{ data?.contactFirstName }}
-          </template>
-        </Column>
-        <Column
-          field="contactEmail"
-          header="Contact Email"
-          :sortable="true"
-        />
-        <Column
-          field="contactPhoneNumber"
-          header="Contact Phone"
-          :sortable="true"
-        />
-        <Column
-          field="form.assignee"
-          header="Assignee"
-          :sortable="true"
-        />
-        <Column header="Address">
-          <template #body="{ data }">
-            {{ data?.streetAddress }}
-          </template>
-        </Column>
-        <Column
-          field="singleFamilyUnits"
-          header="# of Units"
-          :sortable="true"
-        />
-        <Column
-          field="form.status"
-          header="Status"
-          :sortable="true"
-        />
-        <Column
-          field="form.username"
-          header="Created By"
-          :sortable="true"
-        >
-          <template #body="{ data }">
-            {{ formatJwtUsername(data?.form.username) }}
-          </template>
-        </Column>
-        <Column
-          field="form.createdAt"
-          header="Submission Date"
-          :sortable="true"
-        >
-          <template #body="{ data }">
-            {{ formatDateShort(data?.form.createdAt) }}
-          </template>
-        </Column>
-      </DataTable>
-    </div>
+      </Column>
+      <Column
+        field="intakeStatus"
+        header="Intake status"
+        :sortable="true"
+        style="min-width: 150px"
+      />
+      <Column
+        field="applicationStatus"
+        header="Status"
+        :sortable="true"
+        style="min-width: 150px"
+      />
+      <Column
+        field="singleFamilyUnits"
+        header="Units"
+        :sortable="true"
+        style="min-width: 100px"
+      />
+      <Column
+        field="streetAddress"
+        header="Location address"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="latitude"
+        header="Location latitude"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="longitude"
+        header="Location longitude"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="queuePriority"
+        header="Priority"
+        :sortable="true"
+        style="min-width: 100px"
+      />
+      <Column
+        field="relatedPermits"
+        header="Related permits"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="astUpdated"
+        header="Automated Status Tool (AST) updated"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.astUpdated"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
+        field="addedToATS"
+        header="Authorized Tracking System (ATS)"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.addedToATS"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
+        field="atsClientNumber"
+        header="ATS Client #"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="ltsaCompleted"
+        header="Land Title Survey Authority (LTSA) completed"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.ltsaCompleted"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
+        field="naturalDisaster"
+        header="Location affected by natural disaster"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.naturalDisaster"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
+        field="financiallySupported"
+        header="Financially supported"
+        :sortable="true"
+        style="min-width: 150px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.financiallySupported"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
+        field="waitingOn"
+        header="Waiting on"
+        :sortable="true"
+        style="min-width: 200px"
+      />
+      <Column
+        field="bringForwardDate"
+        header="Bring forward date"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          {{ formatDate(data?.bringForwardDate) }}
+        </template>
+      </Column>
+    </DataTable>
   </div>
 </template>

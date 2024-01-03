@@ -230,10 +230,10 @@ const service = {
       where: {
         OR: [
           {
-            userId: { in: params.userId, mode: 'insensitive' }
+            userId: { in: params.userId }
           },
           {
-            identityId: { in: params.identityId, mode: 'insensitive' }
+            identityId: { in: params.identityId }
           },
           {
             idp: { in: params.idp, mode: 'insensitive' }
