@@ -7,7 +7,7 @@ import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { ChefsSubmissionForm } from '../types';
+import type { ChefsSubmissionForm, SubmissionSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -103,6 +103,29 @@ const service = {
     } catch (e: unknown) {
       throw e;
     }
+  },
+
+  /**
+   * @function searchSubmissions
+   * Search and filter for specific submission
+   * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
+   * @returns {Promise<object>} The result of running the findMany operation
+   */
+  searchSubmissions: async (params: SubmissionSearchParameters) => {
+    const result = await prisma.submission.findMany({
+      where: {
+        OR: [
+          {
+            submissionId: { in: params.submissionId }
+          }
+        ]
+      },
+      include: {
+        user: true
+      }
+    });
+
+    return result.map((x) => submission.fromDBModel(x));
   },
 
   updateSubmission: async (data: ChefsSubmissionForm) => {
