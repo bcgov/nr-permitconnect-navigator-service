@@ -30,10 +30,10 @@ model knex_migrations_lock {
 }
 
 model submission {
-  submissionId                    String    @id @db.Uuid
-  assignedToUserId                String?   @db.Uuid
+  submissionId                    String     @id @db.Uuid
+  assignedToUserId                String?    @db.Uuid
   confirmationId                  String
-  submittedAt                     DateTime  @db.Timestamptz(6)
+  submittedAt                     DateTime   @db.Timestamptz(6)
   submittedBy                     String
   locationPIDs                    String?
   contactName                     String?
@@ -58,15 +58,16 @@ model submission {
   financiallySupportedNonProfit   Boolean?
   financiallySupportedHousingCoop Boolean?
   waitingOn                       String?
-  bringForwardDate                DateTime? @db.Timestamptz(6)
+  bringForwardDate                DateTime?  @db.Timestamptz(6)
   notes                           String?
   intakeStatus                    String?
   applicationStatus               String?
-  createdBy                       String?   @default("00000000-0000-0000-0000-000000000000")
-  createdAt                       DateTime? @default(now()) @db.Timestamptz(6)
+  createdBy                       String?    @default("00000000-0000-0000-0000-000000000000")
+  createdAt                       DateTime?  @default(now()) @db.Timestamptz(6)
   updatedBy                       String?
-  updatedAt                       DateTime? @db.Timestamptz(6)
-  user                            user?     @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
+  updatedAt                       DateTime?  @db.Timestamptz(6)
+  document                        document[]
+  user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }
 
 model user {
@@ -89,4 +90,16 @@ model user {
   @@index([email], map: "user_email_index")
   @@index([identityId], map: "user_identityid_index")
   @@index([username], map: "user_username_index")
+}
+
+model document {
+  documentId   String      @id @db.Uuid
+  submissionId String?     @db.Uuid
+  filename     String?
+  mimeType     String?
+  createdBy    String?     @default("00000000-0000-0000-0000-000000000000")
+  createdAt    DateTime?   @default(now()) @db.Timestamptz(6)
+  updatedBy    String?
+  updatedAt    DateTime?   @db.Timestamptz(6)
+  submission   submission? @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "document_submissionid_foreign")
 }
