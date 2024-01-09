@@ -1,14 +1,15 @@
 import { Prisma } from '@prisma/client';
 
 import type { IStamps } from '../../interfaces/IStamps';
-import type { User } from '../../types';
+import type { User } from '../../types/User';
 
 // Define types
 const _user = Prisma.validator<Prisma.userDefaultArgs>()({});
-type DBUser = Omit<Prisma.userGetPayload<typeof _user>, keyof IStamps>;
+
+type PrismaRelationUser = Omit<Prisma.userGetPayload<typeof _user>, keyof IStamps>;
 
 export default {
-  toDBModel(input: User): DBUser {
+  toPrismaModel(input: User): PrismaRelationUser {
     return {
       userId: input.userId as string,
       identityId: input.identityId,
@@ -22,7 +23,7 @@ export default {
     };
   },
 
-  fromDBModel(input: DBUser | null): User | null {
+  fromPrismaModel(input: PrismaRelationUser | null): User | null {
     if (!input) return null;
 
     return {

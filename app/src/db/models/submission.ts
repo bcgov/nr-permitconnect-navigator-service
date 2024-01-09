@@ -22,13 +22,16 @@ type UserRelation = {
         disconnect: boolean;
       };
 };
-type DBSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, 'assignedToUserId' | keyof IStamps> &
+type PrismaRelationSubmission = Omit<
+  Prisma.submissionGetPayload<typeof _submission>,
+  'assignedToUserId' | keyof IStamps
+> &
   UserRelation;
 
-type Submission = Prisma.submissionGetPayload<typeof _submissionWithRelations>;
+type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithRelations>;
 
 export default {
-  toDBModel(input: ChefsSubmissionForm): DBSubmission {
+  toPrismaModel(input: ChefsSubmissionForm): PrismaRelationSubmission {
     return {
       submissionId: input.submissionId,
       confirmationId: input.confirmationId,
@@ -65,7 +68,7 @@ export default {
     };
   },
 
-  fromDBModel(input: Submission | null): ChefsSubmissionForm | null {
+  fromPrismaModel(input: PrismaGraphSubmission | null): ChefsSubmissionForm | null {
     if (!input) return null;
 
     return {
@@ -98,7 +101,7 @@ export default {
       waitingOn: input.waitingOn,
       bringForwardDate: input.bringForwardDate?.toISOString() ?? null,
       notes: input.notes,
-      user: user.fromDBModel(input.user),
+      user: user.fromPrismaModel(input.user),
       intakeStatus: input.intakeStatus,
       applicationStatus: input.applicationStatus
     };
