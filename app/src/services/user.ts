@@ -53,7 +53,7 @@ const service = {
       createdBy: NIL
     };
 
-    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toDBModel(obj) });
+    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toPrismaModel(obj) });
 
     return response;
   },
@@ -100,7 +100,7 @@ const service = {
         };
 
         response = await trx.user.create({
-          data: user.toDBModel(newUser)
+          data: user.toPrismaModel(newUser)
         });
       }
     };
@@ -193,7 +193,7 @@ const service = {
       }
     });
 
-    return identity_provider.fromDBModel(response);
+    return identity_provider.fromPrismaModel(response);
   },
 
   /**
@@ -260,7 +260,7 @@ const service = {
       }
     });
 
-    return response.map((x) => user.fromDBModel(x));
+    return response.map((x) => user.fromPrismaModel(x));
   },
 
   /**
@@ -301,7 +301,7 @@ const service = {
 
         // TODO: Add support for updating userId primary key in the event it changes
         response = await trx?.user.update({
-          data: user.toDBModel(obj),
+          data: user.toPrismaModel(obj),
           where: {
             userId: userId
           }

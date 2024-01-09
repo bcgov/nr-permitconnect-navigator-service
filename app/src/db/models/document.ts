@@ -3,11 +3,11 @@ import { default as submission } from './submission';
 import disconnectRelation from '../utils/disconnectRelation';
 
 import type { IStamps } from '../../interfaces/IStamps';
-import type { Document as AppDocument } from '../../types';
+import type { Document } from '../../types';
 
 // Define types
 const _document = Prisma.validator<Prisma.documentDefaultArgs>()({});
-const _documentWithRelations = Prisma.validator<Prisma.documentDefaultArgs>()({
+const _documentWithGraph = Prisma.validator<Prisma.documentDefaultArgs>()({
   include: { submission: { include: { user: true } } }
 });
 
@@ -22,13 +22,14 @@ type SubmissionRelation = {
         disconnect: boolean;
       };
 };
-type DBDocument = Omit<Prisma.documentGetPayload<typeof _document>, 'submissionId' | keyof IStamps> &
+
+type PrismaRelationDocument = Omit<Prisma.documentGetPayload<typeof _document>, 'submissionId' | keyof IStamps> &
   SubmissionRelation;
 
-type Document = Prisma.documentGetPayload<typeof _documentWithRelations>;
+type PrismaGraphDocument = Prisma.documentGetPayload<typeof _documentWithGraph>;
 
 export default {
-  toDBModel(input: AppDocument): DBDocument {
+  toPrismaModel(input: Document): PrismaRelationDocument {
     return {
       documentId: input.documentId as string,
       filename: input.filename,
@@ -39,14 +40,14 @@ export default {
     };
   },
 
-  fromDBModel(input: Document | null): AppDocument | null {
+  fromPrismaModel(input: PrismaGraphDocument | null): Document | null {
     if (!input) return null;
 
     return {
       documentId: input.documentId,
       filename: input.filename,
       mimeType: input.mimeType,
-      submission: submission.fromDBModel(input.submission),
+      submission: submission.fromPrismaModel(input.submission),
       submissionId: input.submissionId as string
     };
   }
