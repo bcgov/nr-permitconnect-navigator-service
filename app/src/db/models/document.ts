@@ -31,7 +31,7 @@ export default {
       documentId: input.documentId as string,
       filename: input.filename,
       mimeType: input.mimeType,
-      filesize: input.filesize ? BigInt(input.filesize) : null,
+      filesize: BigInt(input.filesize),
       submission: input.submissionId ? { connect: { submissionId: input.submissionId } } : disconnectRelation
     };
   },

@@ -52,14 +52,6 @@ const onUpload = async (file: File) => {
 <template>
   <h1>Activity submission</h1>
 
-  <input
-    ref="fileInput"
-    type="file"
-    accept="*"
-    @change="(event: any) => onUpload(event.target.files[0])"
-    @click="(event: any) => (event.target.value = null)"
-  />
-
   <Button
     class="mb-3"
     @click="editable = !editable"

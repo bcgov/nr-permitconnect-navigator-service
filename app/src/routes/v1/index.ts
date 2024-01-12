@@ -10,7 +10,7 @@ router.use(currentUser);
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/chefs', '/user']
+    endpoints: ['/chefs', '/document', '/user']
   });
 });
 

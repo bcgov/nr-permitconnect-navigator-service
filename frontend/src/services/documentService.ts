@@ -31,10 +31,6 @@ export default {
   },
 
   async listDocuments(submissionId: string) {
-    try {
-      return appAxios().get(`${PATH}/list/${submissionId}`);
-    } catch (e) {
-      console.log(e);
-    }
+    return appAxios().get(`${PATH}/list/${submissionId}`);
   }
 };

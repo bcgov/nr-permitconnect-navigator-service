@@ -93,16 +93,16 @@ model user {
 }
 
 model document {
-  documentId   String      @id @db.Uuid
-  submissionId String?     @db.Uuid
-  filename     String?
-  mimeType     String?
-  filesize     BigInt?
-  createdBy    String?     @default("00000000-0000-0000-0000-000000000000")
-  createdAt    DateTime?   @default(now()) @db.Timestamptz(6)
+  documentId   String     @id @db.Uuid
+  submissionId String     @db.Uuid
+  filename     String
+  mimeType     String     @default("application/octet-stream")
+  filesize     BigInt
+  createdBy    String?    @default("00000000-0000-0000-0000-000000000000")
+  createdAt    DateTime?  @default(now()) @db.Timestamptz(6)
   updatedBy    String?
-  updatedAt    DateTime?   @db.Timestamptz(6)
-  submission   submission? @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "document_submissionid_foreign")
+  updatedAt    DateTime?  @db.Timestamptz(6)
+  submission   submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "document_submissionid_foreign")
 
   @@unique([documentId, submissionId], map: "document_documentid_submissionid_unique")
 }

@@ -75,13 +75,14 @@ export async function up(knex: Knex): Promise<void> {
           table.uuid('documentId').primary();
           table
             .uuid('submissionId')
+            .notNullable()
             .references('submissionId')
             .inTable('submission')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
-          table.text('filename');
-          table.text('mimeType');
-          table.bigInteger('filesize');
+          table.text('filename').notNullable();
+          table.text('mimeType').defaultTo('application/octet-stream').notNullable();
+          table.bigInteger('filesize').notNullable();
           stamps(knex, table);
           table.unique(['documentId', 'submissionId']);
         })
