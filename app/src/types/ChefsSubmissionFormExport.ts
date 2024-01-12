@@ -13,5 +13,27 @@ export type ChefsSubmissionFormExport = {
     assignee: string;
     assigneedEmail: string;
   };
-  // Additional form field data will be added
+
+  submissionId: string;
+  confirmationId: string;
+  contactEmail: string;
+  contactPhoneNumber: string;
+  contactFirstName: string;
+  contactLastName: string;
+  financiallySupported: boolean;
+  intakeStatus: string;
+  isBCHousingSupported: boolean;
+  isIndigenousHousingProviderSupported: boolean;
+  isNonProfitSupported: boolean;
+  isHousingCooperativeSupported: boolean;
+  latitude: number;
+  longitude: number;
+  naturalDisasterInd: boolean;
+  companyNameRegistered: string;
+  queuePriority: number;
+  singleFamilyUnits: string;
+  multiFamilyUnits: string;
+  streetAddress: string;
+  createdAt: string;
+  createdBy: string;
 };
