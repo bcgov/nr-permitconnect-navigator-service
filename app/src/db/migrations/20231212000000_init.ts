@@ -81,6 +81,7 @@ export async function up(knex: Knex): Promise<void> {
             .onDelete('CASCADE');
           table.text('filename');
           table.text('mimeType');
+          table.bigInteger('filesize');
           stamps(knex, table);
         })
       )

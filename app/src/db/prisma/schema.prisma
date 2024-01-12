@@ -97,6 +97,7 @@ model document {
   submissionId String?     @db.Uuid
   filename     String?
   mimeType     String?
+  filesize     BigInt?
   createdBy    String?     @default("00000000-0000-0000-0000-000000000000")
   createdAt    DateTime?   @default(now()) @db.Timestamptz(6)
   updatedBy    String?

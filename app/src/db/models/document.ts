@@ -34,6 +34,7 @@ export default {
       documentId: input.documentId as string,
       filename: input.filename,
       mimeType: input.mimeType,
+      filesize: input.filesize,
       submission: input.submission?.submissionId
         ? { connect: { submissionId: input.submission.submissionId } }
         : disconnectRelation
@@ -47,6 +48,7 @@ export default {
       documentId: input.documentId,
       filename: input.filename,
       mimeType: input.mimeType,
+      filesize: input.filesize,
       submission: submission.fromPrismaModel(input.submission),
       submissionId: input.submissionId as string
     };

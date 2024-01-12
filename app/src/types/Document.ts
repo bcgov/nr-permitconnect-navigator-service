@@ -6,5 +6,6 @@ export type Document = {
   submissionId: string;
   filename: string | null;
   mimeType: string | null;
+  filesize: bigint | null;
   submission: ChefsSubmissionForm | null;
 } & Partial<IStamps>;
