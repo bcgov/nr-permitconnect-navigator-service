@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 
 import SubmissionForm from '../components/submission/SubmissionForm.vue';
 import { Button, useToast } from '@/lib/primevue';
-import { chefsService } from '@/services';
+import { chefsService, documentService } from '@/services';
+import { useConfigStore } from '@/store';
 
 import type { Ref } from 'vue';
 
@@ -14,6 +16,9 @@ type Props = {
 };
 
 const props = withDefaults(defineProps<Props>(), {});
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const editable: Ref<boolean> = ref(false);
@@ -38,10 +43,22 @@ async function onSubmit(data: any) {
 onMounted(async () => {
   submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
 });
+
+const onUpload = async (file: File) => {
+  await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId);
+};
 </script>
 
 <template>
   <h1>Activity submission</h1>
+
+  <input
+    ref="fileInput"
+    type="file"
+    accept="*"
+    @change="(event: any) => onUpload(event.target.files[0])"
+    @click="(event: any) => (event.target.value = null)"
+  />
 
   <Button
     class="mb-3"

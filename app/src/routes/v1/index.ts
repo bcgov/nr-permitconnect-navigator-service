@@ -1,6 +1,7 @@
 import { currentUser } from '../../middleware/authentication';
 import express from 'express';
 import chefs from './chefs';
+import document from './document';
 import user from './user';
 
 const router = express.Router();
@@ -13,8 +14,8 @@ router.get('/', (_req, res) => {
   });
 });
 
-/** CHEFS Router */
 router.use('/chefs', chefs);
+router.use('/document', document);
 router.use('/user', user);
 
 export default router;

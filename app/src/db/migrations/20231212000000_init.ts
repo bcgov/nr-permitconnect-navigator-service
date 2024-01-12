@@ -83,6 +83,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('mimeType');
           table.bigInteger('filesize');
           stamps(knex, table);
+          table.unique(['documentId', 'submissionId']);
         })
       )
 

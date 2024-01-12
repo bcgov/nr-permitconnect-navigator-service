@@ -125,7 +125,7 @@ const service = {
       }
     });
 
-    return result.map((x) => submission.fromDBModel(x));
+    return result.map((x) => submission.fromPrismaModel(x));
   },
 
   updateSubmission: async (data: ChefsSubmissionForm) => {

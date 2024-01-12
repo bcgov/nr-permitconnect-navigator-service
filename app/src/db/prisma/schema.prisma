@@ -103,4 +103,6 @@ model document {
   updatedBy    String?
   updatedAt    DateTime?   @db.Timestamptz(6)
   submission   submission? @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "document_submissionid_foreign")
+
+  @@unique([documentId, submissionId], map: "document_documentid_submissionid_unique")
 }

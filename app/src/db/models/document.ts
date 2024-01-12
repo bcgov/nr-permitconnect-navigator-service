@@ -1,5 +1,4 @@
 import { Prisma } from '@prisma/client';
-import { default as submission } from './submission';
 import disconnectRelation from '../utils/disconnectRelation';
 
 import type { IStamps } from '../../interfaces/IStamps';
@@ -7,9 +6,7 @@ import type { Document } from '../../types';
 
 // Define types
 const _document = Prisma.validator<Prisma.documentDefaultArgs>()({});
-const _documentWithGraph = Prisma.validator<Prisma.documentDefaultArgs>()({
-  include: { submission: { include: { user: true } } }
-});
+const _documentWithGraph = Prisma.validator<Prisma.documentDefaultArgs>()({});
 
 type SubmissionRelation = {
   submission:
@@ -34,10 +31,8 @@ export default {
       documentId: input.documentId as string,
       filename: input.filename,
       mimeType: input.mimeType,
-      filesize: input.filesize,
-      submission: input.submission?.submissionId
-        ? { connect: { submissionId: input.submission.submissionId } }
-        : disconnectRelation
+      filesize: input.filesize ? BigInt(input.filesize) : null,
+      submission: input.submissionId ? { connect: { submissionId: input.submissionId } } : disconnectRelation
     };
   },
 
@@ -48,8 +43,7 @@ export default {
       documentId: input.documentId,
       filename: input.filename,
       mimeType: input.mimeType,
-      filesize: input.filesize,
-      submission: submission.fromPrismaModel(input.submission),
+      filesize: Number(input.filesize),
       submissionId: input.submissionId as string
     };
   }

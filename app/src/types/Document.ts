@@ -1,11 +1,9 @@
 import { IStamps } from '../interfaces/IStamps';
-import { ChefsSubmissionForm } from './ChefsSubmissionForm';
 
 export type Document = {
-  documentId?: string; // Primary Key
+  documentId: string; // Primary Key
   submissionId: string;
   filename: string | null;
   mimeType: string | null;
-  filesize: bigint | null;
-  submission: ChefsSubmissionForm | null;
+  filesize: number | null;
 } & Partial<IStamps>;

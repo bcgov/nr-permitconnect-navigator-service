@@ -1,29 +1,36 @@
-import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../components/utils';
 import { documentService } from '../services';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 const controller = {
-  async searchDocuments(req: Request, res: Response, next: NextFunction) {
+  async createDocument(
+    req: Request<
+      never,
+      never,
+      { documentId: string; submissionId: string; filename: string; mimeType: string; length: number }
+    >,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
-      const response = await documentService.getDocuments(req.query.submissionId as string);
+      const response = await documentService.createDocument(
+        req.body.documentId,
+        req.body.submissionId,
+        req.body.filename,
+        req.body.mimeType,
+        req.body.length
+      );
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  async linkDocument(req: Request, res: Response, next: NextFunction) {
+  async listDocuments(req: Request<{ submissionId: string }>, res: Response, next: NextFunction) {
     try {
-      await documentService.createDocumentEntry(
-        req.params.submissionId,
-        req.params.comsId,
-        req.header('filename') as string,
-        req.header('Content-Type') as string,
-        parseInt(req.header('Content-Length'))
-      );
+      const response = await documentService.listDocuments(req.params.submissionId);
+      res.status(200).send(response);
     } catch (e: unknown) {
-      // if fail, return error (client will rollback/hard-delete uploaded COMS file)
       next(e);
     }
   }
