@@ -5,17 +5,17 @@ import type { IdentityProvider } from '../../types';
 
 // Define a type
 const _identityProvider = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
-type DBIdentityProvider = Omit<Prisma.identity_providerGetPayload<typeof _identityProvider>, keyof IStamps>;
+type PrismaRelationIdentityProvider = Omit<Prisma.identity_providerGetPayload<typeof _identityProvider>, keyof IStamps>;
 
 export default {
-  toDBModel(input: IdentityProvider): DBIdentityProvider {
+  toPrismaModel(input: IdentityProvider): PrismaRelationIdentityProvider {
     return {
       idp: input.idp,
       active: input.active
     };
   },
 
-  fromDBModel(input: DBIdentityProvider | null): IdentityProvider | null {
+  fromPrismaModel(input: PrismaRelationIdentityProvider | null): IdentityProvider | null {
     if (!input) return null;
 
     return {

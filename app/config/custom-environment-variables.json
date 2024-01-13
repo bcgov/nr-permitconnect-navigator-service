@@ -1,6 +1,10 @@
 {
   "frontend": {
     "apiPath": "FRONTEND_APIPATH",
+    "coms": {
+      "apiPath": "FRONTEND_COMS_APIPATH",
+      "bucketId": "FRONTEND_COMS_BUCKETID"
+    },
     "notificationBanner": "FRONTEND_NOTIFICATION_BANNER",
     "oidc": {
       "authority": "FRONTEND_OIDC_AUTHORITY",

@@ -91,7 +91,7 @@ const service = {
         }
       });
 
-      return submission.fromDBModel(result);
+      return submission.fromPrismaModel(result);
     } catch (e: unknown) {
       throw e;
     }
@@ -125,13 +125,13 @@ const service = {
       }
     });
 
-    return result.map((x) => submission.fromDBModel(x));
+    return result.map((x) => submission.fromPrismaModel(x));
   },
 
   updateSubmission: async (data: ChefsSubmissionForm) => {
     try {
       await prisma.submission.update({
-        data: submission.toDBModel(data),
+        data: submission.toPrismaModel(data),
         where: {
           submissionId: data.submissionId
         }

@@ -70,6 +70,24 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      .then(() =>
+        knex.schema.createTable('document', (table) => {
+          table.uuid('documentId').primary();
+          table
+            .uuid('submissionId')
+            .notNullable()
+            .references('submissionId')
+            .inTable('submission')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.text('filename').notNullable();
+          table.text('mimeType').defaultTo('application/octet-stream').notNullable();
+          table.bigInteger('filesize').notNullable();
+          stamps(knex, table);
+          table.unique(['documentId', 'submissionId']);
+        })
+      )
+
       // Create audit schema and logged_actions table
       .then(() => knex.schema.raw('CREATE SCHEMA IF NOT EXISTS audit'))
 
@@ -147,6 +165,12 @@ export async function up(knex: Knex): Promise<void> {
           FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
 
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_document_trigger
+          AFTER UPDATE OR DELETE ON document
+          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+
       // Populate Baseline Data
       .then(() => {
         const users = ['system'];
@@ -165,6 +189,7 @@ export async function down(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
       // Drop audit triggers
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_document_trigger ON document'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_submission_trigger ON submission'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_user_trigger ON "user"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_identity_provider_trigger ON identity_provider'))
@@ -173,6 +198,7 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.withSchema('audit').dropTableIfExists('logged_actions'))
       .then(() => knex.schema.dropSchemaIfExists('audit'))
       // Drop public schema COMS tables
+      .then(() => knex.schema.dropTableIfExists('document'))
       .then(() => knex.schema.dropTableIfExists('submission'))
       .then(() => knex.schema.dropTableIfExists('user'))
       .then(() => knex.schema.dropTableIfExists('identity_provider'))
