@@ -1,14 +1,27 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 import { FileUpload } from '@/lib/primevue';
-import { useFileStore } from '@/store';
+import { documentService } from '@/services';
+import { useConfigStore } from '@/store';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
 
+// Props
+type Props = {
+  submissionId: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {});
+
+const lastUploadedDocument = defineModel();
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
+
 // State
-const fileStore = useFileStore();
 const fileInput: Ref<any> = ref(null);
 
 // Actions
@@ -20,8 +33,10 @@ const onFileUploadClick = () => {
   fileInput.value.click();
 };
 
-const onUpload = (file: File) => {
-  fileStore.createFile(file);
+const onUpload = async (file: File) => {
+  lastUploadedDocument.value = (
+    await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId)
+  )?.data;
 };
 </script>
 

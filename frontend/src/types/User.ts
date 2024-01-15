@@ -1,4 +1,4 @@
-import type { IAudit } from '@/interfaces';
+import type { IStamps } from '@/interfaces';
 
 export type User = {
   active: boolean;
@@ -11,4 +11,4 @@ export type User = {
   userId: string;
   username: string;
   elevatedRights: boolean;
-} & IAudit;
+} & IStamps;

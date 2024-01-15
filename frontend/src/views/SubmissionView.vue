@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { filesize } from 'filesize';
 import { onMounted, ref } from 'vue';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, Carousel, TabPanel, TabView, useToast } from '@/lib/primevue';
-import { chefsService } from '@/services';
-import { useFileStore } from '@/store';
+import { chefsService, documentService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
-import { useConfigStore } from '@/store';
 
 import type { Ref } from 'vue';
+import type { Document } from '@/types';
 
 // Props
 type Props = {
@@ -20,14 +19,27 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
-
 // State
 const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
-
-const { getFiles } = storeToRefs(useFileStore());
+const documents: Ref<Array<Document>> = ref([]);
+const responsiveOptions = ref([
+  {
+    breakpoint: '1600px',
+    numVisible: 3,
+    numScroll: 1
+  },
+  {
+    breakpoint: '1200px',
+    numVisible: 2,
+    numScroll: 1
+  },
+  {
+    breakpoint: '800px',
+    numVisible: 1,
+    numScroll: 1
+  }
+]);
 
 // Actions
 const toast = useToast();
@@ -47,11 +59,8 @@ async function onSubmit(data: any) {
 
 onMounted(async () => {
   submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
+  documents.value = (await documentService.listDocuments(props.submissionId)).data;
 });
-
-const onUpload = async (file: File) => {
-  await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId);
-};
 </script>
 
 <template>
@@ -77,14 +86,18 @@ const onUpload = async (file: File) => {
     <TabPanel header="Files">
       <div class="grid border-1 surface-border border-round text-center">
         <div class="col-2">
-          <FileUpload />
+          <FileUpload
+            :submission-id="props.submissionId"
+            @update:model-value="(e: Document) => documents.push(e)"
+          />
         </div>
         <div class="col-10 p-0">
           <Carousel
-            v-if="getFiles.length > 0"
-            :value="getFiles"
+            v-if="documents.length"
+            :value="documents"
             :num-visible="3"
-            :num-scroll="3"
+            :num-scroll="1"
+            :responsive-options="responsiveOptions"
           >
             <template #item="slotProps">
               <div class="grid border-1 surface-border border-round text-center m-2">
@@ -94,12 +107,12 @@ const onUpload = async (file: File) => {
                     class="carousel-image"
                   />
                 </div>
-                <h4 class="col-12 mb-0 text-left">{{ slotProps.data.name }}</h4>
+                <h4 class="col-12 mb-0 text-left">{{ slotProps.data.filename }}</h4>
 
                 <h6 class="col-8 text-left mt-0">
-                  {{ formatDateLong(slotProps.data.lastModifiedDate.toISOString()) }}
+                  {{ formatDateLong(slotProps.data.createdAt) }}
                 </h6>
-                <h6 class="col-4 text-right mt-0">{{ slotProps.data.size }}</h6>
+                <h6 class="col-4 text-right mt-0">{{ filesize(slotProps.data.filesize) }}</h6>
               </div>
             </template>
           </Carousel>

@@ -1,5 +1,8 @@
+import { v4 } from 'uuid';
+
 import comsService from './comsService';
 import { appAxios } from './interceptors';
+import { getFilenameAndExtension } from '@/utils/utils';
 
 const PATH = '/document';
 
@@ -8,16 +11,27 @@ export default {
    * @function createDocument
    * @returns {Promise} An axios response
    */
-  async createDocument(file: File, submissionId: string, bucketId: string) {
+  async createDocument(document: File, submissionId: string, bucketId: string) {
     let comsResponse;
     try {
+      // Add a unique hash to the end of the filename
+      const hash = v4();
+      const fileAndExt = getFilenameAndExtension(document.name);
+      let newDocumentName = `${fileAndExt.filename}_${hash.substring(0, 8)}`;
+      if (fileAndExt.extension) {
+        newDocumentName = `${newDocumentName}.${fileAndExt.extension}`;
+      }
+      const newDocument = new File([document], newDocumentName, { type: document.type });
+
+      // Create COMS object
       comsResponse = await comsService.createObject(
-        file,
+        newDocument,
         {},
         { bucketId },
-        { timeout: 0 } // Infinite timeout for big files upload to avoid timeout error
+        { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
       );
 
+      // Create document link
       return appAxios().put(PATH, {
         submissionId: submissionId,
         documentId: comsResponse.data.id,
@@ -26,7 +40,7 @@ export default {
         length: comsResponse.data.length
       });
     } catch (e) {
-      // TODO: Delete object if Prisma write fails
+      // TODO: Delete COMS object if Prisma write fails
     }
   },
 

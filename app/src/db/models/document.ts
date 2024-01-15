@@ -44,6 +44,7 @@ export default {
       filename: input.filename,
       mimeType: input.mimeType,
       filesize: Number(input.filesize),
+      createdAt: input.createdAt?.toISOString(),
       submissionId: input.submissionId as string
     };
   }

@@ -21,6 +21,22 @@ export function isDebugMode(): boolean {
 }
 
 /**
+ * @function getFilenameAndExtension
+ * Separates a full filename into name and extension parts
+ * @returns {filename: string, extension: string} An object containing filename and extension
+ */
+export function getFilenameAndExtension(filename: string): { filename: string; extension: string | undefined } {
+  const extensionIdx = filename.lastIndexOf('.');
+  if (extensionIdx > 0) {
+    const name = filename.substring(0, extensionIdx);
+    const ext = filename.split('.').pop();
+    return { filename: name, extension: ext };
+  } else {
+    return { filename, extension: undefined };
+  }
+}
+
+/**
  * @function joinPath
  * Joins a set of string arguments to yield a string path
  * @param  {...string} items The strings to join on
