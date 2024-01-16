@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { Prisma } from '@prisma/client';
-import { v4, NIL } from 'uuid';
+import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
@@ -87,7 +87,7 @@ const service = {
         }
 
         const newUser = {
-          userId: v4(),
+          userId: uuidv4(),
           identityId: data.identityId,
           username: data.username,
           fullName: data.fullName,

@@ -1,4 +1,4 @@
-export interface IAudit {
+export interface IStamps {
   createdBy?: string;
   createdAt?: string;
   updatedBy?: string;

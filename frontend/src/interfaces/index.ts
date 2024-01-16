@@ -1,2 +1,2 @@
-export type { IAudit } from './IAudit';
+export type { IStamps } from './IStamps';
 export type { IInputEvent } from './IInputEvent';

@@ -18,7 +18,7 @@ const service = {
     mimeType: string,
     filesize: number
   ) => {
-    await prisma.document.create({
+    const response = await prisma.document.create({
       data: {
         documentId: documentId,
         submissionId: submissionId,
@@ -27,6 +27,8 @@ const service = {
         filesize: filesize
       }
     });
+
+    return document.fromPrismaModel(response);
   },
 
   /**
@@ -39,6 +41,9 @@ const service = {
     const response = await prisma.document.findMany({
       where: {
         submissionId: submissionId
+      },
+      orderBy: {
+        createdAt: 'asc'
       }
     });
 

@@ -4,7 +4,7 @@ import { join } from 'path';
 
 import { getLogger } from './log';
 
-import type { ChefsFormConfig, ChefsFormConfigData, YRN } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -20,16 +20,6 @@ export function addDashesToUuid(str: string): string {
       20
     )}`.toLowerCase();
   } else return str;
-}
-
-/**
- * @function fromYrn
- * Converts a YRN to boolean
- * @param {YRN} yrn An arbitrary YRN
- * @returns {boolean | null} The converted value
- */
-export function fromYrn(yrn: YRN): boolean | null {
-  return yrn === null ? null : yrn.toUpperCase() === 'Y';
 }
 
 /**
@@ -167,15 +157,4 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
     });
   }
   return data;
-}
-
-/**
- * @function toYrn
- * Converts a boolean to YRN
- * @param {boolean | null} bool An arbitrary boolean
- * @returns {YRN} The converted value
- */
-export function toYrn(bool: boolean | null): YRN {
-  if (bool === null) return null;
-  return bool ? 'Y' : 'N';
 }
