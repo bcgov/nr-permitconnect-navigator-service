@@ -1,4 +1,4 @@
-import { v4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import comsService from './comsService';
 import { appAxios } from './interceptors';
@@ -15,7 +15,7 @@ export default {
     let comsResponse;
     try {
       // Add a unique hash to the end of the filename
-      const hash = v4();
+      const hash = uuidv4();
       const fileAndExt = getFilenameAndExtension(document.name);
       let newDocumentName = `${fileAndExt.filename}_${hash.substring(0, 8)}`;
       if (fileAndExt.extension) {

@@ -9,6 +9,8 @@ import { useConfigStore } from '@/store';
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
 
+import type { Document } from '@/types';
+
 // Props
 type Props = {
   submissionId: string;
@@ -16,7 +18,7 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
-const lastUploadedDocument = defineModel();
+const lastUploadedDocument = defineModel<Document>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -34,9 +36,12 @@ const onFileUploadClick = () => {
 };
 
 const onUpload = async (file: File) => {
-  lastUploadedDocument.value = (
-    await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId)
-  )?.data;
+  const response = (await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId))
+    ?.data;
+
+  if (response) {
+    lastUploadedDocument.value = response;
+  }
 };
 </script>
 
