@@ -221,3 +221,12 @@ label {
   color: $app-primary;
   font-size: 1.8rem;
 }
+
+/* hover effects */
+.hover-hand:hover {
+  cursor: pointer;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+}

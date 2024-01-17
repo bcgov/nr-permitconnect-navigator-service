@@ -54,5 +54,41 @@ export default {
     }
 
     return comsAxios(axiosOptions).put(PATH, object, config);
+  },
+
+  /**
+   * @function deleteObject
+   * Delete an object
+   * @param {string} objectId The id for the object to delete
+   * @param {string} versionId An optional versionId
+   * @returns {Promise} An axios response
+   */
+  deleteObject(objectId: string, versionId?: string) {
+    return comsAxios().delete(`${PATH}/${objectId}`, {
+      params: {
+        versionId: versionId
+      }
+    });
+  },
+
+  /**
+   * @function getObject
+   * Get an object
+   * @param {string} objectId The id for the object to get
+   * @param {string} versionId An optional versionId
+   */
+  getObject(objectId: string, versionId?: string) {
+    // Running in 'url' download mode only, could add options for other modes if needed
+    return comsAxios()
+      .get(`${PATH}/${objectId}`, {
+        params: {
+          versionId: versionId,
+          download: 'url'
+        }
+      })
+      .then((response) => {
+        const url = response.data;
+        window.open(url, '_blank');
+      });
   }
 };

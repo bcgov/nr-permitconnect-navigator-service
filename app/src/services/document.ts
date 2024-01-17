@@ -32,6 +32,21 @@ const service = {
   },
 
   /**
+   * @function deleteDocument
+   * Delete a document
+   * @param documentId Document ID
+   */
+  deleteDocument: async (documentId: string) => {
+    const response = await prisma.document.delete({
+      where: {
+        documentId: documentId
+      }
+    });
+
+    return document.fromPrismaModel(response);
+  },
+
+  /**
    * @function listDocuments
    * Retrieve a list of documents associated with a given submission
    * @param submissionId PCNS Submission ID

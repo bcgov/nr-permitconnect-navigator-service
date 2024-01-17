@@ -32,7 +32,7 @@ export default {
       );
 
       // Create document link
-      return appAxios().put(PATH, {
+      return await appAxios().put(PATH, {
         submissionId: submissionId,
         documentId: comsResponse.data.id,
         filename: comsResponse.data.name,
@@ -40,10 +40,42 @@ export default {
         length: comsResponse.data.length
       });
     } catch (e) {
-      // TODO: Delete COMS object if Prisma write fails
+      // In event of any error try to Delete COMS object if it was created
+      if (comsResponse) {
+        await comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId);
+      }
     }
   },
 
+  /**
+   * @function deleteDocument
+   * @returns {Promise} An axios response
+   */
+  async deleteDocument(documentId: string, versionId?: string) {
+    try {
+      await comsService.deleteObject(documentId, versionId);
+      await appAxios().delete(`${PATH}/${documentId}`, {
+        params: {
+          versionId: versionId
+        }
+      });
+    } catch (e) {
+      // TODO: If one fails and other doesn't then??
+    }
+  },
+
+  /**
+   * @function downloadDocument
+   * @returns {Promise} An axios response
+   */
+  async downloadDocument(documentId: string, versionId?: string) {
+    await comsService.getObject(documentId, versionId);
+  },
+
+  /**
+   * @function listDocuments
+   * @returns {Promise} An axios response
+   */
   async listDocuments(submissionId: string) {
     return appAxios().get(`${PATH}/list/${submissionId}`);
   }

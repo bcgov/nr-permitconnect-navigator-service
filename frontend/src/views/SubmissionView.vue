@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
-import { Button, Carousel, TabPanel, TabView, useToast } from '@/lib/primevue';
+import { Button, Carousel, TabPanel, TabView, useConfirm, useToast } from '@/lib/primevue';
 import { chefsService, documentService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
 
@@ -42,7 +42,28 @@ const responsiveOptions = ref([
 ]);
 
 // Actions
+const confirm = useConfirm();
 const toast = useToast();
+
+const confirmDelete = (documentId: string, filename: string) => {
+  if (documentId) {
+    confirm.require({
+      message: `Please confirm that you want to delete ${filename}.`,
+      header: 'Delete document?',
+      acceptLabel: 'Confirm',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        documentService
+          .deleteDocument(documentId)
+          .then(() => {
+            documents.value = documents.value.filter((x: Document) => x.documentId !== documentId);
+            toast.success('File deleted');
+          })
+          .catch(() => {});
+      }
+    });
+  }
+};
 
 function onCancel() {
   editable.value = false;
@@ -84,7 +105,7 @@ onMounted(async () => {
       />
     </TabPanel>
     <TabPanel header="Files">
-      <div class="grid border-1 surface-border border-round text-center">
+      <div class="grid text-center">
         <div class="col-2">
           <FileUpload
             :submission-id="props.submissionId"
@@ -100,7 +121,10 @@ onMounted(async () => {
             :responsive-options="responsiveOptions"
           >
             <template #item="slotProps">
-              <div class="grid border-1 surface-border border-round text-center m-2">
+              <div
+                class="grid border-1 surface-border border-round text-center m-2 hover-hand hover-shadow"
+                @click="documentService.downloadDocument(slotProps.data.documentId)"
+              >
                 <div class="col-12 text-center">
                   <img
                     src="../assets/images/bcboxy.png"
@@ -109,10 +133,26 @@ onMounted(async () => {
                 </div>
                 <h4 class="col-12 mb-0 text-left">{{ slotProps.data.filename }}</h4>
 
-                <h6 class="col-8 text-left mt-0">
+                <h6 class="col-8 text-left mt-0 mb-0">
                   {{ formatDateLong(slotProps.data.createdAt) }}
                 </h6>
-                <h6 class="col-4 text-right mt-0">{{ filesize(slotProps.data.filesize) }}</h6>
+                <h6 class="col-4 text-right mt-0 mb-0">{{ filesize(slotProps.data.filesize) }}</h6>
+                <div class="col-10 mt-0 mb-0" />
+                <div class="col-2 text-right mt-0 mb-0">
+                  <Button
+                    v-tooltip.bottom="'Delete document'"
+                    class="p-button-lg p-button-text p-button-danger p-0 pr-2"
+                    aria-label="Delete object"
+                    @click="
+                      (e) => {
+                        confirmDelete(slotProps.data.documentId, slotProps.data.filename);
+                        e.stopPropagation();
+                      }
+                    "
+                  >
+                    <font-awesome-icon icon="fa-solid fa-trash" />
+                  </Button>
+                </div>
               </div>
             </template>
           </Carousel>
@@ -130,7 +170,7 @@ onMounted(async () => {
 }
 
 .p-carousel-item {
-  height: 270px;
+  height: 320px;
 }
 
 .p-tabview {
