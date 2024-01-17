@@ -9,7 +9,7 @@ import { ProgressSpinner } from '@/lib/primevue';
   />
 </template>
 
-<style lang="scss" scoped>
+<style scoped lang="scss">
 :deep(.p-progress-spinner-circle) {
   stroke: #00004d !important;
 }

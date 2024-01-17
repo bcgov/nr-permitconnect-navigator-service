@@ -56,26 +56,26 @@ const onUpload = async (file: File) => {
       @click="onFileUploadClick"
     >
       <template #empty>
-        <div class="flex align-items-center justify-content-center flex-column mb-3 hover-hand">
+        <div class="flex align-items-center justify-content-center flex-column">
           <font-awesome-icon
             icon="fa-solid fa-upload"
             class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
           />
           <p class="font-bold">Upload</p>
-          <p class="mt-2 mb-0">Click or drag-and-drop</p>
+          <p>Click or drag-and-drop</p>
         </div>
       </template>
       <template #content="{ files }">
         <div
           v-if="files.length > 0"
-          class="flex align-items-center justify-content-center flex-column mb-3 hover-hand"
+          class="flex align-items-center justify-content-center flex-column"
         >
           <font-awesome-icon
             icon="fa-solid fa-upload"
             class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
           />
           <p class="font-bold">Upload</p>
-          <p class="mb-0">Click or drag-and-drop</p>
+          <p>Click or drag-and-drop</p>
         </div>
       </template>
     </FileUpload>
@@ -96,8 +96,7 @@ const onUpload = async (file: File) => {
 }
 
 .p-fileupload-content {
-  height: 295px;
-  padding-bottom: 0px;
+  padding: 1rem;
   border-style: dashed;
 }
 </style>
