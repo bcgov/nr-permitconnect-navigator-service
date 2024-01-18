@@ -61,6 +61,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('financiallySupportedIndigenous');
           table.boolean('financiallySupportedNonProfit');
           table.boolean('financiallySupportedHousingCoop');
+          table.boolean('aaiUpdated');
           table.text('waitingOn');
           table.timestamp('bringForwardDate', { useTz: true });
           table.text('notes');

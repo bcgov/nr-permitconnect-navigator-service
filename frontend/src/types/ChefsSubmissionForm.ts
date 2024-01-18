@@ -28,6 +28,7 @@ export type ChefsSubmissionForm = {
   financiallySupportedIndigenous?: boolean;
   financiallySupportedNonProfit?: boolean;
   financiallySupportedHousingCoop?: boolean;
+  aaiUpdated?: boolean;
   waitingOn?: string;
   bringForwardDate?: string;
   notes?: string;
