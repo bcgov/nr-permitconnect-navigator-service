@@ -257,6 +257,20 @@ onMounted(async () => {
         </template>
       </Column>
       <Column
+        field="aaiUpdated"
+        header="Authorization and Approvals Insight (AAI) updated"
+        :sortable="true"
+        style="min-width: 200px"
+      >
+        <template #body="{ data }">
+          <Checkbox
+            v-model="data.aaiUpdated"
+            :binary="true"
+            disabled
+          />
+        </template>
+      </Column>
+      <Column
         field="waitingOn"
         header="Waiting on"
         :sortable="true"

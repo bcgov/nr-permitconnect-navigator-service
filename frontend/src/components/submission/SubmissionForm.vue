@@ -293,6 +293,12 @@ const onSubmit = (values: any) => {
         :disabled="!props.editable"
         :bold="false"
       />
+      <Checkbox
+        class="col-12"
+        name="aaiUpdated"
+        label="Authorization and Approvals Insight (AAI) updated"
+        :disabled="!props.editable"
+      />
       <InputText
         class="col-6"
         name="waitingOn"
@@ -330,7 +336,7 @@ const onSubmit = (values: any) => {
       <Dropdown
         class="col-4"
         name="applicationStatus"
-        label="Status"
+        label="Activity state"
         :disabled="!props.editable"
         :options="ApplicationStatusList"
       />
