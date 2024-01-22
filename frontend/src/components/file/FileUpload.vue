@@ -46,46 +46,48 @@ const onUpload = async (file: File) => {
 </script>
 
 <template>
-  <FileUpload
-    name="fileUpload"
-    :multiple="false"
-    :custom-upload="true"
-    :auto="true"
-    @uploader="onFileUploadDragAndDrop"
-    @click="onFileUploadClick"
-  >
-    <template #empty>
-      <div class="flex align-items-center justify-content-center flex-column mb-3">
-        <font-awesome-icon
-          icon="fa-solid fa-upload"
-          class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
-        />
-        <p class="font-bold">Upload</p>
-        <p class="mt-2 mb-0">Click or drag-and-drop</p>
-      </div>
-    </template>
-    <template #content="{ files }">
-      <div
-        v-if="files.length > 0"
-        class="flex align-items-center justify-content-center flex-column mb-3"
-      >
-        <font-awesome-icon
-          icon="fa-solid fa-upload"
-          class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
-        />
-        <p class="font-bold">Upload</p>
-        <p class="mb-0">Click or drag-and-drop</p>
-      </div>
-    </template>
-  </FileUpload>
-  <input
-    ref="fileInput"
-    type="file"
-    style="display: none"
-    accept="*"
-    @change="(event: any) => onUpload(event.target.files[0])"
-    @click="(event: any) => (event.target.value = null)"
-  />
+  <div class="hover-hand hover-shadow">
+    <FileUpload
+      name="fileUpload"
+      :multiple="false"
+      :custom-upload="true"
+      :auto="true"
+      @uploader="onFileUploadDragAndDrop"
+      @click="onFileUploadClick"
+    >
+      <template #empty>
+        <div class="flex align-items-center justify-content-center flex-column">
+          <font-awesome-icon
+            icon="fa-solid fa-upload"
+            class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
+          />
+          <p class="font-bold">Upload</p>
+          <p>Click or drag-and-drop</p>
+        </div>
+      </template>
+      <template #content="{ files }">
+        <div
+          v-if="files.length > 0"
+          class="flex align-items-center justify-content-center flex-column"
+        >
+          <font-awesome-icon
+            icon="fa-solid fa-upload"
+            class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
+          />
+          <p class="font-bold">Upload</p>
+          <p>Click or drag-and-drop</p>
+        </div>
+      </template>
+    </FileUpload>
+    <input
+      ref="fileInput"
+      type="file"
+      style="display: none"
+      accept="*"
+      @change="(event: any) => onUpload(event.target.files[0])"
+      @click="(event: any) => (event.target.value = null)"
+    />
+  </div>
 </template>
 
 <style lang="scss">
@@ -94,6 +96,7 @@ const onUpload = async (file: File) => {
 }
 
 .p-fileupload-content {
-  padding-bottom: 0px;
+  padding: 1rem;
+  border-style: dashed;
 }
 </style>

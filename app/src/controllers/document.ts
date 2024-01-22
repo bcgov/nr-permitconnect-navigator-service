@@ -26,6 +26,15 @@ const controller = {
     }
   },
 
+  async deleteDocument(req: Request<{ documentId: string }>, res: Response, next: NextFunction) {
+    try {
+      const response = await documentService.deleteDocument(req.params.documentId);
+      res.status(200).send(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   async listDocuments(req: Request<{ submissionId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await documentService.listDocuments(req.params.submissionId);

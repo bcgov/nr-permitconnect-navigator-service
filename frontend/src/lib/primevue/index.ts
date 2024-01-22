@@ -2,7 +2,7 @@
 export { FilterMatchMode } from 'primevue/api';
 export { default as Button } from 'primevue/button';
 export { default as Calendar } from 'primevue/calendar';
-export { default as Carousel } from 'primevue/carousel';
+export { default as Card } from 'primevue/card';
 export { default as Checkbox } from 'primevue/checkbox';
 export { default as Column } from 'primevue/column';
 export { default as ConfirmDialog } from 'primevue/confirmdialog';
