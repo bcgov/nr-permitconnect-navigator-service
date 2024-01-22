@@ -46,7 +46,7 @@ const initialFormValues: any = {
 
 // Form validation schema
 const formSchema = object({
-  applicationStatus: string().oneOf(ApplicationStatusList).label('Application Status'),
+  applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
   atsClientNumber: string()
     .when('addedToATS', {
       is: true,
@@ -56,7 +56,7 @@ const formSchema = object({
     .label('ATS Client Number'),
   confirmationId: string().required().label('Confirmation ID'),
   contactEmail: string().email().label('Contact Email'),
-  intakeStatus: string().oneOf(IntakeStatusList).label('Intake Status'),
+  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
   queuePriority: number()
@@ -329,7 +329,7 @@ const onSubmit = (values: any) => {
       <Dropdown
         class="col-4"
         name="intakeStatus"
-        label="Intake status"
+        label="Intake state"
         :disabled="!props.editable"
         :options="IntakeStatusList"
       />
