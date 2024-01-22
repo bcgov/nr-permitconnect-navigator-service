@@ -19,7 +19,7 @@
     "migrate:rollback:all": "knex migrate:rollback --all",
     "migrate:rollback": "knex migrate:rollback",
     "migrate:up": "knex migrate:up",
-    "migrate": "npm run migrate:latest",
+    "migrate": "knex migrate:latest --knexfile ./sbin/knexfile.js",
     "postbuild:all": "npm run build",
     "postclean:all": "npm run clean",
     "postprisma:migrate:down": "npm run prisma:sync",

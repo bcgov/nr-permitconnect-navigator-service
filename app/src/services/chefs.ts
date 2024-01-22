@@ -59,6 +59,18 @@ const service = {
           financiallySupportedHousingCoop: isTruthy(submission.isHousingCooperativeSupported)
         };
 
+        // get greatest of multiple Units data
+        const unitTypes = [submission.singleFamilyUnits, submission.multiFamilyUnits, submission.multiFamilyUnits1];
+        const maxUnits = unitTypes.reduce(
+          (ac, value) => {
+            // get max integer from value (eg: '1-49' returns 49)
+            const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
+            // compare with accumulator
+            return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
+          },
+          { upperRange: 0 } // initial value
+        ).value;
+
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
@@ -74,7 +86,7 @@ const service = {
             naturalDisaster: submission.naturalDisasterInd,
             projectName: submission.companyNameRegistered,
             queuePriority: parseInt(submission.queuePriority),
-            singleFamilyUnits: submission.singleFamilyUnits ?? submission.multiFamilyUnits,
+            singleFamilyUnits: maxUnits,
             streetAddress: submission.streetAddress,
             submittedAt: response.submission.createdAt,
             submittedBy: response.submission.createdBy
