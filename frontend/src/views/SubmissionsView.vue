@@ -73,6 +73,7 @@ onMounted(async () => {
         field="confirmationId"
         header="Activity"
         :sortable="true"
+        frozen
       >
         <template #body="{ data }">
           <div :data-submissionId="data.submissionId">
