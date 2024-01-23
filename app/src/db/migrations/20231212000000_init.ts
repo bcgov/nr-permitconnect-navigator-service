@@ -89,6 +89,52 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      .then(() =>
+        knex.schema.createTable('permit_type', (table) => {
+          table.specificType('permitTypeId', 'integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY');
+          table.text('agency').notNullable();
+          table.text('division').notNullable();
+          table.text('branch').notNullable();
+          table.text('businessDomain').notNullable();
+          table.text('type').notNullable();
+          table.text('family');
+          table.text('name').notNullable();
+          table.text('name_subtype');
+          table.text('acronym');
+          table.boolean('tracked_in_ats');
+          table.text('source_system').notNullable();
+          table.text('source_system_acronym').notNullable();
+          stamps(knex, table);
+        })
+      )
+
+      .then(() =>
+        knex.schema.createTable('permit', (table) => {
+          table.uuid('permitId').primary();
+          table
+            .integer('permitTypeId')
+            .notNullable()
+            .references('permitTypeId')
+            .inTable('permit_type')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table
+            .uuid('submissionId')
+            .notNullable()
+            .references('submissionId')
+            .inTable('submission')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.text('trackingId');
+          table.text('authStatus');
+          table.text('needed');
+          table.text('status');
+          table.timestamp('adjudicationDate', { useTz: true });
+          stamps(knex, table);
+          table.unique(['permitId', 'permitTypeId', 'submissionId']);
+        })
+      )
+
       // Create audit schema and logged_actions table
       .then(() => knex.schema.raw('CREATE SCHEMA IF NOT EXISTS audit'))
 
@@ -172,6 +218,18 @@ export async function up(knex: Knex): Promise<void> {
           FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
 
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_permit_type_trigger
+          AFTER UPDATE OR DELETE ON permit_type
+          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_permit_trigger
+          AFTER UPDATE OR DELETE ON permit
+          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+
       // Populate Baseline Data
       .then(() => {
         const users = ['system'];
@@ -183,6 +241,80 @@ export async function up(knex: Knex): Promise<void> {
         }));
         return knex('user').insert(items);
       })
+
+      .then(() => {
+        const items = [
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Forest Resiliency and Archaeology',
+            branch: 'Archaeology',
+            businessDomain: 'Archaeology',
+            type: 'Alteration',
+            name: 'Site Alteration Permit',
+            acronym: 'SAP',
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Forest Resiliency and Archaeology',
+            branch: 'Archaeology',
+            businessDomain: 'Archaeology',
+            type: 'Inspection',
+            name: 'Heritage Inspection Permit',
+            acronym: 'HIP',
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Forest Resiliency and Archaeology',
+            branch: 'Archaeology',
+            businessDomain: 'Archaeology',
+            type: 'Investigation',
+            name: 'Investigation Permit',
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
+          },
+          {
+            agency: 'Environment and Climate Change Strategy',
+            division: 'Environmental Protection',
+            branch: 'Environmental Emergencies and Land Remediation',
+            businessDomain: 'Contaminated Sites',
+            type: 'Contaminated Sites Remediation',
+            name: 'Contaminated Sites Remediation Permit',
+            tracked_in_ats: false,
+            source_system: 'Contaminated Sites Application Tracking System',
+            source_system_acronym: 'CATS'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            businessDomain: 'Forestry',
+            type: 'Occupant Licence To Cut',
+            name: 'Occupant Licence to Cut',
+            acronym: 'OLTC',
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            businessDomain: 'Forestry',
+            type: 'Private Timber Mark',
+            name: 'Private Timber Mark',
+            acronym: 'PTM',
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
+          }
+        ];
+        return knex('permit_type').insert(items);
+      })
   );
 }
 
@@ -190,6 +322,8 @@ export async function down(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
       // Drop audit triggers
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_permit_trigger ON permit'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_permit_type_trigger ON permit_type'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_document_trigger ON document'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_submission_trigger ON submission'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_user_trigger ON "user"'))
@@ -199,6 +333,8 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.withSchema('audit').dropTableIfExists('logged_actions'))
       .then(() => knex.schema.dropSchemaIfExists('audit'))
       // Drop public schema COMS tables
+      .then(() => knex.schema.dropTableIfExists('permit'))
+      .then(() => knex.schema.dropTableIfExists('permit_type'))
       .then(() => knex.schema.dropTableIfExists('document'))
       .then(() => knex.schema.dropTableIfExists('submission'))
       .then(() => knex.schema.dropTableIfExists('user'))

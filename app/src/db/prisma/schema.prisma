@@ -44,6 +44,46 @@ model identity_provider {
   user      user[]
 }
 
+model permit {
+  permitId         String      @id @db.Uuid
+  permitTypeId     Int
+  submissionId     String      @db.Uuid
+  trackingId       String?
+  authStatus       String?
+  needed           String?
+  status           String?
+  adjudicationDate DateTime?   @db.Timestamptz(6)
+  createdBy        String?     @default("00000000-0000-0000-0000-000000000000")
+  createdAt        DateTime?   @default(now()) @db.Timestamptz(6)
+  updatedBy        String?
+  updatedAt        DateTime?   @db.Timestamptz(6)
+  permit_type      permit_type @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permittypeid_foreign")
+  submission       submission  @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "permit_submissionid_foreign")
+
+  @@unique([permitId, permitTypeId, submissionId], map: "permit_permitid_permittypeid_submissionid_unique")
+}
+
+model permit_type {
+  permitTypeId          Int       @id @default(autoincrement())
+  agency                String
+  division              String
+  branch                String
+  businessDomain        String
+  type                  String
+  family                String?
+  name                  String
+  name_subtype          String?
+  acronym               String?
+  tracked_in_ats        Boolean?
+  source_system         String
+  source_system_acronym String
+  createdBy             String?   @default("00000000-0000-0000-0000-000000000000")
+  createdAt             DateTime? @default(now()) @db.Timestamptz(6)
+  updatedBy             String?
+  updatedAt             DateTime? @db.Timestamptz(6)
+  permit                permit[]
+}
+
 model submission {
   submissionId                    String     @id @db.Uuid
   assignedToUserId                String?    @db.Uuid
@@ -83,6 +123,7 @@ model submission {
   updatedBy                       String?
   updatedAt                       DateTime?  @db.Timestamptz(6)
   document                        document[]
+  permit                          permit[]
   user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }
 
