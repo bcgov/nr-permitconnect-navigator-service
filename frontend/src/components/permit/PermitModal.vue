@@ -23,14 +23,14 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Emits
-const emit = defineEmits(['permit:submit']);
+const emit = defineEmits(['permit:delete', 'permit:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
 const permitTypes: Ref<Array<PermitType> | undefined> = ref(undefined);
 
 // Default form values
-const initialFormValues: any = {
+let initialFormValues: any = {
   permitType: props.permit?.permitType,
   needed: props.permit?.needed,
   status: props.permit?.status,
@@ -39,7 +39,7 @@ const initialFormValues: any = {
   businessDomain: props.permit?.permitType?.businessDomain,
   authStatus: props.permit?.authStatus,
   sourceSystem: props.permit?.permitType?.sourceSystem,
-  submittedAt: props.permit?.createdAt ? new Date(props.permit.createdAt) : undefined,
+  submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
   permitId: props.permit?.permitId,
   adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
 };
@@ -48,18 +48,19 @@ const initialFormValues: any = {
 const formSchema = object({
   permitType: object().required().label('Permit'),
   needed: string().required().label('Needed'),
-  status: string().required().label('Status'),
+  status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
-  trackingId: string().label('Tracking ID'),
   businessDomain: string().required().label('Business domain'),
-  authStatus: string().required().label('Authorization Status'),
+  authStatus: string().required().label('Authorization status'),
   sourceSystem: string().required().label('Source system'),
-  submittedAt: string().required().label('Submitted date'),
-  permitId: string().label('Permit ID'),
-  adjudicationDate: string().label('Adjudication date')
+  submittedDate: string().required().label('Submitted date')
 });
 
 // Actions
+function onDelete() {
+  emit('permit:delete', props.permit);
+}
+
 function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
   const type: PermitType = e.value;
   setValues({
@@ -69,13 +70,14 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
   });
 }
 
+function onSubmit(data: any) {
+  initialFormValues = data;
+  emit('permit:submit', data);
+}
+
 onMounted(async () => {
   permitTypes.value = (await permitService.getPermitTypes())?.data;
 });
-
-function onSubmit(data: any) {
-  emit('permit:submit', data);
-}
 </script>
 
 <template>
@@ -129,7 +131,7 @@ function onSubmit(data: any) {
         <Dropdown
           class="col-12 lg:col-6"
           name="status"
-          label="Status"
+          label="Permit state"
           :options="PermitStatus"
         />
         <InputText
@@ -160,7 +162,7 @@ function onSubmit(data: any) {
         />
         <Calendar
           class="col-12 lg:col-6"
-          name="submittedAt"
+          name="submittedDate"
           label="Submitted date"
         />
         <InputText
@@ -174,19 +176,32 @@ function onSubmit(data: any) {
           name="adjudicationDate"
           label="Adjudication date"
         />
-        <div class="field col-12">
-          <Button
-            class="mr-2"
-            label="Save"
-            type="submit"
-            icon="pi pi-check"
-          />
-          <Button
-            class="p-button-outlined mr-2"
-            label="Cancel"
-            icon="pi pi-times"
-            @click="visible = false"
-          />
+        <div class="field col-12 flex">
+          <div class="flex-auto">
+            <Button
+              class="mr-2"
+              label="Save"
+              type="submit"
+              icon="pi pi-check"
+            />
+            <Button
+              class="p-button-outlined mr-2"
+              label="Cancel"
+              icon="pi pi-times"
+              @click="visible = false"
+            />
+          </div>
+          <div
+            v-if="permit"
+            class="flex justify-content-right"
+          >
+            <Button
+              class="p-button-outlined p-button-danger mr-2"
+              label="Delete"
+              icon="pi pi-trash"
+              @click="onDelete"
+            />
+          </div>
         </div>
       </div>
     </Form>

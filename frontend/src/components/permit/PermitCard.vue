@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 
 import PermitModal from '@/components/permit/PermitModal.vue';
-import { Button, Card, useToast } from '@/lib/primevue';
+import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
 
@@ -17,16 +17,50 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// Emits
+const emit = defineEmits(['permit:delete']);
+
 // State
+const cardData: Ref<Permit> = ref(props.permit);
 const permitModalVisible: Ref<boolean> = ref(false);
 
 // Actions
+const confirm = useConfirm();
 const toast = useToast();
 
-async function onPermitSubmit(data: any) {
+const confirmDelete = (data: Permit) => {
+  if (data.permitId) {
+    confirm.require({
+      message: `Please confirm that you want to delete the ${data.permitType?.name}.`,
+      header: 'Delete permit?',
+      acceptLabel: 'Confirm',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        permitService
+          .deletePermit(data.permitId)
+          .then(() => {
+            emit('permit:delete', data);
+            permitModalVisible.value = false;
+            toast.success('Permit deleted');
+          })
+          .catch(() => {});
+      }
+    });
+  }
+};
+
+async function onPermitSubmit(data: Permit) {
   await permitService.updatePermit({ ...data, submissionId: props.submissionId });
-  toast.success('Permit saved');
+
+  cardData.value = {
+    ...data,
+    submittedDate: data.submittedDate,
+    adjudicationDate: data.adjudicationDate
+  };
+
   permitModalVisible.value = false;
+
+  toast.success('Permit saved');
 }
 </script>
 
@@ -35,7 +69,7 @@ async function onPermitSubmit(data: any) {
     <template #header>
       <div class="flex px-3 pt-2">
         <div class="flex-auto">
-          <h2>{{ permit.permitType?.name }}</h2>
+          <h2>{{ cardData.permitType?.name }}</h2>
         </div>
         <div class="flex justify-content-right">
           <Button
@@ -56,19 +90,19 @@ async function onPermitSubmit(data: any) {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Last updated:</span>
-              {{ formatDateLong(permit.updatedAt as string) }}
+              {{ formatDateLong(cardData.updatedAt as string) }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Updated by:</span>
-              {{ permit.updatedBy }}
+              {{ cardData.updatedBy }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Needed:</span>
-              {{ permit.needed }}
+              {{ cardData.needed }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Permit state:</span>
-              {{ permit.status }}
+              {{ cardData.status }}
             </p>
           </div>
         </div>
@@ -77,19 +111,19 @@ async function onPermitSubmit(data: any) {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Agency:</span>
-              {{ permit.permitType?.agency }}
+              {{ cardData.permitType?.agency }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Business domain:</span>
-              {{ permit.permitType?.businessDomain }}
+              {{ cardData.permitType?.businessDomain }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Source system:</span>
-              {{ permit.permitType?.sourceSystem }}
+              {{ cardData.permitType?.sourceSystem }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Permit ID:</span>
-              {{ permit.permitId }}
+              {{ cardData.permitId }}
             </p>
           </div>
         </div>
@@ -98,19 +132,19 @@ async function onPermitSubmit(data: any) {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Tracking ID:</span>
-              {{ permit.trackingId }}
+              {{ cardData.trackingId }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Auth status:</span>
-              {{ permit.authStatus }}
+              {{ cardData.authStatus }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Submitted date:</span>
-              {{ formatDateLong(permit.createdAt as string) }}
+              {{ formatDateLong(cardData.submittedDate as string) }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Adjudication date:</span>
-              {{ formatDateLong(permit.adjudicationDate as string) }}
+              {{ formatDateLong(cardData.adjudicationDate as string) }}
             </p>
           </div>
         </div>
@@ -120,7 +154,8 @@ async function onPermitSubmit(data: any) {
 
   <PermitModal
     v-model:visible="permitModalVisible"
-    :permit="permit"
+    :permit="cardData"
+    @permit:delete="confirmDelete"
     @permit:submit="onPermitSubmit"
   />
 </template>

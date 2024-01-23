@@ -34,9 +34,14 @@ function onCancel() {
   editable.value = false;
 }
 
+function onPermitDelete(data: any) {
+  permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId);
+}
+
 async function onPermitSubmit(data: any) {
-  await permitService.createPermit({ ...data, submissionId: props.submissionId });
+  const result = (await permitService.createPermit({ ...data, submissionId: props.submissionId })).data;
   toast.success('Permit saved');
+  permits.value.push(result);
   permitModalVisible.value = false;
 }
 
@@ -129,6 +134,7 @@ onMounted(async () => {
         <PermitCard
           :permit="permit"
           :submission-id="submissionId"
+          @permit:delete="onPermitDelete"
         />
       </div>
 

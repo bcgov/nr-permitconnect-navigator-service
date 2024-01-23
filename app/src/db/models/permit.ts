@@ -52,6 +52,7 @@ export default {
       authStatus: input.authStatus,
       needed: input.needed,
       status: input.status,
+      submittedDate: input.submittedDate ? new Date(input.submittedDate) : null,
       adjudicationDate: input.adjudicationDate ? new Date(input.adjudicationDate) : null,
       permit_type: input.permitType?.permitTypeId
         ? { connect: { permitTypeId: input.permitType?.permitTypeId } }
@@ -71,11 +72,10 @@ export default {
       authStatus: input.authStatus,
       needed: input.needed,
       status: input.status,
+      submittedDate: input.submittedDate?.toISOString() ?? null,
       adjudicationDate: input.adjudicationDate?.toISOString() ?? null,
       permitType: permit_type.fromPrismaModel(input.permit_type),
       submission: null,
-      createdAt: input.createdAt?.toISOString() ?? null,
-      createdBy: input.createdBy,
       updatedAt: input.updatedAt?.toISOString() ?? null,
       updatedBy: input.updatedBy
     };

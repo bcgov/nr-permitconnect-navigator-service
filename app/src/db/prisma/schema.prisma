@@ -52,6 +52,7 @@ model permit {
   authStatus       String?
   needed           String?
   status           String?
+  submittedDate    DateTime?   @db.Timestamptz(6)
   adjudicationDate DateTime?   @db.Timestamptz(6)
   createdBy        String?     @default("00000000-0000-0000-0000-000000000000")
   createdAt        DateTime?   @default(now()) @db.Timestamptz(6)

@@ -12,6 +12,14 @@ export default {
   },
 
   /**
+   * @function deletePermit
+   * @returns {Promise} An axios response
+   */
+  deletePermit(permitId: string) {
+    return appAxios().delete(`permit/${permitId}`);
+  },
+
+  /**
    * @function getPermitTypes
    * @returns {Promise} An axios response
    */

@@ -129,6 +129,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('authStatus');
           table.text('needed');
           table.text('status');
+          table.timestamp('submittedDate', { useTz: true });
           table.timestamp('adjudicationDate', { useTz: true });
           stamps(knex, table);
           table.unique(['permitId', 'permitTypeId', 'submissionId']);

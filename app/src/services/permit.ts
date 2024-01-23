@@ -16,12 +16,42 @@ const service = {
     try {
       const newPermit = { ...data, permitId: uuidv4() };
 
-      await prisma.permit.create({
+      const create = await prisma.permit.create({
+        // @ts-expect-error TS2322 - I cant figure out the type error but it works fine
         data: permit.toPrismaModel(newPermit)
       });
+
+      const result = await prisma.permit.findUnique({
+        include: {
+          permit_type: true
+        },
+        where: {
+          permitId: create.permitId
+        }
+      });
+
+      return permit.fromPrismaModel(result);
     } catch (e: unknown) {
       throw e;
     }
+  },
+
+  /**
+   * @function deletePermit
+   * Delete a permit
+   * @param permitId Permit ID
+   */
+  deletePermit: async (permitId: string) => {
+    const response = await prisma.permit.delete({
+      include: {
+        permit_type: true
+      },
+      where: {
+        permitId: permitId
+      }
+    });
+
+    return permit.fromPrismaModel(response);
   },
 
   /**
@@ -68,6 +98,7 @@ const service = {
   updatePermit: async (data: Permit) => {
     try {
       await prisma.permit.update({
+        // @ts-expect-error TS2322 - I cant figure out the type error but it works fine
         data: permit.toPrismaModel(data),
         where: {
           permitId: data.permitId

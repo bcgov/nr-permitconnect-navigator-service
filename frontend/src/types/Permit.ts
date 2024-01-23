@@ -9,6 +9,7 @@ export type Permit = {
   authStatus?: string;
   needed?: string;
   status?: string;
+  submittedDate?: string;
   adjudicationDate?: string;
   permitType?: PermitType;
 } & Partial<IStamps>;

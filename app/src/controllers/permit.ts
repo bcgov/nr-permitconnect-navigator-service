@@ -12,6 +12,15 @@ const controller = {
     }
   },
 
+  deletePermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await permitService.deletePermit(req.params.permitId);
+      res.status(200).send(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getPermitTypes: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.getPermitTypes();

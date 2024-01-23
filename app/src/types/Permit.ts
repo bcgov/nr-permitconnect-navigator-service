@@ -10,6 +10,7 @@ export type Permit = {
   authStatus: string | null;
   needed: string | null;
   status: string | null;
+  submittedDate: string | null;
   adjudicationDate: string | null;
   permitType: PermitType | null;
   submission: ChefsSubmissionForm | null;
