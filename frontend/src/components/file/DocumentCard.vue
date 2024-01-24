@@ -4,6 +4,17 @@ import { filesize } from 'filesize';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
+import { getFilenameAndExtension } from '@/utils/utils';
+
+import bcboxy from '@/assets/images/bcboxy.png';
+import compressed from '@/assets/images/image.svg';
+import doc from '@/assets/images/doc.svg';
+import email from '@/assets/images/shape.svg';
+import file from '@/assets/images/file.svg';
+import image from '@/assets/images/image.svg';
+import pdf from '@/assets/images/doc.svg';
+import shape from '@/assets/images/shape.svg';
+import spreadsheet from '@/assets/images/image.svg';
 
 import type { Document } from '@/types';
 
@@ -43,6 +54,49 @@ const confirmDelete = (documentId: string, filename: string) => {
     });
   }
 };
+
+const displayExtensionIcon = (fileString: string) => {
+  const fileAndExtension = getFilenameAndExtension(fileString);
+  const extension = fileAndExtension?.extension?.toLowerCase() ?? '';
+
+  switch (extension) {
+    case 'shp':
+    case 'dbs':
+    case 'cpg':
+    case 'prj':
+    case 'shx':
+      return shape;
+    case 'docx':
+    case 'doc':
+      return doc;
+    case 'pdf':
+      return pdf;
+    case 'xls':
+    case 'xlsx':
+    case 'csv':
+      return spreadsheet;
+    case 'jpg':
+    case 'jpeg':
+    case 'png':
+    case 'bmp':
+    case 'gif':
+    case 'svg':
+    case 'webp':
+    case 'tiff':
+      return image;
+    case 'eml':
+    case 'pst':
+    case 'msg':
+      return email;
+    case 'zip':
+    case 'rar':
+    case 'gz':
+    case '7z':
+      return compressed;
+    default:
+      return file;
+  }
+};
 </script>
 
 <template>
@@ -50,7 +104,7 @@ const confirmDelete = (documentId: string, filename: string) => {
     <template #header>
       <img
         alt="document header"
-        src="@/assets/images/bcboxy.png"
+        :src="displayExtensionIcon(props.document.filename)"
         class="document-image"
       />
     </template>
