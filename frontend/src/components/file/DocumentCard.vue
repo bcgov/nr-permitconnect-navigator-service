@@ -6,15 +6,14 @@ import { documentService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
 import { getFilenameAndExtension } from '@/utils/utils';
 
-import bcboxy from '@/assets/images/bcboxy.png';
-import compressed from '@/assets/images/image.svg';
+import compressed from '@/assets/images/compressed.svg';
 import doc from '@/assets/images/doc.svg';
-import email from '@/assets/images/shape.svg';
+import email from '@/assets/images/email.svg';
 import file from '@/assets/images/file.svg';
 import image from '@/assets/images/image.svg';
-import pdf from '@/assets/images/doc.svg';
+import pdf from '@/assets/images/pdf.svg';
 import shape from '@/assets/images/shape.svg';
-import spreadsheet from '@/assets/images/image.svg';
+import spreadsheet from '@/assets/images/spreadsheet.svg';
 
 import type { Document } from '@/types';
 
@@ -146,9 +145,15 @@ const displayExtensionIcon = (fileString: string) => {
 
 <style lang="scss">
 .document-image {
-  max-height: 140px;
-  width: auto;
-  height: auto;
+  max-height: 2.5rem;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.p-card-header {
+  height: 5rem;
+  background-color: lightgray;
 }
 
 .p-card-content {
