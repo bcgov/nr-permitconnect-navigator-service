@@ -163,9 +163,6 @@ label {
 
 /* datatable */
 .p-datatable {
-  thead > tr > th {
-    background-color: transparent !important;
-  }
   &.p-datatable-striped tbody > tr {
     &:nth-child(even) {
       background-color: $app-table-stripe-background;
@@ -179,6 +176,9 @@ label {
       &:focus {
         outline: none !important;
       }
+    }
+    .p-frozen-column {
+      z-index: 1; // display over non-text elements (eg: checkboxes) in other columns
     }
   }
   .p-column-title {
