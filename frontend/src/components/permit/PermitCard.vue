@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { formatDateLong } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
@@ -31,9 +31,10 @@ const toast = useToast();
 const confirmDelete = (data: Permit) => {
   if (data.permitId) {
     confirm.require({
-      message: `Please confirm that you want to delete the ${data.permitType?.name}.`,
-      header: 'Delete permit?',
+      message: 'Please confirm that you want to delete the selected permit. This cannot be undone.',
+      header: 'Confirm delete',
       acceptLabel: 'Confirm',
+      acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
       accept: () => {
         permitService
@@ -54,8 +55,8 @@ async function onPermitSubmit(data: Permit) {
 
   cardData.value = {
     ...data,
-    submittedDate: data.submittedDate,
-    adjudicationDate: data.adjudicationDate
+    submittedDate: data.submittedDate ? new Date(data.submittedDate).toISOString() : undefined,
+    adjudicationDate: data.adjudicationDate ? new Date(data.adjudicationDate).toISOString() : undefined
   };
 
   permitModalVisible.value = false;
@@ -90,7 +91,7 @@ async function onPermitSubmit(data: Permit) {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Last updated:</span>
-              {{ formatDateLong(cardData.updatedAt as string) }}
+              {{ cardData.updatedAt ? formatDate(cardData.updatedAt) : undefined }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Updated by:</span>
@@ -123,7 +124,7 @@ async function onPermitSubmit(data: Permit) {
             </p>
             <p class="col-12">
               <span class="key font-bold">Permit ID:</span>
-              {{ cardData.permitId }}
+              {{ cardData.issuedPermitId }}
             </p>
           </div>
         </div>
@@ -140,11 +141,11 @@ async function onPermitSubmit(data: Permit) {
             </p>
             <p class="col-12">
               <span class="key font-bold">Submitted date:</span>
-              {{ formatDateLong(cardData.submittedDate as string) }}
+              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Adjudication date:</span>
-              {{ formatDateLong(cardData.adjudicationDate as string) }}
+              {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
             </p>
           </div>
         </div>

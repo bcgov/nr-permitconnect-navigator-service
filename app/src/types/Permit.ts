@@ -6,12 +6,13 @@ export type Permit = {
   permitId: string; // Primary Key
   permitTypeId: number;
   submissionId: string;
+  issuedPermitId: string | null;
   trackingId: string | null;
   authStatus: string | null;
   needed: string | null;
   status: string | null;
   submittedDate: string | null;
   adjudicationDate: string | null;
-  permitType: PermitType | null;
-  submission: ChefsSubmissionForm | null;
+  permitType: PermitType;
+  submission: ChefsSubmissionForm;
 } & Partial<IStamps>;

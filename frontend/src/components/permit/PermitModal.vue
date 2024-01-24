@@ -38,7 +38,7 @@ let initialFormValues: any = {
   trackingId: props.permit?.trackingId,
   businessDomain: props.permit?.permitType?.businessDomain,
   authStatus: props.permit?.authStatus,
-  sourceSystem: props.permit?.permitType?.sourceSystem,
+  sourceSystem: props.permit?.permitType?.sourceSystem ?? props.permit?.permitType?.sourceSystemAcronym,
   submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
   permitId: props.permit?.permitId,
   adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
@@ -51,7 +51,6 @@ const formSchema = object({
   status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
   businessDomain: string().required().label('Business domain'),
-  authStatus: string().required().label('Authorization status'),
   sourceSystem: string().required().label('Source system'),
   submittedDate: string().required().label('Submitted date')
 });
@@ -66,12 +65,14 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
   setValues({
     agency: type.agency,
     businessDomain: type.businessDomain,
-    sourceSystem: type.sourceSystem
+    sourceSystem: type.sourceSystem ?? type.sourceSystemAcronym
   });
 }
 
-function onSubmit(data: any) {
-  initialFormValues = data;
+// @ts-expect-error TS7031 resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
+function onSubmit(data: any, { resetForm }) {
+  if (props.permit) initialFormValues = data;
+  else resetForm();
   emit('permit:submit', data);
 }
 
@@ -138,6 +139,7 @@ onMounted(async () => {
           class="col-12 lg:col-6"
           name="agency"
           label="Agency"
+          :disabled="true"
         />
         <InputText
           class="col-12 lg:col-6"
@@ -148,6 +150,7 @@ onMounted(async () => {
           class="col-12 lg:col-6"
           name="businessDomain"
           label="Business domain"
+          :disabled="true"
         />
         <Dropdown
           class="col-12 lg:col-6"
@@ -159,6 +162,7 @@ onMounted(async () => {
           class="col-12 lg:col-6"
           name="sourceSystem"
           label="Source system"
+          :disabled="true"
         />
         <Calendar
           class="col-12 lg:col-6"
@@ -167,9 +171,8 @@ onMounted(async () => {
         />
         <InputText
           class="col-12 lg:col-6"
-          name="permitId"
+          name="issuedPermitId"
           label="Permit ID"
-          :disabled="true"
         />
         <Calendar
           class="col-12 lg:col-6"

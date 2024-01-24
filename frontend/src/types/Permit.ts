@@ -5,6 +5,7 @@ export type Permit = {
   permitId: string; // Primary Key
   permitTypeId: number;
   submissionId: string;
+  issuedPermitId?: string;
   trackingId?: string;
   authStatus?: string;
   needed?: string;

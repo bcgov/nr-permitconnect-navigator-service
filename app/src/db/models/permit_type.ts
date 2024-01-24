@@ -19,17 +19,15 @@ export default {
       type: input.type,
       family: input.family,
       name: input.name,
-      name_subtype: input.nameSubtype,
+      nameSubtype: input.nameSubtype,
       acronym: input.acronym,
-      tracked_in_ats: input.trackedInATS,
-      source_system: input.sourceSystem,
-      source_system_acronym: input.sourceSystemAcronym
+      trackedInATS: input.trackedInATS,
+      sourceSystem: input.sourceSystem,
+      sourceSystemAcronym: input.sourceSystemAcronym
     };
   },
 
-  fromPrismaModel(input: PrismaRelationPermitType | null): PermitType | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaRelationPermitType): PermitType {
     return {
       permitTypeId: input.permitTypeId,
       agency: input.agency,
@@ -39,11 +37,11 @@ export default {
       type: input.type,
       family: input.family,
       name: input.name,
-      nameSubtype: input.name_subtype,
+      nameSubtype: input.nameSubtype,
       acronym: input.acronym,
-      trackedInATS: input.tracked_in_ats,
-      sourceSystem: input.source_system,
-      sourceSystemAcronym: input.source_system_acronym
+      trackedInATS: input.trackedInATS,
+      sourceSystem: input.sourceSystem,
+      sourceSystemAcronym: input.sourceSystemAcronym
     };
   }
 };

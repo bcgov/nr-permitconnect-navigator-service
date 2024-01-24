@@ -93,17 +93,17 @@ export async function up(knex: Knex): Promise<void> {
         knex.schema.createTable('permit_type', (table) => {
           table.specificType('permitTypeId', 'integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY');
           table.text('agency').notNullable();
-          table.text('division').notNullable();
-          table.text('branch').notNullable();
+          table.text('division');
+          table.text('branch');
           table.text('businessDomain').notNullable();
           table.text('type').notNullable();
           table.text('family');
           table.text('name').notNullable();
-          table.text('name_subtype');
+          table.text('nameSubtype');
           table.text('acronym');
-          table.boolean('tracked_in_ats');
-          table.text('source_system').notNullable();
-          table.text('source_system_acronym').notNullable();
+          table.boolean('trackedInATS');
+          table.text('sourceSystem');
+          table.text('sourceSystemAcronym').notNullable();
           stamps(knex, table);
         })
       )
@@ -125,6 +125,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('submission')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
+          table.text('issuedPermitId');
           table.text('trackingId');
           table.text('authStatus');
           table.text('needed');
@@ -253,9 +254,9 @@ export async function up(knex: Knex): Promise<void> {
             type: 'Alteration',
             name: 'Site Alteration Permit',
             acronym: 'SAP',
-            tracked_in_ats: false,
-            source_system: 'Archaeology Permit Tracking System',
-            source_system_acronym: 'APTS'
+            trackedInATS: false,
+            sourceSystem: 'Archaeology Permit Tracking System',
+            sourceSystemAcronym: 'APTS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
@@ -265,9 +266,9 @@ export async function up(knex: Knex): Promise<void> {
             type: 'Inspection',
             name: 'Heritage Inspection Permit',
             acronym: 'HIP',
-            tracked_in_ats: false,
-            source_system: 'Archaeology Permit Tracking System',
-            source_system_acronym: 'APTS'
+            trackedInATS: false,
+            sourceSystem: 'Archaeology Permit Tracking System',
+            sourceSystemAcronym: 'APTS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
@@ -276,9 +277,9 @@ export async function up(knex: Knex): Promise<void> {
             businessDomain: 'Archaeology',
             type: 'Investigation',
             name: 'Investigation Permit',
-            tracked_in_ats: false,
-            source_system: 'Archaeology Permit Tracking System',
-            source_system_acronym: 'APTS'
+            trackedInATS: false,
+            sourceSystem: 'Archaeology Permit Tracking System',
+            sourceSystemAcronym: 'APTS'
           },
           {
             agency: 'Environment and Climate Change Strategy',
@@ -287,9 +288,9 @@ export async function up(knex: Knex): Promise<void> {
             businessDomain: 'Contaminated Sites',
             type: 'Contaminated Sites Remediation',
             name: 'Contaminated Sites Remediation Permit',
-            tracked_in_ats: false,
-            source_system: 'Contaminated Sites Application Tracking System',
-            source_system_acronym: 'CATS'
+            trackedInATS: false,
+            sourceSystem: 'Contaminated Sites Application Tracking System',
+            sourceSystemAcronym: 'CATS'
           },
           {
             agency: 'Forests',
@@ -299,8 +300,8 @@ export async function up(knex: Knex): Promise<void> {
             type: 'Occupant Licence To Cut',
             name: 'Occupant Licence to Cut',
             acronym: 'OLTC',
-            source_system: 'Forest Tenure Administration',
-            source_system_acronym: 'FTA'
+            sourceSystem: 'Forest Tenure Administration',
+            sourceSystemAcronym: 'FTA'
           },
           {
             agency: 'Forests',
@@ -310,10 +311,180 @@ export async function up(knex: Knex): Promise<void> {
             type: 'Private Timber Mark',
             name: 'Private Timber Mark',
             acronym: 'PTM',
-            source_system: 'Forest Tenure Administration',
-            source_system_acronym: 'FTA'
+            sourceSystem: 'Forest Tenure Administration',
+            sourceSystemAcronym: 'FTA'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Commercial General',
+            family: 'Crown Land Tenure',
+            name: 'Commercial General',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Nominal Rent Tenure',
+            family: 'Crown Land Tenure',
+            name: 'Nominal Rent Tenure',
+            acronym: 'NRT',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Residential',
+            family: 'Crown Land Tenure',
+            name: 'Residential',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Roadways - Public',
+            family: 'Crown Land Tenure',
+            name: 'Roadways - Public',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Sponsored Crown Grant',
+            family: 'Crown Land Tenure',
+            name: 'Sponsored Crown Grant',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            businessDomain: 'Lands',
+            type: 'Utilities',
+            family: 'Crown Land Tenure',
+            name: 'Utilities',
+            sourceSystem: 'Tantalis',
+            sourceSystemAcronym: 'TANTALIS'
+          },
+          {
+            agency: 'Transportation and Infrastructure',
+            businessDomain: 'Transportation',
+            type: 'Rural Subdivision',
+            name: 'Rural subdivision',
+            sourceSystemAcronym: 'MOTI'
+          },
+          {
+            agency: 'Transportation and Infrastructure',
+            businessDomain: 'Transportation',
+            type: 'Rezoning',
+            name: 'Rezoning',
+            sourceSystemAcronym: 'MOTI'
+          },
+          {
+            agency: 'Transportation and Infrastructure',
+            businessDomain: 'Transportation',
+            type: 'Municipal Subdivision',
+            name: 'Municipal subdivision',
+            sourceSystemAcronym: 'MOTI'
+          },
+          {
+            agency: 'Transportation and Infrastructure',
+            businessDomain: 'Transportation',
+            type: 'Highway Use Permit',
+            name: 'Highway Use Permit',
+            sourceSystemAcronym: 'MOTI'
+          },
+          {
+            agency: 'Transportation and Infrastructure',
+            businessDomain: 'Transportation',
+            type: 'Other',
+            name: 'Other',
+            sourceSystemAcronym: 'MOTI'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Fisheries, Aquaculture and Wild Salmon',
+            businessDomain: 'RAPR',
+            type: 'New',
+            name: 'Riparian Area Development Permit',
+            sourceSystem: 'Riparian Areas Regulation Notification System',
+            sourceSystemAcronym: 'RARN'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Water Management',
+            businessDomain: 'Water',
+            type: 'Change Approval for Work in and About a Stream',
+            name: 'Change approval for work in and about a stream',
+            acronym: 'A-CIAS',
+            sourceSystem: 'Water Management Application',
+            sourceSystemAcronym: 'WMA'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Water Management',
+            businessDomain: 'Water',
+            type: 'Notification',
+            name: 'Notification of authorized changes in and about a stream',
+            acronym: 'N-CIAS',
+            sourceSystem: 'Water Management Application',
+            sourceSystemAcronym: 'WMA'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Water Management',
+            businessDomain: 'Water',
+            type: 'Use Approval',
+            name: 'Short-term use approval',
+            acronym: 'STU',
+            sourceSystem: 'Water Management Application',
+            sourceSystemAcronym: 'WMA'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Water Management',
+            businessDomain: 'Water',
+            type: 'New Groundwater Licence',
+            family: 'Water Licence',
+            name: 'Groundwater Licence - Wells',
+            acronym: 'PWD',
+            sourceSystem: 'Water Management Application',
+            sourceSystemAcronym: 'WMA'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Water Management',
+            businessDomain: 'Water',
+            type: 'Water Licence',
+            family: 'Water Licence',
+            name: 'Surface Water Licence',
+            acronym: 'PD',
+            sourceSystem: 'Water Management Application',
+            sourceSystemAcronym: 'WMA'
           }
         ];
+
         return knex('permit_type').insert(items);
       })
   );

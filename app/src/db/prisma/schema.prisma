@@ -48,6 +48,7 @@ model permit {
   permitId         String      @id @db.Uuid
   permitTypeId     Int
   submissionId     String      @db.Uuid
+  issuedPermitId   String?
   trackingId       String?
   authStatus       String?
   needed           String?
@@ -65,24 +66,24 @@ model permit {
 }
 
 model permit_type {
-  permitTypeId          Int       @id @default(autoincrement())
-  agency                String
-  division              String
-  branch                String
-  businessDomain        String
-  type                  String
-  family                String?
-  name                  String
-  name_subtype          String?
-  acronym               String?
-  tracked_in_ats        Boolean?
-  source_system         String
-  source_system_acronym String
-  createdBy             String?   @default("00000000-0000-0000-0000-000000000000")
-  createdAt             DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy             String?
-  updatedAt             DateTime? @db.Timestamptz(6)
-  permit                permit[]
+  permitTypeId        Int       @id @default(autoincrement())
+  agency              String
+  division            String?
+  branch              String?
+  businessDomain      String
+  type                String
+  family              String?
+  name                String
+  nameSubtype         String?
+  acronym             String?
+  trackedInATS        Boolean?
+  sourceSystem        String?
+  sourceSystemAcronym String
+  createdBy           String?   @default("00000000-0000-0000-0000-000000000000")
+  createdAt           DateTime? @default(now()) @db.Timestamptz(6)
+  updatedBy           String?
+  updatedAt           DateTime? @db.Timestamptz(6)
+  permit              permit[]
 }
 
 model submission {

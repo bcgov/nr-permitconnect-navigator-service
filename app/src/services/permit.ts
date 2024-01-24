@@ -17,13 +17,15 @@ const service = {
       const newPermit = { ...data, permitId: uuidv4() };
 
       const create = await prisma.permit.create({
-        // @ts-expect-error TS2322 - I cant figure out the type error but it works fine
         data: permit.toPrismaModel(newPermit)
       });
 
       const result = await prisma.permit.findUnique({
         include: {
-          permit_type: true
+          permit_type: true,
+          submission: {
+            include: { user: true }
+          }
         },
         where: {
           permitId: create.permitId
@@ -44,7 +46,10 @@ const service = {
   deletePermit: async (permitId: string) => {
     const response = await prisma.permit.delete({
       include: {
-        permit_type: true
+        permit_type: true,
+        submission: {
+          include: { user: true }
+        }
       },
       where: {
         permitId: permitId
@@ -77,7 +82,10 @@ const service = {
   listPermits: async (submissionId: string) => {
     const response = await prisma.permit.findMany({
       include: {
-        permit_type: true
+        permit_type: true,
+        submission: {
+          include: { user: true }
+        }
       },
       where: {
         submissionId: submissionId
@@ -92,13 +100,12 @@ const service = {
 
   /**
    * @function updatePermit
-   * Creates a Permit
+   * Updates a Permit
    * @returns {Promise<object>} The result of running the findMany operation
    */
   updatePermit: async (data: Permit) => {
     try {
       await prisma.permit.update({
-        // @ts-expect-error TS2322 - I cant figure out the type error but it works fine
         data: permit.toPrismaModel(data),
         where: {
           permitId: data.permitId

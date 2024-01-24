@@ -3,8 +3,8 @@ import { IStamps } from '../interfaces/IStamps';
 export type PermitType = {
   permitTypeId: number; // Primary Key
   agency: string;
-  division: string;
-  branch: string;
+  division: string | null;
+  branch: string | null;
   businessDomain: string;
   type: string;
   family: string | null;
@@ -12,6 +12,6 @@ export type PermitType = {
   nameSubtype: string | null;
   acronym: string | null;
   trackedInATS: boolean | null;
-  sourceSystem: string;
+  sourceSystem: string | null;
   sourceSystemAcronym: string;
 } & Partial<IStamps>;
