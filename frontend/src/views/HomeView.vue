@@ -26,10 +26,8 @@ const toSubmissions = (): void => {
   </Message>
 
   <div class="text-center">
-    <h1 class="font-bold">Welcome to the PermitConnect Navigator Service!</h1>
-  </div>
-  <div>
-    <h2>Choose an Initiative:</h2>
+    <h1 class="font-bold">Welcome to the PermitConnect Applications</h1>
+    <h2 class="mb-3">Choose an Initiative:</h2>
     <Button
       :disabled="!getIsAuthenticated"
       @click="toSubmissions"
