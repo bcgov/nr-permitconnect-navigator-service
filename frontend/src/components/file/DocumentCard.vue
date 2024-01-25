@@ -3,8 +3,9 @@ import { filesize } from 'filesize';
 
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
+import { FILE_CATEGORIES } from '@/utils/constants';
 import { formatDateLong } from '@/utils/formatters';
-import { isFileCategory } from '@/utils/utils';
+import { getFileCategory } from '@/utils/utils';
 
 import compressed from '@/assets/images/compressed.svg';
 import doc from '@/assets/images/doc.svg';
@@ -55,22 +56,22 @@ const confirmDelete = (documentId: string, filename: string) => {
 };
 
 const displayIcon = (mimeType = '') => {
-  const icon = isFileCategory(mimeType);
+  const icon = getFileCategory(mimeType);
 
   switch (icon) {
-    case 'doc':
+    case FILE_CATEGORIES.DOC:
       return doc;
-    case 'shape':
+    case FILE_CATEGORIES.SHAPE:
       return shape;
-    case 'pdf':
+    case FILE_CATEGORIES.PDF:
       return pdf;
-    case 'spreadsheet':
+    case FILE_CATEGORIES.SPREADSHEET:
       return spreadsheet;
-    case 'image':
+    case FILE_CATEGORIES.IMAGE:
       return image;
-    case 'email':
+    case FILE_CATEGORIES.EMAIL:
       return email;
-    case 'compressed':
+    case FILE_CATEGORIES.COMPRESSED:
       return compressed;
     default:
       return file;
