@@ -5,6 +5,7 @@ import config from 'config';
 import { getChefsApiKey, isTruthy } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { ChefsSubmissionForm, SubmissionSearchParameters } from '../types';
@@ -25,6 +26,12 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 }
 
 const service = {
+  /**
+   * @function getSubmission
+   * Gets a full data export for the requested CHEFS form
+   * @param {string} [formId] CHEFS form id
+   * @returns {Promise<object>} The result of running the get operation
+   */
   getFormExport: async (formId: string) => {
     try {
       const response = await chefsAxios(formId).get(`forms/${formId}/export`, {
@@ -36,6 +43,14 @@ const service = {
     }
   },
 
+  /**
+   * @function getSubmission
+   * Gets a specific submission from the PCNS database
+   * The record will be pulled from CHEFS and created if it does not first exist
+   * @param {string} [formId] CHEFS form id
+   * @param {string} [formSubmissionId] CHEFS form submission id
+   * @returns {Promise<object>} The result of running the findUnique operation
+   */
   getSubmission: async (formId: string, submissionId: string) => {
     try {
       // Check if record exists in our db
@@ -59,18 +74,19 @@ const service = {
           financiallySupportedHousingCoop: isTruthy(submission.isHousingCooperativeSupported)
         };
 
-        // get greatest of multiple Units data
+        // Get greatest of multiple Units data
         const unitTypes = [submission.singleFamilyUnits, submission.multiFamilyUnits, submission.multiFamilyUnits1];
         const maxUnits = unitTypes.reduce(
           (ac, value) => {
-            // get max integer from value (eg: '1-49' returns 49)
+            // Get max integer from value (eg: '1-49' returns 49)
             const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
-            // compare with accumulator
+            // Compare with accumulator
             return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
           },
-          { upperRange: 0 } // initial value
+          { upperRange: 0 } // Initial value
         ).value;
 
+        // Create submission
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
@@ -92,6 +108,45 @@ const service = {
             submittedBy: response.submission.createdBy
           }
         });
+
+        // Mapping of SHAS intake permit names to PCNS types
+        const shasPermitMapping = new Map<string, string>([
+          ['archaeologySiteAlterationPermit', 'Alteration'],
+          ['archaeologyHeritageInspectionPermit', 'Inspection'],
+          ['archaeologyInvestigationPermit', 'Investigation'],
+          ['forestsPrivateTimberMark', 'Private Timber Mark'],
+          ['forestsOccupantLicenceToCut', 'Occupant Licence To Cut'],
+          ['landsCrownLandTenure', 'Commercial General'],
+          ['roadwaysHighwayUsePermit', 'Highway Use Permit'],
+          ['siteRemediation', 'Contaminated Sites Remediation'],
+          ['subdividingLandOutsideAMunicipality', 'Rural Subdivision'],
+          ['waterChangeApprovalForWorkInAndAboutAStream', 'Change Approval for Work in and About a Stream'],
+          ['waterLicence', 'Water Licence'],
+          ['waterNotificationOfAuthorizedChangesInAndAboutAStream', 'Notification'],
+          ['waterShortTermUseApproval', 'Use Approval'],
+          ['waterRiparianAreasProtection', 'New'],
+          ['waterRiparianAreasProtection', 'New']
+        ]);
+
+        // Create Permits defined in SHAS intake form
+        const permitTypes = await prisma.permit_type.findMany();
+        const c = submission.permitGrid
+          .map((x: { previousPermitType: string; previousTrackingNumber2: string }) => {
+            const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
+            if (permit) {
+              return {
+                permitId: uuidv4(),
+                permitTypeId: permit.permitTypeId,
+                submissionId: response.submission.id,
+                trackingId: x.previousTrackingNumber2
+              };
+            }
+          })
+          .filter((x: unknown) => !!x);
+
+        await prisma.permit.createMany({
+          data: c
+        });
       }
 
       const result = await prisma.submission.findUnique({
@@ -109,6 +164,13 @@ const service = {
     }
   },
 
+  /**
+   * @function getSubmissionStatus
+   * Gets a specific submission status from CHEFS
+   * @param {string} [formId] CHEFS form id
+   * @param {string} [formSubmissionId] CHEFS form submission id
+   * @returns {Promise<object>} The result of running the get operation
+   */
   getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
     try {
       return (await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`)).data;
@@ -140,6 +202,12 @@ const service = {
     return result.map((x) => submission.fromPrismaModel(x));
   },
 
+  /**
+   * @function updateSubmission
+   * Updates a specific submission
+   * @param {ChefsSubmissionForm} [params.data] Submission to update
+   * @returns {Promise<object>}
+   */
   updateSubmission: async (data: ChefsSubmissionForm) => {
     try {
       await prisma.submission.update({

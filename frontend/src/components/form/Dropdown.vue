@@ -14,7 +14,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   options: Array<any> | undefined;
-  optionLabel?: string;
+  optionLabel?: string | ((data: any) => string);
   bold?: boolean;
   loading?: boolean;
 };

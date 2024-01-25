@@ -10,29 +10,23 @@ const service = {
   /**
    * @function createPermit
    * Creates a Permit
-   * @returns {Promise<object>} The result of running the findMany operation
+   * @returns {Promise<object>} The result of running the findUnique operation
    */
   createPermit: async (data: Permit) => {
     try {
       const newPermit = { ...data, permitId: uuidv4() };
 
       const create = await prisma.permit.create({
-        data: permit.toPrismaModel(newPermit)
-      });
-
-      const result = await prisma.permit.findUnique({
         include: {
           permit_type: true,
           submission: {
             include: { user: true }
           }
         },
-        where: {
-          permitId: create.permitId
-        }
+        data: permit.toPrismaModel(newPermit)
       });
 
-      return permit.fromPrismaModel(result);
+      return permit.fromPrismaModel(create);
     } catch (e: unknown) {
       throw e;
     }
@@ -42,6 +36,7 @@ const service = {
    * @function deletePermit
    * Delete a permit
    * @param permitId Permit ID
+   * @returns {Promise<object>} The result of running the delete operation
    */
   deletePermit: async (permitId: string) => {
     const response = await prisma.permit.delete({
@@ -77,7 +72,7 @@ const service = {
    * @function listPermits
    * Retrieve a list of permits associated with a given submission
    * @param submissionId PCNS Submission ID
-   * @returns Array of documents associated with the submission
+   * @returns {Promise<object>} Array of documents associated with the submission
    */
   listPermits: async (submissionId: string) => {
     const response = await prisma.permit.findMany({
@@ -101,7 +96,7 @@ const service = {
   /**
    * @function updatePermit
    * Updates a Permit
-   * @returns {Promise<object>} The result of running the findMany operation
+   * @returns {Promise<object>} The result of running the update operation
    */
   updatePermit: async (data: Permit) => {
     try {

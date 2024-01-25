@@ -6,7 +6,7 @@ import { object, string } from 'yup';
 import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { PermitAuthorizationStatus, PermitStatus } from '@/utils/constants';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
 import { onMounted } from 'vue';
 
 import type { Ref } from 'vue';
@@ -118,7 +118,7 @@ onMounted(async () => {
           name="permitType"
           label="Permit"
           :options="permitTypes"
-          option-label="name"
+          :option-label="(e) => `${e.businessDomain}: ${e.name}`"
           :loading="permitTypes === undefined"
           autofocus
           @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
@@ -127,7 +127,7 @@ onMounted(async () => {
           class="col-12 lg:col-6"
           name="needed"
           label="Needed"
-          :options="['Yes', 'Under investigation', 'No']"
+          :options="PermitNeeded"
         />
         <Dropdown
           class="col-12 lg:col-6"

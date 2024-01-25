@@ -17,7 +17,7 @@ router.put('/:permitId', (req: Request, res: Response, next: NextFunction): void
   permitController.updatePermit(req, res, next);
 });
 
-// Permit update endpoint
+// Permit delete endpoint
 router.delete('/:permitId', (req: Request, res: Response, next: NextFunction): void => {
   permitController.deletePermit(req, res, next);
 });

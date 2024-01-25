@@ -32,6 +32,12 @@ export const enum PERMIT_AUTHORIZATION_STATUS {
   NONE = 'None'
 }
 
+export const enum PERMIT_NEEDED {
+  YES = 'Yes',
+  UNDER_INVESTIGATION = 'Under investigation',
+  NO = 'No'
+}
+
 export const enum PERMIT_STATUS {
   NEW = 'New',
   APPLIED = 'Applied',
