@@ -4,7 +4,7 @@ import { filesize } from 'filesize';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { formatDateLong } from '@/utils/formatters';
-import { getFilenameAndExtension } from '@/utils/utils';
+import { isFileCategory } from '@/utils/utils';
 
 import compressed from '@/assets/images/compressed.svg';
 import doc from '@/assets/images/doc.svg';
@@ -54,43 +54,23 @@ const confirmDelete = (documentId: string, filename: string) => {
   }
 };
 
-const displayExtensionIcon = (fileString: string) => {
-  const fileAndExtension = getFilenameAndExtension(fileString);
-  const extension = fileAndExtension?.extension?.toLowerCase() ?? '';
+const displayIcon = (mimeType = '') => {
+  const icon = isFileCategory(mimeType);
 
-  switch (extension) {
-    case 'shp':
-    case 'dbs':
-    case 'cpg':
-    case 'prj':
-    case 'shx':
-      return shape;
-    case 'docx':
+  switch (icon) {
     case 'doc':
       return doc;
+    case 'shape':
+      return shape;
     case 'pdf':
       return pdf;
-    case 'xls':
-    case 'xlsx':
-    case 'csv':
+    case 'spreadsheet':
       return spreadsheet;
-    case 'jpg':
-    case 'jpeg':
-    case 'png':
-    case 'bmp':
-    case 'gif':
-    case 'svg':
-    case 'webp':
-    case 'tiff':
+    case 'image':
       return image;
-    case 'eml':
-    case 'pst':
-    case 'msg':
+    case 'email':
       return email;
-    case 'zip':
-    case 'rar':
-    case 'gz':
-    case '7z':
+    case 'compressed':
       return compressed;
     default:
       return file;
@@ -103,7 +83,7 @@ const displayExtensionIcon = (fileString: string) => {
     <template #header>
       <img
         alt="document header"
-        :src="displayExtensionIcon(props.document.filename)"
+        :src="displayIcon(props.document.mimeType)"
         class="document-image"
       />
     </template>
