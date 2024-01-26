@@ -7,6 +7,7 @@ import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
+import { PERMIT_STATUS } from '@/utils/enums';
 import { onMounted } from 'vue';
 
 import type { Ref } from 'vue';
@@ -33,7 +34,7 @@ const permitTypes: Ref<Array<PermitType> | undefined> = ref(undefined);
 let initialFormValues: any = {
   permitType: props.permit?.permitType,
   needed: props.permit?.needed,
-  status: props.permit?.status,
+  status: props.permit?.status ?? PERMIT_STATUS.NEW,
   agency: props.permit?.permitType?.agency,
   trackingId: props.permit?.trackingId,
   businessDomain: props.permit?.permitType?.businessDomain,

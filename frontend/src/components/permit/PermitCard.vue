@@ -68,13 +68,13 @@ async function onPermitSubmit(data: Permit) {
 <template>
   <Card>
     <template #header>
-      <div class="flex px-3 pt-2">
-        <div class="flex-auto">
+      <div class="flex flex-row px-3 pt-2">
+        <div class="flex-grow-1">
           <h2>{{ cardData.permitType?.name }}</h2>
         </div>
-        <div class="flex justify-content-right">
+        <div class="flex flex-none">
           <Button
-            class="p-button-lg p-button-outlined"
+            class="p-button-outlined"
             aria-label="Edit"
             @click="permitModalVisible = true"
           >

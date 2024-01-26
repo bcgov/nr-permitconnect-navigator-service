@@ -111,11 +111,11 @@ onMounted(async () => {
       </div>
     </TabPanel>
     <TabPanel header="Permits">
-      <div class="flex pb-2">
-        <div class="flex flex-auto align-content-end align-items-end">
+      <div class="flex flex-row pb-2">
+        <div class="flex flex-grow-1 align-items-end">
           <p class="font-bold">Applicable permits ({{ permits.length }})</p>
         </div>
-        <div class="flex justify-content-right">
+        <div class="flex flex-none">
           <Button
             aria-label="Add permit"
             @click="permitModalVisible = true"
