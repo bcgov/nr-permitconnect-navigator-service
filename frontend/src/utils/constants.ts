@@ -1,4 +1,10 @@
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '@/utils/enums';
+import {
+  APPLICATION_STATUS_LIST,
+  INTAKE_STATUS_LIST,
+  PERMIT_STATUS,
+  PERMIT_NEEDED,
+  PERMIT_AUTHORIZATION_STATUS
+} from '@/utils/enums';
 
 /**
  * Default string delimiter
@@ -61,6 +67,21 @@ export const IntakeStatusList = [
 ];
 
 export const QueuePriority = [0, 1, 2, 3, 4, 5];
+
+/**
+ * Permit form constants
+ */
+export const PermitAuthorizationStatus = [
+  PERMIT_AUTHORIZATION_STATUS.ISSUED,
+  PERMIT_AUTHORIZATION_STATUS.DENIED,
+  PERMIT_AUTHORIZATION_STATUS.PENDING,
+  PERMIT_AUTHORIZATION_STATUS.IN_REVIEW,
+  PERMIT_AUTHORIZATION_STATUS.NONE
+];
+
+export const PermitNeeded = [PERMIT_NEEDED.YES, PERMIT_NEEDED.UNDER_INVESTIGATION, PERMIT_NEEDED.NO];
+
+export const PermitStatus = [PERMIT_STATUS.NEW, PERMIT_STATUS.APPLIED, PERMIT_STATUS.COMPLETED];
 
 /**
  * Default System User ID

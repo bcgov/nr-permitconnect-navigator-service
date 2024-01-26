@@ -4,6 +4,8 @@ import { useField, ErrorMessage } from 'vee-validate';
 
 import { Dropdown } from '@/lib/primevue';
 
+import type { DropdownChangeEvent } from 'primevue/dropdown';
+
 // Props
 type Props = {
   helpText?: string;
@@ -11,8 +13,10 @@ type Props = {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  options: Array<unknown>;
+  options: Array<any> | undefined;
+  optionLabel?: string | ((data: any) => string);
   bold?: boolean;
+  loading?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -21,8 +25,13 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: '',
   disabled: false,
-  bold: true
+  optionLabel: undefined,
+  bold: true,
+  loading: undefined
 });
+
+// Emits
+const emit = defineEmits(['onChange']);
 
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
@@ -44,6 +53,9 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
       :options="props.options"
+      :option-label="props.optionLabel"
+      :loading="props.loading"
+      @change="(e: DropdownChangeEvent) => emit('onChange', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

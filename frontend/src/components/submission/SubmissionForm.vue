@@ -229,7 +229,7 @@ const onSubmit = (values: any) => {
       >
         <div>
           <p
-            class="clientNumber align-items-center"
+            class="client-number align-items-center"
             style="color: #38598a"
           >
             ATS Client #
@@ -369,7 +369,7 @@ const onSubmit = (values: any) => {
 </template>
 
 <style scoped lang="scss">
-.clientNumber {
+.client-number {
   margin-top: 8px;
 }
 </style>

@@ -2,13 +2,15 @@
 import { onMounted, ref } from 'vue';
 
 import DocumentCard from '@/components/file/DocumentCard.vue';
+import PermitCard from '@/components/permit/PermitCard.vue';
+import PermitModal from '@/components/permit/PermitModal.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
-import { chefsService, documentService } from '@/services';
+import { chefsService, documentService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Document } from '@/types';
+import type { Document, Permit } from '@/types';
 
 // Props
 type Props = {
@@ -22,6 +24,8 @@ const props = withDefaults(defineProps<Props>(), {});
 const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
 const documents: Ref<Array<Document>> = ref([]);
+const permits: Ref<Array<Permit>> = ref([]);
+const permitModalVisible: Ref<boolean> = ref(false);
 
 // Actions
 const toast = useToast();
@@ -30,7 +34,18 @@ function onCancel() {
   editable.value = false;
 }
 
-async function onSubmit(data: any) {
+function onPermitDelete(data: any) {
+  permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId);
+}
+
+async function onPermitSubmit(data: any) {
+  const result = (await permitService.createPermit({ ...data, submissionId: props.submissionId })).data;
+  toast.success('Permit saved');
+  permits.value.push(result);
+  permitModalVisible.value = false;
+}
+
+async function onSubmissionSubmit(data: any) {
   editable.value = false;
   await chefsService.updateSubmission(props.submissionId, {
     ...data,
@@ -42,6 +57,7 @@ async function onSubmit(data: any) {
 onMounted(async () => {
   submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
   documents.value = (await documentService.listDocuments(props.submissionId)).data;
+  permits.value = (await permitService.listPermits(props.submissionId)).data;
 });
 </script>
 
@@ -62,7 +78,7 @@ onMounted(async () => {
         :editable="editable"
         :submission="submission"
         @cancel="onCancel"
-        @submit="onSubmit"
+        @submit="onSubmissionSubmit"
       />
     </TabPanel>
     <TabPanel header="Files">
@@ -70,7 +86,7 @@ onMounted(async () => {
         <div class="col-2">
           <FileUpload
             :submission-id="props.submissionId"
-            @update:model-value="(e: Document) => documents.push(e)"
+            @update:last-uploaded-document="(e: Document) => documents.push(e)"
           />
         </div>
         <div class="col-10">
@@ -93,6 +109,39 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+    </TabPanel>
+    <TabPanel header="Permits">
+      <div class="flex flex-row pb-2">
+        <div class="flex flex-grow-1 align-items-end">
+          <p class="font-bold">Applicable permits ({{ permits.length }})</p>
+        </div>
+        <div class="flex flex-none">
+          <Button
+            aria-label="Add permit"
+            @click="permitModalVisible = true"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" />
+            &nbsp; Add permit
+          </Button>
+        </div>
+      </div>
+      <div
+        v-for="(permit, index) in permits"
+        :key="permit.permitId"
+        :index="index"
+        class="col-12"
+      >
+        <PermitCard
+          :permit="permit"
+          :submission-id="submissionId"
+          @permit:delete="onPermitDelete"
+        />
+      </div>
+
+      <PermitModal
+        v-model:visible="permitModalVisible"
+        @permit:submit="onPermitSubmit"
+      />
     </TabPanel>
   </TabView>
 </template>

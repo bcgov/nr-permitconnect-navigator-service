@@ -7,7 +7,7 @@ import type { ChefsSubmissionForm } from '../../types';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithRelations = Prisma.validator<Prisma.submissionDefaultArgs>()({
+const _submissionWithGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
   include: { user: true }
 });
 
@@ -28,7 +28,7 @@ type PrismaRelationSubmission = Omit<
 > &
   UserRelation;
 
-type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithRelations>;
+type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithGraph>;
 
 export default {
   toPrismaModel(input: ChefsSubmissionForm): PrismaRelationSubmission {

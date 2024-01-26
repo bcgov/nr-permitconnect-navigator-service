@@ -141,7 +141,7 @@ onMounted(async () => {
       />
       <Column
         field="applicationStatus"
-        header="Status"
+        header="Activity state"
         :sortable="true"
         style="min-width: 150px"
       />

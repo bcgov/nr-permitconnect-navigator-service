@@ -18,7 +18,7 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
-const lastUploadedDocument = defineModel<Document>();
+const lastUploadedDocument = defineModel<Document>('lastUploadedDocument');
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
