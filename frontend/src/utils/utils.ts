@@ -1,4 +1,4 @@
-import { DELIMITER } from '@/utils/constants';
+import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
 
 /**
  * @function differential
@@ -9,6 +9,51 @@ import { DELIMITER } from '@/utils/constants';
  */
 export function differential(source: any, comparer: any): any {
   return Object.fromEntries(Object.entries(source).filter(([key, value]) => comparer[key] !== value));
+}
+
+/**
+ * @function getFileCategory
+ * Compares mimeType to a list and returns a string category for that mimetype
+ * @param {string} mimeType mimeType to be categorized
+ * @returns {string} Category of file the mimeType falls under
+ */
+export function getFileCategory(mimeType: string): string {
+  // Checks for commonly used and likely used mimetypes
+  switch (true) {
+    case mimeType.includes('/vnd.shp'):
+    case mimeType.includes('/vnd.shx'):
+    case mimeType.includes('/dbase'):
+    case mimeType.includes('/dbf'):
+      return FILE_CATEGORIES.SHAPE;
+    case mimeType.includes('/msword'):
+    case mimeType.includes('/vnd.ms-word'):
+    case mimeType.includes('/vnd.oasis.opendocument.text'):
+    case mimeType.includes('/vnd.openxmlformats-officedocument.wordprocessingml'):
+      return FILE_CATEGORIES.DOC;
+    case mimeType.includes('/vnd.pdf'):
+    case mimeType.includes('/pdf'):
+    case mimeType.includes('/x-pdf'):
+      return FILE_CATEGORIES.PDF;
+    case mimeType.includes('/vnd.ms-excel'):
+    case mimeType.includes('/vnd.openxmlformats-officedocument.spreadsheetml'):
+    case mimeType.includes('/vnd.oasis.opendocument.spreadsheet'):
+      return FILE_CATEGORIES.SPREADSHEET;
+    case mimeType.includes('image/'):
+      return FILE_CATEGORIES.IMAGE;
+    case mimeType.includes('/vnd.seemail'):
+    case mimeType.includes('/vnd.omads-email+xml'):
+    case mimeType.includes('message/'):
+      return FILE_CATEGORIES.EMAIL;
+    case mimeType.includes('/gzip'):
+    case mimeType.includes('/zip'):
+    case mimeType.includes('/x-gzip'):
+    case mimeType.includes('/x-zip'):
+    case mimeType.includes('/x-7z'):
+    case mimeType.includes('/x-rar'):
+      return FILE_CATEGORIES.COMPRESSED;
+    default:
+      return FILE_CATEGORIES.FILE;
+  }
 }
 
 /**

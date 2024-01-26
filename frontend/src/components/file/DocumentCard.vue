@@ -3,7 +3,18 @@ import { filesize } from 'filesize';
 
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
+import { FILE_CATEGORIES } from '@/utils/constants';
 import { formatDateLong } from '@/utils/formatters';
+import { getFileCategory } from '@/utils/utils';
+
+import compressed from '@/assets/images/compressed.svg';
+import doc from '@/assets/images/doc.svg';
+import email from '@/assets/images/email.svg';
+import file from '@/assets/images/file.svg';
+import image from '@/assets/images/image.svg';
+import pdf from '@/assets/images/pdf.svg';
+import shape from '@/assets/images/shape.svg';
+import spreadsheet from '@/assets/images/spreadsheet.svg';
 
 import type { Document } from '@/types';
 
@@ -43,6 +54,29 @@ const confirmDelete = (documentId: string, filename: string) => {
     });
   }
 };
+
+const displayIcon = (mimeType = '') => {
+  const icon = getFileCategory(mimeType);
+
+  switch (icon) {
+    case FILE_CATEGORIES.DOC:
+      return doc;
+    case FILE_CATEGORIES.SHAPE:
+      return shape;
+    case FILE_CATEGORIES.PDF:
+      return pdf;
+    case FILE_CATEGORIES.SPREADSHEET:
+      return spreadsheet;
+    case FILE_CATEGORIES.IMAGE:
+      return image;
+    case FILE_CATEGORIES.EMAIL:
+      return email;
+    case FILE_CATEGORIES.COMPRESSED:
+      return compressed;
+    default:
+      return file;
+  }
+};
 </script>
 
 <template>
@@ -50,7 +84,7 @@ const confirmDelete = (documentId: string, filename: string) => {
     <template #header>
       <img
         alt="document header"
-        src="@/assets/images/bcboxy.png"
+        :src="displayIcon(props.document.mimeType)"
         class="document-image"
       />
     </template>
@@ -92,9 +126,15 @@ const confirmDelete = (documentId: string, filename: string) => {
 
 <style lang="scss">
 .document-image {
-  max-height: 140px;
-  width: auto;
-  height: auto;
+  max-height: 2.5rem;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.p-card-header {
+  height: 5rem;
+  background-color: lightgray;
 }
 
 .p-card-content {

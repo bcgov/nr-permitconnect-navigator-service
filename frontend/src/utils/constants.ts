@@ -66,3 +66,17 @@ export const QueuePriority = [0, 1, 2, 3, 4, 5];
  * Default System User ID
  */
 export const SYSTEM_USER = '00000000-0000-0000-0000-000000000000';
+
+/**
+ * File category definitions
+ */
+export const FILE_CATEGORIES = {
+  COMPRESSED: 'compressed',
+  DOC: 'doc',
+  EMAIL: 'email',
+  FILE: 'file',
+  IMAGE: 'image',
+  PDF: 'pdf',
+  SHAPE: 'shape',
+  SPREADSHEET: 'spreadsheet'
+};
