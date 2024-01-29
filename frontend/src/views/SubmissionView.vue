@@ -7,6 +7,7 @@ import PermitModal from '@/components/permit/PermitModal.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
+import { RouteNames } from '@/utils/constants';
 import { chefsService, documentService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
@@ -62,6 +63,13 @@ onMounted(async () => {
 </script>
 
 <template>
+  <router-link :to="{ name: RouteNames.SUBMISSIONS }">
+    <font-awesome-icon
+      icon="fa fa-arrow-circle-left"
+      class="mr-1"
+    />
+    <span>Back to Submissions</span>
+  </router-link>
   <h1>Activity submission</h1>
 
   <TabView>
