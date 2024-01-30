@@ -16,6 +16,7 @@ import {
 import { Button } from '@/lib/primevue';
 import { userService } from '@/services';
 import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
+import { APPLICATION_STATUS_LIST } from '@/utils/enums';
 import { formatJwtUsername } from '@/utils/formatters';
 
 import type { IInputEvent } from '@/interfaces';
@@ -39,6 +40,9 @@ const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
 // Default form values
 const initialFormValues: any = {
   ...props.submission,
+  applicationStatus: props.submission.applicationStatus
+    ? props.submission.applicationStatus
+    : APPLICATION_STATUS_LIST.NEW,
   bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
   submittedAt: new Date(props.submission.submittedAt),
   submittedBy: formatJwtUsername(props.submission.submittedBy)

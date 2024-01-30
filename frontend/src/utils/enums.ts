@@ -10,15 +10,16 @@ export const enum BUTTON_MODE {
  * CHEFS form statuses
  */
 export const enum APPLICATION_STATUS_LIST {
-  IN_PROGRESS = 'IN PROGRESS',
-  DELAYED = 'DELAYED',
-  COMPLETED = 'COMPLETED'
+  NEW = 'New',
+  IN_PROGRESS = 'In Progress',
+  DELAYED = 'Delayed',
+  COMPLETED = 'Completed'
 }
 
 export const enum INTAKE_STATUS_LIST {
-  SUBMITTED = 'SUBMITTED',
-  ASSIGNED = 'ASSIGNED',
-  COMPLETED = 'COMPLETED'
+  SUBMITTED = 'Submitted',
+  ASSIGNED = 'Assigned',
+  COMPLETED = 'Completed'
 }
 
 /**
