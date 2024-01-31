@@ -84,6 +84,19 @@ const controller = {
     }
   },
 
+  getStatistics: async (
+    req: Request<never, { dateFrom: string; dateTo: string; monthYear: string; userId: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await chefsService.getStatistics(req.query);
+      res.status(200).send(response[0]);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getSubmission: async (
     req: Request<{ submissionId: string }, { formId: string }>,
     res: Response,

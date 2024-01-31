@@ -3,13 +3,14 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, onErrorCaptured, ref } from 'vue';
 import { RouterView } from 'vue-router';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
-import { ConfirmDialog, Toast, useToast } from '@/lib/primevue';
+import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthStore, useConfigStore } from '@/store';
 
 import type { Ref } from 'vue';
 
 const appStore = useAppStore();
 const { getIsLoading } = storeToRefs(appStore);
+const { getConfig } = storeToRefs(useConfigStore());
 
 const ready: Ref<boolean> = ref(false);
 
@@ -39,6 +40,13 @@ onErrorCaptured((e: Error) => {
         <Navbar />
       </template>
       <template #main>
+        <Message
+          v-if="getConfig?.notificationBanner"
+          severity="warn"
+          class="text-center"
+        >
+          {{ getConfig?.notificationBanner }}
+        </Message>
         <RouterView v-if="ready" />
       </template>
     </AppLayout>

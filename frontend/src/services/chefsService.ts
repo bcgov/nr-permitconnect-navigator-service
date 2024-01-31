@@ -10,6 +10,14 @@ export default {
   },
 
   /**
+   * @function getStatistics
+   * @returns {Promise} An axios response
+   */
+  getStatistics(filters?: any) {
+    return appAxios().get('chefs/submission/statistics', { params: { ...filters } });
+  },
+
+  /**
    * @function getSubmission
    * @returns {Promise} An axios response
    */

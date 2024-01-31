@@ -161,6 +161,58 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
+          date_from text,
+          date_to text,
+          month_year text,
+          user_id uuid
+       )
+       returns table (
+         total_submissions bigint,
+         intake_submitted bigint,
+         intake_assigned bigint,
+         intake_completed bigint,
+         state_new bigint,
+         state_inprogress bigint,
+         state_delayed bigint,
+         state_completed bigint,
+         waiting_on bigint,
+         queue_0 bigint,
+         queue_1 bigint,
+         queue_2 bigint,
+         queue_3 bigint,
+         queue_4 bigint,
+         queue_5 bigint
+       )
+       language plpgsql
+       as $$
+       begin
+           return query
+            select
+            count(*),
+            count(*) filter (where s."intakeStatus" = 'SUBMITTED'),
+            count(*) filter (where s."intakeStatus" = 'ASSIGNED'),
+            count(*) filter (where s."intakeStatus" = 'COMPLETE'),
+            count(*) filter (where s."applicationStatus" = 'NEW'),
+            count(*) filter (where s."applicationStatus" = 'IN PROGRESS'),
+            count(*) filter (where s."applicationStatus" = 'DELAYED'),
+            count(*) filter (where s."applicationStatus" = 'COMPLETED'),
+            count(*) filter (where s."waitingOn" is not null),
+            count(*) filter (where s."queuePriority" = 0),
+            count(*) filter (where s."queuePriority" = 1),
+            count(*) filter (where s."queuePriority" = 2),
+            count(*) filter (where s."queuePriority" = 3),
+            count(*) filter (where s."queuePriority" = 4),
+            count(*) filter (where s."queuePriority" = 5)
+         from public.submission s
+         left join public.user u on u."userId" = s."assignedToUserId"
+         where (date_from is null or date_to is null or (s."submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)))
+         and (month_year is null or (extract(month from cast(month_year as timestamp)) = extract(month from s."submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from s."submittedAt")))
+         and (user_id is null or s."assignedToUserId" = user_id);
+       end; $$`)
+      )
+
+      .then(() =>
         knex.schema.raw(`CREATE OR REPLACE FUNCTION audit.if_modified_func() RETURNS trigger AS $body$
           DECLARE
               v_old_data json;
@@ -507,10 +559,12 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_user_trigger ON "user"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_identity_provider_trigger ON identity_provider'))
       // Drop audit schema and logged_actions table
-      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS audit.if_modified_func()'))
+      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS audit.if_modified_func'))
       .then(() => knex.schema.withSchema('audit').dropTableIfExists('logged_actions'))
       .then(() => knex.schema.dropSchemaIfExists('audit'))
-      // Drop public schema COMS tables
+      // Drop public schema functions
+      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.get_activity_statistics'))
+      // Drop public schema PCNS tables
       .then(() => knex.schema.dropTableIfExists('permit'))
       .then(() => knex.schema.dropTableIfExists('permit_type'))
       .then(() => knex.schema.dropTableIfExists('document'))

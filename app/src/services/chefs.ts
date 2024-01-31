@@ -45,6 +45,31 @@ const service = {
   },
 
   /**
+   * @function getStatistics
+   * Gets a set of submission related statistics
+   * @returns {Promise<object>} The result of running the query
+   */
+  getStatistics: async (filters: { dateFrom: string; dateTo: string; monthYear: string; userId: string }) => {
+    // Return a single quoted string or null for the given value
+    const val = (value: unknown) => (value ? `'${value}'` : null);
+
+    const date_from = val(filters.dateFrom);
+    const date_to = val(filters.dateTo);
+    const month_year = val(filters.monthYear);
+    const user_id = filters.userId?.length ? filters.userId : null;
+
+    /* eslint-disable max-len */
+    const response =
+      await prisma.$queryRaw`select * from get_activity_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+    /* eslint-enable max-len */
+
+    // count() returns BigInt
+    // JSON.stringify() doesn't know how to serialize BigInt
+    // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
+    return JSON.parse(JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : value)));
+  },
+
+  /**
    * @function getSubmission
    * Gets a specific submission from the PCNS database
    * The record will be pulled from CHEFS and created if it does not first exist
