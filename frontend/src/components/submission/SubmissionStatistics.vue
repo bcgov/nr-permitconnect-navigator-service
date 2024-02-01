@@ -98,8 +98,8 @@ onMounted(async () => {
             icon-display="input"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions) }}%</td>
+        <td class="col-2">{{ statistics.total_submissions_between }}</td>
+        <td class="col-2">{{ getPercentage(statistics.total_submissions_between) }}%</td>
       </tr>
       <tr>
         <td class="col-8">
@@ -111,8 +111,8 @@ onMounted(async () => {
             icon-display="input"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions) }}%</td>
+        <td class="col-2">{{ statistics.total_submissions_monthyear }}</td>
+        <td class="col-2">{{ getPercentage(statistics.total_submissions_monthyear) }}%</td>
       </tr>
       <tr>
         <td class="col-8">
@@ -127,8 +127,8 @@ onMounted(async () => {
             @input="(e: IInputEvent) => onAssigneeInput(e)"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions) }}%</td>
+        <td class="col-2">{{ statistics.total_submissions_assignedto }}</td>
+        <td class="col-2">{{ getPercentage(statistics.total_submissions_assignedto) }}%</td>
       </tr>
       <tr>
         <td class="col-8">Submissions by intake state: Submitted</td>

@@ -169,6 +169,9 @@ export async function up(knex: Knex): Promise<void> {
        )
        returns table (
          total_submissions bigint,
+         total_submissions_between bigint,
+         total_submissions_monthyear bigint,
+         total_submissions_assignedto bigint,
          intake_submitted bigint,
          intake_assigned bigint,
          intake_completed bigint,
@@ -188,8 +191,11 @@ export async function up(knex: Knex): Promise<void> {
        as $$
        begin
            return query
-            select
+           select
             count(*),
+            (select count(*) from public.submission where "submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+            (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from "submittedAt")),
+            (select count(*) from public.submission where "assignedToUserId" = user_id),
             count(*) filter (where s."intakeStatus" = 'SUBMITTED'),
             count(*) filter (where s."intakeStatus" = 'ASSIGNED'),
             count(*) filter (where s."intakeStatus" = 'COMPLETE'),
@@ -204,11 +210,7 @@ export async function up(knex: Knex): Promise<void> {
             count(*) filter (where s."queuePriority" = 3),
             count(*) filter (where s."queuePriority" = 4),
             count(*) filter (where s."queuePriority" = 5)
-         from public.submission s
-         left join public.user u on u."userId" = s."assignedToUserId"
-         where (date_from is null or date_to is null or (s."submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)))
-         and (month_year is null or (extract(month from cast(month_year as timestamp)) = extract(month from s."submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from s."submittedAt")))
-         and (user_id is null or s."assignedToUserId" = user_id);
+          from public.submission s;
        end; $$`)
       )
 
