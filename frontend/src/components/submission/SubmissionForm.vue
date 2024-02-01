@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
-import { mixed, number, object, string } from 'yup';
+import { boolean, mixed, number, object, string } from 'yup';
 
 import {
   Calendar,
@@ -36,6 +36,7 @@ const emit = defineEmits(['submit', 'cancel']);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
+const submissionTypesError: Ref<boolean> = ref(false);
 
 // Default form values
 const initialFormValues: any = {
@@ -49,6 +50,23 @@ const initialFormValues: any = {
 };
 
 // Form validation schema
+const submissionSchema = (name: string) => {
+  return {
+    name: name,
+    message: '',
+    test: (value: any, ctx: any) => {
+      let form = ctx.parent;
+
+      if (form.guidance || form.inquiry || form.emergencyAssist || form.statusRequest || form.inapplicable) {
+        submissionTypesError.value = false;
+        return false;
+      }
+      submissionTypesError.value = true;
+      return ctx.createError({ message: new String('') });
+    }
+  };
+};
+
 const formSchema = object({
   applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
   atsClientNumber: string()
@@ -60,6 +78,10 @@ const formSchema = object({
     .label('ATS Client Number'),
   confirmationId: string().required().label('Confirmation ID'),
   contactEmail: string().email().label('Contact Email'),
+  emergencyAssist: boolean().test(submissionSchema('emergencyAssist')),
+  guidance: boolean().test(submissionSchema('guidance')),
+  inapplicable: boolean().test(submissionSchema('inapplicable')),
+  inquiry: boolean().test(submissionSchema('inquiry')),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
@@ -69,6 +91,7 @@ const formSchema = object({
     .integer()
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
+  statusRequest: boolean().test(submissionSchema('statusRequest')),
   user: mixed()
     .when('intakeStatus', {
       is: (val: string) => val !== 'SUBMITTED',
@@ -120,6 +143,7 @@ const onSubmit = (values: any) => {
     v-slot="{ handleReset, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
+    :validate-on-mount="true"
     @submit="onSubmit"
   >
     <div class="formgrid grid">
@@ -344,6 +368,43 @@ const onSubmit = (values: any) => {
         :disabled="!props.editable"
         :options="ApplicationStatusList"
       />
+      <h3 class="col-12">Submission Type</h3>
+      <Checkbox
+        class="col-2"
+        name="guidance"
+        label="Guidance"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-2"
+        name="statusRequest"
+        label="Status Request"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-2"
+        name="inquiry"
+        label="Inquiry"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-2"
+        name="emergencyAssist"
+        label="Emergency Assistance"
+        :disabled="!props.editable"
+      />
+      <Checkbox
+        class="col-2"
+        name="inapplicable"
+        label="Inapplicable"
+        :disabled="!props.editable"
+      />
+      <div
+        v-if="submissionTypesError"
+        class="col-12 mb-2"
+      >
+        At least one submission type must be selected
+      </div>
       <div
         v-if="props.editable"
         class="field col-12"
@@ -369,6 +430,7 @@ const onSubmit = (values: any) => {
         />
       </div>
     </div>
+    <div></div>
   </Form>
 </template>
 

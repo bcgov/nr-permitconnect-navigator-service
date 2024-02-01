@@ -65,7 +65,12 @@ export default {
       notes: input.notes,
       user: input.user?.userId ? { connect: { userId: input.user.userId } } : disconnectRelation,
       intakeStatus: input.intakeStatus,
-      applicationStatus: input.applicationStatus
+      applicationStatus: input.applicationStatus,
+      guidance: input.guidance,
+      statusRequest: input.statusRequest,
+      inquiry: input.inquiry,
+      emergencyAssist: input.emergencyAssist,
+      inapplicable: input.inapplicable
     };
   },
 
@@ -105,7 +110,12 @@ export default {
       notes: input.notes,
       user: user.fromPrismaModel(input.user),
       intakeStatus: input.intakeStatus,
-      applicationStatus: input.applicationStatus
+      applicationStatus: input.applicationStatus,
+      guidance: input.guidance,
+      statusRequest: input.statusRequest,
+      inquiry: input.inquiry,
+      emergencyAssist: input.emergencyAssist,
+      inapplicable: input.inapplicable
     };
   }
 };

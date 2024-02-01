@@ -67,6 +67,11 @@ export async function up(knex: Knex): Promise<void> {
           table.text('notes');
           table.text('intakeStatus');
           table.text('applicationStatus');
+          table.boolean('guidance').notNullable().defaultTo(false);
+          table.boolean('statusRequest').notNullable().defaultTo(false);
+          table.boolean('inquiry').notNullable().defaultTo(false);
+          table.boolean('emergencyAssist').notNullable().defaultTo(false);
+          table.boolean('inapplicable').notNullable().defaultTo(false);
           stamps(knex, table);
         })
       )

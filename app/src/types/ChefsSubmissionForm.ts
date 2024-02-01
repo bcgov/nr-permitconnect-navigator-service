@@ -35,4 +35,9 @@ export type ChefsSubmissionForm = {
   user: User | null; // assigned to
   intakeStatus: string | null;
   applicationStatus: string | null;
+  guidance: boolean | null;
+  statusRequest: boolean | null;
+  inquiry: boolean | null;
+  emergencyAssist: boolean | null;
+  inapplicable: boolean | null;
 } & Partial<IStamps>;

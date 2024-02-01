@@ -44,71 +44,6 @@ model identity_provider {
   user      user[]
 }
 
-model submission {
-  submissionId                    String     @id @db.Uuid
-  assignedToUserId                String?    @db.Uuid
-  confirmationId                  String
-  submittedAt                     DateTime   @db.Timestamptz(6)
-  submittedBy                     String
-  locationPIDs                    String?
-  contactName                     String?
-  contactPhoneNumber              String?
-  contactEmail                    String?
-  projectName                     String?
-  singleFamilyUnits               String?
-  streetAddress                   String?
-  latitude                        Int?
-  longitude                       Int?
-  queuePriority                   Int?
-  relatedPermits                  String?
-  astNotes                        String?
-  astUpdated                      Boolean?
-  addedToATS                      Boolean?
-  atsClientNumber                 String?
-  ltsaCompleted                   Boolean?
-  naturalDisaster                 Boolean?
-  financiallySupported            Boolean?
-  financiallySupportedBC          Boolean?
-  financiallySupportedIndigenous  Boolean?
-  financiallySupportedNonProfit   Boolean?
-  financiallySupportedHousingCoop Boolean?
-  aaiUpdated                      Boolean?
-  waitingOn                       String?
-  bringForwardDate                DateTime?  @db.Timestamptz(6)
-  notes                           String?
-  intakeStatus                    String?
-  applicationStatus               String?
-  createdBy                       String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt                       DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy                       String?
-  updatedAt                       DateTime?  @db.Timestamptz(6)
-  document                        document[]
-  permit                          permit[]
-  user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
-}
-
-model user {
-  userId            String             @id @db.Uuid
-  identityId        String?            @db.Uuid
-  idp               String?
-  username          String
-  email             String?
-  firstName         String?
-  fullName          String?
-  lastName          String?
-  active            Boolean            @default(true)
-  createdBy         String?            @default("00000000-0000-0000-0000-000000000000")
-  createdAt         DateTime?          @default(now()) @db.Timestamptz(6)
-  updatedBy         String?
-  updatedAt         DateTime?          @db.Timestamptz(6)
-  submission        submission[]
-  identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
-
-  @@index([email], map: "user_email_index")
-  @@index([identityId], map: "user_identityid_index")
-  @@index([username], map: "user_username_index")
-}
-
 model permit {
   permitId         String      @id @db.Uuid
   permitTypeId     Int
@@ -149,4 +84,74 @@ model permit_type {
   updatedBy           String?
   updatedAt           DateTime? @db.Timestamptz(6)
   permit              permit[]
+}
+
+model submission {
+  submissionId                    String     @id @db.Uuid
+  assignedToUserId                String?    @db.Uuid
+  confirmationId                  String
+  submittedAt                     DateTime   @db.Timestamptz(6)
+  submittedBy                     String
+  locationPIDs                    String?
+  contactName                     String?
+  contactPhoneNumber              String?
+  contactEmail                    String?
+  projectName                     String?
+  singleFamilyUnits               String?
+  streetAddress                   String?
+  latitude                        Int?
+  longitude                       Int?
+  queuePriority                   Int?
+  relatedPermits                  String?
+  astNotes                        String?
+  astUpdated                      Boolean?
+  addedToATS                      Boolean?
+  atsClientNumber                 String?
+  ltsaCompleted                   Boolean?
+  naturalDisaster                 Boolean?
+  financiallySupported            Boolean?
+  financiallySupportedBC          Boolean?
+  financiallySupportedIndigenous  Boolean?
+  financiallySupportedNonProfit   Boolean?
+  financiallySupportedHousingCoop Boolean?
+  aaiUpdated                      Boolean?
+  waitingOn                       String?
+  bringForwardDate                DateTime?  @db.Timestamptz(6)
+  notes                           String?
+  intakeStatus                    String?
+  applicationStatus               String?
+  guidance                        Boolean    @default(false)
+  statusRequest                   Boolean    @default(false)
+  inquiry                         Boolean    @default(false)
+  emergencyAssist                 Boolean    @default(false)
+  inapplicable                    Boolean    @default(false)
+  createdBy                       String?    @default("00000000-0000-0000-0000-000000000000")
+  createdAt                       DateTime?  @default(now()) @db.Timestamptz(6)
+  updatedBy                       String?
+  updatedAt                       DateTime?  @db.Timestamptz(6)
+  document                        document[]
+  permit                          permit[]
+  user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
+}
+
+model user {
+  userId            String             @id @db.Uuid
+  identityId        String?            @db.Uuid
+  idp               String?
+  username          String
+  email             String?
+  firstName         String?
+  fullName          String?
+  lastName          String?
+  active            Boolean            @default(true)
+  createdBy         String?            @default("00000000-0000-0000-0000-000000000000")
+  createdAt         DateTime?          @default(now()) @db.Timestamptz(6)
+  updatedBy         String?
+  updatedAt         DateTime?          @db.Timestamptz(6)
+  submission        submission[]
+  identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
+
+  @@index([email], map: "user_email_index")
+  @@index([identityId], map: "user_identityid_index")
+  @@index([username], map: "user_username_index")
 }
