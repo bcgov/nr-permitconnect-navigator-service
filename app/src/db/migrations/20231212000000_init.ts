@@ -55,6 +55,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('addedToATS');
           table.text('atsClientNumber');
           table.boolean('ltsaCompleted');
+          table.boolean('bcOnlineCompleted');
           table.boolean('naturalDisaster');
           table.boolean('financiallySupported');
           table.boolean('financiallySupportedBC');

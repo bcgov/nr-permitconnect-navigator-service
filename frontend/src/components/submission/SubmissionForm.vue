@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { ErrorMessage, Form } from 'vee-validate';
 import { ref } from 'vue';
 import { boolean, mixed, number, object, string } from 'yup';
 
@@ -13,7 +13,7 @@ import {
   InputText,
   TextArea
 } from '@/components/form';
-import { Button } from '@/lib/primevue';
+import { Button, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
 import { APPLICATION_STATUS_LIST } from '@/utils/enums';
@@ -36,7 +36,6 @@ const emit = defineEmits(['submit', 'cancel']);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
-const submissionTypesError: Ref<boolean> = ref(false);
 
 // Default form values
 const initialFormValues: any = {
@@ -46,27 +45,17 @@ const initialFormValues: any = {
     : APPLICATION_STATUS_LIST.NEW,
   bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
   submittedAt: new Date(props.submission.submittedAt),
-  submittedBy: formatJwtUsername(props.submission.submittedBy)
+  submittedBy: formatJwtUsername(props.submission.submittedBy),
+  submissionTypes: {
+    emergencyAssist: props.submission.emergencyAssist,
+    guidance: props.submission.guidance,
+    inapplicable: props.submission.inapplicable,
+    inquiry: props.submission.inquiry,
+    statusRequest: props.submission.statusRequest
+  }
 };
 
 // Form validation schema
-const submissionSchema = (name: string) => {
-  return {
-    name: name,
-    message: '',
-    test: (value: any, ctx: any) => {
-      let form = ctx.parent;
-
-      if (form.guidance || form.inquiry || form.emergencyAssist || form.statusRequest || form.inapplicable) {
-        submissionTypesError.value = false;
-        return false;
-      }
-      submissionTypesError.value = true;
-      return ctx.createError({ message: new String('') });
-    }
-  };
-};
-
 const formSchema = object({
   applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
   atsClientNumber: string()
@@ -78,10 +67,6 @@ const formSchema = object({
     .label('ATS Client Number'),
   confirmationId: string().required().label('Confirmation ID'),
   contactEmail: string().email().label('Contact Email'),
-  emergencyAssist: boolean().test(submissionSchema('emergencyAssist')),
-  guidance: boolean().test(submissionSchema('guidance')),
-  inapplicable: boolean().test(submissionSchema('inapplicable')),
-  inquiry: boolean().test(submissionSchema('inquiry')),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
@@ -91,7 +76,17 @@ const formSchema = object({
     .integer()
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  statusRequest: boolean().test(submissionSchema('statusRequest')),
+  submissionTypes: object({
+    guidance: boolean(),
+    statusRequest: boolean(),
+    inquiry: boolean(),
+    emergencyAssistance: boolean(),
+    inapplicable: boolean()
+  })
+    .test('at-least-one-true', 'At least one submission type must be selected', (obj) => {
+      return Object.values(obj).some((value) => value);
+    })
+    .label('Submission Types'),
   user: mixed()
     .when('intakeStatus', {
       is: (val: string) => val !== 'SUBMITTED',
@@ -134,7 +129,10 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  emit('submit', values);
+  const toSubmit = { ...values, ...values.submissionTypes };
+  delete toSubmit.submissionTypes;
+
+  emit('submit', toSubmit);
 };
 </script>
 
@@ -143,7 +141,6 @@ const onSubmit = (values: any) => {
     v-slot="{ handleReset, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
-    :validate-on-mount="true"
     @submit="onSubmit"
   >
     <div class="formgrid grid">
@@ -238,95 +235,144 @@ const onSubmit = (values: any) => {
         label="AST notes"
         :disabled="!props.editable"
       />
-      <Checkbox
-        class="col-12"
-        name="astUpdated"
-        label="Automated Status Tool (AST) updated"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-12"
-        name="addedToATS"
-        label="Authorized Tracking System (ATS)"
-        :disabled="!props.editable"
-        :bold="true"
-      />
-      <div
-        v-if="values.addedToATS"
-        class="pl-4 col-12 flex"
-      >
-        <div>
-          <p
-            class="client-number align-items-center"
-            style="color: #38598a"
-          >
-            ATS Client #
-          </p>
+      <div class="col-5">
+        <Checkbox
+          class="col-12"
+          name="astUpdated"
+          label="Automated Status Tool (AST) updated"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="addedToATS"
+          label="Authorized Tracking System (ATS)"
+          :disabled="!props.editable"
+          :bold="true"
+        />
+        <div
+          v-if="values.addedToATS"
+          class="pl-4 col-12 flex"
+        >
+          <div>
+            <p
+              class="client-number align-items-center"
+              style="color: #38598a"
+            >
+              ATS Client #
+            </p>
+          </div>
+          <div class="col">
+            <InputText
+              class="col-4 align-items-center"
+              name="atsClientNumber"
+              :disabled="!props.editable"
+            />
+          </div>
         </div>
-        <div class="col">
-          <InputText
-            class="col-4 align-items-center"
-            name="atsClientNumber"
-            :disabled="!props.editable"
-          />
+        <Checkbox
+          class="col-12"
+          name="ltsaCompleted"
+          label="Land Title Survey Authority (LTSA) completed"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="bcOnlineCompleted"
+          label="BC Online Completed"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="naturalDisaster"
+          label="Location affeced by natural disaster"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="financiallySupported"
+          label="Financially supported"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          v-if="values.financiallySupported"
+          class="pl-4 col-12"
+          name="financiallySupportedBC"
+          label="BC Housing"
+          :disabled="!props.editable"
+          :bold="false"
+        />
+        <Checkbox
+          v-if="values.financiallySupported"
+          class="pl-4 col-12"
+          name="financiallySupportedIndigenous"
+          label="Indigenous Housing Provider"
+          :disabled="!props.editable"
+          :bold="false"
+        />
+        <Checkbox
+          v-if="values.financiallySupported"
+          class="pl-4 col-12"
+          name="financiallySupportedNonProfit"
+          label="Non-profit housing society"
+          :disabled="!props.editable"
+          :bold="false"
+        />
+        <Checkbox
+          v-if="values.financiallySupported"
+          class="pl-4 col-12"
+          name="financiallySupportedHousingCoop"
+          label="Housing co-operative"
+          :disabled="!props.editable"
+          :bold="false"
+        />
+        <Checkbox
+          class="col-12"
+          name="aaiUpdated"
+          label="Authorization and Approvals Insight (AAI) updated"
+          :disabled="!props.editable"
+        />
+      </div>
+      <div class="col-1">
+        <Divider
+          layout="vertical"
+          style="height: 100%"
+        />
+      </div>
+      <div class="col-5">
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.statusRequest"
+          label="Submission Type: Request for status"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.emergencyAssist"
+          label="Submission Type: Request for emergency assistance"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.guidance"
+          label="Submission Type: Request for Guidance"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.inquiry"
+          label="Submission Type: General inquiry"
+          :disabled="!props.editable"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.inapplicable"
+          label="Submission Type: Inapplicable"
+          :disabled="!props.editable"
+        />
+        <div class="col-12 mb-3">
+          <ErrorMessage name="submissionTypes" />
         </div>
       </div>
-      <Checkbox
-        class="col-12"
-        name="ltsaCompleted"
-        label="Land Title Survey Authority (LTSA) completed"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-12"
-        name="naturalDisaster"
-        label="Location affeced by natural disaster"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-12"
-        name="financiallySupported"
-        label="Financially supported"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        v-if="values.financiallySupported"
-        class="pl-4 col-12"
-        name="financiallySupportedBC"
-        label="BC Housing"
-        :disabled="!props.editable"
-        :bold="false"
-      />
-      <Checkbox
-        v-if="values.financiallySupported"
-        class="pl-4 col-12"
-        name="financiallySupportedIndigenous"
-        label="Indigenous Housing Provider"
-        :disabled="!props.editable"
-        :bold="false"
-      />
-      <Checkbox
-        v-if="values.financiallySupported"
-        class="pl-4 col-12"
-        name="financiallySupportedNonProfit"
-        label="Non-profit housing society"
-        :disabled="!props.editable"
-        :bold="false"
-      />
-      <Checkbox
-        v-if="values.financiallySupported"
-        class="pl-4 col-12"
-        name="financiallySupportedHousingCoop"
-        label="Housing co-operative"
-        :disabled="!props.editable"
-        :bold="false"
-      />
-      <Checkbox
-        class="col-12"
-        name="aaiUpdated"
-        label="Authorization and Approvals Insight (AAI) updated"
-        :disabled="!props.editable"
-      />
       <InputText
         class="col-6"
         name="waitingOn"
@@ -368,43 +414,6 @@ const onSubmit = (values: any) => {
         :disabled="!props.editable"
         :options="ApplicationStatusList"
       />
-      <h3 class="col-12">Submission Type</h3>
-      <Checkbox
-        class="col-2"
-        name="guidance"
-        label="Guidance"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-2"
-        name="statusRequest"
-        label="Status Request"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-2"
-        name="inquiry"
-        label="Inquiry"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-2"
-        name="emergencyAssist"
-        label="Emergency Assistance"
-        :disabled="!props.editable"
-      />
-      <Checkbox
-        class="col-2"
-        name="inapplicable"
-        label="Inapplicable"
-        :disabled="!props.editable"
-      />
-      <div
-        v-if="submissionTypesError"
-        class="col-12 mb-2"
-      >
-        At least one submission type must be selected
-      </div>
       <div
         v-if="props.editable"
         class="field col-12"
@@ -430,7 +439,6 @@ const onSubmit = (values: any) => {
         />
       </div>
     </div>
-    <div></div>
   </Form>
 </template>
 

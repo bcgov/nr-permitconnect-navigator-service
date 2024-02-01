@@ -108,6 +108,7 @@ model submission {
   addedToATS                      Boolean?
   atsClientNumber                 String?
   ltsaCompleted                   Boolean?
+  bcOnlineCompleted               Boolean?
   naturalDisaster                 Boolean?
   financiallySupported            Boolean?
   financiallySupportedBC          Boolean?

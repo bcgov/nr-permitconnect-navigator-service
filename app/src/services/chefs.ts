@@ -2,6 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
+import { APPLICATION_STATUS_LIST } from '../components/constants';
 import { getChefsApiKey, isTruthy } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
@@ -90,6 +91,7 @@ const service = {
         await prisma.submission.create({
           data: {
             submissionId: response.submission.id,
+            applicationStatus: APPLICATION_STATUS_LIST.NEW,
             confirmationId: response.submission.confirmationId,
             contactEmail: submission.contactEmail,
             contactPhoneNumber: submission.contactPhoneNumber,

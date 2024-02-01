@@ -53,6 +53,7 @@ export default {
       addedToATS: input.addedToATS,
       atsClientNumber: input.atsClientNumber,
       ltsaCompleted: input.ltsaCompleted,
+      bcOnlineCompleted: input.bcOnlineCompleted,
       naturalDisaster: input.naturalDisaster,
       financiallySupported: input.financiallySupported,
       financiallySupportedBC: input.financiallySupportedBC,
@@ -66,11 +67,11 @@ export default {
       user: input.user?.userId ? { connect: { userId: input.user.userId } } : disconnectRelation,
       intakeStatus: input.intakeStatus,
       applicationStatus: input.applicationStatus,
-      guidance: input.guidance,
-      statusRequest: input.statusRequest,
-      inquiry: input.inquiry,
-      emergencyAssist: input.emergencyAssist,
-      inapplicable: input.inapplicable
+      guidance: input.guidance ? input.guidance : false,
+      statusRequest: input.statusRequest ? input.statusRequest : false,
+      inquiry: input.inquiry ? input.inquiry : false,
+      emergencyAssist: input.emergencyAssist ? input.emergencyAssist : false,
+      inapplicable: input.inapplicable ? input.inapplicable : false
     };
   },
 
@@ -98,6 +99,7 @@ export default {
       addedToATS: input.addedToATS,
       atsClientNumber: input.atsClientNumber,
       ltsaCompleted: input.ltsaCompleted,
+      bcOnlineCompleted: input.bcOnlineCompleted,
       naturalDisaster: input.naturalDisaster,
       financiallySupported: input.financiallySupported,
       financiallySupportedBC: input.financiallySupportedBC,

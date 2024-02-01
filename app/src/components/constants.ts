@@ -20,3 +20,11 @@ export const IdentityProvider = Object.freeze({
   BCEID: 'bceidbasic',
   BCEIDBUSINESS: 'bceidbusiness'
 });
+
+/** CHEFS form statuses */
+export const APPLICATION_STATUS_LIST = Object.freeze({
+  NEW: 'New',
+  IN_PROGRESS: 'In Progress',
+  DELAYED: 'Delayed',
+  COMPLETED: 'Completed'
+});

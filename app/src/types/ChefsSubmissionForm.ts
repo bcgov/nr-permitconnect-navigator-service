@@ -22,6 +22,7 @@ export type ChefsSubmissionForm = {
   addedToATS: boolean | null;
   atsClientNumber: string | null;
   ltsaCompleted: boolean | null;
+  bcOnlineCompleted: boolean | null;
   naturalDisaster: boolean | null;
   financiallySupported: boolean | null;
   financiallySupportedBC: boolean | null;
@@ -35,9 +36,9 @@ export type ChefsSubmissionForm = {
   user: User | null; // assigned to
   intakeStatus: string | null;
   applicationStatus: string | null;
-  guidance: boolean | null;
-  statusRequest: boolean | null;
-  inquiry: boolean | null;
-  emergencyAssist: boolean | null;
-  inapplicable: boolean | null;
+  guidance: boolean;
+  statusRequest: boolean;
+  inquiry: boolean;
+  emergencyAssist: boolean;
+  inapplicable: boolean;
 } & Partial<IStamps>;
