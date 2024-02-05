@@ -55,6 +55,7 @@ export const ToastTimeout = Object.freeze({
  * CHEFS form constants
  */
 export const ApplicationStatusList = [
+  APPLICATION_STATUS_LIST.NEW,
   APPLICATION_STATUS_LIST.IN_PROGRESS,
   APPLICATION_STATUS_LIST.DELAYED,
   APPLICATION_STATUS_LIST.COMPLETED

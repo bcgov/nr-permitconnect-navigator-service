@@ -15,6 +15,7 @@ type Props = {
   disabled?: boolean;
   options: Array<any> | undefined;
   optionLabel?: string | ((data: any) => string);
+  optionValue?: string;
   bold?: boolean;
   loading?: boolean;
 };
@@ -26,6 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: '',
   disabled: false,
   optionLabel: undefined,
+  optionValue: undefined,
   bold: true,
   loading: undefined
 });
@@ -54,6 +56,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       :disabled="disabled"
       :options="props.options"
       :option-label="props.optionLabel"
+      :option-value="props.optionValue"
       :loading="props.loading"
       @change="(e: DropdownChangeEvent) => emit('onChange', e)"
     />
