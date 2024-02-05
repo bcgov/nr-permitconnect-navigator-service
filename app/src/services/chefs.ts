@@ -155,25 +155,33 @@ const service = {
           ['waterRiparianAreasProtection', 'New']
         ]);
 
-        // Create Permits defined in SHAS intake form
+        // Attempt to create Permits defined in SHAS intake form
+        // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
+        // dataGrid/previousTrackingNumber is previous intake version
+        // not attempting to go back further than that
         const permitTypes = await prisma.permit_type.findMany();
-        const c = submission.permitGrid
-          .map((x: { previousPermitType: string; previousTrackingNumber2: string }) => {
-            const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
-            if (permit) {
-              return {
-                permitId: uuidv4(),
-                permitTypeId: permit.permitTypeId,
-                submissionId: response.submission.id,
-                trackingId: x.previousTrackingNumber2
-              };
-            }
-          })
-          .filter((x: unknown) => !!x);
+        const permitGrid = submission.permitGrid ?? submission.dataGrid ?? null;
+        if (permitGrid) {
+          const c = permitGrid
+            .map(
+              (x: { previousPermitType: string; previousTrackingNumber2: string; previousTrackingNumber: string }) => {
+                const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
+                if (permit) {
+                  return {
+                    permitId: uuidv4(),
+                    permitTypeId: permit.permitTypeId,
+                    submissionId: response.submission.id,
+                    trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
+                  };
+                }
+              }
+            )
+            .filter((x: unknown) => !!x);
 
-        await prisma.permit.createMany({
-          data: c
-        });
+          await prisma.permit.createMany({
+            data: c
+          });
+        }
       }
 
       const result = await prisma.submission.findUnique({

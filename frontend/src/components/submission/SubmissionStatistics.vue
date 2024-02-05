@@ -72,19 +72,19 @@ onMounted(async () => {
 
 <template>
   <div v-if="statistics">
-    <table class="striped text-left">
+    <table class="text-left">
       <thead>
-        <th class="col-8">Statistic</th>
-        <th class="col-2">Number</th>
-        <th class="col-2">Percentage of total</th>
+        <th class="col-9">Statistic</th>
+        <th class="col-1 text-right">Number</th>
+        <th class="col-2 text-right">Percentage of total</th>
       </thead>
       <tr>
-        <td class="col-8">Total submissions</td>
-        <td class="col-2">{{ statistics.total_submissions }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions) }}%</td>
+        <td class="col-9">Total submissions</td>
+        <td class="col-1 text-right">{{ statistics.total_submissions }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">
+        <td class="col-9">
           Submissions by range
           <Calendar
             v-model="statisticFilters.dateFrom"
@@ -98,11 +98,11 @@ onMounted(async () => {
             icon-display="input"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions_between }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions_between) }}%</td>
+        <td class="col-1 text-right">{{ statistics.total_submissions_between }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions_between) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">
+        <td class="col-9">
           Submissions by month
           <Calendar
             v-model="statisticFilters.monthYear"
@@ -111,15 +111,15 @@ onMounted(async () => {
             icon-display="input"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions_monthyear }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions_monthyear) }}%</td>
+        <td class="col-1 text-right">{{ statistics.total_submissions_monthyear }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions_monthyear) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">
+        <td class="col-9">
           Submissions by assigned navigator
           <Dropdown
             v-model.trim="statisticFilters.userId"
-            class="w-5"
+            class="w-7"
             editable
             :options="assigneeOptions"
             :option-label="getAssigneeOptionLabel"
@@ -127,78 +127,103 @@ onMounted(async () => {
             @input="(e: IInputEvent) => onAssigneeInput(e)"
           />
         </td>
-        <td class="col-2">{{ statistics.total_submissions_assignedto }}</td>
-        <td class="col-2">{{ getPercentage(statistics.total_submissions_assignedto) }}%</td>
+        <td class="col-1 text-right">{{ statistics.total_submissions_assignedto }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions_assignedto) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by intake state: Submitted</td>
-        <td class="col-2">{{ statistics.intake_submitted }}</td>
-        <td class="col-2">{{ getPercentage(statistics.intake_submitted) }}%</td>
+        <td class="col-9">Submissions by intake state: Submitted</td>
+        <td class="col-1 text-right">{{ statistics.intake_submitted }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.intake_submitted) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by intake state: Assigned</td>
-        <td class="col-2">{{ statistics.intake_assigned }}</td>
-        <td class="col-2">{{ getPercentage(statistics.intake_assigned) }}%</td>
+        <td class="col-9">Submissions by intake state: Assigned</td>
+        <td class="col-1 text-right">{{ statistics.intake_assigned }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.intake_assigned) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by intake state: Completed</td>
-        <td class="col-2">{{ statistics.intake_completed }}</td>
-        <td class="col-2">{{ getPercentage(statistics.intake_completed) }}%</td>
+        <td class="col-9">Submissions by intake state: Completed</td>
+        <td class="col-1 text-right">{{ statistics.intake_completed }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.intake_completed) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by activity state: New</td>
-        <td class="col-2">{{ statistics.state_new }}</td>
-        <td class="col-2">{{ getPercentage(statistics.state_new) }}%</td>
+        <td class="col-9">Submissions by activity state: New</td>
+        <td class="col-1 text-right">{{ statistics.state_new }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.state_new) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by activity state: In Progress</td>
-        <td class="col-2">{{ statistics.state_inprogress }}</td>
-        <td class="col-2">{{ getPercentage(statistics.state_inprogress) }}%</td>
+        <td class="col-9">Submissions by activity state: In Progress</td>
+        <td class="col-1 text-right">{{ statistics.state_inprogress }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.state_inprogress) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by activity state: Delayed</td>
-        <td class="col-2">{{ statistics.state_delayed }}</td>
-        <td class="col-2">{{ getPercentage(statistics.state_delayed) }}%</td>
+        <td class="col-9">Submissions by activity state: Delayed</td>
+        <td class="col-1 text-right">{{ statistics.state_delayed }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.state_delayed) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions by activity state: Completed</td>
-        <td class="col-2">{{ statistics.state_completed }}</td>
-        <td class="col-2">{{ getPercentage(statistics.state_completed) }}%</td>
+        <td class="col-9">Submissions by activity state: Completed</td>
+        <td class="col-1 text-right">{{ statistics.state_completed }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions waiting on someone</td>
-        <td class="col-2">{{ statistics.waiting_on }}</td>
-        <td class="col-2">{{ getPercentage(statistics.waiting_on) }}%</td>
+        <td class="col-9">Submissions waiting on someone</td>
+        <td class="col-1 text-right">{{ statistics.waiting_on }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.waiting_on) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 0</td>
-        <td class="col-2">{{ statistics.queue_0 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_0) }}%</td>
+        <td class="col-9">Submissions at priority 0</td>
+        <td class="col-1 text-right">{{ statistics.queue_0 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_0) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 1</td>
-        <td class="col-2">{{ statistics.queue_1 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_1) }}%</td>
+        <td class="col-9">Submissions at priority 1</td>
+        <td class="col-1 text-right">{{ statistics.queue_1 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_1) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 2</td>
-        <td class="col-2">{{ statistics.queue_2 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_2) }}%</td>
+        <td class="col-9">Submissions at priority 2</td>
+        <td class="col-1 text-right">{{ statistics.queue_2 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_2) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 3</td>
-        <td class="col-2">{{ statistics.queue_3 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_3) }}%</td>
+        <td class="col-9">Submissions at priority 3</td>
+        <td class="col-1 text-right">{{ statistics.queue_3 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_3) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 4</td>
-        <td class="col-2">{{ statistics.queue_4 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_4) }}%</td>
+        <td class="col-9">Submissions at priority 4</td>
+        <td class="col-1 text-right">{{ statistics.queue_4 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_4) }}%</td>
       </tr>
       <tr>
-        <td class="col-8">Submissions at priority 5</td>
-        <td class="col-2">{{ statistics.queue_5 }}</td>
-        <td class="col-2">{{ getPercentage(statistics.queue_5) }}%</td>
+        <td class="col-9">Submissions at priority 5</td>
+        <td class="col-1 text-right">{{ statistics.queue_5 }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.queue_5) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Submissions by type: Guidance</td>
+        <td class="col-1 text-right">{{ statistics.guidance }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.guidance) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Submissions by type: Status Request</td>
+        <td class="col-1 text-right">{{ statistics.status_request }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Submissions by type: Inquiry</td>
+        <td class="col-1 text-right">{{ statistics.inquiry }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.inquiry) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Submissions by type: Emergency Assistance</td>
+        <td class="col-1 text-right">{{ statistics.emergency_assist }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.emergency_assist) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Submissions by type: Inapplicable</td>
+        <td class="col-1 text-right">{{ statistics.inapplicable }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
       </tr>
     </table>
   </div>
@@ -208,7 +233,6 @@ onMounted(async () => {
 table {
   border-collapse: collapse;
   border-spacing: 0;
-  width: 100%;
   margin: auto;
 }
 

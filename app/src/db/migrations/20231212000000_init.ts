@@ -166,52 +166,62 @@ export async function up(knex: Knex): Promise<void> {
           date_to text,
           month_year text,
           user_id uuid
-       )
-       returns table (
-         total_submissions bigint,
-         total_submissions_between bigint,
-         total_submissions_monthyear bigint,
-         total_submissions_assignedto bigint,
-         intake_submitted bigint,
-         intake_assigned bigint,
-         intake_completed bigint,
-         state_new bigint,
-         state_inprogress bigint,
-         state_delayed bigint,
-         state_completed bigint,
-         waiting_on bigint,
-         queue_0 bigint,
-         queue_1 bigint,
-         queue_2 bigint,
-         queue_3 bigint,
-         queue_4 bigint,
-         queue_5 bigint
-       )
-       language plpgsql
-       as $$
-       begin
-           return query
-           select
-            count(*),
-            (select count(*) from public.submission where "submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)),
-            (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from "submittedAt")),
-            (select count(*) from public.submission where "assignedToUserId" = user_id),
-            count(*) filter (where s."intakeStatus" = 'SUBMITTED'),
-            count(*) filter (where s."intakeStatus" = 'ASSIGNED'),
-            count(*) filter (where s."intakeStatus" = 'COMPLETE'),
-            count(*) filter (where s."applicationStatus" = 'NEW'),
-            count(*) filter (where s."applicationStatus" = 'IN PROGRESS'),
-            count(*) filter (where s."applicationStatus" = 'DELAYED'),
-            count(*) filter (where s."applicationStatus" = 'COMPLETED'),
-            count(*) filter (where s."waitingOn" is not null),
-            count(*) filter (where s."queuePriority" = 0),
-            count(*) filter (where s."queuePriority" = 1),
-            count(*) filter (where s."queuePriority" = 2),
-            count(*) filter (where s."queuePriority" = 3),
-            count(*) filter (where s."queuePriority" = 4),
-            count(*) filter (where s."queuePriority" = 5)
-          from public.submission s;
-       end; $$`)
+        )
+        returns table (
+          total_submissions bigint,
+          total_submissions_between bigint,
+          total_submissions_monthyear bigint,
+          total_submissions_assignedto bigint,
+          intake_submitted bigint,
+          intake_assigned bigint,
+          intake_completed bigint,
+          state_new bigint,
+          state_inprogress bigint,
+          state_delayed bigint,
+          state_completed bigint,
+          waiting_on bigint,
+          queue_0 bigint,
+          queue_1 bigint,
+          queue_2 bigint,
+          queue_3 bigint,
+          queue_4 bigint,
+          queue_5 bigint,
+          guidance bigint,
+          status_request bigint,
+          inquiry bigint,
+          emergency_assist bigint,
+          inapplicable bigint
+        )
+        language plpgsql
+        as $$
+        begin
+            return query
+            select
+              count(*),
+              (select count(*) from public.submission where "submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+              (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from "submittedAt")),
+              (select count(*) from public.submission where "assignedToUserId" = user_id),
+              count(*) filter (where s."intakeStatus" = 'SUBMITTED'),
+              count(*) filter (where s."intakeStatus" = 'ASSIGNED'),
+              count(*) filter (where s."intakeStatus" = 'COMPLETE'),
+              count(*) filter (where s."applicationStatus" = 'NEW'),
+              count(*) filter (where s."applicationStatus" = 'IN PROGRESS'),
+              count(*) filter (where s."applicationStatus" = 'DELAYED'),
+              count(*) filter (where s."applicationStatus" = 'COMPLETED'),
+              count(*) filter (where s."waitingOn" is not null),
+              count(*) filter (where s."queuePriority" = 0),
+              count(*) filter (where s."queuePriority" = 1),
+              count(*) filter (where s."queuePriority" = 2),
+              count(*) filter (where s."queuePriority" = 3),
+              count(*) filter (where s."queuePriority" = 4),
+              count(*) filter (where s."queuePriority" = 5),
+              count(*) filter (where s."guidance" = true),
+              count(*) filter (where s."statusRequest" = true),
+              count(*) filter (where s."inquiry" = true),
+              count(*) filter (where s."emergencyAssist" = true),
+              count(*) filter (where s."inapplicable" = true)
+            from public.submission s;
+        end; $$`)
       )
 
       .then(() =>

@@ -70,7 +70,8 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
   });
 }
 
-// @ts-expect-error TS7031 resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
+// @ts-expect-error TS7031
+// resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 function onSubmit(data: any, { resetForm }) {
   if (props.permit) initialFormValues = data;
   else resetForm();
