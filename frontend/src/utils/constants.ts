@@ -1,4 +1,5 @@
 import {
+  ACCESS_ROLES,
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,
   PERMIT_STATUS,
@@ -49,6 +50,16 @@ export const ToastTimeout = Object.freeze({
   INFO: 3000,
   SUCCESS: 3000,
   WARNING: 5000
+});
+
+/**
+ * Route names
+ */
+export const AccessRoles = Object.freeze({
+  PCNS_ADMIN: ACCESS_ROLES.PCNS_ADMIN,
+  PCNS_DEVELOPER: ACCESS_ROLES.PCNS_DEVELOPER,
+  PCNS_NAVIGATOR: ACCESS_ROLES.PCNS_NAVIGATOR,
+  PCNS_OTHER: ACCESS_ROLES.PCNS_OTHER
 });
 
 /**

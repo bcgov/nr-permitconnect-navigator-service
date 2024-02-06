@@ -14,11 +14,19 @@ export const DEFAULTCORS = Object.freeze({
   origin: true
 });
 
-/** Current user authentication type */
+/** Current user authentication types */
 export const IdentityProvider = Object.freeze({
   IDIR: 'idir',
   BCEID: 'bceidbasic',
   BCEIDBUSINESS: 'bceidbusiness'
+});
+
+/** Current user access role types */
+export const AccessRoles = Object.freeze({
+  PCNS_ADMIN: 'PCNS_ADMIN',
+  PCNS_DEVELOPER: 'PCNS_DEVELOPER',
+  PCNS_NAVIGATOR: 'PCNS_NAVIGATOR',
+  PCNS_OTHER: 'PCNS_OTHER'
 });
 
 /** CHEFS form statuses */
