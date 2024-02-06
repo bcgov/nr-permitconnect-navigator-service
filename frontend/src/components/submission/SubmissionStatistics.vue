@@ -28,7 +28,7 @@ const statisticFilters: Ref<StatisticFilters> = ref({});
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
 
 const getPercentage = (input: number) =>
-  statistics.value.total_submissions > 0 ? (input / statistics.value.total_submissions) * 100 : 0;
+  statistics.value.total_submissions > 0 ? Math.round((input / statistics.value.total_submissions) * 100) : 0;
 
 const isEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
@@ -131,37 +131,58 @@ onMounted(async () => {
         <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions_assignedto) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by intake state: Submitted</td>
+        <td class="col-9">
+          Submissions by intake state:
+          <span class="font-bold">Submitted</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.intake_submitted }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.intake_submitted) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by intake state: Assigned</td>
+        <td class="col-9">
+          Submissions by intake state:
+          <span class="font-bold">Assigned</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.intake_assigned }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.intake_assigned) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by intake state: Completed</td>
+        <td class="col-9">
+          Submissions by intake state:
+          <span class="font-bold">Completed</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.intake_completed }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.intake_completed) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by activity state: New</td>
+        <td class="col-9">
+          Submissions by activity state:
+          <span class="font-bold">New</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.state_new }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.state_new) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by activity state: In Progress</td>
+        <td class="col-9">
+          Submissions by activity state:
+          <span class="font-bold">In Progress</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.state_inprogress }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.state_inprogress) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by activity state: Delayed</td>
+        <td class="col-9">
+          Submissions by activity state:
+          <span class="font-bold">Delayed</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.state_delayed }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.state_delayed) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by activity state: Completed</td>
+        <td class="col-9">
+          Submissions by activity state:
+          <span class="font-bold">Completed</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.state_completed }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
       </tr>
@@ -171,57 +192,90 @@ onMounted(async () => {
         <td class="col-2 text-right">{{ getPercentage(statistics.waiting_on) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 0</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">0</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_0 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_0) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 1</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">1</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_1 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_1) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 2</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">2</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_2 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_2) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 3</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">3</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_3 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_3) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 4</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">4</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_4 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_4) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions at priority 5</td>
+        <td class="col-9">
+          Submissions at priority:
+          <span class="font-bold">5</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.queue_5 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_5) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by type: Guidance</td>
+        <td class="col-9">
+          Submissions by type:
+          <span class="font-bold">Guidance</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.guidance }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.guidance) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by type: Status Request</td>
+        <td class="col-9">
+          Submissions by type:
+          <span class="font-bold">Status Request</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.status_request }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by type: Inquiry</td>
+        <td class="col-9">
+          Submissions by type:
+          <span class="font-bold">Inquiry</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.inquiry }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.inquiry) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by type: Emergency Assistance</td>
+        <td class="col-9">
+          Submissions by type:
+          <span class="font-bold">Emergency Assistance</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.emergency_assist }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.emergency_assist) }}%</td>
       </tr>
       <tr>
-        <td class="col-9">Submissions by type: Inapplicable</td>
+        <td class="col-9">
+          Submissions by type:
+          <span class="font-bold">Inapplicable</span>
+        </td>
         <td class="col-1 text-right">{{ statistics.inapplicable }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
       </tr>
