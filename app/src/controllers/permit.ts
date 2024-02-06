@@ -1,6 +1,10 @@
-import { permitService } from '../services';
+import { NIL } from 'uuid';
+
+import { permitService, userService } from '../services';
+import { getCurrentIdentity } from '../components/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { Permit } from '../types';
 
 const controller = {
   createPermit: async (req: Request, res: Response, next: NextFunction) => {
@@ -41,7 +45,8 @@ const controller = {
 
   updatePermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await permitService.updatePermit(req.body);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const response = await permitService.updatePermit({ ...(req.body as Permit), updatedBy: userId });
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

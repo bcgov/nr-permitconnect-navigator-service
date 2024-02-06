@@ -101,7 +101,7 @@ const service = {
   updatePermit: async (data: Permit) => {
     try {
       await prisma.permit.update({
-        data: permit.toPrismaModel(data),
+        data: { ...permit.toPrismaModel(data), updatedBy: data.updatedBy },
         where: {
           permitId: data.permitId
         }

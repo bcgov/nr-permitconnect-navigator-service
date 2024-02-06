@@ -246,7 +246,7 @@ const service = {
   updateSubmission: async (data: ChefsSubmissionForm) => {
     try {
       await prisma.submission.update({
-        data: submission.toPrismaModel(data),
+        data: { ...submission.toPrismaModel(data), updatedBy: data.updatedBy },
         where: {
           submissionId: data.submissionId
         }

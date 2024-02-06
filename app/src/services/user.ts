@@ -125,7 +125,7 @@ const service = {
    * @param {string} [defaultValue=undefined] An optional default return value
    * @returns {string} The current userId if applicable, or `defaultValue`
    */
-  getCurrentUserId: async (identityId: string, defaultValue = undefined) => {
+  getCurrentUserId: async (identityId: string, defaultValue: string | undefined = undefined) => {
     // TODO: Consider conditionally skipping when identityId is undefined?
     const user = await prisma.user.findFirst({
       where: {
@@ -296,12 +296,12 @@ const service = {
           lastName: data.lastName,
           idp: data.idp,
           active: data.active,
-          updatedBy: data.userId
+          updatedBy: data.updatedBy
         };
 
         // TODO: Add support for updating userId primary key in the event it changes
         response = await trx?.user.update({
-          data: user.toPrismaModel(obj),
+          data: { ...user.toPrismaModel(obj), updatedBy: obj.updatedBy },
           where: {
             userId: userId
           }
