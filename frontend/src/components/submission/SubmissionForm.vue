@@ -65,6 +65,7 @@ const formSchema = object({
   confirmationId: string().required().label('Confirmation ID'),
   contactEmail: string().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
+  companyNameRegistered: string().notRequired().label('Company'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
   projectName: string().notRequired().label('Project Name'),
@@ -188,7 +189,7 @@ const onSubmit = (values: any) => {
       />
       <InputText
         class="col-4"
-        name="projectName"
+        name="companyNameRegistered"
         label="Company"
         :disabled="!props.editable"
       />
@@ -198,7 +199,6 @@ const onSubmit = (values: any) => {
         label="Units"
         :disabled="!props.editable"
       />
-      <div class="col-4" />
       <InputText
         class="col-4"
         name="streetAddress"

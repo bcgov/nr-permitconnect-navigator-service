@@ -84,6 +84,12 @@ const filters = ref({
       </template>
     </Column>
     <Column
+      field="projectName"
+      header="Project Name"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
       field="contactName"
       header="Contact"
       :sortable="true"

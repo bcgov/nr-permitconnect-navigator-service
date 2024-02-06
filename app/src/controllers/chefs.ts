@@ -27,6 +27,7 @@ const controller = {
             return {
               formId: x.id,
               submissionId: data.form.submissionId,
+              companyNameRegistered: data.companyNameRegistered,
               confirmationId: data.form.confirmationId,
               contactEmail: data.contactEmail,
               contactPhoneNumber: data.contactPhoneNumber,
@@ -37,7 +38,7 @@ const controller = {
               latitude: data.latitude,
               longitude: data.longitude,
               naturalDisaster: data.naturalDisasterInd,
-              projectName: data.companyNameRegistered,
+              projectName: data.projectName,
               queuePriority: data.queuePriority,
               singleFamilyUnits: data.singleFamilyUnits ?? data.multiFamilyUnits,
               streetAddress: data.streetAddress,

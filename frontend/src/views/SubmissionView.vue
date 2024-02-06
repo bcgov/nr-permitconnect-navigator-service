@@ -43,7 +43,6 @@ async function onPermitSubmit(data: any) {
   const result = (await permitService.createPermit({ ...data, submissionId: props.submissionId })).data;
   toast.success('Permit saved');
   permits.value.push(result);
-  sortPermits();
   permitModalVisible.value = false;
 }
 
@@ -55,10 +54,6 @@ async function onSubmissionSubmit(data: any) {
   });
   toast.success('Form saved');
 }
-
-const sortPermits = (): void => {
-  permits.value.sort((a: Permit, b: Permit) => a.permitType?.name.localeCompare(b.permitType?.name ?? '') || 0);
-};
 
 onMounted(async () => {
   submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
@@ -77,8 +72,16 @@ onMounted(async () => {
   </router-link>
   <h1>
     Activity submission:
-    <span v-if="submission?.confirmationId">{{ submission.confirmationId }}</span>
-    <span v-if="submission?.projectName">&nbsp;- {{ submission.projectName }}</span>
+    <span
+      v-if="submission?.confirmationId"
+      class="mr-1"
+    >
+      {{ submission.confirmationId }}
+    </span>
+    <span v-if="submission?.projectName">
+      -
+      <span class="ml-1">{{ submission.projectName }}</span>
+    </span>
   </h1>
 
   <TabView>
