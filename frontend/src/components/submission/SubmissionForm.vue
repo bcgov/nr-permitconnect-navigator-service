@@ -67,6 +67,7 @@ const formSchema = object({
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
+  projectName: string().notRequired().label('Project Name'),
   queuePriority: number()
     .required()
     .min(0)
@@ -146,6 +147,12 @@ const onSubmit = (values: any) => {
         name="confirmationId"
         label="Activity"
         :disabled="true"
+      />
+      <InputText
+        class="col-4"
+        name="projectName"
+        label="Project Name"
+        :disabled="!props.editable"
       />
       <Calendar
         class="col-4"
