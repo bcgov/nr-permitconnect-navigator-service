@@ -2,12 +2,11 @@
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
-import { Button, Message } from '@/lib/primevue';
+import { Button } from '@/lib/primevue';
 import { RouteNames } from '@/utils/constants';
-import { useAuthStore, useConfigStore } from '@/store';
+import { useAuthStore } from '@/store';
 
 // Store
-const { getConfig } = storeToRefs(useConfigStore());
 const { getIsAuthenticated } = storeToRefs(useAuthStore());
 
 const router = useRouter();
@@ -18,13 +17,6 @@ const toSubmissions = (): void => {
 </script>
 
 <template>
-  <Message
-    v-if="getConfig?.notificationBanner"
-    severity="warn"
-  >
-    {{ getConfig?.notificationBanner }}
-  </Message>
-
   <div class="text-center">
     <h1 class="font-bold">Welcome to the PermitConnect Applications</h1>
     <h2 class="mb-3">Choose an Initiative:</h2>

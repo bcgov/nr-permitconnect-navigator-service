@@ -161,6 +161,70 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
+          date_from text,
+          date_to text,
+          month_year text,
+          user_id uuid
+        )
+        returns table (
+          total_submissions bigint,
+          total_submissions_between bigint,
+          total_submissions_monthyear bigint,
+          total_submissions_assignedto bigint,
+          intake_submitted bigint,
+          intake_assigned bigint,
+          intake_completed bigint,
+          state_new bigint,
+          state_inprogress bigint,
+          state_delayed bigint,
+          state_completed bigint,
+          waiting_on bigint,
+          queue_0 bigint,
+          queue_1 bigint,
+          queue_2 bigint,
+          queue_3 bigint,
+          queue_4 bigint,
+          queue_5 bigint,
+          guidance bigint,
+          status_request bigint,
+          inquiry bigint,
+          emergency_assist bigint,
+          inapplicable bigint
+        )
+        language plpgsql
+        as $$
+        begin
+            return query
+            select
+              count(*),
+              (select count(*) from public.submission where "submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+              (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from "submittedAt")),
+              (select count(*) from public.submission where "assignedToUserId" = user_id),
+              count(*) filter (where s."intakeStatus" = 'Submitted'),
+              count(*) filter (where s."intakeStatus" = 'Assigned'),
+              count(*) filter (where s."intakeStatus" = 'Completed'),
+              count(*) filter (where s."applicationStatus" = 'New'),
+              count(*) filter (where s."applicationStatus" = 'In Progress'),
+              count(*) filter (where s."applicationStatus" = 'Delayed'),
+              count(*) filter (where s."applicationStatus" = 'Completed'),
+              count(*) filter (where s."waitingOn" is not null),
+              count(*) filter (where s."queuePriority" = 0),
+              count(*) filter (where s."queuePriority" = 1),
+              count(*) filter (where s."queuePriority" = 2),
+              count(*) filter (where s."queuePriority" = 3),
+              count(*) filter (where s."queuePriority" = 4),
+              count(*) filter (where s."queuePriority" = 5),
+              count(*) filter (where s."guidance" = true),
+              count(*) filter (where s."statusRequest" = true),
+              count(*) filter (where s."inquiry" = true),
+              count(*) filter (where s."emergencyAssist" = true),
+              count(*) filter (where s."inapplicable" = true)
+            from public.submission s;
+        end; $$`)
+      )
+
+      .then(() =>
         knex.schema.raw(`CREATE OR REPLACE FUNCTION audit.if_modified_func() RETURNS trigger AS $body$
           DECLARE
               v_old_data json;
@@ -507,10 +571,12 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_user_trigger ON "user"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_identity_provider_trigger ON identity_provider'))
       // Drop audit schema and logged_actions table
-      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS audit.if_modified_func()'))
+      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS audit.if_modified_func'))
       .then(() => knex.schema.withSchema('audit').dropTableIfExists('logged_actions'))
       .then(() => knex.schema.dropSchemaIfExists('audit'))
-      // Drop public schema COMS tables
+      // Drop public schema functions
+      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.get_activity_statistics'))
+      // Drop public schema PCNS tables
       .then(() => knex.schema.dropTableIfExists('permit'))
       .then(() => knex.schema.dropTableIfExists('permit_type'))
       .then(() => knex.schema.dropTableIfExists('document'))

@@ -45,6 +45,31 @@ const service = {
   },
 
   /**
+   * @function getStatistics
+   * Gets a set of submission related statistics
+   * @returns {Promise<object>} The result of running the query
+   */
+  getStatistics: async (filters: { dateFrom: string; dateTo: string; monthYear: string; userId: string }) => {
+    // Return a single quoted string or null for the given value
+    const val = (value: unknown) => (value ? `'${value}'` : null);
+
+    const date_from = val(filters.dateFrom);
+    const date_to = val(filters.dateTo);
+    const month_year = val(filters.monthYear);
+    const user_id = filters.userId?.length ? filters.userId : null;
+
+    /* eslint-disable max-len */
+    const response =
+      await prisma.$queryRaw`select * from get_activity_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+    /* eslint-enable max-len */
+
+    // count() returns BigInt
+    // JSON.stringify() doesn't know how to serialize BigInt
+    // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
+    return JSON.parse(JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : value)));
+  },
+
+  /**
    * @function getSubmission
    * Gets a specific submission from the PCNS database
    * The record will be pulled from CHEFS and created if it does not first exist
@@ -130,25 +155,33 @@ const service = {
           ['waterRiparianAreasProtection', 'New']
         ]);
 
-        // Create Permits defined in SHAS intake form
+        // Attempt to create Permits defined in SHAS intake form
+        // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
+        // dataGrid/previousTrackingNumber is previous intake version
+        // not attempting to go back further than that
         const permitTypes = await prisma.permit_type.findMany();
-        const c = submission.permitGrid
-          .map((x: { previousPermitType: string; previousTrackingNumber2: string }) => {
-            const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
-            if (permit) {
-              return {
-                permitId: uuidv4(),
-                permitTypeId: permit.permitTypeId,
-                submissionId: response.submission.id,
-                trackingId: x.previousTrackingNumber2
-              };
-            }
-          })
-          .filter((x: unknown) => !!x);
+        const permitGrid = submission.permitGrid ?? submission.dataGrid ?? null;
+        if (permitGrid) {
+          const c = permitGrid
+            .map(
+              (x: { previousPermitType: string; previousTrackingNumber2: string; previousTrackingNumber: string }) => {
+                const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
+                if (permit) {
+                  return {
+                    permitId: uuidv4(),
+                    permitTypeId: permit.permitTypeId,
+                    submissionId: response.submission.id,
+                    trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
+                  };
+                }
+              }
+            )
+            .filter((x: unknown) => !!x);
 
-        await prisma.permit.createMany({
-          data: c
-        });
+          await prisma.permit.createMany({
+            data: c
+          });
+        }
       }
 
       const result = await prisma.submission.findUnique({

@@ -16,7 +16,6 @@ import {
 import { Button, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
-import { APPLICATION_STATUS_LIST } from '@/utils/enums';
 import { formatJwtUsername } from '@/utils/formatters';
 
 import type { IInputEvent } from '@/interfaces';
@@ -40,9 +39,7 @@ const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
 // Default form values
 const initialFormValues: any = {
   ...props.submission,
-  applicationStatus: props.submission.applicationStatus
-    ? props.submission.applicationStatus
-    : APPLICATION_STATUS_LIST.NEW,
+  applicationStatus: props.submission.applicationStatus,
   bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
   submittedAt: new Date(props.submission.submittedAt),
   submittedBy: formatJwtUsername(props.submission.submittedBy),
@@ -239,13 +236,13 @@ const onSubmit = (values: any) => {
         <Checkbox
           class="col-12"
           name="astUpdated"
-          label="Automated Status Tool (AST) updated"
+          label="Automated Status Tool (AST)"
           :disabled="!props.editable"
         />
         <Checkbox
           class="col-12"
           name="addedToATS"
-          label="Authorized Tracking System (ATS)"
+          label="Authorized Tracking System (ATS) updated"
           :disabled="!props.editable"
           :bold="true"
         />
@@ -369,7 +366,10 @@ const onSubmit = (values: any) => {
           label="Submission Type: Inapplicable"
           :disabled="!props.editable"
         />
-        <div class="col-12 mb-3">
+        <div
+          v-if="props.editable"
+          class="col-12 mb-3"
+        >
           <ErrorMessage name="submissionTypes" />
         </div>
       </div>

@@ -1,4 +1,5 @@
 import { currentUser } from '../../middleware/authentication';
+import { hasAccess } from '../../middleware/authorization';
 import express from 'express';
 import chefs from './chefs';
 import document from './document';
@@ -7,6 +8,7 @@ import user from './user';
 
 const router = express.Router();
 router.use(currentUser);
+router.use(hasAccess);
 
 // Base v1 Responder
 router.get('/', (_req, res) => {

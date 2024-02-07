@@ -116,6 +116,11 @@ export default function getRouter() {
       if (!user || user.expired) {
         router.replace({ name: RouteNames.LOGIN });
       }
+
+      // Forbid if user does not have at least one assigned role
+      if (user && (!user?.profile?.client_roles || (user?.profile?.client_roles as []).length === 0)) {
+        router.replace({ name: RouteNames.FORBIDDEN });
+      }
     }
   });
 
