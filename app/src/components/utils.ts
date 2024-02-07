@@ -2,9 +2,11 @@ import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
+import { AuthType } from './constants';
 import { getLogger } from './log';
 
-import type { ChefsFormConfig, ChefsFormConfigData } from '../types';
+import type { JwtPayload } from 'jsonwebtoken';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -66,6 +68,39 @@ export function getGitRevision(): string {
     log.warn(err.message, { function: 'getGitRevision' });
     return '';
   }
+}
+
+/**
+ * @function getCurrentIdentity
+ * Attempts to acquire current identity value.
+ * Always takes first non-default value available. Yields `defaultValue` otherwise.
+ * @param {object} currentUser The express request currentUser object
+ * @param {string} [defaultValue=undefined] An optional default return value
+ * @returns {string} The current user identifier if applicable, or `defaultValue`
+ */
+export function getCurrentIdentity(currentUser: CurrentUser | undefined, defaultValue: string | undefined = undefined) {
+  return parseIdentityKeyClaims()
+    .map((claim) => getCurrentTokenClaim(currentUser, claim, undefined))
+    .filter((value) => value) // Drop falsy values from array
+    .concat(defaultValue)[0]; // Add defaultValue as last element of array
+}
+
+/**
+ * @function getCurrentTokenClaim
+ * Attempts to acquire a specific current token claim. Yields `defaultValue` otherwise
+ * @param {object} currentUser The express request currentUser object
+ * @param {string} claim The requested token claim
+ * @param {string} [defaultValue=undefined] An optional default return value
+ * @returns {object} The requested current token claim if applicable, or `defaultValue`
+ */
+export function getCurrentTokenClaim(
+  currentUser: CurrentUser | undefined,
+  claim: string,
+  defaultValue: string | undefined = undefined
+) {
+  return currentUser && currentUser.authType === AuthType.BEARER
+    ? (currentUser.tokenPayload as JwtPayload)[claim]
+    : defaultValue;
 }
 
 /**

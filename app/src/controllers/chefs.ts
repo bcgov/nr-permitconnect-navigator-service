@@ -1,7 +1,8 @@
 import config from 'config';
+import { NIL } from 'uuid';
 
-import { chefsService } from '../services';
-import { addDashesToUuid, isTruthy } from '../components/utils';
+import { chefsService, userService } from '../services';
+import { addDashesToUuid, getCurrentIdentity, isTruthy } from '../components/utils';
 import { IdentityProvider } from '../components/constants';
 
 import type { JwtPayload } from 'jsonwebtoken';
@@ -112,7 +113,8 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await chefsService.updateSubmission(req.body);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const response = await chefsService.updateSubmission({ ...(req.body as ChefsSubmissionForm), updatedBy: userId });
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);
