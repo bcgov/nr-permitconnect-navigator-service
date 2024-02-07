@@ -70,7 +70,19 @@ onMounted(async () => {
     />
     <span>Back to Submissions</span>
   </router-link>
-  <h1>Activity submission</h1>
+  <h1>
+    Activity submission:
+    <span
+      v-if="submission?.confirmationId"
+      class="mr-1"
+    >
+      {{ submission.confirmationId }}
+    </span>
+    <span v-if="submission?.projectName">
+      -
+      <span class="ml-1">{{ submission.projectName }}</span>
+    </span>
+  </h1>
 
   <TabView>
     <TabPanel header="Info">

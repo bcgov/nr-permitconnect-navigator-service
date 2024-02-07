@@ -7,6 +7,7 @@ export type ChefsSubmissionForm = {
   submittedAt: string;
   submittedBy: string;
   locationPIDs: string | null;
+  companyNameRegistered: string | null;
   contactName: string | null;
   contactPhoneNumber: string | null;
   contactEmail: string | null;

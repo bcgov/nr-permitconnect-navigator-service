@@ -93,6 +93,7 @@ model submission {
   submittedAt                     DateTime   @db.Timestamptz(6)
   submittedBy                     String
   locationPIDs                    String?
+  companyNameRegistered           String?
   contactName                     String?
   contactPhoneNumber              String?
   contactEmail                    String?

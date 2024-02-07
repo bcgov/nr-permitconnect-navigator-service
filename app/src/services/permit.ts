@@ -86,7 +86,9 @@ const service = {
         submissionId: submissionId
       },
       orderBy: {
-        updatedAt: 'asc'
+        permit_type: {
+          name: 'asc'
+        }
       }
     });
 

@@ -63,6 +63,7 @@ export async function up(knex: Knex): Promise<void> {
           table.timestamp('submittedAt', { useTz: true }).notNullable();
           table.text('submittedBy').notNullable();
           table.text('locationPIDs');
+          table.text('companyNameRegistered');
           table.text('contactName');
           table.text('contactPhoneNumber');
           table.text('contactEmail');

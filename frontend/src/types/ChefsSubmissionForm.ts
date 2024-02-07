@@ -11,6 +11,7 @@ export type ChefsSubmissionForm = {
   contactPhoneNumber?: string;
   contactEmail?: string;
   projectName?: string;
+  companyNameRegistered?: string;
   singleFamilyUnits?: string;
   streetAddress?: string;
   latitude?: number;

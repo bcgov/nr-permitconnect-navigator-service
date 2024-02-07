@@ -29,6 +29,7 @@ export type ChefsSubmissionFormExport = {
   latitude: number;
   longitude: number;
   naturalDisasterInd: boolean;
+  projectName: string;
   companyNameRegistered: string;
   queuePriority: number;
   singleFamilyUnits: string;
