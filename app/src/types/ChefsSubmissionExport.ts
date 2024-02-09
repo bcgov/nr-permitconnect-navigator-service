@@ -1,4 +1,4 @@
-export type ChefsSubmissionFormExport = {
+export type ChefsSubmissionExport = {
   form: {
     id: string;
     submissionId: string;

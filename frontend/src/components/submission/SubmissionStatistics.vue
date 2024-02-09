@@ -3,7 +3,7 @@ import { version as uuidVersion, validate as uuidValidate } from 'uuid';
 import { onMounted, ref, watch } from 'vue';
 
 import { Calendar, Dropdown } from '@/lib/primevue';
-import { chefsService, userService } from '@/services';
+import { submissionService, userService } from '@/services';
 import { Regex } from '@/utils/constants';
 
 import type { Ref } from 'vue';
@@ -57,7 +57,7 @@ watch(
     if (valid) {
       loading.value = true;
       statistics.value = (
-        await chefsService.getStatistics(statisticFilters.value).finally(() => (loading.value = false))
+        await submissionService.getStatistics(statisticFilters.value).finally(() => (loading.value = false))
       ).data;
     }
   },
@@ -66,7 +66,7 @@ watch(
 
 onMounted(async () => {
   loading.value = true;
-  statistics.value = (await chefsService.getStatistics().finally(() => (loading.value = false))).data;
+  statistics.value = (await submissionService.getStatistics().finally(() => (loading.value = false))).data;
 });
 </script>
 

@@ -62,7 +62,7 @@ const formSchema = object({
       otherwise: (schema) => schema.notRequired()
     })
     .label('ATS Client Number'),
-  confirmationId: string().required().label('Confirmation ID'),
+  activityId: string().required().label('Confirmation ID'),
   contactEmail: string().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   companyNameRegistered: string().notRequired().label('Company'),
@@ -145,7 +145,7 @@ const onSubmit = (values: any) => {
     <div class="formgrid grid">
       <InputText
         class="col-4"
-        name="confirmationId"
+        name="activityId"
         label="Activity"
         :disabled="true"
       />

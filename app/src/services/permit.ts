@@ -47,7 +47,7 @@ const service = {
         }
       },
       where: {
-        permitId: permitId
+        permit_id: permitId
       }
     });
 
@@ -62,7 +62,7 @@ const service = {
   getPermitTypes: async () => {
     const result = await prisma.permit_type.findMany({
       orderBy: {
-        permitTypeId: 'asc'
+        permit_type_id: 'asc'
       }
     });
     return result.map((x) => permit_type.fromPrismaModel(x));
@@ -83,7 +83,7 @@ const service = {
         }
       },
       where: {
-        submissionId: submissionId
+        submission_id: submissionId
       },
       orderBy: {
         permit_type: {
@@ -103,9 +103,9 @@ const service = {
   updatePermit: async (data: Permit) => {
     try {
       await prisma.permit.update({
-        data: { ...permit.toPrismaModel(data), updatedBy: data.updatedBy },
+        data: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
         where: {
-          permitId: data.permitId
+          permit_id: data.permitId
         }
       });
     } catch (e: unknown) {

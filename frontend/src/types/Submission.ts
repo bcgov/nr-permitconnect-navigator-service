@@ -1,9 +1,9 @@
 import type { User } from './User';
 
-export type ChefsSubmissionForm = {
+export type Submission = {
   formId?: string;
   submissionId: string;
-  confirmationId: string;
+  activityId: string;
   submittedAt: string;
   submittedBy: string;
   locationPIDs?: string;

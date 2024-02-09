@@ -1,15 +1,15 @@
 /* eslint-disable no-useless-catch */
 import axios from 'axios';
 import config from 'config';
+import { v4 as uuidv4 } from 'uuid';
 
 import { APPLICATION_STATUS_LIST } from '../components/constants';
 import { getChefsApiKey, isTruthy } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
-import { v4 as uuidv4 } from 'uuid';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { ChefsSubmissionForm, SubmissionSearchParameters } from '../types';
+import type { Submission, SubmissionSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -82,7 +82,7 @@ const service = {
       // Check if record exists in our db
       const count = await prisma.submission.count({
         where: {
-          submissionId: submissionId
+          submission_id: submissionId
         }
       });
 
@@ -94,10 +94,10 @@ const service = {
         const submission = response.submission.submission.data;
 
         const financiallySupportedValues = {
-          financiallySupportedBC: isTruthy(submission.isBCHousingSupported),
-          financiallySupportedIndigenous: isTruthy(submission.isIndigenousHousingProviderSupported),
-          financiallySupportedNonProfit: isTruthy(submission.isNonProfitSupported),
-          financiallySupportedHousingCoop: isTruthy(submission.isHousingCooperativeSupported)
+          financially_supported_bc: isTruthy(submission.isBCHousingSupported),
+          financially_supported_indigenous: isTruthy(submission.isIndigenousHousingProviderSupported),
+          financially_supported_non_profit: isTruthy(submission.isNonProfitSupported),
+          financially_supported_housing_coop: isTruthy(submission.isHousingCooperativeSupported)
         };
 
         // Get greatest of multiple Units data
@@ -115,25 +115,25 @@ const service = {
         // Create submission
         await prisma.submission.create({
           data: {
-            submissionId: response.submission.id,
-            applicationStatus: APPLICATION_STATUS_LIST.NEW,
-            confirmationId: response.submission.confirmationId,
-            companyNameRegistered: submission.companyNameRegistered,
-            contactEmail: submission.contactEmail,
-            contactPhoneNumber: submission.contactPhoneNumber,
-            contactName: `${submission.contactFirstName} ${submission.contactLastName}`,
-            financiallySupported: Object.values(financiallySupportedValues).includes(true),
+            submission_id: response.submission.id,
+            application_status: APPLICATION_STATUS_LIST.NEW,
+            activity_id: response.submission.confirmationId,
+            company_name_registered: submission.companyNameRegistered,
+            contact_email: submission.contactEmail,
+            contact_phone_number: submission.contactPhoneNumber,
+            contact_name: `${submission.contactFirstName} ${submission.contactLastName}`,
+            financially_supported: Object.values(financiallySupportedValues).includes(true),
             ...financiallySupportedValues,
-            intakeStatus: status[0].code,
+            intake_status: status[0].code,
             latitude: parseInt(submission.latitude),
             longitude: parseInt(submission.longitude),
-            naturalDisaster: submission.naturalDisasterInd,
-            projectName: submission.projectName,
-            queuePriority: parseInt(submission.queuePriority),
-            singleFamilyUnits: maxUnits,
-            streetAddress: submission.streetAddress,
-            submittedAt: response.submission.createdAt,
-            submittedBy: response.submission.createdBy
+            natural_disaster: submission.naturalDisasterInd,
+            project_name: submission.projectName,
+            queue_priority: parseInt(submission.queuePriority),
+            single_family_units: maxUnits,
+            street_address: submission.streetAddress,
+            submitted_at: response.submission.createdAt,
+            submitted_by: response.submission.createdBy
           }
         });
 
@@ -169,10 +169,10 @@ const service = {
                 const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
                 if (permit) {
                   return {
-                    permitId: uuidv4(),
-                    permitTypeId: permit.permitTypeId,
-                    submissionId: response.submission.id,
-                    trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
+                    permit_id: uuidv4(),
+                    permit_type_id: permit.permit_type_id,
+                    submission_id: response.submission.id,
+                    tracking_id: x.previousTrackingNumber2 ?? x.previousTrackingNumber
                   };
                 }
               }
@@ -187,7 +187,7 @@ const service = {
 
       const result = await prisma.submission.findUnique({
         where: {
-          submissionId: submissionId
+          submission_id: submissionId
         },
         include: {
           user: true
@@ -226,7 +226,7 @@ const service = {
       where: {
         OR: [
           {
-            submissionId: { in: params.submissionId }
+            submission_id: { in: params.submissionId }
           }
         ]
       },
@@ -241,15 +241,15 @@ const service = {
   /**
    * @function updateSubmission
    * Updates a specific submission
-   * @param {ChefsSubmissionForm} [params.data] Submission to update
+   * @param {Submission} [params.data] Submission to update
    * @returns {Promise<object>}
    */
-  updateSubmission: async (data: ChefsSubmissionForm) => {
+  updateSubmission: async (data: Submission) => {
     try {
       await prisma.submission.update({
-        data: { ...submission.toPrismaModel(data), updatedBy: data.updatedBy },
+        data: { ...submission.toPrismaModel(data), updated_by: data.updatedBy },
         where: {
-          submissionId: data.submissionId
+          submission_id: data.submissionId
         }
       });
     } catch (e: unknown) {

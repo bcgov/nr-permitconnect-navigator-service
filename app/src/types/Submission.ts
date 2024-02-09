@@ -1,9 +1,9 @@
 import { User } from './User';
 import { IStamps } from '../interfaces/IStamps';
 
-export type ChefsSubmissionForm = {
+export type Submission = {
   submissionId: string;
-  confirmationId: string;
+  activityId: string;
   submittedAt: string;
   submittedBy: string;
   locationPIDs: string | null;
@@ -19,18 +19,18 @@ export type ChefsSubmissionForm = {
   queuePriority: number | null;
   relatedPermits: string | null;
   astNotes: string | null;
-  astUpdated: boolean | null;
-  addedToATS: boolean | null;
+  astUpdated: boolean;
+  addedToATS: boolean;
   atsClientNumber: string | null;
-  ltsaCompleted: boolean | null;
-  bcOnlineCompleted: boolean | null;
-  naturalDisaster: boolean | null;
-  financiallySupported: boolean | null;
-  financiallySupportedBC: boolean | null;
-  financiallySupportedIndigenous: boolean | null;
-  financiallySupportedNonProfit: boolean | null;
-  financiallySupportedHousingCoop: boolean | null;
-  aaiUpdated: boolean | null;
+  ltsaCompleted: boolean;
+  bcOnlineCompleted: boolean;
+  naturalDisaster: boolean;
+  financiallySupported: boolean;
+  financiallySupportedBC: boolean;
+  financiallySupportedIndigenous: boolean;
+  financiallySupportedNonProfit: boolean;
+  financiallySupportedHousingCoop: boolean;
+  aaiUpdated: boolean;
   waitingOn: string | null;
   bringForwardDate: string | null;
   notes: string | null;

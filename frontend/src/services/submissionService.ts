@@ -6,7 +6,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getFormExport() {
-    return appAxios().get('chefs/export');
+    return appAxios().get('submission/export');
   },
 
   /**
@@ -14,7 +14,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getStatistics(filters?: any) {
-    return appAxios().get('chefs/submission/statistics', { params: { ...filters } });
+    return appAxios().get('submission/statistics', { params: { ...filters } });
   },
 
   /**
@@ -22,7 +22,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getSubmission(formId: string, submissionId: string) {
-    return appAxios().get(`chefs/submission/${submissionId}`, { params: { formId } });
+    return appAxios().get(`submission/${submissionId}`, { params: { formId } });
   },
 
   /**
@@ -30,6 +30,6 @@ export default {
    * @returns {Promise} An axios response
    */
   updateSubmission(submissionId: string, data: any) {
-    return appAxios().put(`chefs/submission/${submissionId}`, data);
+    return appAxios().put(`submission/${submissionId}`, data);
   }
 };
