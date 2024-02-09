@@ -8,7 +8,7 @@ import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { RouteNames } from '@/utils/constants';
-import { chefsService, documentService, permitService } from '@/services';
+import { submissionService, documentService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { Document, Permit } from '@/types';
@@ -48,7 +48,7 @@ async function onPermitSubmit(data: any) {
 
 async function onSubmissionSubmit(data: any) {
   editable.value = false;
-  await chefsService.updateSubmission(props.submissionId, {
+  await submissionService.updateSubmission(props.submissionId, {
     ...data,
     submissionId: props.submissionId
   });
@@ -56,7 +56,7 @@ async function onSubmissionSubmit(data: any) {
 }
 
 onMounted(async () => {
-  submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
+  submission.value = (await submissionService.getSubmission(props.formId, props.submissionId)).data;
   documents.value = (await documentService.listDocuments(props.submissionId)).data;
   permits.value = (await permitService.listPermits(props.submissionId)).data;
 });
@@ -73,10 +73,10 @@ onMounted(async () => {
   <h1>
     Activity submission:
     <span
-      v-if="submission?.confirmationId"
+      v-if="submission?.activityId"
       class="mr-1"
     >
-      {{ submission.confirmationId }}
+      {{ submission.activityId }}
     </span>
     <span v-if="submission?.projectName">
       -

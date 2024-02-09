@@ -1,7 +1,7 @@
 import { currentUser } from '../../middleware/authentication';
 import { hasAccess } from '../../middleware/authorization';
 import express from 'express';
-import chefs from './chefs';
+import submission from './submission';
 import document from './document';
 import permit from './permit';
 import user from './user';
@@ -13,13 +13,13 @@ router.use(hasAccess);
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/chefs', '/document', '/permit', '/user']
+    endpoints: ['/document', '/permit', 'submission', '/user']
   });
 });
 
-router.use('/chefs', chefs);
 router.use('/document', document);
 router.use('/permit', permit);
+router.use('/submission', submission);
 router.use('/user', user);
 
 export default router;

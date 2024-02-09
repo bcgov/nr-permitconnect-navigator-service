@@ -20,10 +20,10 @@ const service = {
   ) => {
     const response = await prisma.document.create({
       data: {
-        documentId: documentId,
-        submissionId: submissionId,
+        document_id: documentId,
+        submission_id: submissionId,
         filename: filename,
-        mimeType: mimeType,
+        mime_type: mimeType,
         filesize: filesize
       }
     });
@@ -39,7 +39,7 @@ const service = {
   deleteDocument: async (documentId: string) => {
     const response = await prisma.document.delete({
       where: {
-        documentId: documentId
+        document_id: documentId
       }
     });
 
@@ -55,10 +55,10 @@ const service = {
   listDocuments: async (submissionId: string) => {
     const response = await prisma.document.findMany({
       where: {
-        submissionId: submissionId
+        submission_id: submissionId
       },
       orderBy: {
-        createdAt: 'asc'
+        created_at: 'asc'
       }
     });
 

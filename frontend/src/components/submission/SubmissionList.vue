@@ -7,18 +7,18 @@ import { RouteNames } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { ChefsSubmissionForm } from '@/types';
+import type { Submission } from '@/types';
 
 // Props
 type Props = {
   loading: boolean;
-  submissions: Array<ChefsSubmissionForm> | undefined;
+  submissions: Array<Submission> | undefined;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
 
 // State
-const selection: Ref<ChefsSubmissionForm | undefined> = ref(undefined);
+const selection: Ref<Submission | undefined> = ref(undefined);
 
 // Datatable filter(s)
 const filters = ref({
@@ -65,7 +65,7 @@ const filters = ref({
       </div>
     </template>
     <Column
-      field="confirmationId"
+      field="activityId"
       header="Activity"
       :sortable="true"
       frozen
@@ -78,7 +78,7 @@ const filters = ref({
               query: { formId: data.formId, submissionId: data.submissionId }
             }"
           >
-            {{ data.confirmationId }}
+            {{ data.activityId }}
           </router-link>
         </div>
       </template>

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import disconnectRelation from '../utils/disconnectRelation';
 
-import type { IStamps } from '../../interfaces/IStamps';
+import type { Stamps } from '../stamps';
 import type { Document } from '../../types';
 
 // Define types
@@ -12,7 +12,7 @@ type SubmissionRelation = {
   submission:
     | {
         connect: {
-          submissionId: string;
+          submission_id: string;
         };
       }
     | {
@@ -20,7 +20,7 @@ type SubmissionRelation = {
       };
 };
 
-type PrismaRelationDocument = Omit<Prisma.documentGetPayload<typeof _document>, 'submissionId' | keyof IStamps> &
+type PrismaRelationDocument = Omit<Prisma.documentGetPayload<typeof _document>, 'submission_id' | keyof Stamps> &
   SubmissionRelation;
 
 type PrismaGraphDocument = Prisma.documentGetPayload<typeof _documentWithGraph>;
@@ -28,11 +28,11 @@ type PrismaGraphDocument = Prisma.documentGetPayload<typeof _documentWithGraph>;
 export default {
   toPrismaModel(input: Document): PrismaRelationDocument {
     return {
-      documentId: input.documentId as string,
+      document_id: input.documentId as string,
       filename: input.filename,
-      mimeType: input.mimeType,
+      mime_type: input.mimeType,
       filesize: BigInt(input.filesize),
-      submission: input.submissionId ? { connect: { submissionId: input.submissionId } } : disconnectRelation
+      submission: input.submissionId ? { connect: { submission_id: input.submissionId } } : disconnectRelation
     };
   },
 
@@ -40,12 +40,12 @@ export default {
     if (!input) return null;
 
     return {
-      documentId: input.documentId,
+      documentId: input.document_id,
       filename: input.filename,
-      mimeType: input.mimeType,
+      mimeType: input.mime_type,
       filesize: Number(input.filesize),
-      createdAt: input.createdAt?.toISOString(),
-      submissionId: input.submissionId as string
+      createdAt: input.created_at?.toISOString(),
+      submissionId: input.submission_id as string
     };
   }
 };

@@ -4,19 +4,19 @@ import { TabPanel, TabView } from '@/lib/primevue';
 
 import SubmissionList from '@/components/submission/SubmissionList.vue';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
-import { chefsService } from '@/services';
+import { submissionService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ChefsSubmissionForm } from '@/types';
+import type { Submission } from '@/types';
 
 // State
 const loading: Ref<boolean> = ref(false);
-const submissions: Ref<Array<ChefsSubmissionForm>> = ref([]);
+const submissions: Ref<Array<Submission>> = ref([]);
 
 // Actions
 onMounted(async () => {
   loading.value = true;
-  submissions.value = (await chefsService.getFormExport()).data;
+  submissions.value = (await submissionService.getFormExport()).data;
   loading.value = false;
 });
 </script>
