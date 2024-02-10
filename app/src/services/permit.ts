@@ -102,12 +102,20 @@ const service = {
    */
   updatePermit: async (data: Permit) => {
     try {
-      await prisma.permit.update({
+      const response = await prisma.permit.update({
+        include: {
+          permit_type: true,
+          submission: {
+            include: { user: true }
+          }
+        },
         data: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
         where: {
           permit_id: data.permitId
         }
       });
+
+      return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;
     }

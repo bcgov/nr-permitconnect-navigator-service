@@ -11,6 +11,7 @@ type Props = {
   name: string;
   disabled?: boolean;
   bold?: boolean;
+  invalid?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -18,7 +19,8 @@ const props = withDefaults(defineProps<Props>(), {
   type: 'text',
   label: '',
   disabled: false,
-  bold: true
+  bold: true,
+  invalid: false
 });
 
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
@@ -32,7 +34,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
         binary
         :aria-describedby="`${name}-help`"
         :name="name"
-        :class="{ 'p-invalid': errorMessage }"
+        :class="{ 'p-invalid': errorMessage || invalid }"
         :disabled="disabled"
       />
       <label
