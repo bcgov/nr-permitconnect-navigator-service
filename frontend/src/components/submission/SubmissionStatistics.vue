@@ -8,7 +8,7 @@ import { Regex } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { User } from '@/types';
+import type { Statistics, User } from '@/types';
 
 // Types
 type StatisticFilters = {
@@ -20,7 +20,7 @@ type StatisticFilters = {
 
 // State
 const loading: Ref<boolean> = ref(false);
-const statistics: Ref<any> = ref(undefined);
+const statistics: Ref<Statistics | undefined> = ref(undefined);
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const statisticFilters: Ref<StatisticFilters> = ref({});
 
@@ -28,7 +28,9 @@ const statisticFilters: Ref<StatisticFilters> = ref({});
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
 
 const getPercentage = (input: number) =>
-  statistics.value.total_submissions > 0 ? Math.round((input / statistics.value.total_submissions) * 100) : 0;
+  statistics.value && statistics.value.total_submissions > 0
+    ? Math.round((input / statistics.value.total_submissions) * 100)
+    : 0;
 
 const isEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);

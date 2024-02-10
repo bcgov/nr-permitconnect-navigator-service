@@ -47,9 +47,9 @@ const confirmDelete = (documentId: string, filename: string) => {
           .deleteDocument(documentId)
           .then(() => {
             emit('document:deleted', documentId);
-            toast.success('File deleted');
+            toast.success('Document deleted');
           })
-          .catch(() => {});
+          .catch((e: any) => toast.error('Failed to deleted document', e.message));
       }
     });
   }
@@ -80,7 +80,7 @@ const displayIcon = (mimeType = '') => {
 </script>
 
 <template>
-  <Card class="pt-2 pb-1 text-center">
+  <Card class="pb-1 text-center">
     <template #header>
       <img
         alt="document header"
@@ -124,7 +124,7 @@ const displayIcon = (mimeType = '') => {
   </Card>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 .document-image {
   max-height: 2.5rem;
   position: relative;
@@ -132,17 +132,17 @@ const displayIcon = (mimeType = '') => {
   transform: translateY(-50%);
 }
 
-.p-card-header {
+:deep(.p-card-header) {
   height: 5rem;
   background-color: lightgray;
 }
 
-.p-card-content {
+:deep(.p-card-content) {
   padding-top: 0;
   padding-bottom: 0;
 }
 
-.p-card-footer {
+:deep(.p-card-footer) {
   padding: 0;
   text-align: right;
 }

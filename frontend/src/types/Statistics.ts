@@ -1,0 +1,25 @@
+export type Statistics = {
+  total_submissions: number;
+  total_submissions_between: number;
+  total_submissions_monthyear: number;
+  total_submissions_assignedto: number;
+  intake_submitted: number;
+  intake_assigned: number;
+  intake_completed: number;
+  state_new: number;
+  state_inprogress: number;
+  state_delayed: number;
+  state_completed: number;
+  waiting_on: number;
+  queue_0: number;
+  queue_1: number;
+  queue_2: number;
+  queue_3: number;
+  queue_4: number;
+  queue_5: number;
+  guidance: number;
+  status_request: number;
+  inquiry: number;
+  emergency_assist: number;
+  inapplicable: number;
+};

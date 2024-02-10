@@ -124,7 +124,8 @@ const service = {
             contact_name: `${submission.contactFirstName} ${submission.contactLastName}`,
             financially_supported: Object.values(financiallySupportedValues).includes(true),
             ...financiallySupportedValues,
-            intake_status: status[0].code,
+            // Convert uppercase code to title case
+            intake_status: status[0].code.charAt(0).toUpperCase() + status[0].code.substr(1).toLowerCase(),
             latitude: parseInt(submission.latitude),
             longitude: parseInt(submission.longitude),
             natural_disaster: submission.naturalDisasterInd,

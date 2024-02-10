@@ -1,3 +1,5 @@
+import { NIL } from 'uuid';
+
 import {
   ACCESS_ROLES,
   APPLICATION_STATUS_LIST,
@@ -104,7 +106,7 @@ export const PermitStatus = [PERMIT_STATUS.NEW, PERMIT_STATUS.APPLIED, PERMIT_ST
 /**
  * Default System User ID
  */
-export const SYSTEM_USER = '00000000-0000-0000-0000-000000000000';
+export const SYSTEM_USER = NIL;
 
 /**
  * File category definitions

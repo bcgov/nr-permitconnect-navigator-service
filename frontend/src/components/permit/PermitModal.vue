@@ -11,7 +11,7 @@ import { PERMIT_STATUS } from '@/utils/enums';
 import { onMounted } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType } from '@/types';
+import type { Permit, PermitForm, PermitType } from '@/types';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
@@ -31,7 +31,8 @@ const visible = defineModel<boolean>('visible');
 const permitTypes: Ref<Array<PermitType> | undefined> = ref(undefined);
 
 // Default form values
-let initialFormValues: any = {
+let initialFormValues: PermitForm = {
+  permitId: props.permit?.permitId,
   permitType: props.permit?.permitType,
   needed: props.permit?.needed,
   status: props.permit?.status ?? PERMIT_STATUS.NEW,
@@ -41,7 +42,7 @@ let initialFormValues: any = {
   authStatus: props.permit?.authStatus,
   sourceSystem: props.permit?.permitType?.sourceSystem ?? props.permit?.permitType?.sourceSystemAcronym,
   submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
-  permitId: props.permit?.permitId,
+  issuedPermitId: props.permit?.issuedPermitId,
   adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
 };
 
@@ -72,10 +73,16 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
 
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
-function onSubmit(data: any, { resetForm }) {
+function onSubmit(data: PermitForm, { resetForm }) {
   if (props.permit) initialFormValues = data;
   else resetForm();
-  emit('permit:submit', data);
+
+  // Convert form back to a proper Permit type
+  emit('permit:submit', {
+    ...data,
+    submittedDate: data.submittedDate?.toISOString(),
+    adjudicationDate: data.adjudicationDate?.toISOString()
+  } as Permit);
 }
 
 onMounted(async () => {
@@ -84,14 +91,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-model-argument -->
   <Dialog
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6"
   >
-    <!-- eslint-enable vue/no-v-model-argument -->
     <template #header>
       <font-awesome-icon
         v-if="props.permit"

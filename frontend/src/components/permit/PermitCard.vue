@@ -7,7 +7,7 @@ import { permitService } from '@/services';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Permit } from '@/types';
+import type { Permit, PermitForm } from '@/types';
 
 // Props
 type Props = {
@@ -41,27 +41,25 @@ const confirmDelete = (data: Permit) => {
           .deletePermit(data.permitId)
           .then(() => {
             emit('permit:delete', data);
-            permitModalVisible.value = false;
             toast.success('Permit deleted');
           })
-          .catch(() => {});
+          .catch((e: any) => toast.error('Failed to delete permit', e.message))
+          .finally(() => (permitModalVisible.value = false));
       }
     });
   }
 };
 
 async function onPermitSubmit(data: Permit) {
-  await permitService.updatePermit({ ...data, submissionId: props.submissionId });
-
-  cardData.value = {
-    ...data,
-    submittedDate: data.submittedDate ? new Date(data.submittedDate).toISOString() : undefined,
-    adjudicationDate: data.adjudicationDate ? new Date(data.adjudicationDate).toISOString() : undefined
-  };
-
-  permitModalVisible.value = false;
-
-  toast.success('Permit saved');
+  try {
+    const result = await permitService.updatePermit({ ...data, submissionId: props.submissionId });
+    cardData.value = result.data;
+    toast.success('Permit saved');
+  } catch (e: any) {
+    toast.error('Failed to update permit', e.message);
+  } finally {
+    permitModalVisible.value = false;
+  }
 }
 </script>
 

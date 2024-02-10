@@ -6,11 +6,10 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
-import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
-import { RouteNames } from '@/utils/constants';
 import { submissionService, documentService, permitService } from '@/services';
+import { RouteNames } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { Document, Permit, Note } from '@/types';
@@ -24,6 +23,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // State
+const documents: Ref<Array<Document>> = ref([]);
 const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
 const documents: Ref<Array<Document>> = ref([]);
@@ -31,14 +31,24 @@ const notes: Ref<Array<Note>> = ref([]);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permits: Ref<Array<Permit>> = ref([]);
 const permitModalVisible: Ref<boolean> = ref(false);
+const submission: Ref<Submission | undefined> = ref(undefined);
 
 // Actions
 const toast = useToast();
 
-function onCancel() {
-  editable.value = false;
-}
+const onPermitDelete = (data: Permit) =>
+  (permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId));
 
+async function onPermitSubmit(data: Permit) {
+  try {
+    const result = (await permitService.createPermit({ ...data, submissionId: props.submissionId })).data;
+    permits.value.push(result);
+    toast.success('Permit saved');
+  } catch (e: any) {
+    toast.error('Failed to save permit', e.message);
+  } finally {
+    permitModalVisible.value = false;
+  }
 async function onNoteSubmit(data: any) {
   try {
     const result = (await noteService.createNote({ ...data, submissionId: props.submissionId })).data;
@@ -49,20 +59,10 @@ async function onNoteSubmit(data: any) {
   }
 
   noteModalVisible.value = false;
+
 }
 
-function onPermitDelete(data: any) {
-  permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId);
-}
-
-async function onPermitSubmit(data: any) {
-  const result = (await permitService.createPermit({ ...data, submissionId: props.submissionId })).data;
-  toast.success('Permit saved');
-  permits.value.push(result);
-  permitModalVisible.value = false;
-}
-
-async function onSubmissionSubmit(data: any) {
+async function onSubmissionSubmit(data: Submission) {
   editable.value = false;
   await submissionService.updateSubmission(props.submissionId, {
     ...data,
@@ -105,7 +105,8 @@ onMounted(async () => {
     <TabPanel header="Info">
       <Button
         class="mb-3"
-        @click="editable = !editable"
+        :disabled="editable"
+        @click="editable = true"
       >
         Edit
       </Button>
@@ -114,7 +115,7 @@ onMounted(async () => {
         v-if="submission"
         :editable="editable"
         :submission="submission"
-        @cancel="onCancel"
+        @cancel="editable = false"
         @submit="onSubmissionSubmit"
       />
     </TabPanel>

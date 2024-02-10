@@ -2,13 +2,12 @@
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
-import { FileUpload } from '@/lib/primevue';
+import { FileUpload, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { useConfigStore } from '@/store';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
-
 import type { Document } from '@/types';
 
 // Props
@@ -27,6 +26,8 @@ const { getConfig } = storeToRefs(useConfigStore());
 const fileInput: Ref<any> = ref(null);
 
 // Actions
+const toast = useToast();
+
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
   onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
 };
@@ -36,11 +37,17 @@ const onFileUploadClick = () => {
 };
 
 const onUpload = async (file: File) => {
-  const response = (await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId))
-    ?.data;
+  try {
+    const response = (await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId))
+      ?.data;
 
-  if (response) {
-    lastUploadedDocument.value = response;
+    if (response) {
+      lastUploadedDocument.value = response;
+    }
+
+    toast.success('Document uploaded');
+  } catch (e: any) {
+    toast.error('Failed to upload document', e);
   }
 };
 </script>
