@@ -5,3 +5,4 @@ export type { Permit } from './Permit';
 export type { PermitType } from './PermitType';
 export type { User } from './User';
 export type { UserSearchParameters } from './UserSearchParameters';
+export type { Note } from './Note';

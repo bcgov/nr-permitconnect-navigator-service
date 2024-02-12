@@ -89,6 +89,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('aaiUpdated');
           table.text('waitingOn');
           table.timestamp('bringForwardDate', { useTz: true });
+          // TODO: REMOVE THIS WHEN DONE NOTE LOGS
           table.text('notes');
           table.text('intakeStatus');
           table.text('applicationStatus');
@@ -189,6 +190,30 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.raw(`create trigger before_update_permit_trigger
           before update on public.permit
+          for each row execute procedure public.set_updatedAt();`)
+      )
+
+      .then(() =>
+        knex.schema.createTable('note', (table) => {
+          table.uuid('note_id').primary();
+          table
+            .uuid('submission_id')
+            .notNullable()
+            .references('submissionId')
+            .inTable('submission')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.text('category_type').defaultTo('').notNullable();
+          table.text('note_type').defaultTo('').notNullable();
+          table.text('note').defaultTo('').notNullable();
+          stamps(knex, table);
+          table.unique(['note_id']);
+        })
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_note_trigger
+          before update on public.note
           for each row execute procedure public.set_updatedAt();`)
       )
 
@@ -349,6 +374,12 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.raw(`CREATE TRIGGER audit_permit_trigger
           AFTER UPDATE OR DELETE ON permit
+          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_note_trigger
+          AFTER UPDATE OR DELETE ON note
           FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
 
@@ -620,6 +651,7 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_submission_trigger ON submission'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_user_trigger ON "user"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_identity_provider_trigger ON identity_provider'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_note_trigger ON note'))
       // Drop audit schema and logged_actions table
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS audit.if_modified_func'))
       .then(() => knex.schema.withSchema('audit').dropTableIfExists('logged_actions'))
@@ -642,6 +674,8 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_provider_trigger ON identity_provider')
       )
       .then(() => knex.schema.dropTableIfExists('identity_provider'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
+      .then(() => knex.schema.dropTableIfExists('note'))
       // Drop public schema triggers
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.set_updatedAt'))
   );

@@ -4,6 +4,7 @@ export type { ChefsSubmissionFormExport } from './ChefsSubmissionFormExport';
 export type { CurrentUser } from './CurrentUser';
 export type { Document } from './Document';
 export type { IdentityProvider } from './IdentityProvider';
+export type { Note } from './Note';
 export type { Permit } from './Permit';
 export type { PermitType } from './PermitType';
 export type { SubmissionSearchParameters } from './SubmissionSearchParameters';
