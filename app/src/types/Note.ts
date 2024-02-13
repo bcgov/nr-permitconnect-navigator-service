@@ -1,9 +1,12 @@
-import { IStamps } from '../interfaces/IStamps';
+import type { ChefsSubmissionForm } from './ChefsSubmissionForm';
 
 export type Note = {
-  note_id: string; // Primary Key
-  submission_id: string;
-  category_type: string;
+  noteId: string; // Primary Key
+  submissionId: string;
   note: string;
-  note_type: string;
-} & Partial<IStamps>;
+  noteType: string;
+  submission: ChefsSubmissionForm;
+  title: string;
+  createdAt: string | null;
+  createdBy: string | null;
+};

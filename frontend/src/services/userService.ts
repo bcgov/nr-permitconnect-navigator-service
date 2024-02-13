@@ -22,7 +22,7 @@ export default {
       if (userIds.length === 0) {
         delete params.userId;
       } else {
-        params.userId = [...new Set(userIds)];
+        params.userId = Array.from(new Set(userIds));
       }
     }
 

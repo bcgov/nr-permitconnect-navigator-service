@@ -1,27 +1,23 @@
 import { Prisma } from '@prisma/client';
-import disconnectRelation from '../utils/disconnectRelation';
+import { default as submission } from './submission';
 
-import type { IStamps } from '../../interfaces/IStamps';
-import type { Note } from '../../types';
+import type { ChefsSubmissionForm, Note } from '../../types';
 
 // Define types
 const _note = Prisma.validator<Prisma.noteDefaultArgs>()({});
-const _noteWithGraph = Prisma.validator<Prisma.noteDefaultArgs>()({});
+const _noteWithGraph = Prisma.validator<Prisma.noteDefaultArgs>()({
+  include: { submission: { include: { user: true } } }
+});
 
 type SubmissionRelation = {
-  submission:
-    | {
-        connect: {
-          submissionId: string;
-        };
-      }
-    | {
-        disconnect: boolean;
-      };
+  submission: {
+    connect: {
+      submissionId: string;
+    };
+  };
 };
 
-type PrismaRelationNote = Omit<Prisma.noteGetPayload<typeof _note>, 'submissionId' | keyof IStamps> &
-  SubmissionRelation;
+type PrismaRelationNote = Omit<Prisma.noteGetPayload<typeof _note>, 'submission_id'> & SubmissionRelation;
 
 type PrismaGraphNote = Prisma.noteGetPayload<typeof _noteWithGraph>;
 
@@ -29,11 +25,13 @@ export default {
   toPrismaModel(input: Note): PrismaRelationNote {
     // Note: submissionId conversion to submission_id will be required here
     return {
-      note_id: input.note_id as string,
-      submission: input.submission_id ? { connect: { submissionId: input.submission_id } } : disconnectRelation,
-      category_type: input.category_type,
+      note_id: input.noteId as string,
       note: input.note,
-      note_type: input.note_type
+      note_type: input.noteType,
+      submission: { connect: { submissionId: input.submissionId } },
+      title: input.title,
+      createdAt: input.createdAt ?? new Date().toISOString(),
+      createdBy: input.createdBy
     };
   },
 
@@ -41,12 +39,14 @@ export default {
     if (!input) return null;
 
     return {
-      note_id: input.note_id,
-      submission_id: input.submissionId as string,
-      category_type: input.category_type || '',
+      noteId: input.note_id,
       note: input.note || '',
-      note_type: input.note_type || '',
-      createdAt: input.createdAt?.toISOString()
+      noteType: input.note_type || '',
+      submission: submission.fromPrismaModel(input.submission) as ChefsSubmissionForm,
+      submissionId: input.submission_id as string,
+      title: input.title || '',
+      createdAt: input.createdAt,
+      createdBy: input.createdBy
     };
   }
 };

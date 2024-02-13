@@ -46,15 +46,13 @@ model identity_provider {
 
 model note {
   note_id       String     @id @unique(map: "note_note_id_unique") @db.Uuid
-  submissionId  String     @db.Uuid
-  category_type String?
-  note_type     String?
-  note          String?
-  createdBy     String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt     DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy     String?
-  updatedAt     DateTime?  @db.Timestamptz(6)
-  submission    submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "note_submissionid_foreign")
+  submission_id String     @db.Uuid
+  note          String     @default("")
+  note_type     String     @default("")
+  title         String     @default("")
+  createdAt     String?
+  createdBy     String?
+  submission    submission @relation(fields: [submission_id], references: [submissionId], onDelete: Cascade, map: "note_submission_id_foreign")
 }
 
 model permit {

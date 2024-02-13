@@ -89,7 +89,6 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('aaiUpdated');
           table.text('waitingOn');
           table.timestamp('bringForwardDate', { useTz: true });
-          // TODO: REMOVE THIS WHEN DONE NOTE LOGS
           table.text('notes');
           table.text('intakeStatus');
           table.text('applicationStatus');
@@ -203,10 +202,11 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('submission')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
-          table.text('category_type').defaultTo('').notNullable();
-          table.text('note_type').defaultTo('').notNullable();
           table.text('note').defaultTo('').notNullable();
-          stamps(knex, table);
+          table.text('note_type').defaultTo('').notNullable();
+          table.text('title').defaultTo('').notNullable();
+          table.text('createdAt');
+          table.text('createdBy');
           table.unique(['note_id']);
         })
       )
@@ -659,6 +659,8 @@ export async function down(knex: Knex): Promise<void> {
       // Drop public schema functions
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.get_activity_statistics'))
       // Drop public schema tables and triggers
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
+      .then(() => knex.schema.dropTableIfExists('note'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_trigger ON permit'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_insert_permit_trigger ON permit'))
       .then(() => knex.schema.dropTableIfExists('permit'))
@@ -674,8 +676,6 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_provider_trigger ON identity_provider')
       )
       .then(() => knex.schema.dropTableIfExists('identity_provider'))
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
-      .then(() => knex.schema.dropTableIfExists('note'))
       // Drop public schema triggers
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.set_updatedAt'))
   );
