@@ -1,89 +1,130 @@
 import config from 'config';
-import { NIL } from 'uuid';
+import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { submissionService, userService } from '../services';
-import { addDashesToUuid, getCurrentIdentity, isTruthy } from '../components/utils';
-import { IdentityProvider } from '../components/constants';
+import { submissionService, permitService, userService } from '../services';
+import { getCurrentIdentity, isTruthy } from '../components/utils';
+import { APPLICATION_STATUS_LIST } from '../components/constants';
 
-import type { JwtPayload } from 'jsonwebtoken';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
 
 const controller = {
-  getFormExport: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
+  checkAndStoreNewSubmissions: async () => {
+    const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
 
-      const exportData: Array<Partial<Submission & { formId: string }>> = await Promise.all(
-        Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
-          return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
-            const financiallySupportedValues = {
-              financiallySupportedBC: isTruthy(data.isBCHousingSupported),
-              financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
-              financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
-              financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
-            };
+    const permitTypes = await permitService.getPermitTypes();
 
-            return {
-              formId: x.id,
-              submissionId: data.form.submissionId,
-              companyNameRegistered: data.companyNameRegistered,
-              activityId: data.form.confirmationId,
-              contactEmail: data.contactEmail,
-              contactPhoneNumber: data.contactPhoneNumber,
-              contactName: `${data.contactFirstName} ${data.contactLastName}`,
-              financiallySupported: Object.values(financiallySupportedValues).includes(true),
-              ...financiallySupportedValues,
-              intakeStatus: data.form.status,
-              latitude: data.latitude,
-              longitude: data.longitude,
-              naturalDisaster: data.naturalDisasterInd,
-              projectName: data.projectName,
-              queuePriority: data.queuePriority,
-              singleFamilyUnits: data.singleFamilyUnits ?? data.multiFamilyUnits,
-              streetAddress: data.streetAddress,
-              submittedAt: data.form.createdAt,
-              submittedBy: data.form.username
-            };
-          });
-        })
-      ).then((x) => x.filter((y) => y.length).flat());
+    // Mapping of SHAS intake permit names to PCNS types
+    const shasPermitMapping = new Map<string, string>([
+      ['archaeologySiteAlterationPermit', 'Alteration'],
+      ['archaeologyHeritageInspectionPermit', 'Inspection'],
+      ['archaeologyInvestigationPermit', 'Investigation'],
+      ['forestsPrivateTimberMark', 'Private Timber Mark'],
+      ['forestsOccupantLicenceToCut', 'Occupant Licence To Cut'],
+      ['landsCrownLandTenure', 'Commercial General'],
+      ['roadwaysHighwayUsePermit', 'Highway Use Permit'],
+      ['siteRemediation', 'Contaminated Sites Remediation'],
+      ['subdividingLandOutsideAMunicipality', 'Rural Subdivision'],
+      ['waterChangeApprovalForWorkInAndAboutAStream', 'Change Approval for Work in and About a Stream'],
+      ['waterLicence', 'Water Licence'],
+      ['waterNotificationOfAuthorizedChangesInAndAboutAStream', 'Notification'],
+      ['waterShortTermUseApproval', 'Use Approval'],
+      ['waterRiparianAreasProtection', 'New'],
+      ['waterRiparianAreasProtection', 'New']
+    ]);
 
-      // Get a list of all submission IDs
-      const result = await submissionService.searchSubmissions({
-        submissionId: exportData.map((x) => x.submissionId as string)
-      });
+    const exportData: Array<Partial<Submission & { formId: string; permits: Array<Permit> }>> = await Promise.all(
+      Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
+        return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
+          const financiallySupportedValues = {
+            financiallySupportedBC: isTruthy(data.isBCHousingSupported),
+            financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
+            financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
+            financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
+          };
 
-      // Overwrite export data with application data where possible
-      const mergedExportData = exportData.map((x: Partial<Submission & { formId: string }>) => ({
-        ...x,
-        ...result.find((y) => y?.submissionId === x.submissionId)
-      }));
+          // Get greatest of multiple Units data
+          const unitTypes = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
+          const maxUnits = unitTypes.reduce(
+            (ac, value) => {
+              // Get max integer from value (eg: '1-49' returns 49)
+              const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
+              // Compare with accumulator
+              return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
+            },
+            { upperRange: 0, value: '' } // Initial value
+          ).value;
 
-      /*
-       * Filter Data source
-       * IDIR users should be able to see all submissions
-       * BCeID/Business should only see their own submissions
-       */
-      const filterData = (data: Array<Partial<Submission & { formId: string }>>) => {
-        const tokenPayload = req.currentUser?.tokenPayload as JwtPayload;
-        const filterToUser = tokenPayload && tokenPayload.identity_provider !== IdentityProvider.IDIR;
+          // Attempt to create Permits defined in SHAS intake form
+          // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
+          // dataGrid/previousTrackingNumber is previous intake version
+          // not attempting to go back further than that
+          const permitGrid = data.permitGrid ?? data.dataGrid ?? null;
+          let permits: Array<Permit> = [];
+          if (permitGrid) {
+            permits = permitGrid
+              .map(
+                (x: {
+                  previousPermitType: string;
+                  previousTrackingNumber2: string;
+                  previousTrackingNumber: string;
+                }) => {
+                  const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
+                  if (permit) {
+                    return {
+                      permitId: uuidv4(),
+                      permitType: {
+                        permitTypeId: permit.permitTypeId
+                      },
+                      submissionId: data.form.submissionId,
+                      trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
+                    };
+                  }
+                }
+              )
+              .filter((x: unknown) => !!x);
+          }
 
-        if (isTruthy(filterToUser)) {
-          return data.filter(
-            (x: Partial<Submission>) =>
-              x.submittedBy?.toUpperCase().substring(0, x.submittedBy.indexOf('@')) ===
-              (req.currentUser?.tokenPayload as JwtPayload).bceid_username.toUpperCase()
-          );
-        } else {
-          return data;
-        }
-      };
+          return {
+            formId: x.id,
+            submissionId: data.form.submissionId,
+            activityId: data.form.confirmationId,
+            applicationStatus: APPLICATION_STATUS_LIST.NEW,
+            companyNameRegistered: data.companyNameRegistered,
+            contactEmail: data.contactEmail,
+            contactPhoneNumber: data.contactPhoneNumber,
+            contactName: `${data.contactFirstName} ${data.contactLastName}`,
+            financiallySupported: Object.values(financiallySupportedValues).includes(true),
+            ...financiallySupportedValues,
+            intakeStatus: data.form.status.charAt(0).toUpperCase() + data.form.status.substring(1).toLowerCase(),
+            latitude: parseInt(data.latitude),
+            longitude: parseInt(data.longitude),
+            naturalDisaster: data.naturalDisasterInd,
+            projectName: data.projectName,
+            queuePriority: parseInt(data.queuePriority),
+            singleFamilyUnits: maxUnits,
+            streetAddress: data.streetAddress,
+            submittedAt: data.form.createdAt,
+            submittedBy: data.form.username,
+            permits: permits
+          };
+        });
+      })
+    ).then((x) => x.filter((y) => y.length).flat());
 
-      res.status(200).send(filterData(mergedExportData));
-    } catch (e: unknown) {
-      next(e);
-    }
+    // Get a list of all activity IDs currently in our DB
+    const stored = (
+      await submissionService.searchSubmissions({
+        activityId: exportData.map((x) => x.activityId as string)
+      })
+    ).map((x) => x?.activityId);
+
+    // Create new activities
+    const notStored = exportData.filter((x) => !stored.some((activityId) => activityId === x.activityId));
+    await submissionService.createSubmissionsFromExport(notStored);
+
+    // Create each permit
+    notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
   getStatistics: async (
@@ -99,16 +140,22 @@ const controller = {
     }
   },
 
-  getSubmission: async (
-    req: Request<{ submissionId: string }, { formId: string }>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getSubmission(
-        addDashesToUuid(req.query.formId),
-        req.params.submissionId
-      );
+      const response = await submissionService.getSubmission(req.params.submissionId);
+      res.status(200).send(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // Check for and store new submissions in CHEFS
+      await controller.checkAndStoreNewSubmissions();
+
+      // Pull from PCNS database
+      const response = await submissionService.getSubmissions();
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

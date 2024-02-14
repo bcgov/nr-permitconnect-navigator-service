@@ -26,14 +26,15 @@ export type ChefsSubmissionExport = {
   isIndigenousHousingProviderSupported: boolean;
   isNonProfitSupported: boolean;
   isHousingCooperativeSupported: boolean;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
   naturalDisasterInd: boolean;
   projectName: string;
   companyNameRegistered: string;
-  queuePriority: number;
+  queuePriority: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
+  multiFamilyUnits1: string;
   streetAddress: string;
   guidance: boolean;
   statusRequest: boolean;
@@ -42,4 +43,9 @@ export type ChefsSubmissionExport = {
   inapplicable: boolean;
   createdAt: string;
   createdBy: string;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  permitGrid: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  dataGrid: any;
 };

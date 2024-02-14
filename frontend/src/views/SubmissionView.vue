@@ -72,7 +72,7 @@ async function onSubmissionSubmit(data: Submission) {
 }
 
 onMounted(async () => {
-  submission.value = (await submissionService.getSubmission(props.formId, props.submissionId)).data;
+  submission.value = (await submissionService.getSubmission(props.submissionId)).data;
   documents.value = (await documentService.listDocuments(props.submissionId)).data;
   notes.value = (await noteService.listNotes(props.submissionId)).data;
   permits.value = (await permitService.listPermits(props.submissionId)).data;

@@ -1,10 +1,9 @@
 /* eslint-disable no-useless-catch */
 import axios from 'axios';
 import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
 
 import { APPLICATION_STATUS_LIST } from '../components/constants';
-import { getChefsApiKey, isTruthy } from '../components/utils';
+import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
 
@@ -27,6 +26,41 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 }
 
 const service = {
+  /**
+   * @function createSubmissionsFromExport
+   * Creates the given submissions from exported CHEFS data
+   * @param {Array<Submission>} [submission] Array of Submissions
+   * @returns {Promise<object>} The result of running the get operation
+   */
+  createSubmissionsFromExport: async (submissions: Array<Partial<Submission>>) => {
+    await prisma.submission.createMany({
+      data: submissions.map((x) => ({
+        submission_id: x.submissionId as string,
+        activity_id: x.activityId as string,
+        application_status: APPLICATION_STATUS_LIST.NEW,
+        company_name_registered: x.companyNameRegistered,
+        contact_email: x.contactEmail,
+        contact_phone_number: x.contactPhoneNumber,
+        contact_name: x.contactName,
+        financially_supported: x.financiallySupported,
+        financially_supported_bc: x.financiallySupportedBC,
+        financially_supported_indigenous: x.financiallySupportedIndigenous,
+        financially_supported_non_profit: x.financiallySupportedNonProfit,
+        financially_supported_housing_coop: x.financiallySupportedHousingCoop,
+        intake_status: x.intakeStatus,
+        latitude: x.latitude,
+        longitude: x.longitude,
+        natural_disaster: x.naturalDisaster,
+        project_name: x.projectName,
+        queue_priority: x.queuePriority,
+        single_family_units: x.singleFamilyUnits,
+        street_address: x.streetAddress,
+        submitted_at: new Date(x.submittedAt ?? Date.now()),
+        submitted_by: x.submittedBy as string
+      }))
+    });
+  },
+
   /**
    * @function getSubmission
    * Gets a full data export for the requested CHEFS form
@@ -73,119 +107,11 @@ const service = {
    * @function getSubmission
    * Gets a specific submission from the PCNS database
    * The record will be pulled from CHEFS and created if it does not first exist
-   * @param {string} [formId] CHEFS form id
    * @param {string} [formSubmissionId] CHEFS form submission id
    * @returns {Promise<object>} The result of running the findUnique operation
    */
-  getSubmission: async (formId: string, submissionId: string) => {
+  getSubmission: async (submissionId: string) => {
     try {
-      // Check if record exists in our db
-      const count = await prisma.submission.count({
-        where: {
-          submission_id: submissionId
-        }
-      });
-
-      // Pull submission data from CHEFS and store to our DB if it doesn't exist
-      if (!count) {
-        const response = (await chefsAxios(formId).get(`submissions/${submissionId}`)).data;
-        const status = (await chefsAxios(formId).get(`submissions/${submissionId}/status`)).data;
-
-        const submission = response.submission.submission.data;
-
-        const financiallySupportedValues = {
-          financially_supported_bc: isTruthy(submission.isBCHousingSupported),
-          financially_supported_indigenous: isTruthy(submission.isIndigenousHousingProviderSupported),
-          financially_supported_non_profit: isTruthy(submission.isNonProfitSupported),
-          financially_supported_housing_coop: isTruthy(submission.isHousingCooperativeSupported)
-        };
-
-        // Get greatest of multiple Units data
-        const unitTypes = [submission.singleFamilyUnits, submission.multiFamilyUnits, submission.multiFamilyUnits1];
-        const maxUnits = unitTypes.reduce(
-          (ac, value) => {
-            // Get max integer from value (eg: '1-49' returns 49)
-            const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
-            // Compare with accumulator
-            return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
-          },
-          { upperRange: 0 } // Initial value
-        ).value;
-
-        // Create submission
-        await prisma.submission.create({
-          data: {
-            submission_id: response.submission.id,
-            application_status: APPLICATION_STATUS_LIST.NEW,
-            activity_id: response.submission.confirmationId,
-            company_name_registered: submission.companyNameRegistered,
-            contact_email: submission.contactEmail,
-            contact_phone_number: submission.contactPhoneNumber,
-            contact_name: `${submission.contactFirstName} ${submission.contactLastName}`,
-            financially_supported: Object.values(financiallySupportedValues).includes(true),
-            ...financiallySupportedValues,
-            // Convert uppercase code to title case
-            intake_status: status[0].code.charAt(0).toUpperCase() + status[0].code.substr(1).toLowerCase(),
-            latitude: parseInt(submission.latitude),
-            longitude: parseInt(submission.longitude),
-            natural_disaster: submission.naturalDisasterInd,
-            project_name: submission.projectName,
-            queue_priority: parseInt(submission.queuePriority),
-            single_family_units: maxUnits,
-            street_address: submission.streetAddress,
-            submitted_at: response.submission.createdAt,
-            submitted_by: response.submission.createdBy
-          }
-        });
-
-        // Mapping of SHAS intake permit names to PCNS types
-        const shasPermitMapping = new Map<string, string>([
-          ['archaeologySiteAlterationPermit', 'Alteration'],
-          ['archaeologyHeritageInspectionPermit', 'Inspection'],
-          ['archaeologyInvestigationPermit', 'Investigation'],
-          ['forestsPrivateTimberMark', 'Private Timber Mark'],
-          ['forestsOccupantLicenceToCut', 'Occupant Licence To Cut'],
-          ['landsCrownLandTenure', 'Commercial General'],
-          ['roadwaysHighwayUsePermit', 'Highway Use Permit'],
-          ['siteRemediation', 'Contaminated Sites Remediation'],
-          ['subdividingLandOutsideAMunicipality', 'Rural Subdivision'],
-          ['waterChangeApprovalForWorkInAndAboutAStream', 'Change Approval for Work in and About a Stream'],
-          ['waterLicence', 'Water Licence'],
-          ['waterNotificationOfAuthorizedChangesInAndAboutAStream', 'Notification'],
-          ['waterShortTermUseApproval', 'Use Approval'],
-          ['waterRiparianAreasProtection', 'New'],
-          ['waterRiparianAreasProtection', 'New']
-        ]);
-
-        // Attempt to create Permits defined in SHAS intake form
-        // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
-        // dataGrid/previousTrackingNumber is previous intake version
-        // not attempting to go back further than that
-        const permitTypes = await prisma.permit_type.findMany();
-        const permitGrid = submission.permitGrid ?? submission.dataGrid ?? null;
-        if (permitGrid) {
-          const c = permitGrid
-            .map(
-              (x: { previousPermitType: string; previousTrackingNumber2: string; previousTrackingNumber: string }) => {
-                const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
-                if (permit) {
-                  return {
-                    permit_id: uuidv4(),
-                    permit_type_id: permit.permit_type_id,
-                    submission_id: response.submission.id,
-                    tracking_id: x.previousTrackingNumber2 ?? x.previousTrackingNumber
-                  };
-                }
-              }
-            )
-            .filter((x: unknown) => !!x);
-
-          await prisma.permit.createMany({
-            data: c
-          });
-        }
-      }
-
       const result = await prisma.submission.findUnique({
         where: {
           submission_id: submissionId
@@ -202,15 +128,19 @@ const service = {
   },
 
   /**
-   * @function getSubmissionStatus
-   * Gets a specific submission status from CHEFS
-   * @param {string} [formId] CHEFS form id
-   * @param {string} [formSubmissionId] CHEFS form submission id
-   * @returns {Promise<object>} The result of running the get operation
+   * @function getSubmissions
+   * Gets a list of submissions
+   * @returns {Promise<object>} The result of running the findMany operation
    */
-  getSubmissionStatus: async (formId: string, formSubmissionId: string) => {
+  getSubmissions: async () => {
     try {
-      return (await chefsAxios(formId).get(`submissions/${formSubmissionId}/status`)).data;
+      const result = await prisma.submission.findMany({
+        include: {
+          user: true
+        }
+      });
+
+      return result.map((x) => submission.fromPrismaModel(x));
     } catch (e: unknown) {
       throw e;
     }
@@ -226,6 +156,9 @@ const service = {
     const result = await prisma.submission.findMany({
       where: {
         OR: [
+          {
+            activity_id: { in: params.activityId }
+          },
           {
             submission_id: { in: params.submissionId }
           }

@@ -5,8 +5,8 @@ export default {
    * @function getFormExport
    * @returns {Promise} An axios response
    */
-  getFormExport() {
-    return appAxios().get('submission/export');
+  getSubmissions() {
+    return appAxios().get('submission/');
   },
 
   /**
@@ -21,8 +21,8 @@ export default {
    * @function getSubmission
    * @returns {Promise} An axios response
    */
-  getSubmission(formId: string, submissionId: string) {
-    return appAxios().get(`submission/${submissionId}`, { params: { formId } });
+  getSubmission(submissionId: string) {
+    return appAxios().get(`submission/${submissionId}`);
   },
 
   /**

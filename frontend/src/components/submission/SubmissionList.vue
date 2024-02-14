@@ -75,7 +75,7 @@ const filters = ref({
           <router-link
             :to="{
               name: RouteNames.SUBMISSION,
-              query: { formId: data.formId, submissionId: data.submissionId }
+              query: { submissionId: data.submissionId }
             }"
           >
             {{ data.activityId }}

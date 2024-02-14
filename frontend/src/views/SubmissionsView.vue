@@ -7,16 +7,18 @@ import SubmissionStatistics from '@/components/submission/SubmissionStatistics.v
 import { submissionService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Submission } from '@/types';
+import type { Statistics, Submission } from '@/types';
 
 // State
 const loading: Ref<boolean> = ref(false);
 const submissions: Ref<Array<Submission>> = ref([]);
+const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
 onMounted(async () => {
   loading.value = true;
-  submissions.value = (await submissionService.getFormExport()).data;
+  submissions.value = (await submissionService.getSubmissions()).data;
+  statistics.value = (await submissionService.getStatistics()).data;
   loading.value = false;
 });
 </script>
@@ -32,7 +34,11 @@ onMounted(async () => {
       />
     </TabPanel>
     <TabPanel header="Statistics">
-      <SubmissionStatistics />
+      <SubmissionStatistics
+        v-if="statistics"
+        :loading="loading"
+        :initial-statistics="statistics"
+      />
     </TabPanel>
   </TabView>
 </template>

@@ -10,7 +10,7 @@ const service = {
   /**
    * @function createPermit
    * Creates a Permit
-   * @returns {Promise<object>} The result of running the findUnique operation
+   * @returns {Promise<object>} The result of running the create operation
    */
   createPermit: async (data: Permit) => {
     try {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import { Calendar, Dropdown } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
@@ -18,9 +18,16 @@ type StatisticFilters = {
   userId?: string;
 };
 
+// Props
+type Props = {
+  loading: boolean;
+  initialStatistics: Statistics | undefined;
+};
+
+const props = withDefaults(defineProps<Props>(), {});
+
 // State
-const loading: Ref<boolean> = ref(false);
-const statistics: Ref<Statistics | undefined> = ref(undefined);
+const statistics: Ref<Statistics | undefined> = ref(props.initialStatistics);
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const statisticFilters: Ref<StatisticFilters> = ref({});
 
@@ -50,26 +57,20 @@ async function onAssigneeInput(e: IInputEvent) {
 watch(
   statisticFilters,
   async () => {
-    let valid =
+    // Only submit if the user filter is empty or valid uuid
+    // It's possible for the value to contain a garbage string due to how PrimeVue editable dropdown works
+    let validUser =
       isEmpty(statisticFilters.value.userId) ||
       (!isEmpty(statisticFilters.value.userId) &&
         uuidValidate(statisticFilters.value.userId as string) &&
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
-    if (valid) {
-      loading.value = true;
-      statistics.value = (
-        await submissionService.getStatistics(statisticFilters.value).finally(() => (loading.value = false))
-      ).data;
+    if (validUser) {
+      statistics.value = (await submissionService.getStatistics(statisticFilters.value)).data;
     }
   },
   { deep: true }
 );
-
-onMounted(async () => {
-  loading.value = true;
-  statistics.value = (await submissionService.getStatistics().finally(() => (loading.value = false))).data;
-});
 </script>
 
 <template>
