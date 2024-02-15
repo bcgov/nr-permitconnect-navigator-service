@@ -65,7 +65,7 @@ const filters = ref({
       </div>
     </template>
     <Column
-      field="activityId"
+      field="activity.activityId"
       header="Activity"
       :sortable="true"
       frozen
@@ -78,7 +78,7 @@ const filters = ref({
               query: { submissionId: data.submissionId }
             }"
           >
-            {{ data.activityId }}
+            {{ data.activity.activityId }}
           </router-link>
         </div>
       </template>

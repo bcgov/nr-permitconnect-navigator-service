@@ -51,6 +51,7 @@ const initialFormValues: any = {
     inquiry: props.submission.inquiry,
     statusRequest: props.submission.statusRequest
   },
+  activityId: props.submission.activity.activityId,
   user: props.submission.user ?? ''
 };
 
@@ -84,8 +85,8 @@ const formSchema = object({
     emergencyAssistance: boolean(),
     inapplicable: boolean()
   })
-    .test('at-least-one-true', 'At least one submission type must be selected', (obj) => {
-      return Object.values(obj).some((value) => value);
+    .test('at-least-one-true', 'At least one submission type must be selected', (input) => {
+      return Object.values(input).some((value) => value);
     })
     .label('Submission Types'),
   user: mixed()

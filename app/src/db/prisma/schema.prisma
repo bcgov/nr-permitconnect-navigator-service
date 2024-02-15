@@ -20,13 +20,14 @@ model knex_migrations_lock {
 }
 
 model activity {
-  activity_id   String      @id @db.Uuid
-  initiative_id String?     @db.Uuid
-  created_by    String?     @default("00000000-0000-0000-0000-000000000000")
-  created_at    DateTime?   @default(now()) @db.Timestamptz(6)
+  activity_id   String       @id
+  initiative_id String?      @db.Uuid
+  created_by    String?      @default("00000000-0000-0000-0000-000000000000")
+  created_at    DateTime?    @default(now()) @db.Timestamptz(6)
   updated_by    String?
-  updated_at    DateTime?   @db.Timestamptz(6)
-  initiative    initiative? @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  updated_at    DateTime?    @db.Timestamptz(6)
+  initiative    initiative?  @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  submission    submission[]
 }
 
 model document {
@@ -56,8 +57,8 @@ model identity_provider {
 
 model initiative {
   initiative_id String     @id @db.Uuid
-  type          String
-  name          String
+  code          String
+  label         String
   created_by    String?    @default("00000000-0000-0000-0000-000000000000")
   created_at    DateTime?  @default(now()) @db.Timestamptz(6)
   updated_by    String?
@@ -122,7 +123,7 @@ model permit_type {
 
 model submission {
   submission_id                      String     @id @db.Uuid
-  activity_id                        String
+  activity_id                        String?
   assigned_user_id                   String?    @db.Uuid
   submitted_at                       DateTime   @db.Timestamptz(6)
   submitted_by                       String
@@ -167,6 +168,7 @@ model submission {
   updated_at                         DateTime?  @db.Timestamptz(6)
   document                           document[]
   permit                             permit[]
+  activity                           activity?  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?      @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 }
 

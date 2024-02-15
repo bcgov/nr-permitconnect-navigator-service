@@ -1,9 +1,9 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { submissionService, permitService, userService } from '../services';
-import { getCurrentIdentity, isTruthy } from '../components/utils';
 import { APPLICATION_STATUS_LIST } from '../components/constants';
+import { getCurrentIdentity, isTruthy } from '../components/utils';
+import { submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
@@ -33,91 +33,92 @@ const controller = {
       ['waterRiparianAreasProtection', 'New']
     ]);
 
-    const exportData: Array<Partial<Submission & { formId: string; permits: Array<Permit> }>> = await Promise.all(
-      Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
-        return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
-          const financiallySupportedValues = {
-            financiallySupportedBC: isTruthy(data.isBCHousingSupported),
-            financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
-            financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
-            financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
-          };
+    const exportData: Array<Partial<Submission & { activityId: string; formId: string; permits: Array<Permit> }>> =
+      await Promise.all(
+        Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
+          return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
+            const financiallySupportedValues = {
+              financiallySupportedBC: isTruthy(data.isBCHousingSupported),
+              financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
+              financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
+              financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
+            };
 
-          // Get greatest of multiple Units data
-          const unitTypes = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
-          const maxUnits = unitTypes.reduce(
-            (ac, value) => {
-              // Get max integer from value (eg: '1-49' returns 49)
-              const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
-              // Compare with accumulator
-              return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
-            },
-            { upperRange: 0, value: '' } // Initial value
-          ).value;
+            // Get greatest of multiple Units data
+            const unitTypes = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
+            const maxUnits = unitTypes.reduce(
+              (ac, value) => {
+                // Get max integer from value (eg: '1-49' returns 49)
+                const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
+                // Compare with accumulator
+                return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
+              },
+              { upperRange: 0, value: '' } // Initial value
+            ).value;
 
-          // Attempt to create Permits defined in SHAS intake form
-          // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
-          // dataGrid/previousTrackingNumber is previous intake version
-          // not attempting to go back further than that
-          const permitGrid = data.permitGrid ?? data.dataGrid ?? null;
-          let permits: Array<Permit> = [];
-          if (permitGrid) {
-            permits = permitGrid
-              .map(
-                (x: {
-                  previousPermitType: string;
-                  previousTrackingNumber2: string;
-                  previousTrackingNumber: string;
-                }) => {
-                  const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
-                  if (permit) {
-                    return {
-                      permitId: uuidv4(),
-                      permitType: {
-                        permitTypeId: permit.permitTypeId
-                      },
-                      submissionId: data.form.submissionId,
-                      trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
-                    };
+            // Attempt to create Permits defined in SHAS intake form
+            // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
+            // dataGrid/previousTrackingNumber is previous intake version
+            // not attempting to go back further than that
+            const permitGrid = data.permitGrid ?? data.dataGrid ?? null;
+            let permits: Array<Permit> = [];
+            if (permitGrid) {
+              permits = permitGrid
+                .map(
+                  (x: {
+                    previousPermitType: string;
+                    previousTrackingNumber2: string;
+                    previousTrackingNumber: string;
+                  }) => {
+                    const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
+                    if (permit) {
+                      return {
+                        permitId: uuidv4(),
+                        permitType: {
+                          permitTypeId: permit.permitTypeId
+                        },
+                        submissionId: data.form.submissionId,
+                        trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
+                      };
+                    }
                   }
-                }
-              )
-              .filter((x: unknown) => !!x);
-          }
+                )
+                .filter((x: unknown) => !!x);
+            }
 
-          return {
-            formId: x.id,
-            submissionId: data.form.submissionId,
-            activityId: data.form.confirmationId,
-            applicationStatus: APPLICATION_STATUS_LIST.NEW,
-            companyNameRegistered: data.companyNameRegistered,
-            contactEmail: data.contactEmail,
-            contactPhoneNumber: data.contactPhoneNumber,
-            contactName: `${data.contactFirstName} ${data.contactLastName}`,
-            financiallySupported: Object.values(financiallySupportedValues).includes(true),
-            ...financiallySupportedValues,
-            intakeStatus: data.form.status.charAt(0).toUpperCase() + data.form.status.substring(1).toLowerCase(),
-            latitude: parseInt(data.latitude),
-            longitude: parseInt(data.longitude),
-            naturalDisaster: data.naturalDisasterInd,
-            projectName: data.projectName,
-            queuePriority: parseInt(data.queuePriority),
-            singleFamilyUnits: maxUnits,
-            streetAddress: data.streetAddress,
-            submittedAt: data.form.createdAt,
-            submittedBy: data.form.username,
-            permits: permits
-          };
-        });
-      })
-    ).then((x) => x.filter((y) => y.length).flat());
+            return {
+              formId: x.id,
+              submissionId: data.form.submissionId,
+              activityId: data.form.confirmationId,
+              applicationStatus: APPLICATION_STATUS_LIST.NEW,
+              companyNameRegistered: data.companyNameRegistered,
+              contactEmail: data.contactEmail,
+              contactPhoneNumber: data.contactPhoneNumber,
+              contactName: `${data.contactFirstName} ${data.contactLastName}`,
+              financiallySupported: Object.values(financiallySupportedValues).includes(true),
+              ...financiallySupportedValues,
+              intakeStatus: data.form.status.charAt(0).toUpperCase() + data.form.status.substring(1).toLowerCase(),
+              latitude: parseInt(data.latitude),
+              longitude: parseInt(data.longitude),
+              naturalDisaster: data.naturalDisasterInd,
+              projectName: data.projectName,
+              queuePriority: parseInt(data.queuePriority),
+              singleFamilyUnits: maxUnits,
+              streetAddress: data.streetAddress,
+              submittedAt: data.form.createdAt,
+              submittedBy: data.form.username,
+              permits: permits
+            };
+          });
+        })
+      ).then((x) => x.filter((y) => y.length).flat());
 
     // Get a list of all activity IDs currently in our DB
     const stored = (
       await submissionService.searchSubmissions({
         activityId: exportData.map((x) => x.activityId as string)
       })
-    ).map((x) => x?.activityId);
+    ).map((x) => x?.activity?.activityId);
 
     // Create new activities
     const notStored = exportData.filter((x) => !stored.some((activityId) => activityId === x.activityId));

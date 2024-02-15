@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { NIL } from 'uuid';
+import { NIL, v4 as uuidv4 } from 'uuid';
 
 import stamps from '../stamps';
 
@@ -48,15 +48,15 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.createTable('initiative', (table) => {
           table.uuid('initiative_id').primary();
-          table.text('type').notNullable();
-          table.text('name').notNullable();
+          table.text('code').notNullable();
+          table.text('label').notNullable();
           stamps(knex, table);
         })
       )
 
       .then(() =>
         knex.schema.createTable('activity', (table) => {
-          table.uuid('activity_id').primary();
+          table.text('activity_id').primary();
           table
             .uuid('initiative_id')
             .references('initiative_id')
@@ -70,7 +70,12 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.createTable('submission', (table) => {
           table.uuid('submission_id').primary();
-          table.text('activity_id').notNullable();
+          table
+            .text('activity_id')
+            .references('activity_id')
+            .inTable('activity')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
           table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
           table.timestamp('submitted_at', { useTz: true }).notNullable();
           table.text('submitted_by').notNullable();
@@ -421,6 +426,17 @@ export async function up(knex: Knex): Promise<void> {
           created_by: NIL
         }));
         return knex('user').insert(items);
+      })
+
+      .then(() => {
+        const items = [
+          {
+            initiative_id: uuidv4(),
+            code: 'HOUSING',
+            label: 'Housing'
+          }
+        ];
+        return knex('initiative').insert(items);
       })
 
       .then(() => {

@@ -16,7 +16,6 @@ import type { Document, Permit, Note } from '@/types';
 
 // Props
 type Props = {
-  formId: string;
   submissionId: string;
 };
 
@@ -90,10 +89,10 @@ onMounted(async () => {
   <h1>
     Activity submission:
     <span
-      v-if="submission?.activityId"
+      v-if="submission?.activity.activityId"
       class="mr-1"
     >
-      {{ submission.activityId }}
+      {{ submission.activity.activityId }}
     </span>
     <span v-if="submission?.projectName">
       -

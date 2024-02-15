@@ -8,7 +8,7 @@ import type { Submission, Permit } from '../../types';
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
 const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_type: true, submission: { include: { user: true } } }
+  include: { permit_type: true, submission: { include: { activity: true, user: true } } }
 });
 
 type PermitTypeRelation = {

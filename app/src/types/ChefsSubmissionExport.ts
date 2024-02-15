@@ -44,8 +44,9 @@ export type ChefsSubmissionExport = {
   createdAt: string;
   createdBy: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  // No clue what format the CHEFS permits might be delivered in
   permitGrid: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   dataGrid: any;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 };

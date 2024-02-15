@@ -2,7 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { APPLICATION_STATUS_LIST } from '../components/constants';
+import { APPLICATION_STATUS_LIST, Initiatives } from '../components/constants';
 import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
@@ -28,36 +28,51 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 const service = {
   /**
    * @function createSubmissionsFromExport
-   * Creates the given submissions from exported CHEFS data
+   * Creates the given activities and submissions from exported CHEFS data
    * @param {Array<Submission>} [submission] Array of Submissions
    * @returns {Promise<object>} The result of running the get operation
    */
-  createSubmissionsFromExport: async (submissions: Array<Partial<Submission>>) => {
-    await prisma.submission.createMany({
-      data: submissions.map((x) => ({
-        submission_id: x.submissionId as string,
-        activity_id: x.activityId as string,
-        application_status: APPLICATION_STATUS_LIST.NEW,
-        company_name_registered: x.companyNameRegistered,
-        contact_email: x.contactEmail,
-        contact_phone_number: x.contactPhoneNumber,
-        contact_name: x.contactName,
-        financially_supported: x.financiallySupported,
-        financially_supported_bc: x.financiallySupportedBC,
-        financially_supported_indigenous: x.financiallySupportedIndigenous,
-        financially_supported_non_profit: x.financiallySupportedNonProfit,
-        financially_supported_housing_coop: x.financiallySupportedHousingCoop,
-        intake_status: x.intakeStatus,
-        latitude: x.latitude,
-        longitude: x.longitude,
-        natural_disaster: x.naturalDisaster,
-        project_name: x.projectName,
-        queue_priority: x.queuePriority,
-        single_family_units: x.singleFamilyUnits,
-        street_address: x.streetAddress,
-        submitted_at: new Date(x.submittedAt ?? Date.now()),
-        submitted_by: x.submittedBy as string
-      }))
+  createSubmissionsFromExport: async (submissions: Array<Partial<Submission> & { activityId: string }>) => {
+    await prisma.$transaction(async (trx) => {
+      const initiative = await trx.initiative.findFirst({
+        where: {
+          code: Initiatives.HOUSING
+        }
+      });
+
+      await trx.activity.createMany({
+        data: submissions.map((x) => ({
+          activity_id: x.activityId as string,
+          initiative_id: initiative?.initiative_id
+        }))
+      });
+
+      await trx.submission.createMany({
+        data: submissions.map((x) => ({
+          submission_id: x.submissionId as string,
+          activity_id: x.activityId as string,
+          application_status: APPLICATION_STATUS_LIST.NEW,
+          company_name_registered: x.companyNameRegistered,
+          contact_email: x.contactEmail,
+          contact_phone_number: x.contactPhoneNumber,
+          contact_name: x.contactName,
+          financially_supported: x.financiallySupported,
+          financially_supported_bc: x.financiallySupportedBC,
+          financially_supported_indigenous: x.financiallySupportedIndigenous,
+          financially_supported_non_profit: x.financiallySupportedNonProfit,
+          financially_supported_housing_coop: x.financiallySupportedHousingCoop,
+          intake_status: x.intakeStatus,
+          latitude: x.latitude,
+          longitude: x.longitude,
+          natural_disaster: x.naturalDisaster,
+          project_name: x.projectName,
+          queue_priority: x.queuePriority,
+          single_family_units: x.singleFamilyUnits,
+          street_address: x.streetAddress,
+          submitted_at: new Date(x.submittedAt ?? Date.now()),
+          submitted_by: x.submittedBy as string
+        }))
+      });
     });
   },
 
@@ -117,6 +132,7 @@ const service = {
           submission_id: submissionId
         },
         include: {
+          activity: true,
           user: true
         }
       });
@@ -136,6 +152,7 @@ const service = {
     try {
       const result = await prisma.submission.findMany({
         include: {
+          activity: true,
           user: true
         }
       });
@@ -165,6 +182,7 @@ const service = {
         ]
       },
       include: {
+        activity: true,
         user: true
       }
     });

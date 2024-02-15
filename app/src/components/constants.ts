@@ -29,6 +29,11 @@ export const AccessRoles = Object.freeze({
   PCNS_OTHER: 'PCNS_OTHER'
 });
 
+/** Current initiative types*/
+export const Initiatives = Object.freeze({
+  HOUSING: 'HOUSING'
+});
+
 /** CHEFS form statuses */
 export const APPLICATION_STATUS_LIST = Object.freeze({
   NEW: 'New',
