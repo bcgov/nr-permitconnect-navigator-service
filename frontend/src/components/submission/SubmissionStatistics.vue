@@ -244,7 +244,7 @@ watch(
       </tr>
       <tr>
         <td class="col-9">
-          Submissions by type:
+          Type:
           <span class="font-bold">Guidance</span>
         </td>
         <td class="col-1 text-right">{{ statistics.guidance }}</td>
@@ -252,15 +252,7 @@ watch(
       </tr>
       <tr>
         <td class="col-9">
-          Submissions by type:
-          <span class="font-bold">Status Request</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.status_request }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Submissions by type:
+          Type:
           <span class="font-bold">Inquiry</span>
         </td>
         <td class="col-1 text-right">{{ statistics.inquiry }}</td>
@@ -268,15 +260,23 @@ watch(
       </tr>
       <tr>
         <td class="col-9">
-          Submissions by type:
-          <span class="font-bold">Emergency Assistance</span>
+          Type:
+          <span class="font-bold">Status Request</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.status_request }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Type:
+          <span class="font-bold">Emergency</span>
         </td>
         <td class="col-1 text-right">{{ statistics.emergency_assist }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.emergency_assist) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
-          Submissions by type:
+          Type:
           <span class="font-bold">Inapplicable</span>
         </td>
         <td class="col-1 text-right">{{ statistics.inapplicable }}</td>

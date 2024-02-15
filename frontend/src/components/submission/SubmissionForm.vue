@@ -246,12 +246,6 @@ onBeforeMount(async () => {
         :options="QueuePriority"
       />
       <div class="col" />
-      <InputText
-        class="col-12"
-        name="relatedPermits"
-        label="Related permits"
-        :disabled="!props.editable"
-      />
       <TextArea
         class="col-12"
         name="astNotes"
@@ -301,13 +295,13 @@ onBeforeMount(async () => {
         <Checkbox
           class="col-12"
           name="bcOnlineCompleted"
-          label="BC Online Completed"
+          label="BC Online completed"
           :disabled="!props.editable"
         />
         <Checkbox
           class="col-12"
           name="naturalDisaster"
-          label="Location affeced by natural disaster"
+          label="Location affected by natural disaster"
           :disabled="!props.editable"
         />
         <Checkbox
@@ -356,38 +350,39 @@ onBeforeMount(async () => {
         />
       </div>
       <div class="col-6">
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.statusRequest"
-          label="Submission Type: Request for Status"
-          :disabled="!props.editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.emergencyAssist"
-          label="Submission Type: Request for Emergency Assistance"
-          :disabled="!props.editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
+        <h4 class="col-12">Submission Types:</h4>
         <Checkbox
           class="col-12"
           name="submissionTypes.guidance"
-          label="Submission Type: Request for Guidance"
+          label="Guidance"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
-          label="Submission Type: General Inquiry"
+          label="Inquiry"
+          :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.statusRequest"
+          label="Status Request"
+          :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
+        />
+        <Checkbox
+          class="col-12"
+          name="submissionTypes.emergencyAssist"
+          label="Emergency"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inapplicable"
-          label="Submission Type: Inapplicable"
+          label="Inapplicable"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
