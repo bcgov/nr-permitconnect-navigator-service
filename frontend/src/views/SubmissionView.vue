@@ -13,7 +13,7 @@ import { RouteNames } from '@/utils/constants';
 import { chefsService, documentService, noteService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Document, Permit, Note, User } from '@/types';
+import type { Document, Permit, Note } from '@/types';
 
 // Props
 type Props = {
@@ -43,7 +43,7 @@ async function onNoteSubmit(data: any) {
   try {
     const result = (await noteService.createNote({ ...data, submissionId: props.submissionId })).data;
     toast.success('Note saved');
-    notes.value.push(result);
+    notes.value.unshift(result);
   } catch {
     toast.error('Note save error');
   }
@@ -183,7 +183,7 @@ onMounted(async () => {
     <TabPanel header="Notes">
       <div class="flex flex-row pb-2">
         <div class="flex flex-grow-1 align-items-end">
-          <p class="font-bold">Notes:</p>
+          <p class="font-bold">Notes ({{ notes.length }})</p>
         </div>
         <div class="flex flex-none">
           <Button
@@ -215,7 +215,7 @@ onMounted(async () => {
   </TabView>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 .p-tabview {
   .p-tabview-title {
     font-size: 1.1rem;

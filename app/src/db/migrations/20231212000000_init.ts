@@ -205,9 +205,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('note').defaultTo('').notNullable();
           table.text('note_type').defaultTo('').notNullable();
           table.text('title').defaultTo('').notNullable();
-          table.text('createdAt');
-          table.text('createdBy');
-          table.unique(['note_id']);
+          stamps(knex, table);
         })
       )
 

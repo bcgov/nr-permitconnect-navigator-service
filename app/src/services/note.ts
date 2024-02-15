@@ -1,22 +1,20 @@
 import prisma from '../db/dataConnection';
 import { note } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
-import { addDashesToUuid } from '../components/utils';
 
-import type { CurrentUser, Note } from '../types';
-import { JwtPayload } from 'jsonwebtoken';
+import type { Note } from '../types';
 
 const service = {
   /**
    * @function createNote
-   * Creates a Permit
-   * @param note Note Object
+   * Creates a note
+   * @param data Note Object
+   * @param identityId string
    * @returns {Promise<object>} The result of running the findUnique operation
    */
-  createNote: async (data: Note, currentUser: CurrentUser) => {
+  createNote: async (data: Note) => {
     const newNote = {
       ...data,
-      createdBy: addDashesToUuid((currentUser.tokenPayload as JwtPayload)?.idir_user_guid),
       noteId: uuidv4()
     };
     const create = await prisma.note.create({
@@ -43,6 +41,9 @@ const service = {
         submission: {
           include: { user: true }
         }
+      },
+      orderBy: {
+        createdAt: 'desc'
       },
       where: {
         submission_id: submissionId

@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-// import { ref } from 'vue';
 import { object, string } from 'yup';
 
 import { Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
-// import { noteService } from '@/services';
 import { NoteTypes } from '@/utils/constants';
 import { NOTE_TYPES } from '@/utils/enums';
-import { onMounted } from 'vue';
+import { formatDateShort } from '@/utils/formatters';
 
 // import type { Ref } from 'vue';
 import type { Note } from '@/types';
@@ -30,6 +28,7 @@ const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: any = {
+  createdAt: formatDateShort(new Date().toISOString()),
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL
 };
@@ -47,12 +46,9 @@ const formSchema = object({
 function onSubmit(data: any, { resetForm }) {
   if (props.note) initialFormValues = data;
   else resetForm();
+
   emit('note:submit', data);
 }
-
-onMounted(async () => {
-  // permitTypes.value = (await permitService.getPermitTypes())?.data;
-});
 </script>
 
 <template>
@@ -65,6 +61,11 @@ onMounted(async () => {
   >
     <!-- eslint-enable vue/no-v-model-argument -->
     <template #header>
+      <font-awesome-icon
+        icon="fa-solid fa-plus"
+        fixed-width
+        class="mr-2"
+      />
       <span class="p-dialog-title">Add note</span>
     </template>
 
@@ -74,25 +75,30 @@ onMounted(async () => {
       @submit="onSubmit"
     >
       <div class="formgrid grid">
-        <div class="field col">
-          <label class="font-bold">Date</label>
-          <p>{{ new Date() }}</p>
-        </div>
         <InputText
-          class="col-12"
+          class="col-6"
+          name="createdAt"
+          label="Date"
+          :disabled="true"
+        />
+        <div class="col-6" />
+        <Dropdown
+          class="col-6"
+          name="noteType"
+          label="Note type"
+          :options="NoteTypes"
+        />
+        <div class="col-6" />
+        <InputText
+          class="col-6"
           name="title"
           label="Title"
         />
+        <div class="col-6" />
         <TextArea
           class="col-12"
           name="note"
           label="Note"
-        />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="noteType"
-          label="Note type"
-          :options="NoteTypes"
         />
         <div class="field col-12 flex">
           <div class="flex-auto">

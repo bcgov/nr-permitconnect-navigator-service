@@ -1,3 +1,4 @@
+import { IStamps } from '../interfaces/IStamps';
 import type { ChefsSubmissionForm } from './ChefsSubmissionForm';
 
 export type Note = {
@@ -7,6 +8,4 @@ export type Note = {
   noteType: string;
   submission: ChefsSubmissionForm;
   title: string;
-  createdAt: string | null;
-  createdBy: string | null;
-};
+} & Partial<IStamps>;

@@ -6,10 +6,4 @@ export type Note = {
   noteType: string;
   submissionId: string;
   title: string;
-
-  // note_id: string; // Primary Key
-  // note: string;
-  // note_type: string;
-  // submission_id: string;
-  // title: string;
 } & Partial<IStamps>;

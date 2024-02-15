@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 import { Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { formatDate } from '@/utils/formatters';
+import { formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
@@ -17,13 +17,13 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // State
-const cardData: Ref<Note> = ref(props.note);
 const userName: Ref<string> = ref('');
 
-onMounted(async () => {
+onMounted(() => {
   if (props.note.createdBy) {
-    const res = (await userService.searchUsers({ identityId: [props.note.createdBy] })).data;
-    userName.value = res.length ? res.pop().fullName : '';
+    userService.searchUsers({ userId: [props.note.createdBy] }).then((res) => {
+      userName.value = res?.data.length ? res?.data[0].fullName : '';
+    });
   }
 });
 </script>
@@ -31,7 +31,7 @@ onMounted(async () => {
 <template>
   <Card>
     <template #title>
-      <h3 class="mt-3 mb-1">{{ cardData.title }}</h3>
+      <h3 class="mt-1 mb-1">{{ props.note.title }}</h3>
       <Divider type="solid" />
     </template>
     <template #content>
@@ -41,7 +41,7 @@ onMounted(async () => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
-              {{ cardData.createdAt ? formatDate(cardData.createdAt ?? '') : undefined }}
+              {{ props.note.createdAt ? formatDateShort(props.note.createdAt ?? '') : undefined }}
             </p>
           </div>
         </div>
@@ -58,20 +58,18 @@ onMounted(async () => {
         <div class="col-12 md:col-6 lg:col-4">
           <div class="grid">
             <p class="col-12">
-              <span class="key font-bold">Category:</span>
-              {{ cardData.noteType }}
+              <span class="key font-bold">Note type:</span>
+              {{ props.note.noteType }}
             </p>
           </div>
         </div>
-        <div class="col-12 mb-2">
-          {{ cardData.note }}
-        </div>
+        <p class="col-12 mt-0 mb-0 note-content">{{ props.note.note }}</p>
       </div>
     </template>
   </Card>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 h2 {
   margin: 0;
 }
@@ -97,5 +95,9 @@ p {
       padding-bottom: 0;
     }
   }
+}
+.note-content {
+  white-space: pre;
+  text-wrap: balance;
 }
 </style>

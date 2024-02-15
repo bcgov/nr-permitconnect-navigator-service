@@ -30,8 +30,10 @@ export default {
       note_type: input.noteType,
       submission: { connect: { submissionId: input.submissionId } },
       title: input.title,
-      createdAt: input.createdAt ?? new Date().toISOString(),
-      createdBy: input.createdBy
+      createdAt: input.createdAt ? new Date(input.createdAt) : null,
+      createdBy: input.createdBy as string,
+      updatedAt: input.updatedAt ? new Date(input.updatedAt) : null,
+      updatedBy: input.updatedBy as string
     };
   },
 
@@ -45,8 +47,10 @@ export default {
       submission: submission.fromPrismaModel(input.submission) as ChefsSubmissionForm,
       submissionId: input.submission_id as string,
       title: input.title || '',
-      createdAt: input.createdAt,
-      createdBy: input.createdBy
+      createdAt: input.createdAt?.toISOString() ?? null,
+      createdBy: input.createdBy,
+      updatedAt: input.updatedAt?.toISOString() ?? null,
+      updatedBy: input.updatedBy
     };
   }
 };
