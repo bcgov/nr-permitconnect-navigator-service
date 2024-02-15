@@ -44,6 +44,19 @@ model identity_provider {
   user      user[]
 }
 
+model note {
+  note_id       String     @id @db.Uuid
+  submission_id String     @db.Uuid
+  note          String     @default("")
+  note_type     String     @default("")
+  title         String     @default("")
+  createdBy     String?    @default("00000000-0000-0000-0000-000000000000")
+  createdAt     DateTime?  @default(now()) @db.Timestamptz(6)
+  updatedBy     String?
+  updatedAt     DateTime?  @db.Timestamptz(6)
+  submission    submission @relation(fields: [submission_id], references: [submissionId], onDelete: Cascade, map: "note_submission_id_foreign")
+}
+
 model permit {
   permitId         String      @id @db.Uuid
   permitTypeId     Int
@@ -132,6 +145,7 @@ model submission {
   updatedBy                       String?
   updatedAt                       DateTime?  @db.Timestamptz(6)
   document                        document[]
+  note                            note[]
   permit                          permit[]
   user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
 }

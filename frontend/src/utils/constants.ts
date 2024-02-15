@@ -2,6 +2,7 @@ import {
   ACCESS_ROLES,
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,
+  NOTE_TYPES,
   PERMIT_STATUS,
   PERMIT_NEEDED,
   PERMIT_AUTHORIZATION_STATUS
@@ -77,6 +78,11 @@ export const IntakeStatusList = [
   INTAKE_STATUS_LIST.ASSIGNED,
   INTAKE_STATUS_LIST.COMPLETED
 ];
+
+/**
+ * Note form constants
+ */
+export const NoteTypes = [NOTE_TYPES.GENERAL, NOTE_TYPES.BRING_FORWARD];
 
 export const QueuePriority = [0, 1, 2, 3, 4, 5];
 

@@ -128,7 +128,7 @@ export function mixedQueryToArray(param: string | Array<string>): Array<string> 
   if (!param) return undefined;
 
   const parsed = Array.isArray(param) ? param.flatMap((p) => parseCSV(p)) : parseCSV(param);
-  const unique = [...new Set(parsed)];
+  const unique = Array.from(new Set(parsed));
 
   return unique.length ? unique : undefined;
 }

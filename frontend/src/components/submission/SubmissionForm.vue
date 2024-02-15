@@ -88,7 +88,7 @@ const formSchema = object({
     .label('Submission Types'),
   user: mixed()
     .when('intakeStatus', {
-      is: (val: string) => val !== 'SUBMITTED',
+      is: (val: string) => val !== 'Submitted',
       then: (schema) => schema.required(),
       otherwise: (schema) => schema.notRequired()
     })
@@ -346,13 +346,13 @@ const onSubmit = (values: any) => {
         <Checkbox
           class="col-12"
           name="submissionTypes.statusRequest"
-          label="Submission Type: Request for status"
+          label="Submission Type: Request for Status"
           :disabled="!props.editable"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.emergencyAssist"
-          label="Submission Type: Request for emergency assistance"
+          label="Submission Type: Request for Emergency Assistance"
           :disabled="!props.editable"
         />
         <Checkbox
@@ -364,7 +364,7 @@ const onSubmit = (values: any) => {
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
-          label="Submission Type: General inquiry"
+          label="Submission Type: General Inquiry"
           :disabled="!props.editable"
         />
         <Checkbox
@@ -390,12 +390,6 @@ const onSubmit = (values: any) => {
         class="col-6"
         name="bringForwardDate"
         label="Bring forward date"
-        :disabled="!props.editable"
-      />
-      <TextArea
-        class="col-12"
-        name="notes"
-        label="Notes"
         :disabled="!props.editable"
       />
       <EditableDropdown

@@ -161,7 +161,7 @@ async function onPermitSubmit(data: Permit) {
   />
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 h2 {
   margin: 0;
 }

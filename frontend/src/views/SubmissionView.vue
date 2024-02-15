@@ -2,16 +2,18 @@
 import { onMounted, ref } from 'vue';
 
 import DocumentCard from '@/components/file/DocumentCard.vue';
+import NoteCard from '@/components/note/NoteCard.vue';
+import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { RouteNames } from '@/utils/constants';
-import { chefsService, documentService, permitService } from '@/services';
+import { chefsService, documentService, noteService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Document, Permit } from '@/types';
+import type { Document, Permit, Note } from '@/types';
 
 // Props
 type Props = {
@@ -25,6 +27,8 @@ const props = withDefaults(defineProps<Props>(), {});
 const editable: Ref<boolean> = ref(false);
 const submission: Ref<any | undefined> = ref(undefined);
 const documents: Ref<Array<Document>> = ref([]);
+const notes: Ref<Array<Note>> = ref([]);
+const noteModalVisible: Ref<boolean> = ref(false);
 const permits: Ref<Array<Permit>> = ref([]);
 const permitModalVisible: Ref<boolean> = ref(false);
 
@@ -33,6 +37,18 @@ const toast = useToast();
 
 function onCancel() {
   editable.value = false;
+}
+
+async function onNoteSubmit(data: any) {
+  try {
+    const result = (await noteService.createNote({ ...data, submissionId: props.submissionId })).data;
+    toast.success('Note saved');
+    notes.value.unshift(result);
+  } catch {
+    toast.error('Note save error');
+  }
+
+  noteModalVisible.value = false;
 }
 
 function onPermitDelete(data: any) {
@@ -58,6 +74,7 @@ async function onSubmissionSubmit(data: any) {
 onMounted(async () => {
   submission.value = (await chefsService.getSubmission(props.formId, props.submissionId)).data;
   documents.value = (await documentService.listDocuments(props.submissionId)).data;
+  notes.value = (await noteService.listNotes(props.submissionId)).data;
   permits.value = (await permitService.listPermits(props.submissionId)).data;
 });
 </script>
@@ -163,10 +180,42 @@ onMounted(async () => {
         @permit:submit="onPermitSubmit"
       />
     </TabPanel>
+    <TabPanel header="Notes">
+      <div class="flex flex-row pb-2">
+        <div class="flex flex-grow-1 align-items-end">
+          <p class="font-bold">Notes ({{ notes.length }})</p>
+        </div>
+        <div class="flex flex-none">
+          <Button
+            aria-label="Add permit"
+            @click="noteModalVisible = true"
+          >
+            <font-awesome-icon icon="fa-solid fa-plus" />
+            &nbsp; Add note
+          </Button>
+        </div>
+      </div>
+      <div
+        v-for="(note, index) in notes"
+        :key="note.noteId"
+        :index="index"
+        class="col-12"
+      >
+        <NoteCard
+          :note="note"
+          :submission-id="submissionId"
+        />
+      </div>
+
+      <NoteModal
+        v-model:visible="noteModalVisible"
+        @note:submit="onNoteSubmit"
+      />
+    </TabPanel>
   </TabView>
 </template>
 
-<style lang="scss">
+<style scoped lang="scss">
 .p-tabview {
   .p-tabview-title {
     font-size: 1.1rem;
