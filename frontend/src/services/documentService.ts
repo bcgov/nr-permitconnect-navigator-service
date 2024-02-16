@@ -11,7 +11,7 @@ export default {
    * @function createDocument
    * @returns {Promise} An axios response
    */
-  async createDocument(document: File, submissionId: string, bucketId: string) {
+  async createDocument(document: File, activityId: string, bucketId: string) {
     let comsResponse;
     try {
       // Add a unique hash to the end of the filename
@@ -33,7 +33,7 @@ export default {
 
       // Create document link
       return await appAxios().put(PATH, {
-        submissionId: submissionId,
+        activityId: activityId,
         documentId: comsResponse.data.id,
         filename: comsResponse.data.name,
         mimeType: comsResponse.data.mimeType,
@@ -76,7 +76,7 @@ export default {
    * @function listDocuments
    * @returns {Promise} An axios response
    */
-  async listDocuments(submissionId: string) {
-    return appAxios().get(`${PATH}/list/${submissionId}`);
+  async listDocuments(activityId: string) {
+    return appAxios().get(`${PATH}/list/${activityId}`);
   }
 };

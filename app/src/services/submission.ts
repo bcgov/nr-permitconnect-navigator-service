@@ -29,12 +29,12 @@ const service = {
   /**
    * @function createSubmissionsFromExport
    * Creates the given activities and submissions from exported CHEFS data
-   * @param {Array<Submission>} [submission] Array of Submissions
-   * @returns {Promise<object>} The result of running the get operation
+   * @param {Array<Partial<Submission>>} submissions Array of Submissions
+   * @returns {Promise<void>} The result of running the transaction
    */
-  createSubmissionsFromExport: async (submissions: Array<Partial<Submission> & { activityId: string }>) => {
+  createSubmissionsFromExport: async (submissions: Array<Partial<Submission>>) => {
     await prisma.$transaction(async (trx) => {
-      const initiative = await trx.initiative.findFirst({
+      const initiative = await trx.initiative.findFirstOrThrow({
         where: {
           code: Initiatives.HOUSING
         }
@@ -43,7 +43,7 @@ const service = {
       await trx.activity.createMany({
         data: submissions.map((x) => ({
           activity_id: x.activityId as string,
-          initiative_id: initiative?.initiative_id
+          initiative_id: initiative.initiative_id
         }))
       });
 
@@ -79,8 +79,8 @@ const service = {
   /**
    * @function getSubmission
    * Gets a full data export for the requested CHEFS form
-   * @param {string} [formId] CHEFS form id
-   * @returns {Promise<object>} The result of running the get operation
+   * @param {string} formId CHEFS form id
+   * @returns {Promise<any>} The result of running the get operation
    */
   getFormExport: async (formId: string) => {
     try {
@@ -121,19 +121,14 @@ const service = {
   /**
    * @function getSubmission
    * Gets a specific submission from the PCNS database
-   * The record will be pulled from CHEFS and created if it does not first exist
-   * @param {string} [formSubmissionId] CHEFS form submission id
-   * @returns {Promise<object>} The result of running the findUnique operation
+   * @param {string} activityId PCNS Activity ID
+   * @returns {Promise<Submission | null>} The result of running the findFirst operation
    */
-  getSubmission: async (submissionId: string) => {
+  getSubmission: async (activityId: string) => {
     try {
-      const result = await prisma.submission.findUnique({
+      const result = await prisma.submission.findFirst({
         where: {
-          submission_id: submissionId
-        },
-        include: {
-          activity: true,
-          user: true
+          activity_id: activityId
         }
       });
 
@@ -146,16 +141,11 @@ const service = {
   /**
    * @function getSubmissions
    * Gets a list of submissions
-   * @returns {Promise<object>} The result of running the findMany operation
+   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   getSubmissions: async () => {
     try {
-      const result = await prisma.submission.findMany({
-        include: {
-          activity: true,
-          user: true
-        }
-      });
+      const result = await prisma.submission.findMany({});
 
       return result.map((x) => submission.fromPrismaModel(x));
     } catch (e: unknown) {
@@ -166,8 +156,9 @@ const service = {
   /**
    * @function searchSubmissions
    * Search and filter for specific submission
+   * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
-   * @returns {Promise<object>} The result of running the findMany operation
+   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
     const result = await prisma.submission.findMany({
@@ -180,10 +171,6 @@ const service = {
             submission_id: { in: params.submissionId }
           }
         ]
-      },
-      include: {
-        activity: true,
-        user: true
       }
     });
 
@@ -193,8 +180,8 @@ const service = {
   /**
    * @function updateSubmission
    * Updates a specific submission
-   * @param {Submission} [params.data] Submission to update
-   * @returns {Promise<object>}
+   * @param {Submission} data Submission to update
+   * @returns {Promise<void>} The result of running the update operation
    */
   updateSubmission: async (data: Submission) => {
     try {

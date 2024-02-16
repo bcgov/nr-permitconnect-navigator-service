@@ -59,6 +59,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('activity_id').primary();
           table
             .uuid('initiative_id')
+            .notNullable()
             .references('initiative_id')
             .inTable('initiative')
             .onUpdate('CASCADE')
@@ -72,6 +73,7 @@ export async function up(knex: Knex): Promise<void> {
           table.uuid('submission_id').primary();
           table
             .text('activity_id')
+            .notNullable()
             .references('activity_id')
             .inTable('activity')
             .onUpdate('CASCADE')
@@ -122,17 +124,17 @@ export async function up(knex: Knex): Promise<void> {
         knex.schema.createTable('document', (table) => {
           table.uuid('document_id').primary();
           table
-            .uuid('submission_id')
+            .text('activity_id')
             .notNullable()
-            .references('submission_id')
-            .inTable('submission')
+            .references('activity_id')
+            .inTable('activity')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table.text('filename').notNullable();
           table.text('mime_type').defaultTo('application/octet-stream').notNullable();
           table.bigInteger('filesize').notNullable();
           stamps(knex, table);
-          table.unique(['document_id', 'submission_id']);
+          table.unique(['document_id', 'activity_id']);
         })
       )
 
@@ -166,10 +168,10 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table
-            .uuid('submission_id')
+            .text('activity_id')
             .notNullable()
-            .references('submission_id')
-            .inTable('submission')
+            .references('activity_id')
+            .inTable('activity')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table.text('issued_permit_id');
@@ -180,7 +182,24 @@ export async function up(knex: Knex): Promise<void> {
           table.timestamp('submitted_date', { useTz: true });
           table.timestamp('adjudication_date', { useTz: true });
           stamps(knex, table);
-          table.unique(['permit_id', 'permit_type_id', 'submission_id']);
+          table.unique(['permit_id', 'permit_type_id', 'activity_id']);
+        })
+      )
+
+      .then(() =>
+        knex.schema.createTable('note', (table) => {
+          table.uuid('note_id').primary();
+          table
+            .text('activity_id')
+            .notNullable()
+            .references('activity_id')
+            .inTable('activity')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.text('note').defaultTo('').notNullable();
+          table.text('note_type').defaultTo('').notNullable();
+          table.text('title').defaultTo('').notNullable();
+          stamps(knex, table);
         })
       )
 
@@ -228,26 +247,9 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
-        knex.schema.createTable('note', (table) => {
-          table.uuid('note_id').primary();
-          table
-            .uuid('submission_id')
-            .notNullable()
-            .references('submissionId')
-            .inTable('submission')
-            .onUpdate('CASCADE')
-            .onDelete('CASCADE');
-          table.text('note').defaultTo('').notNullable();
-          table.text('note_type').defaultTo('').notNullable();
-          table.text('title').defaultTo('').notNullable();
-          stamps(knex, table);
-        })
-      )
-
-      .then(() =>
         knex.schema.raw(`create trigger before_update_note_trigger
           before update on public.note
-          for each row execute procedure public.set_updatedAt();`)
+          for each row execute procedure public.set_updated_at();`)
       )
 
       // Create public schema functions
@@ -704,7 +706,6 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.get_activity_statistics'))
       // Drop public schema table triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
-      .then(() => knex.schema.dropTableIfExists('note'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_trigger ON permit'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_insert_permit_trigger ON permit'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_type_trigger ON permit_type'))
@@ -715,6 +716,7 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_provider_trigger ON identity_provider')
       )
       // Drop public schema tables
+      .then(() => knex.schema.dropTableIfExists('note'))
       .then(() => knex.schema.dropTableIfExists('permit'))
       .then(() => knex.schema.dropTableIfExists('permit_type'))
       .then(() => knex.schema.dropTableIfExists('document'))

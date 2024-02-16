@@ -21,8 +21,8 @@ export default {
    * @function getSubmission
    * @returns {Promise} An axios response
    */
-  getSubmission(submissionId: string) {
-    return appAxios().get(`submission/${submissionId}`);
+  getSubmission(activityId: string) {
+    return appAxios().get(`submission/${activityId}`);
   },
 
   /**

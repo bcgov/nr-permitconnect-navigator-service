@@ -2,7 +2,7 @@ import { IStamps } from '../interfaces/IStamps';
 
 export type Document = {
   documentId: string; // Primary Key
-  submissionId: string;
+  activityId: string;
   filename: string;
   mimeType: string;
   filesize: number;

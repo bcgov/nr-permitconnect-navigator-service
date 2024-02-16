@@ -8,45 +8,35 @@ const service = {
   /**
    * @function createNote
    * Creates a note
-   * @param data Note Object
-   * @param identityId string
-   * @returns {Promise<object>} The result of running the findUnique operation
+   * @param {Note} data Note object
+   * @returns {Promise<Note | null>} The result of running the create operation
    */
   createNote: async (data: Note) => {
     const newNote = {
       ...data,
       noteId: uuidv4()
     };
-    const create = await prisma.note.create({
-      include: {
-        submission: {
-          include: { user: true }
-        }
-      },
+
+    const response = await prisma.note.create({
       data: note.toPrismaModel(newNote)
     });
 
-    return note.fromPrismaModel(create);
+    return note.fromPrismaModel(response);
   },
 
   /**
    * @function listNotes
    * Retrieve a list of permits associated with a given submission
-   * @param submissionId PCNS Submission ID
-   * @returns {Promise<object>} Array of documents associated with the submission
+   * @param {string} activityId PCNS Activity ID
+   * @returns {Promise<(Note | null)[]>} The result of running the findMany operation
    */
-  listNotes: async (submissionId: string) => {
+  listNotes: async (activityId: string) => {
     const response = await prisma.note.findMany({
-      include: {
-        submission: {
-          include: { user: true }
-        }
-      },
       orderBy: {
-        createdAt: 'desc'
+        created_at: 'desc'
       },
       where: {
-        submission_id: submissionId
+        activity_id: activityId
       }
     });
     return response.map((x) => note.fromPrismaModel(x));

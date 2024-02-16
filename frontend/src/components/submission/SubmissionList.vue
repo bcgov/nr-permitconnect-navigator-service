@@ -71,14 +71,14 @@ const filters = ref({
       frozen
     >
       <template #body="{ data }">
-        <div :data-submissionId="data.submissionId">
+        <div :data-activityId="data.activityId">
           <router-link
             :to="{
               name: RouteNames.SUBMISSION,
-              query: { submissionId: data.submissionId }
+              query: { activityId: data.activityId }
             }"
           >
-            {{ data.activity.activityId }}
+            {{ data.activityId }}
           </router-link>
         </div>
       </template>

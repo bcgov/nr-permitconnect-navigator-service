@@ -18,7 +18,7 @@ router.get('/statistics', (req: Request, res: Response, next: NextFunction): voi
 });
 
 // Submission endpoint
-router.get('/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
+router.get('/:activityId', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.getSubmission(req, res, next);
 });
 

@@ -2,7 +2,7 @@ import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { APPLICATION_STATUS_LIST } from '../components/constants';
-import { getCurrentIdentity, isTruthy } from '../components/utils';
+import { getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
 import { submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -11,8 +11,6 @@ import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionE
 const controller = {
   checkAndStoreNewSubmissions: async () => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
-
-    const permitTypes = await permitService.getPermitTypes();
 
     // Mapping of SHAS intake permit names to PCNS types
     const shasPermitMapping = new Map<string, string>([
@@ -32,6 +30,8 @@ const controller = {
       ['waterRiparianAreasProtection', 'New'],
       ['waterRiparianAreasProtection', 'New']
     ]);
+
+    const permitTypes = await permitService.getPermitTypes();
 
     const exportData: Array<Partial<Submission & { activityId: string; formId: string; permits: Array<Permit> }>> =
       await Promise.all(
@@ -74,10 +74,8 @@ const controller = {
                     if (permit) {
                       return {
                         permitId: uuidv4(),
-                        permitType: {
-                          permitTypeId: permit.permitTypeId
-                        },
-                        submissionId: data.form.submissionId,
+                        permitTypeId: permit.permitTypeId,
+                        activityId: data.form.confirmationId,
                         trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
                       };
                     }
@@ -97,7 +95,7 @@ const controller = {
               contactName: `${data.contactFirstName} ${data.contactLastName}`,
               financiallySupported: Object.values(financiallySupportedValues).includes(true),
               ...financiallySupportedValues,
-              intakeStatus: data.form.status.charAt(0).toUpperCase() + data.form.status.substring(1).toLowerCase(),
+              intakeStatus: toTitleCase(data.form.status),
               latitude: parseInt(data.latitude),
               longitude: parseInt(data.longitude),
               naturalDisaster: data.naturalDisasterInd,
@@ -118,7 +116,7 @@ const controller = {
       await submissionService.searchSubmissions({
         activityId: exportData.map((x) => x.activityId as string)
       })
-    ).map((x) => x?.activity?.activityId);
+    ).map((x) => x?.activityId);
 
     // Create new activities
     const notStored = exportData.filter((x) => !stored.some((activityId) => activityId === x.activityId));
@@ -141,9 +139,9 @@ const controller = {
     }
   },
 
-  getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  getSubmission: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getSubmission(req.params.submissionId);
+      const response = await submissionService.getSubmission(req.params.activityId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

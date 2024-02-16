@@ -1,54 +1,21 @@
 import { Prisma } from '@prisma/client';
-import { default as activity } from './activity';
-import { default as user } from './user';
-import disconnectRelation from '../utils/disconnectRelation';
 
 import type { Stamps } from '../stamps';
 import type { Submission } from '../../types';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
-  include: { activity: true, user: true }
-});
+const _submissionWithGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({});
 
-type ActivityRelation = {
-  activity:
-    | {
-        connect: {
-          activity_id: string;
-        };
-      }
-    | {
-        disconnect: boolean;
-      };
-};
-
-type UserRelation = {
-  user:
-    | {
-        connect: {
-          user_id: string;
-        };
-      }
-    | {
-        disconnect: boolean;
-      };
-};
-
-type PrismaRelationSubmission = Omit<
-  Prisma.submissionGetPayload<typeof _submission>,
-  'activity_id' | 'assigned_user_id' | keyof Stamps
-> &
-  ActivityRelation &
-  UserRelation;
-
+type PrismaRelationSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, keyof Stamps>;
 type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithGraph>;
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
     return {
       submission_id: input.submissionId,
+      activity_id: input.activityId,
+      assigned_user_id: input.assignedUserId,
       project_name: input.projectName,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
@@ -79,10 +46,6 @@ export default {
       waiting_on: input.waitingOn,
       bring_forward_date: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
       notes: input.notes,
-      activity: input.activity?.activityId
-        ? { connect: { activity_id: input.activity.activityId } }
-        : disconnectRelation,
-      user: input.user?.userId ? { connect: { user_id: input.user.userId } } : disconnectRelation,
       intake_status: input.intakeStatus,
       application_status: input.applicationStatus,
       guidance: input.guidance,
@@ -98,8 +61,10 @@ export default {
 
     return {
       submissionId: input.submission_id,
+      activityId: input.activity_id,
+      assignedUserId: input.assigned_user_id,
       submittedAt: input.submitted_at?.toISOString() as string,
-      submittedBy: input.submitted_by as string,
+      submittedBy: input.submitted_by,
       locationPIDs: input.location_pids,
       contactName: input.contact_name,
       contactPhoneNumber: input.contact_phone_number,
@@ -128,8 +93,6 @@ export default {
       waitingOn: input.waiting_on,
       bringForwardDate: input.bring_forward_date?.toISOString() ?? null,
       notes: input.notes,
-      activity: activity.fromPrismaModel(input.activity),
-      user: user.fromPrismaModel(input.user),
       intakeStatus: input.intake_status,
       applicationStatus: input.application_status,
       guidance: input.guidance,

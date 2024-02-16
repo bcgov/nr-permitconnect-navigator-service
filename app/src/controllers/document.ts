@@ -7,7 +7,7 @@ const controller = {
     req: Request<
       never,
       never,
-      { documentId: string; submissionId: string; filename: string; mimeType: string; length: number }
+      { documentId: string; activityId: string; filename: string; mimeType: string; length: number }
     >,
     res: Response,
     next: NextFunction
@@ -15,7 +15,7 @@ const controller = {
     try {
       const response = await documentService.createDocument(
         req.body.documentId,
-        req.body.submissionId,
+        req.body.activityId,
         req.body.filename,
         req.body.mimeType,
         req.body.length
@@ -35,9 +35,9 @@ const controller = {
     }
   },
 
-  async listDocuments(req: Request<{ submissionId: string }>, res: Response, next: NextFunction) {
+  async listDocuments(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await documentService.listDocuments(req.params.submissionId);
+      const response = await documentService.listDocuments(req.params.activityId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

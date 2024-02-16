@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ErrorMessage, Form } from 'vee-validate';
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { boolean, mixed, number, object, string } from 'yup';
 
 import {
@@ -35,25 +35,9 @@ const props = withDefaults(defineProps<Props>(), {});
 const emit = defineEmits(['submit', 'cancel']);
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref(props.submission.user ? [props.submission.user] : []);
+const assigneeOptions: Ref<Array<User>> = ref([]);
 
-// Default form values
-const initialFormValues: any = {
-  ...props.submission,
-  applicationStatus: props.submission.applicationStatus,
-  bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
-  submittedAt: new Date(props.submission.submittedAt),
-  submittedBy: formatJwtUsername(props.submission.submittedBy),
-  submissionTypes: {
-    emergencyAssist: props.submission.emergencyAssist,
-    guidance: props.submission.guidance,
-    inapplicable: props.submission.inapplicable,
-    inquiry: props.submission.inquiry,
-    statusRequest: props.submission.statusRequest
-  },
-  activityId: props.submission.activity.activityId,
-  user: props.submission.user ?? ''
-};
+const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Form validation schema
 const formSchema = object({
@@ -143,12 +127,35 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  emit('submit', { ...values, ...values.submissionTypes });
+  emit('submit', { ...values, assignedUserId: values.user.userId, ...values.submissionTypes });
 };
+
+onBeforeMount(async () => {
+  assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+
+  // Default form values
+  initialFormValues.value = {
+    ...props.submission,
+    applicationStatus: props.submission.applicationStatus,
+    bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
+    submittedAt: new Date(props.submission.submittedAt),
+    submittedBy: formatJwtUsername(props.submission.submittedBy),
+    submissionTypes: {
+      emergencyAssist: props.submission.emergencyAssist,
+      guidance: props.submission.guidance,
+      inapplicable: props.submission.inapplicable,
+      inquiry: props.submission.inquiry,
+      statusRequest: props.submission.statusRequest
+    },
+    activityId: props.submission.activityId,
+    user: assigneeOptions.value[0]
+  };
+});
 </script>
 
 <template>
   <Form
+    v-if="initialFormValues"
     v-slot="{ handleReset, values, errors }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"

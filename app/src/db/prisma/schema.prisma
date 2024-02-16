@@ -21,28 +21,31 @@ model knex_migrations_lock {
 
 model activity {
   activity_id   String       @id
-  initiative_id String?      @db.Uuid
+  initiative_id String       @db.Uuid
   created_by    String?      @default("00000000-0000-0000-0000-000000000000")
   created_at    DateTime?    @default(now()) @db.Timestamptz(6)
   updated_by    String?
   updated_at    DateTime?    @db.Timestamptz(6)
-  initiative    initiative?  @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  initiative    initiative   @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  document      document[]
+  note          note[]
+  permit        permit[]
   submission    submission[]
 }
 
 model document {
-  document_id   String     @id @db.Uuid
-  submission_id String     @db.Uuid
-  filename      String
-  mime_type     String     @default("application/octet-stream")
-  filesize      BigInt
-  created_by    String?    @default("00000000-0000-0000-0000-000000000000")
-  created_at    DateTime?  @default(now()) @db.Timestamptz(6)
-  updated_by    String?
-  updated_at    DateTime?  @db.Timestamptz(6)
-  submission    submission @relation(fields: [submission_id], references: [submission_id], onDelete: Cascade, map: "document_submission_id_foreign")
+  document_id String    @id @db.Uuid
+  activity_id String
+  filename    String
+  mime_type   String    @default("application/octet-stream")
+  filesize    BigInt
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "document_activity_id_foreign")
 
-  @@unique([document_id, submission_id], map: "document_document_id_submission_id_unique")
+  @@unique([document_id, activity_id], map: "document_document_id_activity_id_unique")
 }
 
 model identity_provider {
@@ -67,22 +70,22 @@ model initiative {
 }
 
 model note {
-  note_id       String     @id @db.Uuid
-  submission_id String     @db.Uuid
-  note          String     @default("")
-  note_type     String     @default("")
-  title         String     @default("")
-  createdBy     String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt     DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy     String?
-  updatedAt     DateTime?  @db.Timestamptz(6)
-  submission    submission @relation(fields: [submission_id], references: [submissionId], onDelete: Cascade, map: "note_submission_id_foreign")
+  note_id     String    @id @db.Uuid
+  activity_id String
+  note        String    @default("")
+  note_type   String    @default("")
+  title       String    @default("")
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
 }
 
 model permit {
   permit_id         String      @id @db.Uuid
   permit_type_id    Int
-  submission_id     String      @db.Uuid
+  activity_id       String
   issued_permit_id  String?
   tracking_id       String?
   auth_status       String?
@@ -94,10 +97,10 @@ model permit {
   created_at        DateTime?   @default(now()) @db.Timestamptz(6)
   updated_by        String?
   updated_at        DateTime?   @db.Timestamptz(6)
+  activity          activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
   permit_type       permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
-  submission        submission  @relation(fields: [submission_id], references: [submission_id], onDelete: Cascade, map: "permit_submission_id_foreign")
 
-  @@unique([permit_id, permit_type_id, submission_id], map: "permit_permit_id_permit_type_id_submission_id_unique")
+  @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
 }
 
 model permit_type {
@@ -122,10 +125,10 @@ model permit_type {
 }
 
 model submission {
-  submission_id                      String     @id @db.Uuid
-  activity_id                        String?
-  assigned_user_id                   String?    @db.Uuid
-  submitted_at                       DateTime   @db.Timestamptz(6)
+  submission_id                      String    @id @db.Uuid
+  activity_id                        String
+  assigned_user_id                   String?   @db.Uuid
+  submitted_at                       DateTime  @db.Timestamptz(6)
   submitted_by                       String
   location_pids                      String?
   company_name_registered            String?
@@ -140,36 +143,34 @@ model submission {
   queue_priority                     Int?
   related_permits                    String?
   ast_notes                          String?
-  ast_updated                        Boolean    @default(false)
-  added_to_ats                       Boolean    @default(false)
+  ast_updated                        Boolean   @default(false)
+  added_to_ats                       Boolean   @default(false)
   ats_client_number                  String?
-  ltsa_completed                     Boolean    @default(false)
-  bc_online_completed                Boolean    @default(false)
-  natural_disaster                   Boolean    @default(false)
-  financially_supported              Boolean    @default(false)
-  financially_supported_bc           Boolean    @default(false)
-  financially_supported_indigenous   Boolean    @default(false)
-  financially_supported_non_profit   Boolean    @default(false)
-  financially_supported_housing_coop Boolean    @default(false)
-  aai_updated                        Boolean    @default(false)
+  ltsa_completed                     Boolean   @default(false)
+  bc_online_completed                Boolean   @default(false)
+  natural_disaster                   Boolean   @default(false)
+  financially_supported              Boolean   @default(false)
+  financially_supported_bc           Boolean   @default(false)
+  financially_supported_indigenous   Boolean   @default(false)
+  financially_supported_non_profit   Boolean   @default(false)
+  financially_supported_housing_coop Boolean   @default(false)
+  aai_updated                        Boolean   @default(false)
   waiting_on                         String?
-  bring_forward_date                 DateTime?  @db.Timestamptz(6)
+  bring_forward_date                 DateTime? @db.Timestamptz(6)
   notes                              String?
   intake_status                      String?
   application_status                 String?
-  guidance                           Boolean    @default(false)
-  status_request                     Boolean    @default(false)
-  inquiry                            Boolean    @default(false)
-  emergency_assist                   Boolean    @default(false)
-  inapplicable                       Boolean    @default(false)
-  created_by                         String?    @default("00000000-0000-0000-0000-000000000000")
-  created_at                         DateTime?  @default(now()) @db.Timestamptz(6)
+  guidance                           Boolean   @default(false)
+  status_request                     Boolean   @default(false)
+  inquiry                            Boolean   @default(false)
+  emergency_assist                   Boolean   @default(false)
+  inapplicable                       Boolean   @default(false)
+  created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at                         DateTime? @default(now()) @db.Timestamptz(6)
   updated_by                         String?
-  updated_at                         DateTime?  @db.Timestamptz(6)
-  document                           document[]
-  permit                             permit[]
-  activity                           activity?  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
-  user                               user?      @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
+  updated_at                         DateTime? @db.Timestamptz(6)
+  activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
+  user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 }
 
 model user {

@@ -1,9 +1,8 @@
-import type { Activity } from './Activity';
-import type { User } from './User';
-
 export type Submission = {
   formId?: string;
   submissionId: string;
+  activityId: string;
+  assignedUserId: string;
   submittedAt: string;
   submittedBy: string;
   locationPIDs?: string;
@@ -32,9 +31,6 @@ export type Submission = {
   aaiUpdated: boolean;
   waitingOn?: string;
   bringForwardDate?: string;
-  notes?: string;
-  activity: Activity;
-  user?: User; // assigned to
   intakeStatus?: string;
   applicationStatus?: string;
   guidance: boolean;

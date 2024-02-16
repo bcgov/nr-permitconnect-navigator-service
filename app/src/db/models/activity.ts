@@ -21,7 +21,7 @@ export default {
 
     return {
       activityId: input.activity_id,
-      initiativeId: input.initiative_id as string
+      initiativeId: input.initiative_id
     };
   }
 };

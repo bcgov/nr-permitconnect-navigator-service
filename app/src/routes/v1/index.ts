@@ -14,7 +14,7 @@ router.use(hasAccess);
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/document', '/permit', 'submission', '/user']
+    endpoints: ['/document', '/note', '/permit', '/submission', '/user']
   });
 });
 

@@ -15,7 +15,7 @@ router.delete('/:documentId', (req: Request, res: Response, next: NextFunction):
   documentController.deleteDocument(req, res, next);
 });
 
-router.get('/list/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
+router.get('/list/:activityId', (req: Request, res: Response, next: NextFunction): void => {
   documentController.listDocuments(req, res, next);
 });
 

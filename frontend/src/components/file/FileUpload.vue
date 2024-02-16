@@ -12,7 +12,7 @@ import type { Document } from '@/types';
 
 // Props
 type Props = {
-  submissionId: string;
+  activityId: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
@@ -38,7 +38,7 @@ const onFileUploadClick = () => {
 
 const onUpload = async (file: File) => {
   try {
-    const response = (await documentService.createDocument(file, props.submissionId, getConfig.value.coms.bucketId))
+    const response = (await documentService.createDocument(file, props.activityId, getConfig.value.coms.bucketId))
       ?.data;
 
     if (response) {
@@ -97,12 +97,12 @@ const onUpload = async (file: File) => {
   </div>
 </template>
 
-<style lang="scss">
-.p-fileupload-buttonbar {
+<style scoped lang="scss">
+:deep(.p-fileupload-buttonbar) {
   display: none;
 }
 
-.p-fileupload-content {
+:deep(.p-fileupload-content) {
   padding: 1rem;
   border-style: dashed;
 }

@@ -14,7 +14,7 @@ export default {
    * @function listNotes
    * @returns {Promise} An axios response
    */
-  async listNotes(submissionId: string) {
-    return appAxios().get(`note/list/${submissionId}`);
+  async listNotes(activityId: string) {
+    return appAxios().get(`note/list/${activityId}`);
   }
 };

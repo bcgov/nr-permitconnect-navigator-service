@@ -1,9 +1,9 @@
-import { Activity } from './Activity';
-import { User } from './User';
 import { IStamps } from '../interfaces/IStamps';
 
 export type Submission = {
-  submissionId: string;
+  submissionId: string; // Primary key
+  activityId: string;
+  assignedUserId: string | null;
   submittedAt: string;
   submittedBy: string;
   locationPIDs: string | null;
@@ -34,8 +34,6 @@ export type Submission = {
   waitingOn: string | null;
   bringForwardDate: string | null;
   notes: string | null;
-  activity: Activity | null;
-  user: User | null; // assigned to
   intakeStatus: string | null;
   applicationStatus: string | null;
   guidance: boolean;

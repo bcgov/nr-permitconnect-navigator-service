@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { TabPanel, TabView } from '@/lib/primevue';
 
+import { Spinner } from '@/components/layout';
 import SubmissionList from '@/components/submission/SubmissionList.vue';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
 import { submissionService } from '@/services';
@@ -39,6 +40,13 @@ onMounted(async () => {
         :loading="loading"
         :initial-statistics="statistics"
       />
+      <div v-else>
+        <span v-if="loading">
+          <Spinner />
+          Loading statistics...
+        </span>
+        <span v-else>Failed to load statistics.</span>
+      </div>
     </TabPanel>
   </TabView>
 </template>

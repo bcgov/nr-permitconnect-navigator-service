@@ -20,9 +20,9 @@ const controller = {
     }
   },
 
-  async listNotes(req: Request<{ submissionId: string }>, res: Response, next: NextFunction) {
+  async listNotes(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await noteService.listNotes(req.params.submissionId);
+      const response = await noteService.listNotes(req.params.activityId);
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);
