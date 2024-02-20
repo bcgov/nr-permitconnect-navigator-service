@@ -1,4 +1,4 @@
-export { default as chefsService } from './chefs';
+export { default as submissionService } from './submission';
 export { default as documentService } from './document';
 export { default as noteService } from './note';
 export { default as permitService } from './permit';

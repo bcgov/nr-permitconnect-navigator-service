@@ -11,7 +11,6 @@ import type { Note } from '@/types';
 // Props
 type Props = {
   note: Note;
-  submissionId: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {});

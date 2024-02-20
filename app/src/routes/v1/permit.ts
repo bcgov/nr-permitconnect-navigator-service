@@ -22,8 +22,8 @@ router.delete('/:permitId', (req: Request, res: Response, next: NextFunction): v
   permitController.deletePermit(req, res, next);
 });
 
-// Permit list by submission endpoint
-router.get('/list/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
+// Permit list by activity endpoint
+router.get('/list/:activityId', (req: Request, res: Response, next: NextFunction): void => {
   permitController.listPermits(req, res, next);
 });
 

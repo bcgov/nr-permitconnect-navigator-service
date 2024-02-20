@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ErrorMessage, Form } from 'vee-validate';
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { boolean, mixed, number, object, string } from 'yup';
 
 import {
@@ -13,19 +13,20 @@ import {
   InputText,
   TextArea
 } from '@/components/form';
-import { Button, Divider } from '@/lib/primevue';
+import { Button } from '@/lib/primevue';
 import { userService } from '@/services';
 import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
+import { INTAKE_STATUS_LIST } from '@/utils/enums';
 import { formatJwtUsername } from '@/utils/formatters';
 
-import type { IInputEvent } from '@/interfaces';
-import type { User } from '@/types';
 import type { Ref } from 'vue';
+import type { IInputEvent } from '@/interfaces';
+import type { Submission, User } from '@/types';
 
 // Props
 type Props = {
   editable: boolean;
-  submission: any;
+  submission: Submission;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
@@ -34,23 +35,9 @@ const props = withDefaults(defineProps<Props>(), {});
 const emit = defineEmits(['submit', 'cancel']);
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([props.submission.user]);
+const assigneeOptions: Ref<Array<User>> = ref([]);
 
-// Default form values
-const initialFormValues: any = {
-  ...props.submission,
-  applicationStatus: props.submission.applicationStatus,
-  bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
-  submittedAt: new Date(props.submission.submittedAt),
-  submittedBy: formatJwtUsername(props.submission.submittedBy),
-  submissionTypes: {
-    emergencyAssist: props.submission.emergencyAssist,
-    guidance: props.submission.guidance,
-    inapplicable: props.submission.inapplicable,
-    inquiry: props.submission.inquiry,
-    statusRequest: props.submission.statusRequest
-  }
-};
+const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Form validation schema
 const formSchema = object({
@@ -62,7 +49,7 @@ const formSchema = object({
       otherwise: (schema) => schema.notRequired()
     })
     .label('ATS Client Number'),
-  confirmationId: string().required().label('Confirmation ID'),
+  activityId: string().required().label('Activity ID'),
   contactEmail: string().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   companyNameRegistered: string().notRequired().label('Company'),
@@ -82,17 +69,28 @@ const formSchema = object({
     emergencyAssistance: boolean(),
     inapplicable: boolean()
   })
-    .test('at-least-one-true', 'At least one submission type must be selected', (obj) => {
-      return Object.values(obj).some((value) => value);
+    .test('at-least-one-true', 'At least one submission type must be selected', (input) => {
+      return Object.values(input).some((value) => value);
     })
     .label('Submission Types'),
   user: mixed()
     .when('intakeStatus', {
-      is: (val: string) => val !== 'Submitted',
-      then: (schema) => schema.required(),
-      otherwise: (schema) => schema.notRequired()
+      is: (val: string) => val === INTAKE_STATUS_LIST.SUBMITTED,
+      then: (schema) =>
+        schema
+          .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
+            if (typeof obj === 'object') return true;
+            if (typeof obj === 'string') {
+              return obj === null || obj === undefined || obj.length === 0;
+            }
+          })
+          .nullable(),
+      otherwise: (schema) =>
+        schema.test('expect-user', 'Assigned to must be a selected user', (obj) => {
+          return typeof obj === 'object';
+        })
     })
-    .label('Assignee')
+    .label('Assigned to')
 });
 
 // Actions
@@ -119,8 +117,9 @@ const onCancel = () => {
 const onSubmit = (values: any) => {
   // Ensure child values are reset if parent not set
   if (!values.addedToATS) {
-    values.atsClientNumber = null;
+    values.atsClientNumber = undefined;
   }
+
   if (!values.financiallySupported) {
     values.financiallySupportedBC = false;
     values.financiallySupportedIndigenous = false;
@@ -128,16 +127,36 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  const toSubmit = { ...values, ...values.submissionTypes };
-  delete toSubmit.submissionTypes;
-
-  emit('submit', toSubmit);
+  emit('submit', { ...values, assignedUserId: values.user.userId, ...values.submissionTypes });
 };
+
+onBeforeMount(async () => {
+  assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+
+  // Default form values
+  initialFormValues.value = {
+    ...props.submission,
+    applicationStatus: props.submission.applicationStatus,
+    bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
+    submittedAt: new Date(props.submission.submittedAt),
+    submittedBy: formatJwtUsername(props.submission.submittedBy),
+    submissionTypes: {
+      emergencyAssist: props.submission.emergencyAssist,
+      guidance: props.submission.guidance,
+      inapplicable: props.submission.inapplicable,
+      inquiry: props.submission.inquiry,
+      statusRequest: props.submission.statusRequest
+    },
+    activityId: props.submission.activityId,
+    user: assigneeOptions.value[0]
+  };
+});
 </script>
 
 <template>
   <Form
-    v-slot="{ handleReset, values }"
+    v-if="initialFormValues"
+    v-slot="{ handleReset, values, errors }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="onSubmit"
@@ -145,7 +164,7 @@ const onSubmit = (values: any) => {
     <div class="formgrid grid">
       <InputText
         class="col-4"
-        name="confirmationId"
+        name="activityId"
         label="Activity"
         :disabled="true"
       />
@@ -239,7 +258,7 @@ const onSubmit = (values: any) => {
         label="AST notes"
         :disabled="!props.editable"
       />
-      <div class="col-5">
+      <div class="col-6">
         <Checkbox
           class="col-12"
           name="astUpdated"
@@ -336,42 +355,41 @@ const onSubmit = (values: any) => {
           :disabled="!props.editable"
         />
       </div>
-      <div class="col-1">
-        <Divider
-          layout="vertical"
-          style="height: 100%"
-        />
-      </div>
-      <div class="col-5">
+      <div class="col-6">
         <Checkbox
           class="col-12"
           name="submissionTypes.statusRequest"
           label="Submission Type: Request for Status"
           :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.emergencyAssist"
           label="Submission Type: Request for Emergency Assistance"
           :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.guidance"
           label="Submission Type: Request for Guidance"
           :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
           label="Submission Type: General Inquiry"
           :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inapplicable"
           label="Submission Type: Inapplicable"
           :disabled="!props.editable"
+          :invalid="props.editable && !!errors.submissionTypes"
         />
         <div
           v-if="props.editable"
@@ -399,7 +417,7 @@ const onSubmit = (values: any) => {
         :disabled="!props.editable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
-        @on-input="(e) => onAssigneeInput(e)"
+        @on-input="onAssigneeInput"
       />
       <Dropdown
         class="col-4"

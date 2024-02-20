@@ -7,13 +7,13 @@ import type { NextFunction, Request, Response } from '../../interfaces/IExpress'
 const router = express.Router();
 router.use(requireSomeAuth);
 
-// note create endpoint
+// Note create endpoint
 router.put('/', (req: Request, res: Response, next: NextFunction): void => {
   noteController.createNote(req, res, next);
 });
 
-// note list by submission endpoint
-router.get('/list/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
+// Note list by activity endpoint
+router.get('/list/:activityId', (req: Request, res: Response, next: NextFunction): void => {
   noteController.listNotes(req, res, next);
 });
 

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import { Calendar, Dropdown } from '@/lib/primevue';
-import { chefsService, userService } from '@/services';
+import { submissionService, userService } from '@/services';
 import { Regex } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { User } from '@/types';
+import type { Statistics, User } from '@/types';
 
 // Types
 type StatisticFilters = {
@@ -18,9 +18,16 @@ type StatisticFilters = {
   userId?: string;
 };
 
+// Props
+type Props = {
+  loading: boolean;
+  initialStatistics: Statistics | undefined;
+};
+
+const props = withDefaults(defineProps<Props>(), {});
+
 // State
-const loading: Ref<boolean> = ref(false);
-const statistics: Ref<any> = ref(undefined);
+const statistics: Ref<Statistics | undefined> = ref(props.initialStatistics);
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const statisticFilters: Ref<StatisticFilters> = ref({});
 
@@ -28,7 +35,9 @@ const statisticFilters: Ref<StatisticFilters> = ref({});
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
 
 const getPercentage = (input: number) =>
-  statistics.value.total_submissions > 0 ? Math.round((input / statistics.value.total_submissions) * 100) : 0;
+  statistics.value && statistics.value.total_submissions > 0
+    ? Math.round((input / statistics.value.total_submissions) * 100)
+    : 0;
 
 const isEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
@@ -48,26 +57,20 @@ async function onAssigneeInput(e: IInputEvent) {
 watch(
   statisticFilters,
   async () => {
-    let valid =
+    // Only submit if the user filter is empty or valid uuid
+    // It's possible for the value to contain a garbage string due to how PrimeVue editable dropdown works
+    let validUser =
       isEmpty(statisticFilters.value.userId) ||
       (!isEmpty(statisticFilters.value.userId) &&
         uuidValidate(statisticFilters.value.userId as string) &&
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
-    if (valid) {
-      loading.value = true;
-      statistics.value = (
-        await chefsService.getStatistics(statisticFilters.value).finally(() => (loading.value = false))
-      ).data;
+    if (validUser) {
+      statistics.value = (await submissionService.getStatistics(statisticFilters.value)).data;
     }
   },
   { deep: true }
 );
-
-onMounted(async () => {
-  loading.value = true;
-  statistics.value = (await chefsService.getStatistics().finally(() => (loading.value = false))).data;
-});
 </script>
 
 <template>

@@ -2,17 +2,17 @@
 import { ref } from 'vue';
 
 import PermitModal from '@/components/permit/PermitModal.vue';
-import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Permit } from '@/types';
+import type { Permit, PermitType } from '@/types';
 
 // Props
 type Props = {
   permit: Permit;
-  submissionId: string;
+  permitTypes: Array<PermitType>;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
@@ -22,6 +22,9 @@ const emit = defineEmits(['permit:delete']);
 
 // State
 const cardData: Ref<Permit> = ref(props.permit);
+const permitType: Ref<PermitType | undefined> = ref(
+  props.permitTypes.find((x) => x.permitTypeId === props.permit.permitTypeId) as PermitType
+);
 const permitModalVisible: Ref<boolean> = ref(false);
 
 // Actions
@@ -41,27 +44,25 @@ const confirmDelete = (data: Permit) => {
           .deletePermit(data.permitId)
           .then(() => {
             emit('permit:delete', data);
-            permitModalVisible.value = false;
             toast.success('Permit deleted');
           })
-          .catch(() => {});
+          .catch((e: any) => toast.error('Failed to delete permit', e.message))
+          .finally(() => (permitModalVisible.value = false));
       }
     });
   }
 };
 
 async function onPermitSubmit(data: Permit) {
-  await permitService.updatePermit({ ...data, submissionId: props.submissionId });
-
-  cardData.value = {
-    ...data,
-    submittedDate: data.submittedDate ? new Date(data.submittedDate).toISOString() : undefined,
-    adjudicationDate: data.adjudicationDate ? new Date(data.adjudicationDate).toISOString() : undefined
-  };
-
-  permitModalVisible.value = false;
-
-  toast.success('Permit saved');
+  try {
+    const result = await permitService.updatePermit({ ...data, activityId: props.permit.activityId });
+    cardData.value = result.data;
+    toast.success('Permit saved');
+  } catch (e: any) {
+    toast.error('Failed to update permit', e.message);
+  } finally {
+    permitModalVisible.value = false;
+  }
 }
 </script>
 
@@ -70,7 +71,7 @@ async function onPermitSubmit(data: Permit) {
     <template #header>
       <div class="flex flex-row px-3 pt-2">
         <div class="flex-grow-1">
-          <h2>{{ cardData.permitType?.name }}</h2>
+          <h3>{{ permitType?.name }}</h3>
         </div>
         <div class="flex flex-none">
           <Button
@@ -78,10 +79,16 @@ async function onPermitSubmit(data: Permit) {
             aria-label="Edit"
             @click="permitModalVisible = true"
           >
-            <font-awesome-icon icon="fa-solid fa-edit" />
-            &nbsp; Edit
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-edit"
+            />
+            Edit
           </Button>
         </div>
+      </div>
+      <div class="flex flex-row px-3">
+        <Divider type="solid" />
       </div>
     </template>
     <template #content>
@@ -112,15 +119,15 @@ async function onPermitSubmit(data: Permit) {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Agency:</span>
-              {{ cardData.permitType?.agency }}
+              {{ permitType?.agency }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Business domain:</span>
-              {{ cardData.permitType?.businessDomain }}
+              {{ permitType?.businessDomain }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Source system:</span>
-              {{ cardData.permitType?.sourceSystem }}
+              {{ permitType?.sourceSystem }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Permit ID:</span>
@@ -156,6 +163,7 @@ async function onPermitSubmit(data: Permit) {
   <PermitModal
     v-model:visible="permitModalVisible"
     :permit="cardData"
+    :permit-types="permitTypes"
     @permit:delete="confirmDelete"
     @permit:submit="onPermitSubmit"
   />
@@ -179,11 +187,12 @@ p {
   border-style: solid;
   border-width: 1px;
 
-  .p-card-body {
+  :deep(.p-card-body) {
     padding-top: 0;
     padding-bottom: 0;
 
-    .p-card-content {
+    :deep(.p-card-content) {
+      padding-top: 0;
       padding-bottom: 0;
     }
   }

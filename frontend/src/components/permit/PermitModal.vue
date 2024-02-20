@@ -5,18 +5,17 @@ import { object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
-import { permitService } from '@/services';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
 import { PERMIT_STATUS } from '@/utils/enums';
-import { onMounted } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType } from '@/types';
+import type { Permit, PermitForm, PermitType } from '@/types';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
 type Props = {
   permit?: Permit;
+  permitTypes: Array<PermitType>;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -28,20 +27,23 @@ const emit = defineEmits(['permit:delete', 'permit:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
-const permitTypes: Ref<Array<PermitType> | undefined> = ref(undefined);
+const permitType: Ref<PermitType | undefined> = ref(
+  props.permitTypes.find((x) => x.permitTypeId === props.permit?.permitTypeId)
+);
 
 // Default form values
-let initialFormValues: any = {
-  permitType: props.permit?.permitType,
+let initialFormValues: PermitForm = {
+  permitId: props.permit?.permitId,
+  permitType: permitType.value,
   needed: props.permit?.needed,
   status: props.permit?.status ?? PERMIT_STATUS.NEW,
-  agency: props.permit?.permitType?.agency,
+  agency: permitType.value?.agency,
   trackingId: props.permit?.trackingId,
-  businessDomain: props.permit?.permitType?.businessDomain,
+  businessDomain: permitType.value?.businessDomain,
   authStatus: props.permit?.authStatus,
-  sourceSystem: props.permit?.permitType?.sourceSystem ?? props.permit?.permitType?.sourceSystemAcronym,
+  sourceSystem: permitType.value?.sourceSystem ?? permitType.value?.sourceSystemAcronym,
   submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
-  permitId: props.permit?.permitId,
+  issuedPermitId: props.permit?.issuedPermitId,
   adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
 };
 
@@ -62,36 +64,37 @@ function onDelete() {
 }
 
 function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
-  const type: PermitType = e.value;
+  permitType.value = e.value;
   setValues({
-    agency: type.agency,
-    businessDomain: type.businessDomain,
-    sourceSystem: type.sourceSystem ?? type.sourceSystemAcronym
+    agency: e.value.agency,
+    businessDomain: e.value.businessDomain,
+    sourceSystem: e.value.sourceSystem ?? e.value.sourceSystemAcronym
   });
 }
 
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
-function onSubmit(data: any, { resetForm }) {
+function onSubmit(data: PermitForm, { resetForm }) {
   if (props.permit) initialFormValues = data;
   else resetForm();
-  emit('permit:submit', data);
-}
 
-onMounted(async () => {
-  permitTypes.value = (await permitService.getPermitTypes())?.data;
-});
+  // Convert form back to a proper Permit type
+  emit('permit:submit', {
+    ...data,
+    permitTypeId: data.permitType?.permitTypeId,
+    submittedDate: data.submittedDate?.toISOString(),
+    adjudicationDate: data.adjudicationDate?.toISOString()
+  } as Permit);
+}
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-model-argument -->
   <Dialog
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6"
   >
-    <!-- eslint-enable vue/no-v-model-argument -->
     <template #header>
       <font-awesome-icon
         v-if="props.permit"

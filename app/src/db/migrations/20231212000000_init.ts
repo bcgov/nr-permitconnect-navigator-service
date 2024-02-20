@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { NIL } from 'uuid';
+import { NIL, v4 as uuidv4 } from 'uuid';
 
 import stamps from '../stamps';
 
@@ -10,12 +10,12 @@ export async function up(knex: Knex): Promise<void> {
     Promise.resolve()
       // Create public schema triggers
       .then(() =>
-        knex.schema.raw(`create or replace function set_updatedAt()
+        knex.schema.raw(`create or replace function set_updated_at()
           returns trigger
           language plpgsql
           as $$
           begin
-            new."updatedAt" = now();
+            new."updated_at" = now();
             return new;
           end;
           $$`)
@@ -29,177 +29,171 @@ export async function up(knex: Knex): Promise<void> {
           stamps(knex, table);
         })
       )
-      .then(() =>
-        knex.schema.raw(`create trigger before_update_identity_provider_trigger
-          before update on public.identity_provider
-          for each row execute procedure public.set_updatedAt();`)
-      )
 
       .then(() =>
         knex.schema.createTable('user', (table) => {
-          table.uuid('userId').primary();
-          table.uuid('identityId').index();
+          table.uuid('user_id').primary();
+          table.uuid('identity_id').index();
           table.text('idp').references('idp').inTable('identity_provider').onUpdate('CASCADE').onDelete('CASCADE');
           table.text('username').notNullable().index();
           table.text('email').index();
-          table.text('firstName');
-          table.text('fullName');
-          table.text('lastName');
+          table.text('first_name');
+          table.text('full_name');
+          table.text('last_name');
           table.boolean('active').notNullable().defaultTo(true);
           stamps(knex, table);
         })
       )
+
       .then(() =>
-        knex.schema.raw(`create trigger before_update_user_trigger
-          before update on "user"
-          for each row execute procedure public.set_updatedAt();`)
+        knex.schema.createTable('initiative', (table) => {
+          table.uuid('initiative_id').primary();
+          table.text('code').notNullable();
+          table.text('label').notNullable();
+          stamps(knex, table);
+        })
+      )
+
+      .then(() =>
+        knex.schema.createTable('activity', (table) => {
+          table.text('activity_id').primary();
+          table
+            .uuid('initiative_id')
+            .notNullable()
+            .references('initiative_id')
+            .inTable('initiative')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          stamps(knex, table);
+        })
       )
 
       .then(() =>
         knex.schema.createTable('submission', (table) => {
-          table.uuid('submissionId').primary();
-          table.uuid('assignedToUserId').references('userId').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
-          table.text('confirmationId').notNullable();
-          table.timestamp('submittedAt', { useTz: true }).notNullable();
-          table.text('submittedBy').notNullable();
-          table.text('locationPIDs');
-          table.text('companyNameRegistered');
-          table.text('contactName');
-          table.text('contactPhoneNumber');
-          table.text('contactEmail');
-          table.text('projectName');
-          table.text('singleFamilyUnits');
-          table.text('streetAddress');
+          table.uuid('submission_id').primary();
+          table
+            .text('activity_id')
+            .notNullable()
+            .references('activity_id')
+            .inTable('activity')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
+          table.timestamp('submitted_at', { useTz: true }).notNullable();
+          table.text('submitted_by').notNullable();
+          table.text('location_pids');
+          table.text('company_name_registered');
+          table.text('contact_name');
+          table.text('contact_phone_number');
+          table.text('contact_email');
+          table.text('project_name');
+          table.text('single_family_units');
+          table.text('street_address');
           table.integer('latitude');
           table.integer('longitude');
-          table.integer('queuePriority');
-          table.text('relatedPermits');
-          table.text('astNotes');
-          table.boolean('astUpdated');
-          table.boolean('addedToATS');
-          table.text('atsClientNumber');
-          table.boolean('ltsaCompleted');
-          table.boolean('bcOnlineCompleted');
-          table.boolean('naturalDisaster');
-          table.boolean('financiallySupported');
-          table.boolean('financiallySupportedBC');
-          table.boolean('financiallySupportedIndigenous');
-          table.boolean('financiallySupportedNonProfit');
-          table.boolean('financiallySupportedHousingCoop');
-          table.boolean('aaiUpdated');
-          table.text('waitingOn');
-          table.timestamp('bringForwardDate', { useTz: true });
+          table.integer('queue_priority');
+          table.text('related_permits');
+          table.text('ast_notes');
+          table.boolean('ast_updated').notNullable().defaultTo(false);
+          table.boolean('added_to_ats').notNullable().defaultTo(false);
+          table.text('ats_client_number');
+          table.boolean('ltsa_completed').notNullable().defaultTo(false);
+          table.boolean('bc_online_completed').notNullable().defaultTo(false);
+          table.boolean('natural_disaster').notNullable().defaultTo(false);
+          table.boolean('financially_supported').notNullable().defaultTo(false);
+          table.boolean('financially_supported_bc').notNullable().defaultTo(false);
+          table.boolean('financially_supported_indigenous').notNullable().defaultTo(false);
+          table.boolean('financially_supported_non_profit').notNullable().defaultTo(false);
+          table.boolean('financially_supported_housing_coop').notNullable().defaultTo(false);
+          table.boolean('aai_updated').notNullable().defaultTo(false);
+          table.text('waiting_on');
+          table.timestamp('bring_forward_date', { useTz: true });
           table.text('notes');
-          table.text('intakeStatus');
-          table.text('applicationStatus');
+          table.text('intake_status');
+          table.text('application_status');
           table.boolean('guidance').notNullable().defaultTo(false);
-          table.boolean('statusRequest').notNullable().defaultTo(false);
+          table.boolean('status_request').notNullable().defaultTo(false);
           table.boolean('inquiry').notNullable().defaultTo(false);
-          table.boolean('emergencyAssist').notNullable().defaultTo(false);
+          table.boolean('emergency_assist').notNullable().defaultTo(false);
           table.boolean('inapplicable').notNullable().defaultTo(false);
           stamps(knex, table);
         })
       )
-      .then(() =>
-        knex.schema.raw(`create trigger before_update_submission_trigger
-          before update on public.submission
-          for each row execute procedure public.set_updatedAt();`)
-      )
 
       .then(() =>
         knex.schema.createTable('document', (table) => {
-          table.uuid('documentId').primary();
+          table.uuid('document_id').primary();
           table
-            .uuid('submissionId')
+            .text('activity_id')
             .notNullable()
-            .references('submissionId')
-            .inTable('submission')
+            .references('activity_id')
+            .inTable('activity')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table.text('filename').notNullable();
-          table.text('mimeType').defaultTo('application/octet-stream').notNullable();
+          table.text('mime_type').defaultTo('application/octet-stream').notNullable();
           table.bigInteger('filesize').notNullable();
           stamps(knex, table);
-          table.unique(['documentId', 'submissionId']);
+          table.unique(['document_id', 'activity_id']);
         })
-      )
-      .then(() =>
-        knex.schema.raw(`create trigger before_update_document_trigger
-          before update on public.document
-          for each row execute procedure public.set_updatedAt();`)
       )
 
       .then(() =>
         knex.schema.createTable('permit_type', (table) => {
-          table.specificType('permitTypeId', 'integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY');
+          table.specificType('permit_type_id', 'integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY');
           table.text('agency').notNullable();
           table.text('division');
           table.text('branch');
-          table.text('businessDomain').notNullable();
+          table.text('business_domain').notNullable();
           table.text('type').notNullable();
           table.text('family');
           table.text('name').notNullable();
-          table.text('nameSubtype');
+          table.text('name_subtype');
           table.text('acronym');
-          table.boolean('trackedInATS');
-          table.text('sourceSystem');
-          table.text('sourceSystemAcronym').notNullable();
+          table.boolean('tracked_in_ats').notNullable().defaultTo(false);
+          table.text('source_system');
+          table.text('source_system_acronym').notNullable();
           stamps(knex, table);
         })
-      )
-      .then(() =>
-        knex.schema.raw(`create trigger before_update_permit_type_trigger
-          before update on public.permit_type
-          for each row execute procedure public.set_updatedAt();`)
       )
 
       .then(() =>
         knex.schema.createTable('permit', (table) => {
-          table.uuid('permitId').primary();
+          table.uuid('permit_id').primary();
           table
-            .integer('permitTypeId')
+            .integer('permit_type_id')
             .notNullable()
-            .references('permitTypeId')
+            .references('permit_type_id')
             .inTable('permit_type')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table
-            .uuid('submissionId')
+            .text('activity_id')
             .notNullable()
-            .references('submissionId')
-            .inTable('submission')
+            .references('activity_id')
+            .inTable('activity')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
-          table.text('issuedPermitId');
-          table.text('trackingId');
-          table.text('authStatus');
+          table.text('issued_permit_id');
+          table.text('tracking_id');
+          table.text('auth_status');
           table.text('needed');
           table.text('status');
-          table.timestamp('submittedDate', { useTz: true });
-          table.timestamp('adjudicationDate', { useTz: true });
+          table.timestamp('submitted_date', { useTz: true });
+          table.timestamp('adjudication_date', { useTz: true });
           stamps(knex, table);
-          table.unique(['permitId', 'permitTypeId', 'submissionId']);
+          table.unique(['permit_id', 'permit_type_id', 'activity_id']);
         })
-      )
-      .then(() =>
-        knex.schema.raw(`create trigger before_insert_permit_trigger
-          before insert on public.permit
-          for each row execute procedure public.set_updatedAt();`)
-      )
-      .then(() =>
-        knex.schema.raw(`create trigger before_update_permit_trigger
-          before update on public.permit
-          for each row execute procedure public.set_updatedAt();`)
       )
 
       .then(() =>
         knex.schema.createTable('note', (table) => {
           table.uuid('note_id').primary();
           table
-            .uuid('submission_id')
+            .text('activity_id')
             .notNullable()
-            .references('submissionId')
-            .inTable('submission')
+            .references('activity_id')
+            .inTable('activity')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table.text('note').defaultTo('').notNullable();
@@ -209,10 +203,53 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      // Create public schema table triggers
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_identity_provider_trigger
+        before update on public.identity_provider
+        for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_user_trigger
+        before update on "user"
+        for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_submission_trigger
+        before update on public.submission
+        for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_document_trigger
+        before update on public.document
+        for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_permit_type_trigger
+          before update on public.permit_type
+          for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_insert_permit_trigger
+          before insert on public.permit
+          for each row execute procedure public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_permit_trigger
+          before update on public.permit
+          for each row execute procedure public.set_updated_at();`)
+      )
+
       .then(() =>
         knex.schema.raw(`create trigger before_update_note_trigger
           before update on public.note
-          for each row execute procedure public.set_updatedAt();`)
+          for each row execute procedure public.set_updated_at();`)
       )
 
       // Create public schema functions
@@ -254,27 +291,27 @@ export async function up(knex: Knex): Promise<void> {
             return query
             select
               count(*),
-              (select count(*) from public.submission where "submittedAt" between cast(date_from as timestamp) and cast(date_to as timestamp)),
-              (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submittedAt") and extract(year from cast(month_year as timestamp)) = extract(year from "submittedAt")),
-              (select count(*) from public.submission where "assignedToUserId" = user_id),
-              count(*) filter (where s."intakeStatus" = 'Submitted'),
-              count(*) filter (where s."intakeStatus" = 'Assigned'),
-              count(*) filter (where s."intakeStatus" = 'Completed'),
-              count(*) filter (where s."applicationStatus" = 'New'),
-              count(*) filter (where s."applicationStatus" = 'In Progress'),
-              count(*) filter (where s."applicationStatus" = 'Delayed'),
-              count(*) filter (where s."applicationStatus" = 'Completed'),
-              count(*) filter (where s."waitingOn" is not null),
-              count(*) filter (where s."queuePriority" = 0),
-              count(*) filter (where s."queuePriority" = 1),
-              count(*) filter (where s."queuePriority" = 2),
-              count(*) filter (where s."queuePriority" = 3),
-              count(*) filter (where s."queuePriority" = 4),
-              count(*) filter (where s."queuePriority" = 5),
+              (select count(*) from public.submission where "submitted_at" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+              (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submitted_at") and extract(year from cast(month_year as timestamp)) = extract(year from "submitted_at")),
+              (select count(*) from public.submission where "assigned_user_id" = user_id),
+              count(*) filter (where s."intake_status" = 'Submitted'),
+              count(*) filter (where s."intake_status" = 'Assigned'),
+              count(*) filter (where s."intake_status" = 'Completed'),
+              count(*) filter (where s."application_status" = 'New'),
+              count(*) filter (where s."application_status" = 'In Progress'),
+              count(*) filter (where s."application_status" = 'Delayed'),
+              count(*) filter (where s."application_status" = 'Completed'),
+              count(*) filter (where s."waiting_on" is not null),
+              count(*) filter (where s."queue_priority" = 0),
+              count(*) filter (where s."queue_priority" = 1),
+              count(*) filter (where s."queue_priority" = 2),
+              count(*) filter (where s."queue_priority" = 3),
+              count(*) filter (where s."queue_priority" = 4),
+              count(*) filter (where s."queue_priority" = 5),
               count(*) filter (where s."guidance" = true),
-              count(*) filter (where s."statusRequest" = true),
+              count(*) filter (where s."status_request" = true),
               count(*) filter (where s."inquiry" = true),
-              count(*) filter (where s."emergencyAssist" = true),
+              count(*) filter (where s."emergency_assist" = true),
               count(*) filter (where s."inapplicable" = true)
             from public.submission s;
         end; $$`)
@@ -286,14 +323,14 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.withSchema('audit').createTable('logged_actions', (table) => {
           table.specificType('id', 'integer GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY');
-          table.text('schemaName').notNullable().index();
-          table.text('tableName').notNullable().index();
-          table.text('dbUser').notNullable();
-          table.text('updatedByUsername');
-          table.timestamp('actionTimestamp', { useTz: true }).defaultTo(knex.fn.now()).index();
+          table.text('schema_name').notNullable().index();
+          table.text('table_name').notNullable().index();
+          table.text('db_user').notNullable();
+          table.text('updated_by_username');
+          table.timestamp('action_timestamp', { useTz: true }).defaultTo(knex.fn.now()).index();
           table.text('action').notNullable().index();
-          table.json('originalData');
-          table.json('newData');
+          table.json('original_data');
+          table.json('new_data');
         })
       )
 
@@ -307,12 +344,12 @@ export async function up(knex: Knex): Promise<void> {
               if (TG_OP = 'UPDATE') then
                   v_old_data := row_to_json(OLD);
                   v_new_data := row_to_json(NEW);
-                  insert into audit.logged_actions ("schemaName", "tableName", "dbUser", "updatedByUsername", "actionTimestamp", "action", "originalData", "newData")
-                  values (TG_TABLE_SCHEMA::TEXT, TG_TABLE_NAME::TEXT, SESSION_USER::TEXT, NEW."updatedBy", now(), TG_OP::TEXT, v_old_data, v_new_data);
+                  insert into audit.logged_actions ("schema_name", "table_name", "db_user", "updated_by_username", "action_timestamp", "action", "original_data", "new_data")
+                  values (TG_TABLE_SCHEMA::TEXT, TG_TABLE_NAME::TEXT, SESSION_USER::TEXT, NEW."updated_by", now(), TG_OP::TEXT, v_old_data, v_new_data);
                   RETURN NEW;
               elsif (TG_OP = 'DELETE') then
                   v_old_data := row_to_json(OLD);
-                  insert into audit.logged_actions ("schemaName", "tableName", "dbUser", "actionTimestamp", "action", "originalData")
+                  insert into audit.logged_actions ("schema_name", "table_name", "db_user", "action_timestamp", "action", "original_data")
                   values (TG_TABLE_SCHEMA::TEXT, TG_TABLE_NAME::TEXT, SESSION_USER::TEXT, now(), TG_OP::TEXT, v_old_data);
                   RETURN OLD;
               else
@@ -385,12 +422,23 @@ export async function up(knex: Knex): Promise<void> {
       .then(() => {
         const users = ['system'];
         const items = users.map((user) => ({
-          userId: NIL,
+          user_id: NIL,
           username: user,
           active: true,
-          createdBy: NIL
+          created_by: NIL
         }));
         return knex('user').insert(items);
+      })
+
+      .then(() => {
+        const items = [
+          {
+            initiative_id: uuidv4(),
+            code: 'HOUSING',
+            label: 'Housing'
+          }
+        ];
+        return knex('initiative').insert(items);
       })
 
       .then(() => {
@@ -399,238 +447,238 @@ export async function up(knex: Knex): Promise<void> {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Forest Resiliency and Archaeology',
             branch: 'Archaeology',
-            businessDomain: 'Archaeology',
+            business_domain: 'Archaeology',
             type: 'Alteration',
             name: 'Site Alteration Permit',
             acronym: 'SAP',
-            trackedInATS: false,
-            sourceSystem: 'Archaeology Permit Tracking System',
-            sourceSystemAcronym: 'APTS'
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Forest Resiliency and Archaeology',
             branch: 'Archaeology',
-            businessDomain: 'Archaeology',
+            business_domain: 'Archaeology',
             type: 'Inspection',
             name: 'Heritage Inspection Permit',
             acronym: 'HIP',
-            trackedInATS: false,
-            sourceSystem: 'Archaeology Permit Tracking System',
-            sourceSystemAcronym: 'APTS'
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Forest Resiliency and Archaeology',
             branch: 'Archaeology',
-            businessDomain: 'Archaeology',
+            business_domain: 'Archaeology',
             type: 'Investigation',
             name: 'Investigation Permit',
-            trackedInATS: false,
-            sourceSystem: 'Archaeology Permit Tracking System',
-            sourceSystemAcronym: 'APTS'
+            tracked_in_ats: false,
+            source_system: 'Archaeology Permit Tracking System',
+            source_system_acronym: 'APTS'
           },
           {
             agency: 'Environment and Climate Change Strategy',
             division: 'Environmental Protection',
             branch: 'Environmental Emergencies and Land Remediation',
-            businessDomain: 'Contaminated Sites',
+            business_domain: 'Contaminated Sites',
             type: 'Contaminated Sites Remediation',
             name: 'Contaminated Sites Remediation Permit',
-            trackedInATS: false,
-            sourceSystem: 'Contaminated Sites Application Tracking System',
-            sourceSystemAcronym: 'CATS'
+            tracked_in_ats: false,
+            source_system: 'Contaminated Sites Application Tracking System',
+            source_system_acronym: 'CATS'
           },
           {
             agency: 'Forests',
             division: 'Integrated Resource Operations',
             branch: 'Forest Tenures',
-            businessDomain: 'Forestry',
+            business_domain: 'Forestry',
             type: 'Occupant Licence To Cut',
             name: 'Occupant Licence to Cut',
             acronym: 'OLTC',
-            sourceSystem: 'Forest Tenure Administration',
-            sourceSystemAcronym: 'FTA'
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
           },
           {
             agency: 'Forests',
             division: 'Integrated Resource Operations',
             branch: 'Forest Tenures',
-            businessDomain: 'Forestry',
+            business_domain: 'Forestry',
             type: 'Private Timber Mark',
             name: 'Private Timber Mark',
             acronym: 'PTM',
-            sourceSystem: 'Forest Tenure Administration',
-            sourceSystemAcronym: 'FTA'
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Commercial General',
             family: 'Crown Land Tenure',
             name: 'Commercial General',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Nominal Rent Tenure',
             family: 'Crown Land Tenure',
             name: 'Nominal Rent Tenure',
             acronym: 'NRT',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Residential',
             family: 'Crown Land Tenure',
             name: 'Residential',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Roadways - Public',
             family: 'Crown Land Tenure',
             name: 'Roadways - Public',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Sponsored Crown Grant',
             family: 'Crown Land Tenure',
             name: 'Sponsored Crown Grant',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Integrated Resource Operations',
             branch: 'Lands Program',
-            businessDomain: 'Lands',
+            business_domain: 'Lands',
             type: 'Utilities',
             family: 'Crown Land Tenure',
             name: 'Utilities',
-            sourceSystem: 'Tantalis',
-            sourceSystemAcronym: 'TANTALIS'
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
           },
           {
             agency: 'Transportation and Infrastructure',
-            businessDomain: 'Transportation',
+            business_domain: 'Transportation',
             type: 'Rural Subdivision',
             name: 'Rural subdivision',
-            sourceSystemAcronym: 'MOTI'
+            source_system_acronym: 'MOTI'
           },
           {
             agency: 'Transportation and Infrastructure',
-            businessDomain: 'Transportation',
+            business_domain: 'Transportation',
             type: 'Rezoning',
             name: 'Rezoning',
-            sourceSystemAcronym: 'MOTI'
+            source_system_acronym: 'MOTI'
           },
           {
             agency: 'Transportation and Infrastructure',
-            businessDomain: 'Transportation',
+            business_domain: 'Transportation',
             type: 'Municipal Subdivision',
             name: 'Municipal subdivision',
-            sourceSystemAcronym: 'MOTI'
+            source_system_acronym: 'MOTI'
           },
           {
             agency: 'Transportation and Infrastructure',
-            businessDomain: 'Transportation',
+            business_domain: 'Transportation',
             type: 'Highway Use Permit',
             name: 'Highway Use Permit',
-            sourceSystemAcronym: 'MOTI'
+            source_system_acronym: 'MOTI'
           },
           {
             agency: 'Transportation and Infrastructure',
-            businessDomain: 'Transportation',
+            business_domain: 'Transportation',
             type: 'Other',
             name: 'Other',
-            sourceSystemAcronym: 'MOTI'
+            source_system_acronym: 'MOTI'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Fisheries, Aquaculture and Wild Salmon',
-            businessDomain: 'RAPR',
+            business_domain: 'RAPR',
             type: 'New',
             name: 'Riparian Area Development Permit',
-            sourceSystem: 'Riparian Areas Regulation Notification System',
-            sourceSystemAcronym: 'RARN'
+            source_system: 'Riparian Areas Regulation Notification System',
+            source_system_acronym: 'RARN'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Water Management',
-            businessDomain: 'Water',
+            business_domain: 'Water',
             type: 'Change Approval for Work in and About a Stream',
             name: 'Change approval for work in and about a stream',
             acronym: 'A-CIAS',
-            sourceSystem: 'Water Management Application',
-            sourceSystemAcronym: 'WMA'
+            source_system: 'Water Management Application',
+            source_system_acronym: 'WMA'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Water Management',
-            businessDomain: 'Water',
+            business_domain: 'Water',
             type: 'Notification',
             name: 'Notification of authorized changes in and about a stream',
             acronym: 'N-CIAS',
-            sourceSystem: 'Water Management Application',
-            sourceSystemAcronym: 'WMA'
+            source_system: 'Water Management Application',
+            source_system_acronym: 'WMA'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Water Management',
-            businessDomain: 'Water',
+            business_domain: 'Water',
             type: 'Use Approval',
             name: 'Short-term use approval',
             acronym: 'STU',
-            sourceSystem: 'Water Management Application',
-            sourceSystemAcronym: 'WMA'
+            source_system: 'Water Management Application',
+            source_system_acronym: 'WMA'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Water Management',
-            businessDomain: 'Water',
+            business_domain: 'Water',
             type: 'New Groundwater Licence',
             family: 'Water Licence',
             name: 'Groundwater Licence - Wells',
             acronym: 'PWD',
-            sourceSystem: 'Water Management Application',
-            sourceSystemAcronym: 'WMA'
+            source_system: 'Water Management Application',
+            source_system_acronym: 'WMA'
           },
           {
             agency: 'Water, Land and Resource Stewardship',
             division: 'Water, Fisheries and Coast',
             branch: 'Water Management',
-            businessDomain: 'Water',
+            business_domain: 'Water',
             type: 'Water Licence',
             family: 'Water Licence',
             name: 'Surface Water Licence',
             acronym: 'PD',
-            sourceSystem: 'Water Management Application',
-            sourceSystemAcronym: 'WMA'
+            source_system: 'Water Management Application',
+            source_system_acronym: 'WMA'
           }
         ];
 
@@ -656,25 +704,28 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropSchemaIfExists('audit'))
       // Drop public schema functions
       .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.get_activity_statistics'))
-      // Drop public schema tables and triggers
+      // Drop public schema table triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
-      .then(() => knex.schema.dropTableIfExists('note'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_trigger ON permit'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_insert_permit_trigger ON permit'))
-      .then(() => knex.schema.dropTableIfExists('permit'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_type_trigger ON permit_type'))
-      .then(() => knex.schema.dropTableIfExists('permit_type'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_document_trigger ON document'))
-      .then(() => knex.schema.dropTableIfExists('document'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_submission_trigger ON submission'))
-      .then(() => knex.schema.dropTableIfExists('submission'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_user_trigger ON "user"'))
-      .then(() => knex.schema.dropTableIfExists('user'))
       .then(() =>
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_provider_trigger ON identity_provider')
       )
+      // Drop public schema tables
+      .then(() => knex.schema.dropTableIfExists('note'))
+      .then(() => knex.schema.dropTableIfExists('permit'))
+      .then(() => knex.schema.dropTableIfExists('permit_type'))
+      .then(() => knex.schema.dropTableIfExists('document'))
+      .then(() => knex.schema.dropTableIfExists('submission'))
+      .then(() => knex.schema.dropTableIfExists('activity'))
+      .then(() => knex.schema.dropTableIfExists('initiative'))
+      .then(() => knex.schema.dropTableIfExists('user'))
       .then(() => knex.schema.dropTableIfExists('identity_provider'))
       // Drop public schema triggers
-      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.set_updatedAt'))
+      .then(() => knex.schema.raw('DROP FUNCTION IF EXISTS public.set_updated_at'))
   );
 }

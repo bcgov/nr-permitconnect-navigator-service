@@ -4,26 +4,27 @@ import { document } from '../db/models';
 const service = {
   /**
    * @function createDocument
-   * Creates a link between a submission and a previously existing object in COMS
-   * @param documentId COMS ID of an existing object
-   * @param submissionId Submission ID the document is associated with
-   * @param filename Original filename of the document
-   * @param mimeType Type of document
-   * @param filesize Size of document
+   * Creates a link between an activity and a previously existing object in COMS
+   * @param {string} documentId COMS ID of an existing object
+   * @param {string} activityId Activity ID the document is associated with
+   * @param {string} filename Original filename of the document
+   * @param {string} mimeType Type of document
+   * @param {number} filesize Size of document
+   * @returns {Promise<Document | null>} The result of running the create operation
    */
   createDocument: async (
     documentId: string,
-    submissionId: string,
+    activityId: string,
     filename: string,
     mimeType: string,
     filesize: number
   ) => {
     const response = await prisma.document.create({
       data: {
-        documentId: documentId,
-        submissionId: submissionId,
+        document_id: documentId,
+        activity_id: activityId,
         filename: filename,
-        mimeType: mimeType,
+        mime_type: mimeType,
         filesize: filesize
       }
     });
@@ -34,12 +35,13 @@ const service = {
   /**
    * @function deleteDocument
    * Delete a document
-   * @param documentId Document ID
+   * @param {string} documentId PCNS Document ID
+   * @returns {Promise<Document | null>} The result of running the delete operation
    */
   deleteDocument: async (documentId: string) => {
     const response = await prisma.document.delete({
       where: {
-        documentId: documentId
+        document_id: documentId
       }
     });
 
@@ -48,17 +50,17 @@ const service = {
 
   /**
    * @function listDocuments
-   * Retrieve a list of documents associated with a given submission
-   * @param submissionId PCNS Submission ID
-   * @returns Array of documents associated with the submission
+   * Retrieve a list of documents associated with a given activity
+   * @param {string} activityId PCNS Activity ID
+   * @returns {Promise<(Document | null)[]>} The result of running the findMany operation
    */
-  listDocuments: async (submissionId: string) => {
+  listDocuments: async (activityId: string) => {
     const response = await prisma.document.findMany({
       where: {
-        submissionId: submissionId
+        activity_id: activityId
       },
       orderBy: {
-        createdAt: 'asc'
+        created_at: 'asc'
       }
     });
 

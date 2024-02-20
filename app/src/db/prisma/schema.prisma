@@ -19,155 +19,178 @@ model knex_migrations_lock {
   is_locked Int?
 }
 
-model document {
-  documentId   String     @id @db.Uuid
-  submissionId String     @db.Uuid
-  filename     String
-  mimeType     String     @default("application/octet-stream")
-  filesize     BigInt
-  createdBy    String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt    DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy    String?
-  updatedAt    DateTime?  @db.Timestamptz(6)
-  submission   submission @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "document_submissionid_foreign")
+model activity {
+  activity_id   String       @id
+  initiative_id String       @db.Uuid
+  created_by    String?      @default("00000000-0000-0000-0000-000000000000")
+  created_at    DateTime?    @default(now()) @db.Timestamptz(6)
+  updated_by    String?
+  updated_at    DateTime?    @db.Timestamptz(6)
+  initiative    initiative   @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  document      document[]
+  note          note[]
+  permit        permit[]
+  submission    submission[]
+}
 
-  @@unique([documentId, submissionId], map: "document_documentid_submissionid_unique")
+model document {
+  document_id String    @id @db.Uuid
+  activity_id String
+  filename    String
+  mime_type   String    @default("application/octet-stream")
+  filesize    BigInt
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "document_activity_id_foreign")
+
+  @@unique([document_id, activity_id], map: "document_document_id_activity_id_unique")
 }
 
 model identity_provider {
-  idp       String    @id
-  active    Boolean   @default(true)
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000")
-  createdAt DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy String?
-  updatedAt DateTime? @db.Timestamptz(6)
-  user      user[]
+  idp        String    @id
+  active     Boolean   @default(true)
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  user       user[]
+}
+
+model initiative {
+  initiative_id String     @id @db.Uuid
+  code          String
+  label         String
+  created_by    String?    @default("00000000-0000-0000-0000-000000000000")
+  created_at    DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_by    String?
+  updated_at    DateTime?  @db.Timestamptz(6)
+  activity      activity[]
 }
 
 model note {
-  note_id       String     @id @db.Uuid
-  submission_id String     @db.Uuid
-  note          String     @default("")
-  note_type     String     @default("")
-  title         String     @default("")
-  createdBy     String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt     DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy     String?
-  updatedAt     DateTime?  @db.Timestamptz(6)
-  submission    submission @relation(fields: [submission_id], references: [submissionId], onDelete: Cascade, map: "note_submission_id_foreign")
+  note_id     String    @id @db.Uuid
+  activity_id String
+  note        String    @default("")
+  note_type   String    @default("")
+  title       String    @default("")
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
 }
 
 model permit {
-  permitId         String      @id @db.Uuid
-  permitTypeId     Int
-  submissionId     String      @db.Uuid
-  issuedPermitId   String?
-  trackingId       String?
-  authStatus       String?
-  needed           String?
-  status           String?
-  submittedDate    DateTime?   @db.Timestamptz(6)
-  adjudicationDate DateTime?   @db.Timestamptz(6)
-  createdBy        String?     @default("00000000-0000-0000-0000-000000000000")
-  createdAt        DateTime?   @default(now()) @db.Timestamptz(6)
-  updatedBy        String?
-  updatedAt        DateTime?   @db.Timestamptz(6)
-  permit_type      permit_type @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permittypeid_foreign")
-  submission       submission  @relation(fields: [submissionId], references: [submissionId], onDelete: Cascade, map: "permit_submissionid_foreign")
+  permit_id         String      @id @db.Uuid
+  permit_type_id    Int
+  activity_id       String
+  issued_permit_id  String?
+  tracking_id       String?
+  auth_status       String?
+  needed            String?
+  status            String?
+  submitted_date    DateTime?   @db.Timestamptz(6)
+  adjudication_date DateTime?   @db.Timestamptz(6)
+  created_by        String?     @default("00000000-0000-0000-0000-000000000000")
+  created_at        DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_by        String?
+  updated_at        DateTime?   @db.Timestamptz(6)
+  activity          activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
+  permit_type       permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
 
-  @@unique([permitId, permitTypeId, submissionId], map: "permit_permitid_permittypeid_submissionid_unique")
+  @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
 }
 
 model permit_type {
-  permitTypeId        Int       @id @default(autoincrement())
-  agency              String
-  division            String?
-  branch              String?
-  businessDomain      String
-  type                String
-  family              String?
-  name                String
-  nameSubtype         String?
-  acronym             String?
-  trackedInATS        Boolean?
-  sourceSystem        String?
-  sourceSystemAcronym String
-  createdBy           String?   @default("00000000-0000-0000-0000-000000000000")
-  createdAt           DateTime? @default(now()) @db.Timestamptz(6)
-  updatedBy           String?
-  updatedAt           DateTime? @db.Timestamptz(6)
-  permit              permit[]
+  permit_type_id        Int       @id @default(autoincrement())
+  agency                String
+  division              String?
+  branch                String?
+  business_domain       String
+  type                  String
+  family                String?
+  name                  String
+  name_subtype          String?
+  acronym               String?
+  tracked_in_ats        Boolean   @default(false)
+  source_system         String?
+  source_system_acronym String
+  created_by            String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at            DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by            String?
+  updated_at            DateTime? @db.Timestamptz(6)
+  permit                permit[]
 }
 
 model submission {
-  submissionId                    String     @id @db.Uuid
-  assignedToUserId                String?    @db.Uuid
-  confirmationId                  String
-  submittedAt                     DateTime   @db.Timestamptz(6)
-  submittedBy                     String
-  locationPIDs                    String?
-  companyNameRegistered           String?
-  contactName                     String?
-  contactPhoneNumber              String?
-  contactEmail                    String?
-  projectName                     String?
-  singleFamilyUnits               String?
-  streetAddress                   String?
-  latitude                        Int?
-  longitude                       Int?
-  queuePriority                   Int?
-  relatedPermits                  String?
-  astNotes                        String?
-  astUpdated                      Boolean?
-  addedToATS                      Boolean?
-  atsClientNumber                 String?
-  ltsaCompleted                   Boolean?
-  bcOnlineCompleted               Boolean?
-  naturalDisaster                 Boolean?
-  financiallySupported            Boolean?
-  financiallySupportedBC          Boolean?
-  financiallySupportedIndigenous  Boolean?
-  financiallySupportedNonProfit   Boolean?
-  financiallySupportedHousingCoop Boolean?
-  aaiUpdated                      Boolean?
-  waitingOn                       String?
-  bringForwardDate                DateTime?  @db.Timestamptz(6)
-  notes                           String?
-  intakeStatus                    String?
-  applicationStatus               String?
-  guidance                        Boolean    @default(false)
-  statusRequest                   Boolean    @default(false)
-  inquiry                         Boolean    @default(false)
-  emergencyAssist                 Boolean    @default(false)
-  inapplicable                    Boolean    @default(false)
-  createdBy                       String?    @default("00000000-0000-0000-0000-000000000000")
-  createdAt                       DateTime?  @default(now()) @db.Timestamptz(6)
-  updatedBy                       String?
-  updatedAt                       DateTime?  @db.Timestamptz(6)
-  document                        document[]
-  note                            note[]
-  permit                          permit[]
-  user                            user?      @relation(fields: [assignedToUserId], references: [userId], onDelete: Cascade, map: "submission_assignedtouserid_foreign")
+  submission_id                      String    @id @db.Uuid
+  activity_id                        String
+  assigned_user_id                   String?   @db.Uuid
+  submitted_at                       DateTime  @db.Timestamptz(6)
+  submitted_by                       String
+  location_pids                      String?
+  company_name_registered            String?
+  contact_name                       String?
+  contact_phone_number               String?
+  contact_email                      String?
+  project_name                       String?
+  single_family_units                String?
+  street_address                     String?
+  latitude                           Int?
+  longitude                          Int?
+  queue_priority                     Int?
+  related_permits                    String?
+  ast_notes                          String?
+  ast_updated                        Boolean   @default(false)
+  added_to_ats                       Boolean   @default(false)
+  ats_client_number                  String?
+  ltsa_completed                     Boolean   @default(false)
+  bc_online_completed                Boolean   @default(false)
+  natural_disaster                   Boolean   @default(false)
+  financially_supported              Boolean   @default(false)
+  financially_supported_bc           Boolean   @default(false)
+  financially_supported_indigenous   Boolean   @default(false)
+  financially_supported_non_profit   Boolean   @default(false)
+  financially_supported_housing_coop Boolean   @default(false)
+  aai_updated                        Boolean   @default(false)
+  waiting_on                         String?
+  bring_forward_date                 DateTime? @db.Timestamptz(6)
+  notes                              String?
+  intake_status                      String?
+  application_status                 String?
+  guidance                           Boolean   @default(false)
+  status_request                     Boolean   @default(false)
+  inquiry                            Boolean   @default(false)
+  emergency_assist                   Boolean   @default(false)
+  inapplicable                       Boolean   @default(false)
+  created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at                         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by                         String?
+  updated_at                         DateTime? @db.Timestamptz(6)
+  activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
+  user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 }
 
 model user {
-  userId            String             @id @db.Uuid
-  identityId        String?            @db.Uuid
+  user_id           String             @id @db.Uuid
+  identity_id       String?            @db.Uuid
   idp               String?
   username          String
   email             String?
-  firstName         String?
-  fullName          String?
-  lastName          String?
+  first_name        String?
+  full_name         String?
+  last_name         String?
   active            Boolean            @default(true)
-  createdBy         String?            @default("00000000-0000-0000-0000-000000000000")
-  createdAt         DateTime?          @default(now()) @db.Timestamptz(6)
-  updatedBy         String?
-  updatedAt         DateTime?          @db.Timestamptz(6)
+  created_by        String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by        String?
+  updated_at        DateTime?          @db.Timestamptz(6)
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
-  @@index([identityId], map: "user_identityid_index")
+  @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
 }

@@ -1,4 +1,4 @@
-export type ChefsSubmissionFormExport = {
+export type ChefsSubmissionExport = {
   form: {
     id: string;
     submissionId: string;
@@ -26,14 +26,15 @@ export type ChefsSubmissionFormExport = {
   isIndigenousHousingProviderSupported: boolean;
   isNonProfitSupported: boolean;
   isHousingCooperativeSupported: boolean;
-  latitude: number;
-  longitude: number;
+  latitude: string;
+  longitude: string;
   naturalDisasterInd: boolean;
   projectName: string;
   companyNameRegistered: string;
-  queuePriority: number;
+  queuePriority: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
+  multiFamilyUnits1: string;
   streetAddress: string;
   guidance: boolean;
   statusRequest: boolean;
@@ -42,4 +43,10 @@ export type ChefsSubmissionFormExport = {
   inapplicable: boolean;
   createdAt: string;
   createdBy: string;
+
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  // No clue what format the CHEFS permits might be delivered in
+  permitGrid: any;
+  dataGrid: any;
+  /* eslint-enable @typescript-eslint/no-explicit-any */
 };

@@ -1,54 +1,30 @@
 import { Prisma } from '@prisma/client';
-import { default as permit_type } from './permit_type';
-import { default as submission } from './submission';
 
-import type { IStamps } from '../../interfaces/IStamps';
-import type { ChefsSubmissionForm, Permit } from '../../types';
+import type { Stamps } from '../stamps';
+import type { Permit } from '../../types';
 
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
 const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_type: true, submission: { include: { user: true } } }
+  include: { permit_type: true }
 });
 
-type PermitTypeRelation = {
-  permit_type: {
-    connect: {
-      permitTypeId: number;
-    };
-  };
-};
-
-type SubmissionRelation = {
-  submission: {
-    connect: {
-      submissionId: string;
-    };
-  };
-};
-
-type PrismaRelationPermit = Omit<
-  Prisma.permitGetPayload<typeof _permit>,
-  'permitTypeId' | 'submissionId' | keyof IStamps
-> &
-  PermitTypeRelation &
-  SubmissionRelation;
-
+type PrismaRelationPermit = Omit<Prisma.permitGetPayload<typeof _permit>, 'activity' | keyof Stamps>;
 type PrismaGraphPermit = Prisma.permitGetPayload<typeof _permitWithGraph>;
 
 export default {
   toPrismaModel(input: Permit): PrismaRelationPermit {
     return {
-      permitId: input.permitId,
-      issuedPermitId: input.issuedPermitId,
-      trackingId: input.trackingId,
-      authStatus: input.authStatus,
+      permit_id: input.permitId,
+      permit_type_id: input.permitTypeId,
+      activity_id: input.activityId,
+      issued_permit_id: input.issuedPermitId,
+      tracking_id: input.trackingId,
+      auth_status: input.authStatus,
       needed: input.needed,
       status: input.status,
-      submittedDate: input.submittedDate ? new Date(input.submittedDate) : null,
-      adjudicationDate: input.adjudicationDate ? new Date(input.adjudicationDate) : null,
-      permit_type: { connect: { permitTypeId: input.permitType.permitTypeId } },
-      submission: { connect: { submissionId: input.submissionId } }
+      submitted_date: input.submittedDate ? new Date(input.submittedDate) : null,
+      adjudication_date: input.adjudicationDate ? new Date(input.adjudicationDate) : null
     };
   },
 
@@ -56,20 +32,18 @@ export default {
     if (!input) return null;
 
     return {
-      permitId: input.permitId,
-      permitTypeId: input.permitTypeId,
-      submissionId: input.submissionId,
-      issuedPermitId: input.issuedPermitId,
-      trackingId: input.trackingId,
-      authStatus: input.authStatus,
+      permitId: input.permit_id,
+      permitTypeId: input.permit_type_id,
+      activityId: input.activity_id,
+      issuedPermitId: input.issued_permit_id,
+      trackingId: input.tracking_id,
+      authStatus: input.auth_status,
       needed: input.needed,
       status: input.status,
-      submittedDate: input.submittedDate?.toISOString() ?? null,
-      adjudicationDate: input.adjudicationDate?.toISOString() ?? null,
-      permitType: permit_type.fromPrismaModel(input.permit_type),
-      submission: submission.fromPrismaModel(input.submission) as ChefsSubmissionForm,
-      updatedAt: input.updatedAt?.toISOString() ?? null,
-      updatedBy: input.updatedBy
+      submittedDate: input.submitted_date?.toISOString() ?? null,
+      adjudicationDate: input.adjudication_date?.toISOString() ?? null,
+      updatedAt: input.updated_at?.toISOString() ?? null,
+      updatedBy: input.updated_by
     };
   }
 };

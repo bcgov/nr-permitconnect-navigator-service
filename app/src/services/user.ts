@@ -73,7 +73,7 @@ const service = {
     const _createUser = async (data: User, trx: Prisma.TransactionClient) => {
       const exists = await trx.user.findFirst({
         where: {
-          identityId: data.identityId,
+          identity_id: data.identityId,
           idp: data.idp
         }
       });
@@ -129,11 +129,11 @@ const service = {
     // TODO: Consider conditionally skipping when identityId is undefined?
     const user = await prisma.user.findFirst({
       where: {
-        identityId: identityId
+        identity_id: identityId
       }
     });
 
-    return user && user.userId ? user.userId : defaultValue;
+    return user && user.user_id ? user.user_id : defaultValue;
   },
 
   /**
@@ -163,7 +163,7 @@ const service = {
     await prisma.$transaction(async (trx) => {
       const oldUser = await trx.user.findFirst({
         where: {
-          identityId: newUser.identityId,
+          identity_id: newUser.identityId,
           idp: newUser.idp
         }
       });
@@ -171,7 +171,7 @@ const service = {
       if (!oldUser) {
         response = await service.createUser(newUser, trx);
       } else {
-        response = await service.updateUser(oldUser.userId, newUser, trx);
+        response = await service.updateUser(oldUser.user_id, newUser, trx);
       }
     });
 
@@ -204,11 +204,13 @@ const service = {
    * @throws If no record is found
    */
   readUser: async (userId: string) => {
-    return await prisma.user.findUnique({
+    const response = await prisma.user.findUnique({
       where: {
-        userId: userId
+        user_id: userId
       }
     });
+
+    return user.fromPrismaModel(response);
   },
 
   /**
@@ -230,10 +232,10 @@ const service = {
       where: {
         OR: [
           {
-            userId: { in: params.userId }
+            user_id: { in: params.userId }
           },
           {
-            identityId: { in: params.identityId }
+            identity_id: { in: params.identityId }
           },
           {
             idp: { in: params.idp, mode: 'insensitive' }
@@ -245,13 +247,13 @@ const service = {
             email: { contains: params.email, mode: 'insensitive' }
           },
           {
-            firstName: { contains: params.firstName, mode: 'insensitive' }
+            first_name: { contains: params.firstName, mode: 'insensitive' }
           },
           {
-            fullName: { contains: params.fullName, mode: 'insensitive' }
+            full_name: { contains: params.fullName, mode: 'insensitive' }
           },
           {
-            lastName: { contains: params.lastName, mode: 'insensitive' }
+            last_name: { contains: params.lastName, mode: 'insensitive' }
           },
           {
             active: params.active
@@ -301,9 +303,9 @@ const service = {
 
         // TODO: Add support for updating userId primary key in the event it changes
         response = await trx?.user.update({
-          data: { ...user.toPrismaModel(obj), updatedBy: obj.updatedBy },
+          data: { ...user.toPrismaModel(obj), updated_by: obj.updatedBy },
           where: {
-            userId: userId
+            user_id: userId
           }
         });
       };
