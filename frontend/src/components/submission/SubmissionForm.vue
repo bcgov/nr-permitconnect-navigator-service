@@ -127,7 +127,16 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  emit('submit', { ...values, assignedUserId: values.user.userId, ...values.submissionTypes });
+  const submissionData = {
+    ...values,
+    assignedUserId: values.user.userId,
+    ...values.submissionTypes
+  };
+
+  delete submissionData.submissionTypes;
+  delete submissionData.user;
+
+  emit('submit', submissionData);
 };
 
 onBeforeMount(async () => {

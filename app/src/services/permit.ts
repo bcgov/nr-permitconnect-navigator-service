@@ -23,7 +23,6 @@ const service = {
         },
         data: permit.toPrismaModel(newPermit)
       });
-
       return permit.fromPrismaModel(create);
     } catch (e: unknown) {
       throw e;

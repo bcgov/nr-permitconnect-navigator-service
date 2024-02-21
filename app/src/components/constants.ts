@@ -41,3 +41,9 @@ export const APPLICATION_STATUS_LIST = Object.freeze({
   DELAYED: 'Delayed',
   COMPLETED: 'Completed'
 });
+
+/** Types of notes */
+export const NOTE_TYPE_LIST = Object.freeze({
+  GENERAL: 'General',
+  BRING_FORWARD: 'Bring Forward'
+});

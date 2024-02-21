@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate';
 import { object, string } from 'yup';
 
-import { Dropdown, InputText, TextArea } from '@/components/form';
+import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
 import { NoteTypes } from '@/utils/constants';
 import { NOTE_TYPES } from '@/utils/enums';
@@ -28,7 +28,7 @@ const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: any = {
-  createdAt: formatDateShort(new Date().toISOString()),
+  createdAt: new Date(), //formatDateShort(new Date().toISOString()),
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL
 };
@@ -37,17 +37,22 @@ let initialFormValues: any = {
 const formSchema = object({
   note: string().required().label('Note'),
   noteType: string().oneOf(NoteTypes).label('Note type'),
-  title: string().required().max(100, 'Title too long').label('Title')
+  title: string().required().max(255, 'Title too long').label('Title')
 });
 
 // Actions
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 function onSubmit(data: any, { resetForm }) {
-  if (props.note) initialFormValues = data;
+  const parsedData = {
+    ...data,
+    createdAt: new Date(data.createdAt)
+  };
+
+  if (props.note) initialFormValues = parsedData;
   else resetForm();
 
-  emit('note:submit', data);
+  emit('note:submit', parsedData);
 }
 </script>
 
@@ -75,11 +80,12 @@ function onSubmit(data: any, { resetForm }) {
       @submit="onSubmit"
     >
       <div class="formgrid grid">
-        <InputText
+        <Calendar
           class="col-6"
           name="createdAt"
           label="Date"
           :disabled="true"
+          :show-time="true"
         />
         <div class="col-6" />
         <Dropdown
