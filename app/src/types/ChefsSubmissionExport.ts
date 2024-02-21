@@ -26,8 +26,8 @@ export type ChefsSubmissionExport = {
   isIndigenousHousingProviderSupported: boolean;
   isNonProfitSupported: boolean;
   isHousingCooperativeSupported: boolean;
-  latitude: string;
-  longitude: string;
+  latitude: number;
+  longitude: number;
   naturalDisasterInd: boolean;
   projectName: string;
   companyNameRegistered: string;

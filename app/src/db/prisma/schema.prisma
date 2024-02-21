@@ -138,8 +138,8 @@ model submission {
   project_name                       String?
   single_family_units                String?
   street_address                     String?
-  latitude                           Int?
-  longitude                          Int?
+  latitude                           Decimal?  @db.Decimal(8, 6)
+  longitude                          Decimal?  @db.Decimal(9, 6)
   queue_priority                     Int?
   related_permits                    String?
   ast_notes                          String?

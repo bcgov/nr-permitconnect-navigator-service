@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { Decimal } from '@prisma/client/runtime/library';
 
 import type { Stamps } from '../stamps';
 import type { Submission } from '../../types';
@@ -26,8 +27,8 @@ export default {
       company_name_registered: input.companyNameRegistered,
       single_family_units: input.singleFamilyUnits,
       street_address: input.streetAddress,
-      latitude: input.latitude,
-      longitude: input.longitude,
+      latitude: input.latitude ? new Decimal(input.latitude) : null,
+      longitude: input.longitude ? new Decimal(input.longitude) : null,
       queue_priority: input.queuePriority,
       related_permits: input.relatedPermits,
       ast_notes: input.astNotes,
@@ -73,8 +74,8 @@ export default {
       companyNameRegistered: input.company_name_registered,
       singleFamilyUnits: input.single_family_units,
       streetAddress: input.street_address,
-      latitude: input.latitude,
-      longitude: input.longitude,
+      latitude: input.latitude ? input.latitude.toNumber() : null,
+      longitude: input.longitude ? input.longitude.toNumber() : null,
       queuePriority: input.queue_priority,
       relatedPermits: input.related_permits,
       astNotes: input.ast_notes,

@@ -89,8 +89,8 @@ export async function up(knex: Knex): Promise<void> {
           table.text('project_name');
           table.text('single_family_units');
           table.text('street_address');
-          table.integer('latitude');
-          table.integer('longitude');
+          table.decimal('latitude', 8, 6);
+          table.decimal('longitude', 9, 6);
           table.integer('queue_priority');
           table.text('related_permits');
           table.text('ast_notes');
