@@ -46,6 +46,8 @@ const fieldActive: Ref<boolean> = ref(false);
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
+      :min-fraction-digits="0"
+      :max-fraction-digits="6"
       @focus="fieldActive = true"
       @blur="fieldActive = false"
     />
