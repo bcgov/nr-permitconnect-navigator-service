@@ -203,6 +203,14 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      .then(() =>
+        knex.schema.createTable('test_table', (table) => {
+          table.text('test_table_id').primary();
+          table.text('some_column');
+          stamps(knex, table);
+        })
+      )
+
       // Create public schema table triggers
       .then(() =>
         knex.schema.raw(`create trigger before_update_identity_provider_trigger
@@ -716,6 +724,7 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_provider_trigger ON identity_provider')
       )
       // Drop public schema tables
+      .then(() => knex.schema.dropTableIfExists('test_table'))
       .then(() => knex.schema.dropTableIfExists('note'))
       .then(() => knex.schema.dropTableIfExists('permit'))
       .then(() => knex.schema.dropTableIfExists('permit_type'))
