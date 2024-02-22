@@ -17,6 +17,13 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// Actions
+const latLongFormat = (lat: number | null, long: number | null): string => {
+  if (!lat || !long) return '';
+
+  return `${lat}, ${long}`;
+};
+
 // State
 const selection: Ref<Submission | undefined> = ref(undefined);
 
@@ -118,12 +125,6 @@ const filters = ref({
       </template>
     </Column>
     <Column
-      field="locationPIDs"
-      header="Location PID(s)"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
       field="assignedTo"
       header="Assigned to"
       :sortable="true"
@@ -159,17 +160,20 @@ const filters = ref({
       style="min-width: 200px"
     />
     <Column
-      field="latitude"
-      header="Location latitude"
+      field="locationPIDs"
+      header="Location PID(s)"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="longitude"
-      header="Location longitude"
-      :sortable="true"
-      style="min-width: 200px"
-    />
+      field="latitude"
+      header="Latitude & Longitude"
+      style="min-width: 100px"
+    >
+      <template #body="{ data }">
+        {{ latLongFormat(data.latitude, data.longitude) }}
+      </template>
+    </Column>
     <Column
       field="queuePriority"
       header="Priority"
@@ -177,11 +181,75 @@ const filters = ref({
       style="min-width: 100px"
     />
     <Column
-      field="relatedPermits"
-      header="Related permits"
+      field="guidance"
+      header="Type: Guidance"
       :sortable="true"
-      style="min-width: 200px"
-    />
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Checkbox
+          v-model="data.guidance"
+          :binary="true"
+          disabled
+        />
+      </template>
+    </Column>
+    <Column
+      field="inquiry"
+      header="Type: Inquiry"
+      :sortable="true"
+      style="min-width: 125px"
+    >
+      <template #body="{ data }">
+        <Checkbox
+          v-model="data.inquiry"
+          :binary="true"
+          disabled
+        />
+      </template>
+    </Column>
+    <Column
+      field="statusRequest"
+      header="Type: Status Request"
+      :sortable="true"
+      style="min-width: 125px"
+    >
+      <template #body="{ data }">
+        <Checkbox
+          v-model="data.statusRequest"
+          :binary="true"
+          disabled
+        />
+      </template>
+    </Column>
+    <Column
+      field="emergencyAssist"
+      header="Type: Emergency"
+      :sortable="true"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Checkbox
+          v-model="data.emergencyAssist"
+          :binary="true"
+          disabled
+        />
+      </template>
+    </Column>
+    <Column
+      field="inapplicable"
+      header="Type: Inapplicable"
+      :sortable="true"
+      style="min-width: 100px"
+    >
+      <template #body="{ data }">
+        <Checkbox
+          v-model="data.inapplicable"
+          :binary="true"
+          disabled
+        />
+      </template>
+    </Column>
     <Column
       field="astUpdated"
       header="Automated Status Tool (AST)"

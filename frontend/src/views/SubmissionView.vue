@@ -104,6 +104,7 @@ onMounted(async () => {
   <TabView>
     <TabPanel header="Info">
       <Button
+        v-if="!editable"
         class="mb-3"
         :disabled="editable"
         @click="editable = true"
