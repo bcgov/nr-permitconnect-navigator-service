@@ -174,12 +174,13 @@ model submission {
 }
 
 model test_table {
-  test_table_id String    @id
-  some_column   String?
-  created_by    String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by    String?
-  updated_at    DateTime? @db.Timestamptz(6)
+  test_table_id  String    @id
+  some_column    String?
+  created_by     String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by     String?
+  updated_at     DateTime? @db.Timestamptz(6)
+  the_new_column String?
 }
 
 model user {
@@ -202,4 +203,13 @@ model user {
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
+}
+
+model test_table_number_two {
+  test_table_number_two_id String    @id
+  some_column              String?
+  created_by               String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by               String?
+  updated_at               DateTime? @db.Timestamptz(6)
 }
