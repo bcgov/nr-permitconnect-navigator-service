@@ -26,6 +26,7 @@ export type ChefsSubmissionExport = {
   isIndigenousHousingProviderSupported: boolean;
   isNonProfitSupported: boolean;
   isHousingCooperativeSupported: boolean;
+  parcelID: string;
   latitude: number;
   longitude: number;
   naturalDisasterInd: boolean;
