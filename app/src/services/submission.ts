@@ -62,6 +62,7 @@ const service = {
           financially_supported_non_profit: x.financiallySupportedNonProfit,
           financially_supported_housing_coop: x.financiallySupportedHousingCoop,
           intake_status: x.intakeStatus,
+          location_pids: x.locationPIDs,
           latitude: parseFloat(x.latitude as unknown as string),
           longitude: parseFloat(x.longitude as unknown as string),
           natural_disaster: x.naturalDisaster,

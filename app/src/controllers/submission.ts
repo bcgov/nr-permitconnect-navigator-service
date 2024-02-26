@@ -96,6 +96,7 @@ const controller = {
               financiallySupported: Object.values(financiallySupportedValues).includes(true),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
+              locationPIDs: data.parcelID,
               latitude: data.latitude,
               longitude: data.longitude,
               naturalDisaster: data.naturalDisasterInd,
