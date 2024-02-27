@@ -361,7 +361,7 @@ onBeforeMount(async () => {
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
-          label="Inquiry"
+          label="Enquiry"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />

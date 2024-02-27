@@ -253,7 +253,7 @@ watch(
       <tr>
         <td class="col-9">
           Type:
-          <span class="font-bold">Inquiry</span>
+          <span class="font-bold">Enquiry</span>
         </td>
         <td class="col-1 text-right">{{ statistics.inquiry }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.inquiry) }}%</td>
