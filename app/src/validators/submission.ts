@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { activityId, uuidv4 } from './common';
+import { activityId, emailJoi, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 
 const schema = {
@@ -29,7 +29,7 @@ const schema = {
       locationPIDs: Joi.string().min(0).max(255).allow(null),
       contactName: Joi.string().min(0).max(255).allow(null),
       contactPhoneNumber: Joi.string().min(0).max(255).allow(null),
-      contactEmail: Joi.string().min(0).max(255).allow(null),
+      contactEmail: emailJoi,
       companyNameRegistered: Joi.string().min(0).max(255).allow(null),
       singleFamilyUnits: Joi.string().min(0).max(255).allow(null),
       streetAddress: Joi.string().min(0).max(255).allow(null),

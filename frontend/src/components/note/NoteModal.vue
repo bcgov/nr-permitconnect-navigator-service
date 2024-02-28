@@ -6,10 +6,10 @@ import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
 import { NoteTypes } from '@/utils/constants';
 import { NOTE_TYPES } from '@/utils/enums';
-import { formatDateShort } from '@/utils/formatters';
 
-// import type { Ref } from 'vue';
 import type { Note } from '@/types';
+import { nextTick, ref, watch } from 'vue';
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -25,10 +25,11 @@ const emit = defineEmits(['note:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 
 // Default form values
 let initialFormValues: any = {
-  createdAt: new Date(), //formatDateShort(new Date().toISOString()),
+  createdAt: new Date(),
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL
 };
@@ -54,6 +55,15 @@ function onSubmit(data: any, { resetForm }) {
 
   emit('note:submit', parsedData);
 }
+
+watch(visible, (newValue) => {
+  // sets 'createdAt' to current time when modal is visible
+  nextTick().then(() => {
+    if (newValue && formRef.value) {
+      formRef.value.setFieldValue('createdAt', new Date());
+    }
+  });
+});
 </script>
 
 <template>
@@ -75,6 +85,7 @@ function onSubmit(data: any, { resetForm }) {
     </template>
 
     <Form
+      ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="onSubmit"

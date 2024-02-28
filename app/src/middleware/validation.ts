@@ -2,7 +2,6 @@
 // @ts-expect-error api-problem lacks a defined interface; code still works fine
 import Problem from 'api-problem';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-// import type { NextFunction, Request, Response } from 'express';
 
 /**
  * @function validator
@@ -19,7 +18,7 @@ export const validate = (schema: object) => {
         return result ? [prop, result?.details] : undefined;
       })
       .filter((error) => !!error)
-      .map((x) => x as any[]);
+      .map((x) => x as Array<Array<string>>);
 
     if (Object.keys(validationErrors).length) {
       throw new Problem(422, {

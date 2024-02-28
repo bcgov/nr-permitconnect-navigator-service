@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
-import { permitService } from '@/services';
+import { permitService, userService } from '@/services';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -26,6 +26,7 @@ const permitType: Ref<PermitType | undefined> = ref(
   props.permitTypes.find((x) => x.permitTypeId === props.permit.permitTypeId) as PermitType
 );
 const permitModalVisible: Ref<boolean> = ref(false);
+const cardUpdatedBy: Ref<string> = ref('');
 
 // Actions
 const confirm = useConfirm();
@@ -64,6 +65,14 @@ async function onPermitSubmit(data: Permit) {
     permitModalVisible.value = false;
   }
 }
+
+onMounted(() => {
+  if (cardData.value.updatedBy) {
+    userService.searchUsers({ userId: [cardData.value.updatedBy] }).then((res) => {
+      cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
+    });
+  }
+});
 </script>
 
 <template>
@@ -102,7 +111,7 @@ async function onPermitSubmit(data: Permit) {
             </p>
             <p class="col-12">
               <span class="key font-bold">Updated by:</span>
-              {{ cardData.updatedBy }}
+              {{ cardUpdatedBy }}
             </p>
             <p class="col-12">
               <span class="key font-bold">Needed:</span>
