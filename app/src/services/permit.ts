@@ -21,9 +21,8 @@ const service = {
         include: {
           permit_type: true
         },
-        data: permit.toPrismaModel(newPermit)
+        data: { ...permit.toPrismaModel(newPermit), updated_by: data.updatedBy }
       });
-
       return permit.fromPrismaModel(create);
     } catch (e: unknown) {
       throw e;

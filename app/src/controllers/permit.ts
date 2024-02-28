@@ -9,7 +9,8 @@ import type { Permit } from '../types';
 const controller = {
   createPermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await permitService.createPermit(req.body);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
       res.status(200).send(response);
     } catch (e: unknown) {
       next(e);

@@ -78,13 +78,19 @@ function onSubmit(data: PermitForm, { resetForm }) {
   if (props.permit) initialFormValues = data;
   else resetForm();
 
+  // Remove extra fields in permit that belongs to permitType
+  delete data.agency;
+  delete data.businessDomain;
+  delete data.sourceSystem;
+
   // Convert form back to a proper Permit type
-  emit('permit:submit', {
+  const permitData = {
     ...data,
     permitTypeId: data.permitType?.permitTypeId,
     submittedDate: data.submittedDate?.toISOString(),
     adjudicationDate: data.adjudicationDate?.toISOString()
-  } as Permit);
+  } as Permit;
+  emit('permit:submit', permitData);
 }
 </script>
 

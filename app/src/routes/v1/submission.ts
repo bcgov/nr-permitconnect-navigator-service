@@ -1,6 +1,7 @@
 import express from 'express';
 import { submissionController } from '../../controllers';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
 
@@ -13,18 +14,30 @@ router.get('/', (req: Request, res: Response, next: NextFunction): void => {
 });
 
 // Statistics endpoint
-router.get('/statistics', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.getStatistics(req, res, next);
-});
+router.get(
+  '/statistics',
+  submissionValidator.getStatistics,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getStatistics(req, res, next);
+  }
+);
 
 // Submission endpoint
-router.get('/:activityId', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.getSubmission(req, res, next);
-});
+router.get(
+  '/:activityId',
+  submissionValidator.getSubmission,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getSubmission(req, res, next);
+  }
+);
 
 // Submission update endpoint
-router.put('/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.updateSubmission(req, res, next);
-});
+router.put(
+  '/:submissionId',
+  submissionValidator.updateSubmission,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.updateSubmission(req, res, next);
+  }
+);
 
 export default router;

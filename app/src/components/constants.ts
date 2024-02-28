@@ -41,3 +41,15 @@ export const APPLICATION_STATUS_LIST = Object.freeze({
   DELAYED: 'Delayed',
   COMPLETED: 'Completed'
 });
+
+/** Types of notes */
+export const NOTE_TYPE_LIST = Object.freeze({
+  GENERAL: 'General',
+  BRING_FORWARD: 'Bring Forward'
+});
+
+/**
+ * Generic email regex modified to require domain of at least 2 characters
+ * @see {@link https://emailregex.com/}
+ */
+export const EMAIL_REGEX = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$';

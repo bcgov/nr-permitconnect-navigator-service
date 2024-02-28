@@ -40,7 +40,7 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
-              {{ props.note.createdAt ? formatDateShort(props.note.createdAt ?? '') : undefined }}
+              {{ props.note.createdAt ? formatDateShort(props.note.createdAt) : undefined }}
             </p>
           </div>
         </div>
