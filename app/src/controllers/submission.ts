@@ -48,8 +48,18 @@ const controller = {
             const unitTypes = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
             const maxUnits = unitTypes.reduce(
               (ac, value) => {
-                // Get max integer from value (eg: '1-49' returns 49)
-                const upperRange: number = value ? parseInt(value.toString().replace(/(.*)-/, '').trim()) : 0;
+                // Unit types are in the form of '1-49' or '>500'
+                // .match() with regex '/(\d+)(?!.*\d)/' matches the last number in a string, puts it in array.
+                // Get max integer from last element of array.
+                let upperRange: number = 0;
+                if (value) {
+                  upperRange = parseInt(
+                    value
+                      .toString()
+                      .match(/(\d+)(?!.*\d)/)
+                      ?.pop() ?? '0'
+                  );
+                }
                 // Compare with accumulator
                 return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
               },
