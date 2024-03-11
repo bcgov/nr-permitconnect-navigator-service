@@ -45,8 +45,18 @@ const controller = {
             };
 
             // Get greatest of multiple Units data
-            const unitTypes = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
-            const maxUnits = unitTypes.reduce(
+            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1].sort();
+
+            // Replace text instances with symbols
+            const parsedUnitData = unitData.map((element) => {
+              if (typeof element === 'string') {
+                return element?.replace('greaterthan', '>');
+              } else {
+                return element;
+              }
+            });
+
+            const maxUnits = parsedUnitData.reduce(
               (ac, value) => {
                 // Unit types are in the form of '1-49' or '>500'
                 // .match() with regex '/(\d+)(?!.*\d)/' matches the last number in a string, puts it in array.
