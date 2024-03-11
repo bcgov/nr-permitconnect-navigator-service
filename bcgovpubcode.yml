@@ -1,0 +1,54 @@
+---
+data_management_roles:
+  data_custodian: Emma Krakow
+  data_steward: Christian Evans
+  product_owner: Sharolyn Hurley
+product_external_dependencies:
+  common_components:
+    - BC-Address-Geocoder
+    - Common-Object-Management-Service
+    - Address-Complete
+  identity_authorization:
+    - IDIR
+    - BceId
+    - Business-BceId
+  notification_standard:
+    - Common-Hosted-Email-Service
+product_information:
+  api_specifications: []
+  business_capabilities_custom: Case Management
+  business_capabilities_standard:
+    - Manage Object Storage Objects
+    - Program Management
+    - Other
+  ministry:
+    - Water, Land and Resource Stewardship
+  product_acronym: PCNS
+  product_description: Case management for the PSB Navigators
+  product_name: PermitConnect Navigator Service
+  product_status: maturing
+  product_urls:
+    - https://pcns-prod-master.apps.silver.devops.gov.bc.ca/
+  program_area: Permitting Solutions Branch
+product_technology_information:
+  backend_frameworks:
+    - name: Node.js
+      version: '20.9.0'
+  backend_languages_version:
+    - name: TypeScript
+      version: '5.3.3'
+  ci_cd_tools:
+    - GitHub-Actions
+  data_storage_platforms:
+    - Postgresql
+  frontend_frameworks:
+    - name: Vue
+      version: '3'
+  frontend_languages:
+    - name: TypeScript
+      version: '5.3.3'
+  hosting_platforms:
+    - Private-Cloud-Openshift
+  spatial_mapping_technologies:
+    - Leaflet
+version: 1
