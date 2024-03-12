@@ -20,7 +20,7 @@ const controller = {
         req.body.mimeType,
         req.body.length
       );
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -29,7 +29,7 @@ const controller = {
   async deleteDocument(req: Request<{ documentId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await documentService.deleteDocument(req.params.documentId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -38,7 +38,7 @@ const controller = {
   async listDocuments(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await documentService.listDocuments(req.params.activityId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

@@ -11,7 +11,7 @@ const controller = {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -20,7 +20,7 @@ const controller = {
   deletePermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.deletePermit(req.params.permitId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -29,7 +29,7 @@ const controller = {
   getPermitTypes: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.getPermitTypes();
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -38,7 +38,7 @@ const controller = {
   async listPermits(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await permitService.listPermits(req.params.activityId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -48,7 +48,7 @@ const controller = {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await permitService.updatePermit({ ...(req.body as Permit), updatedBy: userId });
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
