@@ -4,14 +4,13 @@ import { noteController } from '../../../src/controllers';
 import { noteService, userService } from '../../../src/services';
 import * as utils from '../../../src/components/utils';
 
-const mockResponse = () => {
-  const res = {
-    status: jest.fn(),
-    json: jest.fn()
-  };
+// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
+jest.mock('config');
 
-  res.status.mockReturnValue(res);
-  res.json.mockReturnValue(res);
+const mockResponse = () => {
+  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
+  res.status = jest.fn().mockReturnValue(res);
+  res.json = jest.fn().mockReturnValue(res);
 
   return res;
 };

@@ -1,22 +1,5 @@
 {
-  "frontend": {
-    "oidc": {
-      "authority": "https://some.authority",
-      "clientId": "client-frontend-local"
-    }
-  },
   "server": {
-    "keycloak": {
-      "authority": "https://some.authority",
-      "clientId": "client",
-      "clientSecret": "password"
-    },
     "logLevel": "silent"
-  },
-  "serviceClient": {
-    "commonServices": {
-      "username": "username",
-      "password": "password"
-    }
   }
 }

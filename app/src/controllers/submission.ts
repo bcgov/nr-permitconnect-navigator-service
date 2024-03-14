@@ -154,7 +154,7 @@ const controller = {
   ) => {
     try {
       const response = await submissionService.getStatistics(req.query);
-      res.status(200).send(response[0]);
+      res.status(200).json(response[0]);
     } catch (e: unknown) {
       next(e);
     }
@@ -163,7 +163,7 @@ const controller = {
   getSubmission: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getSubmission(req.params.activityId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -176,7 +176,7 @@ const controller = {
 
       // Pull from PCNS database
       const response = await submissionService.getSubmissions();
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -186,7 +186,7 @@ const controller = {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

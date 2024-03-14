@@ -19,7 +19,7 @@ const controller = {
         lastName: req.query.lastName as string,
         active: isTruthy(req.query.active as string)
       });
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

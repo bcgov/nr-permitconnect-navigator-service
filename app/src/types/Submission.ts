@@ -33,7 +33,6 @@ export type Submission = {
   aaiUpdated: boolean;
   waitingOn: string | null;
   bringForwardDate: string | null;
-  notes: string | null;
   intakeStatus: string | null;
   applicationStatus: string | null;
   guidance: boolean;
