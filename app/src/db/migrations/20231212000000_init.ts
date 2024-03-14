@@ -108,7 +108,6 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('aai_updated').notNullable().defaultTo(false);
           table.text('waiting_on');
           table.timestamp('bring_forward_date', { useTz: true });
-          table.text('notes');
           table.text('intake_status');
           table.text('application_status');
           table.boolean('guidance').notNullable().defaultTo(false);

@@ -157,7 +157,6 @@ model submission {
   aai_updated                        Boolean   @default(false)
   waiting_on                         String?
   bring_forward_date                 DateTime? @db.Timestamptz(6)
-  notes                              String?
   intake_status                      String?
   application_status                 String?
   guidance                           Boolean   @default(false)

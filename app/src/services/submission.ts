@@ -182,16 +182,18 @@ const service = {
    * @function updateSubmission
    * Updates a specific submission
    * @param {Submission} data Submission to update
-   * @returns {Promise<void>} The result of running the update operation
+   * @returns {Promise<Submission | null>} The result of running the update operation
    */
   updateSubmission: async (data: Submission) => {
     try {
-      await prisma.submission.update({
+      const result = await prisma.submission.update({
         data: { ...submission.toPrismaModel(data), updated_by: data.updatedBy },
         where: {
           submission_id: data.submissionId
         }
       });
+
+      return submission.fromPrismaModel(result);
     } catch (e: unknown) {
       throw e;
     }

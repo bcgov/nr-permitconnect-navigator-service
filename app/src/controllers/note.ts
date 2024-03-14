@@ -13,7 +13,7 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = req.body as any;
       const response = await noteService.createNote({ ...body, createdBy: userId });
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -22,7 +22,7 @@ const controller = {
   async listNotes(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await noteService.listNotes(req.params.activityId);
-      res.status(200).send(response);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

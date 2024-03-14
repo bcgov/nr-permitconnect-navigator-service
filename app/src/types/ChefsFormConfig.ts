@@ -4,7 +4,6 @@ export type ChefsFormConfig = {
 };
 
 export type ChefsFormConfigData = {
-  name: string;
   id: string;
   apiKey: string;
 };
