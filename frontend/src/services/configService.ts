@@ -35,7 +35,7 @@ export default class ConfigService {
           .get('/config', {
             headers: {
               'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
+              Pragma: 'no-cache'
             }
           })
           .then(({ data }) => {
@@ -67,7 +67,7 @@ export default class ConfigService {
           .get('/config', {
             headers: {
               'Cache-Control': 'no-cache',
-              'Pragma': 'no-cache'
+              Pragma: 'no-cache'
             }
           })
           .then(({ data }) => {
