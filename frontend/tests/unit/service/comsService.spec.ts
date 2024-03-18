@@ -12,7 +12,7 @@ const PATH = '/object';
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
 const putSpy = vi.fn();
-const windowSpy = vi.spyOn(window, 'open').mockImplementation(() => vi.fn() as any);
+const windowSpy = vi.spyOn(window, 'open');
 const testObjectId = 'testObjectId';
 const testVersionId = 'testObjectId';
 const testData = 'testDatas';
@@ -26,6 +26,7 @@ vi.mocked(comsAxios).mockReturnValue({
 
 beforeEach(() => {
   vi.clearAllMocks();
+  windowSpy.mockImplementation(() => vi.fn() as any);
 });
 
 describe('comsService test', () => {
@@ -51,6 +52,7 @@ describe('comsService test', () => {
 
     it('creates an object', async () => {
       await comsService.createObject(testObject, {}, testParams);
+      expect(putSpy).toBeCalledTimes(1);
       expect(putSpy).toBeCalledWith(PATH, testObject, expect.anything());
     });
 
@@ -72,6 +74,7 @@ describe('comsService test', () => {
       };
 
       await comsService.createObject(testObject, headers, testParams);
+      expect(putSpy).toBeCalledTimes(1);
       expect(putSpy).toBeCalledWith(PATH, testObject, expectedConfig);
     });
 
@@ -97,6 +100,7 @@ describe('comsService test', () => {
       };
 
       await comsService.createObject(testObject, headers, newTestParams);
+      expect(putSpy).toBeCalledTimes(1);
       expect(putSpy).toBeCalledWith(PATH, testObject, expectedConfig);
     });
   });
@@ -104,6 +108,7 @@ describe('comsService test', () => {
   it('deletes an object with versionId', async () => {
     await comsService.deleteObject(testObjectId, testVersionId);
 
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: testVersionId
@@ -114,6 +119,7 @@ describe('comsService test', () => {
   it('deletes an object without versionId', async () => {
     await comsService.deleteObject(testObjectId);
 
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: undefined
@@ -125,7 +131,9 @@ describe('comsService test', () => {
     const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
     await comsService.getObject(testObjectId, testVersionId);
 
+    expect(windowSpy).toBeCalledTimes(1);
     expect(windowSpy).toHaveBeenCalledWith(testData, '_blank');
+    expect(comsSpy).toBeCalledTimes(1);
     expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: testVersionId,
@@ -138,7 +146,9 @@ describe('comsService test', () => {
     const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
     await comsService.getObject(testObjectId);
 
+    expect(windowSpy).toBeCalledTimes(1);
     expect(windowSpy).toHaveBeenCalledWith(testData, '_blank');
+    expect(comsSpy).toBeCalledTimes(1);
     expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: undefined,

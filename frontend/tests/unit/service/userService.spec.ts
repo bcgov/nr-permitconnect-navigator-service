@@ -37,6 +37,7 @@ describe('userService test', () => {
     };
     await userService.searchUsers(testSearchParam);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith('user', { params: testSearchParam });
   });
 
@@ -49,6 +50,7 @@ describe('userService test', () => {
     };
     await userService.searchUsers(searchParams);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
   });
 
@@ -61,6 +63,7 @@ describe('userService test', () => {
     };
     await userService.searchUsers(searchParams);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
   });
 
@@ -74,13 +77,14 @@ describe('userService test', () => {
     };
     await userService.searchUsers(searchParams);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
   });
 
   it('returns empty data if no params', async () => {
     const searchParams: UserSearchParameters = {};
     const result = await userService.searchUsers(searchParams);
-
+    expect(getSpy).not.toHaveBeenCalled();
     expect(result).toMatchObject({ data: [] } as AxiosResponse);
   });
 });

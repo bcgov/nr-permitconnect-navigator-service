@@ -65,7 +65,7 @@ describe('noteService test', () => {
 
       // Testing
       await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
-
+      expect(fileSpy).toHaveBeenCalledTimes(1);
       expect(fileSpy).toHaveBeenCalledWith([testFile1], modifiedFileName, { type: testFileData.mimeType });
     });
 
@@ -78,7 +78,7 @@ describe('noteService test', () => {
 
       // Testing
       await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
-
+      expect(comsCreateSpy).toHaveBeenCalledTimes(1);
       expect(comsCreateSpy).toHaveBeenCalledWith(testFile1, {}, { bucketId: testBucketId }, { timeout: 0 });
     });
 
@@ -91,7 +91,7 @@ describe('noteService test', () => {
 
       // Testing
       await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
-
+      expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}`, {
         activityId: testActivityId,
         documentId: testFileData.id,
@@ -119,6 +119,7 @@ describe('noteService test', () => {
 
       // Testing
       await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
+      expect(comsDeleteSpy).toHaveBeenCalledTimes(1);
       expect(comsDeleteSpy).toHaveBeenCalledWith(testFileData.id, testVersionId);
     });
 
@@ -141,6 +142,7 @@ describe('noteService test', () => {
     comsGetSpy.mockResolvedValue();
     await documentService.downloadDocument(testId);
 
+    expect(comsGetSpy).toHaveBeenCalledTimes(1);
     expect(comsGetSpy).toHaveBeenCalledWith(testId, undefined);
   });
 
@@ -149,7 +151,7 @@ describe('noteService test', () => {
     const versionId = 'testVersionId';
     comsGetSpy.mockResolvedValue();
     await documentService.downloadDocument(testId, versionId);
-
+    expect(comsGetSpy).toHaveBeenCalledTimes(1);
     expect(comsGetSpy).toHaveBeenCalledWith(testId, versionId);
   });
 
@@ -157,8 +159,9 @@ describe('noteService test', () => {
     const testId = 'testDocumentId';
     comsDeleteSpy.mockResolvedValue({} as AxiosResponse);
     await documentService.deleteDocument(testId);
-
+    expect(comsDeleteSpy).toHaveBeenCalledTimes(1);
     expect(comsDeleteSpy).toHaveBeenCalledWith(testId, undefined);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testId}`, {
       params: {
         versionId: undefined
@@ -171,8 +174,9 @@ describe('noteService test', () => {
     const versionId = 'testVersionId';
     comsDeleteSpy.mockResolvedValue({} as AxiosResponse);
     await documentService.deleteDocument(testId, versionId);
-
+    expect(comsDeleteSpy).toHaveBeenCalledTimes(1);
     expect(comsDeleteSpy).toHaveBeenCalledWith(testId, versionId);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testId}`, {
       params: {
         versionId: versionId
@@ -184,6 +188,7 @@ describe('noteService test', () => {
     const testId = 'testActivityId';
     await documentService.listDocuments(testId);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}/list/${testId}`);
   });
 });

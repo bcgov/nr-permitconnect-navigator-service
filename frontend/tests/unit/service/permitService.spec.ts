@@ -46,36 +46,43 @@ beforeEach(() => {
 describe('permitService test', () => {
   it('calls creates a permit', async () => {
     await permitService.createPermit(testPermit1);
+    expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith(PATH, testPermit1);
   });
 
   it('calls delete permit', async () => {
     await permitService.deletePermit(TEST_ID);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${TEST_ID}`);
   });
 
   it('calls delete permit with wrong ID', async () => {
     await permitService.deletePermit('wrongId');
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).not.toHaveBeenCalledWith(`${PATH}/${TEST_ID}`);
   });
 
   it('calls get permit type list', async () => {
     await permitService.getPermitTypes();
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}/types`);
   });
 
   it('calls get permit list', async () => {
     await permitService.listPermits(TEST_ID);
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
   });
 
   it('calls get permit list with wrong ID', async () => {
     await permitService.listPermits('wrongId');
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).not.toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
   });
 
   it('calls put permit', async () => {
     await permitService.updatePermit(testPermit1);
+    expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testPermit1.permitId}`, testPermit1);
   });
 
@@ -84,6 +91,7 @@ describe('permitService test', () => {
     delete modifiedPermit.permitTypeId;
 
     await permitService.updatePermit(modifiedPermit);
+    expect(updatePermitSpy).toHaveBeenCalledTimes(1);
     expect(updatePermitSpy).toThrow();
   });
 });

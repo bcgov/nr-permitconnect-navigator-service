@@ -37,12 +37,14 @@ describe('noteService test', () => {
   it('creates a note', async () => {
     await noteService.createNote(testNote);
 
+    expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith('note', testNote);
   });
 
   it('retrieves note list', async () => {
     await noteService.listNotes('testUUID');
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith('note/list/testUUID');
   });
 });

@@ -25,6 +25,7 @@ describe('submissionService test', () => {
   it('gets submissions', async () => {
     await submissionService.getSubmissions();
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(PATH);
   });
 
@@ -37,6 +38,7 @@ describe('submissionService test', () => {
     };
     await submissionService.getStatistics(testFilter);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}statistics`, { params: testFilter });
   });
 
@@ -44,6 +46,7 @@ describe('submissionService test', () => {
     const testActivityId = 'testActivityId';
     await submissionService.getSubmission(testActivityId);
 
+    expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}${testActivityId}`);
   });
 
@@ -56,6 +59,7 @@ describe('submissionService test', () => {
     };
     await submissionService.updateSubmission(testActivityId, testObj);
 
+    expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith(`${PATH}${testActivityId}`, testObj);
   });
 });
