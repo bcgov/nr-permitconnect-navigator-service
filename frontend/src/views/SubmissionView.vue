@@ -7,6 +7,7 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
+import UpdateRoadmap from '@/components/roadmap/UpdateRoadmap.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
@@ -219,6 +220,9 @@ onMounted(async () => {
         v-model:visible="noteModalVisible"
         @note:submit="onNoteSubmit"
       />
+    </TabPanel>
+    <TabPanel header="Road Map">
+      <UpdateRoadmap :activity-id="activityId" />
     </TabPanel>
   </TabView>
 </template>
