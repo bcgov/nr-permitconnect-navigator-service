@@ -128,6 +128,16 @@ spec:
                 secretKeyRef:
                   key: password
                   name: {{ include "pcns.configname" . }}-form2
+            - name: SERVER_CHES_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: ches-service-account
+            - name: SERVER_CHES_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: ches-service-account
             - name: SERVER_DB_HOST
               value: {{ $dbHostName }}
             - name: SERVER_DB_USERNAME

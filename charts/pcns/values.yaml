@@ -142,6 +142,9 @@ config:
 
     SERVER_CHEFS_APIPATH: ~
 
+    SERVER_CHES_APIPATH: ~
+    SERVER_CHES_TOKENURL: ~
+
     SERVER_DB_HOST: ~
     SERVER_DB_PORT: "5432"
     SERVER_DB_POOL_MIN: "2"
@@ -163,6 +166,9 @@ form1SecretOverride:
   username: ~
   password: ~
 form2SecretOverride:
+  username: ~
+  password: ~
+chesSecretOverride:
   username: ~
   password: ~
 oidcSecretOverride:
