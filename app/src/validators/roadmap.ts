@@ -1,13 +1,13 @@
-import Joi from 'joi';
+// import Joi from 'joi';
 
-import { activityId } from './common';
+// import { activityId } from './common';
 import { validate } from '../middleware/validation';
 
 const schema = {
   update: {
-    params: Joi.object({
-      activityId: activityId
-    })
+    // params: Joi.object({
+    //   activityId: activityId
+    // })
     // body: Joi.object({})
   }
 };
