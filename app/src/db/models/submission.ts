@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import user from './user';
 
 import type { Stamps } from '../stamps';
 import type { Submission } from '../../types';
@@ -7,9 +8,11 @@ import type { Submission } from '../../types';
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
 const _submissionWithGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({});
+const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({ include: { user: true } });
 
 type PrismaRelationSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, keyof Stamps>;
 type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithGraph>;
+type PrismaGraphSubmissionUser = Prisma.submissionGetPayload<typeof _submissionWithUserGraph>;
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
@@ -98,7 +101,19 @@ export default {
       statusRequest: input.status_request,
       inquiry: input.inquiry,
       emergencyAssist: input.emergency_assist,
-      inapplicable: input.inapplicable
+      inapplicable: input.inapplicable,
+      user: null
     };
+  },
+
+  fromPrismaModelWithUser(input: PrismaGraphSubmissionUser | null): Submission | null {
+    if (!input) return null;
+
+    const submission = this.fromPrismaModel(input);
+    if (submission) {
+      submission.user = user.fromPrismaModel(input.user);
+    }
+
+    return submission;
   }
 };

@@ -1,5 +1,7 @@
 import { IStamps } from '../interfaces/IStamps';
 
+import type { User } from './User';
+
 export type Submission = {
   submissionId: string; // Primary key
   activityId: string;
@@ -40,4 +42,5 @@ export type Submission = {
   inquiry: boolean;
   emergencyAssist: boolean;
   inapplicable: boolean;
+  user: User | null;
 } & Partial<IStamps>;
