@@ -7,6 +7,7 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
+import RoadmapMessage from '@/components/roadmap/RoadmapMessage.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
@@ -14,6 +15,7 @@ import { RouteNames } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { Document, Note, Permit, PermitType, Submission } from '@/types';
+import emailService from '@/services/emailService';
 
 // Props
 type Props = {
@@ -218,6 +220,15 @@ onMounted(async () => {
       <NoteModal
         v-model:visible="noteModalVisible"
         @note:submit="onNoteSubmit"
+      />
+    </TabPanel>
+    <!-- TODO: create emit handlers for success/fail so that we can show toasts (@emit-name-here="emitHandler") -->
+    <TabPanel header="Roadmap">
+      <RoadmapMessage
+        v-if="submission"
+        :submission="submission"
+        :permits="permits"
+        :permit-type="permitTypes"
       />
     </TabPanel>
   </TabView>
