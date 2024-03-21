@@ -54,6 +54,17 @@ const confirmDelete = (data: Permit) => {
   }
 };
 
+function populateUpdatedBy() {
+  if (cardData.value.updatedBy) {
+    userService
+      .searchUsers({ userId: [cardData.value.updatedBy] })
+      .then((res) => {
+        cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
+      })
+      .catch(() => {});
+  }
+}
+
 async function onPermitSubmit(data: Permit) {
   try {
     const result = await permitService.updatePermit({ ...data, activityId: props.permit.activityId });
@@ -62,16 +73,13 @@ async function onPermitSubmit(data: Permit) {
   } catch (e: any) {
     toast.error('Failed to update permit', e.message);
   } finally {
+    populateUpdatedBy();
     permitModalVisible.value = false;
   }
 }
 
 onMounted(() => {
-  if (cardData.value.updatedBy) {
-    userService.searchUsers({ userId: [cardData.value.updatedBy] }).then((res) => {
-      cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
-    });
-  }
+  populateUpdatedBy();
 });
 </script>
 

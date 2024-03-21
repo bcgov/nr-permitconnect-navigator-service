@@ -243,7 +243,8 @@ const SUBMISSION_1 = {
   statusRequest: false,
   inquiry: false,
   emergencyAssist: false,
-  inapplicable: false
+  inapplicable: false,
+  user: null
 };
 
 describe('checkAndStoreNewSubmissions', () => {
