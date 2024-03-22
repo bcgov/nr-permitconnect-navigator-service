@@ -222,7 +222,13 @@ onMounted(async () => {
       />
     </TabPanel>
     <TabPanel header="Road Map">
-      <UpdateRoadmap :activity-id="activityId" />
+      <UpdateRoadmap
+        v-if="submission"
+        :activity-id="activityId"
+        :permits="permits"
+        :permitTypes="permitTypes"
+        :submission="submission"
+      />
     </TabPanel>
   </TabView>
 </template>

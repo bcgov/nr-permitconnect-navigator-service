@@ -1,4 +1,5 @@
 import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
+import type { Permit, PermitType } from '@/types';
 
 /**
  * @function differential
@@ -54,6 +55,25 @@ export function getFileCategory(mimeType: string): string {
     default:
       return FILE_CATEGORIES.FILE;
   }
+}
+
+/**
+ * gets the name of the permit type for each of the given permits
+ * with the given status
+ * @param permits
+ * @param permitTypes
+ * @param status
+ * @returns array of permit type names eg: ['Fishing', 'Drilling', 'Parking']
+ */
+export function getPermitTypesByStatus(permits: Array<Permit>, permitTypes: Array<PermitType>, status: string) {
+  return permits
+    .map(
+      (p) =>
+        permitTypes.find((pt) => {
+          return pt.permitTypeId === p.permitTypeId && p.status === status;
+        })?.name
+    )
+    .filter((p) => p !== undefined && p !== '');
 }
 
 /**
