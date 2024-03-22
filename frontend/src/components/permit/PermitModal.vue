@@ -54,8 +54,7 @@ const formSchema = object({
   status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
   businessDomain: string().required().label('Business domain'),
-  sourceSystem: string().required().label('Source system'),
-  submittedDate: string().required().label('Submitted date')
+  sourceSystem: string().required().label('Source system')
 });
 
 // Actions
@@ -75,7 +74,7 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 function onSubmit(data: PermitForm, { resetForm }) {
-  if (props.permit) initialFormValues = data;
+  if (props.permit) initialFormValues = { ...data };
   else resetForm();
 
   // Remove extra fields in permit that belongs to permitType

@@ -146,9 +146,9 @@ const service = {
    */
   getSubmissions: async () => {
     try {
-      const result = await prisma.submission.findMany({});
+      const result = await prisma.submission.findMany({ include: { user: true } });
 
-      return result.map((x) => submission.fromPrismaModel(x));
+      return result.map((x) => submission.fromPrismaModelWithUser(x));
     } catch (e: unknown) {
       throw e;
     }
