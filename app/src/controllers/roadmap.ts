@@ -1,21 +1,20 @@
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import { emailService } from '../services';
 
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email } from '../types';
 
 const controller = {
   /**
-   * @function update
-   * update roadmap
+   * @function send
+   * Send an email with the roadmap data
    */
-  update: async (req: Request, res: Response, next: NextFunction) => {
+  send: async (
+    req: Request<never, never, { activityId: string; emailData: Email }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      // do other stuff related to roadmap items
-      // eg: update note where id = req.body.activityId;
-
-      const body = req.body as { activityId: string; emailData: Email };
-      // send email
-      const { data, status } = await emailService.email(body.emailData);
+      const { data, status } = await emailService.email(req.body.emailData);
       res.status(status).json(data);
     } catch (e: unknown) {
       next(e);

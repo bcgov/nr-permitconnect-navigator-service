@@ -1,13 +1,24 @@
 import { appAxios } from './interceptors';
 
+import { parseCSV } from '@/utils/utils';
+
 export default {
   /**
-   * @function update
-   *
-   * updates roadmap for an activity
+   * @function send
+   * Send an email with the roadmap data
    * @returns {Promise} An axios response
    */
-  update(activityId: string, emailData: any) {
+  send(activityId: string, emailData: any) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = parseCSV(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = parseCSV(emailData.cc);
+    }
+    if (emailData.bcc && !Array.isArray(emailData.bcc)) {
+      emailData.bcc = parseCSV(emailData.bcc);
+    }
+
     return appAxios().put('roadmap', { activityId, emailData });
   }
 };

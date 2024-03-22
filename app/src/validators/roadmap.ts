@@ -4,7 +4,7 @@
 import { validate } from '../middleware/validation';
 
 const schema = {
-  update: {
+  send: {
     // params: Joi.object({
     //   activityId: activityId
     // })
@@ -13,5 +13,5 @@ const schema = {
 };
 
 export default {
-  update: validate(schema.update)
+  send: validate(schema.send)
 };

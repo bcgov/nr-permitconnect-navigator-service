@@ -1,21 +1,26 @@
-export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] }) => {
+export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   // Using template literal, baseTemplate's whitespace matters
   {/* prettier-ignore */}
   const baseTemplate = `Dear {{ contactName }},
+
 Here is your Permit Roadmap for {{ locationAddress }},
+
 You need to apply for the following permit(s):
 {{ permitStateNew }}
+
 Based on the information provided, you have already applied for the following permit(s):
 {{ permitStateApplied }}
+
 Based on the information provided, you have completed the process for the following permit(s):
 {{ permitStateCompleted }}
+
 Regards,
 {{ navigatorName }}`;
 
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-const replacePlaceholders = (baseText: string, replacementConfig: { [key: string]: string | string[] }) => {
+const replacePlaceholders = (baseText: string, replacementConfig: { [key: string]: string | string[] | undefined }) => {
   if (!baseText || !Object.keys(replacementConfig)) return baseText;
 
   let newText = baseText;

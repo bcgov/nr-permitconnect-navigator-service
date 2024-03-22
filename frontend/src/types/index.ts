@@ -1,10 +1,10 @@
-export type { Submission } from './Submission';
 export type { Document } from './Document';
 export type { IdentityProvider } from './IdentityProvider';
+export type { Note } from './Note';
 export type { Permit } from './Permit';
 export type { PermitForm } from './PermitForm';
 export type { PermitType } from './PermitType';
 export type { Statistics } from './Statistics';
+export type { Submission } from './Submission';
 export type { User } from './User';
 export type { UserSearchParameters } from './UserSearchParameters';
-export type { Note } from './Note';

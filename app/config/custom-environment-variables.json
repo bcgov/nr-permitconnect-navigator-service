@@ -1,6 +1,9 @@
 {
   "frontend": {
     "apiPath": "FRONTEND_APIPATH",
+    "ches": {
+      "bcc": "FRONTEND_CHES_BCC"
+    },
     "coms": {
       "apiPath": "FRONTEND_COMS_APIPATH",
       "bucketId": "FRONTEND_COMS_BUCKETID"
