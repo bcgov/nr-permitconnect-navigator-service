@@ -5,6 +5,7 @@ import { RouterView } from 'vue-router';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthStore, useConfigStore } from '@/store';
+import { ToastTimeout } from './utils/constants';
 
 import type { Ref } from 'vue';
 
@@ -25,7 +26,7 @@ onBeforeMount(async () => {
 // Top level error handler
 onErrorCaptured((e: Error) => {
   const toast = useToast();
-  toast.error('Error', e.message);
+  toast.error('Error', e.message, { life: ToastTimeout.STICKY });
 });
 </script>
 
