@@ -58,25 +58,6 @@ export function getFileCategory(mimeType: string): string {
 }
 
 /**
- * gets the name of the permit type for each of the given permits
- * with the given status
- * @param permits
- * @param permitTypes
- * @param status
- * @returns array of permit type names eg: ['Fishing', 'Drilling', 'Parking']
- */
-export function getPermitTypesByStatus(permits: Array<Permit>, permitTypes: Array<PermitType>, status: string) {
-  return permits
-    .map(
-      (p) =>
-        permitTypes.find((pt) => {
-          return pt.permitTypeId === p.permitTypeId && p.status === status;
-        })?.name
-    )
-    .filter((p) => p !== undefined && p !== '');
-}
-
-/**
  * @function isDebugMode
  * Checks if the app is currently running in debug mode
  * @returns {boolean} True if in debug, false otherwise
@@ -118,6 +99,16 @@ export function joinPath(...items: Array<string>): string {
     });
     return parts.join(DELIMITER);
   } else return '';
+}
+
+/**
+ * @function parseCSV
+ * Converts a comma separated value string into an array of string values
+ * @param {string} value The CSV string to parse
+ * @returns {string[]} An array of string values, or `value` if it is not a string
+ */
+export function parseCSV(value: string): Array<string> {
+  return value.split(',').map((s) => s.trim());
 }
 
 /**

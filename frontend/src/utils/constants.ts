@@ -51,6 +51,7 @@ export const StorageKey = Object.freeze({
 export const ToastTimeout = Object.freeze({
   ERROR: 5000,
   INFO: 3000,
+  STICKY: 0,
   SUCCESS: 3000,
   WARNING: 5000
 });

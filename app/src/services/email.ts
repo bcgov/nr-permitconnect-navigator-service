@@ -32,12 +32,12 @@ async function getToken() {
  * @returns {AxiosInstance} An axios instance
  */
 function chesAxios(): AxiosInstance {
-  // create axios instance
+  // Create axios instance
   const chesAxios = axios.create({
     baseURL: config.get('server.ches.apiPath'),
     timeout: 10000
   });
-  // add bearer token
+  // Add bearer token
   chesAxios.interceptors.request.use(async (config) => {
     const token = await getToken();
     const auth = token ? `Bearer ${token}` : '';
@@ -50,7 +50,7 @@ function chesAxios(): AxiosInstance {
 const service = {
   /**
    * @function email
-   * sends an email with CHES service
+   * Sends an email with CHES service
    * @param emailData
    * @returns Axios response status and data
    */
@@ -67,7 +67,7 @@ const service = {
 
   /**
    * @function health
-   * checks CHES service health
+   * Checks CHES service health
    * @returns Axios response status and data
    */
   health: async () => {

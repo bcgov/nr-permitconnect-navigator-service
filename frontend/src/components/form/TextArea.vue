@@ -12,6 +12,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
+  rows?: number;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,7 +21,8 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: '',
   disabled: false,
-  bold: true
+  bold: true,
+  rows: 5
 });
 
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
@@ -42,7 +44,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
-      :rows="5"
+      :rows="rows"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

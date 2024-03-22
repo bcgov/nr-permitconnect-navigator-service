@@ -3,6 +3,7 @@ config:
   enabled: true
   configMap:
     FRONTEND_APIPATH: api/v1
+    FRONTEND_CHES_BCC: Housing.Authorizations@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 0089d041-5aab-485e-842d-8875475d0ed6
     FRONTEND_OIDC_AUTHORITY: https://loginproxy.gov.bc.ca/auth/realms/standard

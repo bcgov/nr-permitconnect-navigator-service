@@ -7,7 +7,7 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
-import UpdateRoadmap from '@/components/roadmap/UpdateRoadmap.vue';
+import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<Props>(), {});
 // State
 const documents: Ref<Array<Document>> = ref([]);
 const editable: Ref<boolean> = ref(false);
+const loading: Ref<boolean> = ref(true);
 const notes: Ref<Array<Note>> = ref([]);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permits: Ref<Array<Permit>> = ref([]);
@@ -72,11 +73,17 @@ async function onSubmissionSubmit(data: Submission) {
 }
 
 onMounted(async () => {
-  submission.value = (await submissionService.getSubmission(props.activityId)).data;
-  documents.value = (await documentService.listDocuments(props.activityId)).data;
-  notes.value = (await noteService.listNotes(props.activityId)).data;
-  permits.value = (await permitService.listPermits(props.activityId)).data;
-  permitTypes.value = (await permitService.getPermitTypes()).data;
+  [submission.value, documents.value, notes.value, permits.value, permitTypes.value] = (
+    await Promise.all([
+      submissionService.getSubmission(props.activityId),
+      documentService.listDocuments(props.activityId),
+      noteService.listNotes(props.activityId),
+      permitService.listPermits(props.activityId),
+      permitService.getPermitTypes()
+    ])
+  ).map((r) => r.data);
+
+  loading.value = false;
 });
 </script>
 
@@ -104,22 +111,23 @@ onMounted(async () => {
 
   <TabView>
     <TabPanel header="Info">
-      <Button
-        v-if="!editable"
-        class="mb-3"
-        :disabled="editable"
-        @click="editable = true"
-      >
-        Edit
-      </Button>
+      <span v-if="!loading">
+        <Button
+          v-if="!editable"
+          class="mb-3"
+          :disabled="editable"
+          @click="editable = true"
+        >
+          Edit
+        </Button>
 
-      <SubmissionForm
-        v-if="submission"
-        :editable="editable"
-        :submission="submission"
-        @cancel="editable = false"
-        @submit="onSubmissionSubmit"
-      />
+        <SubmissionForm
+          :editable="editable"
+          :submission="submission as Submission"
+          @cancel="editable = false"
+          @submit="onSubmissionSubmit"
+        />
+      </span>
     </TabPanel>
     <TabPanel header="Files">
       <div class="grid nested-grid">
@@ -221,13 +229,13 @@ onMounted(async () => {
         @note:submit="onNoteSubmit"
       />
     </TabPanel>
-    <TabPanel header="Road Map">
-      <UpdateRoadmap
-        v-if="submission"
+    <TabPanel header="Roadmap">
+      <Roadmap
+        v-if="!loading"
         :activity-id="activityId"
         :permits="permits"
-        :permitTypes="permitTypes"
-        :submission="submission"
+        :permit-types="permitTypes"
+        :submission="submission as Submission"
       />
     </TabPanel>
   </TabView>
