@@ -63,7 +63,7 @@ const confirmSubmit = (data: any) => {
         await roadmapService.send(props.activityId, data);
         toast.success('Roadmap sent');
       } catch (e: any) {
-        toast.error('Failed to send roadmap', e.message);
+        toast.error('Failed to send roadmap', e.response.data);
       }
     }
   });
@@ -77,13 +77,26 @@ function getPermitTypeNamesByStatus(permits: Array<Permit>, permitTypes: Array<P
 }
 
 onMounted(async () => {
-  const assignee = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data[0];
+  // get navigator details
   const configBCC = getConfig.value.ches?.bcc;
-  const bcc = assignee.email + (configBCC ? `, ${configBCC}` : '');
+  let bcc = configBCC;
+  let navigator = {
+    email: configBCC,
+    fullName: 'Permit Connect Navigator Service'
+  };
+  if (props.submission.assignedUserId) {
+    const assignee = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data[0];
+
+    if (assignee) {
+      navigator = assignee;
+      navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
+      bcc = `${bcc}, ${assignee.email}`;
+    }
+  }
 
   // Initial form values
   initialFormValues.value = {
-    from: assignee.email,
+    // from: navigator.email,
     to: props.submission.contactEmail,
     cc: undefined,
     bcc: bcc,
@@ -99,7 +112,7 @@ onMounted(async () => {
         props.permitTypes,
         PERMIT_STATUS.COMPLETED
       ),
-      '{{ navigatorName }}': `${assignee.firstName} ${assignee.lastName}`
+      '{{ navigatorName }}': navigator.fullName
     })
   };
 });
