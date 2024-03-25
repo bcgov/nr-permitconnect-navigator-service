@@ -8,6 +8,9 @@ Here is your Permit Roadmap for {{ locationAddress }},
 You need to apply for the following permit(s):
 {{ permitStateNew }}
 
+Based on the information provided, you may need the following permit(s):
+{{ permitPossiblyNeeded }}
+
 Based on the information provided, you have already applied for the following permit(s):
 {{ permitStateApplied }}
 
