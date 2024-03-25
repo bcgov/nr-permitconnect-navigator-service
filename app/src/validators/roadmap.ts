@@ -1,14 +1,31 @@
-// import Joi from 'joi';
+import Joi from 'joi';
 
-// import { activityId } from './common';
+import { activityId, emailJoi } from './common';
 import { validate } from '../middleware/validation';
 
 const schema = {
   send: {
-    // params: Joi.object({
-    //   activityId: activityId
-    // })
-    // body: Joi.object({})
+    body: Joi.object({
+      activityId: activityId,
+      emailData: Joi.object().keys({
+        // attachments: Joi.object().keys({
+        //   content: Joi.string().required(),
+        //   contentType: Joi.string(),
+        //   encoding: Joi.string(),
+        //   filename: Joi.string().required(),
+        // }),
+        bcc: Joi.array().items(emailJoi),
+        bodyType: Joi.string().required(),
+        body: Joi.string().required(),
+        cc: Joi.array().items(emailJoi),
+        delayTS: Joi.number(),
+        from: emailJoi.required(),
+        priority: Joi.string(),
+        subject: Joi.string().required(),
+        tag: Joi.string(),
+        to: Joi.array().items(emailJoi).required()
+      })
+    })
   }
 };
 

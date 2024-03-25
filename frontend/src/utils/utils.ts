@@ -1,5 +1,4 @@
 import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
-import type { Permit, PermitType } from '@/types';
 
 /**
  * @function differential

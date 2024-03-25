@@ -55,14 +55,28 @@ const service = {
    * @returns Axios response status and data
    */
   email: async (emailData: Email) => {
-    const { data, status } = await chesAxios().post('/email', emailData, {
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity
-    });
-    return { data, status };
+    try {
+      const { data, status } = await chesAxios().post('/email', emailData, {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity
+      });
+      return { data, status };
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        return {
+          data: e.response?.data.errors[0].message,
+          status: e.response ? e.response.status : 500
+        };
+      } else {
+        return {
+          data: 'Email error',
+          status: 500
+        };
+      }
+    }
   },
 
   /**
