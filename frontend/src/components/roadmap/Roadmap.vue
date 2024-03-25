@@ -8,7 +8,7 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useConfigStore } from '@/store';
-import { PERMIT_STATUS } from '@/utils/enums';
+import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
 import { roadmapTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
@@ -85,6 +85,13 @@ function getPermitTypeNamesByStatus(permits: Array<Permit>, permitTypes: Array<P
     .map((name) => name as string);
 }
 
+function getPermitTypeNamesByNeeded(permits: Array<Permit>, permitTypes: Array<PermitType>, needed: string) {
+  return permits
+    .map((p) => permitTypes.find((pt) => pt.permitTypeId === p.permitTypeId && p.needed === needed)?.name)
+    .filter((pt) => !!pt)
+    .map((name) => name as string);
+}
+
 function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
@@ -112,6 +119,14 @@ onMounted(async () => {
     }
   }
 
+  // Permits
+  const permitStateNew = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW);
+  const permitPossiblyNeeded = permitStateNew.filter((value) =>
+    getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
+  );
+  const permitStateApplied = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.APPLIED);
+  const permitStateCompleted = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.COMPLETED);
+
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
@@ -123,13 +138,10 @@ onMounted(async () => {
     body: roadmapTemplate({
       '{{ contactName }}': props.submission.contactName ?? '',
       '{{ locationAddress }}': props.submission.streetAddress ?? '',
-      '{{ permitStateNew }}': getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW),
-      '{{ permitStateApplied }}': getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.APPLIED),
-      '{{ permitStateCompleted }}': getPermitTypeNamesByStatus(
-        props.permits,
-        props.permitTypes,
-        PERMIT_STATUS.COMPLETED
-      ),
+      '{{ permitStateNew }}': permitStateNew,
+      '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
+      '{{ permitStateApplied }}': permitStateApplied,
+      '{{ permitStateCompleted }}': permitStateCompleted,
       '{{ navigatorName }}': navigator.fullName
     })
   };
