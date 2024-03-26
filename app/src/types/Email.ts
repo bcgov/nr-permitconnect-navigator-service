@@ -1,14 +1,16 @@
+import { EmailAttachment } from './EmailAttachment';
+
 export type Email = {
-  bcc: Array<string> | undefined;
+  bcc?: Array<string>;
   bodyType: string;
   body: string;
-  cc: Array<string> | undefined;
-  delayTS: number | undefined;
-  encoding: string | undefined;
+  cc?: Array<string>;
+  delayTS?: number;
+  encoding?: string;
   from: string;
-  priority: string | undefined;
+  priority?: string;
   subject: string;
   to: Array<string>;
-  tag: string | undefined;
-  attachments: Array<string> | undefined;
+  tag?: string;
+  attachments?: Array<EmailAttachment>;
 };
