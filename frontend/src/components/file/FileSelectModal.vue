@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed } from 'vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import { Button, Dialog } from '@/lib/primevue';
 
@@ -9,29 +9,33 @@ import type { Document } from '@/types';
 // Props
 type Props = {
   documents: Array<Document>;
+  selectedDocuments?: Array<Document>;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  selectedDocuments: () => []
+});
 
 // Emits
 const emit = defineEmits(['fileSelect:submit']);
 
 // State
-const selectedFiles: Ref<Array<Document>> = ref([]);
 const visible = defineModel<boolean>('visible');
+const selectedFiles: Ref<Array<Document>> = computed(() => props.selectedDocuments);
 
 // Actions
-function onDocumentClicked(data: any) {
+function onDocumentClicked(data: { document: Document; selected: boolean }) {
   if (data.selected) {
-    if (!selectedFiles.value.find((x) => x === data.document.documentId)) selectedFiles.value.push(data.document);
+    if (!selectedFiles.value.includes(data.document)) {
+      selectedFiles.value.push(data.document);
+    }
   } else {
     selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== data.document.documentId);
   }
 }
 
 function onSave() {
-  emit('fileSelect:submit', selectedFiles.value);
-  selectedFiles.value = [];
+  emit('fileSelect:submit', selectedFiles.value.slice());
   visible.value = false;
 }
 </script>
@@ -49,7 +53,7 @@ function onSave() {
     <div class="col-12">
       <div class="grid">
         <div
-          v-for="(document, index) in documents"
+          v-for="(document, index) in props.documents"
           :key="document.documentId"
           :index="index"
           class="col-12 md:col-6 lg:col-4 xl:col-3"

@@ -85,7 +85,7 @@ function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
 
-function onFileSelect(data: any) {
+function onFileSelect(data: Array<Document>) {
   selectedFiles.value = data;
   formRef.value?.setFieldValue(
     'attachments',
@@ -113,7 +113,7 @@ onMounted(async () => {
 
   // Initial form values
   initialFormValues.value = {
-    // from: navigator.email,
+    from: navigator.email,
     to: props.submission.contactEmail,
     cc: undefined,
     bcc: bcc,
@@ -215,6 +215,7 @@ onMounted(async () => {
   <FileSelectModal
     v-model:visible="fileSelectModalVisible"
     :documents="documents"
+    :selected-documents="selectedFiles.slice()"
     @file-select:submit="onFileSelect"
   />
 </template>
