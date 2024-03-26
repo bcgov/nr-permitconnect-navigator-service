@@ -3,6 +3,7 @@ import { Form } from 'vee-validate';
 import { onMounted, ref } from 'vue';
 import { array, object, string } from 'yup';
 
+import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
@@ -11,12 +12,13 @@ import { PERMIT_STATUS } from '@/utils/enums';
 import { roadmapTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType, Submission } from '@/types';
+import type { Document, Permit, PermitType, Submission } from '@/types';
 import { storeToRefs } from 'pinia';
 
 // Props
 type Props = {
   activityId: string;
+  documents: Array<Document>;
   permits: Array<Permit>;
   permitTypes: Array<PermitType>;
   submission: Submission;
@@ -28,7 +30,10 @@ const props = withDefaults(defineProps<Props>(), {});
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
+const fileSelectModalVisible: Ref<boolean> = ref(false);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any> = ref();
+const selectedFiles: Ref<Array<Document>> = ref([]);
 
 // Form schema
 const emailValidator = array()
@@ -76,6 +81,18 @@ function getPermitTypeNamesByStatus(permits: Array<Permit>, permitTypes: Array<P
     .map((name) => name as string);
 }
 
+function onFileRemove(document: Document) {
+  selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
+}
+
+function onFileSelect(data: any) {
+  selectedFiles.value = data;
+  formRef.value?.setFieldValue(
+    'attachments',
+    data.map((x: Document) => ({ filename: x.filename, documentId: x.documentId }))
+  );
+}
+
 onMounted(async () => {
   // get navigator details
   const configBCC = getConfig.value.ches?.bcc;
@@ -121,6 +138,7 @@ onMounted(async () => {
 <template>
   <Form
     v-if="initialFormValues"
+    ref="formRef"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="confirmSubmit"
@@ -158,13 +176,31 @@ onMounted(async () => {
       />
       <div class="col-12"><label class="font-bold">Add attachments</label></div>
       <div class="col-12 pt-2">
-        <Button>
+        <Button @click="fileSelectModalVisible = true">
           <font-awesome-icon
             icon="fa-solid fa-plus"
             class="mr-1"
           />
           Choose
         </Button>
+        <div
+          v-for="(document, index) in selectedFiles"
+          :key="document.documentId"
+          :index="index"
+          class="mt-1"
+        >
+          <div class="flex align-items-center">
+            <div>
+              <Button
+                class="p-button-sm p-button-outlined p-button-danger p-1 mr-1"
+                @click="onFileRemove(document)"
+              >
+                <font-awesome-icon icon="fa-solid fa-times" />
+              </Button>
+            </div>
+            <div>{{ document.filename }}</div>
+          </div>
+        </div>
       </div>
       <div class="col-12 pt-5">
         <Button
@@ -175,4 +211,10 @@ onMounted(async () => {
       </div>
     </div>
   </Form>
+
+  <FileSelectModal
+    v-model:visible="fileSelectModalVisible"
+    :documents="documents"
+    @file-select:submit="onFileSelect"
+  />
 </template>

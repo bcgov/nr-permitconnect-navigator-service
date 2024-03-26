@@ -233,6 +233,7 @@ onMounted(async () => {
       <Roadmap
         v-if="!loading"
         :activity-id="activityId"
+        :documents="documents"
         :permits="permits"
         :permit-types="permitTypes"
         :submission="submission as Submission"

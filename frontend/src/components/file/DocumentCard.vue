@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { filesize } from 'filesize';
+import { ref } from 'vue';
 
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
@@ -16,20 +17,28 @@ import pdf from '@/assets/images/pdf.svg';
 import shape from '@/assets/images/shape.svg';
 import spreadsheet from '@/assets/images/spreadsheet.svg';
 
+import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
 type Props = {
   document: Document;
   deleteButton?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  deleteButton: true
+  deleteButton: true,
+  selectable: false,
+  selected: false
 });
 
 // Emits
-const emit = defineEmits(['document:deleted']);
+const emit = defineEmits(['document:clicked', 'document:deleted']);
+
+// State
+const isSelected: Ref<boolean> = ref(props.selected);
 
 // Actions
 const confirm = useConfirm();
@@ -77,6 +86,13 @@ const displayIcon = (mimeType = '') => {
       return file;
   }
 };
+
+function onClick() {
+  if (props.selectable) {
+    isSelected.value = !isSelected.value;
+    emit('document:clicked', { document: props.document, selected: isSelected.value });
+  }
+}
 </script>
 
 <template>
@@ -89,7 +105,10 @@ const displayIcon = (mimeType = '') => {
       />
     </template>
     <template #content>
-      <div class="grid">
+      <div
+        class="grid"
+        @click="onClick"
+      >
         <h4
           v-tooltip.bottom="props.document.filename"
           class="col-12 mb-0 text-left"
@@ -119,6 +138,9 @@ const displayIcon = (mimeType = '') => {
         "
       >
         <font-awesome-icon icon="fa-solid fa-trash" />
+      </Button>
+      <Button v-if="selectable && isSelected">
+        <font-awesome-icon icon="fa-solid fa-check" />
       </Button>
     </template>
   </Card>

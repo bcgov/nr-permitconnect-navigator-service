@@ -19,6 +19,9 @@ export default {
       emailData.bcc = parseCSV(emailData.bcc);
     }
 
-    return appAxios().put('roadmap', { activityId, emailData });
+    const attachmentIds = emailData.attachments;
+    delete emailData.attachments;
+
+    return appAxios().put('roadmap', { activityId, attachmentIds, emailData });
   }
 };
