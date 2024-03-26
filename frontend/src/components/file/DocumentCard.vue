@@ -96,7 +96,11 @@ function onClick() {
 </script>
 
 <template>
-  <Card class="pb-1 text-center">
+  <Card
+    class="pb-1 text-center"
+    :class="{ clicked: isSelected }"
+    @click="onClick"
+  >
     <template #header>
       <img
         alt="document header"
@@ -105,17 +109,14 @@ function onClick() {
       />
     </template>
     <template #content>
-      <div
-        class="grid"
-        @click="onClick"
-      >
-        <h4
+      <div class="grid">
+        <div
           v-tooltip.bottom="props.document.filename"
-          class="col-12 mb-0 text-left"
-          style="text-overflow: ellipsis; overflow: hidden"
+          class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap"
+          style="overflow: hidden"
         >
           {{ props.document.filename }}
-        </h4>
+        </div>
         <h6 class="col-8 text-left mt-0 mb-0">
           {{ formatDateLong(props.document.createdAt as string) }}
         </h6>
@@ -139,7 +140,10 @@ function onClick() {
       >
         <font-awesome-icon icon="fa-solid fa-trash" />
       </Button>
-      <Button v-if="selectable && isSelected">
+      <Button
+        v-if="false"
+        class="p-button-lg p-button-text p-0"
+      >
         <font-awesome-icon icon="fa-solid fa-check" />
       </Button>
     </template>
@@ -152,6 +156,10 @@ function onClick() {
   position: relative;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.clicked {
+  box-shadow: 0 0 11px rgb(83, 186, 15);
 }
 
 :deep(.p-card-header) {
