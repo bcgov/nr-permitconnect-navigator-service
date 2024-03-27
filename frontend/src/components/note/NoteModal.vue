@@ -30,7 +30,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 // Default form values
 let initialFormValues: any = {
   createdAt: new Date(),
-  bringForwardDate: new Date(),
+  bringForwardDate: null,
   bringForwardState: BRING_FORWARD_TYPES.UNRESOLVED,
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL

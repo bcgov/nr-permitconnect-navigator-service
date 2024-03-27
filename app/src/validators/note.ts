@@ -8,6 +8,8 @@ const schema = {
     body: Joi.object({
       createdAt: Joi.date().required(),
       activityId: activityId,
+      bringForwardDate: Joi.date().iso(),
+      bringForwardState: Joi.string(),
       note: Joi.string(),
       noteType: Joi.string().max(255).required(),
       title: Joi.string().max(255)
