@@ -1,7 +1,7 @@
 import { NIL } from 'uuid';
 
-import { noteService, userService } from '../services';
 import { getCurrentIdentity } from '../components/utils';
+import { noteService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 

@@ -12,7 +12,7 @@ type PrismaGraphNote = Prisma.noteGetPayload<typeof _noteWithGraph>;
 export default {
   toPrismaModel(input: Note): PrismaRelationNote {
     return {
-      note_id: input.noteId,
+      note_id: input.noteId as string,
       activity_id: input.activityId,
       note: input.note,
       note_type: input.noteType,
