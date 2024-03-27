@@ -30,13 +30,16 @@ onMounted(() => {
 <template>
   <Card>
     <template #title>
-      <h3 class="mt-1 mb-1">{{ props.note.title }}</h3>
+      <h3 class="mt-1 mb-1">
+        {{ props.note.title }}
+        <span v-if="props.note.bringForwardState">{{ '(Unresolved)' }}</span>
+      </h3>
       <Divider type="solid" />
     </template>
     <template #content>
       <div class="grid nested-grid">
         <!-- Left column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
@@ -45,7 +48,7 @@ onMounted(() => {
           </div>
         </div>
         <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Author:</span>
@@ -54,11 +57,22 @@ onMounted(() => {
           </div>
         </div>
         <!-- Right column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Note type:</span>
               {{ props.note.noteType }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-if="props.note.bringForwardDate"
+          class="col-12 md:col-6 lg:col-3"
+        >
+          <div class="grid">
+            <p class="col-12">
+              <span class="key font-bold">Bring forward date:</span>
+              {{ props.note.bringForwardDate }}
             </p>
           </div>
         </div>

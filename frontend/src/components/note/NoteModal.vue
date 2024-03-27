@@ -4,8 +4,8 @@ import { object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
-import { NoteTypes } from '@/utils/constants';
-import { NOTE_TYPES } from '@/utils/enums';
+import { BringForwardTypes, NoteTypes } from '@/utils/constants';
+import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
 
 import type { Note } from '@/types';
 import { nextTick, ref, watch } from 'vue';
@@ -30,6 +30,8 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 // Default form values
 let initialFormValues: any = {
   createdAt: new Date(),
+  bringForwardDate: new Date(),
+  bringForwardState: BRING_FORWARD_TYPES.UNRESOLVED,
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL
 };
@@ -105,13 +107,22 @@ watch(visible, (newValue) => {
           label="Note type"
           :options="NoteTypes"
         />
-        <div class="col-6" />
+        <Calendar
+          class="col-6"
+          name="bringForwardDate"
+          label="Bring forward date"
+        />
         <InputText
           class="col-6"
           name="title"
           label="Title"
         />
-        <div class="col-6" />
+        <Dropdown
+          class="col-6"
+          name="bringForwardState"
+          label="Bring froward state"
+          :options="BringForwardTypes"
+        />
         <TextArea
           class="col-12"
           name="note"

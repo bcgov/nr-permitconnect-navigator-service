@@ -3,6 +3,7 @@ import { NIL } from 'uuid';
 import {
   ACCESS_ROLES,
   APPLICATION_STATUS_LIST,
+  BRING_FORWARD_TYPES,
   CONTACT_PREFERENCE_LIST,
   INTAKE_STATUS_LIST,
   NOTE_TYPES,
@@ -96,6 +97,8 @@ export const RentalStatusList = [RENTAL_STATUS_LIST.UNSURE, RENTAL_STATUS_LIST.N
  * Note form constants
  */
 export const NoteTypes = [NOTE_TYPES.GENERAL, NOTE_TYPES.BRING_FORWARD, NOTE_TYPES.ENQUIRY];
+
+export const BringForwardTypes = [BRING_FORWARD_TYPES.UNRESOLVED, BRING_FORWARD_TYPES.RESOLVED];
 
 export const QueuePriority = [0, 1, 2, 3, 4, 5];
 
