@@ -1,4 +1,7 @@
-import { comsService, emailService } from '../services';
+import { NIL } from 'uuid';
+
+import { getCurrentIdentity } from '../components/utils';
+import { comsService, emailService, noteService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';
@@ -47,6 +50,29 @@ const controller = {
 
       // Send the email
       const { data, status } = await emailService.email(req.body.emailData);
+
+      // Add a new note on success
+      if (status === 201) {
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+
+        let noteBody = req.body.emailData.body;
+        if (req.body.emailData.attachments) {
+          noteBody += '\n\nAttachments:\n';
+          req.body.emailData.attachments.forEach((x) => {
+            noteBody += `${x.filename}\n`;
+          });
+        }
+
+        await noteService.createNote({
+          activityId: req.body.activityId,
+          note: noteBody,
+          noteType: 'Roadmap',
+          title: 'Sent roadmap',
+          createdAt: new Date().toISOString(),
+          createdBy: userId
+        });
+      }
+
       res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
