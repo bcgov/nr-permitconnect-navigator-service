@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, watchEffect } from 'vue';
+
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import { Button, Dialog } from '@/lib/primevue';
 
@@ -21,7 +22,7 @@ const emit = defineEmits(['fileSelect:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectedFiles: Ref<Array<Document>> = computed(() => props.selectedDocuments);
+const selectedFiles: Ref<Array<Document>> = ref(props.selectedDocuments);
 
 // Actions
 function onDocumentClicked(data: { document: Document; selected: boolean }) {
@@ -38,6 +39,10 @@ function onSave() {
   emit('fileSelect:submit', selectedFiles.value.slice());
   visible.value = false;
 }
+
+watchEffect(() => {
+  selectedFiles.value = props.selectedDocuments;
+});
 </script>
 
 <template>
