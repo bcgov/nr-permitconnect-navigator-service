@@ -1,26 +1,36 @@
 export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
-  // Using template literal, baseTemplate's whitespace matters
-  {/* prettier-ignore */}
-  const baseTemplate = `Dear {{ contactName }},
-
-Here is your Permit Roadmap for {{ locationAddress }},
-
-You need to apply for the following permit(s):
-{{ permitStateNew }}
-
-Based on the information provided, you may need the following permit(s):
-{{ permitPossiblyNeeded }}
-
-Based on the information provided, you have already applied for the following permit(s):
-{{ permitStateApplied }}
-
-Based on the information provided, you have completed the process for the following permit(s):
-{{ permitStateCompleted }}
-
-Regards,
-{{ navigatorName }}`;
+  const baseTemplate =
+    'Dear {{ contactName }},\n\n' +
+    'Here is your Permit Roadmap for {{ locationAddress }}.\n\n' +
+    // You need to apply for the following permit(s):
+    (replaceConfig['{{ permitStateNew }}']?.length ? templateConfig.permitStateNew : '') +
+    // Based on the information provided, you may need the following permit(s):
+    (replaceConfig['{{ permitPossiblyNeeded }}']?.length ? templateConfig.permitPossiblyNeeded : '') +
+    // Based on the information provided, you have already applied for the following permit(s):
+    (replaceConfig['{{ permitStateApplied }}']?.length ? templateConfig.permitStateApplied : '') +
+    // Based on the information provided, you have completed the process for the following permit(s):
+    (replaceConfig['{{ permitStateCompleted }}']?.length ? templateConfig.permitStateCompleted : '') +
+    'Regards,\n\n' +
+    '{{ navigatorName }}';
 
   return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+// Optional template sections - don't show if corresponding replaceConfig key is blank
+// prettier-ignore
+const templateConfig = {
+  permitStateNew:
+    'You need to apply for the following permit(s):\n' +
+    '{{ permitStateNew }}\n\n',
+  permitPossiblyNeeded:
+    'Based on the information provided, you may need the following permit(s):\n' +
+    '{{ permitPossiblyNeeded }}\n\n',
+  permitStateApplied:
+    'Based on the information provided, you have already applied for the following permit(s):\n' +
+    '{{ permitStateApplied }}\n\n',
+  permitStateCompleted:
+    'Based on the information provided, you have completed the process for the following permit(s):\n' +
+    '{{ permitStateCompleted }}\n\n'
 };
 
 const replacePlaceholders = (baseText: string, replacementConfig: { [key: string]: string | string[] | undefined }) => {
