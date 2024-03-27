@@ -38,8 +38,12 @@ export const enum INTAKE_STATUS_LIST {
  * Note types
  */
 export const enum NOTE_TYPES {
-  GENERAL = 'General',
-  BRING_FORWARD = 'Bring Forward'
+  GENERAL = 'General'
+}
+
+export const enum BRING_FORWARD_TYPES {
+  UNRESOLVED = 'Unresolved',
+  RESOLVED = 'Resolved'
 }
 
 /**
