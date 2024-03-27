@@ -1,5 +1,3 @@
-import { EmailAttachment } from './EmailAttachment';
-
 export type Email = {
   bcc?: Array<string>;
   bodyType: string;
@@ -12,5 +10,4 @@ export type Email = {
   subject: string;
   to: Array<string>;
   tag?: string;
-  attachments?: Array<EmailAttachment>;
 };

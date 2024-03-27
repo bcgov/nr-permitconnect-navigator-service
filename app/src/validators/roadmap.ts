@@ -7,13 +7,8 @@ const schema = {
   send: {
     body: Joi.object({
       activityId: activityId,
+      selectedFileIds: Joi.array().items(Joi.string()),
       emailData: Joi.object().keys({
-        // attachments: Joi.object().keys({
-        //   content: Joi.string().required(),
-        //   contentType: Joi.string(),
-        //   encoding: Joi.string(),
-        //   filename: Joi.string().required(),
-        // }),
         bcc: Joi.array().items(emailJoi),
         bodyType: Joi.string().required(),
         body: Joi.string().required(),
