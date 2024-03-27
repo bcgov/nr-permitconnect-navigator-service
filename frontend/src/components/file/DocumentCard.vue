@@ -140,12 +140,6 @@ function onClick() {
       >
         <font-awesome-icon icon="fa-solid fa-trash" />
       </Button>
-      <Button
-        v-if="false"
-        class="p-button-lg p-button-text p-0"
-      >
-        <font-awesome-icon icon="fa-solid fa-check" />
-      </Button>
     </template>
   </Card>
 </template>

@@ -1,4 +1,5 @@
 export type { Document } from './Document';
+export type { Email } from './Email';
 export type { IdentityProvider } from './IdentityProvider';
 export type { Note } from './Note';
 export type { Permit } from './Permit';

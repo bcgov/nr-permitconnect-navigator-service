@@ -9,34 +9,37 @@ const controller = {
    * Send an email with the roadmap data
    */
   send: async (
-    req: Request<
-      never,
-      never,
-      { activityId: string; attachmentIds: Array<{ filename: string; documentId: string }>; emailData: Email }
-    >,
+    req: Request<never, never, { activityId: string; selectedFileIds: Array<string>; emailData: Email }>,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      if (req.body.attachmentIds) {
+      if (req.body.selectedFileIds) {
         const attachments: Array<EmailAttachment> = [];
+
+        const comsObjects = await comsService.getObjects(req.headers, req.body.selectedFileIds);
 
         // Attempt to get the requested documents from COMS
         // If succesful it is converted to base64 encoding and added to the attachment list
-        const uploadPromises = req.body.attachmentIds.map(async (x) => {
-          const { status, headers, data } = await comsService.getObject(req.headers, x.documentId);
+        const objectPromises = req.body.selectedFileIds.map(async (id) => {
+          const { status, headers, data } = await comsService.getObject(req.headers, id);
 
           if (status === 200) {
-            attachments.push({
-              content: Buffer.from(data).toString('base64'),
-              contentType: headers['content-type'],
-              encoding: 'base64',
-              filename: x.filename
-            });
+            const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;
+            if (filename) {
+              attachments.push({
+                content: Buffer.from(data).toString('base64'),
+                contentType: headers['content-type'],
+                encoding: 'base64',
+                filename: filename
+              });
+            } else {
+              throw new Error(`Unable to obtain filename for file ${id}`);
+            }
           }
         });
 
-        await Promise.all(uploadPromises);
+        await Promise.all(objectPromises);
 
         // All succesful so attachment list is added to payload
         req.body.emailData.attachments = attachments;

@@ -65,7 +65,11 @@ const confirmSubmit = (data: any) => {
     rejectLabel: 'Cancel',
     accept: async () => {
       try {
-        await roadmapService.send(props.activityId, data);
+        await roadmapService.send(
+          props.activityId,
+          selectedFiles.value.map((x: Document) => x.documentId),
+          data
+        );
         toast.success('Roadmap sent');
       } catch (e: any) {
         toast.error('Failed to send roadmap', e.response.data);
@@ -87,27 +91,24 @@ function onFileRemove(document: Document) {
 
 function onFileSelect(data: Array<Document>) {
   selectedFiles.value = data;
-  formRef.value?.setFieldValue(
-    'attachments',
-    data.map((x: Document) => ({ filename: x.filename, documentId: x.documentId }))
-  );
 }
 
 onMounted(async () => {
-  // get navigator details
+  // Get navigator details
   const configBCC = getConfig.value.ches?.bcc;
   let bcc = configBCC;
   let navigator = {
-    email: configBCC,
+    email: configBCC ?? '',
     fullName: 'Permit Connect Navigator Service'
   };
+
   if (props.submission.assignedUserId) {
     const assignee = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data[0];
 
     if (assignee) {
       navigator = assignee;
       navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
-      bcc = `${bcc}, ${assignee.email}`;
+      bcc = (bcc ? `${bcc}, ` : '') + assignee.email;
     }
   }
 
