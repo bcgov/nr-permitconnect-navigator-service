@@ -1,13 +1,13 @@
 import Joi from 'joi';
 
-import { activityId, emailJoi } from './common';
+import { activityId, emailJoi, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 
 const schema = {
   send: {
     body: Joi.object({
       activityId: activityId,
-      selectedFileIds: Joi.array().items(Joi.string()),
+      selectedFileIds: Joi.array().items(uuidv4),
       emailData: Joi.object().keys({
         bcc: Joi.array().items(emailJoi),
         bodyType: Joi.string().required(),
