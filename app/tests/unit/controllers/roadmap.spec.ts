@@ -162,9 +162,7 @@ describe('send', () => {
         }
       },
       currentUser: CURRENT_USER,
-      headers: {
-        authorization: '89sdfiuw4'
-      }
+      headers: {}
     };
 
     const getObjectsResponse = [
@@ -231,9 +229,7 @@ describe('send', () => {
         }
       },
       currentUser: CURRENT_USER,
-      headers: {
-        authorization: '89sdfiuw4'
-      }
+      headers: {}
     };
 
     const emailResponse = {
@@ -325,9 +321,7 @@ describe('send', () => {
         }
       },
       currentUser: CURRENT_USER,
-      headers: {
-        authorization: '89sdfiuw4'
-      }
+      headers: {}
     };
 
     const getObjectsResponse = [
@@ -381,9 +375,7 @@ describe('send', () => {
         }
       },
       currentUser: CURRENT_USER,
-      headers: {
-        authorization: '89sdfiuw4'
-      }
+      headers: {}
     };
 
     const getObjectsResponse = [
