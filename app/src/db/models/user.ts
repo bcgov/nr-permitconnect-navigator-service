@@ -23,9 +23,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaRelationUser | null): User | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaRelationUser): User {
     return {
       userId: input.user_id,
       identityId: input.identity_id as string,

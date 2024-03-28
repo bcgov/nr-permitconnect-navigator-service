@@ -1,3 +1,4 @@
+export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
 export type { CurrentUser } from './CurrentUser';

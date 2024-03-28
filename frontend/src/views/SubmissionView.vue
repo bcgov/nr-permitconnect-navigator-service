@@ -18,11 +18,15 @@ import type { Document, Note, Permit, PermitType, Submission } from '@/types';
 // Props
 type Props = {
   activityId: string;
+  initialTab?: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  initialTab: '0'
+});
 
 // State
+const activeTab: Ref<number> = ref(Number(props.initialTab));
 const documents: Ref<Array<Document>> = ref([]);
 const editable: Ref<boolean> = ref(false);
 const notes: Ref<Array<Note>> = ref([]);
@@ -101,7 +105,7 @@ onMounted(async () => {
     </span>
   </h1>
 
-  <TabView>
+  <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Info">
       <Button
         v-if="!editable"

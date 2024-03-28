@@ -10,6 +10,15 @@ export default {
   createNote(data: Note) {
     return appAxios().put('note', data);
   },
+
+  /**
+   * @function listBringForward
+   * @returns {Promise} An axios response
+   */
+  async listBringForward() {
+    return appAxios().get('note/bringForward');
+  },
+
   /**
    * @function listNotes
    * @returns {Promise} An axios response

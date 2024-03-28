@@ -13,6 +13,10 @@ router.put('/', noteValidator.createNote, (req: Request, res: Response, next: Ne
   noteController.createNote(req, res, next);
 });
 
+router.get('/bringForward', (req: Request, res: Response, next: NextFunction): void => {
+  noteController.listBringForward(req, res, next);
+});
+
 // Note list by activity endpoint
 router.get('/list/:activityId', noteValidator.listNotes, (req: Request, res: Response, next: NextFunction): void => {
   noteController.listNotes(req, res, next);

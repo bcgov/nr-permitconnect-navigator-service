@@ -26,9 +26,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphNote | null): Note | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphNote): Note {
     return {
       noteId: input.note_id,
       activityId: input.activity_id,

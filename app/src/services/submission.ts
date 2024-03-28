@@ -133,7 +133,7 @@ const service = {
         }
       });
 
-      return submission.fromPrismaModel(result);
+      return result ? submission.fromPrismaModel(result) : null;
     } catch (e: unknown) {
       throw e;
     }

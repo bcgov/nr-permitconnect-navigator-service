@@ -1,3 +1,4 @@
+export type { BringForward } from './BringForward';
 export type { Submission } from './Submission';
 export type { Document } from './Document';
 export type { IdentityProvider } from './IdentityProvider';
