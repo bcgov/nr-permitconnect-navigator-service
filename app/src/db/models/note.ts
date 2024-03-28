@@ -14,8 +14,8 @@ export default {
     return {
       note_id: input.noteId,
       activity_id: input.activityId,
-      bringForwardDate: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
-      bringForwardState: input.bringForwardState,
+      bring_forward_date: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
+      bring_forward_state: input.bringForwardState,
       note: input.note,
       note_type: input.noteType,
       title: input.title,
@@ -32,8 +32,8 @@ export default {
     return {
       noteId: input.note_id,
       activityId: input.activity_id,
-      bringForwardDate: input.bringForwardDate?.toISOString() ?? null,
-      bringForwardState: input.bringForwardState || '',
+      bringForwardDate: input.bring_forward_date?.toISOString() ?? null,
+      bringForwardState: input.bring_forward_state ?? null,
       note: input.note || '',
       noteType: input.note_type || '',
       title: input.title || '',

@@ -34,7 +34,6 @@ export type Submission = {
   financiallySupportedHousingCoop: boolean;
   aaiUpdated: boolean;
   waitingOn: string | null;
-  bringForwardDate: string | null;
   intakeStatus: string | null;
   applicationStatus: string | null;
   guidance: boolean;

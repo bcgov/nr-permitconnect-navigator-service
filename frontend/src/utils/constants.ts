@@ -85,7 +85,7 @@ export const IntakeStatusList = [
 /**
  * Note form constants
  */
-export const NoteTypes = [NOTE_TYPES.GENERAL];
+export const NoteTypes = [NOTE_TYPES.GENERAL, NOTE_TYPES.BRING_FORWARD];
 
 export const BringForwardTypes = [BRING_FORWARD_TYPES.UNRESOLVED, BRING_FORWARD_TYPES.RESOLVED];
 
