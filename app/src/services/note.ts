@@ -9,7 +9,7 @@ const service = {
    * @function createNote
    * Creates a note
    * @param {Note} data Note object
-   * @returns {Promise<Note | null>} The result of running the create operation
+   * @returns {Promise<Note>} The result of running the create operation
    */
   createNote: async (data: Note) => {
     const newNote = {
@@ -25,10 +25,28 @@ const service = {
   },
 
   /**
+   * @function listBringForward
+   * Retrieve a list of notes with the Bring forward type
+   * @returns {Promise<Note[]>} The result of running the findMany operation
+   */
+  listBringForward: async () => {
+    const response = await prisma.note.findMany({
+      orderBy: {
+        created_at: 'asc'
+      },
+      where: {
+        note_type: 'Bring forward',
+        bring_forward_state: 'Unresolved'
+      }
+    });
+    return response.map((x) => note.fromPrismaModel(x));
+  },
+
+  /**
    * @function listNotes
-   * Retrieve a list of permits associated with a given submission
+   * Retrieve a list of notes associated with a given activity
    * @param {string} activityId PCNS Activity ID
-   * @returns {Promise<(Note | null)[]>} The result of running the findMany operation
+   * @returns {Promise<Note[]>} The result of running the findMany operation
    */
   listNotes: async (activityId: string) => {
     const response = await prisma.note.findMany({

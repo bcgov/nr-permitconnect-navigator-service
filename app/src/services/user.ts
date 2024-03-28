@@ -210,7 +210,7 @@ const service = {
       }
     });
 
-    return user.fromPrismaModel(response);
+    return response ? user.fromPrismaModel(response) : null;
   },
 
   /**

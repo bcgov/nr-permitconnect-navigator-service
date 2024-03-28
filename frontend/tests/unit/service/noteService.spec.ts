@@ -41,6 +41,13 @@ describe('noteService test', () => {
     expect(putSpy).toHaveBeenCalledWith('note', testNote);
   });
 
+  it('retrieves bring forward list', async () => {
+    await noteService.listBringForward();
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith('note/bringForward');
+  });
+
   it('retrieves note list', async () => {
     await noteService.listNotes('testUUID');
 

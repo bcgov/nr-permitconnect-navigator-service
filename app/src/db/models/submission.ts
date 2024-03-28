@@ -62,9 +62,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphSubmission | null): Submission | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphSubmission): Submission {
     return {
       submissionId: input.submission_id,
       activityId: input.activity_id,
@@ -116,7 +114,7 @@ export default {
     if (!input) return null;
 
     const submission = this.fromPrismaModel(input);
-    if (submission) {
+    if (submission && input.user) {
       submission.user = user.fromPrismaModel(input.user);
     }
 

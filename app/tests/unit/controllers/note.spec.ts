@@ -1,7 +1,7 @@
 import { NIL } from 'uuid';
 
 import { noteController } from '../../../src/controllers';
-import { noteService, userService } from '../../../src/services';
+import { noteService, submissionService, userService } from '../../../src/services';
 import * as utils from '../../../src/components/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -105,6 +105,94 @@ describe('createNote', () => {
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID });
+    expect(res.status).toHaveBeenCalledTimes(0);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('listBringForward', () => {
+  const next = jest.fn();
+
+  // Mock service calls
+  const listSpy = jest.spyOn(noteService, 'listBringForward');
+  const searchSubmissionsSpy = jest.spyOn(submissionService, 'searchSubmissions');
+  const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
+
+  it('should return 200 if all good', async () => {
+    const req = {
+      currentUser: CURRENT_USER
+    };
+
+    const noteList = [
+      {
+        noteId: '123-123',
+        activityId: '123',
+        bringForwardDate: '2024-04-06 00:00:00.000 -0700',
+        bringForwardState: 'Unresolved',
+        note: 'Some text',
+        noteType: 'Bring Forward',
+        title: 'Test 1',
+        createdBy: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6'
+      }
+    ];
+
+    const submissionList = [
+      {
+        activityId: '123',
+        projectName: 'Project ABC'
+      }
+    ];
+
+    const userList = [
+      {
+        userId: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6',
+        fullName: 'Test User'
+      }
+    ];
+
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    listSpy.mockResolvedValue(noteList);
+    searchSubmissionsSpy.mockResolvedValue(submissionList as any);
+    searchUsersSpy.mockResolvedValue(userList as any);
+
+    await noteController.listBringForward(req as any, res as any, next);
+    /* eslint-enable @typescript-eslint/no-explicit-any */
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith();
+    expect(searchSubmissionsSpy).toHaveBeenCalledTimes(1);
+    expect(searchSubmissionsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
+    expect(searchUsersSpy).toHaveBeenCalledTimes(1);
+    expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['11abbea6-2f3a-4ff3-8e55-b1e5290046f6'] });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([
+      {
+        activityId: '123',
+        noteId: '123-123',
+        title: 'Test 1',
+        projectName: 'Project ABC',
+        createdByFullName: 'Test User',
+        bringForwardDate: '2024-04-06 00:00:00.000 -0700'
+      }
+    ]);
+  });
+
+  it('calls next if the note service fails to list bring forward notes', async () => {
+    const req = {
+      currentUser: CURRENT_USER
+    };
+
+    listSpy.mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await noteController.listBringForward(req as any, res as any, next);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith();
+    expect(searchSubmissionsSpy).toHaveBeenCalledTimes(0);
+    expect(searchUsersSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
