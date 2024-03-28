@@ -9,6 +9,7 @@ on:
   pull_request:
     branches:
       - master
+      - 'feature/**'
     types:
       - opened
       - reopened
