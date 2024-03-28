@@ -154,7 +154,6 @@ onBeforeMount(async () => {
   initialFormValues.value = {
     ...props.submission,
     applicationStatus: props.submission.applicationStatus,
-    bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
     submittedAt: new Date(props.submission.submittedAt),
     submittedBy: formatJwtUsername(props.submission.submittedBy),
     submissionTypes: {
@@ -440,12 +439,6 @@ onBeforeMount(async () => {
         class="col-6"
         name="waitingOn"
         label="Waiting on"
-        :disabled="!props.editable"
-      />
-      <Calendar
-        class="col-6"
-        name="bringForwardDate"
-        label="Bring forward date"
         :disabled="!props.editable"
       />
       <EditableDropdown

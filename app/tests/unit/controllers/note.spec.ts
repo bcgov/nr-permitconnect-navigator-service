@@ -39,6 +39,8 @@ describe('createNote', () => {
       body: {
         noteId: '123-123',
         activityId: '123',
+        bringForwardDate: null,
+        bringForwardState: null,
         note: 'Some not text',
         noteType: 'GENERAL',
         title: 'Note title'
@@ -52,6 +54,8 @@ describe('createNote', () => {
     const created = {
       noteId: '123-123',
       activityId: '123',
+      bringForwardDate: null,
+      bringForwardState: null,
       note: 'Some not text',
       noteType: 'GENERAL',
       title: 'Note title'
@@ -79,6 +83,8 @@ describe('createNote', () => {
       body: {
         noteId: '123-123',
         activityId: '123',
+        bringForwardDate: null,
+        bringForwardState: null,
         note: 'Some not text',
         noteType: 'GENERAL',
         title: 'Note title'
@@ -120,6 +126,8 @@ describe('listNotes', () => {
       {
         noteId: '123-123',
         activityId: '123',
+        bringForwardDate: null,
+        bringForwardState: null,
         note: 'Some not text',
         noteType: 'GENERAL',
         title: 'Note title'

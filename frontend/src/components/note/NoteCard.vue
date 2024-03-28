@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 import { Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { formatDateShort } from '@/utils/formatters';
+import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
@@ -32,7 +32,12 @@ onMounted(() => {
     <template #title>
       <h3 class="mt-1 mb-1">
         {{ props.note.title }}
-        <span v-if="props.note.bringForwardState">{{ '(Unresolved)' }}</span>
+        <span
+          v-if="props.note.bringForwardState"
+          data-test="bf-title"
+        >
+          {{ `(${props.note.bringForwardState})` }}
+        </span>
       </h3>
       <Divider type="solid" />
     </template>
@@ -72,7 +77,7 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Bring forward date:</span>
-              {{ props.note.bringForwardDate }}
+              {{ props.note.bringForwardDate ? formatDate(props.note.bringForwardDate) : '' }}
             </p>
           </div>
         </div>
