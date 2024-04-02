@@ -16,7 +16,7 @@ type PrismaGraphSubmissionUser = Prisma.submissionGetPayload<typeof _submissionW
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
-    const test = {
+    return {
       submission_id: input.submissionId,
       activity_id: input.activityId,
       assigned_user_id: input.assignedUserId,
@@ -61,8 +61,6 @@ export default {
       emergency_assist: input.emergencyAssist,
       inapplicable: input.inapplicable
     };
-
-    return test;
   },
 
   fromPrismaModel(input: PrismaGraphSubmission | null): Submission | null {

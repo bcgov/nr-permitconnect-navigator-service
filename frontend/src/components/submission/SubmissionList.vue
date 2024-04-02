@@ -196,7 +196,7 @@ const filters = ref({
     </Column>
     <Column
       field="inquiry"
-      header="Type: Enquiry"
+      header="Type: General Enquiry"
       :sortable="true"
       style="min-width: 125px"
     >
@@ -224,7 +224,7 @@ const filters = ref({
     </Column>
     <Column
       field="emergencyAssist"
-      header="Type: Emergency"
+      header="Type: Escalation Request"
       :sortable="true"
       style="min-width: 150px"
     >

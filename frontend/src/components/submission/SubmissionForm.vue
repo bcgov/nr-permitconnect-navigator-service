@@ -403,7 +403,7 @@ onBeforeMount(async () => {
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
-          label="Enquiry"
+          label="General Enquiry"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
@@ -417,7 +417,7 @@ onBeforeMount(async () => {
         <Checkbox
           class="col-12"
           name="submissionTypes.emergencyAssist"
-          label="Emergency"
+          label="Escalation Request"
           :disabled="!props.editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
