@@ -2,7 +2,7 @@ import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { APPLICATION_STATUS_LIST } from '../components/constants';
-import { getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
 import { submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -111,8 +111,12 @@ const controller = {
               applicationStatus: APPLICATION_STATUS_LIST.NEW,
               companyNameRegistered: data.companyNameRegistered,
               contactEmail: data.contactEmail,
+              contactPreference: camelCaseToTitleCase(data.contactPreference),
+              projectName: data.projectName,
+              projectDescription: data.projectDescription,
               contactPhoneNumber: data.contactPhoneNumber,
               contactName: `${data.contactFirstName} ${data.contactLastName}`,
+              contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
               financiallySupported: Object.values(financiallySupportedValues).includes(true),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
@@ -120,9 +124,9 @@ const controller = {
               latitude: data.latitude,
               longitude: data.longitude,
               naturalDisaster: data.naturalDisasterInd,
-              projectName: data.projectName,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
+              isRentalUnit: camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit)),
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
