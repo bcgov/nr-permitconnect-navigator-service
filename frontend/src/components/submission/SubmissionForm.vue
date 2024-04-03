@@ -15,7 +15,14 @@ import {
 } from '@/components/form';
 import { Button } from '@/lib/primevue';
 import { userService } from '@/services';
-import { ApplicationStatusList, IntakeStatusList, QueuePriority, Regex } from '@/utils/constants';
+import {
+  ApplicationStatusList,
+  ContactPreferenceList,
+  IntakeStatusList,
+  QueuePriority,
+  Regex,
+  RentalStatusList
+} from '@/utils/constants';
 import { INTAKE_STATUS_LIST } from '@/utils/enums';
 import { formatJwtUsername } from '@/utils/formatters';
 
@@ -189,48 +196,55 @@ onBeforeMount(async () => {
         :disabled="true"
       />
       <InputText
-        class="col-4"
-        name="locationPIDs"
-        label="Location PID(s)"
-        :disabled="!props.editable"
-        autofocus
-      />
-      <InputText
-        class="col-4"
+        class="col-3"
         name="contactName"
         label="Contact"
         :disabled="!props.editable"
       />
       <InputMask
-        class="col-4"
+        class="col-3"
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!props.editable"
       />
       <InputText
-        class="col-4"
+        class="col-3"
         name="contactEmail"
         label="Contact email"
         :disabled="!props.editable"
       />
+      <Dropdown
+        class="col-3"
+        name="contactPreference"
+        label="Preferred contact method"
+        :disabled="!props.editable"
+        :options="ContactPreferenceList"
+      />
       <InputText
-        class="col-4"
+        class="col-6"
+        name="contactApplicantRelationship"
+        label="Relationship to activity"
+        :disabled="!props.editable"
+      />
+      <InputText
+        class="col-6"
         name="companyNameRegistered"
         label="Company"
         :disabled="!props.editable"
       />
-      <InputText
-        class="col-4"
-        name="singleFamilyUnits"
-        label="Units"
+      <TextArea
+        class="col-12"
+        name="projectDescription"
+        label="Activity information"
         :disabled="!props.editable"
       />
       <InputText
         class="col-4"
-        name="streetAddress"
-        label="Location address"
+        name="locationPIDs"
+        label="Location PID(s)"
         :disabled="!props.editable"
+        autofocus
       />
       <InputNumber
         class="col-4"
@@ -245,6 +259,25 @@ onBeforeMount(async () => {
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
         :disabled="!props.editable"
+      />
+      <InputText
+        class="col-4"
+        name="streetAddress"
+        label="Location address"
+        :disabled="!props.editable"
+      />
+      <InputText
+        class="col-4"
+        name="singleFamilyUnits"
+        label="Units"
+        :disabled="!props.editable"
+      />
+      <Dropdown
+        class="col-4"
+        name="isRentalUnit"
+        label="Rental units"
+        :disabled="!props.editable"
+        :options="RentalStatusList"
       />
       <Dropdown
         class="col-2"

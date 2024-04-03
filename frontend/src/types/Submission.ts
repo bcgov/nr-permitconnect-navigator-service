@@ -9,9 +9,13 @@ export type Submission = {
   contactName?: string;
   contactPhoneNumber?: string;
   contactEmail?: string;
+  contactApplicantRelationship?: string;
   projectName?: string;
+  projectDescription?: string;
+  contactPreference?: string;
   companyNameRegistered?: string;
   singleFamilyUnits?: string;
+  isRentalUnit?: string;
   streetAddress?: string;
   latitude?: number;
   longitude?: number;

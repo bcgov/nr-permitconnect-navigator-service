@@ -16,19 +16,23 @@ type PrismaGraphSubmissionUser = Prisma.submissionGetPayload<typeof _submissionW
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
-    return {
+    const test = {
       submission_id: input.submissionId,
       activity_id: input.activityId,
       assigned_user_id: input.assignedUserId,
       project_name: input.projectName,
+      project_description: input.projectDescription,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
       location_pids: input.locationPIDs,
       contact_name: input.contactName,
+      contact_applicant_relationship: input.contactApplicantRelationship,
       contact_phone_number: input.contactPhoneNumber,
       contact_email: input.contactEmail,
+      contact_preference: input.contactPreference,
       company_name_registered: input.companyNameRegistered,
       single_family_units: input.singleFamilyUnits,
+      is_rental_unit: input.isRentalUnit,
       street_address: input.streetAddress,
       latitude: input.latitude ? new Decimal(input.latitude) : null,
       longitude: input.longitude ? new Decimal(input.longitude) : null,
@@ -56,6 +60,8 @@ export default {
       emergency_assist: input.emergencyAssist,
       inapplicable: input.inapplicable
     };
+
+    return test;
   },
 
   fromPrismaModel(input: PrismaGraphSubmission | null): Submission | null {
@@ -69,11 +75,15 @@ export default {
       submittedBy: input.submitted_by,
       locationPIDs: input.location_pids,
       contactName: input.contact_name,
+      contactApplicantRelationship: input.contact_applicant_relationship,
       contactPhoneNumber: input.contact_phone_number,
       contactEmail: input.contact_email,
+      contactPreference: input.contact_preference,
       projectName: input.project_name,
+      projectDescription: input.project_description,
       companyNameRegistered: input.company_name_registered,
       singleFamilyUnits: input.single_family_units,
+      isRentalUnit: input.is_rental_unit,
       streetAddress: input.street_address,
       latitude: input.latitude ? input.latitude.toNumber() : null,
       longitude: input.longitude ? input.longitude.toNumber() : null,

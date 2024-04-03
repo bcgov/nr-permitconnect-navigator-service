@@ -11,10 +11,14 @@ export type Submission = {
   locationPIDs: string | null;
   companyNameRegistered: string | null;
   contactName: string | null;
+  contactApplicantRelationship: string | null;
   contactPhoneNumber: string | null;
   contactEmail: string | null;
+  contactPreference: string | null;
   projectName: string | null;
+  projectDescription: string | null;
   singleFamilyUnits: string | null;
+  isRentalUnit: string | null;
   streetAddress: string | null;
   latitude: number | null;
   longitude: number | null;
