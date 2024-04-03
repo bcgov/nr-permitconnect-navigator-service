@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { array, object, string } from 'yup';
 
 import FileSelectModal from '@/components/file/FileSelectModal.vue';
@@ -59,8 +59,8 @@ const toast = useToast();
 
 const confirmSubmit = (data: any) => {
   confirm.require({
-    message: 'Please confirm that you want to send this roadmap. This cannot be undone.',
-    header: 'Confirm sending this Roadmap',
+    message: 'Please confirm that you want to send this Permit Roadmap. This cannot be undone.',
+    header: 'Confirm sending this Permit Roadmap',
     acceptLabel: 'Send',
     rejectLabel: 'Cancel',
     accept: async () => {
@@ -100,7 +100,7 @@ function onFileSelect(data: Array<Document>) {
   selectedFiles.value = data;
 }
 
-onMounted(async () => {
+watchEffect(async () => {
   // Get navigator details
   const configBCC = getConfig.value.ches?.bcc;
   let bcc = configBCC;
@@ -120,12 +120,25 @@ onMounted(async () => {
   }
 
   // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW);
-  const permitPossiblyNeeded = permitStateNew.filter((value) =>
-    getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
+  const permitStateNew = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW).filter(
+    (value) => getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.YES).includes(value)
+  );
+  const permitPossiblyNeeded = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW).filter(
+    (value) =>
+      getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
   );
   const permitStateApplied = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.APPLIED);
   const permitStateCompleted = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.COMPLETED);
+
+  const body = roadmapTemplate({
+    '{{ contactName }}': props.submission.contactName ?? '',
+    '{{ locationAddress }}': props.submission.streetAddress ?? '',
+    '{{ permitStateNew }}': permitStateNew,
+    '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
+    '{{ permitStateApplied }}': permitStateApplied,
+    '{{ permitStateCompleted }}': permitStateCompleted,
+    '{{ navigatorName }}': navigator.fullName
+  });
 
   // Initial form values
   initialFormValues.value = {
@@ -135,16 +148,10 @@ onMounted(async () => {
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
     bodyType: 'text',
-    body: roadmapTemplate({
-      '{{ contactName }}': props.submission.contactName ?? '',
-      '{{ locationAddress }}': props.submission.streetAddress ?? '',
-      '{{ permitStateNew }}': permitStateNew,
-      '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
-      '{{ permitStateApplied }}': permitStateApplied,
-      '{{ permitStateCompleted }}': permitStateCompleted,
-      '{{ navigatorName }}': navigator.fullName
-    })
+    body: body
   };
+
+  formRef.value?.setFieldValue('body', body);
 });
 </script>
 

@@ -52,6 +52,11 @@ async function onPermitSubmit(data: Permit) {
   }
 }
 
+const onPermitUpdate = (data: Permit) => {
+  let idx = permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
+  if (idx >= 0) permits.value[idx] = data;
+};
+
 async function onNoteSubmit(data: any) {
   try {
     const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
@@ -187,6 +192,7 @@ onMounted(async () => {
             :permit="permit"
             :permit-types="permitTypes"
             @permit:delete="onPermitDelete"
+            @permit:update="onPermitUpdate"
           />
         </div>
 

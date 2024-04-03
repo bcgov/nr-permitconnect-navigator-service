@@ -153,7 +153,7 @@ function onClick() {
 }
 
 .clicked {
-  box-shadow: 0 0 11px rgb(83, 186, 15);
+  box-shadow: 0 0 11px #036;
 }
 
 :deep(.p-card-header) {
