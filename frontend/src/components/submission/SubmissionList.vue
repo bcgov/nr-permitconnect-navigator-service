@@ -154,6 +154,12 @@ const filters = ref({
       style="min-width: 100px"
     />
     <Column
+      field="isRentalUnit"
+      header="Rental unit"
+      :sortable="true"
+      style="min-width: 100px"
+    />
+    <Column
       field="streetAddress"
       header="Location address"
       :sortable="true"

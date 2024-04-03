@@ -60,6 +60,7 @@ const formSchema = object({
   contactEmail: string().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   companyNameRegistered: string().notRequired().label('Company'),
+  isRentalUnit: string().oneOf(RentalStatusList).label('Rental units'),
   latitude: number().notRequired().min(48).max(60).label('Latitude'),
   longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
   projectName: string().notRequired().label('Project Name'),

@@ -18,7 +18,7 @@ export type Submission = {
   projectName: string | null;
   projectDescription: string | null;
   singleFamilyUnits: string | null;
-  isRentalUnit: string | null;
+  isRentalUnit: string;
   streetAddress: string | null;
   latitude: number | null;
   longitude: number | null;

@@ -1,7 +1,7 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { APPLICATION_STATUS_LIST } from '../components/constants';
+import { APPLICATION_STATUS_LIST, RENTAL_STATUS_LIST } from '../components/constants';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
 import { submissionService, permitService, userService } from '../services';
 
@@ -126,7 +126,9 @@ const controller = {
               naturalDisaster: data.naturalDisasterInd,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
-              isRentalUnit: camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit)),
+              isRentalUnit: data.isRentalUnit
+                ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
+                : RENTAL_STATUS_LIST.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,

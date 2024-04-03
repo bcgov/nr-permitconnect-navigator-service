@@ -170,7 +170,7 @@ model submission {
   updated_at                         DateTime? @db.Timestamptz(6)
   contact_preference                 String?
   contact_applicant_relationship     String?
-  is_rental_unit                     String?
+  is_rental_unit                     String    @default("Unsure")
   project_description                String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")

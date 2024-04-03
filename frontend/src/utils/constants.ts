@@ -90,7 +90,7 @@ export const ContactPreferenceList = [
   CONTACT_PREFERENCE_LIST.EITHER
 ];
 
-export const RentalStatusList = [RENTAL_STATUS_LIST.YES, RENTAL_STATUS_LIST.NO, RENTAL_STATUS_LIST.UNSURE];
+export const RentalStatusList = [RENTAL_STATUS_LIST.UNSURE, RENTAL_STATUS_LIST.NO, RENTAL_STATUS_LIST.YES];
 
 /**
  * Note form constants
