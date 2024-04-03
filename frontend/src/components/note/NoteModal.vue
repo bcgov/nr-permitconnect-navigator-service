@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { object, string } from 'yup';
+import { mixed, object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
-import { NoteTypes } from '@/utils/constants';
-import { NOTE_TYPES } from '@/utils/enums';
+import { BringForwardTypes, NoteTypes } from '@/utils/constants';
+import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
 
 import type { Note } from '@/types';
 import { nextTick, ref, watch } from 'vue';
@@ -26,20 +26,54 @@ const emit = defineEmits(['note:submit']);
 // State
 const visible = defineModel<boolean>('visible');
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const showBringForward: Ref<boolean> = ref(false);
 
 // Default form values
 let initialFormValues: any = {
   createdAt: new Date(),
+  bringForwardDate: null,
+  bringForwardState: null,
   note: props.note?.note,
   noteType: NOTE_TYPES.GENERAL
 };
 
 // Form validation schema
 const formSchema = object({
+  bringForwardDate: mixed()
+    .nullable()
+    .when('noteType', {
+      is: (noteType: string) => noteType === NOTE_TYPES.BRING_FORWARD,
+      then: (schema) =>
+        schema.test(
+          'bring forward required',
+          'Bring forward date is a required field',
+          (value) => value instanceof Date
+        ),
+      otherwise: (schema) => schema.nullable()
+    })
+    .label('Bring forward date'),
+  bringForwardState: mixed()
+    .when('noteType', {
+      is: (noteType: string) => noteType === NOTE_TYPES.BRING_FORWARD,
+      then: () => string().oneOf(BringForwardTypes),
+      otherwise: () => mixed().nullable()
+    })
+    .label('Bring forward state'),
   note: string().required().label('Note'),
   noteType: string().oneOf(NoteTypes).label('Note type'),
   title: string().required().max(255, 'Title too long').label('Title')
 });
+
+const handleBringForward = (e: { OriginalEvent: Event; value: string }) => {
+  if (e.value === NOTE_TYPES.BRING_FORWARD) {
+    formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
+    showBringForward.value = true;
+  } else {
+    showBringForward.value = false;
+    formRef.value?.setFieldValue('bringForwardDate', null);
+    formRef.value?.setFieldValue('bringForwardState', null);
+  }
+};
 
 // Actions
 // @ts-expect-error TS7031
@@ -61,6 +95,8 @@ watch(visible, (newValue) => {
   nextTick().then(() => {
     if (newValue && formRef.value) {
       formRef.value.setFieldValue('createdAt', new Date());
+    } else {
+      showBringForward.value = false;
     }
   });
 });
@@ -104,14 +140,34 @@ watch(visible, (newValue) => {
           name="noteType"
           label="Note type"
           :options="NoteTypes"
+          @on-change="(e) => handleBringForward(e)"
         />
-        <div class="col-6" />
+        <Calendar
+          v-if="showBringForward"
+          class="col-6"
+          name="bringForwardDate"
+          label="Bring forward date"
+        />
+        <div
+          v-else
+          class="col-6"
+        />
         <InputText
           class="col-6"
           name="title"
           label="Title"
         />
-        <div class="col-6" />
+        <Dropdown
+          v-if="showBringForward"
+          class="col-6"
+          name="bringForwardState"
+          label="Bring forward state"
+          :options="BringForwardTypes"
+        />
+        <div
+          v-else
+          class="col-6"
+        />
         <TextArea
           class="col-12"
           name="note"
