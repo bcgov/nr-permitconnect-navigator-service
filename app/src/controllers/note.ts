@@ -38,7 +38,7 @@ const controller = {
           title: note.title,
           projectName: submissions.find((s) => s?.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
-          bringForwardDate: note.bringForwardDate
+          bringForwardDate: note.bringForwardDate as string
         }));
       }
       res.status(200).json(response);

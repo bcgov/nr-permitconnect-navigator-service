@@ -53,7 +53,7 @@ watchEffect(() => {
         scrollable
         responsive-layout="scroll"
         sort-field="bringForwardDate"
-        :sort-order="-1"
+        :sort-order="1"
       >
         <Column
           field="title"

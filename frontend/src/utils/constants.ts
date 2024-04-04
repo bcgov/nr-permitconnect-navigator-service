@@ -43,7 +43,8 @@ export const RouteNames = Object.freeze({
  */
 export const StorageKey = Object.freeze({
   AUTH: 'entrypoint',
-  CONFIG: 'config'
+  CONFIG: 'config',
+  BF_ACCORDION_IDX: 'bf_accordion_idx'
 });
 
 /**
