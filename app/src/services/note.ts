@@ -32,7 +32,7 @@ const service = {
   listBringForward: async () => {
     const response = await prisma.note.findMany({
       orderBy: {
-        created_at: 'asc'
+        bring_forward_date: 'asc'
       },
       where: {
         note_type: 'Bring forward',

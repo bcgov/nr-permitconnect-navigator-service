@@ -3,6 +3,6 @@ export type BringForward = {
   noteId: string;
   title: string;
   projectName?: string;
-  bringForwardDate?: string;
+  bringForwardDate: string;
   createdByFullName?: string;
 };
