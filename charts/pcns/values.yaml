@@ -132,6 +132,7 @@ config:
   # to string value "true".
   configMap:
     FRONTEND_APIPATH: api/v1
+    FRONTEND_CHES_BCC: ~
     FRONTEND_COMS_APIPATH: ~
     FRONTEND_COMS_BUCKETID: ~
     FRONTEND_OIDC_AUTHORITY: ~
@@ -141,6 +142,9 @@ config:
     SERVER_BODYLIMIT: 30mb
 
     SERVER_CHEFS_APIPATH: ~
+
+    SERVER_CHES_APIPATH: ~
+    SERVER_CHES_TOKENURL: ~
 
     SERVER_DB_HOST: ~
     SERVER_DB_PORT: "5432"
@@ -163,6 +167,9 @@ form1SecretOverride:
   username: ~
   password: ~
 form2SecretOverride:
+  username: ~
+  password: ~
+chesSecretOverride:
   username: ~
   password: ~
 oidcSecretOverride:

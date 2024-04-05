@@ -18,7 +18,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // Emits
-const emit = defineEmits(['permit:delete']);
+const emit = defineEmits(['permit:delete', 'permit:update']);
 
 // State
 const cardData: Ref<Permit> = ref(props.permit);
@@ -69,6 +69,7 @@ async function onPermitSubmit(data: Permit) {
   try {
     const result = await permitService.updatePermit({ ...data, activityId: props.permit.activityId });
     cardData.value = result.data;
+    emit('permit:update', result.data);
     toast.success('Permit saved');
   } catch (e: any) {
     toast.error('Failed to update permit', e.message);

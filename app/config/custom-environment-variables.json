@@ -1,6 +1,9 @@
 {
   "frontend": {
     "apiPath": "FRONTEND_APIPATH",
+    "ches": {
+      "bcc": "FRONTEND_CHES_BCC"
+    },
     "coms": {
       "apiPath": "FRONTEND_COMS_APIPATH",
       "bucketId": "FRONTEND_COMS_BUCKETID"
@@ -14,6 +17,12 @@
   "server": {
     "apiPath": "SERVER_APIPATH",
     "bodyLimit": "SERVER_BODYLIMIT",
+    "ches": {
+      "apiPath": "SERVER_CHES_APIPATH",
+      "clientId": "SERVER_CHES_CLIENTID",
+      "clientSecret": "SERVER_CHES_CLIENTSECRET",
+      "tokenUrl": "SERVER_CHES_TOKENURL"
+    },
     "chefs": {
       "apiPath": "SERVER_CHEFS_APIPATH",
       "forms": {

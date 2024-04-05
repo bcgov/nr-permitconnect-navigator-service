@@ -101,6 +101,16 @@ export function joinPath(...items: Array<string>): string {
 }
 
 /**
+ * @function parseCSV
+ * Converts a comma separated value string into an array of string values
+ * @param {string} value The CSV string to parse
+ * @returns {string[]} An array of string values, or `value` if it is not a string
+ */
+export function parseCSV(value: string): Array<string> {
+  return value.split(',').map((s) => s.trim());
+}
+
+/**
  * @function partition
  * Partitions an array into two array sets depending on conditional
  * @see {@link https://stackoverflow.com/a/71247432}

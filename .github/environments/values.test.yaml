@@ -3,6 +3,7 @@ config:
   enabled: true
   configMap:
     FRONTEND_APIPATH: api/v1
+    # FRONTEND_CHES_BCC: ~
     FRONTEND_COMS_APIPATH: https://coms-test.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: a9eabd1d-5f77-4c60-bf6b-83ffa0e21c59
     FRONTEND_OIDC_AUTHORITY: https://test.loginproxy.gov.bc.ca/auth/realms/standard
@@ -10,6 +11,8 @@ config:
     SERVER_APIPATH: /api/v1
     SERVER_BODYLIMIT: 30mb
     SERVER_CHEFS_APIPATH: https://submit.digital.gov.bc.ca/app/api/v1
+    SERVER_CHES_APIPATH: https://ches-test.api.gov.bc.ca/api/v1
+    SERVER_CHES_TOKENURL: https://test.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
     SERVER_DB_PORT: "5432"
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http

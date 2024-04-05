@@ -5,4 +5,5 @@ export { default as comsService } from './comsService';
 export { default as documentService } from './documentService';
 export { default as noteService } from './noteService';
 export { default as permitService } from './permitService';
+export { default as roadmapService } from './roadmapService';
 export { default as userService } from './userService';

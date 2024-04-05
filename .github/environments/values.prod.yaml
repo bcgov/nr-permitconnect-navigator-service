@@ -3,6 +3,7 @@ config:
   enabled: true
   configMap:
     FRONTEND_APIPATH: api/v1
+    FRONTEND_CHES_BCC: Housing.Authorizations@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 0089d041-5aab-485e-842d-8875475d0ed6
     FRONTEND_OIDC_AUTHORITY: https://loginproxy.gov.bc.ca/auth/realms/standard
@@ -10,6 +11,8 @@ config:
     SERVER_APIPATH: /api/v1
     SERVER_BODYLIMIT: 30mb
     SERVER_CHEFS_APIPATH: https://submit.digital.gov.bc.ca/app/api/v1
+    SERVER_CHES_APIPATH: https://ches.api.gov.bc.ca/api/v1
+    SERVER_CHES_TOKENURL: https://loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
     SERVER_DB_PORT: "5432"
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http

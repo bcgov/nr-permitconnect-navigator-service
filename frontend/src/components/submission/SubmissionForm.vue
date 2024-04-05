@@ -261,7 +261,7 @@ onBeforeMount(async () => {
         label="AST notes"
         :disabled="!props.editable"
       />
-      <div class="col-6">
+      <div class="col-6 p-0">
         <Checkbox
           class="col-12"
           name="astUpdated"
@@ -358,7 +358,7 @@ onBeforeMount(async () => {
           :disabled="!props.editable"
         />
       </div>
-      <div class="col-6">
+      <div class="col-6 p-0">
         <h4 class="col-12">Submission Types:</h4>
         <Checkbox
           class="col-12"

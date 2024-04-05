@@ -150,15 +150,17 @@ label {
 }
 
 /* checkboxes, radios, input switches */
-.p-checkbox-checked .p-checkbox-box,
-.p-checkbox-box.p-highlight,
-.p-radiobutton-checked .p-radiobutton-box,
-.p-inputswitch-checked .p-inputswitch-slider:not(.p-disabled) {
-  background-color: $app-primary;
-  border-color: $app-primary;
+.p-checkbox.p-highlight {
   &:hover {
     opacity: 0.8;
   }
+}
+
+.p-checkbox.p-highlight .p-checkbox-box,
+.p-radiobutton-checked .p-radiobutton-box,
+.p-inputswitch-checked .p-inputswitch-slider:not(.p-disabled) {
+  background: $app-primary;
+  border-color: $app-primary;
 }
 
 /* datatable */

@@ -9,7 +9,7 @@ const sharedPermitSchema = {
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().min(0).max(255).allow(null),
-  trackingId: Joi.string().min(0).max(255),
+  trackingId: Joi.string().min(0).max(255).allow(null),
   authStatus: Joi.string().max(255).allow(null),
   needed: Joi.string().max(255).required(),
   status: Joi.string().max(255).required(),

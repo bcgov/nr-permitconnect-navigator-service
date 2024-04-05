@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { filesize } from 'filesize';
+import { ref } from 'vue';
 
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
@@ -16,20 +17,28 @@ import pdf from '@/assets/images/pdf.svg';
 import shape from '@/assets/images/shape.svg';
 import spreadsheet from '@/assets/images/spreadsheet.svg';
 
+import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
 type Props = {
   document: Document;
   deleteButton?: boolean;
+  selectable?: boolean;
+  selected?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  deleteButton: true
+  deleteButton: true,
+  selectable: false,
+  selected: false
 });
 
 // Emits
-const emit = defineEmits(['document:deleted']);
+const emit = defineEmits(['document:clicked', 'document:deleted']);
+
+// State
+const isSelected: Ref<boolean> = ref(props.selected);
 
 // Actions
 const confirm = useConfirm();
@@ -77,10 +86,21 @@ const displayIcon = (mimeType = '') => {
       return file;
   }
 };
+
+function onClick() {
+  if (props.selectable) {
+    isSelected.value = !isSelected.value;
+    emit('document:clicked', { document: props.document, selected: isSelected.value });
+  }
+}
 </script>
 
 <template>
-  <Card class="pb-1 text-center">
+  <Card
+    class="pb-1 text-center"
+    :class="{ clicked: isSelected }"
+    @click="onClick"
+  >
     <template #header>
       <img
         alt="document header"
@@ -90,13 +110,13 @@ const displayIcon = (mimeType = '') => {
     </template>
     <template #content>
       <div class="grid">
-        <h4
+        <div
           v-tooltip.bottom="props.document.filename"
-          class="col-12 mb-0 text-left"
-          style="text-overflow: ellipsis; overflow: hidden"
+          class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap"
+          style="overflow: hidden"
         >
           {{ props.document.filename }}
-        </h4>
+        </div>
         <h6 class="col-8 text-left mt-0 mb-0">
           {{ formatDateLong(props.document.createdAt as string) }}
         </h6>
@@ -130,6 +150,10 @@ const displayIcon = (mimeType = '') => {
   position: relative;
   top: 50%;
   transform: translateY(-50%);
+}
+
+.clicked {
+  box-shadow: 0 0 11px #036;
 }
 
 :deep(.p-card-header) {
