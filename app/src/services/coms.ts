@@ -29,9 +29,10 @@ const service = {
    * @param {string} objectId The id for the object to get
    */
   async getObject(incomingHeaders: IncomingHttpHeaders, objectId: string) {
-    const { status, headers, data } = await comsAxios({ responseType: 'arraybuffer', headers: incomingHeaders }).get(
-      `/object/${objectId}`
-    );
+    const { status, headers, data } = await comsAxios({
+      responseType: 'arraybuffer',
+      headers: { Authorization: incomingHeaders.authorization }
+    }).get(`/object/${objectId}`);
     return { status, headers, data };
   },
 
@@ -42,7 +43,7 @@ const service = {
    * @param {string[]} objectIds Array of object ids to get
    */
   async getObjects(incomingHeaders: IncomingHttpHeaders, objectIds: Array<string>) {
-    const { data } = await comsAxios({ headers: incomingHeaders }).get('/object', {
+    const { data } = await comsAxios({ headers: { Authorization: incomingHeaders.authorization } }).get('/object', {
       params: { objectId: objectIds }
     });
 
