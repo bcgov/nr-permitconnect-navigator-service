@@ -132,12 +132,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: username
-                  name: ches-service-account
+                  name: {{ include "pcns.configname" . }}-ches-service-account
             - name: SERVER_CHES_CLIENTSECRET
               valueFrom:
                 secretKeyRef:
                   key: password
-                  name: ches-service-account
+                  name: {{ include "pcns.configname" . }}-ches-service-account
             - name: SERVER_DB_HOST
               value: {{ $dbHostName }}
             - name: SERVER_DB_USERNAME
