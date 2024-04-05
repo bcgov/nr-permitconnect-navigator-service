@@ -68,6 +68,8 @@ const controller = {
           note: noteBody,
           noteType: 'Roadmap',
           title: 'Sent roadmap',
+          bringForwardDate: null,
+          bringForwardState: null,
           createdAt: new Date().toISOString(),
           createdBy: userId
         });

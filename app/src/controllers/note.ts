@@ -1,10 +1,10 @@
 import { NIL } from 'uuid';
 
 import { getCurrentIdentity } from '../components/utils';
-import { noteService, userService } from '../services';
+import { noteService, submissionService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import { BringForward } from '../types';
+import type { BringForward } from '../types';
 
 const controller = {
   async createNote(req: Request, res: Response, next: NextFunction) {
@@ -34,7 +34,7 @@ const controller = {
         });
         response = notes.map((note) => ({
           activityId: note.activityId,
-          noteId: note.noteId,
+          noteId: note.noteId as string,
           title: note.title,
           projectName: submissions.find((s) => s?.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,

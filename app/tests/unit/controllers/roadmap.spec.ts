@@ -4,6 +4,8 @@ import * as utils from '../../../src/components/utils';
 import { roadmapController } from '../../../src/controllers';
 import { comsService, emailService, noteService, userService } from '../../../src/services';
 
+import type { Note } from '../../../src/types';
+
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
 
@@ -52,6 +54,17 @@ describe('send', () => {
       currentUser: CURRENT_USER
     };
 
+    const noteCreate: Note = {
+      activityId: '123-123',
+      note: 'Some message text',
+      noteType: 'Roadmap',
+      title: 'Sent roadmap',
+      bringForwardDate: null,
+      bringForwardState: null,
+      createdAt: new Date().toISOString(),
+      createdBy: 'abc-123'
+    };
+
     const emailResponse = {
       data: 'foo',
       status: 201
@@ -60,7 +73,7 @@ describe('send', () => {
     const USR_IDENTITY = 'xxxy';
     const USR_ID = 'abc-123';
 
-    createNoteSpy.mockResolvedValue(null);
+    createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
     getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
     getCurrentUserIdSpy.mockResolvedValue(USR_ID);
@@ -96,11 +109,13 @@ describe('send', () => {
       status: 201
     };
 
-    const noteCreate = {
+    const noteCreate: Note = {
       activityId: '123-123',
       note: 'Some message text',
       noteType: 'Roadmap',
       title: 'Sent roadmap',
+      bringForwardDate: null,
+      bringForwardState: null,
       createdAt: new Date().toISOString(),
       createdBy: 'abc-123'
     };
@@ -110,7 +125,7 @@ describe('send', () => {
 
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-    createNoteSpy.mockResolvedValue(null);
+    createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
     getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
     getCurrentUserIdSpy.mockResolvedValue(USR_ID);
@@ -250,11 +265,13 @@ describe('send', () => {
       status: 200
     };
 
-    const noteCreate = {
+    const noteCreate: Note = {
       activityId: '123-123',
       note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`,
       noteType: 'Roadmap',
       title: 'Sent roadmap',
+      bringForwardDate: null,
+      bringForwardState: null,
       createdAt: new Date().toISOString(),
       createdBy: 'abc-123'
     };
@@ -264,7 +281,7 @@ describe('send', () => {
 
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-    createNoteSpy.mockResolvedValue(null);
+    createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
     getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
     getCurrentUserIdSpy.mockResolvedValue(USR_ID);

@@ -1,3 +1,4 @@
+export type { BringForward } from './BringForward';
 export type { Document } from './Document';
 export type { Email } from './Email';
 export type { IdentityProvider } from './IdentityProvider';
