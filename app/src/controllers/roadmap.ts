@@ -17,7 +17,7 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      if (req.body.selectedFileIds) {
+      if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
         const attachments: Array<EmailAttachment> = [];
 
         const comsObjects = await comsService.getObjects(req.headers, req.body.selectedFileIds);
