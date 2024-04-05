@@ -12,9 +12,9 @@ import type { Statistics, User } from '@/types';
 
 // Types
 type StatisticFilters = {
-  dateFrom?: string;
-  dateTo?: string;
-  monthYear?: string;
+  dateFrom?: Date;
+  dateTo?: Date;
+  monthYear?: Date;
   userId?: string;
 };
 
