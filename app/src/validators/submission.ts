@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+import { RENTAL_STATUS_LIST } from '../components/constants';
 import { activityId, emailJoi, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 
@@ -23,15 +24,19 @@ const schema = {
       activityId: activityId,
       applicationStatus: Joi.string().max(255).required(),
       assignedUserId: uuidv4.required(),
-      projectName: Joi.string().min(0).max(255).allow(null),
       submittedAt: Joi.date().required(),
       submittedBy: Joi.string().max(255).allow(null),
       locationPIDs: Joi.string().min(0).max(255).allow(null),
       contactName: Joi.string().min(0).max(255).allow(null),
+      contactApplicantRelationship: Joi.string().min(0).max(255).allow(null),
       contactPhoneNumber: Joi.string().min(0).max(255).allow(null),
       contactEmail: emailJoi,
+      contactPreference: Joi.string().min(0).max(255).allow(null),
+      projectName: Joi.string().min(0).max(255).allow(null),
+      projectDescription: Joi.string().min(0).max(255).allow(null),
       companyNameRegistered: Joi.string().min(0).max(255).allow(null),
       singleFamilyUnits: Joi.string().min(0).max(255).allow(null),
+      isRentalUnit: Joi.string().valid(...Object.values(RENTAL_STATUS_LIST)),
       streetAddress: Joi.string().min(0).max(255).allow(null),
       latitude: Joi.number().max(255).allow(null),
       longitude: Joi.number().max(255).allow(null),

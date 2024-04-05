@@ -42,6 +42,12 @@ export const APPLICATION_STATUS_LIST = Object.freeze({
   COMPLETED: 'Completed'
 });
 
+export const RENTAL_STATUS_LIST = Object.freeze({
+  YES: 'Yes',
+  NO: 'No',
+  UNSURE: 'Unsure'
+});
+
 /** Types of notes */
 export const NOTE_TYPE_LIST = Object.freeze({
   GENERAL: 'General',

@@ -253,7 +253,7 @@ watch(
       <tr>
         <td class="col-9">
           Type:
-          <span class="font-bold">Enquiry</span>
+          <span class="font-bold">General Enquiry</span>
         </td>
         <td class="col-1 text-right">{{ statistics.inquiry }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.inquiry) }}%</td>
@@ -269,7 +269,7 @@ watch(
       <tr>
         <td class="col-9">
           Type:
-          <span class="font-bold">Emergency</span>
+          <span class="font-bold">Escalation Request</span>
         </td>
         <td class="col-1 text-right">{{ statistics.emergency_assist }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.emergency_assist) }}%</td>

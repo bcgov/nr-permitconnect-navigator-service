@@ -17,9 +17,13 @@ export type ChefsSubmissionExport = {
   submissionId: string;
   confirmationId: string;
   contactEmail: string;
+  contactPreference: string;
+  projectName: string;
+  projectDescription: string;
   contactPhoneNumber: string;
   contactFirstName: string;
   contactLastName: string;
+  contactApplicantRelationship: string;
   financiallySupported: boolean;
   intakeStatus: string;
   isBCHousingSupported: boolean;
@@ -30,12 +34,12 @@ export type ChefsSubmissionExport = {
   latitude: number;
   longitude: number;
   naturalDisasterInd: boolean;
-  projectName: string;
   companyNameRegistered: string;
   queuePriority: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
   multiFamilyUnits1: string;
+  isRentalUnit: string;
   streetAddress: string;
   guidance: boolean;
   statusRequest: boolean;

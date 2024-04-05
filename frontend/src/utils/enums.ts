@@ -34,12 +34,30 @@ export const enum INTAKE_STATUS_LIST {
   COMPLETED = 'Completed'
 }
 
+export const enum CONTACT_PREFERENCE_LIST {
+  PHONE_CALL = 'Phone call',
+  EMAIL = 'Email',
+  EITHER = 'Either'
+}
+
+export const enum RENTAL_STATUS_LIST {
+  YES = 'Yes',
+  NO = 'No',
+  UNSURE = 'Unsure'
+}
+
 /**
  * Note types
  */
 export const enum NOTE_TYPES {
   GENERAL = 'General',
-  BRING_FORWARD = 'Bring Forward'
+  BRING_FORWARD = 'Bring forward',
+  ENQUIRY = 'Enquiry'
+}
+
+export const enum BRING_FORWARD_TYPES {
+  UNRESOLVED = 'Unresolved',
+  RESOLVED = 'Resolved'
 }
 
 /**
