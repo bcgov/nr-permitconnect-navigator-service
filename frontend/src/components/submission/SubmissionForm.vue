@@ -436,11 +436,12 @@ onBeforeMount(async () => {
         </div>
       </div>
       <InputText
-        class="col-6"
+        class="col-4"
         name="waitingOn"
         label="Waiting on"
         :disabled="!props.editable"
       />
+      <div class="col-8" />
       <EditableDropdown
         class="col-4"
         name="user"
