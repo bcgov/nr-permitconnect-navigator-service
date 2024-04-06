@@ -28,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card>
+  <Card :id="props.note.noteId">
     <template #title>
       <h3 class="mt-1 mb-1">
         {{ props.note.title }}

@@ -137,7 +137,7 @@ const onSubmit = (values: any) => {
 
   const submissionData = {
     ...values,
-    assignedUserId: values.user.userId,
+    assignedUserId: values.user?.userId ?? undefined,
     ...values.submissionTypes
   };
 
@@ -149,6 +149,8 @@ const onSubmit = (values: any) => {
 
 onBeforeMount(async () => {
   assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+
+  console.log(assigneeOptions.value[0]);
 
   // Default form values
   initialFormValues.value = {
@@ -164,7 +166,7 @@ onBeforeMount(async () => {
       statusRequest: props.submission.statusRequest
     },
     activityId: props.submission.activityId,
-    user: assigneeOptions.value[0]
+    user: assigneeOptions.value[0] ?? null
   };
 });
 </script>

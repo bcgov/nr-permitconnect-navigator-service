@@ -95,7 +95,20 @@ export default function getRouter() {
   const authService = new AuthService();
   const router = createRouter({
     history: createWebHistory(),
-    routes
+    routes,
+    scrollBehavior(to) {
+      // Slight delay to account for asynchronous loading
+      if (to.hash) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            resolve({
+              el: to.hash,
+              behavior: 'smooth'
+            });
+          }, 500);
+        });
+      }
+    }
   });
 
   router.beforeEach(async (to) => {
