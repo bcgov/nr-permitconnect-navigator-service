@@ -11,6 +11,7 @@ import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { noteService, submissionService } from '@/services';
 import { useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
+import { BRING_FORWARD_TYPES } from '@/utils/enums';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -59,7 +60,7 @@ onMounted(async () => {
     await Promise.all([
       submissionService.getSubmissions(),
       submissionService.getStatistics(),
-      noteService.listBringForward()
+      noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED)
     ])
   ).map((r) => r.data);
 

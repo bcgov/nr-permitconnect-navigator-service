@@ -120,7 +120,8 @@ describe('listBringForward', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentUser: CURRENT_USER,
+      query: {}
     };
 
     const noteList = [
@@ -159,7 +160,7 @@ describe('listBringForward', () => {
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith();
+    expect(listSpy).toHaveBeenCalledWith(undefined);
     expect(searchSubmissionsSpy).toHaveBeenCalledTimes(1);
     expect(searchSubmissionsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
@@ -179,7 +180,8 @@ describe('listBringForward', () => {
 
   it('calls next if the note service fails to list bring forward notes', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentUser: CURRENT_USER,
+      query: {}
     };
 
     listSpy.mockImplementationOnce(() => {
@@ -190,7 +192,7 @@ describe('listBringForward', () => {
     await noteController.listBringForward(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith();
+    expect(listSpy).toHaveBeenCalledWith(undefined);
     expect(searchSubmissionsSpy).toHaveBeenCalledTimes(0);
     expect(searchUsersSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);

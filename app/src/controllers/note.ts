@@ -13,19 +13,24 @@ const controller = {
       // TODO: define body type in request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = req.body as any;
-      const response = await noteService.createNote({ ...body, createdBy: userId });
+      const response = await noteService.createNote({
+        ...body,
+        createdBy: userId
+      });
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  async listBringForward(req: Request, res: Response, next: NextFunction) {
+  async listBringForward(req: Request<never, { bringForwardState?: string }>, res: Response, next: NextFunction) {
     try {
       let response = new Array<BringForward>();
-      const notes = await noteService.listBringForward();
+      const notes = await noteService.listBringForward(req.query.bringForwardState);
       if (notes && notes.length) {
-        const submissions = await submissionService.searchSubmissions({ activityId: notes.map((x) => x.activityId) });
+        const submissions = await submissionService.searchSubmissions({
+          activityId: notes.map((x) => x.activityId)
+        });
         const users = await userService.searchUsers({
           userId: notes
             .map((x) => x.createdBy)

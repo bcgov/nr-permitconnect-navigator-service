@@ -1,5 +1,6 @@
 import { noteService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { BRING_FORWARD_TYPES } from '@/utils/enums';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -33,25 +34,49 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('noteService test', () => {
-  it('creates a note', async () => {
-    await noteService.createNote(testNote);
+describe('noteService', () => {
+  describe('createNote', () => {
+    it('calls with given data', async () => {
+      await noteService.createNote(testNote);
 
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('note', testNote);
+      expect(putSpy).toHaveBeenCalledTimes(1);
+      expect(putSpy).toHaveBeenCalledWith('note', testNote);
+    });
   });
 
-  it('retrieves bring forward list', async () => {
-    await noteService.listBringForward();
+  describe('listBringForward', () => {
+    it('does not include state when given no parameter', async () => {
+      await noteService.listBringForward();
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('note/bringForward');
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith('note/bringForward', { params: { bringForwardState: undefined } });
+    });
+
+    it('adds Unresolved to query when given as parameter', async () => {
+      await noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED);
+
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
+        params: { bringForwardState: BRING_FORWARD_TYPES.UNRESOLVED }
+      });
+    });
+
+    it('adds Resolved to query when given as parameter', async () => {
+      await noteService.listBringForward(BRING_FORWARD_TYPES.RESOLVED);
+
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
+        params: { bringForwardState: BRING_FORWARD_TYPES.RESOLVED }
+      });
+    });
   });
 
-  it('retrieves note list', async () => {
-    await noteService.listNotes('testUUID');
+  describe('listNotes', () => {
+    it('retrieves note list', async () => {
+      await noteService.listNotes('testUUID');
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('note/list/testUUID');
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith('note/list/testUUID');
+    });
   });
 });

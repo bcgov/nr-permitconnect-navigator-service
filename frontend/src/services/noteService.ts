@@ -15,8 +15,8 @@ export default {
    * @function listBringForward
    * @returns {Promise} An axios response
    */
-  async listBringForward() {
-    return appAxios().get('note/bringForward');
+  async listBringForward(bringForwardState?: string) {
+    return appAxios().get('note/bringForward', { params: { bringForwardState: bringForwardState } });
   },
 
   /**

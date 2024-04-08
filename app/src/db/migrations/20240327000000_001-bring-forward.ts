@@ -10,7 +10,7 @@ export async function up(knex: Knex): Promise<void> {
     .then(() =>
       knex.schema.alterTable('note', function (table) {
         table.timestamp('bring_forward_date', { useTz: true });
-        table.text('bring_forward_state').nullable();
+        table.text('bring_forward_state');
       })
     );
 }

@@ -27,16 +27,17 @@ const service = {
   /**
    * @function listBringForward
    * Retrieve a list of notes with the Bring forward type
+   * @param {string} bringForwardState Optional state to filter on
    * @returns {Promise<Note[]>} The result of running the findMany operation
    */
-  listBringForward: async () => {
+  listBringForward: async (bringForwardState?: string) => {
     const response = await prisma.note.findMany({
       orderBy: {
         bring_forward_date: 'asc'
       },
       where: {
         note_type: 'Bring forward',
-        bring_forward_state: 'Unresolved'
+        bring_forward_state: bringForwardState
       }
     });
     return response.map((x) => note.fromPrismaModel(x));
