@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 import { Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { formatDateShort } from '@/utils/formatters';
+import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
@@ -28,15 +28,23 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card>
+  <Card :id="props.note.noteId">
     <template #title>
-      <h3 class="mt-1 mb-1">{{ props.note.title }}</h3>
+      <h3 class="mt-1 mb-1">
+        {{ props.note.title }}
+        <span
+          v-if="props.note.bringForwardState"
+          data-test="bf-title"
+        >
+          {{ `(${props.note.bringForwardState})` }}
+        </span>
+      </h3>
       <Divider type="solid" />
     </template>
     <template #content>
       <div class="grid nested-grid">
         <!-- Left column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
@@ -45,7 +53,7 @@ onMounted(() => {
           </div>
         </div>
         <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Author:</span>
@@ -54,11 +62,22 @@ onMounted(() => {
           </div>
         </div>
         <!-- Right column -->
-        <div class="col-12 md:col-6 lg:col-4">
+        <div class="col-12 md:col-6 lg:col-3">
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Note type:</span>
               {{ props.note.noteType }}
+            </p>
+          </div>
+        </div>
+        <div
+          v-if="props.note.bringForwardDate"
+          class="col-12 md:col-6 lg:col-3"
+        >
+          <div class="grid">
+            <p class="col-12">
+              <span class="key font-bold">Bring forward date:</span>
+              {{ props.note.bringForwardDate ? formatDate(props.note.bringForwardDate) : '' }}
             </p>
           </div>
         </div>

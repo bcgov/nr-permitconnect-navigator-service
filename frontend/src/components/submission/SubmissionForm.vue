@@ -137,7 +137,7 @@ const onSubmit = (values: any) => {
 
   const submissionData = {
     ...values,
-    assignedUserId: values.user.userId,
+    assignedUserId: values.user?.userId ?? undefined,
     ...values.submissionTypes
   };
 
@@ -154,7 +154,6 @@ onBeforeMount(async () => {
   initialFormValues.value = {
     ...props.submission,
     applicationStatus: props.submission.applicationStatus,
-    bringForwardDate: props.submission.bringForwardDate ? new Date(props.submission.bringForwardDate) : undefined,
     submittedAt: new Date(props.submission.submittedAt),
     submittedBy: formatJwtUsername(props.submission.submittedBy),
     submissionTypes: {
@@ -165,7 +164,7 @@ onBeforeMount(async () => {
       statusRequest: props.submission.statusRequest
     },
     activityId: props.submission.activityId,
-    user: assigneeOptions.value[0]
+    user: assigneeOptions.value[0] ?? null
   };
 });
 </script>
@@ -437,17 +436,12 @@ onBeforeMount(async () => {
         </div>
       </div>
       <InputText
-        class="col-6"
+        class="col-4"
         name="waitingOn"
         label="Waiting on"
         :disabled="!props.editable"
       />
-      <Calendar
-        class="col-6"
-        name="bringForwardDate"
-        label="Bring forward date"
-        :disabled="!props.editable"
-      />
+      <div class="col-8" />
       <EditableDropdown
         class="col-4"
         name="user"

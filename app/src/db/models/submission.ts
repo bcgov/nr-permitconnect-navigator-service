@@ -52,7 +52,6 @@ export default {
       financially_supported_housing_coop: input.financiallySupportedHousingCoop,
       aai_updated: input.aaiUpdated,
       waiting_on: input.waitingOn,
-      bring_forward_date: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
       intake_status: input.intakeStatus,
       application_status: input.applicationStatus,
       guidance: input.guidance,
@@ -63,9 +62,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphSubmission | null): Submission | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphSubmission): Submission {
     return {
       submissionId: input.submission_id,
       activityId: input.activity_id,
@@ -102,7 +99,6 @@ export default {
       financiallySupportedHousingCoop: input.financially_supported_housing_coop,
       aaiUpdated: input.aai_updated,
       waitingOn: input.waiting_on,
-      bringForwardDate: input.bring_forward_date?.toISOString() ?? null,
       intakeStatus: input.intake_status,
       applicationStatus: input.application_status,
       guidance: input.guidance,
@@ -118,7 +114,7 @@ export default {
     if (!input) return null;
 
     const submission = this.fromPrismaModel(input);
-    if (submission) {
+    if (submission && input.user) {
       submission.user = user.fromPrismaModel(input.user);
     }
 

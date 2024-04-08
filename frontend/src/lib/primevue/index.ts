@@ -1,4 +1,6 @@
 // Add imports as needed
+export { default as Accordion } from 'primevue/accordion';
+export { default as AccordionTab } from 'primevue/accordiontab';
 export { FilterMatchMode } from 'primevue/api';
 export { default as Button } from 'primevue/button';
 export { default as Calendar } from 'primevue/calendar';

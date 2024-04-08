@@ -14,6 +14,8 @@ export default {
     return {
       note_id: input.noteId as string,
       activity_id: input.activityId,
+      bring_forward_date: input.bringForwardDate ? new Date(input.bringForwardDate) : null,
+      bring_forward_state: input.bringForwardState,
       note: input.note,
       note_type: input.noteType,
       title: input.title,
@@ -24,12 +26,12 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphNote | null): Note | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphNote): Note {
     return {
       noteId: input.note_id,
       activityId: input.activity_id,
+      bringForwardDate: input.bring_forward_date?.toISOString() ?? null,
+      bringForwardState: input.bring_forward_state ?? null,
       note: input.note || '',
       noteType: input.note_type || '',
       title: input.title || '',

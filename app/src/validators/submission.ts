@@ -23,7 +23,7 @@ const schema = {
       submissionId: uuidv4.required(),
       activityId: activityId,
       applicationStatus: Joi.string().max(255).required(),
-      assignedUserId: uuidv4.required(),
+      assignedUserId: uuidv4.allow(null),
       submittedAt: Joi.date().required(),
       submittedBy: Joi.string().max(255).allow(null),
       locationPIDs: Joi.string().min(0).max(255).allow(null),

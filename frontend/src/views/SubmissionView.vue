@@ -19,11 +19,15 @@ import type { Document, Note, Permit, PermitType, Submission } from '@/types';
 // Props
 type Props = {
   activityId: string;
+  initialTab?: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  initialTab: '0'
+});
 
 // State
+const activeTab: Ref<number> = ref(Number(props.initialTab));
 const documents: Ref<Array<Document>> = ref([]);
 const editable: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
@@ -114,7 +118,7 @@ onMounted(async () => {
     </span>
   </h1>
 
-  <TabView>
+  <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Info">
       <span v-if="!loading">
         <Button
@@ -204,22 +208,20 @@ onMounted(async () => {
       </span>
     </TabPanel>
     <TabPanel header="Notes">
-      <div class="flex flex-row pb-2">
-        <div class="flex flex-grow-1 align-items-end">
+      <div class="flex flex-row align-items-center pb-2">
+        <div class="flex flex-grow-1">
           <p class="font-bold">Notes ({{ notes.length }})</p>
         </div>
-        <div class="flex flex-none">
-          <Button
-            aria-label="Add permit"
-            @click="noteModalVisible = true"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-plus"
-            />
-            Add note
-          </Button>
-        </div>
+        <Button
+          aria-label="Add note"
+          @click="noteModalVisible = true"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-plus"
+          />
+          Add note
+        </Button>
       </div>
       <div
         v-for="(note, index) in notes"

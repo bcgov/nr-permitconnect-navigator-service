@@ -70,16 +70,18 @@ model initiative {
 }
 
 model note {
-  note_id     String    @id @db.Uuid
-  activity_id String
-  note        String    @default("")
-  note_type   String    @default("")
-  title       String    @default("")
-  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by  String?
-  updated_at  DateTime? @db.Timestamptz(6)
-  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
+  note_id             String    @id @db.Uuid
+  activity_id         String
+  note                String    @default("")
+  note_type           String    @default("")
+  title               String    @default("")
+  created_by          String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by          String?
+  updated_at          DateTime? @db.Timestamptz(6)
+  bring_forward_date  DateTime? @db.Timestamptz(6)
+  bring_forward_state String?
+  activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
 }
 
 model permit {
@@ -167,7 +169,6 @@ model submission {
   created_at                         DateTime? @default(now()) @db.Timestamptz(6)
   updated_by                         String?
   updated_at                         DateTime? @db.Timestamptz(6)
-  bring_forward_date                 DateTime? @db.Timestamptz(6)
   contact_preference                 String?
   contact_applicant_relationship     String?
   is_rental_unit                     String    @default("Unsure")

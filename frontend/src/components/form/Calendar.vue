@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<Props>(), {
   bold: true
 });
 
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
 </script>
 
 <template>
@@ -35,7 +35,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       {{ label }}
     </label>
     <Calendar
-      v-model.trim="value"
+      v-model="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       class="w-full"
