@@ -41,7 +41,7 @@ const emailValidator = array()
     if (this.isType(value) && value !== null) {
       return value;
     }
-    return originalValue ? originalValue.split(/[\s,]+/) : [];
+    return originalValue ? originalValue.split(/[\s;]+/) : [];
   })
   .of(string().email(({ value }) => `${value} is not a valid email`));
 
@@ -115,7 +115,7 @@ watchEffect(async () => {
     if (assignee) {
       navigator = assignee;
       navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
-      bcc = (bcc ? `${bcc}, ` : '') + assignee.email;
+      bcc = (bcc ? `${bcc}; ` : '') + assignee.email;
     }
   }
 

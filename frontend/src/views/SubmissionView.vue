@@ -169,22 +169,20 @@ onMounted(async () => {
     </TabPanel>
     <TabPanel header="Permits">
       <span v-if="permitTypes.length">
-        <div class="flex flex-row pb-2">
-          <div class="flex flex-grow-1 align-items-end">
+        <div class="flex align-items-center pb-2">
+          <div class="flex-grow-1">
             <p class="font-bold">Applicable permits ({{ permits.length }})</p>
           </div>
-          <div class="flex flex-none">
-            <Button
-              aria-label="Add permit"
-              @click="permitModalVisible = true"
-            >
-              <font-awesome-icon
-                class="pr-2"
-                icon="fa-solid fa-plus"
-              />
-              Add permit
-            </Button>
-          </div>
+          <Button
+            aria-label="Add permit"
+            @click="permitModalVisible = true"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-plus"
+            />
+            Add permit
+          </Button>
         </div>
         <div
           v-for="(permit, index) in permits"
@@ -208,8 +206,8 @@ onMounted(async () => {
       </span>
     </TabPanel>
     <TabPanel header="Notes">
-      <div class="flex flex-row align-items-center pb-2">
-        <div class="flex flex-grow-1">
+      <div class="flex align-items-center pb-2">
+        <div class="flex-grow-1">
           <p class="font-bold">Notes ({{ notes.length }})</p>
         </div>
         <Button

@@ -30,15 +30,19 @@ onMounted(() => {
 <template>
   <Card :id="props.note.noteId">
     <template #title>
-      <h3 class="mt-1 mb-1">
-        {{ props.note.title }}
-        <span
-          v-if="props.note.bringForwardState"
-          data-test="bf-title"
-        >
-          {{ `(${props.note.bringForwardState})` }}
-        </span>
-      </h3>
+      <div class="flex align-items-center">
+        <div class="flex-grow-1">
+          <h3 class="mb-0">
+            {{ props.note.title }}
+            <span
+              v-if="props.note.bringForwardState"
+              data-test="bf-title"
+            >
+              {{ `(${props.note.bringForwardState})` }}
+            </span>
+          </h3>
+        </div>
+      </div>
       <Divider type="solid" />
     </template>
     <template #content>
@@ -88,10 +92,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-h2 {
-  margin: 0;
-}
-
 p {
   margin-top: 0;
   margin-bottom: 0;
@@ -105,13 +105,8 @@ p {
   border-style: solid;
   border-width: 1px;
 
-  .p-card-body {
-    padding-top: 0;
+  :deep(.p-card-content) {
     padding-bottom: 0;
-
-    .p-card-content {
-      padding-bottom: 0;
-    }
   }
 }
 .note-content {
