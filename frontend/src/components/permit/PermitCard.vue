@@ -86,28 +86,24 @@ onMounted(() => {
 
 <template>
   <Card>
-    <template #header>
-      <div class="flex flex-row px-3 pt-2">
+    <template #title>
+      <div class="flex align-items-center">
         <div class="flex-grow-1">
-          <h3>{{ permitType?.name }}</h3>
+          <h3 class="mb-0">{{ permitType?.name }}</h3>
         </div>
-        <div class="flex flex-none">
-          <Button
-            class="p-button-outlined"
-            aria-label="Edit"
-            @click="permitModalVisible = true"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-edit"
-            />
-            Edit
-          </Button>
-        </div>
+        <Button
+          class="p-button-outlined"
+          aria-label="Edit"
+          @click="permitModalVisible = true"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-edit"
+          />
+          Edit
+        </Button>
       </div>
-      <div class="flex flex-row px-3">
-        <Divider type="solid" />
-      </div>
+      <Divider type="solid" />
     </template>
     <template #content>
       <div class="grid nested-grid">
@@ -188,10 +184,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-h2 {
-  margin: 0;
-}
-
 p {
   margin-top: 0;
   margin-bottom: 0;
@@ -205,14 +197,8 @@ p {
   border-style: solid;
   border-width: 1px;
 
-  :deep(.p-card-body) {
-    padding-top: 0;
+  :deep(.p-card-content) {
     padding-bottom: 0;
-
-    :deep(.p-card-content) {
-      padding-top: 0;
-      padding-bottom: 0;
-    }
   }
 }
 </style>
