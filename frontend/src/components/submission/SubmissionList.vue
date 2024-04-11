@@ -352,15 +352,5 @@ const filters = ref({
       :sortable="true"
       style="min-width: 200px"
     />
-    <Column
-      field="bringForwardDate"
-      header="Bring forward date"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        {{ formatDate(data?.bringForwardDate) }}
-      </template>
-    </Column>
   </DataTable>
 </template>
