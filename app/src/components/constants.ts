@@ -42,6 +42,12 @@ export const APPLICATION_STATUS_LIST = Object.freeze({
   COMPLETED: 'Completed'
 });
 
+export const INTAKE_STATUS_LIST = Object.freeze({
+  SUBMITTED: 'Submitted',
+  ASSIGNED: 'Assigned',
+  COMPLETED: 'Completed'
+});
+
 export const RENTAL_STATUS_LIST = Object.freeze({
   YES: 'Yes',
   NO: 'No',

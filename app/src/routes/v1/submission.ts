@@ -23,6 +23,10 @@ router.get(
 );
 
 // Submission endpoint
+router.put('/create', (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.createEmptySubmission(req, res, next);
+});
+
 router.get(
   '/:activityId',
   submissionValidator.getSubmission,

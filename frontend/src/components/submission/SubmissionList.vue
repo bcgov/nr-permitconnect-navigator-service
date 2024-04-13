@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { Checkbox, Column, DataTable, FilterMatchMode, InputText } from '@/lib/primevue';
+import { Button, Checkbox, Column, DataTable, FilterMatchMode, InputText, useConfirm, useToast } from '@/lib/primevue';
+import { submissionService } from '@/services';
 import { RouteNames } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
 
@@ -17,15 +19,38 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// State
+const selection: Ref<Submission | undefined> = ref(undefined);
+
 // Actions
+const confirmDialog = useConfirm();
+const router = useRouter();
+const toast = useToast();
+
 const latLongFormat = (lat: number | null, long: number | null): string => {
   if (!lat || !long) return '';
 
   return `${lat}, ${long}`;
 };
 
-// State
-const selection: Ref<Submission | undefined> = ref(undefined);
+const handleCreateNewActivity = () => {
+  confirmDialog.require({
+    header: 'Confirm create submission',
+    message: 'Please confirm that you want to create a new submission',
+    accept: async () => {
+      try {
+        const res = await submissionService.createSubmission();
+        if (res?.data?.activityId) {
+          router.push({ name: RouteNames.SUBMISSION, query: { activityId: res.data.activityId } });
+        }
+      } catch (e) {
+        toast.error('Unable to create new submission');
+      }
+    },
+    acceptLabel: 'Confirm',
+    rejectLabel: 'Cancel'
+  });
+};
 
 // Datatable filter(s)
 const filters = ref({
@@ -61,7 +86,13 @@ const filters = ref({
       <Spinner />
     </template>
     <template #header>
-      <div class="flex justify-content-end">
+      <div class="flex justify-content-between">
+        <Button
+          label="Create new activity"
+          type="submit"
+          icon="pi pi-plus"
+          @click="handleCreateNewActivity"
+        />
         <span class="p-input-icon-left ml-4">
           <i class="pi pi-search" />
           <InputText

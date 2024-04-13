@@ -2,6 +2,14 @@ import { appAxios } from './interceptors';
 
 export default {
   /**
+   * @function createSubmission
+   * @returns {Promise} An axios response
+   */
+  createSubmission() {
+    return appAxios().put('submission/create');
+  },
+
+  /**
    * @function getFormExport
    * @returns {Promise} An axios response
    */

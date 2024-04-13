@@ -2,7 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { APPLICATION_STATUS_LIST, Initiatives } from '../components/constants';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, Initiatives } from '../components/constants';
 import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
@@ -26,6 +26,40 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 }
 
 const service = {
+  /**
+   * @function createEmptySubmission
+   * Creates a new minimal submission
+   * @returns {Promise<Partial<{activity_id: string}>>} The result of running the transaction
+   */
+  createEmptySubmission: async (submissionId: string, createdBy: string): Promise<Partial<{ activity_id: string }>> => {
+    return await prisma.$transaction(async (trx) => {
+      const initiative = await trx.initiative.findFirstOrThrow({
+        where: {
+          code: Initiatives.HOUSING
+        }
+      });
+
+      const activityId = submissionId.substring(0, 8).toUpperCase() as string;
+      await trx.activity.create({
+        data: {
+          activity_id: activityId,
+          initiative_id: initiative.initiative_id
+        }
+      });
+
+      return await trx.submission.create({
+        data: {
+          submission_id: submissionId,
+          activity_id: activityId,
+          application_status: APPLICATION_STATUS_LIST.NEW,
+          intake_status: INTAKE_STATUS_LIST.SUBMITTED,
+          submitted_at: new Date(Date.now()),
+          submitted_by: createdBy
+        }
+      });
+    });
+  },
+
   /**
    * @function createSubmissionsFromExport
    * Creates the given activities and submissions from exported CHEFS data
