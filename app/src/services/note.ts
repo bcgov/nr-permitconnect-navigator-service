@@ -59,6 +59,17 @@ const service = {
       }
     });
     return response.map((x) => note.fromPrismaModel(x));
+  },
+
+  updateNote: async (data: Note) => {
+    const response = await prisma.note.update({
+      data: { ...note.toPrismaModel(data), updated_by: data.updatedBy },
+      where: {
+        note_id: data.noteId
+      }
+    });
+
+    return note.fromPrismaModel(response);
   }
 };
 

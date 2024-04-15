@@ -59,6 +59,20 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
+  },
+
+  async updateNote(req: Request, res: Response, next: NextFunction) {
+    try {
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      // TODO: define body type in request
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const body = req.body as any;
+      const response = await submissionService.updateSubmission({ ...body, updatedBy: userId });
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
   }
 };
 
