@@ -3,7 +3,7 @@ name: nr-permitconnect-navigator-service
 # This is the chart version. This version number should be incremented each time you make changes
 # to the chart and its templates, including the app version.
 # Versions are expected to follow Semantic Versioning (https://semver.org/)
-version: 0.0.5
+version: 0.0.6
 kubeVersion: ">= 1.13.0"
 description: PermitConnect Navigator Service
 # A chart can be either an 'application' or a 'library' chart.
@@ -31,9 +31,9 @@ dependencies:
     # by default, the object created will be named <your-app>-patroni. You can use an alias to override the -patroni suffix
     # alias: postgres
 maintainers:
-  - name: NR Common Service Showcase Team
-    email: NR.CommonServiceShowcase@gov.bc.ca
-    url: https://bcgov.github.io/common-service-showcase/team.html
+  - name: NRM Permitting and Data Solutions
+    email: NRM.PermittingAndData@gov.bc.ca
+    url: https://github.com/bcgov/nr-permitconnect-navigator-service
 # This is the version number of the application being deployed. This version number should be
 # incremented each time you make changes to the application. Versions are not expected to
 # follow Semantic Versioning. They should reflect the version the application is using.

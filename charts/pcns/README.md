@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.5](https://img.shields.io/badge/Version-0.0.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.0.6](https://img.shields.io/badge/Version-0.0.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -10,7 +10,7 @@ PermitConnect Navigator Service
 
 | Name | Email | Url |
 | ---- | ------ | --- |
-| NR Common Service Showcase Team | <NR.CommonServiceShowcase@gov.bc.ca> | <https://bcgov.github.io/common-service-showcase/team.html> |
+| NRM Permitting and Data Solutions | <NRM.PermittingAndData@gov.bc.ca> | <https://github.com/bcgov/nr-permitconnect-navigator-service> |
 
 ## Source Code
 
