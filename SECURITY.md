@@ -19,14 +19,14 @@ At this time, only the latest version of NR PermitConnect Navigator Service is s
 
 ## Reporting a Bug
 
-The `CSS` team and community take all security bugs in `NR PermitConnect Navigator Service` seriously.
+The `PAT` team and community take all security bugs in `NR PermitConnect Navigator Service` seriously.
 Thank you for improving the security of `NR PermitConnect Navigator Service`. We appreciate your efforts and
 responsible disclosure and will make every effort to acknowledge your
 contributions.
 
-Report security bugs by sending an email to <NR.CommonServiceShowcase@gov.bc.ca>.
+Report security bugs by sending an email to <NRM.PermittingAndData@gov.bc.ca>.
 
-The `CSS` team will acknowledge your email within 48 hours, and will send a
+The `PAT` team will acknowledge your email within 48 hours, and will send a
 more detailed response within 48 hours indicating the next steps in handling
 your report. After the initial reply to your report, the security team will
 endeavor to keep you informed of the progress towards a fix and full

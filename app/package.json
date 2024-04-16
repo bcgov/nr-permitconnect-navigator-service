@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "PermitConnect Navigator Service ",
-  "author": "NR Common Service Showcase <NR.CommonServiceShowcase@gov.bc.ca>",
+  "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
   "license": "Apache-2.0",
   "scripts": {
     "build:all": "ts-node ./deploy-utils.ts",

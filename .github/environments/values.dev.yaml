@@ -3,7 +3,7 @@ config:
   enabled: true
   configMap:
     FRONTEND_APIPATH: api/v1
-    FRONTEND_CHES_BCC: NR.CommonServiceShowcase@gov.bc.ca
+    FRONTEND_CHES_BCC: NRM.PermittingAndData@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms-dev.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 1f9e1451-c130-4804-aeb0-b78b5b109c47
     FRONTEND_OIDC_AUTHORITY: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
