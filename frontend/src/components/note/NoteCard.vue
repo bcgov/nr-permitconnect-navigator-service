@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import { Card, Divider } from '@/lib/primevue';
+import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<Props>(), {});
 
 // State
 const userName: Ref<string> = ref('');
+const noteModalVisible: Ref<boolean> = ref(false);
 
 onMounted(() => {
   if (props.note.createdBy) {
@@ -42,6 +43,17 @@ onMounted(() => {
             </span>
           </h3>
         </div>
+        <Button
+          class="p-button-outlined"
+          aria-label="Edit"
+          @click="noteModalVisible = true"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-edit"
+          />
+          Edit
+        </Button>
       </div>
       <Divider type="solid" />
     </template>
