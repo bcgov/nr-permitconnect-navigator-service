@@ -13,8 +13,9 @@ import {
   InputText,
   TextArea
 } from '@/components/form';
-import { Button } from '@/lib/primevue';
-import { userService } from '@/services';
+import { Button, useToast } from '@/lib/primevue';
+import { submissionService, userService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import {
   ApplicationStatusList,
   ContactPreferenceList,
@@ -39,7 +40,10 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // Emits
-const emit = defineEmits(['submit', 'cancel']);
+const emit = defineEmits(['submission:submit', 'submission:cancel']);
+
+// Store
+const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -102,6 +106,8 @@ const formSchema = object({
 });
 
 // Actions
+const toast = useToast();
+
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
@@ -119,10 +125,10 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 const onCancel = () => {
-  emit('cancel');
+  emit('submission:cancel');
 };
 
-const onSubmit = (values: any) => {
+const onSubmit = async (values: any) => {
   // Ensure child values are reset if parent not set
   if (!values.addedToATS) {
     values.atsClientNumber = undefined;
@@ -135,16 +141,29 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  const submissionData = {
+  const submissionDataTransform = {
     ...values,
     assignedUserId: values.user?.userId ?? undefined,
     ...values.submissionTypes
   };
 
-  delete submissionData.submissionTypes;
-  delete submissionData.user;
+  delete submissionDataTransform.submissionTypes;
+  delete submissionDataTransform.user;
 
-  emit('submit', submissionData);
+  try {
+    const submissionData = {
+      ...submissionDataTransform
+    };
+    await submissionService.updateSubmission(submissionData.submissionId, submissionData);
+
+    submissionStore.setSubmission(submissionData);
+
+    toast.success('Form saved');
+  } catch (e: any) {
+    toast.error('Failed to save submission', e.message);
+  } finally {
+    emit('submission:submit');
+  }
 };
 
 onBeforeMount(async () => {

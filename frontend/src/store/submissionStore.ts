@@ -1,0 +1,123 @@
+import { defineStore } from 'pinia';
+import { computed, ref } from 'vue';
+
+import type { Ref } from 'vue';
+import type { Document, Note, Permit, PermitType, Submission } from '@/types';
+
+export type SubmissionStoreState = {
+  documents: Ref<Array<Document>>;
+  notes: Ref<Array<Note>>;
+  permits: Ref<Array<Permit>>;
+  permitTypes: Ref<Array<PermitType>>;
+  submission: Ref<Submission | undefined>;
+};
+
+export const useSubmissionStore = defineStore('submission', () => {
+  // State
+  const state: SubmissionStoreState = {
+    documents: ref([]),
+    notes: ref([]),
+    permits: ref([]),
+    permitTypes: ref([]),
+    submission: ref(undefined)
+  };
+
+  // Getters
+  const getters = {
+    getDocuments: computed(() => state.documents.value),
+    getNotes: computed(() => state.notes.value),
+    getPermits: computed(() => state.permits.value),
+    getPermitTypes: computed(() => state.permitTypes.value),
+    getSubmission: computed(() => state.submission.value)
+  };
+
+  // Actions
+  function addDocument(data: Document) {
+    state.documents.value.push(data);
+  }
+
+  function clearDocuments() {
+    state.documents.value = [];
+  }
+
+  function removeDocument(data: Document) {
+    state.documents.value = state.documents.value.filter((x) => x.documentId !== data.documentId);
+  }
+
+  function setDocuments(data: Array<Document>) {
+    state.documents.value = data;
+  }
+
+  function addNote(data: Note, prepend: boolean = false) {
+    if (prepend) state.notes.value.unshift(data);
+    else state.notes.value.push(data);
+  }
+
+  function clearNotes() {
+    state.notes.value = [];
+  }
+
+  function removeNote(data: Note) {
+    state.notes.value = state.notes.value.filter((x) => x.noteId !== data.noteId);
+  }
+
+  function setNotes(data: Array<Note>) {
+    state.notes.value = data;
+  }
+
+  function addPermit(data: Permit) {
+    state.permits.value.push(data);
+  }
+
+  function clearPermits() {
+    state.permits.value = [];
+  }
+
+  function removePermit(data: Permit) {
+    state.permits.value = state.permits.value.filter((x) => x.permitId !== data.permitId);
+  }
+
+  function setPermits(data: Array<Permit>) {
+    state.permits.value = data;
+  }
+
+  function updatePermit(data: Permit) {
+    const idx = state.permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
+    if (idx >= 0) state.permits.value[idx] = data;
+  }
+
+  function setPermitTypes(data: Array<PermitType>) {
+    state.permitTypes.value = data;
+  }
+
+  function setSubmission(data: Submission | undefined) {
+    state.submission.value = data;
+  }
+
+  return {
+    // State
+    ...state,
+
+    // Getters
+    ...getters,
+
+    // Actions
+    addDocument,
+    clearDocuments,
+    removeDocument,
+    setDocuments,
+    addNote,
+    clearNotes,
+    removeNote,
+    setNotes,
+    addPermit,
+    clearPermits,
+    removePermit,
+    setPermits,
+    updatePermit,
+    setPermitTypes,
+    setSubmission
+  };
+});
+
+export default useSubmissionStore;

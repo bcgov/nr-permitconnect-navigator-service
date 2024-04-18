@@ -1,19 +1,21 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
+import { nextTick, ref, watch } from 'vue';
 import { mixed, object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
-import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Dialog, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import { BringForwardTypes, NoteTypes } from '@/utils/constants';
 import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
 
-import type { Note } from '@/types';
-import { nextTick, ref, watch } from 'vue';
 import type { Ref } from 'vue';
+import type { Note } from '@/types';
 
 // Props
 type Props = {
+  activityId: string;
   note?: Note;
   activityId?: string;
 };
@@ -23,8 +25,8 @@ const props = withDefaults(defineProps<Props>(), {
   activityId: undefined
 });
 
-// Emits
-const emit = defineEmits(['note:delete', 'note:submit']);
+// Store
+const submissionStore = useSubmissionStore();
 
 // State
 const visible = defineModel<boolean>('visible');
@@ -71,6 +73,9 @@ const formSchema = object({
 const confirm = useConfirm();
 const toast = useToast();
 
+// Actions
+const toast = useToast();
+
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
@@ -82,7 +87,15 @@ async function onSubmit(data: any, { resetForm }) {
   if (props.note) initialFormValues = parsedData;
   else resetForm();
 
-  emit('note:submit', parsedData);
+  try {
+    const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
+    submissionStore.addNote(result, true);
+    toast.success('Note saved');
+  } catch (e: any) {
+    toast.error('Failed to save note', e.message);
+  } finally {
+    visible.value = false;
+  }
 }
 
 const onDelete = async () => {

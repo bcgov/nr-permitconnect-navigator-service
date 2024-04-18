@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed, ref, watchEffect } from 'vue';
 
 import PermitModal from '@/components/permit/PermitModal.vue';
-import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
-import { permitService, userService } from '@/services';
+import { Button, Card, Divider } from '@/lib/primevue';
+import { userService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -12,49 +14,23 @@ import type { Permit, PermitType } from '@/types';
 // Props
 type Props = {
   permit: Permit;
-  permitTypes: Array<PermitType>;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
 
-// Emits
-const emit = defineEmits(['permit:delete', 'permit:update']);
+// Store
+const { getPermitTypes } = storeToRefs(useSubmissionStore());
 
 // State
-const cardData: Ref<Permit> = ref(props.permit);
+const cardData = computed(() => props.permit);
 const permitType: Ref<PermitType | undefined> = ref(
-  props.permitTypes.find((x) => x.permitTypeId === props.permit.permitTypeId) as PermitType
+  getPermitTypes.value.find((x) => x.permitTypeId === props.permit.permitTypeId)
 );
 const permitModalVisible: Ref<boolean> = ref(false);
 const cardUpdatedBy: Ref<string> = ref('');
 
 // Actions
-const confirm = useConfirm();
-const toast = useToast();
-
-const confirmDelete = (data: Permit) => {
-  if (data.permitId) {
-    confirm.require({
-      message: 'Please confirm that you want to delete the selected permit. This cannot be undone.',
-      header: 'Confirm delete',
-      acceptLabel: 'Confirm',
-      acceptClass: 'p-button-danger',
-      rejectLabel: 'Cancel',
-      accept: () => {
-        permitService
-          .deletePermit(data.permitId)
-          .then(() => {
-            emit('permit:delete', data);
-            toast.success('Permit deleted');
-          })
-          .catch((e: any) => toast.error('Failed to delete permit', e.message))
-          .finally(() => (permitModalVisible.value = false));
-      }
-    });
-  }
-};
-
-function populateUpdatedBy() {
+watchEffect(() => {
   if (cardData.value.updatedBy) {
     userService
       .searchUsers({ userId: [cardData.value.updatedBy] })
@@ -63,24 +39,10 @@ function populateUpdatedBy() {
       })
       .catch(() => {});
   }
-}
+});
 
-async function onPermitSubmit(data: Permit) {
-  try {
-    const result = await permitService.updatePermit({ ...data, activityId: props.permit.activityId });
-    cardData.value = result.data;
-    emit('permit:update', result.data);
-    toast.success('Permit saved');
-  } catch (e: any) {
-    toast.error('Failed to update permit', e.message);
-  } finally {
-    populateUpdatedBy();
-    permitModalVisible.value = false;
-  }
-}
-
-onMounted(() => {
-  populateUpdatedBy();
+watchEffect(() => {
+  permitType.value = getPermitTypes.value.find((x) => x.permitTypeId === props.permit.permitTypeId);
 });
 </script>
 
@@ -176,10 +138,8 @@ onMounted(() => {
 
   <PermitModal
     v-model:visible="permitModalVisible"
+    :activity-id="cardData.activityId"
     :permit="cardData"
-    :permit-types="permitTypes"
-    @permit:delete="confirmDelete"
-    @permit:submit="onPermitSubmit"
   />
 </template>
 

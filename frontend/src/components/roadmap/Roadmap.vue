@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref, watchEffect } from 'vue';
 import { array, object, string } from 'yup';
@@ -7,27 +8,23 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore } from '@/store';
+import { useConfigStore, useSubmissionStore } from '@/store';
 import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
 import { roadmapTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
-import type { Document, Permit, PermitType, Submission } from '@/types';
-import { storeToRefs } from 'pinia';
+import type { Document } from '@/types';
 
 // Props
 type Props = {
   activityId: string;
-  documents: Array<Document>;
-  permits: Array<Permit>;
-  permitTypes: Array<PermitType>;
-  submission: Submission;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
+const { getDocuments, getPermits, getPermitTypes, getSubmission } = storeToRefs(useSubmissionStore());
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);
@@ -78,16 +75,16 @@ const confirmSubmit = (data: any) => {
   });
 };
 
-function getPermitTypeNamesByStatus(permits: Array<Permit>, permitTypes: Array<PermitType>, status: string) {
-  return permits
-    .map((p) => permitTypes.find((pt) => pt.permitTypeId === p.permitTypeId && p.status === status)?.name)
+function getPermitTypeNamesByStatus(status: string) {
+  return getPermits.value
+    .map((p) => getPermitTypes.value.find((pt) => pt.permitTypeId === p.permitTypeId && p.status === status)?.name)
     .filter((pt) => !!pt)
     .map((name) => name as string);
 }
 
-function getPermitTypeNamesByNeeded(permits: Array<Permit>, permitTypes: Array<PermitType>, needed: string) {
-  return permits
-    .map((p) => permitTypes.find((pt) => pt.permitTypeId === p.permitTypeId && p.needed === needed)?.name)
+function getPermitTypeNamesByNeeded(needed: string) {
+  return getPermits.value
+    .map((p) => getPermitTypes.value.find((pt) => pt.permitTypeId === p.permitTypeId && p.needed === needed)?.name)
     .filter((pt) => !!pt)
     .map((name) => name as string);
 }
@@ -101,6 +98,11 @@ function onFileSelect(data: Array<Document>) {
 }
 
 watchEffect(async () => {
+  // Dumb, but need to do something with the ref for it to be watched properly
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  const permits = getPermits.value.concat();
+  const submission = getSubmission.value;
+
   // Get navigator details
   const configBCC = getConfig.value.ches?.bcc;
   let bcc = configBCC;
@@ -109,8 +111,8 @@ watchEffect(async () => {
     fullName: 'Permit Connect Navigator Service'
   };
 
-  if (props.submission.assignedUserId) {
-    const assignee = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data[0];
+  if (submission?.assignedUserId) {
+    const assignee = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data[0];
 
     if (assignee) {
       navigator = assignee;
@@ -120,19 +122,18 @@ watchEffect(async () => {
   }
 
   // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW).filter(
-    (value) => getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.YES).includes(value)
+  const permitStateNew = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PERMIT_NEEDED.YES).includes(value)
   );
-  const permitPossiblyNeeded = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.NEW).filter(
-    (value) =>
-      getPermitTypeNamesByNeeded(props.permits, props.permitTypes, PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
+  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
   );
-  const permitStateApplied = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.APPLIED);
-  const permitStateCompleted = getPermitTypeNamesByStatus(props.permits, props.permitTypes, PERMIT_STATUS.COMPLETED);
+  const permitStateApplied = getPermitTypeNamesByStatus(PERMIT_STATUS.APPLIED);
+  const permitStateCompleted = getPermitTypeNamesByStatus(PERMIT_STATUS.COMPLETED);
 
   const body = roadmapTemplate({
-    '{{ contactName }}': props.submission.contactName ?? '',
-    '{{ locationAddress }}': props.submission.streetAddress ?? '',
+    '{{ contactName }}': submission?.contactName ?? '',
+    '{{ locationAddress }}': submission?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
     '{{ permitStateApplied }}': permitStateApplied,
@@ -143,7 +144,7 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: props.submission.contactEmail,
+    to: submission?.contactEmail,
     cc: undefined,
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
@@ -151,6 +152,9 @@ watchEffect(async () => {
     body: body
   };
 
+  formRef.value?.setFieldValue('from', navigator.email);
+  formRef.value?.setFieldValue('to', submission?.contactEmail);
+  formRef.value?.setFieldValue('bcc', bcc);
   formRef.value?.setFieldValue('body', body);
 });
 </script>
@@ -234,7 +238,7 @@ watchEffect(async () => {
 
   <FileSelectModal
     v-model:visible="fileSelectModalVisible"
-    :documents="documents"
+    :documents="getDocuments"
     :selected-documents="selectedFiles.slice()"
     @file-select:submit="onFileSelect"
   />

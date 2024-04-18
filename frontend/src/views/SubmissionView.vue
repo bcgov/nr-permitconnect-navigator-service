@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 
 import DocumentCard from '@/components/file/DocumentCard.vue';
@@ -9,12 +10,12 @@ import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
-import { Button, TabPanel, TabView, useToast } from '@/lib/primevue';
+import { Button, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
 
 import type { Ref } from 'vue';
-import type { Document, Note, Permit, PermitType, Submission } from '@/types';
 
 // Props
 type Props = {
@@ -26,72 +27,24 @@ const props = withDefaults(defineProps<Props>(), {
   initialTab: '0'
 });
 
+// Store
+const submissionStore = useSubmissionStore();
+const { getDocuments, getNotes, getPermits, getPermitTypes, getSubmission } = storeToRefs(submissionStore);
+
 // State
 const activeTab: Ref<number> = ref(Number(props.initialTab));
-const documents: Ref<Array<Document>> = ref([]);
 const editable: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
-const notes: Ref<Array<Note>> = ref([]);
 const noteModalVisible: Ref<boolean> = ref(false);
-const permits: Ref<Array<Permit>> = ref([]);
 const permitModalVisible: Ref<boolean> = ref(false);
-const permitTypes: Ref<Array<PermitType>> = ref([]);
-const submission: Ref<Submission | undefined> = ref(undefined);
 
 // Actions
-const toast = useToast();
-
-const onNoteDelete = (noteId: string) => {
-  notes.value = notes.value.filter((x: Note) => x.noteId !== noteId);
-};
-
-const onPermitDelete = (data: Permit) =>
-  (permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId));
-
-async function onPermitSubmit(data: Permit) {
-  try {
-    const result = (await permitService.createPermit({ ...data, activityId: props.activityId })).data;
-    permits.value.push(result);
-    toast.success('Permit saved');
-  } catch (e: any) {
-    toast.error('Failed to save permit', e.message);
-  } finally {
-    permitModalVisible.value = false;
-  }
-}
-
-const onPermitUpdate = (data: Permit) => {
-  let idx = permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
-  if (idx >= 0) permits.value[idx] = data;
-};
-
-const onNoteEdit = (data: any, oldNoteId: string) => {
-  notes.value = notes.value.filter((x: Note) => x.noteId !== oldNoteId);
-  notes.value.unshift(data);
-};
-
-async function onNoteSubmit(data: any) {
-  try {
-    const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
-    notes.value.unshift(result);
-    toast.success('Note saved');
-  } catch (e: any) {
-    toast.error('Failed to save note', e.message);
-  } finally {
-    noteModalVisible.value = false;
-  }
-}
-
-async function onSubmissionSubmit(data: Submission) {
+async function onSubmissionSubmit() {
   editable.value = false;
-  await submissionService.updateSubmission(data.submissionId, {
-    ...data
-  });
-  toast.success('Form saved');
 }
 
 onMounted(async () => {
-  [submission.value, documents.value, notes.value, permits.value, permitTypes.value] = (
+  const [submission, documents, notes, permits, permitTypes] = (
     await Promise.all([
       submissionService.getSubmission(props.activityId),
       documentService.listDocuments(props.activityId),
@@ -100,6 +53,12 @@ onMounted(async () => {
       permitService.getPermitTypes()
     ])
   ).map((r) => r.data);
+
+  submissionStore.setSubmission(submission);
+  submissionStore.setDocuments(documents);
+  submissionStore.setNotes(notes);
+  submissionStore.setPermits(permits);
+  submissionStore.setPermitTypes(permitTypes);
 
   loading.value = false;
 });
@@ -116,20 +75,20 @@ onMounted(async () => {
   <h1>
     Activity submission:
     <span
-      v-if="submission?.activityId"
+      v-if="getSubmission?.activityId"
       class="mr-1"
     >
-      {{ submission.activityId }}
+      {{ getSubmission.activityId }}
     </span>
-    <span v-if="submission?.projectName">
+    <span v-if="getSubmission?.projectName">
       -
-      <span class="ml-1">{{ submission.projectName }}</span>
+      <span class="ml-1">{{ getSubmission.projectName }}</span>
     </span>
   </h1>
 
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Info">
-      <span v-if="!loading">
+      <span v-if="getSubmission">
         <Button
           v-if="!editable"
           class="mb-3"
@@ -141,24 +100,21 @@ onMounted(async () => {
 
         <SubmissionForm
           :editable="editable"
-          :submission="submission as Submission"
-          @cancel="editable = false"
-          @submit="onSubmissionSubmit"
+          :submission="getSubmission"
+          @submission:cancel="editable = false"
+          @submission:submit="onSubmissionSubmit"
         />
       </span>
     </TabPanel>
     <TabPanel header="Files">
       <div class="grid nested-grid">
         <div class="col-2">
-          <FileUpload
-            :activity-id="props.activityId"
-            @update:last-uploaded-document="(e: Document) => documents.push(e)"
-          />
+          <FileUpload :activity-id="props.activityId" />
         </div>
         <div class="col-10">
           <div class="grid">
             <div
-              v-for="(document, index) in documents"
+              v-for="(document, index) in getDocuments"
               :key="document.documentId"
               :index="index"
               class="col-12 md:col-6 lg:col-4 xl:col-3"
@@ -167,9 +123,6 @@ onMounted(async () => {
                 :document="document"
                 class="hover-hand hover-shadow"
                 @click="documentService.downloadDocument(document.documentId)"
-                @document:deleted="
-                  (documentId) => (documents = documents.filter((x: Document) => x.documentId !== documentId))
-                "
               />
             </div>
           </div>
@@ -177,10 +130,10 @@ onMounted(async () => {
       </div>
     </TabPanel>
     <TabPanel header="Permits">
-      <span v-if="permitTypes.length">
+      <span v-if="getPermitTypes.length">
         <div class="flex align-items-center pb-2">
           <div class="flex-grow-1">
-            <p class="font-bold">Applicable permits ({{ permits.length }})</p>
+            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
           </div>
           <Button
             aria-label="Add permit"
@@ -194,30 +147,24 @@ onMounted(async () => {
           </Button>
         </div>
         <div
-          v-for="(permit, index) in permits"
+          v-for="(permit, index) in getPermits"
           :key="permit.permitId"
           :index="index"
           class="col-12"
         >
-          <PermitCard
-            :permit="permit"
-            :permit-types="permitTypes"
-            @permit:delete="onPermitDelete"
-            @permit:update="onPermitUpdate"
-          />
+          <PermitCard :permit="permit" />
         </div>
 
         <PermitModal
           v-model:visible="permitModalVisible"
-          :permit-types="permitTypes"
-          @permit:submit="onPermitSubmit"
+          :activity-id="props.activityId"
         />
       </span>
     </TabPanel>
     <TabPanel header="Notes">
       <div class="flex align-items-center pb-2">
         <div class="flex-grow-1">
-          <p class="font-bold">Notes ({{ notes.length }})</p>
+          <p class="font-bold">Notes ({{ getNotes.length }})</p>
         </div>
         <Button
           aria-label="Add note"
@@ -231,7 +178,7 @@ onMounted(async () => {
         </Button>
       </div>
       <div
-        v-for="(note, index) in notes"
+        v-for="(note, index) in getNotes"
         :key="note.noteId"
         :index="index"
         class="col-12"
@@ -245,17 +192,13 @@ onMounted(async () => {
 
       <NoteModal
         v-model:visible="noteModalVisible"
-        @note:submit="onNoteSubmit"
+        :activity-id="props.activityId"
       />
     </TabPanel>
     <TabPanel header="Roadmap">
       <Roadmap
         v-if="!loading"
         :activity-id="activityId"
-        :documents="documents"
-        :permits="permits"
-        :permit-types="permitTypes"
-        :submission="submission as Submission"
       />
     </TabPanel>
   </TabView>

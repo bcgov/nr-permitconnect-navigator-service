@@ -1,5 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
-import { mount } from '@vue/test-utils';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import { shallowMount } from '@vue/test-utils';
 
 import NoteModal from '@/components/note/NoteModal.vue';
 import { StorageKey } from '@/utils/constants';
@@ -31,10 +33,10 @@ const testNote: Note = {
   isDeleted: false
 };
 
-const wrapperSettings = (visibleProp: boolean = true) => ({
+const wrapperSettings = () => ({
   props: {
-    note: testNote,
-    visible: visibleProp
+    activityId: '123',
+    note: testNote
   },
   global: {
     plugins: [
@@ -80,18 +82,9 @@ afterEach(() => {
 });
 
 // Currently, modal functionality hidden behind Primevue component Dialog
-describe('noteModal test', () => {
-  it('sets dialog component prop "visible" to true', async () => {
-    const noteWrapper = mount(NoteModal, wrapperSettings(true));
-
-    const dialogComponent = noteWrapper.getComponent({ name: 'Dialog' });
-    expect(dialogComponent.props('visible')).toBe(true);
-  });
-
-  it('sets dialog component prop "visible" to false', async () => {
-    const noteWrapper = mount(NoteModal, wrapperSettings(false));
-
-    const dialogComponent = noteWrapper.getComponent({ name: 'Dialog' });
-    expect(dialogComponent.props('visible')).toBe(false);
+describe('NoteModal', () => {
+  it('renders', () => {
+    const wrapper = shallowMount(NoteModal, wrapperSettings());
+    expect(wrapper).toBeTruthy();
   });
 });

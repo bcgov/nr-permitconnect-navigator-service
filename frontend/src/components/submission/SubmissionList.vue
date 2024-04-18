@@ -94,7 +94,7 @@ const filters = ref({
           @click="handleCreateNewActivity"
         />
         <span class="p-input-icon-left ml-4">
-          <i class="pi pi-search" />
+          <i class="pi pi-search mr-2" />
           <InputText
             v-model="filters['global'].value"
             placeholder="Search all"
