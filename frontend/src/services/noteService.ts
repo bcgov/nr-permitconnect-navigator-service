@@ -12,6 +12,14 @@ export default {
   },
 
   /**
+   * @function deleteNote
+   * @returns {Promise} An axios response
+   */
+  async deleteNote(noteId: string) {
+    return appAxios().delete(`note/${noteId}`);
+  },
+
+  /**
    * @function listBringForward
    * @returns {Promise} An axios response
    */
@@ -25,5 +33,13 @@ export default {
    */
   async listNotes(activityId: string) {
     return appAxios().get(`note/list/${activityId}`);
+  },
+
+  /**
+   * @function updateNote
+   * @returns {Promise} An axios response
+   */
+  async updateNote(note: Note) {
+    return appAxios().put(`note/${note.noteId}`, note);
   }
 };

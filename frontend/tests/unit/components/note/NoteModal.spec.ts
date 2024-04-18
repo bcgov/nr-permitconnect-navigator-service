@@ -5,6 +5,8 @@ import NoteModal from '@/components/note/NoteModal.vue';
 import { StorageKey } from '@/utils/constants';
 import { NOTE_TYPES } from '@/utils/enums';
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 
 import type { Note } from '@/types';
 
@@ -25,7 +27,8 @@ const testNote: Note = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  isDeleted: false
 };
 
 const wrapperSettings = (visibleProp: boolean = true) => ({
@@ -43,7 +46,9 @@ const wrapperSettings = (visibleProp: boolean = true) => ({
             }
           }
         }),
-      PrimeVue
+      PrimeVue,
+      ConfirmationService,
+      ToastService
     ],
     stubs: {
       Dialog: {

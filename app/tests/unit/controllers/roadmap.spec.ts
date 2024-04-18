@@ -62,7 +62,8 @@ describe('send', () => {
       bringForwardDate: null,
       bringForwardState: null,
       createdAt: new Date().toISOString(),
-      createdBy: 'abc-123'
+      createdBy: 'abc-123',
+      isDeleted: false
     };
 
     const emailResponse = {
@@ -117,7 +118,8 @@ describe('send', () => {
       bringForwardDate: null,
       bringForwardState: null,
       createdAt: new Date().toISOString(),
-      createdBy: 'abc-123'
+      createdBy: 'abc-123',
+      isDeleted: false
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -273,7 +275,8 @@ describe('send', () => {
       bringForwardDate: null,
       bringForwardState: null,
       createdAt: new Date().toISOString(),
-      createdBy: 'abc-123'
+      createdBy: 'abc-123',
+      isDeleted: false
     };
 
     const USR_IDENTITY = 'xxxy';

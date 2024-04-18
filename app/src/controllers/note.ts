@@ -23,6 +23,16 @@ const controller = {
     }
   },
 
+  async deleteNote(req: Request<{ noteId: string }>, res: Response, next: NextFunction) {
+    try {
+      const response = await noteService.deleteNote(req.params.noteId);
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   async listBringForward(req: Request<never, { bringForwardState?: string }>, res: Response, next: NextFunction) {
     try {
       let response = new Array<BringForward>();
@@ -67,7 +77,11 @@ const controller = {
       // TODO: define body type in request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = req.body as any;
-      const response = await submissionService.updateSubmission({ ...body, updatedBy: userId });
+      const response = await noteService.updateNote({
+        ...body,
+        createdBy: userId,
+        updatedAt: new Date().toISOString()
+      });
 
       res.status(200).json(response);
     } catch (e: unknown) {

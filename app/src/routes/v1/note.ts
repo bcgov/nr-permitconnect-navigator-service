@@ -13,15 +13,20 @@ router.put('/', noteValidator.createNote, (req: Request, res: Response, next: Ne
   noteController.createNote(req, res, next);
 });
 
-router.put('/:noteId', noteValidator.createNote, (req: Request, res: Response, next: NextFunction): void => {
+router.put('/:noteId', noteValidator.updateNote, (req: Request, res: Response, next: NextFunction): void => {
   noteController.updateNote(req, res, next);
 });
 
+// Note delete endpoint
+router.delete('/:noteId', (req: Request, res: Response, next: NextFunction): void => {
+  noteController.deleteNote(req, res, next);
+});
+
+// Note list endpoints
 router.get('/bringForward', (req: Request, res: Response, next: NextFunction): void => {
   noteController.listBringForward(req, res, next);
 });
 
-// Note list by activity endpoint
 router.get('/list/:activityId', noteValidator.listNotes, (req: Request, res: Response, next: NextFunction): void => {
   noteController.listNotes(req, res, next);
 });

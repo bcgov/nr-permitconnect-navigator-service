@@ -58,7 +58,8 @@ describe('createNote', () => {
       bringForwardState: null,
       note: 'Some not text',
       noteType: 'GENERAL',
-      title: 'Note title'
+      title: 'Note title',
+      isDeleted: false
     };
 
     createSpy.mockResolvedValue(created);
@@ -133,7 +134,8 @@ describe('listBringForward', () => {
         note: 'Some text',
         noteType: 'Bring Forward',
         title: 'Test 1',
-        createdBy: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6'
+        createdBy: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6',
+        isDeleted: false
       }
     ];
 
@@ -220,7 +222,8 @@ describe('listNotes', () => {
         bringForwardState: null,
         note: 'Some not text',
         noteType: 'GENERAL',
-        title: 'Note title'
+        title: 'Note title',
+        isDeleted: false
       }
     ];
 

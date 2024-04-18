@@ -24,20 +24,34 @@ const service = {
     return note.fromPrismaModel(response);
   },
 
+  deleteNote: async (noteId: string) => {
+    const result = await prisma.note.update({
+      where: {
+        note_id: noteId
+      },
+      data: {
+        is_deleted: true
+      }
+    });
+
+    return note.fromPrismaModel(result);
+  },
+
   /**
    * @function listBringForward
    * Retrieve a list of notes with the Bring forward type
    * @param {string} bringForwardState Optional state to filter on
    * @returns {Promise<Note[]>} The result of running the findMany operation
    */
-  listBringForward: async (bringForwardState?: string) => {
+  listBringForward: async (bringForwardState?: string, isDeleted: boolean = false) => {
     const response = await prisma.note.findMany({
       orderBy: {
         bring_forward_date: 'asc'
       },
       where: {
         note_type: 'Bring forward',
-        bring_forward_state: bringForwardState
+        bring_forward_state: bringForwardState,
+        is_deleted: isDeleted
       }
     });
     return response.map((x) => note.fromPrismaModel(x));
@@ -49,27 +63,41 @@ const service = {
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<Note[]>} The result of running the findMany operation
    */
-  listNotes: async (activityId: string) => {
+  listNotes: async (activityId: string, isDeleted: boolean = false) => {
     const response = await prisma.note.findMany({
       orderBy: {
         created_at: 'desc'
       },
       where: {
-        activity_id: activityId
+        activity_id: activityId,
+        is_deleted: isDeleted
       }
     });
     return response.map((x) => note.fromPrismaModel(x));
   },
 
   updateNote: async (data: Note) => {
-    const response = await prisma.note.update({
-      data: { ...note.toPrismaModel(data), updated_by: data.updatedBy },
-      where: {
-        note_id: data.noteId
-      }
-    });
+    return await prisma.$transaction(async (trx) => {
+      await trx.note.update({
+        where: {
+          note_id: data.noteId
+        },
+        data: {
+          is_deleted: true
+        }
+      });
 
-    return note.fromPrismaModel(response);
+      const newNote = {
+        ...data,
+        noteId: uuidv4()
+      };
+
+      const newCreatedNote = await trx.note.create({
+        data: note.toPrismaModel(newNote)
+      });
+
+      return note.fromPrismaModel(newCreatedNote);
+    });
   }
 };
 

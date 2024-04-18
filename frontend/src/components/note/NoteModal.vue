@@ -3,7 +3,8 @@ import { Form } from 'vee-validate';
 import { mixed, object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
-import { Button, Dialog } from '@/lib/primevue';
+import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
+import { noteService } from '@/services';
 import { BringForwardTypes, NoteTypes } from '@/utils/constants';
 import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
 
@@ -14,14 +15,16 @@ import type { Ref } from 'vue';
 // Props
 type Props = {
   note?: Note;
+  activityId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  note: undefined
+  note: undefined,
+  activityId: undefined
 });
 
 // Emits
-const emit = defineEmits(['note:submit']);
+const emit = defineEmits(['note:delete', 'note:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
@@ -64,21 +67,13 @@ const formSchema = object({
   title: string().required().max(255, 'Title too long').label('Title')
 });
 
-const handleBringForward = (e: { OriginalEvent: Event; value: string }) => {
-  if (e.value === NOTE_TYPES.BRING_FORWARD) {
-    formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
-    showBringForward.value = true;
-  } else {
-    showBringForward.value = false;
-    formRef.value?.setFieldValue('bringForwardDate', null);
-    formRef.value?.setFieldValue('bringForwardState', null);
-  }
-};
-
 // Actions
+const confirm = useConfirm();
+const toast = useToast();
+
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
-function onSubmit(data: any, { resetForm }) {
+async function onSubmit(data: any, { resetForm }) {
   const parsedData = {
     ...data,
     createdAt: new Date(data.createdAt)
@@ -90,13 +85,80 @@ function onSubmit(data: any, { resetForm }) {
   emit('note:submit', parsedData);
 }
 
+const onDelete = async () => {
+  if (props.note?.noteId) {
+    confirm.require({
+      message: 'Please confirm that you want to delete the selected note.',
+      header: 'Confirm delete',
+      acceptLabel: 'Confirm',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      accept: async () => {
+        try {
+          if (props.note) {
+            await noteService.deleteNote(props.note?.noteId);
+            emit('note:delete', props.note.noteId);
+
+            toast.success('Note deleted');
+          }
+        } catch (e) {
+          toast.error('Failed to delete note');
+        } finally {
+          visible.value = false;
+          formRef.value ? formRef.value.resetForm() : null;
+        }
+      }
+    });
+  }
+};
+
+const setShowBringForwardState = () => {
+  formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
+  showBringForward.value = true;
+};
+
+const setHideBringForwardState = () => {
+  showBringForward.value = false;
+  formRef.value?.setFieldValue('bringForwardDate', null);
+  formRef.value?.setFieldValue('bringForwardState', null);
+};
+
+const handleBringForward = (e: { OriginalEvent: Event; value: string }) => {
+  if (e.value === NOTE_TYPES.BRING_FORWARD) {
+    setShowBringForwardState();
+  } else {
+    setHideBringForwardState();
+  }
+};
+
 watch(visible, (newValue) => {
-  // sets 'createdAt' to current time when modal is visible
+  // nextTick triggers when modal becomes visible
   nextTick().then(() => {
-    if (newValue && formRef.value) {
+    if (!newValue) {
+      setHideBringForwardState();
+      return;
+    }
+
+    // sets 'createdAt' to current time when modal is visible
+    if (formRef.value) {
       formRef.value.setFieldValue('createdAt', new Date());
-    } else {
-      showBringForward.value = false;
+
+      // set form values if editing existing note
+      if (props.note) {
+        formRef.value.setFieldValue('noteId', props.note.noteId);
+        formRef.value.setFieldValue('activityId', props.note.activityId);
+        formRef.value.setFieldValue('bringForwardState', props.note.bringForwardState);
+        formRef.value.setFieldValue('noteType', props.note.noteType);
+        if (props.note.noteType === NOTE_TYPES.BRING_FORWARD) {
+          setShowBringForwardState();
+          formRef.value.setFieldValue(
+            'bringForwardDate',
+            props.note.bringForwardDate ? new Date(props.note.bringForwardDate) : null
+          );
+        }
+        formRef.value.setFieldValue('note', props.note.note);
+        formRef.value.setFieldValue('title', props.note.title);
+      }
     }
   });
 });
@@ -186,6 +248,17 @@ watch(visible, (newValue) => {
               label="Cancel"
               icon="pi pi-times"
               @click="visible = false"
+            />
+          </div>
+          <div
+            v-if="props.note"
+            class="flex justify-content-right"
+          >
+            <Button
+              class="p-button-outlined p-button-danger mr-2"
+              label="Delete"
+              icon="pi pi-trash"
+              @click="onDelete"
             />
           </div>
         </div>

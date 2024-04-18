@@ -8,4 +8,5 @@ export type Note = {
   note: string;
   noteType: string;
   title: string;
+  isDeleted: boolean;
 } & Partial<IStamps>;
