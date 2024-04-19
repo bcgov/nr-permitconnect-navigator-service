@@ -11,7 +11,7 @@ const controller = {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
-      res.status(200).json(response);
+      res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
     }

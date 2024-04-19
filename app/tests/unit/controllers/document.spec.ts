@@ -29,7 +29,7 @@ describe('createDocument', () => {
   // Mock service calls
   const createSpy = jest.spyOn(documentService, 'createDocument');
 
-  it('should return 200 if all good', async () => {
+  it('should return 201 if all good', async () => {
     const req = {
       body: { documentId: 'abc123', activityId: '1', filename: 'testfile', mimeType: 'imgjpg', length: 1234567 },
       currentUser: CURRENT_USER
@@ -56,7 +56,7 @@ describe('createDocument', () => {
       req.body.mimeType,
       req.body.length
     );
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
   });
 

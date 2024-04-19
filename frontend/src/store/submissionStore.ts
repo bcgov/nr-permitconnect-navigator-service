@@ -36,10 +36,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     state.documents.value.push(data);
   }
 
-  function clearDocuments() {
-    state.documents.value = [];
-  }
-
   function removeDocument(data: Document) {
     state.documents.value = state.documents.value.filter((x) => x.documentId !== data.documentId);
   }
@@ -53,10 +49,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     else state.notes.value.push(data);
   }
 
-  function clearNotes() {
-    state.notes.value = [];
-  }
-
   function removeNote(data: Note) {
     state.notes.value = state.notes.value.filter((x) => x.noteId !== data.noteId);
   }
@@ -65,12 +57,13 @@ export const useSubmissionStore = defineStore('submission', () => {
     state.notes.value = data;
   }
 
-  function addPermit(data: Permit) {
-    state.permits.value.push(data);
+  function updateNote(oldData: Note, newData: Note) {
+    const idx = state.notes.value.findIndex((x: Note) => x.noteId === oldData.noteId);
+    if (idx >= 0) state.notes.value[idx] = newData;
   }
 
-  function clearPermits() {
-    state.permits.value = [];
+  function addPermit(data: Permit) {
+    state.permits.value.push(data);
   }
 
   function removePermit(data: Permit) {
@@ -103,15 +96,13 @@ export const useSubmissionStore = defineStore('submission', () => {
 
     // Actions
     addDocument,
-    clearDocuments,
     removeDocument,
     setDocuments,
     addNote,
-    clearNotes,
     removeNote,
     setNotes,
+    updateNote,
     addPermit,
-    clearPermits,
     removePermit,
     setPermits,
     updatePermit,

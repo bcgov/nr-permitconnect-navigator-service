@@ -1,14 +1,12 @@
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import NoteModal from '@/components/note/NoteModal.vue';
 import { StorageKey } from '@/utils/constants';
 import { NOTE_TYPES } from '@/utils/enums';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 
 import type { Note } from '@/types';
 

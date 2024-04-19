@@ -24,6 +24,12 @@ const service = {
     return note.fromPrismaModel(response);
   },
 
+  /**
+   * @function deleteNote
+   * Soft deletes a note by marking is as deleted
+   * @param {string} noteId ID of the note to delete
+   * @returns {Promise<Note>} The result of running the update operation
+   */
   deleteNote: async (noteId: string) => {
     const result = await prisma.note.update({
       where: {
@@ -76,8 +82,15 @@ const service = {
     return response.map((x) => note.fromPrismaModel(x));
   },
 
+  /**
+   * @function updateNote
+   * Updates a note by marking the old note as deleted and creating a new one
+   * @param {Note} data New Note object
+   * @returns {Promise<Note>} The result of running the transaction
+   */
   updateNote: async (data: Note) => {
     return await prisma.$transaction(async (trx) => {
+      // Mark old note as deleted
       await trx.note.update({
         where: {
           note_id: data.noteId
@@ -87,16 +100,15 @@ const service = {
         }
       });
 
-      const newNote = {
-        ...data,
-        noteId: uuidv4()
-      };
-
-      const newCreatedNote = await trx.note.create({
-        data: note.toPrismaModel(newNote)
+      // Create new note
+      const response = await trx.note.create({
+        data: note.toPrismaModel({
+          ...data,
+          noteId: uuidv4()
+        })
       });
 
-      return note.fromPrismaModel(newCreatedNote);
+      return note.fromPrismaModel(response);
     });
   }
 };

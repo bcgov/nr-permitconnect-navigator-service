@@ -33,16 +33,11 @@ const { getDocuments, getNotes, getPermits, getPermitTypes, getSubmission } = st
 
 // State
 const activeTab: Ref<number> = ref(Number(props.initialTab));
-const editable: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
 
 // Actions
-async function onSubmissionSubmit() {
-  editable.value = false;
-}
-
 onMounted(async () => {
   const [submission, documents, notes, permits, permitTypes] = (
     await Promise.all([
@@ -89,21 +84,7 @@ onMounted(async () => {
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Info">
       <span v-if="getSubmission">
-        <Button
-          v-if="!editable"
-          class="mb-3"
-          :disabled="editable"
-          @click="editable = true"
-        >
-          Edit
-        </Button>
-
-        <SubmissionForm
-          :editable="editable"
-          :submission="getSubmission"
-          @submission:cancel="editable = false"
-          @submission:submit="onSubmissionSubmit"
-        />
+        <SubmissionForm :submission="getSubmission" />
       </span>
     </TabPanel>
     <TabPanel header="Files">
@@ -183,14 +164,11 @@ onMounted(async () => {
         :index="index"
         class="col-12"
       >
-        <NoteCard
-          :note="note"
-          @note:edit="onNoteEdit"
-          @note:delete="onNoteDelete"
-        />
+        <NoteCard :note="note" />
       </div>
 
       <NoteModal
+        v-if="noteModalVisible"
         v-model:visible="noteModalVisible"
         :activity-id="props.activityId"
       />
@@ -198,7 +176,7 @@ onMounted(async () => {
     <TabPanel header="Roadmap">
       <Roadmap
         v-if="!loading"
-        :activity-id="activityId"
+        :activity-id="props.activityId"
       />
     </TabPanel>
   </TabView>

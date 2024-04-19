@@ -26,12 +26,12 @@ const fileInput: Ref<any> = ref(null);
 // Actions
 const toast = useToast();
 
-const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
-  onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
-};
-
 const onFileUploadClick = () => {
   fileInput.value.click();
+};
+
+const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
+  onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
 };
 
 const onUpload = async (file: File) => {
@@ -41,7 +41,6 @@ const onUpload = async (file: File) => {
 
     if (response) {
       submissionStore.addDocument(response);
-
       toast.success('Document uploaded');
     }
   } catch (e: any) {

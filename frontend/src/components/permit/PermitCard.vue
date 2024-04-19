@@ -23,11 +23,11 @@ const { getPermitTypes } = storeToRefs(useSubmissionStore());
 
 // State
 const cardData = computed(() => props.permit);
+const cardUpdatedBy: Ref<string> = ref('');
+const permitModalVisible: Ref<boolean> = ref(false);
 const permitType: Ref<PermitType | undefined> = ref(
   getPermitTypes.value.find((x) => x.permitTypeId === props.permit.permitTypeId)
 );
-const permitModalVisible: Ref<boolean> = ref(false);
-const cardUpdatedBy: Ref<string> = ref('');
 
 // Actions
 watchEffect(() => {

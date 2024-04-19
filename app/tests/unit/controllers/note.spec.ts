@@ -34,7 +34,7 @@ describe('createNote', () => {
   const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
   const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
-  it('should return 200 if all good', async () => {
+  it('should return 201 if all good', async () => {
     const req = {
       body: {
         noteId: '123-123',
@@ -75,7 +75,7 @@ describe('createNote', () => {
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID });
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
   });
 

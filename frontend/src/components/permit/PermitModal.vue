@@ -11,9 +11,9 @@ import { useSubmissionStore } from '@/store';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
 import { PERMIT_STATUS } from '@/utils/enums';
 
+import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
 import type { Permit, PermitForm, PermitType } from '@/types';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
 type Props = {
@@ -30,10 +30,10 @@ const submissionStore = useSubmissionStore();
 const { getPermitTypes } = storeToRefs(submissionStore);
 
 // State
-const visible = defineModel<boolean>('visible');
 const permitType: Ref<PermitType | undefined> = ref(
   getPermitTypes.value.find((x) => x.permitTypeId === props.permit?.permitTypeId)
 );
+const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: PermitForm = {
@@ -116,16 +116,14 @@ async function onSubmit(data: PermitForm, { resetForm }) {
   } as Permit;
 
   try {
-    let result;
     if (!props.permit) {
-      result = (await permitService.createPermit({ ...permitData, activityId: props.activityId })).data;
+      const result = (await permitService.createPermit({ ...permitData, activityId: props.activityId })).data;
       submissionStore.addPermit(result);
     } else {
-      result = (await permitService.updatePermit({ ...permitData, activityId: props.permit.activityId })).data;
+      const result = (await permitService.updatePermit({ ...permitData, activityId: props.permit.activityId })).data;
       submissionStore.updatePermit(result);
     }
     toast.success('Permit saved');
-    // TODO: Do we still need an emit back to PermitCard to rerender proper data?
   } catch (e: any) {
     toast.error('Failed to save permit', e.message);
   } finally {

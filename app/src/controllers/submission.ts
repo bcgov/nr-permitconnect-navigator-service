@@ -9,28 +9,6 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
 
 const controller = {
-  createEmptySubmission: async (req: Request, res: Response, next: NextFunction) => {
-    let testSubmissionId;
-    let submissionQuery;
-
-    // Testing for activityId collisions, which are truncated UUIDs
-    // If a collision is detected, generate new UUID and test again
-    do {
-      testSubmissionId = uuidv4();
-      submissionQuery = await submissionService.getSubmission(testSubmissionId.substring(0, 8).toUpperCase());
-    } while (submissionQuery);
-
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submitter = (req.currentUser?.tokenPayload as any)?.idir_username;
-      const result = await submissionService.createEmptySubmission(testSubmissionId, submitter);
-
-      res.status(201).json({ activityId: result.activity_id });
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   checkAndStoreNewSubmissions: async () => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
 
@@ -173,6 +151,28 @@ const controller = {
 
     // Create each permit
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
+  },
+
+  createEmptySubmission: async (req: Request, res: Response, next: NextFunction) => {
+    let testSubmissionId;
+    let submissionQuery;
+
+    // Testing for activityId collisions, which are truncated UUIDs
+    // If a collision is detected, generate new UUID and test again
+    do {
+      testSubmissionId = uuidv4();
+      submissionQuery = await submissionService.getSubmission(testSubmissionId.substring(0, 8).toUpperCase());
+    } while (submissionQuery);
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const submitter = (req.currentUser?.tokenPayload as any)?.idir_username;
+      const result = await submissionService.createEmptySubmission(testSubmissionId, submitter);
+
+      res.status(201).json({ activityId: result.activity_id });
+    } catch (e: unknown) {
+      next(e);
+    }
   },
 
   getStatistics: async (

@@ -23,8 +23,8 @@ import type { Document } from '@/types';
 
 // Props
 type Props = {
-  document: Document;
   deleteButton?: boolean;
+  document: Document;
   selectable?: boolean;
   selected?: boolean;
 };

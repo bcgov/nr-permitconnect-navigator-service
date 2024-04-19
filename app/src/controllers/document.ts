@@ -20,7 +20,7 @@ const controller = {
         req.body.mimeType,
         req.body.length
       );
-      res.status(200).json(response);
+      res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
     }

@@ -4,7 +4,7 @@ import { nextTick, ref, watch } from 'vue';
 import { mixed, object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
-import { Button, Dialog, useToast } from '@/lib/primevue';
+import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { BringForwardTypes, NoteTypes } from '@/utils/constants';
@@ -17,29 +17,30 @@ import type { Note } from '@/types';
 type Props = {
   activityId: string;
   note?: Note;
-  activityId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  note: undefined,
-  activityId: undefined
+  note: undefined
 });
 
 // Store
 const submissionStore = useSubmissionStore();
 
 // State
-const visible = defineModel<boolean>('visible');
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const showBringForward: Ref<boolean> = ref(false);
+const showBringForward: Ref<boolean> = ref(props.note?.noteType === NOTE_TYPES.BRING_FORWARD);
+const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: any = {
-  createdAt: new Date(),
-  bringForwardDate: null,
-  bringForwardState: null,
+  activityId: props.note?.activityId,
+  bringForwardDate: props.note?.bringForwardDate ? new Date(props.note.bringForwardDate) : null,
+  bringForwardState: props.note?.bringForwardState ?? null,
+  createdAt: props.note?.createdAt ? new Date(props.note.createdAt) : new Date(),
   note: props.note?.note,
-  noteType: NOTE_TYPES.GENERAL
+  noteId: props.note?.noteId,
+  noteType: props.note?.noteType ?? NOTE_TYPES.GENERAL,
+  title: props.note?.title
 };
 
 // Form validation schema
@@ -73,23 +74,55 @@ const formSchema = object({
 const confirm = useConfirm();
 const toast = useToast();
 
-// Actions
-const toast = useToast();
+function onDelete() {
+  if (props.note) {
+    confirm.require({
+      message: 'Please confirm that you want to delete the selected note.',
+      header: 'Confirm delete',
+      acceptLabel: 'Confirm',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        noteService
+          .deleteNote(props.note?.noteId as string)
+          .then(() => {
+            submissionStore.removeNote(props.note as Note);
+            toast.success('Note deleted');
+          })
+          .catch((e: any) => toast.error('Failed to delete note', e.message))
+          .finally(() => {
+            visible.value = false;
+            formRef.value?.resetForm();
+          });
+      }
+    });
+  }
+}
+
+const onNoteTypeChange = (e: { OriginalEvent: Event; value: string }) => {
+  if (e.value === NOTE_TYPES.BRING_FORWARD) {
+    formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
+    showBringForward.value = true;
+  } else {
+    formRef.value?.setFieldValue('bringForwardDate', null);
+    formRef.value?.setFieldValue('bringForwardState', null);
+    showBringForward.value = false;
+  }
+};
 
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
-  const parsedData = {
-    ...data,
-    createdAt: new Date(data.createdAt)
-  };
-
-  if (props.note) initialFormValues = parsedData;
-  else resetForm();
-
   try {
-    const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
-    submissionStore.addNote(result, true);
+    if (!props.note) {
+      const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
+      submissionStore.addNote(result, true);
+      resetForm();
+    } else {
+      const result = (await noteService.updateNote({ ...data, activityId: props.activityId })).data;
+      submissionStore.updateNote(props.note, result);
+      initialFormValues = data;
+    }
     toast.success('Note saved');
   } catch (e: any) {
     toast.error('Failed to save note', e.message);
@@ -97,95 +130,15 @@ async function onSubmit(data: any, { resetForm }) {
     visible.value = false;
   }
 }
-
-const onDelete = async () => {
-  if (props.note?.noteId) {
-    confirm.require({
-      message: 'Please confirm that you want to delete the selected note.',
-      header: 'Confirm delete',
-      acceptLabel: 'Confirm',
-      acceptClass: 'p-button-danger',
-      rejectLabel: 'Cancel',
-      accept: async () => {
-        try {
-          if (props.note) {
-            await noteService.deleteNote(props.note?.noteId);
-            emit('note:delete', props.note.noteId);
-
-            toast.success('Note deleted');
-          }
-        } catch (e) {
-          toast.error('Failed to delete note');
-        } finally {
-          visible.value = false;
-          formRef.value ? formRef.value.resetForm() : null;
-        }
-      }
-    });
-  }
-};
-
-const setShowBringForwardState = () => {
-  formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
-  showBringForward.value = true;
-};
-
-const setHideBringForwardState = () => {
-  showBringForward.value = false;
-  formRef.value?.setFieldValue('bringForwardDate', null);
-  formRef.value?.setFieldValue('bringForwardState', null);
-};
-
-const handleBringForward = (e: { OriginalEvent: Event; value: string }) => {
-  if (e.value === NOTE_TYPES.BRING_FORWARD) {
-    setShowBringForwardState();
-  } else {
-    setHideBringForwardState();
-  }
-};
-
-watch(visible, (newValue) => {
-  // nextTick triggers when modal becomes visible
-  nextTick().then(() => {
-    if (!newValue) {
-      setHideBringForwardState();
-      return;
-    }
-
-    // sets 'createdAt' to current time when modal is visible
-    if (formRef.value) {
-      formRef.value.setFieldValue('createdAt', new Date());
-
-      // set form values if editing existing note
-      if (props.note) {
-        formRef.value.setFieldValue('noteId', props.note.noteId);
-        formRef.value.setFieldValue('activityId', props.note.activityId);
-        formRef.value.setFieldValue('bringForwardState', props.note.bringForwardState);
-        formRef.value.setFieldValue('noteType', props.note.noteType);
-        if (props.note.noteType === NOTE_TYPES.BRING_FORWARD) {
-          setShowBringForwardState();
-          formRef.value.setFieldValue(
-            'bringForwardDate',
-            props.note.bringForwardDate ? new Date(props.note.bringForwardDate) : null
-          );
-        }
-        formRef.value.setFieldValue('note', props.note.note);
-        formRef.value.setFieldValue('title', props.note.title);
-      }
-    }
-  });
-});
 </script>
 
 <template>
-  <!-- eslint-disable vue/no-v-model-argument -->
   <Dialog
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6"
   >
-    <!-- eslint-enable vue/no-v-model-argument -->
     <template #header>
       <font-awesome-icon
         icon="fa-solid fa-plus"
@@ -197,6 +150,7 @@ watch(visible, (newValue) => {
 
     <Form
       ref="formRef"
+      v-slot="{ handleReset }"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="onSubmit"
@@ -206,7 +160,7 @@ watch(visible, (newValue) => {
           class="col-6"
           name="createdAt"
           label="Date"
-          :disabled="true"
+          :disabled="!props.note"
           :show-time="true"
         />
         <div class="col-6" />
@@ -215,7 +169,7 @@ watch(visible, (newValue) => {
           name="noteType"
           label="Note type"
           :options="NoteTypes"
-          @on-change="(e) => handleBringForward(e)"
+          @on-change="(e) => onNoteTypeChange(e)"
         />
         <Calendar
           v-if="showBringForward"
@@ -260,7 +214,13 @@ watch(visible, (newValue) => {
               class="p-button-outlined mr-2"
               label="Cancel"
               icon="pi pi-times"
-              @click="visible = false"
+              @click="
+                () => {
+                  handleReset();
+                  showBringForward = props.note?.noteType === NOTE_TYPES.BRING_FORWARD;
+                  visible = false;
+                }
+              "
             />
           </div>
           <div
