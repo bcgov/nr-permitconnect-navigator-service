@@ -7,6 +7,8 @@ import { StorageKey } from '@/utils/constants';
 import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 
 import type { AxiosResponse } from 'axios';
 import type { Note } from '@/types';
@@ -42,7 +44,8 @@ const testNote: Note = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  isDeleted: false
 };
 
 const testNoteUnresolved: Note = {
@@ -56,7 +59,8 @@ const testNoteUnresolved: Note = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  isDeleted: false
 };
 
 const testNoteResolved: Note = {
@@ -70,7 +74,8 @@ const testNoteResolved: Note = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  isDeleted: false
 };
 
 const wrapperSettings = (testNoteProp = testNote) => ({
@@ -87,7 +92,9 @@ const wrapperSettings = (testNoteProp = testNote) => ({
             }
           }
         }),
-      PrimeVue
+      PrimeVue,
+      ConfirmationService,
+      ToastService
     ],
     stubs: ['font-awesome-icon']
   }
@@ -129,7 +136,7 @@ describe('noteCard test', () => {
         note: alteredTestNote
       },
       global: {
-        plugins: [emptyTestPinia(), PrimeVue],
+        plugins: [emptyTestPinia(), PrimeVue, ConfirmationService, ToastService],
         stubs: ['font-awesome-icon']
       }
     });

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import { Card, Divider } from '@/lib/primevue';
-import { userService } from '@/services';
+import { Button, Card, Divider, useToast } from '@/lib/primevue';
+import NoteModal from '@/components/note/NoteModal.vue';
+import { noteService, userService } from '@/services';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -15,8 +16,39 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// Emits
+const emit = defineEmits(['note:delete', 'note:edit']);
+
 // State
 const userName: Ref<string> = ref('');
+const noteModalVisible: Ref<boolean> = ref(false);
+const editNoteData: Ref<Note | undefined> = ref(undefined);
+
+// Actions
+const toast = useToast();
+
+const editNote = (note: Note) => {
+  editNoteData.value = note;
+  noteModalVisible.value = true;
+};
+
+const onNoteSubmit = async (data: Note) => {
+  editNoteData.value = undefined;
+
+  try {
+    const newNote = (await noteService.updateNote(data)).data;
+    emit('note:edit', newNote, data.noteId);
+    toast.success('Note saved');
+  } catch (e: any) {
+    toast.error('Failed to save note', e.message);
+  } finally {
+    noteModalVisible.value = false;
+  }
+};
+
+const onNoteDelete = (noteId: string) => {
+  emit('note:delete', noteId);
+};
 
 onMounted(() => {
   if (props.note.createdBy) {
@@ -42,6 +74,17 @@ onMounted(() => {
             </span>
           </h3>
         </div>
+        <Button
+          class="p-button-outlined"
+          aria-label="Edit"
+          @click="editNote(props.note)"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-edit"
+          />
+          Edit
+        </Button>
       </div>
       <Divider type="solid" />
     </template>
@@ -89,6 +132,12 @@ onMounted(() => {
       </div>
     </template>
   </Card>
+  <NoteModal
+    v-model:visible="noteModalVisible"
+    :note="editNoteData"
+    @note:delete="onNoteDelete"
+    @note:submit="onNoteSubmit"
+  />
 </template>
 
 <style scoped lang="scss">

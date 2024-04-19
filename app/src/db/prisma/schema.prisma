@@ -81,6 +81,7 @@ model note {
   updated_at          DateTime? @db.Timestamptz(6)
   bring_forward_date  DateTime? @db.Timestamptz(6)
   bring_forward_state String?
+  is_deleted          Boolean   @default(false)
   activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
 }
 

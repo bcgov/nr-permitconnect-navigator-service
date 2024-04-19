@@ -18,7 +18,8 @@ const testNote = {
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
+  isDeleted: false
 };
 
 const getSpy = vi.fn();

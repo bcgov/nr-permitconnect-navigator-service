@@ -71,7 +71,8 @@ const controller = {
           bringForwardDate: null,
           bringForwardState: null,
           createdAt: new Date().toISOString(),
-          createdBy: userId
+          createdBy: userId,
+          isDeleted: false
         });
       }
 

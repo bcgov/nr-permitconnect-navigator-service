@@ -5,6 +5,7 @@ export type Note = {
   activityId: string;
   bringForwardDate: string | null;
   bringForwardState: string | null;
+  isDeleted: boolean;
   note: string;
   noteType: string;
   title: string;

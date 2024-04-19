@@ -41,6 +41,10 @@ const submission: Ref<Submission | undefined> = ref(undefined);
 // Actions
 const toast = useToast();
 
+const onNoteDelete = (noteId: string) => {
+  notes.value = notes.value.filter((x: Note) => x.noteId !== noteId);
+};
+
 const onPermitDelete = (data: Permit) =>
   (permits.value = permits.value.filter((x: Permit) => x.permitId !== data.permitId));
 
@@ -59,6 +63,11 @@ async function onPermitSubmit(data: Permit) {
 const onPermitUpdate = (data: Permit) => {
   let idx = permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
   if (idx >= 0) permits.value[idx] = data;
+};
+
+const onNoteEdit = (data: any, oldNoteId: string) => {
+  notes.value = notes.value.filter((x: Note) => x.noteId !== oldNoteId);
+  notes.value.unshift(data);
 };
 
 async function onNoteSubmit(data: any) {
@@ -227,7 +236,11 @@ onMounted(async () => {
         :index="index"
         class="col-12"
       >
-        <NoteCard :note="note" />
+        <NoteCard
+          :note="note"
+          @note:edit="onNoteEdit"
+          @note:delete="onNoteDelete"
+        />
       </div>
 
       <NoteModal
