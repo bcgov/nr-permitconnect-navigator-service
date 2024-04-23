@@ -14,6 +14,7 @@ export { default as Dialog } from 'primevue/dialog';
 export { default as Divider } from 'primevue/divider';
 export { default as Dropdown } from 'primevue/dropdown';
 export { default as FileUpload } from 'primevue/fileupload';
+export { default as FloatLabel } from 'primevue/floatlabel';
 export { default as IconField } from 'primevue/iconfield';
 export { default as InputIcon } from 'primevue/inputicon';
 export { default as InputMask } from 'primevue/inputmask';
@@ -24,12 +25,14 @@ export { default as Message } from 'primevue/message';
 export { default as Password } from 'primevue/password';
 export { default as ProgressBar } from 'primevue/progressbar';
 export { default as ProgressSpinner } from 'primevue/progressspinner';
+export { default as RadioButton } from 'primevue/radiobutton';
 export { default as TabView } from 'primevue/tabview';
 export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Textarea } from 'primevue/textarea';
 export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
-export { default as RadioButton } from 'primevue/radiobutton';
+export { default as Stepper } from 'primevue/stepper';
+export { default as StepperPanel } from 'primevue/stepperpanel';
 
 export { useConfirm } from 'primevue/useconfirm';
 
