@@ -10,7 +10,9 @@ import {
   RENTAL_STATUS_LIST,
   PERMIT_STATUS,
   PERMIT_NEEDED,
-  PERMIT_AUTHORIZATION_STATUS
+  PERMIT_AUTHORIZATION_STATUS,
+  PROJECT_RELATIONSHIP_LIST,
+  YES_NO
 } from '@/utils/enums';
 
 /**
@@ -34,7 +36,7 @@ export const RouteNames = Object.freeze({
   FORBIDDEN: 'forbidden',
   HOME: 'home',
   INITIATIVES: 'initiatives',
-  INTAKE: 'intakeform',
+  INTAKE: 'intake',
   LOGIN: 'login',
   LOGOUT: 'logout',
   START: 'start',
@@ -64,6 +66,11 @@ export const ToastTimeout = Object.freeze({
 });
 
 /**
+ * Basic
+ */
+export const YesNo = [YES_NO.YES, YES_NO.NO];
+
+/**
  * Route names
  */
 export const AccessRoles = Object.freeze({
@@ -87,6 +94,14 @@ export const IntakeStatusList = [
   INTAKE_STATUS_LIST.SUBMITTED,
   INTAKE_STATUS_LIST.ASSIGNED,
   INTAKE_STATUS_LIST.COMPLETED
+];
+
+export const ProjectRelationshipList = [
+  PROJECT_RELATIONSHIP_LIST.OWNER,
+  PROJECT_RELATIONSHIP_LIST.EMPLOYEE,
+  PROJECT_RELATIONSHIP_LIST.AGENT,
+  PROJECT_RELATIONSHIP_LIST.CONSULTANT,
+  PROJECT_RELATIONSHIP_LIST.OTHER
 ];
 
 export const ContactPreferenceList = [

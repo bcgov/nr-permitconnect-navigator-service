@@ -19,6 +19,14 @@ export const ACCESS_ROLES = Object.freeze({
 });
 
 /**
+ * Basic
+ */
+export const enum YES_NO {
+  YES = 'Yes',
+  NO = 'No'
+}
+
+/**
  * CHEFS form statuses
  */
 export const enum APPLICATION_STATUS_LIST {
@@ -32,6 +40,14 @@ export const enum INTAKE_STATUS_LIST {
   SUBMITTED = 'Submitted',
   ASSIGNED = 'Assigned',
   COMPLETED = 'Completed'
+}
+
+export const enum PROJECT_RELATIONSHIP_LIST {
+  OWNER = 'Owner',
+  EMPLOYEE = 'Employee',
+  AGENT = 'Agent',
+  CONSULTANT = 'Consultant',
+  OTHER = 'Other'
 }
 
 export const enum CONTACT_PREFERENCE_LIST {
