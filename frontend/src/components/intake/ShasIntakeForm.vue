@@ -8,10 +8,13 @@ import {
   Checkbox,
   Dropdown,
   EditableDropdown,
+  Editor,
   InputMask,
   InputNumber,
   RadioList,
   InputText,
+  StepperHeader,
+  StepperNavigation,
   TextArea
 } from '@/components/form';
 import { Button, Card, Divider, Stepper, StepperPanel, useToast } from '@/lib/primevue';
@@ -72,25 +75,22 @@ onBeforeMount(async () => {
       -->
       <StepperPanel>
         <template #header="{ index, clickCallback }">
-          <Button
-            class="p-button-text"
-            @click="onStepChange(values, setValues, clickCallback)"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-user"
-            />
-            Basic info
-          </Button>
+          <StepperHeader
+            :index="index"
+            :active-step="activeStep"
+            :click-callback="() => onStepChange(values, setValues, clickCallback)"
+            title="Basic info"
+            icon="fa-user"
+          />
         </template>
         <template #content="{ nextCallback }">
           <Card>
             <template #title>
-              Applicant Info
+              <span class="section-header">Applicant Info</span>
               <Divider type="solid" />
             </template>
             <template #content>
-              <div class="formgrid grid">
+              <div class="formgrid grid pt-3">
                 <InputText
                   class="col-6"
                   name="applicant.firstName"
@@ -147,14 +147,16 @@ onBeforeMount(async () => {
           </Card>
           <Card>
             <template #title>
-              Is this project being developed by a business, company, or organization?
+              <span class="section-header">
+                Is this project being developed by a business, company, or organization?
+              </span>
               <Divider type="solid" />
             </template>
             <template #content>
               <div class="formgrid grid">
                 <RadioList
                   class="col-12"
-                  name="isDevelopedByCompanyOrOrg"
+                  name="basic.isDevelopedByCompanyOrOrg"
                   :bold="false"
                   :disabled="!editable"
                   :options="YesNo"
@@ -175,7 +177,7 @@ onBeforeMount(async () => {
                   </div>
                   <RadioList
                     class="col-12 pl-0"
-                    name="developedInBC"
+                    name="basic.developedInBC"
                     :bold="false"
                     :disabled="!editable"
                     :options="YesNo"
@@ -183,7 +185,7 @@ onBeforeMount(async () => {
                   <InputText
                     v-if="values.developedInBC"
                     class="col-6 pl-0"
-                    name="registeredName"
+                    name="basic.registeredName"
                     :placeholder="
                       values.developedInBC === YES_NO.YES
                         ? 'Type to search the B.C registered name'
@@ -197,27 +199,11 @@ onBeforeMount(async () => {
             </template>
           </Card>
 
-          <!-- Step navigation -->
-          <div class="flex pt-4 justify-content-between">
-            <Button
-              outlined
-              icon="pi pi-arrow-left"
-              disabled
-            />
-            <Button
-              class="p-button-sm"
-              outlined
-              label="Save draft"
-              type="submit"
-              :disabled="!editable"
-            />
-            <Button
-              outlined
-              icon="pi pi-arrow-right"
-              icon-pos="right"
-              @click="onStepChange(values, setValues, nextCallback)"
-            />
-          </div>
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => onStepChange(values, setValues, nextCallback)"
+            :prev-disabled="true"
+          />
         </template>
       </StepperPanel>
 
@@ -226,41 +212,59 @@ onBeforeMount(async () => {
       -->
       <StepperPanel>
         <template #header="{ index, clickCallback }">
-          <Button
-            class="p-button-text"
-            @click="onStepChange(values, setValues, clickCallback)"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-house"
-            />
-            Housing
-          </Button>
+          <StepperHeader
+            :index="index"
+            :active-step="activeStep"
+            :click-callback="() => onStepChange(values, setValues, clickCallback)"
+            title="Housing"
+            icon="fa-house"
+          />
         </template>
         <template #content="{ prevCallback, nextCallback }">
-          Some content
+          <Card>
+            <template #title>
+              <span class="section-header">Help us learn more about your housing project</span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="formgrid grid pt-3">
+                <InputText
+                  class="col-6"
+                  name="housing.projectName"
+                  label="Type in project name - well known title like Capital Park"
+                  float-label
+                  :bold="false"
+                  :disabled="!editable"
+                />
+                <div class="col-6" />
+                <div class="col-12">
+                  <div class="flex align-items-center">
+                    <p class="font-bold m-0">Provide additional information</p>
+                    <div
+                      v-tooltip.right="
+                        `Provide us with additional information -
+                         short description about the project, project website link, or upload a document.`
+                      "
+                      class="pl-2"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-circle-question" />
+                    </div>
+                  </div>
+                </div>
+                <Editor
+                  class="col-12"
+                  name="housing.projectDescription"
+                  :disabled="!editable"
+                />
+              </div>
+            </template>
+          </Card>
 
-          <!-- Step navigation -->
-          <div class="flex pt-4 justify-content-between">
-            <Button
-              outlined
-              icon="pi pi-arrow-left"
-              @click="onStepChange(values, setValues, prevCallback)"
-            />
-            <Button
-              class="p-button-sm"
-              outlined
-              label="Save draft"
-              type="submit"
-              :disabled="!editable"
-            />
-            <Button
-              outlined
-              icon="pi pi-arrow-right"
-              icon-pos="right"
-              @click="onStepChange(values, setValues, nextCallback)"
-            />
-          </div>
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => onStepChange(values, setValues, nextCallback)"
+            :prev-callback="() => onStepChange(values, setValues, prevCallback)"
+          />
         </template>
       </StepperPanel>
 
@@ -269,41 +273,22 @@ onBeforeMount(async () => {
       -->
       <StepperPanel>
         <template #header="{ index, clickCallback }">
-          <Button
-            class="p-button-text"
-            @click="onStepChange(values, setValues, clickCallback)"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-location-dot"
-            />
-            Location
-          </Button>
+          <StepperHeader
+            :index="index"
+            :active-step="activeStep"
+            :click-callback="() => onStepChange(values, setValues, clickCallback)"
+            title="Location"
+            icon="fa-location-dot"
+          />
         </template>
         <template #content="{ prevCallback, nextCallback }">
           Some content
 
-          <!-- Step navigation -->
-          <div class="flex pt-4 justify-content-between">
-            <Button
-              outlined
-              icon="pi pi-arrow-left"
-              @click="onStepChange(values, setValues, prevCallback)"
-            />
-            <Button
-              class="p-button-sm"
-              outlined
-              label="Save draft"
-              type="submit"
-              :disabled="!editable"
-            />
-            <Button
-              outlined
-              icon="pi pi-arrow-right"
-              icon-pos="right"
-              @click="onStepChange(values, setValues, nextCallback)"
-            />
-          </div>
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => onStepChange(values, setValues, nextCallback)"
+            :prev-callback="() => onStepChange(values, setValues, prevCallback)"
+          />
         </template>
       </StepperPanel>
 
@@ -312,41 +297,22 @@ onBeforeMount(async () => {
       -->
       <StepperPanel>
         <template #header="{ index, clickCallback }">
-          <Button
-            class="p-button-text"
-            @click="onStepChange(values, setValues, clickCallback)"
-          >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-file"
-            />
-            Permits & Reports
-          </Button>
+          <StepperHeader
+            :index="index"
+            :active-step="activeStep"
+            :click-callback="() => onStepChange(values, setValues, clickCallback)"
+            title="Permits & Reports"
+            icon="fa-file"
+          />
         </template>
         <template #content="{ prevCallback }">
           Some content
 
-          <!-- Step navigation -->
-          <div class="flex pt-4 justify-content-between">
-            <Button
-              outlined
-              icon="pi pi-arrow-left"
-              @click="onStepChange(values, setValues, prevCallback)"
-            />
-            <Button
-              class="p-button-sm"
-              outlined
-              label="Save draft"
-              type="submit"
-              :disabled="!editable"
-            />
-            <Button
-              outlined
-              icon="pi pi-arrow-right"
-              icon-pos="right"
-              disabled
-            />
-          </div>
+          <StepperNavigation
+            :editable="editable"
+            :next-disabled="true"
+            :prev-callback="() => onStepChange(values, setValues, prevCallback)"
+          />
         </template>
       </StepperPanel>
     </Stepper>
@@ -363,16 +329,34 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .p-card {
+  border-color: rgb(242, 241, 241);
+  border-radius: 8px;
   border-style: solid;
   border-width: 1px;
   margin-bottom: 1rem;
+
+  .section-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 
   :deep(.p-card-title) {
     font-size: 1rem;
   }
 
+  :deep(.p-card-body) {
+    padding-bottom: 0.5rem;
+
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   :deep(.p-card-content) {
     padding-bottom: 0;
+    padding-top: 0;
+
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 </style>

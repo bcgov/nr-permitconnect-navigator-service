@@ -13,6 +13,7 @@ export { default as DataTable } from 'primevue/datatable';
 export { default as Dialog } from 'primevue/dialog';
 export { default as Divider } from 'primevue/divider';
 export { default as Dropdown } from 'primevue/dropdown';
+export { default as Editor } from 'primevue/editor';
 export { default as FileUpload } from 'primevue/fileupload';
 export { default as FloatLabel } from 'primevue/floatlabel';
 export { default as IconField } from 'primevue/iconfield';
