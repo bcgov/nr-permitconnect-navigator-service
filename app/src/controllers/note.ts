@@ -17,7 +17,7 @@ const controller = {
         ...body,
         createdBy: userId
       });
-      res.status(200).json(response);
+      res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
     }

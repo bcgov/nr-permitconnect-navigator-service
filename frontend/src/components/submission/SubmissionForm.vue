@@ -13,8 +13,9 @@ import {
   InputText,
   TextArea
 } from '@/components/form';
-import { Button } from '@/lib/primevue';
-import { userService } from '@/services';
+import { Button, useToast } from '@/lib/primevue';
+import { submissionService, userService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import {
   ApplicationStatusList,
   ContactPreferenceList,
@@ -32,18 +33,20 @@ import type { Submission, User } from '@/types';
 
 // Props
 type Props = {
-  editable: boolean;
+  editable?: boolean;
   submission: Submission;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  editable: true
+});
 
-// Emits
-const emit = defineEmits(['submit', 'cancel']);
+// Store
+const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-
+const editable: Ref<boolean> = ref(props.editable);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Form validation schema
@@ -102,6 +105,8 @@ const formSchema = object({
 });
 
 // Actions
+const toast = useToast();
+
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
@@ -118,11 +123,9 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-const onCancel = () => {
-  emit('cancel');
-};
+const onSubmit = async (values: any) => {
+  editable.value = false;
 
-const onSubmit = (values: any) => {
   // Ensure child values are reset if parent not set
   if (!values.addedToATS) {
     values.atsClientNumber = undefined;
@@ -135,16 +138,29 @@ const onSubmit = (values: any) => {
     values.financiallySupportedHousingCoop = false;
   }
 
-  const submissionData = {
+  const submissionDataTransform = {
     ...values,
     assignedUserId: values.user?.userId ?? undefined,
     ...values.submissionTypes
   };
 
-  delete submissionData.submissionTypes;
-  delete submissionData.user;
+  delete submissionDataTransform.submissionTypes;
+  delete submissionDataTransform.user;
 
-  emit('submit', submissionData);
+  try {
+    const submissionData = {
+      ...submissionDataTransform
+    };
+    await submissionService.updateSubmission(submissionData.submissionId, submissionData);
+
+    submissionStore.setSubmission(submissionData);
+
+    toast.success('Form saved');
+  } catch (e: any) {
+    toast.error('Failed to save submission', e.message);
+  } finally {
+    editable.value = true;
+  }
 };
 
 onBeforeMount(async () => {
@@ -188,7 +204,7 @@ onBeforeMount(async () => {
         class="col-4"
         name="projectName"
         label="Project Name"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Calendar
         class="col-4"
@@ -200,51 +216,51 @@ onBeforeMount(async () => {
         class="col-3"
         name="contactName"
         label="Contact"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputMask
         class="col-3"
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="contactEmail"
         label="Contact email"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="ContactPreferenceList"
       />
       <InputText
         class="col-6"
         name="contactApplicantRelationship"
         label="Relationship to activity"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-6"
         name="companyNameRegistered"
         label="Company"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <TextArea
         class="col-12"
         name="projectDescription"
         label="Activity information"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-4"
         name="locationPIDs"
         label="Location PID(s)"
-        :disabled="!props.editable"
+        :disabled="!editable"
         autofocus
       />
       <InputNumber
@@ -252,39 +268,39 @@ onBeforeMount(async () => {
         name="latitude"
         label="Location latitude"
         help-text="Optionally provide a number between 48 and 60"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputNumber
         class="col-4"
         name="longitude"
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-4"
         name="streetAddress"
         label="Location address"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-4"
         name="singleFamilyUnits"
         label="Units"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Dropdown
         class="col-4"
         name="isRentalUnit"
         label="Rental units"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="RentalStatusList"
       />
       <Dropdown
         class="col-2"
         name="queuePriority"
         label="Priority"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="QueuePriority"
       />
       <div class="col" />
@@ -292,20 +308,20 @@ onBeforeMount(async () => {
         class="col-12"
         name="astNotes"
         label="AST notes"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <div class="col-6 p-0">
         <Checkbox
           class="col-12"
           name="astUpdated"
           label="Automated Status Tool (AST)"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Checkbox
           class="col-12"
           name="addedToATS"
           label="Authorized Tracking System (ATS) updated"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :bold="true"
         />
         <div
@@ -324,7 +340,7 @@ onBeforeMount(async () => {
             <InputText
               class="col-4 align-items-center"
               name="atsClientNumber"
-              :disabled="!props.editable"
+              :disabled="!editable"
             />
           </div>
         </div>
@@ -332,32 +348,32 @@ onBeforeMount(async () => {
           class="col-12"
           name="ltsaCompleted"
           label="Land Title Survey Authority (LTSA) completed"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Checkbox
           class="col-12"
           name="bcOnlineCompleted"
           label="BC Online completed"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Checkbox
           class="col-12"
           name="naturalDisaster"
           label="Location affected by natural disaster"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Checkbox
           class="col-12"
           name="financiallySupported"
           label="Financially supported"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Checkbox
           v-if="values.financiallySupported"
           class="pl-4 col-12"
           name="financiallySupportedBC"
           label="BC Housing"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :bold="false"
         />
         <Checkbox
@@ -365,7 +381,7 @@ onBeforeMount(async () => {
           class="pl-4 col-12"
           name="financiallySupportedIndigenous"
           label="Indigenous Housing Provider"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :bold="false"
         />
         <Checkbox
@@ -373,7 +389,7 @@ onBeforeMount(async () => {
           class="pl-4 col-12"
           name="financiallySupportedNonProfit"
           label="Non-profit housing society"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :bold="false"
         />
         <Checkbox
@@ -381,14 +397,14 @@ onBeforeMount(async () => {
           class="pl-4 col-12"
           name="financiallySupportedHousingCoop"
           label="Housing co-operative"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :bold="false"
         />
         <Checkbox
           class="col-12"
           name="aaiUpdated"
           label="Authorization and Approvals Insight (AAI) updated"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
       </div>
       <div class="col-6 p-0">
@@ -397,35 +413,35 @@ onBeforeMount(async () => {
           class="col-12"
           name="submissionTypes.guidance"
           label="Guidance"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inquiry"
           label="General Enquiry"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.statusRequest"
           label="Status Request"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.emergencyAssist"
           label="Escalation Request"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <Checkbox
           class="col-12"
           name="submissionTypes.inapplicable"
           label="Inapplicable"
-          :disabled="!props.editable"
+          :disabled="!editable"
           :invalid="props.editable && !!errors.submissionTypes"
         />
         <div
@@ -439,14 +455,14 @@ onBeforeMount(async () => {
         class="col-4"
         name="waitingOn"
         label="Waiting on"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <div class="col-8" />
       <EditableDropdown
         class="col-4"
         name="user"
         label="Assigned to"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
@@ -455,14 +471,14 @@ onBeforeMount(async () => {
         class="col-4"
         name="intakeStatus"
         label="Intake state"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="IntakeStatusList"
       />
       <Dropdown
         class="col-4"
         name="applicationStatus"
         label="Activity state"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="ApplicationStatusList"
       />
       <div
@@ -473,18 +489,17 @@ onBeforeMount(async () => {
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <Button
           label="Cancel"
           outlined
           class="ml-2"
           icon="pi pi-times"
-          :disabled="!props.editable"
+          :disabled="!editable"
           @click="
             () => {
               handleReset();
-              onCancel();
             }
           "
         />

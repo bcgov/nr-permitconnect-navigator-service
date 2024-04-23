@@ -4,11 +4,10 @@ import { ref } from 'vue';
 
 import { FileUpload, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
-import { useConfigStore } from '@/store';
+import { useConfigStore, useSubmissionStore } from '@/store';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
-import type { Document } from '@/types';
 
 // Props
 type Props = {
@@ -17,10 +16,9 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
-const lastUploadedDocument = defineModel<Document>('lastUploadedDocument');
-
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
+const submissionStore = useSubmissionStore();
 
 // State
 const fileInput: Ref<any> = ref(null);
@@ -28,12 +26,12 @@ const fileInput: Ref<any> = ref(null);
 // Actions
 const toast = useToast();
 
-const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
-  onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
-};
-
 const onFileUploadClick = () => {
   fileInput.value.click();
+};
+
+const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
+  onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
 };
 
 const onUpload = async (file: File) => {
@@ -42,10 +40,9 @@ const onUpload = async (file: File) => {
       ?.data;
 
     if (response) {
-      lastUploadedDocument.value = response;
+      submissionStore.addDocument(response);
+      toast.success('Document uploaded');
     }
-
-    toast.success('Document uploaded');
   } catch (e: any) {
     toast.error('Failed to upload document', e);
   }

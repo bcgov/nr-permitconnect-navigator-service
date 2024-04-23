@@ -3,7 +3,18 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { Button, Checkbox, Column, DataTable, FilterMatchMode, InputText, useConfirm, useToast } from '@/lib/primevue';
+import {
+  Button,
+  Checkbox,
+  Column,
+  DataTable,
+  FilterMatchMode,
+  IconField,
+  InputIcon,
+  InputText,
+  useConfirm,
+  useToast
+} from '@/lib/primevue';
 import { submissionService } from '@/services';
 import { RouteNames } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
@@ -33,24 +44,24 @@ const latLongFormat = (lat: number | null, long: number | null): string => {
   return `${lat}, ${long}`;
 };
 
-const handleCreateNewActivity = () => {
+function handleCreateNewActivity() {
   confirmDialog.require({
     header: 'Confirm create submission',
-    message: 'Please confirm that you want to create a new submission',
+    message: 'Please confirm that you want to create a new submission.',
     accept: async () => {
       try {
-        const res = await submissionService.createSubmission();
-        if (res?.data?.activityId) {
-          router.push({ name: RouteNames.SUBMISSION, query: { activityId: res.data.activityId } });
+        const response = (await submissionService.createSubmission()).data;
+        if (response?.activityId) {
+          router.push({ name: RouteNames.SUBMISSION, query: { activityId: response.activityId } });
         }
-      } catch (e) {
-        toast.error('Unable to create new submission');
+      } catch (e: any) {
+        toast.error('Failed to create new submission', e.message);
       }
     },
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel'
   });
-};
+}
 
 // Datatable filter(s)
 const filters = ref({
@@ -88,18 +99,18 @@ const filters = ref({
     <template #header>
       <div class="flex justify-content-between">
         <Button
-          label="Create new activity"
+          label="Create submission"
           type="submit"
           icon="pi pi-plus"
           @click="handleCreateNewActivity"
         />
-        <span class="p-input-icon-left ml-4">
-          <i class="pi pi-search" />
+        <IconField icon-position="left">
+          <InputIcon class="pi pi-search" />
           <InputText
             v-model="filters['global'].value"
             placeholder="Search all"
           />
-        </span>
+        </IconField>
       </div>
     </template>
     <Column

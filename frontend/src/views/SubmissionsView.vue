@@ -22,9 +22,9 @@ const { getProfile } = storeToRefs(useAuthStore());
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
-const loading: Ref<boolean> = ref(true);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
+const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 

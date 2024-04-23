@@ -4,6 +4,7 @@ import { ref } from 'vue';
 
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import { FILE_CATEGORIES } from '@/utils/constants';
 import { formatDateLong } from '@/utils/formatters';
 import { getFileCategory } from '@/utils/utils';
@@ -22,8 +23,8 @@ import type { Document } from '@/types';
 
 // Props
 type Props = {
-  document: Document;
   deleteButton?: boolean;
+  document: Document;
   selectable?: boolean;
   selected?: boolean;
 };
@@ -35,7 +36,10 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Emits
-const emit = defineEmits(['document:clicked', 'document:deleted']);
+const emit = defineEmits(['document:clicked']);
+
+// Store
+const submissionStore = useSubmissionStore();
 
 // State
 const isSelected: Ref<boolean> = ref(props.selected);
@@ -44,18 +48,18 @@ const isSelected: Ref<boolean> = ref(props.selected);
 const confirm = useConfirm();
 const toast = useToast();
 
-const confirmDelete = (documentId: string, filename: string) => {
-  if (documentId) {
+const confirmDelete = (document: Document) => {
+  if (document) {
     confirm.require({
-      message: `Please confirm that you want to delete ${filename}.`,
+      message: `Please confirm that you want to delete ${document.filename}.`,
       header: 'Delete document?',
       acceptLabel: 'Confirm',
       rejectLabel: 'Cancel',
       accept: () => {
         documentService
-          .deleteDocument(documentId)
+          .deleteDocument(document.documentId)
           .then(() => {
-            emit('document:deleted', documentId);
+            submissionStore.removeDocument(document);
             toast.success('Document deleted');
           })
           .catch((e: any) => toast.error('Failed to deleted document', e.message));
@@ -133,7 +137,7 @@ function onClick() {
         aria-label="Delete object"
         @click="
           (e) => {
-            confirmDelete(props.document.documentId, props.document.filename);
+            confirmDelete(props.document);
             e.stopPropagation();
           }
         "

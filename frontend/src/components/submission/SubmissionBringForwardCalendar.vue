@@ -4,11 +4,11 @@ import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, InputSwitch } from '@/lib/primevue';
 import { useAuthStore } from '@/store';
+import { RouteNames } from '@/utils/constants';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { BringForward } from '@/types';
-import { formatDate } from '@/utils/formatters';
-import { RouteNames } from '@/utils/constants';
 
 // Props
 type Props = {
@@ -23,12 +23,12 @@ const props = withDefaults(defineProps<Props>(), {
 const { getProfile } = storeToRefs(useAuthStore());
 
 // State
-const bfs: Ref<Array<BringForward>> = ref(props.bringForward);
+const bringForwards: Ref<Array<BringForward>> = ref(props.bringForward);
 const filterToUser: Ref<boolean> = ref(false);
 
 // Actions
 watchEffect(() => {
-  bfs.value = props.bringForward;
+  bringForwards.value = props.bringForward;
 });
 </script>
 
@@ -45,7 +45,7 @@ watchEffect(() => {
       <DataTable
         class="p-datatable-sm text-left w-full"
         :value="
-          bfs.filter((x) => {
+          bringForwards.filter((x) => {
             return filterToUser ? x.createdByFullName === getProfile?.name : x;
           })
         "

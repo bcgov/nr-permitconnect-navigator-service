@@ -27,8 +27,8 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // State
-const statistics: Ref<Statistics | undefined> = ref(props.initialStatistics);
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const statistics: Ref<Statistics | undefined> = ref(props.initialStatistics);
 const statisticFilters: Ref<StatisticFilters> = ref({});
 
 // Actions

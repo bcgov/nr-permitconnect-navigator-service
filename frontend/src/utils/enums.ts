@@ -52,7 +52,8 @@ export const enum RENTAL_STATUS_LIST {
 export const enum NOTE_TYPES {
   GENERAL = 'General',
   BRING_FORWARD = 'Bring forward',
-  ENQUIRY = 'Enquiry'
+  ENQUIRY = 'Enquiry',
+  ROADMAP = 'Roadmap'
 }
 
 export const enum BRING_FORWARD_TYPES {

@@ -1,35 +1,39 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText } from '@/components/form';
-import { Button, Dialog } from '@/lib/primevue';
+import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
+import { permitService } from '@/services';
+import { useSubmissionStore } from '@/store';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
 import { PERMIT_STATUS } from '@/utils/enums';
 
+import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
 import type { Permit, PermitForm, PermitType } from '@/types';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
 type Props = {
+  activityId: string;
   permit?: Permit;
-  permitTypes: Array<PermitType>;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   permit: undefined
 });
 
-// Emits
-const emit = defineEmits(['permit:delete', 'permit:submit']);
+// Store
+const submissionStore = useSubmissionStore();
+const { getPermitTypes } = storeToRefs(submissionStore);
 
 // State
-const visible = defineModel<boolean>('visible');
 const permitType: Ref<PermitType | undefined> = ref(
-  props.permitTypes.find((x) => x.permitTypeId === props.permit?.permitTypeId)
+  getPermitTypes.value.find((x) => x.permitTypeId === props.permit?.permitTypeId)
 );
+const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: PermitForm = {
@@ -58,8 +62,29 @@ const formSchema = object({
 });
 
 // Actions
+const confirm = useConfirm();
+const toast = useToast();
+
 function onDelete() {
-  emit('permit:delete', props.permit);
+  if (props.permit) {
+    confirm.require({
+      message: 'Please confirm that you want to delete the selected permit. This cannot be undone.',
+      header: 'Confirm delete',
+      acceptLabel: 'Confirm',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        permitService
+          .deletePermit(props.permit?.permitId as string)
+          .then(() => {
+            submissionStore.removePermit(props.permit as Permit);
+            toast.success('Permit deleted');
+          })
+          .catch((e: any) => toast.error('Failed to delete permit', e.message))
+          .finally(() => (visible.value = false));
+      }
+    });
+  }
 }
 
 function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
@@ -73,7 +98,7 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
 
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
-function onSubmit(data: PermitForm, { resetForm }) {
+async function onSubmit(data: PermitForm, { resetForm }) {
   if (props.permit) initialFormValues = { ...data };
   else resetForm();
 
@@ -89,7 +114,21 @@ function onSubmit(data: PermitForm, { resetForm }) {
     submittedDate: data.submittedDate?.toISOString(),
     adjudicationDate: data.adjudicationDate?.toISOString()
   } as Permit;
-  emit('permit:submit', permitData);
+
+  try {
+    if (!props.permit) {
+      const result = (await permitService.createPermit({ ...permitData, activityId: props.activityId })).data;
+      submissionStore.addPermit(result);
+    } else {
+      const result = (await permitService.updatePermit({ ...permitData, activityId: props.permit.activityId })).data;
+      submissionStore.updatePermit(result);
+    }
+    toast.success('Permit saved');
+  } catch (e: any) {
+    toast.error('Failed to save permit', e.message);
+  } finally {
+    visible.value = false;
+  }
 }
 </script>
 
@@ -127,9 +166,9 @@ function onSubmit(data: PermitForm, { resetForm }) {
           class="col-12"
           name="permitType"
           label="Permit"
-          :options="permitTypes"
+          :options="getPermitTypes"
           :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-          :loading="permitTypes === undefined"
+          :loading="getPermitTypes === undefined"
           autofocus
           @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
         />

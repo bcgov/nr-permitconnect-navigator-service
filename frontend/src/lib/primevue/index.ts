@@ -13,6 +13,8 @@ export { default as Dialog } from 'primevue/dialog';
 export { default as Divider } from 'primevue/divider';
 export { default as Dropdown } from 'primevue/dropdown';
 export { default as FileUpload } from 'primevue/fileupload';
+export { default as IconField } from 'primevue/iconfield';
+export { default as InputIcon } from 'primevue/inputicon';
 export { default as InputMask } from 'primevue/inputmask';
 export { default as InputNumber } from 'primevue/inputnumber';
 export { default as InputSwitch } from 'primevue/inputswitch';
