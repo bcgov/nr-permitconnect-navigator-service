@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
-import { useField, ErrorMessage } from 'vee-validate';
+import { ErrorMessage } from 'vee-validate';
 
-import { InputText } from '@/lib/primevue';
+import InputTextInternal from './internal/InputTextInternal.vue';
+import { FloatLabel } from '@/lib/primevue';
 
 // Props
 type Props = {
@@ -12,6 +12,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
+  floatLabel?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,29 +21,24 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: '',
   disabled: false,
+  floatLabel: false,
   bold: true
 });
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
   <div class="field col">
-    <label
-      :class="{ 'font-bold': bold }"
-      :for="name"
+    <FloatLabel
+      v-if="props.floatLabel"
+      class="mb-3"
     >
-      {{ label }}
-    </label>
-    <InputText
-      v-model="value"
-      :aria-describedby="`${name}-help`"
-      :name="name"
-      :placeholder="placeholder"
-      class="w-full"
-      :class="{ 'p-invalid': errorMessage }"
-      :disabled="disabled"
+      <InputTextInternal v-bind="props" />
+    </FloatLabel>
+    <InputTextInternal
+      v-else
+      v-bind="props"
     />
+
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>
       <ErrorMessage :name="name" />
