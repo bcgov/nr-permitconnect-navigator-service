@@ -60,7 +60,7 @@ const formSchema = object({
     })
     .label('ATS Client Number'),
   activityId: string().required().label('Activity ID'),
-  contactEmail: string().email().label('Contact Email'),
+  contactEmail: string().required().email().label('Contact Email'),
   intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
   companyNameRegistered: string().notRequired().label('Company'),
   isRentalUnit: string().oneOf(RentalStatusList).label('Rental units'),

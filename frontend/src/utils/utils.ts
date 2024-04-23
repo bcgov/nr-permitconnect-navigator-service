@@ -1,4 +1,32 @@
+import { toRaw, isRef, isReactive, isProxy } from 'vue';
+
 import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
+
+/**
+ * @function deepToRaw
+ * Recursively converts a Vue-created proxy object to a raw JSON object
+ * @param {T} sourceObj Source object
+ * @returns {T} Raw object from the given proxy sourceObj
+ */
+export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
+  const objectIterator = (input: any): any => {
+    if (Array.isArray(input)) {
+      return input.map((item) => objectIterator(item));
+    }
+    if (isRef(input) || isReactive(input) || isProxy(input)) {
+      return objectIterator(toRaw(input));
+    }
+    if (input && typeof input === 'object') {
+      return Object.keys(input).reduce((acc, key) => {
+        acc[key as keyof typeof acc] = objectIterator(input[key]);
+        return acc;
+      }, {} as T);
+    }
+    return input;
+  };
+
+  return objectIterator(sourceObj);
+}
 
 /**
  * @function delimitEmails

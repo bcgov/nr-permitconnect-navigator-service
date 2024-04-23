@@ -42,10 +42,10 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Enquiry' }
   },
   {
-    path: '/intakeform',
+    path: '/intake',
     name: RouteNames.INTAKE,
-    component: () => import('../views/IntakeFormView.vue'),
-    meta: { title: 'Intake Form Stub' }
+    component: () => import('../views/ShasIntakeView.vue'),
+    meta: { requiresAuth: true, title: 'Intake' }
   },
   {
     path: '/submission',
