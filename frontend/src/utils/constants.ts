@@ -35,6 +35,7 @@ export const RouteNames = Object.freeze({
   INITIATIVES: 'initiatives',
   LOGIN: 'login',
   LOGOUT: 'logout',
+  START: 'start',
   SUBMISSION: 'submission',
   SUBMISSIONS: 'submissions',
   STYLINGS: 'stylings'
