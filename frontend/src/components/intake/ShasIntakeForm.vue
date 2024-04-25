@@ -18,8 +18,14 @@ import {
   TextArea
 } from '@/components/form';
 import { Button, Card, Divider, Stepper, StepperPanel, useToast } from '@/lib/primevue';
-import { ContactPreferenceList, ProjectRelationshipList, YesNo } from '@/utils/constants';
-import { YES_NO } from '@/utils/enums';
+import {
+  ContactPreferenceList,
+  NumResidentialUnits,
+  ProjectRelationshipList,
+  YesNo,
+  YesNoUnsure
+} from '@/utils/constants';
+import { BASIC_RESPONSES } from '@/utils/enums';
 import { deepToRaw } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -52,7 +58,7 @@ function onStepChange(values: any, setValues: Function, stepCallback: Function) 
   // Step changing wipes form values so store them all to a local state and reapply after step change
   formValues.value = { ...formValues.value, ...deepToRaw(values) };
   stepCallback();
-  setValues(formValues.value);
+  setValues(deepToRaw(formValues.value));
 }
 
 onBeforeMount(async () => {
@@ -64,7 +70,7 @@ onBeforeMount(async () => {
 <template>
   <Form
     v-if="initialFormValues"
-    v-slot="{ handleReset, setValues, values, errors }"
+    v-slot="{ handleReset, setFieldValue, setValues, values, errors }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="onSubmit"
@@ -163,7 +169,7 @@ onBeforeMount(async () => {
                 />
 
                 <span
-                  v-if="values.isDevelopedByCompanyOrOrg === YES_NO.YES"
+                  v-if="values.basic?.isDevelopedByCompanyOrOrg === BASIC_RESPONSES.YES"
                   class="col-12"
                 >
                   <div class="flex align-items-center">
@@ -183,11 +189,11 @@ onBeforeMount(async () => {
                     :options="YesNo"
                   />
                   <InputText
-                    v-if="values.developedInBC"
+                    v-if="values.basic.developedInBC"
                     class="col-6 pl-0"
                     name="basic.registeredName"
                     :placeholder="
-                      values.developedInBC === YES_NO.YES
+                      values.basic.developedInBC === BASIC_RESPONSES.YES
                         ? 'Type to search the B.C registered name'
                         : 'Type the business/company/organization name'
                     "
@@ -251,11 +257,220 @@ onBeforeMount(async () => {
                     </div>
                   </div>
                 </div>
-                <Editor
+                <!-- eslint-disable max-len -->
+                <TextArea
                   class="col-12"
                   name="housing.projectDescription"
+                  placeholder="Provide us with additional information - short description about the project and/or project website link"
                   :disabled="!editable"
                 />
+                <!-- eslint-enable max-len -->
+              </div>
+            </template>
+          </Card>
+
+          <Card>
+            <template #title>
+              <span class="section-header">Select the types of residential units being developed</span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="formgrid grid pt-3">
+                <Checkbox
+                  class="col-6"
+                  name="housing.singleFamilySelected"
+                  label="Single-family"
+                  :disabled="!editable"
+                />
+                <div class="col-6">
+                  <div class="flex">
+                    <Checkbox
+                      name="housing.multiFamilySelected"
+                      label="Multi-family"
+                      :disabled="!editable"
+                    />
+                    <div
+                      v-tooltip.right="
+                        `Multi-family dwelling: a residential building that contains two or more attached dwellings,
+                    including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.`
+                      "
+                      class="pl-2"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-circle-question" />
+                    </div>
+                  </div>
+                </div>
+                <Dropdown
+                  class="col-6"
+                  name="housing.singleFamilyUnits"
+                  :disabled="!editable || !values.housing.singleFamilySelected"
+                  :options="NumResidentialUnits"
+                  placeholder="How many expected units?"
+                />
+                <Dropdown
+                  class="col-6"
+                  name="housing.multiFamilyUnits"
+                  :disabled="!editable || !values.housing.multiFamilySelected"
+                  :options="NumResidentialUnits"
+                  placeholder="How many expected units?"
+                />
+                <Checkbox
+                  class="col-6"
+                  name="housing.otherSelected"
+                  label="Other"
+                  :disabled="!editable"
+                />
+                <div class="col-6" />
+                <InputText
+                  class="col-6"
+                  name="housing.otherDescription"
+                  :disabled="!editable || !values.housing.otherSelected"
+                  placeholder="Type to describe what other type of housing"
+                />
+                <Dropdown
+                  class="col-6"
+                  name="housing.otherUnits"
+                  :disabled="!editable || !values.housing.otherSelected"
+                  :options="NumResidentialUnits"
+                  placeholder="How many expected units?"
+                />
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex">
+                <span class="section-header">Will this project include rental units?</span>
+                <div
+                  v-tooltip.right="
+                    `Rental refers to a purpose built residentual unit, property,
+                  or dwelling that is available for long term rent by tenants.`
+                  "
+                >
+                  <font-awesome-icon icon="fa-solid fa-circle-question" />
+                </div>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="formgrid grid">
+                <RadioList
+                  class="col-12"
+                  name="housing.hasRentalUnits"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YesNoUnsure"
+                />
+                <Dropdown
+                  v-if="values.housing.hasRentalUnits === BASIC_RESPONSES.YES"
+                  class="col-6"
+                  name="housing.rentalUnits"
+                  :disabled="!editable"
+                  :options="NumResidentialUnits"
+                  placeholder="How many expected units?"
+                />
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex align-items-center">
+                <div class="flex flex-grow-1">
+                  <span class="section-header">
+                    Is this project being financially supported by any of the following?
+                  </span>
+                  <div v-tooltip.right="`TODO: MISSING FROM MOCKUPS`">
+                    <font-awesome-icon icon="fa-solid fa-circle-question" />
+                  </div>
+                </div>
+                <Button
+                  class="p-button-sm mr-3"
+                  outlined
+                  @click="
+                    () => {
+                      setFieldValue('housing.financiallySupportedBC', BASIC_RESPONSES.NO);
+                      setFieldValue('housing.financiallySupportedIndigenous', BASIC_RESPONSES.NO);
+                      setFieldValue('housing.financiallySupportedNonProfit', BASIC_RESPONSES.NO);
+                      setFieldValue('housing.financiallySupportedHousingCoop', BASIC_RESPONSES.NO);
+                    }
+                  "
+                >
+                  No to all
+                </Button>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="formgrid grid">
+                <div class="col mb-3">
+                  <div class="flex align-items-center">
+                    <label>BC Housing</label>
+                    <div v-tooltip.right="`TODO: MISSING FROM MOCKUPS`">
+                      <font-awesome-icon
+                        class="pl-2"
+                        icon="fa-solid fa-circle-question"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <RadioList
+                  class="col-12"
+                  name="housing.financiallySupportedBC"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YesNoUnsure"
+                />
+                <div class="col mb-3"><label>Indigenous Housing Provider</label></div>
+                <RadioList
+                  class="col-12"
+                  name="housing.financiallySupportedIndigenous"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YesNoUnsure"
+                />
+                <div class="col-12">
+                  <InputText
+                    v-if="values.housing?.financiallySupportedIndigenous === BASIC_RESPONSES.YES"
+                    class="col-6 pl-0"
+                    name="housing.indigenousDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Indigenous Housing Provider"
+                  />
+                </div>
+                <div class="col mb-3"><label>Non-profit housing society</label></div>
+                <RadioList
+                  class="col-12"
+                  name="housing.financiallySupportedNonProfit"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YesNoUnsure"
+                />
+                <div class="col-12">
+                  <InputText
+                    v-if="values.housing?.financiallySupportedNonProfit === BASIC_RESPONSES.YES"
+                    class="col-6 pl-0"
+                    name="housing.nonProfitDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Non-profit housing society"
+                  />
+                </div>
+                <div class="col mb-3"><label>Housing co-operative</label></div>
+                <RadioList
+                  class="col-12"
+                  name="housing.financiallySupportedHousingCoop"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YesNoUnsure"
+                />
+                <div class="col-12">
+                  <InputText
+                    v-if="values.housing?.financiallySupportedHousingCoop === BASIC_RESPONSES.YES"
+                    class="col-6 pl-0"
+                    name="housing.housingCoopDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Housing co-operative"
+                  />
+                </div>
               </div>
             </template>
           </Card>
@@ -337,7 +552,7 @@ onBeforeMount(async () => {
 
   .section-header {
     padding-left: 1rem;
-    padding-right: 1rem;
+    padding-right: 0.5rem;
   }
 
   :deep(.p-card-title) {

@@ -27,7 +27,7 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <label
       :class="{ 'font-bold': bold }"
       :for="name"

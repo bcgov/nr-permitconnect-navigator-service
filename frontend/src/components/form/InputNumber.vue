@@ -31,7 +31,7 @@ const fieldActive: Ref<boolean> = ref(false);
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <label
       :class="{ 'font-bold': bold }"
       :for="name"

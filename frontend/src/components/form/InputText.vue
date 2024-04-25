@@ -27,7 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <FloatLabel
       v-if="props.floatLabel"
       class="mb-3"
