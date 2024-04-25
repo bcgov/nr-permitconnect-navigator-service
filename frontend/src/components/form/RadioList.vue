@@ -27,7 +27,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <div class="flex flex-column gap-3">
       <div
         v-for="option in options"
