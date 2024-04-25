@@ -11,6 +11,7 @@ import { roadmapService, userService } from '@/services';
 import { useConfigStore, useSubmissionStore } from '@/store';
 import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
 import { roadmapTemplate } from '@/utils/templates';
+import { delimitEmails } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
@@ -38,7 +39,7 @@ const emailValidator = array()
     if (this.isType(value) && value !== null) {
       return value;
     }
-    return originalValue ? originalValue.split(/[\s;]+/) : [];
+    return originalValue ? delimitEmails(originalValue) : [];
   })
   .of(string().email(({ value }) => `${value} is not a valid email`));
 
@@ -69,7 +70,7 @@ const confirmSubmit = (data: any) => {
         );
         toast.success('Roadmap sent');
       } catch (e: any) {
-        toast.error('Failed to send roadmap', e.response.data);
+        toast.error('Failed to send roadmap', e?.response?.statusText);
       }
     }
   });
