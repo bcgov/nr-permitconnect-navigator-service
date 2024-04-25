@@ -17,7 +17,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <Editor
       v-model="value"
       :editor-style="`height: ${props.height}`"

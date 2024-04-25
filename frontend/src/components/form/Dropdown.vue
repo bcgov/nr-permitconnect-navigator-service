@@ -39,7 +39,7 @@ const emit = defineEmits(['onChange']);
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <FloatLabel v-if="props.floatLabel">
       <DropdownInternal
         v-bind="props"
