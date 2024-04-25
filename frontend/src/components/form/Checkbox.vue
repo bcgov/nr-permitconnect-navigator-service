@@ -27,7 +27,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <div class="flex align-items-center">
       <Checkbox
         v-model="value"
@@ -38,7 +38,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
         :disabled="disabled"
       />
       <label
-        class="pl-2"
+        class="pl-2 mb-0"
         :class="{ 'font-bold': bold }"
         :for="name"
       >

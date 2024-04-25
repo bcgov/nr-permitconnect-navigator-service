@@ -28,7 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <FloatLabel v-if="props.floatLabel">
       <InputMaskInternal v-bind="props" />
     </FloatLabel>

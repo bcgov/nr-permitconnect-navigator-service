@@ -29,7 +29,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <label
       :class="{ 'font-bold': bold }"
       :for="name"
