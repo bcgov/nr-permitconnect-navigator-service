@@ -30,9 +30,11 @@ export const Regex = Object.freeze({
 export const RouteNames = Object.freeze({
   CALLBACK: 'callback',
   DEVELOPER: 'developer',
+  ENQUIRY: 'enquiry',
   FORBIDDEN: 'forbidden',
   HOME: 'home',
   INITIATIVES: 'initiatives',
+  INTAKE: 'intakeform',
   LOGIN: 'login',
   LOGOUT: 'logout',
   START: 'start',

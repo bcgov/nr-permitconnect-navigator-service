@@ -36,6 +36,18 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Start' }
   },
   {
+    path: '/enquiry',
+    name: RouteNames.ENQUIRY,
+    component: () => import('../views/EnquiryView.vue'),
+    meta: { title: 'Enquiry' }
+  },
+  {
+    path: '/intakeform',
+    name: RouteNames.INTAKE,
+    component: () => import('../views/IntakeFormView.vue'),
+    meta: { title: 'Intake Form Stub' }
+  },
+  {
     path: '/submission',
     name: RouteNames.SUBMISSION,
     component: () => import('@/views/SubmissionView.vue'),
