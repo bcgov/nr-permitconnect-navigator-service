@@ -3,8 +3,8 @@ import { ErrorMessage, Form, useField } from 'vee-validate';
 import { onBeforeMount, ref, toRaw, toRefs } from 'vue';
 import { boolean, mixed, number, object, string } from 'yup';
 
+import FileUpload from '@/components/file/FileUpload.vue';
 import {
-  Calendar,
   Checkbox,
   Dropdown,
   EditableDropdown,
@@ -17,7 +17,7 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import { Button, Card, Divider, Stepper, StepperPanel, useToast } from '@/lib/primevue';
+import { Accordion, AccordionTab, Button, Card, Divider, Stepper, StepperPanel, useToast } from '@/lib/primevue';
 import {
   ContactPreferenceList,
   NumResidentialUnits,
@@ -35,6 +35,18 @@ const activeStep: Ref<number> = ref(0);
 const editable: Ref<boolean> = ref(true);
 const formValues: Ref<any | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
+const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
+const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
+
+// Enums
+const enum PROJECT_LOCATION {
+  STREET_ADDRESS = 'Street address',
+  LOCATION_COORDINATES = 'Location coordinates'
+}
+
+// Constants
+const ProjectLocation = [PROJECT_LOCATION.STREET_ADDRESS, PROJECT_LOCATION.LOCATION_COORDINATES];
 
 // Form validation schema
 const formSchema = object({});
@@ -56,6 +68,7 @@ const onSubmit = async (data: any) => {
 
 function onStepChange(values: any, setValues: Function, stepCallback: Function) {
   // Step changing wipes form values so store them all to a local state and reapply after step change
+  // TODO: Something is up with this. Sometimes the values lag behind one stage?
   formValues.value = { ...formValues.value, ...deepToRaw(values) };
   stepCallback();
   setValues(deepToRaw(formValues.value));
@@ -497,7 +510,212 @@ onBeforeMount(async () => {
           />
         </template>
         <template #content="{ prevCallback, nextCallback }">
-          Some content
+          <Card>
+            <template #title>
+              <div class="flex align-items-center">
+                <div class="flex flex-grow-1">
+                  <span class="section-header">Provide one of the following project locations</span>
+                  <div
+                    v-tooltip.right="`A civic address contains a street name and number where a non-civid does not.`"
+                  >
+                    <font-awesome-icon icon="fa-solid fa-circle-question" />
+                  </div>
+                </div>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="formgrid grid">
+                <RadioList
+                  class="col-12"
+                  name="location.projectLocation"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="ProjectLocation"
+                />
+                <div
+                  v-if="values.location?.projectLocation === PROJECT_LOCATION.STREET_ADDRESS"
+                  class="col-12"
+                >
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="grid nested-grid">
+                        <InputText
+                          class="col-12"
+                          name="location.addressSearch"
+                          :disabled="!editable"
+                          placeholder="Search the address of your housing project"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.streetAddress"
+                          :disabled="!editable"
+                          placeholder="Street address"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.locality"
+                          :disabled="!editable"
+                          placeholder="Locality"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.province"
+                          :disabled="!editable"
+                          placeholder="Province"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.latitude"
+                          :disabled="!editable"
+                          placeholder="Latitude"
+                        />
+                        <div
+                          v-tooltip.right="`Provide a coordinate between 48 and 60`"
+                          class="mt-2"
+                        >
+                          <font-awesome-icon icon="fa-solid fa-circle-question" />
+                        </div>
+                        <InputText
+                          class="col-4 ml-3"
+                          name="location.longitude"
+                          :disabled="!editable"
+                          placeholder="Longitude"
+                        />
+                        <div
+                          v-tooltip.right="`Provide a coordinate between -114 and -139`"
+                          class="mt-2"
+                        >
+                          <font-awesome-icon icon="fa-solid fa-circle-question" />
+                        </div>
+                        <div class="col-12 text-blue-500">
+                          The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
+                          province.
+                        </div>
+                      </div>
+                    </template>
+                  </Card>
+                </div>
+                <div
+                  v-if="values.location?.projectLocation === PROJECT_LOCATION.LOCATION_COORDINATES"
+                  class="col-12"
+                >
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="grid nested-grid">
+                        <InputNumber
+                          class="col-4"
+                          name="location.latitude"
+                          :disabled="!editable"
+                          placeholder="Latitude"
+                        />
+                        <div
+                          v-tooltip.right="`Provide a coordinate between 48 and 60`"
+                          class="mt-2"
+                        >
+                          <font-awesome-icon icon="fa-solid fa-circle-question" />
+                        </div>
+                        <InputNumber
+                          class="col-4 ml-3"
+                          name="location.longitude"
+                          :disabled="!editable"
+                          placeholder="Longitude"
+                        />
+                        <div
+                          v-tooltip.right="`Provide a coordinate between -114 and -139`"
+                          class="mt-2"
+                        >
+                          <font-awesome-icon icon="fa-solid fa-circle-question" />
+                        </div>
+                        <div class="col-12 text-blue-500">
+                          The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
+                          province.
+                        </div>
+                      </div>
+                    </template>
+                  </Card>
+                </div>
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex align-items-center">
+                <div class="flex flex-grow-1">
+                  <span class="section-header">Provide additional location details (optional)</span>
+                  <div v-tooltip.right="`TODO: MISSING FROM MOCKUPS`">
+                    <font-awesome-icon icon="fa-solid fa-circle-question" />
+                  </div>
+                </div>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <Accordion
+                v-model:active-index="parcelAccordionIndex"
+                class="mb-3"
+              >
+                <AccordionTab header="Parcel ID">
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="formgrid grid">
+                        <!-- eslint-disable max-len -->
+                        <InputText
+                          class="col-12"
+                          name="location.ltsaPIDLookup"
+                          label="LTSA PID Lookup"
+                          :bold="false"
+                          :disabled="!editable"
+                          placeholder="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                        />
+                        <!-- eslint-enable max-len -->
+                      </div>
+                    </template>
+                  </Card>
+                </AccordionTab>
+              </Accordion>
+              <Accordion
+                v-model:active-index="spacialAccordionIndex"
+                class="mb-3"
+              >
+                <AccordionTab header="Spacial file or PDF upload">
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="formgrid grid">
+                        <div class="col-12 text-blue-500">See acceptable file formats</div>
+                        <FileUpload
+                          class="col-12"
+                          activity-id="TODO_HOW_TO_CREATE_DOCUMENTS_WITHOUT_ACTIVITY_ID"
+                          :disabled="true"
+                        />
+                      </div>
+                    </template>
+                  </Card>
+                </AccordionTab>
+              </Accordion>
+              <Accordion
+                v-model:active-index="geomarkAccordionIndex"
+                class="mb-3"
+              >
+                <AccordionTab header="Geomark">
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="formgrid grid">
+                        <InputText
+                          class="col-12"
+                          name="location.geomarkUrl"
+                          label="Open Geomark Web Service"
+                          :bold="false"
+                          :disabled="!editable"
+                          placeholder="Type in URL"
+                        />
+                      </div>
+                    </template>
+                  </Card>
+                </AccordionTab>
+              </Accordion>
+            </template>
+          </Card>
 
           <StepperNavigation
             :editable="editable"
@@ -543,6 +761,10 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
+.no-shadow {
+  box-shadow: none;
+}
+
 .p-card {
   border-color: rgb(242, 241, 241);
   border-radius: 8px;
