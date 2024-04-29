@@ -12,9 +12,10 @@ import type { Ref } from 'vue';
 // Props
 type Props = {
   activityId: string;
+  disabled?: boolean;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), { disabled: false });
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -27,10 +28,20 @@ const fileInput: Ref<any> = ref(null);
 const toast = useToast();
 
 const onFileUploadClick = () => {
+  if (props.disabled) {
+    toast.info('Document uploading is currently disabled');
+    return;
+  }
+
   fileInput.value.click();
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
+  if (props.disabled) {
+    toast.info('Document uploading is currently disabled');
+    return;
+  }
+
   onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
 };
 
@@ -56,6 +67,7 @@ const onUpload = async (file: File) => {
       :multiple="false"
       :custom-upload="true"
       :auto="true"
+      :disabled="props.disabled"
       @uploader="onFileUploadDragAndDrop"
       @click="onFileUploadClick"
     >
