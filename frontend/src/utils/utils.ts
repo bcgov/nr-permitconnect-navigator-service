@@ -1,6 +1,16 @@
 import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
 
 /**
+ * @function delimitEmails
+ * Converts a space, semi-colon, or comma-separated value string into an array of string values
+ * @param {string} value The string to parse
+ * @returns {string[]} An array of string values
+ */
+export function delimitEmails(value: string): Array<string> {
+  return value.split(/[\s;,]+/g).map((s) => s.trim());
+}
+
+/**
  * @function differential
  * Create a key/value differential from source against comparer
  * @param {object} source Source object
