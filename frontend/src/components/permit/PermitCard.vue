@@ -5,7 +5,7 @@ import { computed, ref, watchEffect } from 'vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useSubmissionStore } from '@/store';
+import { useTypeStore } from '@/store';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -19,7 +19,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // Store
-const { getPermitTypes } = storeToRefs(useSubmissionStore());
+const { getPermitTypes } = storeToRefs(useTypeStore());
 
 // State
 const cardData = computed(() => props.permit);

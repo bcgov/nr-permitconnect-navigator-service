@@ -32,6 +32,7 @@ export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Textarea } from 'primevue/textarea';
 export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
+export { default as Sidebar } from 'primevue/sidebar';
 export { default as Stepper } from 'primevue/stepper';
 export { default as StepperPanel } from 'primevue/stepperpanel';
 

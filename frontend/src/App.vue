@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, onErrorCaptured, ref } from 'vue';
 import { RouterView } from 'vue-router';
+
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthStore, useConfigStore } from '@/store';
@@ -9,12 +10,15 @@ import { ToastTimeout } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 
+// Store
 const appStore = useAppStore();
 const { getIsLoading } = storeToRefs(appStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
+// State
 const ready: Ref<boolean> = ref(false);
 
+// Actions
 onBeforeMount(async () => {
   appStore.beginDeterminateLoading();
   await useConfigStore().init();
