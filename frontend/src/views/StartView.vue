@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Breadcrumb, Button, Card, RadioButton } from '@/lib/primevue';
@@ -21,12 +21,12 @@ function getRoutePath(routeName: string) {
   return route?.path;
 }
 
-const handleStartApplication = () => {
+function onStartApplication() {
   if (enquiryOrIntake.value?.includes(RouteNames.INTAKE) || enquiryOrIntake.value?.includes(RouteNames.ENQUIRY))
     router.push({ name: enquiryOrIntake.value });
-};
+}
 
-onMounted(() => {
+onBeforeMount(() => {
   crumbItems.value = [
     { label: 'Home', url: getRoutePath(RouteNames.HOME) },
     { label: 'PermitConnect Housing Navigator Service' }
@@ -135,62 +135,34 @@ onMounted(() => {
         </div>
       </template>
     </Card>
-    <div class="flex flex-wrap gap-3 justify-content-between mt-3">
-      <div>
+    <div class="flex justify-content-between mt-3">
+      <div class="flex align-items-center">
         <RadioButton
           v-model="acceptDisclaimer"
+          name="acceptDisclaimer"
           :value="true"
           @click="acceptDisclaimer = !acceptDisclaimer"
         />
-        <label class="ml-2">
-          <span class="default-color">
-            <b>Yes, I understand</b>
-          </span>
+        <label
+          for="acceptDisclaimer"
+          class="ml-2 mb-0"
+        >
+          <b class="default-color">Yes, I understand</b>
           <span class="pl-1 text-red-500">*</span>
         </label>
-        <div />
       </div>
       <Button
         :label="enquiryOrIntake.includes(RouteNames.INTAKE) ? 'Start application' : 'Start enquiry'"
         outlined
         class="ml-2"
         :disabled="!acceptDisclaimer"
-        @click="handleStartApplication"
+        @click="onStartApplication"
       />
     </div>
   </div>
 </template>
 
 <style scoped lang="scss">
-.p-breadcrumb {
-  border: none;
-  text-decoration: none;
-}
-
-.disclaimer {
-  border-width: 1px;
-  border-style: solid;
-  border-radius: 0.5rem;
-  border-color: var(--surface-300);
-  padding: 0rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.default-color {
-  color: var(--text-color);
-}
-
-.p-menuitem-link {
-  text-decoration: none !important;
-}
-
-.btn-apply {
-  width: 10rem;
-  justify-content: center;
-}
-
 :deep(.breadcrumb-start) {
   li:last-child > a {
     text-decoration: none;
@@ -210,6 +182,36 @@ onMounted(() => {
   }
 }
 
+.btn-apply {
+  width: 10rem;
+  justify-content: center;
+}
+
+.custom-card {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.default-color {
+  color: var(--text-color);
+}
+
+.disclaimer {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 0.5rem;
+  border-color: var(--surface-300);
+  padding: 0rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.p-breadcrumb {
+  border: none;
+  text-decoration: none;
+}
+
 :deep(.p-card-body) {
   padding: 0px;
   margin-bottom: 0.5rem;
@@ -219,8 +221,7 @@ onMounted(() => {
   padding: 0px;
 }
 
-.custom-card {
-  border: none !important;
-  box-shadow: none !important;
+.p-menuitem-link {
+  text-decoration: none !important;
 }
 </style>

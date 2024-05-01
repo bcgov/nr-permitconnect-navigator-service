@@ -12,6 +12,7 @@ type Props = {
   disabled?: boolean;
   showTime?: boolean;
   bold?: boolean;
+  placeholder?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,7 +21,8 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   disabled: false,
   showTime: false,
-  bold: true
+  bold: true,
+  placeholder: ''
 });
 
 const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
@@ -46,6 +48,7 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
       show-icon
       icon-display="input"
       date-format="yy/mm/dd"
+      :placeholder="props.placeholder"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

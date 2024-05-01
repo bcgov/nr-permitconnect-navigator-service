@@ -30,12 +30,6 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAuth: true, title: 'Initiatives' }
   },
   {
-    path: '/start',
-    name: RouteNames.START,
-    component: () => import('../views/StartView.vue'),
-    meta: { title: 'Start' }
-  },
-  {
     path: '/enquiry',
     name: RouteNames.ENQUIRY,
     component: () => import('../views/EnquiryView.vue'),
@@ -46,6 +40,12 @@ const routes: Array<RouteRecordRaw> = [
     name: RouteNames.INTAKE,
     component: () => import('../views/ShasIntakeView.vue'),
     meta: { requiresAuth: true, title: 'Intake' }
+  },
+  {
+    path: '/start',
+    name: RouteNames.START,
+    component: () => import('../views/StartView.vue'),
+    meta: { title: 'Start' }
   },
   {
     path: '/submission',

@@ -8,7 +8,7 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useSubmissionStore } from '@/store';
+import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails } from '@/utils/utils';
@@ -25,7 +25,9 @@ const props = withDefaults(defineProps<Props>(), {});
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getPermitTypes, getSubmission } = storeToRefs(useSubmissionStore());
+const typeStore = useTypeStore();
+const { getDocuments, getPermits, getSubmission } = storeToRefs(useSubmissionStore());
+const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);

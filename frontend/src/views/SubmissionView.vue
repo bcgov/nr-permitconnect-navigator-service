@@ -14,7 +14,7 @@ import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
 import { Button, Column, DataTable, TabPanel, TabView, IconField, InputIcon, InputText } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
-import { useSubmissionStore } from '@/store';
+import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
 import { formatDateLong } from '@/utils/formatters';
 
@@ -45,7 +45,9 @@ const SORT_TYPES = {
 
 // Store
 const submissionStore = useSubmissionStore();
-const { getDocuments, getNotes, getPermits, getPermitTypes, getSubmission } = storeToRefs(submissionStore);
+const typeStore = useTypeStore();
+const { getDocuments, getNotes, getPermits, getSubmission } = storeToRefs(submissionStore);
+const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(props.initialTab));
@@ -74,6 +76,8 @@ onMounted(async () => {
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
   submissionStore.setPermitTypes(permitTypes);
+  typeStore.setPermitTypes(permitTypes);
+
   loading.value = false;
 });
 
