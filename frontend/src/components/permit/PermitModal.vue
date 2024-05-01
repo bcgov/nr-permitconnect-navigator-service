@@ -7,7 +7,7 @@ import { object, string } from 'yup';
 import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { useSubmissionStore } from '@/store';
+import { useSubmissionStore, useTypeStore } from '@/store';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
 import { PERMIT_STATUS } from '@/utils/enums';
 
@@ -27,7 +27,8 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Store
 const submissionStore = useSubmissionStore();
-const { getPermitTypes } = storeToRefs(submissionStore);
+const typeStore = useTypeStore();
+const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const permitType: Ref<PermitType | undefined> = ref(

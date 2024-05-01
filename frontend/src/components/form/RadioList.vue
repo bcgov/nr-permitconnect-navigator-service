@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ErrorMessage, useField } from 'vee-validate';
-import { toRef } from 'vue';
+import { toRef, watch } from 'vue';
 
 import { RadioButton } from '@/lib/primevue';
 
@@ -23,7 +23,16 @@ const props = withDefaults(defineProps<Props>(), {
   bold: true
 });
 
+// Emits
+const emit = defineEmits(['onChange']);
+
+// State
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+
+// Actions
+watch(value, () => {
+  emit('onChange', value.value);
+});
 </script>
 
 <template>
