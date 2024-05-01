@@ -19,9 +19,6 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
           <li v-if="getIsAuthenticated">
             <router-link :to="{ name: RouteNames.SUBMISSIONS }">Submissions</router-link>
           </li>
-          <li v-if="getIsAuthenticated">
-            <router-link :to="{ name: RouteNames.INTAKE }">Intake</router-link>
-          </li>
         </ol>
       </template>
     </Toolbar>

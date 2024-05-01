@@ -2,13 +2,12 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Document, Note, Permit, PermitType, Submission } from '@/types';
+import type { Document, Note, Permit, Submission } from '@/types';
 
 export type SubmissionStoreState = {
   documents: Ref<Array<Document>>;
   notes: Ref<Array<Note>>;
   permits: Ref<Array<Permit>>;
-  permitTypes: Ref<Array<PermitType>>;
   submission: Ref<Submission | undefined>;
 };
 
@@ -18,7 +17,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     documents: ref([]),
     notes: ref([]),
     permits: ref([]),
-    permitTypes: ref([]),
     submission: ref(undefined)
   };
 
@@ -27,7 +25,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
-    getPermitTypes: computed(() => state.permitTypes.value),
     getSubmission: computed(() => state.submission.value)
   };
 
@@ -79,10 +76,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     if (idx >= 0) state.permits.value[idx] = data;
   }
 
-  function setPermitTypes(data: Array<PermitType>) {
-    state.permitTypes.value = data;
-  }
-
   function setSubmission(data: Submission | undefined) {
     state.submission.value = data;
   }
@@ -106,7 +99,6 @@ export const useSubmissionStore = defineStore('submission', () => {
     removePermit,
     setPermits,
     updatePermit,
-    setPermitTypes,
     setSubmission
   };
 });
