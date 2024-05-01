@@ -2,6 +2,7 @@
 export { default as Accordion } from 'primevue/accordion';
 export { default as AccordionTab } from 'primevue/accordiontab';
 export { FilterMatchMode } from 'primevue/api';
+export { default as Breadcrumb } from 'primevue/breadcrumb';
 export { default as Button } from 'primevue/button';
 export { default as Calendar } from 'primevue/calendar';
 export { default as Card } from 'primevue/card';
@@ -28,6 +29,7 @@ export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Textarea } from 'primevue/textarea';
 export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
+export { default as RadioButton } from 'primevue/radiobutton';
 
 export { useConfirm } from 'primevue/useconfirm';
 
