@@ -67,7 +67,47 @@ const enum PROJECT_LOCATION {
 const ProjectLocation = [PROJECT_LOCATION.STREET_ADDRESS, PROJECT_LOCATION.LOCATION_COORDINATES];
 
 // Form validation schema
-const formSchema = object({});
+const YesNoUnsureSchema = (prevQuestion: string) => prevQuestion === BASIC_RESPONSES.YES;
+const stringRequired = string().required().max(255);
+const formSchema = object({
+  housing: object({
+    projectName: string().required().max(255, 'Project name too long').label('Project name'),
+    projectDescription: string().required().label('Project description'),
+    hasRentalUnits: string().required().label('Will this project include rental units?'),
+    financiallySupportedBC: string().required().label('BC Housing'),
+    financiallySupportedIndigenous: string().required().label('Indigenous Housing Provider'),
+    financiallySupportedNonProfit: string().required().label('Non-profit housing society'),
+    financiallySupportedHousingCoop: string().required().label('Housing co-operative'),
+    rentalUnits: string().when('hasRentalUnits', {
+      is: YesNoUnsureSchema,
+      then: () => string().oneOf(NumResidentialUnits).required().label('Expected units'),
+      otherwise: () => string().nullable()
+    }),
+    indigenousDescription: string().when('financiallySupportedIndigenous', {
+      is: YesNoUnsureSchema,
+      then: () => stringRequired.label('Indigenous housing provider'),
+      otherwise: () => string().nullable()
+    }),
+    nonProfitDescription: string().when('financiallySupportedNonProfit', {
+      is: YesNoUnsureSchema,
+      then: () => stringRequired.label('Non-profit housing society'),
+      otherwise: () => string().nullable()
+    }),
+    housingCoopDescription: string().when('financiallySupportedHousingCoop', {
+      is: YesNoUnsureSchema,
+      then: () => stringRequired.label('Housing co-operative'),
+      otherwise: () => string().nullable()
+    })
+  }).test('housing-checkbox-test', 'at least one residential type must be selected', (value, context) => {
+    if (
+      context.originalValue.singleFamilySelected ||
+      context.originalValue.multiFamilySelected ||
+      context.originalValue.otherSelected
+    ) {
+      return true;
+    } else return false;
+  })
+});
 
 // Actions
 const confirm = useConfirm();
