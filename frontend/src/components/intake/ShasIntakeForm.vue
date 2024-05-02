@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { object } from 'yup';
+import { number, object, string } from 'yup';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import {
@@ -69,6 +69,7 @@ const ProjectLocation = [PROJECT_LOCATION.STREET_ADDRESS, PROJECT_LOCATION.LOCAT
 // Form validation schema
 const YesNoUnsureSchema = (prevQuestion: string) => prevQuestion === BASIC_RESPONSES.YES;
 const stringRequired = string().required().max(255);
+const numberRequired = number().required().max(255);
 const formSchema = object({
   housing: object({
     projectName: string().required().max(255, 'Project name too long').label('Project name'),
@@ -106,6 +107,29 @@ const formSchema = object({
     ) {
       return true;
     } else return false;
+  }),
+  location: object({
+    projectLocation: string().required().label('Project locations'),
+    addressSearch: string().when('projectLocation', {
+      is: (prevQuestion: string) => prevQuestion === ProjectLocation[0],
+      then: () => stringRequired.label('Project address'),
+      otherwise: () => string().nullable()
+    }),
+    latitude: number().when('projectLocation', {
+      is: (prevQuestion: string) => prevQuestion === ProjectLocation[1],
+      then: () => numberRequired.label('Lattitude'),
+      otherwise: () => string().nullable()
+    }),
+    longitude: number().when('projectLocation', {
+      is: (prevQuestion: string) => prevQuestion === ProjectLocation[1],
+      then: () => numberRequired.label('Longitude'),
+      otherwise: () => string().nullable()
+    }),
+    ltsaPIDLookup: string().max(255).label('Parcel ID'),
+    geomarkUrl: string().max(255).label('Geomark web service url')
+  }),
+  permits: object({
+    hasApplied: string().oneOf(YesNoUnsure).required().label('Has applied or not')
   })
 });
 
