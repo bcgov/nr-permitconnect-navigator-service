@@ -86,22 +86,23 @@ model note {
 }
 
 model permit {
-  permit_id         String      @id @db.Uuid
-  permit_type_id    Int
-  activity_id       String
-  issued_permit_id  String?
-  tracking_id       String?
-  auth_status       String?
-  needed            String?
-  status            String?
-  submitted_date    DateTime?   @db.Timestamptz(6)
-  adjudication_date DateTime?   @db.Timestamptz(6)
-  created_by        String?     @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?   @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime?   @db.Timestamptz(6)
-  activity          activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
-  permit_type       permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permit_id            String      @id @db.Uuid
+  permit_type_id       Int
+  activity_id          String
+  issued_permit_id     String?
+  tracking_id          String?
+  auth_status          String?
+  needed               String?
+  status               String?
+  submitted_date       DateTime?   @db.Timestamptz(6)
+  adjudication_date    DateTime?   @db.Timestamptz(6)
+  created_by           String?     @default("00000000-0000-0000-0000-000000000000")
+  created_at           DateTime?   @default(now()) @db.Timestamptz(6)
+  updated_by           String?
+  updated_at           DateTime?   @db.Timestamptz(6)
+  status_last_verified DateTime?   @db.Timestamptz(6)
+  activity             activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
+  permit_type          permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
 
   @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
 }
@@ -127,6 +128,7 @@ model permit_type {
   permit                permit[]
 }
 
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model submission {
   submission_id                      String    @id @db.Uuid
   activity_id                        String
@@ -153,10 +155,10 @@ model submission {
   bc_online_completed                Boolean   @default(false)
   natural_disaster                   Boolean   @default(false)
   financially_supported              Boolean   @default(false)
-  financially_supported_bc           Boolean   @default(false)
-  financially_supported_indigenous   Boolean   @default(false)
-  financially_supported_non_profit   Boolean   @default(false)
-  financially_supported_housing_coop Boolean   @default(false)
+  financially_supported_bc           String?
+  financially_supported_indigenous   String?
+  financially_supported_non_profit   String?
+  financially_supported_housing_coop String?
   aai_updated                        Boolean   @default(false)
   waiting_on                         String?
   intake_status                      String?
@@ -172,8 +174,22 @@ model submission {
   updated_at                         DateTime? @db.Timestamptz(6)
   contact_preference                 String?
   contact_applicant_relationship     String?
-  is_rental_unit                     String    @default("Unsure")
+  has_rental_units                   String?
   project_description                String?
+  is_developed_by_company_or_org     String?
+  is_developed_in_bc                 String?
+  multi_family_units                 String?
+  other_units                        String?
+  other_units_description            String?
+  rental_units                       String?
+  project_location                   String?
+  locality                           String?
+  province                           String?
+  has_applied_provincial_permits     String?
+  check_provincial_permits           String?
+  indigenous_description             String?
+  non_profit_description             String?
+  housing_coop_description           String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 }
@@ -198,4 +214,10 @@ model user {
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
+}
+
+enum yes_no_unsure {
+  Yes
+  No
+  Unsure
 }

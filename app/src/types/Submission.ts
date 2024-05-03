@@ -18,7 +18,7 @@ export type Submission = {
   projectName: string | null;
   projectDescription: string | null;
   singleFamilyUnits: string | null;
-  isRentalUnit: string;
+  hasRentalUnits: string | null;
   streetAddress: string | null;
   latitude: number | null;
   longitude: number | null;
@@ -32,10 +32,10 @@ export type Submission = {
   bcOnlineCompleted: boolean;
   naturalDisaster: boolean;
   financiallySupported: boolean;
-  financiallySupportedBC: boolean;
-  financiallySupportedIndigenous: boolean;
-  financiallySupportedNonProfit: boolean;
-  financiallySupportedHousingCoop: boolean;
+  financiallySupportedBC: string | null;
+  financiallySupportedIndigenous: string | null;
+  financiallySupportedNonProfit: string | null;
+  financiallySupportedHousingCoop: string | null;
   aaiUpdated: boolean;
   waitingOn: string | null;
   intakeStatus: string | null;
@@ -45,5 +45,21 @@ export type Submission = {
   inquiry: boolean;
   emergencyAssist: boolean;
   inapplicable: boolean;
+
+  isDevelopedByCompanyOrOrg: string | null;
+  isDevelopedInBC: string | null;
+  multiFamilyUnits: string | null;
+  otherUnits: string | null;
+  otherUnitsDescription: string | null;
+  rentalUnits: string | null;
+  projectLocation: string | null;
+  locality: string | null;
+  province: string | null;
+  hasAppliedProvincialPermits: string | null;
+  checkProvincialPermits: string | null;
+  indigenousDescription: string | null;
+  nonProfitDescription: string | null;
+  housingCoopDescription: string | null;
+
   user: User | null;
 } & Partial<IStamps>;

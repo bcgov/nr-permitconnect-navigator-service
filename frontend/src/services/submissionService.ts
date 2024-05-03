@@ -5,8 +5,8 @@ export default {
    * @function createSubmission
    * @returns {Promise} An axios response
    */
-  createSubmission() {
-    return appAxios().put('submission/create');
+  createSubmission(data?: any) {
+    return appAxios().put('submission', data);
   },
 
   /**
