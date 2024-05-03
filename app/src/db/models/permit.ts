@@ -24,7 +24,8 @@ export default {
       needed: input.needed,
       status: input.status,
       submitted_date: input.submittedDate ? new Date(input.submittedDate) : null,
-      adjudication_date: input.adjudicationDate ? new Date(input.adjudicationDate) : null
+      adjudication_date: input.adjudicationDate ? new Date(input.adjudicationDate) : null,
+      status_last_verified: input.statusLastVerified ? new Date(input.statusLastVerified) : null
     };
   },
 
@@ -42,6 +43,7 @@ export default {
       status: input.status,
       submittedDate: input.submitted_date?.toISOString() ?? null,
       adjudicationDate: input.adjudication_date?.toISOString() ?? null,
+      statusLastVerified: input.status_last_verified?.toISOString() ?? null,
       updatedAt: input.updated_at?.toISOString() ?? null,
       updatedBy: input.updated_by
     };

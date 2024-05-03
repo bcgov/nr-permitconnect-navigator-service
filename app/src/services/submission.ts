@@ -2,7 +2,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, Initiatives } from '../components/constants';
+import { APPLICATION_STATUS_LIST, Initiatives } from '../components/constants';
 import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
@@ -27,37 +27,31 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 
 const service = {
   /**
-   * @function createEmptySubmission
-   * Creates a new minimal submission
-   * @returns {Promise<Partial<{activity_id: string}>>} The result of running the transaction
+   * @function createSubmission
+   * Creates a new submission
+   * @returns {Promise<Partial<Submission>>} The result of running the transaction
    */
-  createEmptySubmission: async (submissionId: string, createdBy: string): Promise<Partial<{ activity_id: string }>> => {
-    return await prisma.$transaction(async (trx) => {
+  createSubmission: async (data: Partial<Submission>) => {
+    const response = await prisma.$transaction(async (trx) => {
       const initiative = await trx.initiative.findFirstOrThrow({
         where: {
           code: Initiatives.HOUSING
         }
       });
 
-      const activityId = submissionId.substring(0, 8).toUpperCase() as string;
       await trx.activity.create({
         data: {
-          activity_id: activityId,
+          activity_id: data.activityId as string,
           initiative_id: initiative.initiative_id
         }
       });
 
       return await trx.submission.create({
-        data: {
-          submission_id: submissionId,
-          activity_id: activityId,
-          application_status: APPLICATION_STATUS_LIST.NEW,
-          intake_status: INTAKE_STATUS_LIST.SUBMITTED,
-          submitted_at: new Date(Date.now()),
-          submitted_by: createdBy
-        }
+        data: submission.toPrismaModel(data as Submission)
       });
     });
+
+    return submission.fromPrismaModel(response);
   },
 
   /**
@@ -106,7 +100,7 @@ const service = {
           project_description: x.projectDescription,
           queue_priority: x.queuePriority,
           single_family_units: x.singleFamilyUnits,
-          is_rental_unit: x.isRentalUnit,
+          has_rental_units: x.hasRentalUnits,
           street_address: x.streetAddress,
           submitted_at: new Date(x.submittedAt ?? Date.now()),
           submitted_by: x.submittedBy as string

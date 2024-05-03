@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { RENTAL_STATUS_LIST } from '../components/constants';
+import { YesNoUnsure } from '../components/constants';
 import { activityId, emailJoi, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 
@@ -36,7 +36,7 @@ const schema = {
       projectDescription: Joi.string().min(0).allow(null),
       companyNameRegistered: Joi.string().min(0).max(255).allow(null),
       singleFamilyUnits: Joi.string().min(0).max(255).allow(null),
-      isRentalUnit: Joi.string().valid(...Object.values(RENTAL_STATUS_LIST)),
+      isRentalUnit: Joi.string().valid(...Object.values(YesNoUnsure)),
       streetAddress: Joi.string().min(0).max(255).allow(null),
       latitude: Joi.number().max(255).allow(null),
       longitude: Joi.number().max(255).allow(null),

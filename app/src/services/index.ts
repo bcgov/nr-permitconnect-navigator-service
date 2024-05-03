@@ -1,3 +1,4 @@
+export { default as activityService } from './activity';
 export { default as comsService } from './coms';
 export { default as documentService } from './document';
 export { default as emailService } from './email';

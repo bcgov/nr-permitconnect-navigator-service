@@ -15,7 +15,7 @@ export type Submission = {
   contactPreference?: string;
   companyNameRegistered?: string;
   singleFamilyUnits?: string;
-  isRentalUnit?: string;
+  hasRentalUnits?: string;
   streetAddress?: string;
   latitude?: number;
   longitude?: number;
