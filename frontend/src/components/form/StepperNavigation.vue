@@ -28,13 +28,7 @@ const props = withDefaults(defineProps<Props>(), {
       :disabled="props.prevDisabled"
       @click="props.prevCallback()"
     />
-    <Button
-      class="p-button-sm"
-      outlined
-      label="Save draft"
-      type="submit"
-      :disabled="!editable"
-    />
+    <slot name="content" />
     <Button
       class="px-4 py-1"
       outlined

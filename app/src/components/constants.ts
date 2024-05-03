@@ -14,6 +14,12 @@ export const DEFAULTCORS = Object.freeze({
   origin: true
 });
 
+/**
+ * Basic
+ */
+export const YesNo = Object.freeze({ YES: 'Yes', NO: 'No' });
+export const YesNoUnsure = Object.freeze({ YES: 'Yes', NO: 'No', UNSURE: 'Unsure' });
+
 /** Current user authentication types */
 export const IdentityProvider = Object.freeze({
   IDIR: 'idir',
@@ -34,7 +40,7 @@ export const Initiatives = Object.freeze({
   HOUSING: 'HOUSING'
 });
 
-/** CHEFS form statuses */
+/** SHAS form statuses */
 export const APPLICATION_STATUS_LIST = Object.freeze({
   NEW: 'New',
   IN_PROGRESS: 'In Progress',
@@ -45,13 +51,14 @@ export const APPLICATION_STATUS_LIST = Object.freeze({
 export const INTAKE_STATUS_LIST = Object.freeze({
   SUBMITTED: 'Submitted',
   ASSIGNED: 'Assigned',
-  COMPLETED: 'Completed'
+  COMPLETED: 'Completed',
+  DRAFT: 'Draft'
 });
 
-export const RENTAL_STATUS_LIST = Object.freeze({
+export const PERMIT_NEEDED = Object.freeze({
   YES: 'Yes',
-  NO: 'No',
-  UNSURE: 'Unsure'
+  UNDER_INVESTIGATION: 'Under investigation',
+  NO: 'No'
 });
 
 /** Types of notes */
