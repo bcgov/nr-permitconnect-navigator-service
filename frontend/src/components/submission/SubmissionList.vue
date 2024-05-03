@@ -196,7 +196,7 @@ const filters = ref({
       style="min-width: 100px"
     />
     <Column
-      field="isRentalUnit"
+      field="hasRentalUnits"
       header="Rental unit"
       :sortable="true"
       style="min-width: 100px"

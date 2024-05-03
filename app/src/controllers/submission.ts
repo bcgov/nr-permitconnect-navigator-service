@@ -1,8 +1,15 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { APPLICATION_STATUS_LIST, RENTAL_STATUS_LIST } from '../components/constants';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
+import {
+  APPLICATION_STATUS_LIST,
+  INTAKE_STATUS_LIST,
+  PERMIT_NEEDED,
+  YesNo,
+  YesNoUnsure
+} from '../components/constants';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, toTitleCase } from '../components/utils';
+import { generateUniqueActivityId } from '../db/utils/utils';
 import { submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -38,10 +45,16 @@ const controller = {
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
             const financiallySupportedValues = {
-              financiallySupportedBC: isTruthy(data.isBCHousingSupported),
-              financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
-              financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
-              financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
+              financiallySupportedBC: data.isBCHousingSupported ? toTitleCase(data.isBCHousingSupported) : YesNo.NO,
+              financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
+                ? toTitleCase(data.isIndigenousHousingProviderSupported)
+                : YesNo.NO,
+              financiallySupportedNonProfit: data.isNonProfitSupported
+                ? toTitleCase(data.isNonProfitSupported)
+                : YesNo.NO,
+              financiallySupportedHousingCoop: data.isHousingCooperativeSupported
+                ? toTitleCase(data.isHousingCooperativeSupported)
+                : YesNo.NO
             };
 
             // Get greatest of multiple Units data
@@ -117,7 +130,7 @@ const controller = {
               contactPhoneNumber: data.contactPhoneNumber,
               contactName: `${data.contactFirstName} ${data.contactLastName}`,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
-              financiallySupported: Object.values(financiallySupportedValues).includes(true),
+              financiallySupported: Object.values(financiallySupportedValues).includes(YesNo.YES),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
               locationPIDs: data.parcelID,
@@ -126,9 +139,9 @@ const controller = {
               naturalDisaster: data.naturalDisasterInd,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
-              isRentalUnit: data.isRentalUnit
+              hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : RENTAL_STATUS_LIST.UNSURE,
+                : YesNoUnsure.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
@@ -153,23 +166,122 @@ const controller = {
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  createEmptySubmission: async (req: Request, res: Response, next: NextFunction) => {
-    let testSubmissionId;
-    let submissionQuery;
-
-    // Testing for activityId collisions, which are truncated UUIDs
-    // If a collision is detected, generate new UUID and test again
-    do {
-      testSubmissionId = uuidv4();
-      submissionQuery = await submissionService.getSubmission(testSubmissionId.substring(0, 8).toUpperCase());
-    } while (submissionQuery);
-
+  createSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submitter = (req.currentUser?.tokenPayload as any)?.idir_username;
-      const result = await submissionService.createEmptySubmission(testSubmissionId, submitter);
+      const newActivityId = await generateUniqueActivityId();
 
-      res.status(201).json({ activityId: result.activity_id });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+
+      let applicant, basic, housing, location, permits;
+      let appliedPermits: Array<Permit> = [],
+        investigatePermits: Array<Permit> = [];
+
+      // Create applicant information
+      if (data.applicant) {
+        applicant = {
+          contactName: `${data.applicant.firstName} ${data.applicant.lastName}`,
+          contactPhoneNumber: data.applicant.phoneNumber,
+          contactEmail: data.applicant.email,
+          contactApplicantRelationship: data.applicant.relationshipToProject,
+          contactPreference: data.applicant.contactPreference
+        };
+      }
+
+      if (data.basic) {
+        basic = {
+          isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: data.basic.isDevelopedInBC,
+          companyNameRegistered: data.basic.registeredName
+        };
+      }
+
+      if (data.housing) {
+        housing = {
+          projectName: data.housing.projectName,
+          projectDescription: data.housing.projectDescription,
+          //singleFamilySelected: true, // not necessary to save - check if singleFamilyUnits not null
+          //multiFamilySelected: true, // not necessary to save - check if multiFamilyUnits not null
+          singleFamilyUnits: data.housing.singleFamilyUnits,
+          multiFamilyUnits: data.housing.multiFamilyUnits,
+          //otherSelected: true, // not necessary to save - check if otherUnits not null
+          otherUnitsDescription: data.housing.otherUnitsDescription,
+          otherUnits: data.housing.otherUnits,
+          hasRentalUnits: data.housing.hasRentalUnits,
+          financiallySupportedBC: data.housing.financiallySupportedBC,
+          financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
+          financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
+          financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
+          rentalUnits: data.housing.rentalUnits,
+          indigenousDescription: data.housing.indigenousDescription,
+          nonProfitDescription: data.housing.nonProfitDescription,
+          housingCoopDescription: data.housing.housingCoopDescription
+        };
+      }
+
+      if (data.location) {
+        location = {
+          projectLocation: data.location.projectLocation,
+          locationPIDs: data.location.ltsaPIDLookup,
+          latitude: data.location.latitude,
+          longitude: data.location.longitude,
+          //addressSearch: 'Search address', // not necessary to save - client side search field
+          streetAddress: data.location.streetAddress,
+          locality: data.location.locality,
+          province: data.location.province
+        };
+      }
+
+      if (data.permits) {
+        permits = {
+          hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+          checkProvincialPermits: data.permits.checkProvincialPermits
+        };
+      }
+
+      if (data.appliedPermits && data.appliedPermits.length) {
+        appliedPermits = data.appliedPermits.map((x: Permit) => ({
+          permitTypeId: x.permitTypeId,
+          activityId: newActivityId,
+          trackingId: x.trackingId,
+          status: x.status,
+          statusLastVerified: '2024-05-03T07:00:00.000Z'
+        }));
+      }
+
+      if (data.investigatePermits && data.investigatePermits.length) {
+        investigatePermits = data.investigatePermits.flatMap((x: Permit) => ({
+          permitTypeId: x.permitTypeId,
+          activityId: newActivityId,
+          needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
+          statusLastVerified: '2024-05-03T07:00:00.000Z'
+        }));
+      }
+
+      // Put new submission together
+      const submission = {
+        ...applicant,
+        ...basic,
+        ...housing,
+        ...location,
+        ...permits,
+        submissionId: uuidv4(),
+        activityId: newActivityId,
+        submittedAt: new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED,
+        applicationStatus: APPLICATION_STATUS_LIST.NEW
+      };
+
+      // Create new submission
+      const result = await submissionService.createSubmission(submission);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+
+      res.status(201).json({ activityId: result.activityId });
     } catch (e: unknown) {
       next(e);
     }

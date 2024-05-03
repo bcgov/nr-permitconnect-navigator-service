@@ -22,9 +22,9 @@ router.get(
   }
 );
 
-// Submission endpoint
-router.put('/create', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.createEmptySubmission(req, res, next);
+// Submission create endpoint
+router.put('/', (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.createSubmission(req, res, next);
 });
 
 router.get(

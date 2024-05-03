@@ -227,5 +227,17 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
  * @returns {object} An arbitrary object with specified secret fields marked as redacted
  */
 export function toTitleCase(str: string): string {
+  if (!str) return str;
+
   return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
+}
+
+/**
+ * @function uuidToActivityId
+ * Converts a UUDI to an activity ID
+ * @param {string} id The ID to convert
+ * @returns {string} A truncated version of the given ID
+ */
+export function uuidToActivityId(id: string): string {
+  return id.substring(0, 8).toUpperCase();
 }

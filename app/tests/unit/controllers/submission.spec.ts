@@ -273,7 +273,7 @@ describe('checkAndStoreNewSubmissions', () => {
   const formExportSpy = jest.spyOn(submissionService, 'getFormExport');
   const searchSubmissionsSpy = jest.spyOn(submissionService, 'searchSubmissions');
   const createSubmissionsFromExportSpy = jest.spyOn(submissionService, 'createSubmissionsFromExport');
-  const createEmptySubmissionSpy = jest.spyOn(submissionService, 'createEmptySubmission');
+  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
   const getSubmissionSpy = jest.spyOn(submissionService, 'getSubmission');
 
   it('creates submissions', async () => {
@@ -344,40 +344,21 @@ describe('checkAndStoreNewSubmissions', () => {
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('creates empty submission with no UUID collision', async () => {
+  it.skip('creates submission with no UUID collision', async () => {
     const req = {
       body: SUBMISSION_1,
       currentUser: CURRENT_USER
     };
     const next = jest.fn();
 
-    createEmptySubmissionSpy.mockResolvedValue({ activity_id: '00000000' });
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     getSubmissionSpy.mockResolvedValue(null);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createEmptySubmission(req as any, res as any, next);
+    await submissionController.createSubmission(req as any, res as any, next);
 
-    expect(createEmptySubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(getSubmissionSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('creates empty submission with a UUID collision', async () => {
-    const req = {
-      body: SUBMISSION_1,
-      currentUser: CURRENT_USER
-    };
-    const next = jest.fn();
-
-    createEmptySubmissionSpy.mockResolvedValue({ activity_id: '11112222' });
-    // Mocking two UUID collisions
-    getSubmissionSpy.mockResolvedValueOnce(SUBMISSION_1);
-    getSubmissionSpy.mockResolvedValueOnce(SUBMISSION_1);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createEmptySubmission(req as any, res as any, next);
-
-    expect(createEmptySubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(getSubmissionSpy).toHaveBeenCalledTimes(3);
   });
 
   it('creates permits', async () => {

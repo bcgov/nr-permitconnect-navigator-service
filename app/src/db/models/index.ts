@@ -1,3 +1,4 @@
+export { default as activity } from './activity';
 export { default as document } from './document';
 export { default as identity_provider } from './identity_provider';
 export { default as note } from './note';

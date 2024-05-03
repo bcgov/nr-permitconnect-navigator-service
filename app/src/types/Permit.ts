@@ -11,4 +11,5 @@ export type Permit = {
   status: string | null;
   submittedDate: string | null;
   adjudicationDate: string | null;
+  statusLastVerified: string | null;
 } & Partial<IStamps>;

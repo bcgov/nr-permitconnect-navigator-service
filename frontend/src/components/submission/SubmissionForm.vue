@@ -291,7 +291,7 @@ onBeforeMount(async () => {
       />
       <Dropdown
         class="col-4"
-        name="isRentalUnit"
+        name="hasRentalUnits"
         label="Rental units"
         :disabled="!editable"
         :options="RentalStatusList"
