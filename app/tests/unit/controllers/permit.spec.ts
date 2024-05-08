@@ -65,7 +65,8 @@ describe('createPermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     createSpy.mockResolvedValue(created);
@@ -144,7 +145,8 @@ describe('deletePermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     deleteSpy.mockResolvedValue(deleted);
@@ -261,7 +263,8 @@ describe('listPermits', () => {
         needed: 'true',
         status: 'FOO',
         submittedDate: now.toISOString(),
-        adjudicationDate: now.toISOString()
+        adjudicationDate: now.toISOString(),
+        statusLastVerified: now.toISOString()
       }
     ];
 
@@ -335,7 +338,8 @@ describe('updatePermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     updateSpy.mockResolvedValue(updated);
