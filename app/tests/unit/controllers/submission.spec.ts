@@ -1,9 +1,9 @@
 import config from 'config';
 import { NIL } from 'uuid';
 
-import { APPLICATION_STATUS_LIST } from '../../../src/components/constants';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../../../src/components/constants';
 import submissionController from '../../../src/controllers/submission';
-import { permitService, submissionService, userService } from '../../../src/services';
+import { activityService, permitService, submissionService, userService } from '../../../src/services';
 import * as utils from '../../../src/components/utils';
 
 import type { Permit, Submission } from '../../../src/types';
@@ -55,10 +55,10 @@ const FORM_EXPORT_1 = {
   contactApplicantRelationship: 'Agent',
   financiallySupported: true,
   intakeStatus: 'IN PROGRESS',
-  isBCHousingSupported: true,
-  isIndigenousHousingProviderSupported: true,
-  isNonProfitSupported: true,
-  isHousingCooperativeSupported: true,
+  isBCHousingSupported: 'Yes',
+  isIndigenousHousingProviderSupported: 'Yes',
+  isNonProfitSupported: 'Yes',
+  isHousingCooperativeSupported: 'Yes',
   parcelID: '132',
   latitude: -48,
   longitude: 160,
@@ -104,10 +104,10 @@ const FORM_EXPORT_2 = {
 
   financiallySupported: true,
   intakeStatus: 'IN PROGRESS',
-  isBCHousingSupported: true,
-  isIndigenousHousingProviderSupported: true,
-  isNonProfitSupported: true,
-  isHousingCooperativeSupported: true,
+  isBCHousingSupported: 'Yes',
+  isIndigenousHousingProviderSupported: 'Yes',
+  isNonProfitSupported: 'Yes',
+  isHousingCooperativeSupported: 'Yes',
   parcelID: '132',
   latitude: -59,
   longitude: 178,
@@ -147,10 +147,10 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   contactPreference: 'Phone Call',
   contactApplicantRelationship: 'Agent',
   financiallySupported: true,
-  financiallySupportedBC: true,
-  financiallySupportedIndigenous: true,
-  financiallySupportedNonProfit: true,
-  financiallySupportedHousingCoop: true,
+  financiallySupportedBC: 'Yes',
+  financiallySupportedIndigenous: 'Yes',
+  financiallySupportedNonProfit: 'Yes',
+  financiallySupportedHousingCoop: 'Yes',
   intakeStatus: 'Submitted',
   locationPIDs: '132',
   latitude: -48,
@@ -159,7 +159,7 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   projectName: 'PROJ',
   queuePriority: 3,
   singleFamilyUnits: '1-49',
-  isRentalUnit: 'Unsure',
+  hasRentalUnits: 'Unsure',
   streetAddress: '123 Some Street',
   submittedAt: FORM_EXPORT_1.form.createdAt,
   submittedBy: 'USERABC',
@@ -179,10 +179,10 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     contactPreference: 'Email',
     contactApplicantRelationship: 'Agent',
     financiallySupported: true,
-    financiallySupportedBC: true,
-    financiallySupportedIndigenous: true,
-    financiallySupportedNonProfit: true,
-    financiallySupportedHousingCoop: true,
+    financiallySupportedBC: 'Yes',
+    financiallySupportedIndigenous: 'Yes',
+    financiallySupportedNonProfit: 'Yes',
+    financiallySupportedHousingCoop: 'Yes',
     intakeStatus: 'Submitted',
     locationPIDs: '132',
     latitude: -59,
@@ -192,7 +192,7 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     projectDescription: 'some project description here',
     queuePriority: 3,
     singleFamilyUnits: '>500',
-    isRentalUnit: 'Yes',
+    hasRentalUnits: 'Yes',
     streetAddress: '112 Other Road',
     submittedAt: FORM_EXPORT_2.form.createdAt,
     submittedBy: 'USERABC',
@@ -248,10 +248,10 @@ const SUBMISSION_1 = {
   bcOnlineCompleted: true,
   naturalDisaster: false,
   financiallySupported: true,
-  financiallySupportedBC: true,
-  financiallySupportedIndigenous: false,
-  financiallySupportedNonProfit: false,
-  financiallySupportedHousingCoop: false,
+  financiallySupportedBC: 'Yes',
+  financiallySupportedIndigenous: 'Yes',
+  financiallySupportedNonProfit: 'Yes',
+  financiallySupportedHousingCoop: 'Yes',
   aaiUpdated: true,
   waitingOn: null,
   bringForwardDate: null,
@@ -273,8 +273,6 @@ describe('checkAndStoreNewSubmissions', () => {
   const formExportSpy = jest.spyOn(submissionService, 'getFormExport');
   const searchSubmissionsSpy = jest.spyOn(submissionService, 'searchSubmissions');
   const createSubmissionsFromExportSpy = jest.spyOn(submissionService, 'createSubmissionsFromExport');
-  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
-  const getSubmissionSpy = jest.spyOn(submissionService, 'getSubmission');
 
   it('creates submissions', async () => {
     (config.get as jest.Mock).mockReturnValueOnce({
@@ -317,7 +315,8 @@ describe('checkAndStoreNewSubmissions', () => {
 
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1, FORM_EXPORT_2]).mockResolvedValueOnce([]);
-    searchSubmissionsSpy.mockResolvedValue([SUBMISSION_1]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    searchSubmissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
     createSubmissionsFromExportSpy.mockResolvedValue();
     createPermitSpy.mockResolvedValue(null);
 
@@ -342,23 +341,6 @@ describe('checkAndStoreNewSubmissions', () => {
       ])
     );
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it.skip('creates submission with no UUID collision', async () => {
-    const req = {
-      body: SUBMISSION_1,
-      currentUser: CURRENT_USER
-    };
-    const next = jest.fn();
-
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    getSubmissionSpy.mockResolvedValue(null);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createSubmission(req as any, res as any, next);
-
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(getSubmissionSpy).toHaveBeenCalledTimes(1);
   });
 
   it('creates permits', async () => {
@@ -389,6 +371,189 @@ describe('checkAndStoreNewSubmissions', () => {
         permitTypeId: 123,
         activityId: 'c8b7d976',
         trackingId: 'tracking2'
+      })
+    );
+  });
+});
+
+describe('createSubmission', () => {
+  // Mock service calls
+  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
+  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
+  const getActivitySpy = jest.spyOn(activityService, 'getActivity');
+
+  it('should return 201 and new activity ID if all good', async () => {
+    const req = {
+      body: {},
+      currentUser: CURRENT_USER
+    };
+    const next = jest.fn();
+
+    getActivitySpy.mockResolvedValue(null);
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await submissionController.createSubmission(req as any, res as any, next);
+
+    expect(getActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000' });
+  });
+
+  it('creates submission with unique activity ID', async () => {
+    const req = {
+      body: SUBMISSION_1,
+      currentUser: CURRENT_USER
+    };
+    const next = jest.fn();
+
+    getActivitySpy.mockResolvedValue(null);
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await submissionController.createSubmission(req as any, res as any, next);
+
+    expect(getActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('attemps to create unique activity ID again on conflict', async () => {
+    const req = {
+      body: SUBMISSION_1,
+      currentUser: CURRENT_USER
+    };
+    const next = jest.fn();
+
+    getActivitySpy.mockResolvedValueOnce({ activityId: '00000000', initiativeId: '123' }).mockResolvedValueOnce(null);
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await submissionController.createSubmission(req as any, res as any, next);
+
+    expect(getActivitySpy).toHaveBeenCalledTimes(2);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('populates data from body if it exists', async () => {
+    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+    const req = {
+      body: {
+        applicant: {
+          firstName: 'Test',
+          lastName: 'User'
+        },
+        basic: {
+          isDevelopedByCompanyOrOrg: true
+        },
+        housing: {
+          projectName: 'TheProject'
+        },
+        location: {
+          projectLocation: 'Some place'
+        },
+        permits: {
+          hasAppliedProvincialPermits: true
+        }
+      },
+      currentUser: CURRENT_USER
+    };
+    const next = jest.fn();
+
+    getActivitySpy.mockResolvedValue(null);
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await submissionController.createSubmission(req as any, res as any, next);
+
+    expect(getActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        isDevelopedByCompanyOrOrg: true,
+        projectName: 'TheProject',
+        projectLocation: 'Some place',
+        hasAppliedProvincialPermits: true,
+        submissionId: expect.any(String),
+        activityId: expect.any(String),
+        submittedAt: expect.stringMatching(isoPattern),
+        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED,
+        applicationStatus: APPLICATION_STATUS_LIST.NEW
+      })
+    );
+  });
+
+  it('creates permits if they exist', async () => {
+    const now = new Date().toISOString();
+
+    const req = {
+      body: {
+        appliedPermits: [
+          {
+            permitTypeId: 1,
+            trackingId: '123',
+            status: 'New',
+            statusLastVerified: now
+          },
+          {
+            permitTypeId: 3,
+            trackingId: '456',
+            status: 'New',
+            statusLastVerified: now
+          }
+        ],
+        investigatePermits: [
+          {
+            permitTypeId: 12,
+            needed: 'Under investigation',
+            statusLastVerified: now
+          }
+        ]
+      },
+      currentUser: CURRENT_USER
+    };
+    const next = jest.fn();
+
+    getActivitySpy.mockResolvedValue(null);
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createPermitSpy.mockResolvedValue(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await submissionController.createSubmission(req as any, res as any, next);
+
+    expect(getActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+
+    expect(createPermitSpy).toHaveBeenCalledTimes(3);
+    expect(createPermitSpy).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        permitTypeId: 1,
+        activityId: expect.any(String),
+        trackingId: '123',
+        status: 'New',
+        statusLastVerified: now
+      })
+    );
+    expect(createPermitSpy).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        permitTypeId: 3,
+        activityId: expect.any(String),
+        trackingId: '456',
+        status: 'New',
+        statusLastVerified: now
+      })
+    );
+    expect(createPermitSpy).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({
+        permitTypeId: 12,
+        activityId: expect.any(String),
+        needed: 'Under investigation',
+        statusLastVerified: now
       })
     );
   });
@@ -468,7 +633,8 @@ describe('getSubmission', () => {
       currentUser: CURRENT_USER
     };
 
-    submissionSpy.mockResolvedValue(SUBMISSION_1);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    submissionSpy.mockResolvedValue(SUBMISSION_1 as any);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmission(req as any, res as any, next);
@@ -514,7 +680,8 @@ describe('getSubmissions', () => {
     };
 
     checkAndStoreSpy.mockResolvedValue();
-    submissionsSpy.mockResolvedValue([SUBMISSION_1]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmissions(req as any, res as any, next);
@@ -532,7 +699,8 @@ describe('getSubmissions', () => {
     };
 
     checkAndStoreSpy.mockResolvedValue();
-    submissionsSpy.mockResolvedValue([SUBMISSION_1]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmissions(req as any, res as any, next);
@@ -596,7 +764,8 @@ describe('updateSubmission', () => {
     const USR_IDENTITY = 'xxxy';
     const USR_ID = 'abc-123';
 
-    const updated = SUBMISSION_1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const updated: any = SUBMISSION_1;
 
     updateSpy.mockResolvedValue(updated);
     getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
@@ -633,7 +802,8 @@ describe('updateSubmission', () => {
     await submissionController.updateSubmission(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({ ...(req.body as Submission), updatedBy: USR_ID });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect(updateSpy).toHaveBeenCalledWith({ ...(req.body as any), updatedBy: USR_ID });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });

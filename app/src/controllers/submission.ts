@@ -245,7 +245,7 @@ const controller = {
           activityId: newActivityId,
           trackingId: x.trackingId,
           status: x.status,
-          statusLastVerified: '2024-05-03T07:00:00.000Z'
+          statusLastVerified: x.statusLastVerified
         }));
       }
 
@@ -254,7 +254,7 @@ const controller = {
           permitTypeId: x.permitTypeId,
           activityId: newActivityId,
           needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
-          statusLastVerified: '2024-05-03T07:00:00.000Z'
+          statusLastVerified: x.statusLastVerified
         }));
       }
 

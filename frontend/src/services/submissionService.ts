@@ -14,7 +14,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getSubmissions() {
-    return appAxios().get('submission/');
+    return appAxios().get('submission');
   },
 
   /**
