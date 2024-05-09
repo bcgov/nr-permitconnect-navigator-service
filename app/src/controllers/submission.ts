@@ -5,6 +5,7 @@ import {
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,
   PERMIT_NEEDED,
+  PERMIT_STATUS,
   YesNo,
   YesNoUnsure
 } from '../components/constants';
@@ -221,6 +222,7 @@ const controller = {
 
       if (data.location) {
         location = {
+          naturalDisaster: data.location.naturalDisaster,
           projectLocation: data.location.projectLocation,
           locationPIDs: data.location.ltsaPIDLookup,
           latitude: data.location.latitude,
@@ -244,7 +246,7 @@ const controller = {
           permitTypeId: x.permitTypeId,
           activityId: newActivityId,
           trackingId: x.trackingId,
-          status: x.status,
+          status: PERMIT_STATUS.APPLIED,
           statusLastVerified: x.statusLastVerified
         }));
       }
