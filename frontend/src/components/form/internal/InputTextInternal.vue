@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
+import { toRef, ref } from 'vue';
 import { useField } from 'vee-validate';
 
 import { InputText } from '@/lib/primevue';
+
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -17,7 +19,9 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// State
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const fieldActive = defineModel<boolean>('fieldActive');
 </script>
 
 <template>
@@ -35,5 +39,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
+    @focus="fieldActive = true"
+    @blur="fieldActive = false"
   />
 </template>
