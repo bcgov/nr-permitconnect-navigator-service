@@ -159,7 +159,7 @@ label {
 }
 
 .p-checkbox.p-highlight .p-checkbox-box,
-.p-radiobutton-checked .p-radiobutton-box,
+.p-radiobutton.p-highlight .p-radiobutton-box,
 .p-inputswitch-checked .p-inputswitch-slider:not(.p-disabled) {
   background: $app-primary;
   border-color: $app-primary;

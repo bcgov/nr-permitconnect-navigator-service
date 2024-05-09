@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { object } from 'yup';
+import { object, string } from 'yup';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import {
@@ -318,13 +318,13 @@ onBeforeMount(async () => {
                   <div class="col-6" />
                   <div class="col-12">
                     <div class="flex align-items-center">
-                      <p class="font-bold m-0">Provide additional information</p>
+                      <label>Provide additional information</label>
                       <div
                         v-tooltip.right="
                           `Provide us with additional information -
                          short description about the project, project website link, or upload a document.`
                         "
-                        class="pl-2"
+                        class="pl-2 mb-2"
                       >
                         <font-awesome-icon icon="fa-solid fa-circle-question" />
                       </div>
@@ -338,6 +338,12 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                   />
                   <!-- eslint-enable max-len -->
+                  <label class="col-12">Upload documents about your housing project (optional)</label>
+                  <FileUpload
+                    class="col-12"
+                    activity-id="TODO_HOW_TO_CREATE_DOCUMENTS_WITHOUT_ACTIVITY_ID"
+                    :disabled="true"
+                  />
                 </div>
               </template>
             </Card>
@@ -455,9 +461,6 @@ onBeforeMount(async () => {
                     <span class="section-header">
                       Is this project being financially supported by any of the following?
                     </span>
-                    <div v-tooltip.right="`TODO: MISSING FROM MOCKUPS`">
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
                   </div>
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
@@ -478,18 +481,29 @@ onBeforeMount(async () => {
               </template>
               <template #content>
                 <div class="formgrid grid">
-                  <div class="col mb-3">
+                  <div class="col mb-2">
                     <div class="flex align-items-center">
-                      <label>BC Housing</label>
+                      <label>
+                        <a
+                          href="https://www.bchousing.org/projects-partners/partner-with-us"
+                          target="_blank"
+                        >
+                          BC Housing
+                        </a>
+                      </label>
+                      <!-- eslint-disable max-len -->
                       <div
-                        v-tooltip.right="`TODO: MISSING FROM MOCKUPS`"
-                        class="mb-1"
+                        v-tooltip.right="
+                          `BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.`
+                        "
+                        class="mb-2"
                       >
                         <font-awesome-icon
                           class="pl-2"
                           icon="fa-solid fa-circle-question"
                         />
                       </div>
+                      <!-- eslint-enable max-len -->
                     </div>
                   </div>
                   <RadioList
@@ -499,7 +513,7 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                     :options="YesNoUnsure"
                   />
-                  <div class="col mb-3"><label>Indigenous Housing Provider</label></div>
+                  <div class="col mb-2"><label>Indigenous Housing Provider</label></div>
                   <RadioList
                     class="col-12"
                     name="housing.financiallySupportedIndigenous"
@@ -516,7 +530,7 @@ onBeforeMount(async () => {
                       placeholder="Name of Indigenous Housing Provider"
                     />
                   </div>
-                  <div class="col mb-3"><label>Non-profit housing society</label></div>
+                  <div class="col mb-2"><label>Non-profit housing society</label></div>
                   <RadioList
                     class="col-12"
                     name="housing.financiallySupportedNonProfit"
@@ -533,7 +547,7 @@ onBeforeMount(async () => {
                       placeholder="Name of Non-profit housing society"
                     />
                   </div>
-                  <div class="col mb-3"><label>Housing co-operative</label></div>
+                  <div class="col mb-2"><label>Housing co-operative</label></div>
                   <RadioList
                     class="col-12"
                     name="housing.financiallySupportedHousingCoop"
@@ -644,14 +658,14 @@ onBeforeMount(async () => {
                             class="col-4"
                             name="location.latitude"
                             :disabled="!editable"
-                            help-text="Provide a coordiante between 48 and 60"
+                            help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.longitude"
                             :disabled="!editable"
-                            help-text="Provide a coordiante between -114 and -139"
+                            help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
                           />
                           <div class="col-12 text-blue-500">
@@ -673,14 +687,14 @@ onBeforeMount(async () => {
                             class="col-4"
                             name="location.latitude"
                             :disabled="!editable"
-                            help-text="Provide a coordiante between 48 and 60"
+                            help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.longitude"
                             :disabled="!editable"
-                            help-text="Provide a coordiante between -114 and -139"
+                            help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
                           />
                           <div class="col-12 text-blue-500">
@@ -699,9 +713,6 @@ onBeforeMount(async () => {
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
                     <span class="section-header">Provide additional location details (optional)</span>
-                    <div v-tooltip.right="`TODO: MISSING FROM MOCKUPS`">
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
                   </div>
                 </div>
                 <Divider type="solid" />
@@ -722,7 +733,7 @@ onBeforeMount(async () => {
                             label="LTSA PID Lookup"
                             :bold="false"
                             :disabled="!editable"
-                            placeholder="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
                           />
                           <!-- eslint-enable max-len -->
                         </div>
@@ -734,7 +745,7 @@ onBeforeMount(async () => {
                   v-model:active-index="spacialAccordionIndex"
                   class="mb-3"
                 >
-                  <AccordionTab header="Spacial file or PDF upload">
+                  <AccordionTab header="Spatial file or PDF upload">
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
@@ -857,7 +868,7 @@ onBeforeMount(async () => {
                               class="w-full flex align-items-center"
                             >
                               <Dropdown
-                                class="col-3"
+                                class="col-4"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
                                 :options="getPermitTypes"
@@ -866,19 +877,12 @@ onBeforeMount(async () => {
                                 :loading="getPermitTypes === undefined"
                               />
                               <InputText
-                                class="col-3"
+                                class="col-4"
                                 :name="`appliedPermits[${idx}].trackingId`"
                                 :disabled="!editable"
                                 placeholder="Tracking #"
                               />
-                              <Dropdown
-                                class="col-3"
-                                :name="`appliedPermits[${idx}].status`"
-                                :disabled="!editable"
-                                placeholder="Permit status"
-                                :options="PermitStatus"
-                              />
-                              <div class="col-3">
+                              <div class="col-4">
                                 <div class="flex justify-content-center">
                                   <Calendar
                                     class="w-full"
@@ -1086,9 +1090,8 @@ onBeforeMount(async () => {
     </Message>
     <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
-      Your submission will be reviewed by a Housing Navigator. You will be notified when the Status Assessment Report is
-      available. You may be contacted by a Housing Navigator if needed. Please be patient as the review can take up to
-      ... business days. Please check your email and keep the confirmation ID of the application for future reference.
+      Your submission will be reviewed by a Housing Navigator. You may be contacted if needed. Please check your email
+      for the confirmation email and keep the confirmation ID for future reference.
     </div>
     <div class="mt-4"><router-link :to="{ name: RouteNames.HOME }">Go to Homepage</router-link></div>
   </div>

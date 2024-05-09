@@ -52,12 +52,12 @@ watch(value, () => {
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
           />
-          <label
+          <span
             :for="option"
             class="ml-2 mb-0"
           >
             {{ option }}
-          </label>
+          </span>
         </div>
       </div>
     </div>
