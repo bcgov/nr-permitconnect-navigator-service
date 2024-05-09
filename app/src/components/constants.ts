@@ -61,6 +61,12 @@ export const PERMIT_NEEDED = Object.freeze({
   NO: 'No'
 });
 
+export const PERMIT_STATUS = Object.freeze({
+  NEW: 'New',
+  APPLIED: 'Applied',
+  COMPLETED: 'Completed'
+});
+
 /** Types of notes */
 export const NOTE_TYPE_LIST = Object.freeze({
   GENERAL: 'General',

@@ -494,13 +494,13 @@ describe('createSubmission', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'New',
+            status: 'Applied',
             statusLastVerified: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
-            status: 'New',
+            status: 'Applied',
             statusLastVerified: now
           }
         ],
@@ -533,7 +533,7 @@ describe('createSubmission', () => {
         permitTypeId: 1,
         activityId: expect.any(String),
         trackingId: '123',
-        status: 'New',
+        status: 'Applied',
         statusLastVerified: now
       })
     );
@@ -543,7 +543,7 @@ describe('createSubmission', () => {
         permitTypeId: 3,
         activityId: expect.any(String),
         trackingId: '456',
-        status: 'New',
+        status: 'Applied',
         statusLastVerified: now
       })
     );
