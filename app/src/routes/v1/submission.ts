@@ -23,7 +23,7 @@ router.get(
 );
 
 // Submission create endpoint
-router.put('/', (req: Request, res: Response, next: NextFunction): void => {
+router.put('/', submissionValidator.createSubmission, (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createSubmission(req, res, next);
 });
 
