@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form, FieldArray } from 'vee-validate';
+import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { number, object, string } from 'yup';
+import { array, mixed, number, object, string } from 'yup';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import {
@@ -67,72 +67,137 @@ const enum PROJECT_LOCATION {
 const ProjectLocation = [PROJECT_LOCATION.STREET_ADDRESS, PROJECT_LOCATION.LOCATION_COORDINATES];
 
 // Form validation schema
-const YesNoUnsureSchema = (prevQuestion: string) => prevQuestion === BASIC_RESPONSES.YES;
+const YesNoUnsureSchema = string().required().oneOf(YesNoUnsure);
+const prevYesSelected = (prevQuestion: string) => prevQuestion === BASIC_RESPONSES.YES;
 const stringRequired = string().required().max(255);
-const numberRequired = number().required().max(255);
 const formSchema = object({
+  applicant: object({
+    firstName: stringRequired.label('First name'),
+    lastName: stringRequired.label('Last name'),
+    phoneNumber: stringRequired.label('Phone number'),
+    email: stringRequired.label('Email'),
+    relationshipToProject: stringRequired.label('Relationship to project'),
+    contactPreference: stringRequired.label('Contact Preference')
+  }),
+  basic: object({
+    isDevelopedByCompanyOrOrg: string().required().oneOf(YesNo).label('Project developed'),
+    isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
+      is: (previousQuestion: string) => previousQuestion === BASIC_RESPONSES.YES,
+      then: (schema) => schema.required().oneOf(YesNo).label('Registered in BC')
+    }),
+    registeredName: string().when('isDevelopedInBC', {
+      is: (previousQuestion: string) => previousQuestion,
+      then: (schema) => schema.required().max(255).label('Business name')
+    })
+  }),
   housing: object({
-    projectName: string().required().max(255, 'Project name too long').label('Project name'),
+    projectName: stringRequired.label('Project name'),
     projectDescription: string().required().label('Project description'),
-    hasRentalUnits: string().required().label('Will this project include rental units?'),
-    financiallySupportedBC: string().required().label('BC Housing'),
-    financiallySupportedIndigenous: string().required().label('Indigenous Housing Provider'),
-    financiallySupportedNonProfit: string().required().label('Non-profit housing society'),
-    financiallySupportedHousingCoop: string().required().label('Housing co-operative'),
+    hasRentalUnits: YesNoUnsureSchema.label('Rental units'),
+    financiallySupportedBC: YesNoUnsureSchema.label('BC Housing'),
+    financiallySupportedIndigenous: YesNoUnsureSchema.label('Indigenous Housing Provider'),
+    financiallySupportedNonProfit: YesNoUnsureSchema.label('Non-profit housing society'),
+    financiallySupportedHousingCoop: YesNoUnsureSchema.label('Housing co-operative'),
     rentalUnits: string().when('hasRentalUnits', {
-      is: YesNoUnsureSchema,
-      then: () => string().oneOf(NumResidentialUnits).required().label('Expected units'),
+      is: prevYesSelected,
+      then: () => string().oneOf(NumResidentialUnits).required().label('Expected rental units'),
       otherwise: () => string().nullable()
     }),
     indigenousDescription: string().when('financiallySupportedIndigenous', {
-      is: YesNoUnsureSchema,
+      is: prevYesSelected,
       then: () => stringRequired.label('Indigenous housing provider'),
       otherwise: () => string().nullable()
     }),
     nonProfitDescription: string().when('financiallySupportedNonProfit', {
-      is: YesNoUnsureSchema,
+      is: prevYesSelected,
       then: () => stringRequired.label('Non-profit housing society'),
       otherwise: () => string().nullable()
     }),
     housingCoopDescription: string().when('financiallySupportedHousingCoop', {
-      is: YesNoUnsureSchema,
+      is: prevYesSelected,
       then: () => stringRequired.label('Housing co-operative'),
       otherwise: () => string().nullable()
+    }),
+    singleFamilyUnits: string().when('singleFamilySelected', {
+      is: (prev: boolean) => prev,
+      then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of single-family units'),
+      otherwise: () => string().nullable()
+    }),
+    multiFamilyUnits: string().when('multiFamilySelected', {
+      is: (prev: boolean) => prev,
+      then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of multi-family units'),
+      otherwise: () => string().nullable()
+    }),
+    otherUnitsDescription: string().when('otherSelected', {
+      is: (prev: boolean) => prev,
+      then: (schema) => schema.required().label('Description of units'),
+      otherwise: () => string().nullable()
+    }),
+    otherUnits: string().when('otherSelected', {
+      is: (prev: boolean) => prev,
+      then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of other units'),
+      otherwise: () => string().nullable()
     })
-  }).test('housing-checkbox-test', 'at least one residential type must be selected', (value, context) => {
-    if (
+  }).test('housing-checkbox-test', 'At least one residential type must be selected', (value, context) => {
+    return (
       context.originalValue.singleFamilySelected ||
       context.originalValue.multiFamilySelected ||
       context.originalValue.otherSelected
-    ) {
-      return true;
-    } else return false;
+    );
   }),
   location: object({
-    projectLocation: string().required().label('Project locations'),
-    addressSearch: string().when('projectLocation', {
+    projectLocation: string().required().label('Location'),
+    streetAddress: string().when('projectLocation', {
       is: (prevQuestion: string) => prevQuestion === ProjectLocation[0],
-      then: () => stringRequired.label('Project address'),
+      then: () => stringRequired.label('Street address'),
+      otherwise: () => string().nullable()
+    }),
+    locality: string().when('projectLocation', {
+      is: (prevQuestion: string) => prevQuestion === ProjectLocation[0],
+      then: () => stringRequired.label('Locality'),
+      otherwise: () => string().nullable()
+    }),
+    province: string().when('projectLocation', {
+      is: (prevQuestion: string) => prevQuestion === ProjectLocation[0],
+      then: () => stringRequired.label('Province'),
       otherwise: () => string().nullable()
     }),
     latitude: number().when('projectLocation', {
       is: (prevQuestion: string) => prevQuestion === ProjectLocation[1],
-      then: () => numberRequired.label('Lattitude'),
+      then: () => number().required().min(48).max(60).label('Latitude'),
       otherwise: () => string().nullable()
     }),
     longitude: number().when('projectLocation', {
       is: (prevQuestion: string) => prevQuestion === ProjectLocation[1],
-      then: () => numberRequired.label('Longitude'),
+      then: () => number().required().min(-139).max(-114).label('Longitude'),
       otherwise: () => string().nullable()
     }),
     ltsaPIDLookup: string().max(255).label('Parcel ID'),
     geomarkUrl: string().max(255).label('Geomark web service url')
   }),
   permits: object({
-    hasApplied: string().oneOf(YesNoUnsure).required().label('Has applied or not')
-  })
+    hasAppliedProvincialPermits: string().oneOf(YesNoUnsure).required().label('Applied permits'),
+    checkProvincialPermits: string().when('hasAppliedProvincialPermits', {
+      is: (prevQuestion: string) => prevQuestion === BASIC_RESPONSES.YES || prevQuestion === BASIC_RESPONSES.UNSURE,
+      then: (schema) => schema.oneOf(YesNo).required().label('Check permits'),
+      otherwise: (schema) => schema.nullable()
+    })
+  }),
+  appliedPermits: array().of(
+    object({
+      permitTypeId: number().required().max(255).label('Permit type'),
+      statusLastVerified: mixed()
+        .test('verified-date', 'Verified date must be valid', (val) => val instanceof Date)
+        .required()
+        .label('Last verified date'),
+      trackingId: string().max(255).label('Tracking ID')
+    })
+  )
 });
 
+function test(input: any) {
+  console.log('input', JSON.parse(JSON.stringify(input)));
+}
 // Actions
 const confirm = useConfirm();
 const toast = useToast();
@@ -221,6 +286,7 @@ onBeforeMount(async () => {
 
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
 });
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 </script>
 
 <template>
@@ -256,6 +322,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Basic info"
               icon="fa-user"
+              @click="() => test(values)"
             />
           </template>
           <template #content="{ nextCallback }">
@@ -460,6 +527,7 @@ onBeforeMount(async () => {
                     label="Single-family"
                     :bold="false"
                     :disabled="!editable"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                   />
                   <div class="col-6">
                     <div class="flex">
@@ -468,6 +536,7 @@ onBeforeMount(async () => {
                         label="Multi-family"
                         :bold="false"
                         :disabled="!editable"
+                        :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                       />
                       <div
                         v-tooltip.right="
@@ -500,6 +569,7 @@ onBeforeMount(async () => {
                     label="Other"
                     :bold="false"
                     :disabled="!editable"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                   />
                   <div class="col-6" />
                   <InputText
@@ -515,6 +585,12 @@ onBeforeMount(async () => {
                     :options="NumResidentialUnits"
                     placeholder="How many expected units?"
                   />
+                  <div class="col-12">
+                    <ErrorMessage
+                      v-show="formRef?.meta?.touched"
+                      name="housing"
+                    />
+                  </div>
                 </div>
               </template>
             </Card>
@@ -1047,7 +1123,7 @@ onBeforeMount(async () => {
                               v-for="(permit, idx) in fields"
                               :key="idx"
                               :index="idx"
-                              class="w-full flex align-items-center"
+                              class="w-full flex align-items-top"
                             >
                               <input
                                 type="hidden"
@@ -1260,7 +1336,7 @@ onBeforeMount(async () => {
           label="Submit"
           type="submit"
           icon="pi pi-upload"
-          :disabled="!editable || activeStep !== 3"
+          :disabled="!editable"
         />
       </div>
     </Form>
