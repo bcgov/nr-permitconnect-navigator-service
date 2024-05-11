@@ -34,10 +34,7 @@ const fieldActive: Ref<boolean> = ref(false);
 
 <template>
   <div class="field">
-    <FloatLabel
-      v-if="props.floatLabel"
-      class="mb-3"
-    >
+    <FloatLabel v-if="props.floatLabel">
       <InputTextInternal v-bind="props" />
     </FloatLabel>
     <InputTextInternal
