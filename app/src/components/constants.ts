@@ -78,7 +78,7 @@ export const NOTE_TYPE_LIST = Object.freeze({
  * @see {@link https://emailregex.com/}
  */
 export const EMAIL_REGEX = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$';
-
+export const PHONE_NUMBER_REGEX = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$';
 /**
  * Basic
  */
@@ -107,7 +107,13 @@ export const NUM_RESIDENTIAL_UNITS = Object.freeze({
 });
 
 /**
- * Mac character length for input text boxes
+ * Max character length for input text boxes
  */
 
 export const TEXT_MAX_LENGTH = 255;
+
+/**
+ * Max character length for phone numbers
+ */
+
+export const PHONE_NUMBER_MAX_LENGTH = 10;
