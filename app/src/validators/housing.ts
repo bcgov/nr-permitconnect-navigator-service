@@ -1,74 +1,61 @@
 import Joi from 'joi';
 
-import { NUM_RESIDENTIAL_UNITS, TEXT_MAX_LENGTH, YES_NO, YES_NO_UNSURE } from '../components/constants';
+import { NUM_RESIDENTIAL_UNITS, TEXT_MAX_LENGTH, YES_NO } from '../components/constants';
+import { stringRequiredMaxLengthTrim, stringRequiredYesNoUnsure } from './common';
+
+const stringRequiredNumResidentialUnits = Joi.string()
+  .valid(...Object.values(NUM_RESIDENTIAL_UNITS))
+  .required();
 
 export const housingSchema = Joi.object({
-  financiallySupportedBC: Joi.string()
-    .valid(...Object.values(YES_NO_UNSURE))
-    .required(),
-  financiallySupportedIndigenous: Joi.string()
-    .valid(...Object.values(YES_NO_UNSURE))
-    .required(),
-  financiallySupportedNonProfit: Joi.string()
-    .valid(...Object.values(YES_NO_UNSURE))
-    .required(),
-  financiallySupportedHousingCoop: Joi.string()
-    .valid(...Object.values(YES_NO_UNSURE))
-    .required(),
-  hasRentalUnits: Joi.string()
-    .valid(...Object.values(YES_NO_UNSURE))
-    .required(),
-  housingCoopDescription: Joi.string().when('financiallySupportedHousingCoop', {
+  financiallySupportedBC: stringRequiredYesNoUnsure,
+  financiallySupportedIndigenous: stringRequiredYesNoUnsure,
+  financiallySupportedNonProfit: stringRequiredYesNoUnsure,
+  financiallySupportedHousingCoop: stringRequiredYesNoUnsure,
+  hasRentalUnits: stringRequiredYesNoUnsure,
+  housingCoopDescription: Joi.when('financiallySupportedHousingCoop', {
     is: YES_NO.YES,
-    then: Joi.string().max(TEXT_MAX_LENGTH).required(),
+    then: stringRequiredMaxLengthTrim,
     otherwise: Joi.forbidden()
   }),
-  indigenousDescription: Joi.string().when('financiallySupportedIndigenous', {
+  indigenousDescription: Joi.when('financiallySupportedIndigenous', {
     is: YES_NO.YES,
-    then: Joi.string().max(TEXT_MAX_LENGTH).required(),
+    then: stringRequiredMaxLengthTrim,
     otherwise: Joi.forbidden()
   }),
   multiFamilySelected: Joi.boolean().allow(null),
-  multiFamilyUnits: Joi.string().when('multiFamilySelected', {
-    is: Joi.exist(),
-    then: Joi.string()
-      .valid(...Object.values(NUM_RESIDENTIAL_UNITS))
-      .required(),
+  multiFamilyUnits: Joi.when('multiFamilySelected', {
+    is: true,
+    then: stringRequiredNumResidentialUnits,
     otherwise: Joi.forbidden()
   }),
-  nonProfitDescription: Joi.string().when('financiallySupportedNonProfit', {
+  nonProfitDescription: Joi.when('financiallySupportedNonProfit', {
     is: YES_NO.YES,
-    then: Joi.string().max(TEXT_MAX_LENGTH).required(),
+    then: stringRequiredMaxLengthTrim,
     otherwise: Joi.forbidden()
   }),
   otherSelected: Joi.boolean().allow(null),
-  otherUnits: Joi.string().when('otherSelected', {
-    is: Joi.exist(),
-    then: Joi.string()
-      .valid(...Object.values(NUM_RESIDENTIAL_UNITS))
-      .required(),
+  otherUnits: Joi.when('otherSelected', {
+    is: true,
+    then: stringRequiredNumResidentialUnits,
     otherwise: Joi.forbidden()
   }),
   otherUnitsDescription: Joi.when('otherSelected', {
     is: Joi.exist(),
-    then: Joi.string().trim().max(TEXT_MAX_LENGTH).required(),
+    then: stringRequiredMaxLengthTrim,
     otherwise: Joi.forbidden()
   }),
-  projectName: Joi.string().max(TEXT_MAX_LENGTH).required(),
+  projectName: stringRequiredMaxLengthTrim,
   projectDescription: Joi.string().max(TEXT_MAX_LENGTH).allow(null),
-  rentalUnits: Joi.string().when('hasRentalUnits', {
+  rentalUnits: Joi.when('hasRentalUnits', {
     is: YES_NO.YES,
-    then: Joi.string()
-      .valid(...Object.values(NUM_RESIDENTIAL_UNITS))
-      .required(),
+    then: stringRequiredNumResidentialUnits,
     otherwise: Joi.forbidden()
   }),
   singleFamilySelected: Joi.boolean().allow(null),
-  singleFamilyUnits: Joi.string().when('singleFamilySelected', {
-    is: Joi.exist(),
-    then: Joi.string()
-      .valid(...Object.values(NUM_RESIDENTIAL_UNITS))
-      .required(),
+  singleFamilyUnits: Joi.when('singleFamilySelected', {
+    is: true,
+    then: stringRequiredNumResidentialUnits,
     otherwise: Joi.forbidden()
   })
-}).xor('singleFamilySelected', 'multiFamilySelected', 'otherSelected');
+}).or('singleFamilySelected', 'multiFamilySelected', 'otherSelected');

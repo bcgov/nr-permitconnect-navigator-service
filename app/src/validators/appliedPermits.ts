@@ -7,6 +7,6 @@ export const appliedPermitsSchema = Joi.object({
   status: Joi.string()
     .valid(...Object.values(PERMIT_STATUS))
     .allow(null),
-  statusLastVerified: Joi.date().allow(null),
+  statusLastVerified: Joi.date().max('now').allow(null),
   trackingId: Joi.string().allow(null)
 });

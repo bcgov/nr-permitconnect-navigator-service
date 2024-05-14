@@ -16,6 +16,9 @@ const schema = {
       appliedPermits: Joi.array().items(appliedPermitsSchema).allow(null),
       basic: basicSchema,
       housing: housingSchema,
+      investigatePermits: Joi.array()
+        .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+        .allow(null),
       permits: permitsSchema
     })
   },
