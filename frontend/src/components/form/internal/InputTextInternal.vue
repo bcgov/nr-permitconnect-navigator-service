@@ -30,7 +30,7 @@ const fieldActive = defineModel<boolean>('fieldActive');
     {{ label }}
   </label>
   <InputText
-    v-model.trim="value"
+    v-model="value"
     :aria-describedby="`${name}-help`"
     :name="name"
     :placeholder="placeholder"

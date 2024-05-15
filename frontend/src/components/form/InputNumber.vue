@@ -39,7 +39,7 @@ const fieldActive: Ref<boolean> = ref(false);
       {{ label }}
     </label>
     <InputNumber
-      v-model.trim="value"
+      v-model="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       :placeholder="placeholder"
