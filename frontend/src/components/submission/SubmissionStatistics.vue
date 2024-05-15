@@ -121,7 +121,7 @@ watch(
         <td class="col-9">
           Submissions by assigned navigator
           <Dropdown
-            v-model.trim="statisticFilters.userId"
+            v-model="statisticFilters.userId"
             class="w-7"
             editable
             :options="assigneeOptions"
