@@ -29,9 +29,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphPermit | null): Permit | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphPermit): Permit {
     return {
       permitId: input.permit_id,
       permitTypeId: input.permit_type_id,

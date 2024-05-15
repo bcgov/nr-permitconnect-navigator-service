@@ -32,23 +32,8 @@ const service = {
    * @returns {Promise<Partial<Submission>>} The result of running the transaction
    */
   createSubmission: async (data: Partial<Submission>) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const initiative = await trx.initiative.findFirstOrThrow({
-        where: {
-          code: Initiatives.HOUSING
-        }
-      });
-
-      await trx.activity.create({
-        data: {
-          activity_id: data.activityId as string,
-          initiative_id: initiative.initiative_id
-        }
-      });
-
-      return await trx.submission.create({
-        data: submission.toPrismaModel(data as Submission)
-      });
+    const response = await prisma.submission.create({
+      data: submission.toPrismaModel(data as Submission)
     });
 
     return submission.fromPrismaModel(response);
