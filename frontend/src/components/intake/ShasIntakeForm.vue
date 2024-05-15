@@ -2,10 +2,11 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { object, string } from 'yup';
+import { object } from 'yup';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import {
+  Calendar,
   Checkbox,
   Dropdown,
   InputMask,
@@ -33,17 +34,14 @@ import { useTypeStore } from '@/store';
 import {
   ContactPreferenceList,
   NumResidentialUnits,
-  PermitStatus,
   ProjectRelationshipList,
   RouteNames,
   YesNo,
   YesNoUnsure
 } from '@/utils/constants';
 import { BASIC_RESPONSES } from '@/utils/enums';
-import { deepToRaw } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import Calendar from '../form/Calendar.vue';
 
 // Store
 const typeStore = useTypeStore();
@@ -53,6 +51,7 @@ const { getPermitTypes } = storeToRefs(typeStore);
 const activeStep: Ref<number> = ref(0);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
@@ -99,11 +98,25 @@ function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, pus
   }
 }
 
-function onSaveDraft(data: any) {
+async function onSaveDraft(data: any) {
   editable.value = false;
 
   try {
-    console.log(deepToRaw(data));
+    let response;
+    if (data.submissionId) {
+      response = await submissionService.updateDraft(data.submissionId, data);
+    } else {
+      response = await submissionService.createDraft(data);
+    }
+
+    if (response.data.submissionId && response.data.activityId) {
+      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
+      formRef.value?.setFieldValue('activityId', response.data.activityId);
+    } else {
+      throw new Error('Failed to retrieve correct draft data');
+    }
+
+    toast.success('Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
@@ -115,10 +128,17 @@ async function onSubmit(data: any) {
   editable.value = false;
 
   try {
-    console.log(data);
-    const result = await submissionService.createSubmission(data);
-    if (result.data.activityId) {
-      assignedActivityId.value = result.data.activityId;
+    let response;
+    if (data.submissionId) {
+      response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
+    } else {
+      response = await submissionService.createDraft({ ...data, submit: true });
+    }
+    if (response.data.activityId) {
+      assignedActivityId.value = response.data.activityId;
+      formRef.value?.setFieldValue('activityId', response.data.activityId);
+    } else {
+      throw new Error('Failed to retrieve correct draft data');
     }
   } catch (e: any) {
     toast.error('Failed to save intake', e);
@@ -144,11 +164,22 @@ onBeforeMount(async () => {
     <Form
       v-if="initialFormValues"
       v-slot="{ setFieldValue, values }"
+      ref="formRef"
       keep-values
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="confirmSubmit"
     >
+      <input
+        type="hidden"
+        name="submissionId"
+      />
+
+      <input
+        type="hidden"
+        name="activityId"
+      />
+
       <Stepper v-model:activeStep="activeStep">
         <!--
       Basic info
@@ -954,6 +985,10 @@ onBeforeMount(async () => {
                               :index="idx"
                               class="w-full flex align-items-center"
                             >
+                              <input
+                                type="hidden"
+                                :name="`appliedPermits[${idx}].permitId`"
+                              />
                               <Dropdown
                                 class="col-4"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
