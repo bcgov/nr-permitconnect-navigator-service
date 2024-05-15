@@ -4,14 +4,14 @@ import { NIL, v4 as uuidv4 } from 'uuid';
 import {
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,
+  Initiatives,
   PERMIT_NEEDED,
   PERMIT_STATUS,
   YesNo,
   YesNoUnsure
 } from '../components/constants';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, toTitleCase } from '../components/utils';
-import { generateUniqueActivityId } from '../db/utils/utils';
-import { submissionService, permitService, userService } from '../services';
+import { activityService, submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
@@ -167,114 +167,130 @@ const controller = {
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  createSubmission: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const newActivityId = await generateUniqueActivityId();
+  generateSubmissionData: async (req: Request, intakeStatus: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = req.body;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
+    const activityId = data.activityId ?? (await activityService.createActivity(Initiatives.HOUSING))?.activityId;
 
-      let applicant, basic, housing, location, permits;
-      let appliedPermits: Array<Permit> = [],
-        investigatePermits: Array<Permit> = [];
+    let applicant, basic, housing, location, permits;
+    let appliedPermits: Array<Permit> = [],
+      investigatePermits: Array<Permit> = [];
 
-      // Create applicant information
-      if (data.applicant) {
-        applicant = {
-          contactName: `${data.applicant.firstName} ${data.applicant.lastName}`,
-          contactPhoneNumber: data.applicant.phoneNumber,
-          contactEmail: data.applicant.email,
-          contactApplicantRelationship: data.applicant.relationshipToProject,
-          contactPreference: data.applicant.contactPreference
-        };
-      }
+    // Create applicant information
+    if (data.applicant) {
+      applicant = {
+        contactName: `${data.applicant.firstName} ${data.applicant.lastName}`,
+        contactPhoneNumber: data.applicant.phoneNumber,
+        contactEmail: data.applicant.email,
+        contactApplicantRelationship: data.applicant.relationshipToProject,
+        contactPreference: data.applicant.contactPreference
+      };
+    }
 
-      if (data.basic) {
-        basic = {
-          isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
-          isDevelopedInBC: data.basic.isDevelopedInBC,
-          companyNameRegistered: data.basic.registeredName
-        };
-      }
+    if (data.basic) {
+      basic = {
+        isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
+        isDevelopedInBC: data.basic.isDevelopedInBC,
+        companyNameRegistered: data.basic.registeredName
+      };
+    }
 
-      if (data.housing) {
-        housing = {
-          projectName: data.housing.projectName,
-          projectDescription: data.housing.projectDescription,
-          //singleFamilySelected: true, // not necessary to save - check if singleFamilyUnits not null
-          //multiFamilySelected: true, // not necessary to save - check if multiFamilyUnits not null
-          singleFamilyUnits: data.housing.singleFamilyUnits,
-          multiFamilyUnits: data.housing.multiFamilyUnits,
-          //otherSelected: true, // not necessary to save - check if otherUnits not null
-          otherUnitsDescription: data.housing.otherUnitsDescription,
-          otherUnits: data.housing.otherUnits,
-          hasRentalUnits: data.housing.hasRentalUnits,
-          financiallySupportedBC: data.housing.financiallySupportedBC,
-          financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
-          financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
-          financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-          rentalUnits: data.housing.rentalUnits,
-          indigenousDescription: data.housing.indigenousDescription,
-          nonProfitDescription: data.housing.nonProfitDescription,
-          housingCoopDescription: data.housing.housingCoopDescription
-        };
-      }
+    if (data.housing) {
+      housing = {
+        projectName: data.housing.projectName,
+        projectDescription: data.housing.projectDescription,
+        //singleFamilySelected: true, // not necessary to save - check if singleFamilyUnits not null
+        //multiFamilySelected: true, // not necessary to save - check if multiFamilyUnits not null
+        singleFamilyUnits: data.housing.singleFamilyUnits,
+        multiFamilyUnits: data.housing.multiFamilyUnits,
+        //otherSelected: true, // not necessary to save - check if otherUnits not null
+        otherUnitsDescription: data.housing.otherUnitsDescription,
+        otherUnits: data.housing.otherUnits,
+        hasRentalUnits: data.housing.hasRentalUnits,
+        financiallySupportedBC: data.housing.financiallySupportedBC,
+        financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
+        financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
+        financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
+        rentalUnits: data.housing.rentalUnits,
+        indigenousDescription: data.housing.indigenousDescription,
+        nonProfitDescription: data.housing.nonProfitDescription,
+        housingCoopDescription: data.housing.housingCoopDescription
+      };
+    }
 
-      if (data.location) {
-        location = {
-          naturalDisaster: data.location.naturalDisaster,
-          projectLocation: data.location.projectLocation,
-          locationPIDs: data.location.ltsaPIDLookup,
-          latitude: data.location.latitude,
-          longitude: data.location.longitude,
-          //addressSearch: 'Search address', // not necessary to save - client side search field
-          streetAddress: data.location.streetAddress,
-          locality: data.location.locality,
-          province: data.location.province
-        };
-      }
+    if (data.location) {
+      location = {
+        naturalDisaster: data.location.naturalDisaster === YesNo.YES,
+        projectLocation: data.location.projectLocation,
+        locationPIDs: data.location.ltsaPIDLookup,
+        latitude: data.location.latitude,
+        longitude: data.location.longitude,
+        //addressSearch: 'Search address', // not necessary to save - client side search field
+        streetAddress: data.location.streetAddress,
+        locality: data.location.locality,
+        province: data.location.province
+      };
+    }
 
-      if (data.permits) {
-        permits = {
-          hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
-          checkProvincialPermits: data.permits.checkProvincialPermits
-        };
-      }
+    if (data.permits) {
+      permits = {
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+        checkProvincialPermits: data.permits.checkProvincialPermits
+      };
+    }
 
-      if (data.appliedPermits && data.appliedPermits.length) {
-        appliedPermits = data.appliedPermits.map((x: Permit) => ({
-          permitTypeId: x.permitTypeId,
-          activityId: newActivityId,
-          trackingId: x.trackingId,
-          status: PERMIT_STATUS.APPLIED,
-          statusLastVerified: x.statusLastVerified
-        }));
-      }
+    if (data.appliedPermits && data.appliedPermits.length) {
+      appliedPermits = data.appliedPermits.map((x: Permit) => ({
+        permitId: x.permitId,
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        trackingId: x.trackingId,
+        status: PERMIT_STATUS.APPLIED,
+        statusLastVerified: x.statusLastVerified
+      }));
+    }
 
-      if (data.investigatePermits && data.investigatePermits.length) {
-        investigatePermits = data.investigatePermits.flatMap((x: Permit) => ({
-          permitTypeId: x.permitTypeId,
-          activityId: newActivityId,
-          needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
-          statusLastVerified: x.statusLastVerified
-        }));
-      }
+    if (data.investigatePermits && data.investigatePermits.length) {
+      investigatePermits = data.investigatePermits.flatMap((x: Permit) => ({
+        permitId: x.permitId,
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
+        statusLastVerified: x.statusLastVerified
+      }));
+    }
 
-      // Put new submission together
-      const submission = {
+    // Put new submission together
+    return {
+      submission: {
         ...applicant,
         ...basic,
         ...housing,
         ...location,
         ...permits,
-        submissionId: uuidv4(),
-        activityId: newActivityId,
-        submittedAt: new Date().toISOString(),
+        submissionId: data.submissionId ?? uuidv4(),
+        activityId: activityId,
+        submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
-      };
+        intakeStatus: intakeStatus,
+        applicationStatus: data.applicationStatus ?? APPLICATION_STATUS_LIST.NEW
+      },
+      appliedPermits,
+      investigatePermits
+    };
+  },
+
+  createDraft: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+      );
 
       // Create new submission
       const result = await submissionService.createSubmission(submission);
@@ -283,7 +299,27 @@ const controller = {
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
       await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
 
-      res.status(201).json({ activityId: result.activityId });
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  createSubmission: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        INTAKE_STATUS_LIST.SUBMITTED
+      );
+
+      // Create new submission
+      const result = await submissionService.createSubmission(submission);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
     }
@@ -319,6 +355,32 @@ const controller = {
       // Pull from PCNS database
       const response = await submissionService.getSubmissions();
       res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  updateDraft: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+      );
+
+      // Update submission
+      const result = await submissionService.updateSubmission(submission as Submission);
+
+      // Remove already existing permits for this activity
+      await permitService.deletePermitsByActivity(submission.activityId);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+
+      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
     }

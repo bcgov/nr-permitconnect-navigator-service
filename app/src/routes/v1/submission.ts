@@ -22,6 +22,16 @@ router.get(
   }
 );
 
+// Submission create draft endpoint
+router.put('/draft', (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.createDraft(req, res, next);
+});
+
+// Submission update draft endpoint
+router.put('/draft/:activityId', (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.updateDraft(req, res, next);
+});
+
 // Submission create endpoint
 router.put('/', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createSubmission(req, res, next);
