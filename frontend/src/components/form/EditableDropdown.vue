@@ -43,7 +43,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       {{ label }}
     </label>
     <Dropdown
-      v-model.trim="value"
+      v-model="value"
       editable
       :aria-describedby="`${name}-help`"
       :name="name"
