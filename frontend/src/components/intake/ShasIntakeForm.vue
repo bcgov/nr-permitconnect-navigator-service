@@ -44,6 +44,17 @@ import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/uti
 
 import type { Ref } from 'vue';
 
+// Props
+type Props = {
+  activityId?: string;
+  submissionId?: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  activityId: undefined,
+  submissionId: undefined
+});
+
 // Constants
 const VALIDATION_BANNER_TEXT =
   'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
@@ -152,8 +163,23 @@ async function onSubmit(data: any) {
 }
 
 onBeforeMount(async () => {
+  let response;
+  if (props.activityId) {
+    response = (await submissionService.getSubmission(props.activityId)).data;
+  }
+
   // Default form values
   initialFormValues.value = {
+    activityId: response?.activityId,
+    submissionId: response?.submissionId,
+    applicant: {
+      firstName: response?.firstName,
+      lastName: response?.lastName,
+      phoneNumber: response?.contactPhoneNumber,
+      email: response?.contactEmail,
+      relationshipToProject: response?.contactApplicantRelationship,
+      contactPreference: response?.contactPreference
+    },
     location: {
       province: 'BC'
     }

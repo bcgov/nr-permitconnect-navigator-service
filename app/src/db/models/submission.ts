@@ -72,7 +72,9 @@ export default {
       check_provincial_permits: input.checkProvincialPermits,
       indigenous_description: input.indigenousDescription,
       non_profit_description: input.nonProfitDescription,
-      housing_coop_description: input.housingCoopDescription
+      housing_coop_description: input.housingCoopDescription,
+      contact_first_name: input.contactFirstName,
+      contact_last_name: input.contactLastName
     };
   },
 
@@ -134,6 +136,8 @@ export default {
       indigenousDescription: input.indigenous_description,
       nonProfitDescription: input.non_profit_description,
       housingCoopDescription: input.housing_coop_description,
+      contactFirstName: input.contact_first_name,
+      contactLastName: input.contact_last_name,
       user: null
     };
   },

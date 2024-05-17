@@ -32,20 +32,21 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/enquiry',
     name: RouteNames.ENQUIRY,
-    component: () => import('../views/EnquiryView.vue'),
-    meta: { title: 'Enquiry' }
+    component: () => import('../views/ShasEnquiryView.vue'),
+    meta: { requiresAuth: true, title: 'Enquiry' }
   },
   {
     path: '/intake',
     name: RouteNames.INTAKE,
     component: () => import('../views/ShasIntakeView.vue'),
-    meta: { requiresAuth: true, title: 'Intake' }
+    meta: { requiresAuth: true, title: 'Intake' },
+    props: createProps
   },
   {
     path: '/start',
     name: RouteNames.START,
     component: () => import('../views/StartView.vue'),
-    meta: { title: 'Start' }
+    meta: { requiresAuth: true, title: 'Start' }
   },
   {
     path: '/submission',
