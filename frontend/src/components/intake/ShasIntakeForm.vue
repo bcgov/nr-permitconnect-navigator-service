@@ -33,16 +33,21 @@ import { useTypeStore } from '@/store';
 import {
   ContactPreferenceList,
   NumResidentialUnits,
+  ProjectLocation,
   ProjectRelationshipList,
   RouteNames,
   YesNo,
   YesNoUnsure
 } from '@/utils/constants';
-import { BASIC_RESPONSES } from '@/utils/enums';
+import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
 import { deepToRaw } from '@/utils/utils';
-import { getIntakeSchema } from './ShasIntakeSchema';
+import { intakeSchema } from './ShasIntakeSchema';
 
 import type { Ref } from 'vue';
+
+// Constants
+const VALIDATION_BANNER_TEXT =
+  'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
 
 // Store
 const typeStore = useTypeStore();
@@ -54,23 +59,24 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
+const isSubmittable: Ref<boolean> = ref(false);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
-
-// Enums
-const enum PROJECT_LOCATION {
-  STREET_ADDRESS = 'Street address',
-  LOCATION_COORDINATES = 'Location coordinates'
-}
-
-// Constants
-const ProjectLocation = [PROJECT_LOCATION.STREET_ADDRESS, PROJECT_LOCATION.LOCATION_COORDINATES];
-const formSchema = getIntakeSchema(ProjectLocation);
+const validationErrors: Ref<string[]> = ref([]);
 
 // Actions
 const confirm = useConfirm();
 const toast = useToast();
+
+const checkSubmittable = (stepNumber: number) => {
+  if (stepNumber === 3) isSubmittable.value = true;
+};
+
+function displayErrors(a: any) {
+  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+}
 
 function confirmSubmit(data: any) {
   confirm.require({
@@ -156,18 +162,19 @@ onBeforeMount(async () => {
 
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
 });
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 </script>
 
 <template>
   <div v-if="!assignedActivityId">
     <Form
       v-if="initialFormValues"
+      id="form"
       v-slot="{ setFieldValue, values }"
       ref="formRef"
       keep-values
       :initial-values="initialFormValues"
-      :validation-schema="formSchema"
+      :validation-schema="intakeSchema"
+      @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
     >
       <input
@@ -180,7 +187,10 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
         name="activityId"
       />
 
-      <Stepper v-model:activeStep="activeStep">
+      <Stepper
+        v-model:activeStep="activeStep"
+        @update:active-step="checkSubmittable"
+      >
         <!--
       Basic info
       -->
@@ -192,9 +202,23 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
               :click-callback="clickCallback"
               title="Basic info"
               icon="fa-user"
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLICANT) ||
+                  validationErrors.includes(INTAKE_FORM_CATEGORIES.BASIC)
+              }"
             />
           </template>
           <template #content="{ nextCallback }">
+            <Message
+              v-if="validationErrors.length"
+              severity="error"
+              icon="pi pi-exclamation-circle"
+              :closable="false"
+              class="text-center mt-0"
+            >
+              {{ VALIDATION_BANNER_TEXT }}
+            </Message>
             <Card>
               <template #title>
                 <span class="section-header">Applicant Info</span>
@@ -333,9 +357,19 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
+              :class="{ 'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.HOUSING) }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
+            <Message
+              v-if="validationErrors.length"
+              severity="error"
+              icon="pi pi-exclamation-circle"
+              :closable="false"
+              class="text-center mt-0"
+            >
+              {{ VALIDATION_BANNER_TEXT }}
+            </Message>
             <Card>
               <template #title>
                 <span class="section-header">Help us learn more about your housing project</span>
@@ -689,9 +723,21 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
               :click-callback="clickCallback"
               title="Location"
               icon="fa-location-dot"
+              :class="{
+                'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.LOCATION)
+              }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
+            <Message
+              v-if="validationErrors.length"
+              severity="error"
+              icon="pi pi-exclamation-circle"
+              :closable="false"
+              class="text-center mt-0"
+            >
+              {{ VALIDATION_BANNER_TEXT }}
+            </Message>
             <Card>
               <template #title>
                 <div class="flex">
@@ -940,9 +986,23 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
               :click-callback="clickCallback"
               title="Permits & Reports"
               icon="fa-file"
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(INTAKE_FORM_CATEGORIES.PERMITS) ||
+                  validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLIED_PERMITS)
+              }"
             />
           </template>
           <template #content="{ prevCallback }">
+            <Message
+              v-if="validationErrors.length"
+              severity="error"
+              icon="pi pi-exclamation-circle"
+              :closable="false"
+              class="text-center mt-0"
+            >
+              {{ VALIDATION_BANNER_TEXT }}
+            </Message>
             <Card>
               <template #title>
                 <div class="flex">
@@ -1137,6 +1197,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
                                 class="col-4"
                                 :name="`investigatePermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
+                                `
                                 :options="getPermitTypes"
                                 :option-label="(e) => `${e.businessDomain}: ${e.name}`"
                                 option-value="permitTypeId"
@@ -1205,7 +1266,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
           label="Submit"
           type="submit"
           icon="pi pi-upload"
-          :disabled="!editable || activeStep !== 3"
+          :disabled="!editable || !isSubmittable"
         />
       </div>
     </Form>
@@ -1231,6 +1292,11 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 <style scoped lang="scss">
 .no-shadow {
   box-shadow: none;
+}
+
+:deep(.p-invalid),
+:deep(.p-card.p-component:has(.p-invalid)) {
+  border-color: $app-error !important;
 }
 
 .p-card {
