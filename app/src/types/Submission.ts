@@ -60,6 +60,8 @@ export type Submission = {
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;
+  contactFirstName: string | null;
+  contactLastName: string | null;
 
   user: User | null;
 } & Partial<IStamps>;
