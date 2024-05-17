@@ -5,6 +5,7 @@ export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
 export type { CurrentUser } from './CurrentUser';
 export type { Document } from './Document';
 export type { Email } from './Email';
+export type { Enquiry } from './Enquiry';
 export type { EmailAttachment } from './EmailAttachment';
 export type { IdentityProvider } from './IdentityProvider';
 export type { Note } from './Note';

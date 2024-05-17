@@ -95,15 +95,6 @@ export function getFileCategory(mimeType: string): string {
 }
 
 /**
- * @function isDebugMode
- * Checks if the app is currently running in debug mode
- * @returns {boolean} True if in debug, false otherwise
- */
-export function isDebugMode(): boolean {
-  return import.meta.env.MODE.toUpperCase() === 'DEBUG';
-}
-
-/**
  * @function getFilenameAndExtension
  * Separates a full filename into name and extension parts
  * @returns {filename: string, extension: string} An object containing filename and extension
@@ -117,6 +108,29 @@ export function getFilenameAndExtension(filename: string): { filename: string; e
   } else {
     return { filename, extension: undefined };
   }
+}
+
+/**
+ * @function isDebugMode
+ * Checks if the app is currently running in debug mode
+ * @returns {boolean} True if in debug, false otherwise
+ */
+export function isDebugMode(): boolean {
+  return import.meta.env.MODE.toUpperCase() === 'DEBUG';
+}
+
+/**
+ * @function isTruthy
+ * Returns true if the element name in the object contains a truthy value
+ * @param {object} value The object to evaluate
+ * @returns {boolean} True if truthy, false if not, and undefined if undefined
+ */
+export function isTruthy(value: unknown) {
+  if (value === undefined) return value;
+
+  const isStr = typeof value === 'string' || value instanceof String;
+  const trueStrings = ['true', 't', 'yes', 'y', '1'];
+  return value === true || value === 1 || (isStr && trueStrings.includes(value.toLowerCase()));
 }
 
 /**

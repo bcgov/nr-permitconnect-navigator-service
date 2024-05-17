@@ -70,7 +70,8 @@ export const PERMIT_STATUS = Object.freeze({
 /** Types of notes */
 export const NOTE_TYPE_LIST = Object.freeze({
   GENERAL: 'General',
-  BRING_FORWARD: 'Bring Forward'
+  BRING_FORWARD: 'Bring Forward',
+  ENQUIRY: 'Enquiry'
 });
 
 /**

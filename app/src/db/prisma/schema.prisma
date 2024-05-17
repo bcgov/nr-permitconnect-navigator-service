@@ -28,6 +28,7 @@ model activity {
   updated_at    DateTime?    @db.Timestamptz(6)
   initiative    initiative   @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
   document      document[]
+  enquiry       enquiry[]
   note          note[]
   permit        permit[]
   submission    submission[]
@@ -190,6 +191,8 @@ model submission {
   indigenous_description             String?
   non_profit_description             String?
   housing_coop_description           String?
+  contact_first_name                 String?
+  contact_last_name                  String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 }
@@ -208,10 +211,35 @@ model user {
   created_at        DateTime?          @default(now()) @db.Timestamptz(6)
   updated_by        String?
   updated_at        DateTime?          @db.Timestamptz(6)
+  enquiry           enquiry[]
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
+}
+
+model enquiry {
+  enquiry_id                     String    @id @db.Uuid
+  activity_id                    String
+  assigned_user_id               String?   @db.Uuid
+  submitted_at                   DateTime  @db.Timestamptz(6)
+  submitted_by                   String
+  contact_first_name             String?
+  contact_last_name              String?
+  contact_phone_number           String?
+  contact_email                  String?
+  contact_preference             String?
+  contact_applicant_relationship String?
+  is_related                     String?
+  related_activity_id            String?
+  enquiry_description            String?
+  apply_for_permit_connect       String?
+  created_by                     String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at                     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by                     String?
+  updated_at                     DateTime? @db.Timestamptz(6)
+  activity                       activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
+  user                           user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
 }
