@@ -53,8 +53,11 @@ const emit = defineEmits(['onChange']);
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>
-    <div>
-      <ErrorMessage :name="name" />
+    <div class="mt-2">
+      <ErrorMessage
+        :name="name"
+        class="app-error-message"
+      />
     </div>
   </div>
 </template>
