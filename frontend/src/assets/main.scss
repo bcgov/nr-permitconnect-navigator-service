@@ -119,6 +119,15 @@ label {
   }
 }
 
+.app-error-color {
+  color: $app-error !important;
+}
+
+.app-error-message {
+  color: $app-error;
+  font-size: 0.8rem;
+}
+
 /* ---------- primevue overrides ------------ */
 
 /* buttons */

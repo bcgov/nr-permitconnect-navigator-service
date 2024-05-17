@@ -3,7 +3,7 @@ import { mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
 import ShasIntakeForm from '@/components/intake/ShasIntakeForm.vue';
-import { getIntakeSchema } from '@/components/intake/ShasIntakeSchema';
+import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
 
 import { permitService } from '@/services';
 import { StorageKey } from '@/utils/constants';
@@ -129,21 +129,10 @@ describe('ShasIntakeForm tests', () => {
 
     const submitButton = wrapper.find('[type="submit"]');
     expect(submitButton.attributes('disabled')).toBeDefined();
-
-    // @ts-ignore
-    wrapper.vm.activeStep = 3;
-    await nextTick();
-
-    expect(submitButton.attributes('disabled')).not.toBeDefined();
   });
 
   it('checks categories for valid data', async () => {
-    const wrapper = mount(ShasIntakeForm, wrapperSettings());
-
-    // @ts-ignore
-    const validationSchema = getIntakeSchema(wrapper.vm.ProjectLocation);
-
-    const applicantTest = validationSchema.validateAt('applicant', {
+    const applicantTest = intakeSchema.validateAt('applicant', {
       applicant: {
         firstName: 'testFirstName',
         lastName: 'testLastName',
@@ -154,7 +143,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const basicTest = validationSchema.validateAt('basic', {
+    const basicTest = intakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: BASIC_RESPONSES.NO,
         isDevelopedInBC: BASIC_RESPONSES.NO,
@@ -162,7 +151,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTest = validationSchema.validateAt('housing', {
+    const housingTest = intakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -183,27 +172,28 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTest = validationSchema.validateAt('location', {
+    const locationTest = intakeSchema.validateAt('location', {
       location: {
+        naturalDisaster: 'Yes',
         projectLocation: 'testString1',
         streetAddress: 'testString2',
         locality: 'testString3',
         province: 'testString4',
-        latitude: '12',
+        latitude: '51',
         longitude: '-139',
         ltsaPIDLookup: '',
         geomarkUrl: ''
       }
     });
 
-    const permitsTest = validationSchema.validateAt('permits', {
+    const permitsTest = intakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BASIC_RESPONSES.NO,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTest = validationSchema.validateAt('appliedPermits', {
+    const appliedPermitsTest = intakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: 1,
@@ -222,12 +212,7 @@ describe('ShasIntakeForm tests', () => {
   });
 
   it('checks categories for successful fail', async () => {
-    const wrapper = mount(ShasIntakeForm, wrapperSettings());
-
-    // @ts-ignore
-    const validationSchema = getIntakeSchema(wrapper.vm.ProjectLocation);
-
-    const applicantTestFail = validationSchema.validateAt('applicant', {
+    const applicantTestFail = intakeSchema.validateAt('applicant', {
       applicant: {
         firstName: '',
         lastName: 'testLastName',
@@ -238,7 +223,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const basicTestFail = validationSchema.validateAt('basic', {
+    const basicTestFail = intakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: 'testString1',
         isDevelopedInBC: 'testString2',
@@ -246,7 +231,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTestFail = validationSchema.validateAt('housing', {
+    const housingTestFail = intakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -266,7 +251,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTestFail = validationSchema.validateAt('location', {
+    const locationTestFail = intakeSchema.validateAt('location', {
       location: {
         projectLocation: '',
         streetAddress: 'testString2',
@@ -279,14 +264,14 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const permitsTestFail = validationSchema.validateAt('permits', {
+    const permitsTestFail = intakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BASIC_RESPONSES.YES,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTestFail = validationSchema.validateAt('appliedPermits', {
+    const appliedPermitsTestFail = intakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: '',
