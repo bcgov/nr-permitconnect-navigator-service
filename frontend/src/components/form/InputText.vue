@@ -34,10 +34,7 @@ const fieldActive: Ref<boolean> = ref(false);
 
 <template>
   <div class="field">
-    <FloatLabel
-      v-if="props.floatLabel"
-      class="mb-3"
-    >
+    <FloatLabel v-if="props.floatLabel">
       <InputTextInternal v-bind="props" />
     </FloatLabel>
     <InputTextInternal
@@ -52,8 +49,11 @@ const fieldActive: Ref<boolean> = ref(false);
     >
       {{ helpText }}
     </small>
-    <div>
-      <ErrorMessage :name="name" />
+    <div class="mt-2">
+      <ErrorMessage
+        :name="name"
+        class="app-error-message"
+      />
     </div>
   </div>
 </template>

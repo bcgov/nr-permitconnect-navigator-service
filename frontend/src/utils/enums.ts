@@ -37,6 +37,15 @@ export const enum APPLICATION_STATUS_LIST {
   COMPLETED = 'Completed'
 }
 
+export const enum INTAKE_FORM_CATEGORIES {
+  APPLICANT = 'applicant',
+  BASIC = 'basic',
+  HOUSING = 'housing',
+  LOCATION = 'location',
+  PERMITS = 'permits',
+  APPLIED_PERMITS = 'appliedPermits'
+}
+
 export const enum INTAKE_STATUS_LIST {
   SUBMITTED = 'Submitted',
   ASSIGNED = 'Assigned',
@@ -110,4 +119,12 @@ export const enum NUM_RESIDENTIAL_UNITS {
   FIFTY_TO_FIVE_HUNDRED = '50-500',
   GREATER_THAN_FIVE_HUNDRED = '>500',
   UNSURE = 'Unsure'
+}
+
+/**
+ * Project location selection
+ */
+export const enum PROJECT_LOCATION {
+  STREET_ADDRESS = 'Street address',
+  LOCATION_COORDINATES = 'Location coordinates'
 }
