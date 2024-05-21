@@ -1,6 +1,5 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount, RouterLinkStub } from '@vue/test-utils';
-import { nextTick } from 'vue';
 
 import ShasIntakeForm from '@/components/intake/ShasIntakeForm.vue';
 import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
