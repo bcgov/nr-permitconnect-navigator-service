@@ -215,9 +215,3 @@ model user {
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
 }
-
-enum yes_no_unsure {
-  Yes
-  No
-  Unsure
-}

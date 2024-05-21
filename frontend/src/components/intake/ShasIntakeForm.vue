@@ -16,6 +16,7 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
+import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -40,8 +41,6 @@ import {
   YesNoUnsure
 } from '@/utils/constants';
 import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
-import { deepToRaw } from '@/utils/utils';
-import { intakeSchema } from './ShasIntakeSchema';
 
 import type { Ref } from 'vue';
 
