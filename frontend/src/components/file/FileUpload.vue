@@ -12,9 +12,10 @@ import type { Ref } from 'vue';
 // Props
 type Props = {
   activityId: string;
+  disabled?: boolean;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), { disabled: false });
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -27,25 +28,39 @@ const fileInput: Ref<any> = ref(null);
 const toast = useToast();
 
 const onFileUploadClick = () => {
+  if (props.disabled) {
+    toast.info('Document uploading is currently disabled');
+    return;
+  }
+
   fileInput.value.click();
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
-  onUpload(Array.isArray(event.files) ? event.files[0] : event.files);
+  if (props.disabled) {
+    toast.info('Document uploading is currently disabled');
+    return;
+  }
+
+  onUpload(Array.isArray(event.files) ? event.files : [event.files]);
 };
 
-const onUpload = async (file: File) => {
-  try {
-    const response = (await documentService.createDocument(file, props.activityId, getConfig.value.coms.bucketId))
-      ?.data;
+const onUpload = async (files: Array<File>) => {
+  await Promise.allSettled(
+    files.map(async (file: File) => {
+      try {
+        const response = (await documentService.createDocument(file, props.activityId, getConfig.value.coms.bucketId))
+          ?.data;
 
-    if (response) {
-      submissionStore.addDocument(response);
-      toast.success('Document uploaded');
-    }
-  } catch (e: any) {
-    toast.error('Failed to upload document', e);
-  }
+        if (response) {
+          submissionStore.addDocument(response);
+          toast.success('Document uploaded');
+        }
+      } catch (e: any) {
+        toast.error('Failed to upload document', e);
+      }
+    })
+  );
 };
 </script>
 
@@ -53,9 +68,10 @@ const onUpload = async (file: File) => {
   <div class="hover-hand hover-shadow">
     <FileUpload
       name="fileUpload"
-      :multiple="false"
+      :multiple="true"
       :custom-upload="true"
       :auto="true"
+      :disabled="props.disabled"
       @uploader="onFileUploadDragAndDrop"
       @click="onFileUploadClick"
     >
@@ -88,7 +104,8 @@ const onUpload = async (file: File) => {
       type="file"
       style="display: none"
       accept="*"
-      @change="(event: any) => onUpload(event.target.files[0])"
+      multiple
+      @change="(event: any) => onUpload(Array.from(event.target.files))"
       @click="(event: any) => (event.target.value = null)"
     />
   </div>
