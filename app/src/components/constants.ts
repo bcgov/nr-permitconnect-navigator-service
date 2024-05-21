@@ -78,3 +78,42 @@ export const NOTE_TYPE_LIST = Object.freeze({
  * @see {@link https://emailregex.com/}
  */
 export const EMAIL_REGEX = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$';
+export const PHONE_NUMBER_REGEX = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$';
+/**
+ * Basic
+ */
+
+export const YES_NO = Object.freeze({
+  YES: 'Yes',
+  NO: 'No'
+});
+
+export const YES_NO_UNSURE = Object.freeze({
+  YES: 'Yes',
+  NO: 'No',
+  UNSURE: 'Unsure'
+});
+
+/**
+ * Number of residential units
+ */
+
+export const NUM_RESIDENTIAL_UNITS = Object.freeze({
+  ONE_TO_NINE: '1-9',
+  TEN_TO_FOURTY_NINE: '10-49',
+  FIFTY_TO_FIVE_HUNDRED: '50-500',
+  GREATER_THAN_FIVE_HUNDRED: '>500',
+  UNSURE: 'Unsure'
+});
+
+/**
+ * Max character length for input text boxes
+ */
+
+export const TEXT_MAX_LENGTH = 255;
+
+/**
+ * Max character length for phone numbers
+ */
+
+export const PHONE_NUMBER_MAX_LENGTH = 10;

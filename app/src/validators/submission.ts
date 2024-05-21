@@ -1,10 +1,27 @@
 import Joi from 'joi';
 
-import { YesNoUnsure } from '../components/constants';
+import { applicantSchema } from './applicant';
+import { appliedPermitsSchema } from './appliedPermits';
+import { basicSchema } from './basic';
 import { activityId, emailJoi, uuidv4 } from './common';
+import { YesNoUnsure } from '../components/constants';
+import { housingSchema } from './housing';
+import { permitsSchema } from './permits';
 import { validate } from '../middleware/validation';
 
 const schema = {
+  createSubmission: {
+    body: Joi.object({
+      applicant: applicantSchema,
+      appliedPermits: Joi.array().items(appliedPermitsSchema).allow(null),
+      basic: basicSchema,
+      housing: housingSchema,
+      investigatePermits: Joi.array()
+        .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+        .allow(null),
+      permits: permitsSchema
+    })
+  },
   getStatistics: {
     query: Joi.object({
       dateFrom: Joi.date().allow(null),
@@ -74,5 +91,6 @@ const schema = {
 export default {
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
+  createSubmission: validate(schema.createSubmission),
   updateSubmission: validate(schema.updateSubmission)
 };
