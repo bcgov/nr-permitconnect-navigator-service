@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { toRef, ref } from 'vue';
+import { toRef } from 'vue';
 import { useField } from 'vee-validate';
 
 import { InputText } from '@/lib/primevue';
-
-import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -32,7 +30,7 @@ const fieldActive = defineModel<boolean>('fieldActive');
     {{ label }}
   </label>
   <InputText
-    v-model.trim="value"
+    v-model="value"
     :aria-describedby="`${name}-help`"
     :name="name"
     :placeholder="placeholder"
