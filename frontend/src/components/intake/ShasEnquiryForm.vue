@@ -2,13 +2,13 @@
 import { Form } from 'vee-validate';
 import { onBeforeMount, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
-import { object } from 'yup';
+import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
-import { ContactPreferenceList, ProjectRelationshipList, RouteNames, YesNo } from '@/utils/constants';
-import { BASIC_RESPONSES } from '@/utils/enums';
+import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
+import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES } from '@/utils/enums';
 
 import type { Ref } from 'vue';
 
@@ -17,9 +17,33 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
-const formSchema = object({});
+const formSchema = object({
+  [INTAKE_FORM_CATEGORIES.APPLICANT]: object({
+    firstName: string().required().max(255).label('First name'),
+    lastName: string().required().max(255).label('Last name'),
+    phoneNumber: string().required().max(255).label('Phone number'),
+    email: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+    relationshipToProject: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
+    contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference')
+  }),
+  [INTAKE_FORM_CATEGORIES.BASIC]: object({
+    isRelated: string().required().oneOf(YesNo).label('Related to existing application'),
+    relatedActivityId: string().when('isRelated', {
+      is: (isRelated: string) => isRelated === BASIC_RESPONSES.YES,
+      then: (schema) => schema.required().max(255).label('Confirmation ID')
+    }),
+    enquiryDescription: string().required().label('Enquiry'),
+    applyForPermitConnect: string()
+      .label('Service application')
+      .when('isRelated', {
+        is: (isRelated: string) => isRelated === BASIC_RESPONSES.NO,
+        then: (schema) => schema.required().oneOf(YesNo)
+      })
+  })
+});
 
 // Actions
 const confirm = useConfirm();
@@ -48,6 +72,12 @@ function confirmSubmit(data: any) {
     accept: () => onSubmit(data)
   });
 }
+
+function displayErrors(a: any) {
+  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+}
+
 async function onSaveDraft(data: any) {
   editable.value = false;
 
@@ -135,6 +165,7 @@ onBeforeMount(async () => {
       keep-values
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
+      @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
     >
       <input
@@ -377,5 +408,10 @@ onBeforeMount(async () => {
 
 :deep(.p-message-wrapper) {
   padding: 0.5rem;
+}
+
+:deep(.p-invalid),
+:deep(.p-card.p-component:has(.p-invalid)) {
+  border-color: $app-error !important;
 }
 </style>
