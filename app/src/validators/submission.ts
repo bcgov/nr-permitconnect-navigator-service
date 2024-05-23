@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 import { applicantSchema } from './applicant';
 import { appliedPermitsSchema } from './appliedPermits';
-import { basicSchema } from './basic';
+import { basicIntakeSchema } from './basic';
 import { activityId, emailJoi, uuidv4 } from './common';
 import { YesNoUnsure } from '../components/constants';
 import { housingSchema } from './housing';
@@ -10,11 +10,16 @@ import { permitsSchema } from './permits';
 import { validate } from '../middleware/validation';
 
 const schema = {
+  createDraft: {
+    body: Joi.object({
+      applicant: applicantSchema
+    })
+  },
   createSubmission: {
     body: Joi.object({
       applicant: applicantSchema,
       appliedPermits: Joi.array().items(appliedPermitsSchema).allow(null),
-      basic: basicSchema,
+      basic: basicIntakeSchema,
       housing: housingSchema,
       investigatePermits: Joi.array()
         .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
@@ -89,8 +94,9 @@ const schema = {
 };
 
 export default {
+  createDraft: validate(schema.createDraft),
+  createSubmission: validate(schema.createSubmission),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
-  createSubmission: validate(schema.createSubmission),
   updateSubmission: validate(schema.updateSubmission)
 };

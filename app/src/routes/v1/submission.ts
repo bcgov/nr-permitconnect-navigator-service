@@ -23,7 +23,7 @@ router.get(
 );
 
 // Submission create draft endpoint
-router.put('/draft', (req: Request, res: Response, next: NextFunction): void => {
+router.put('/draft', submissionValidator.createDraft, (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createDraft(req, res, next);
 });
 
