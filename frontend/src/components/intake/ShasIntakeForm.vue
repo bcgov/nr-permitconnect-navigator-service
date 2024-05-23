@@ -109,7 +109,6 @@ function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, pus
     }
   } else {
     setFieldValue('appliedPermits', undefined);
-    setFieldValue('permits.checkPermits', undefined);
   }
 }
 
@@ -196,7 +195,6 @@ onBeforeMount(async () => {
       id="form"
       v-slot="{ setFieldValue, values }"
       ref="formRef"
-      keep-values
       :initial-values="initialFormValues"
       :validation-schema="intakeSchema"
       @invalid-submit="(e) => displayErrors(e)"
@@ -572,11 +570,8 @@ onBeforeMount(async () => {
                       () => {
                         setFieldValue('housing.financiallySupportedBC', BASIC_RESPONSES.NO);
                         setFieldValue('housing.financiallySupportedIndigenous', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.indigenousDescription', undefined);
                         setFieldValue('housing.financiallySupportedNonProfit', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.nonProfitDescription', undefined);
                         setFieldValue('housing.financiallySupportedHousingCoop', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.housingCoopDescription', undefined);
                       }
                     "
                   >
@@ -635,12 +630,6 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="YesNoUnsure"
-                    @on-change="
-                      (e) => {
-                        console.log(e);
-                        if (e !== BASIC_RESPONSES.YES) setFieldValue('housing.indigenousDescription', undefined);
-                      }
-                    "
                   />
                   <div class="col-12">
                     <InputText
@@ -667,12 +656,6 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="YesNoUnsure"
-                    @on-change="
-                      (e) => {
-                        console.log(e);
-                        if (e !== BASIC_RESPONSES.YES) setFieldValue('housing.nonProfitDescription', undefined);
-                      }
-                    "
                   />
                   <div class="col-12">
                     <InputText
@@ -699,12 +682,6 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="YesNoUnsure"
-                    @on-change="
-                      (e) => {
-                        console.log(e);
-                        if (e !== BASIC_RESPONSES.YES) setFieldValue('housing.housingCoopDescription', undefined);
-                      }
-                    "
                   />
                   <div class="col-12">
                     <InputText
