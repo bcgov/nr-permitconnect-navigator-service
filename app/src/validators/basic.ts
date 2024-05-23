@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { stringRequiredMaxLengthTrim, stringRequiredYesNo } from './common';
-import { YES_NO, YesNo } from '../components/constants';
+import { YES_NO } from '../components/constants';
 
 export const basicIntakeSchema = Joi.object({
   isDevelopedByCompanyOrOrg: stringRequiredYesNo,
@@ -15,9 +15,9 @@ export const basicIntakeSchema = Joi.object({
 
 export const basicEnquirySchema = Joi.object({
   isRelated: Joi.string()
-    .valid(...Object.values(YesNo))
+    .valid(...Object.values(YES_NO))
     .required(),
-  applyForPermitConnect: Joi.string().valid(...Object.values(YesNo)),
+  applyForPermitConnect: Joi.string().valid(...Object.values(YES_NO)),
   enquiryDescription: Joi.string().required(),
   relatedActivityId: Joi.string().max(255)
 });

@@ -7,8 +7,8 @@ import {
   Initiatives,
   PERMIT_NEEDED,
   PERMIT_STATUS,
-  YesNo,
-  YesNoUnsure
+  YES_NO,
+  YES_NO_UNSURE
 } from '../components/constants';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, toTitleCase } from '../components/utils';
 import { activityService, submissionService, permitService, userService } from '../services';
@@ -46,16 +46,16 @@ const controller = {
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
             const financiallySupportedValues = {
-              financiallySupportedBC: data.isBCHousingSupported ? toTitleCase(data.isBCHousingSupported) : YesNo.NO,
+              financiallySupportedBC: data.isBCHousingSupported ? toTitleCase(data.isBCHousingSupported) : YES_NO.NO,
               financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
                 ? toTitleCase(data.isIndigenousHousingProviderSupported)
-                : YesNo.NO,
+                : YES_NO.NO,
               financiallySupportedNonProfit: data.isNonProfitSupported
                 ? toTitleCase(data.isNonProfitSupported)
-                : YesNo.NO,
+                : YES_NO.NO,
               financiallySupportedHousingCoop: data.isHousingCooperativeSupported
                 ? toTitleCase(data.isHousingCooperativeSupported)
-                : YesNo.NO
+                : YES_NO.NO
             };
 
             // Get greatest of multiple Units data
@@ -131,7 +131,7 @@ const controller = {
               contactPhoneNumber: data.contactPhoneNumber,
               contactName: `${data.contactFirstName} ${data.contactLastName}`,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
-              financiallySupported: Object.values(financiallySupportedValues).includes(YesNo.YES),
+              financiallySupported: Object.values(financiallySupportedValues).includes(YES_NO.YES),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
               locationPIDs: data.parcelID,
@@ -142,7 +142,7 @@ const controller = {
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : YesNoUnsure.UNSURE,
+                : YES_NO_UNSURE.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
@@ -221,7 +221,7 @@ const controller = {
 
     if (data.location) {
       location = {
-        naturalDisaster: data.location.naturalDisaster === YesNo.YES,
+        naturalDisaster: data.location.naturalDisaster === YES_NO.YES,
         projectLocation: data.location.projectLocation,
         locationPIDs: data.location.ltsaPIDLookup,
         latitude: data.location.latitude,

@@ -14,12 +14,6 @@ export const DEFAULTCORS = Object.freeze({
   origin: true
 });
 
-/**
- * Basic
- */
-export const YesNo = Object.freeze({ YES: 'Yes', NO: 'No' });
-export const YesNoUnsure = Object.freeze({ YES: 'Yes', NO: 'No', UNSURE: 'Unsure' });
-
 /** Current user authentication types */
 export const IdentityProvider = Object.freeze({
   IDIR: 'idir',

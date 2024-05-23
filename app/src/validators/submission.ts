@@ -4,7 +4,7 @@ import { applicantSchema } from './applicant';
 import { appliedPermitsSchema } from './appliedPermits';
 import { basicIntakeSchema } from './basic';
 import { activityId, emailJoi, uuidv4 } from './common';
-import { YesNoUnsure } from '../components/constants';
+import { YES_NO_UNSURE } from '../components/constants';
 import { housingSchema } from './housing';
 import { permitsSchema } from './permits';
 import { validate } from '../middleware/validation';
@@ -58,7 +58,7 @@ const schema = {
       projectDescription: Joi.string().min(0).allow(null),
       companyNameRegistered: Joi.string().min(0).max(255).allow(null),
       singleFamilyUnits: Joi.string().min(0).max(255).allow(null),
-      isRentalUnit: Joi.string().valid(...Object.values(YesNoUnsure)),
+      isRentalUnit: Joi.string().valid(...Object.values(YES_NO_UNSURE)),
       streetAddress: Joi.string().min(0).max(255).allow(null),
       latitude: Joi.number().max(255).allow(null),
       longitude: Joi.number().max(255).allow(null),

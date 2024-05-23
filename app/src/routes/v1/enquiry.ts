@@ -4,12 +4,12 @@ import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { enquiryValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { Middleware } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const decideValidation = (validator: any) => {
+const decideValidation = (validator: Middleware) => {
   return (req: Request, _res: Response, next: NextFunction) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const body: any = req.body;
