@@ -17,7 +17,7 @@ import { LoginButton } from '@/components/layout';
           </a>
         </div>
         <div class="flex flex-grow-1 ml-2">
-          <h2 class="m-0">NR PermitConnect Navigator Service</h2>
+          <h2 class="m-0">Permit Connect Services</h2>
         </div>
         <div class="flex flex-none lg:mr-6 ml-2">
           <LoginButton />

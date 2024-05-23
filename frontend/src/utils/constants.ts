@@ -37,7 +37,8 @@ export const RouteNames = Object.freeze({
   ENQUIRY: 'enquiry',
   FORBIDDEN: 'forbidden',
   HOME: 'home',
-  INITIATIVES: 'initiatives',
+
+  HOUSING: 'housing',
   INTAKE: 'intake',
   LOGIN: 'login',
   LOGOUT: 'logout',

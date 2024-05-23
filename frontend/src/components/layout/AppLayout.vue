@@ -3,7 +3,7 @@ import { Header, Footer } from '@/components/layout';
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-column">
+  <div class="flex flex-column h-screen">
     <!-- Header/Nav -->
     <div class="layout-head">
       <Header />
