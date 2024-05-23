@@ -8,6 +8,7 @@ export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
 export type { EmailAttachment } from './EmailAttachment';
 export type { IdentityProvider } from './IdentityProvider';
+export type { Middleware } from './Middleware';
 export type { Note } from './Note';
 export type { Permit } from './Permit';
 export type { PermitType } from './PermitType';

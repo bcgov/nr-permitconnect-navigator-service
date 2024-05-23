@@ -14,12 +14,6 @@ export const DEFAULTCORS = Object.freeze({
   origin: true
 });
 
-/**
- * Basic
- */
-export const YesNo = Object.freeze({ YES: 'Yes', NO: 'No' });
-export const YesNoUnsure = Object.freeze({ YES: 'Yes', NO: 'No', UNSURE: 'Unsure' });
-
 /** Current user authentication types */
 export const IdentityProvider = Object.freeze({
   IDIR: 'idir',
@@ -117,4 +111,4 @@ export const TEXT_MAX_LENGTH = 255;
  * Max character length for phone numbers
  */
 
-export const PHONE_NUMBER_MAX_LENGTH = 10;
+export const PHONE_NUMBER_MAX_LENGTH = 14;
