@@ -1,4 +1,4 @@
-import { YesNoUnsure } from '../../components/constants';
+import { YES_NO_UNSURE } from '../../components/constants';
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
     knex.schema.alterTable('submission', function (table) {
       table.text('contact_preference');
       table.text('contact_applicant_relationship');
-      table.text('is_rental_unit').notNullable().defaultTo(YesNoUnsure.UNSURE);
+      table.text('is_rental_unit').notNullable().defaultTo(YES_NO_UNSURE.UNSURE);
       table.text('project_description');
     })
   );

@@ -1,12 +1,7 @@
 import Joi from 'joi';
 
 import { applicantSchema } from './applicant';
-// import { appliedPermitsSchema } from './appliedPermits';
 import { basicEnquirySchema } from './basic';
-// import { activityId, emailJoi, uuidv4 } from './common';
-// import { YesNo } from '../components/constants';
-// import { housingSchema } from './housing';
-// import { permitsSchema } from './permits';
 import { validate } from '../middleware/validation';
 
 const schema = {
