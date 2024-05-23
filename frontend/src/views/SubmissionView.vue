@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { filesize } from 'filesize';
+import { computed, onMounted, ref } from 'vue';
 
+import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
@@ -10,10 +12,11 @@ import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/submission/SubmissionForm.vue';
-import { Button, TabPanel, TabView } from '@/lib/primevue';
+import { Button, Column, DataTable, TabPanel, TabView, IconField, InputIcon, InputText } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
+import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 
@@ -27,6 +30,19 @@ const props = withDefaults(defineProps<Props>(), {
   initialTab: '0'
 });
 
+//Constants
+const SORT_ORDER = {
+  ASCENDING: 1,
+  DESCENDING: -1
+};
+const SORT_TYPES = {
+  CREATED_AT: 'createdAt',
+  FILENAME: 'filename',
+  FILESIZE: 'filesize',
+  MIME_TYPE: 'mimeType',
+  CREATED_BY: 'createdByFullName'
+};
+
 // Store
 const submissionStore = useSubmissionStore();
 const { getDocuments, getNotes, getPermits, getPermitTypes, getSubmission } = storeToRefs(submissionStore);
@@ -36,6 +52,10 @@ const activeTab: Ref<number> = ref(Number(props.initialTab));
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
+const gridView: Ref<boolean> = ref(false);
+const searchTag: Ref<string> = ref('');
+const sortOrder: Ref<number> = ref(Number(SORT_ORDER.DESCENDING));
+const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Actions
 onMounted(async () => {
@@ -54,8 +74,44 @@ onMounted(async () => {
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
   submissionStore.setPermitTypes(permitTypes);
-
   loading.value = false;
+});
+
+// Actions
+
+function sortComparator(sortValue: number, a: any, b: any) {
+  return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
+}
+
+const filteredDocuments = computed(() => {
+  let tempDocuments = getDocuments.value;
+  tempDocuments = tempDocuments.filter((x) => {
+    return searchTag.value ? x.filename.toLowerCase().includes(searchTag.value.toLowerCase()) : x;
+  });
+  switch (sortType.value) {
+    case SORT_TYPES.FILENAME:
+      tempDocuments = tempDocuments.sort((a, b) =>
+        sortComparator(sortOrder.value, a.filename.toLowerCase(), b.filename.toLowerCase())
+      );
+      break;
+    case SORT_TYPES.CREATED_AT:
+      tempDocuments = tempDocuments.sort((a, b) => sortComparator(sortOrder.value, a.createdAt ?? 0, b.createdAt ?? 0));
+      break;
+    case SORT_TYPES.FILESIZE:
+      tempDocuments = tempDocuments.sort((a, b) => sortComparator(sortOrder.value, a.filesize, b.filesize));
+      break;
+    case SORT_TYPES.MIME_TYPE:
+      tempDocuments = tempDocuments.sort((a, b) =>
+        sortComparator(sortOrder.value, a.mimeType.toLowerCase(), b.mimeType.toLowerCase())
+      );
+      break;
+    case SORT_TYPES.CREATED_BY:
+      tempDocuments = tempDocuments.sort((a, b) =>
+        sortComparator(sortOrder.value, a.createdByFullName.toLowerCase(), b.createdByFullName.toLowerCase())
+      );
+      break;
+  }
+  return tempDocuments;
 });
 </script>
 
@@ -88,17 +144,104 @@ onMounted(async () => {
       </span>
     </TabPanel>
     <TabPanel header="Files">
-      <div class="grid nested-grid">
-        <div class="col-2">
-          <FileUpload :activity-id="props.activityId" />
+      <div class="mb-3 border-dashed file-upload border-round-md">
+        <FileUpload
+          :activity-id="props.activityId"
+          class=""
+        />
+      </div>
+      <div class="flex flex-row justify-content-between pb-3">
+        <div class="flex align-items-center">
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="searchTag"
+              placeholder="Search"
+            />
+          </IconField>
         </div>
-        <div class="col-10">
+        <div class="align-items-end">
+          <Button
+            aria-label="List"
+            class="view-switch-button"
+            @click="gridView = false"
+          >
+            <font-awesome-icon
+              icon="fa-solid fa-list"
+              class="fa-lg"
+              :class="gridView ? 'list-grid-deselected-icon' : 'list-grid-selected-icon'"
+            />
+          </Button>
+          <Button
+            aria-label="Grid"
+            class="view-switch-button"
+            @click="gridView = true"
+          >
+            <font-awesome-icon
+              icon="fa-solid fa-grip"
+              class="fa-lg"
+              :class="gridView ? 'list-grid-selected-icon' : 'list-grid-deselected-icon'"
+            />
+          </Button>
+        </div>
+      </div>
+      <div
+        v-if="gridView"
+        class="grid nested-grid"
+      >
+        <DataTable
+          v-if="gridView"
+          class="remove-padding ml-2 mr-2 w-full"
+          :sort-field="SORT_TYPES.CREATED_AT"
+          :sort-order="SORT_ORDER.DESCENDING"
+          @update:sort-order="
+            (order: number) => {
+              sortOrder = order;
+            }
+          "
+          @update:sort-field="
+            (field: string) => {
+              sortType = field;
+            }
+          "
+        >
+          <template #empty>
+            <div class="flex justify-content-center" />
+          </template>
+          <Column
+            sortable
+            field="filename"
+            header="File name"
+            class="w-9rem"
+          />
+          <Column
+            field="createdAt"
+            sortable
+            header="Upload date"
+            class="w-10rem"
+          />
+          <Column
+            field="filesize"
+            sortable
+            header="Size"
+            class="w-6rem"
+          />
+          <Column
+            field="mimeType"
+            sortable
+            header="Type"
+            class="w-10rem"
+          />
+          <Column />
+        </DataTable>
+
+        <div class="col-12">
           <div class="grid">
             <div
-              v-for="(document, index) in getDocuments"
+              v-for="(document, index) in filteredDocuments"
               :key="document.documentId"
               :index="index"
-              class="col-12 md:col-6 lg:col-4 xl:col-3"
+              class="col-12 md:col-6 lg:col-4 xl:col-2"
             >
               <DocumentCard
                 :document="document"
@@ -109,6 +252,68 @@ onMounted(async () => {
           </div>
         </div>
       </div>
+      <DataTable
+        v-if="!gridView"
+        :value="filteredDocuments"
+        :sort-field="SORT_TYPES.CREATED_AT"
+        :sort-order="SORT_ORDER.DESCENDING"
+        :row-hover="true"
+      >
+        <Column
+          field="filename"
+          header="File name"
+          sortable
+        >
+          <template #body="{ data }">
+            <a
+              href="#"
+              @click="documentService.downloadDocument(data.documentId)"
+            >
+              {{ data.filename }}
+            </a>
+          </template>
+        </Column>
+        <Column
+          field="createdAt"
+          header="Upload date"
+          sortable
+        >
+          <template #body="{ data }">
+            {{ formatDateLong(data.createdAt) }}
+          </template>
+        </Column>
+        <Column
+          field="filesize"
+          header="Size"
+          sortable
+        >
+          <template #body="{ data }">
+            {{ filesize(data.filesize) }}
+          </template>
+        </Column>
+        <Column
+          field="mimeType"
+          header="Type"
+          sortable
+        />
+        <Column
+          field="createdByFullName"
+          header="Uploaded by"
+          sortable
+        />
+        <Column field="fileAction">
+          <template #header>
+            <div class="flex justify-content-center w-full">
+              <b>Action</b>
+            </div>
+          </template>
+          <template #body="{ data }">
+            <div class="flex justify-content-center">
+              <DeleteDocument :document="data" />
+            </div>
+          </template>
+        </Column>
+      </DataTable>
     </TabPanel>
     <TabPanel header="Permits">
       <span v-if="getPermitTypes.length">
@@ -187,6 +392,38 @@ onMounted(async () => {
   .p-tabview-title {
     font-size: 1.1rem;
     font-weight: bold;
+  }
+}
+
+:deep(.remove-padding.p-datatable .p-datatable-tbody > tr > td) {
+  display: none;
+}
+
+.p-button.p-component.view-switch-button {
+  background-color: transparent;
+  border: none;
+  padding-left: 0;
+}
+
+.list-grid-selected-icon {
+  color: $app-primary;
+}
+
+.list-grid-deselected-icon {
+  color: $app-out-of-focus;
+  &:hover {
+    color: $app-hover;
+  }
+}
+
+.p-inputtext.p-component {
+  width: 20rem;
+}
+
+.file-upload {
+  color: $app-out-of-focus;
+  &:hover {
+    color: $app-hover;
   }
 }
 </style>

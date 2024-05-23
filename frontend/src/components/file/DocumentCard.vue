@@ -2,9 +2,8 @@
 import { filesize } from 'filesize';
 import { ref } from 'vue';
 
-import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { documentService } from '@/services';
-import { useSubmissionStore } from '@/store';
+import DeleteDocument from '@/components/file/DeleteDocument.vue';
+import { Card } from '@/lib/primevue';
 import { FILE_CATEGORIES } from '@/utils/constants';
 import { formatDateLong } from '@/utils/formatters';
 import { getFileCategory } from '@/utils/utils';
@@ -38,36 +37,10 @@ const props = withDefaults(defineProps<Props>(), {
 // Emits
 const emit = defineEmits(['document:clicked']);
 
-// Store
-const submissionStore = useSubmissionStore();
-
 // State
 const isSelected: Ref<boolean> = ref(props.selected);
 
 // Actions
-const confirm = useConfirm();
-const toast = useToast();
-
-const confirmDelete = (document: Document) => {
-  if (document) {
-    confirm.require({
-      message: `Please confirm that you want to delete ${document.filename}.`,
-      header: 'Delete document?',
-      acceptLabel: 'Confirm',
-      rejectLabel: 'Cancel',
-      accept: () => {
-        documentService
-          .deleteDocument(document.documentId)
-          .then(() => {
-            submissionStore.removeDocument(document);
-            toast.success('Document deleted');
-          })
-          .catch((e: any) => toast.error('Failed to deleted document', e.message));
-      }
-    });
-  }
-};
-
 const displayIcon = (mimeType = '') => {
   const icon = getFileCategory(mimeType);
 
@@ -101,7 +74,7 @@ function onClick() {
 
 <template>
   <Card
-    class="pb-1 text-center"
+    class="pb-1 text-center border-round-xl"
     :class="{ clicked: isSelected }"
     @click="onClick"
   >
@@ -115,35 +88,27 @@ function onClick() {
     <template #content>
       <div class="grid">
         <div
-          v-tooltip.bottom="props.document.filename"
+          v-tooltip.bottom="`${props.document.filename} Uploaded by ${props.document.createdByFullName}`"
           class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap"
           style="overflow: hidden"
         >
-          {{ props.document.filename }}
+          <a href="#">{{ props.document.filename }}</a>
         </div>
-        <h6 class="col-8 text-left mt-0 mb-0">
-          {{ formatDateLong(props.document.createdAt as string) }}
+        <h6 class="col-8 text-left mt-0 mb-0 pt-0 pb-0">
+          {{ formatDateLong(props.document.createdAt as string).split(',')[0] }},
         </h6>
-        <h6 class="col-4 text-right mt-0 mb-0">
-          {{ filesize(props.document.filesize) }}
+        <h6 class="col-8 text-left mt-1 mb-0 pt-0 pb-0">
+          {{ formatDateLong(props.document.createdAt as string).split(',')[1] }}
         </h6>
       </div>
     </template>
     <template #footer>
-      <Button
-        v-if="deleteButton"
-        v-tooltip.bottom="'Delete document'"
-        class="p-button-lg p-button-text p-button-danger p-0"
-        aria-label="Delete object"
-        @click="
-          (e) => {
-            confirmDelete(props.document);
-            e.stopPropagation();
-          }
-        "
-      >
-        <font-awesome-icon icon="fa-solid fa-trash" />
-      </Button>
+      <div class="flex justify-content-between">
+        <h6 class="col-4 text-left mt-0 mb-0 pl-0 inline-block">
+          {{ filesize(props.document.filesize) }}
+        </h6>
+        <DeleteDocument :document="props.document" />
+      </div>
     </template>
   </Card>
 </template>
@@ -163,6 +128,7 @@ function onClick() {
 :deep(.p-card-header) {
   height: 5rem;
   background-color: lightgray;
+  border-radius: 10px 10px 0 0;
 }
 
 :deep(.p-card-content) {
@@ -173,5 +139,9 @@ function onClick() {
 :deep(.p-card-footer) {
   padding: 0;
   text-align: right;
+}
+:deep(.p-card-body) {
+  padding-bottom: 0.4em;
+  padding-top: 0.5em;
 }
 </style>

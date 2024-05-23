@@ -1,4 +1,7 @@
-import { documentService } from '../services';
+import { documentService, userService } from '../services';
+import { NIL } from 'uuid';
+
+import { getCurrentIdentity } from '../components/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
@@ -13,12 +16,14 @@ const controller = {
     next: NextFunction
   ) {
     try {
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await documentService.createDocument(
         req.body.documentId,
         req.body.activityId,
         req.body.filename,
         req.body.mimeType,
-        req.body.length
+        req.body.length,
+        userId as string
       );
       res.status(201).json(response);
     } catch (e: unknown) {

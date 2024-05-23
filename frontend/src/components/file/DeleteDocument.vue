@@ -1,0 +1,58 @@
+<script setup lang="ts">
+import { Button, useConfirm, useToast } from '@/lib/primevue';
+import { documentService } from '@/services';
+import { useSubmissionStore } from '@/store';
+
+import type { Document } from '@/types';
+
+// Props
+type Props = {
+  document: Document;
+};
+const props = withDefaults(defineProps<Props>(), {});
+
+// Store
+const submissionStore = useSubmissionStore();
+
+// Actions
+const confirm = useConfirm();
+const toast = useToast();
+
+const confirmDelete = (document: Document) => {
+  if (document) {
+    confirm.require({
+      message: `Please confirm that you want to delete ${document.filename}.`,
+      header: 'Delete document?',
+      acceptLabel: 'Confirm',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      accept: () => {
+        documentService
+          .deleteDocument(document.documentId)
+          .then(() => {
+            submissionStore.removeDocument(document);
+            toast.success('Document deleted');
+          })
+          .catch((e: any) => toast.error('Failed to deleted document', e.message));
+      }
+    });
+  }
+};
+</script>
+
+<template>
+  <Button
+    v-tooltip.bottom="'Delete document'"
+    class="p-button-lg p-button-text p-button-danger p-0 align-self-center"
+    aria-label="Delete object"
+    style="position: relative; top: 5; right: 0"
+    @click="
+      (e) => {
+        confirmDelete(props.document);
+        e.stopPropagation();
+      }
+    "
+  >
+    <font-awesome-icon icon="fa-solid fa-trash" />
+  </Button>
+</template>
