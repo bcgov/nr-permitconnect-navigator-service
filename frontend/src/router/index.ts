@@ -24,48 +24,54 @@ const routes: Array<RouteRecordRaw> = [
     meta: { title: 'Home' }
   },
   {
-    path: '/initiatives',
-    name: RouteNames.INITIATIVES,
-    component: () => import('../views/InitiativesView.vue'),
-    meta: { requiresAuth: true, title: 'Initiatives' }
-  },
-  {
-    path: '/enquiry',
-    name: RouteNames.ENQUIRY,
-    component: () => import('../views/ShasEnquiryView.vue'),
-    meta: { requiresAuth: true, title: 'Enquiry' }
-  },
-  {
-    path: '/intake',
-    name: RouteNames.INTAKE,
-    component: () => import('../views/ShasIntakeView.vue'),
-    meta: { requiresAuth: true, title: 'Intake' },
-    props: createProps
-  },
-  {
-    path: '/start',
-    name: RouteNames.START,
-    component: () => import('../views/StartView.vue'),
-    meta: { requiresAuth: true, title: 'Start' }
-  },
-  {
-    path: '/submission',
-    name: RouteNames.SUBMISSION,
-    component: () => import('@/views/SubmissionView.vue'),
-    meta: { requiresAuth: true, title: 'Submission' },
-    props: createProps
-  },
-  {
-    path: '/submissions',
-    name: RouteNames.SUBMISSIONS,
-    component: () => import('@/views/SubmissionsView.vue'),
-    meta: { requiresAuth: true, title: 'Submissions' }
-  },
-  {
     path: '/developer',
     name: RouteNames.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
     meta: { requiresAuth: true, title: 'Developer' }
+  },
+  {
+    path: '/forbidden',
+    name: RouteNames.FORBIDDEN,
+    component: () => import('@/views/Forbidden.vue'),
+    meta: { title: 'Forbidden' }
+  },
+  {
+    path: '/housing',
+    component: () => import('@/views/GenericView.vue'),
+    children: [
+      {
+        path: 'enquiry',
+        name: RouteNames.ENQUIRY,
+        component: () => import('../views/ShasEnquiryView.vue'),
+        meta: { requiresAuth: true, title: 'Enquiry' }
+      },
+      {
+        path: 'intake',
+        name: RouteNames.INTAKE,
+        component: () => import('../views/ShasIntakeView.vue'),
+        meta: { requiresAuth: true, title: 'Intake' },
+        props: createProps
+      },
+      {
+        path: 'start',
+        name: RouteNames.START,
+        component: () => import('../views/StartView.vue'),
+        meta: { requiresAuth: true, title: 'Start' }
+      },
+      {
+        path: 'submission',
+        name: RouteNames.SUBMISSION,
+        component: () => import('@/views/SubmissionView.vue'),
+        meta: { requiresAuth: true, title: 'Submission' },
+        props: createProps
+      },
+      {
+        path: 'submissions',
+        name: RouteNames.SUBMISSIONS,
+        component: () => import('@/views/SubmissionsView.vue'),
+        meta: { requiresAuth: true, title: 'Submissions' }
+      }
+    ]
   },
   {
     path: '/oidc',
@@ -94,12 +100,6 @@ const routes: Array<RouteRecordRaw> = [
         meta: { title: 'Logging out...' }
       }
     ]
-  },
-  {
-    path: '/forbidden',
-    name: RouteNames.FORBIDDEN,
-    component: () => import('@/views/Forbidden.vue'),
-    meta: { title: 'Forbidden' }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -156,12 +156,7 @@ export default function getRouter() {
     }
   });
 
-  router.afterEach((to) => {
-    // Update document title
-    document.title = to.meta.title
-      ? `NR PermitConnect Navigator Service - ${to.meta.title}`
-      : 'NR PermitConnect Navigator Service';
-
+  router.afterEach(() => {
     appStore.endDeterminateLoading();
   });
 

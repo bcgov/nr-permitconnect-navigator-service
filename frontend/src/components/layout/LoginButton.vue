@@ -22,7 +22,7 @@ function logout() {
 
 <template>
   <Button
-    v-if="!getIsAuthenticated"
+    v-if="!getIsAuthenticated && router.currentRoute.value.name !== RouteNames.HOME"
     severity="secondary"
     outlined
     @click="login()"
@@ -30,7 +30,7 @@ function logout() {
     Log in
   </Button>
   <Button
-    v-else
+    v-else-if="getIsAuthenticated"
     severity="secondary"
     outlined
     @click="logout()"
