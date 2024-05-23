@@ -1,4 +1,5 @@
 export { default as documentValidator } from './document';
+export { default as enquiryValidator } from './enquiry';
 export { default as noteValidator } from './note';
 export { default as permitValidator } from './permit';
 export { default as roadmapValidator } from './roadmap';

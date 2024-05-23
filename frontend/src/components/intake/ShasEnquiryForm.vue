@@ -50,7 +50,10 @@ const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
 
-function confirmNext(data: any) {
+async function confirmNext(data: any) {
+  const validateResult = await formRef?.value?.validate();
+  if (!validateResult?.valid) return;
+
   confirm.require({
     /* eslint-disable max-len */
     message:
