@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
@@ -19,6 +20,7 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
+import CollectionDisclaimer from '@/components/intake/CollectionDisclaimer.vue';
 import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
 import {
   Accordion,
@@ -91,15 +93,22 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Actions
 const confirm = useConfirm();
+const router = useRouter();
 const toast = useToast();
 
 const checkSubmittable = (stepNumber: number) => {
   if (stepNumber === 3) isSubmittable.value = true;
 };
 
-function displayErrors(a: any) {
-  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+function confirmLeave() {
+  confirm.require({
+    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
+    header: 'Leave this page?',
+    acceptLabel: 'Leave',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    accept: () => router.push({ name: RouteNames.HOUSING })
+  });
 }
 
 function confirmSubmit(data: any) {
@@ -146,6 +155,11 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
   }
 };
+
+function displayErrors(a: any) {
+  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+}
 
 function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BASIC_RESPONSES.YES || e === BASIC_RESPONSES.UNSURE) {
@@ -255,6 +269,18 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!assignedActivityId">
+    <Button
+      class="p-0"
+      text
+      @click="confirmLeave"
+    >
+      <font-awesome-icon
+        icon="fa fa-arrow-circle-left"
+        class="mr-1"
+      />
+      <span>Back to Housing</span>
+    </Button>
+
     <Form
       v-if="initialFormValues"
       id="form"
@@ -298,6 +324,8 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ nextCallback }">
+            <CollectionDisclaimer />
+
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -307,6 +335,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <span class="section-header">Applicant Info</span>
@@ -458,6 +487,8 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
+            <CollectionDisclaimer />
+
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -467,6 +498,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <span class="section-header">Help us learn more about your housing project</span>
@@ -805,6 +837,8 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
+            <CollectionDisclaimer />
+
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -814,6 +848,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <div class="flex">
@@ -1076,6 +1111,8 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback }">
+            <CollectionDisclaimer />
+
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1085,6 +1122,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <div class="flex">
@@ -1415,5 +1453,26 @@ onBeforeMount(async () => {
 
 :deep(.p-message-wrapper) {
   padding: 0.5rem;
+}
+
+:deep(.p-stepper-header:first-child) {
+  padding-left: 0;
+
+  .p-button {
+    padding-left: 0;
+  }
+}
+
+:deep(.p-stepper-header:last-child) {
+  padding-right: 0;
+
+  .p-button {
+    padding-right: 0;
+  }
+}
+
+:deep(.p-stepper-panels) {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>

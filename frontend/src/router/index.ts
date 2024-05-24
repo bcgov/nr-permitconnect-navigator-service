@@ -38,38 +38,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/housing',
     component: () => import('@/views/GenericView.vue'),
+    meta: { requiresAuth: true },
     children: [
       {
+        path: '',
+        name: RouteNames.HOUSING,
+        component: () => import('../views/HousingView.vue')
+      },
+      {
         path: 'enquiry',
-        name: RouteNames.ENQUIRY,
-        component: () => import('../views/ShasEnquiryView.vue'),
-        meta: { requiresAuth: true, title: 'Enquiry' }
+        name: RouteNames.HOUSING_ENQUIRY,
+        component: () => import('../views/ShasEnquiryView.vue')
       },
       {
         path: 'intake',
-        name: RouteNames.INTAKE,
+        name: RouteNames.HOUSING_INTAKE,
         component: () => import('../views/ShasIntakeView.vue'),
-        meta: { requiresAuth: true, title: 'Intake' },
         props: createProps
       },
       {
-        path: 'start',
-        name: RouteNames.START,
-        component: () => import('../views/StartView.vue'),
-        meta: { requiresAuth: true, title: 'Start' }
-      },
-      {
         path: 'submission',
-        name: RouteNames.SUBMISSION,
+        name: RouteNames.HOUSING_SUBMISSION,
         component: () => import('@/views/SubmissionView.vue'),
-        meta: { requiresAuth: true, title: 'Submission' },
         props: createProps
       },
       {
         path: 'submissions',
-        name: RouteNames.SUBMISSIONS,
-        component: () => import('@/views/SubmissionsView.vue'),
-        meta: { requiresAuth: true, title: 'Submissions' }
+        name: RouteNames.HOUSING_SUBMISSIONS,
+        component: () => import('@/views/SubmissionsView.vue')
       }
     ]
   },
@@ -79,23 +75,19 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'callback',
-        name: RouteNames.CALLBACK,
+        name: RouteNames.OIDC_CALLBACK,
         component: () => import('@/views/oidc/OidcCallbackView.vue'),
         meta: { title: 'Authenticating...' }
       },
       {
         path: 'login',
-        name: RouteNames.LOGIN,
+        name: RouteNames.OIDC_LOGIN,
         component: () => import('@/views/oidc/OidcLoginView.vue'),
-        meta: { title: 'Logging in...' },
-        beforeEnter: () => {
-          const entrypoint = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-          window.sessionStorage.setItem(StorageKey.AUTH, entrypoint);
-        }
+        meta: { title: 'Logging in...' }
       },
       {
         path: 'logout',
-        name: RouteNames.LOGOUT,
+        name: RouteNames.OIDC_LOGOUT,
         component: () => import('@/views/oidc/OidcLogoutView.vue'),
         meta: { title: 'Logging out...' }
       }
@@ -146,7 +138,8 @@ export default function getRouter() {
     if (to.meta.requiresAuth) {
       const user = await authService.getUser();
       if (!user || user.expired) {
-        router.replace({ name: RouteNames.LOGIN });
+        window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
+        router.replace({ name: RouteNames.OIDC_LOGIN });
       }
 
       // Forbid if user does not have at least one assigned role

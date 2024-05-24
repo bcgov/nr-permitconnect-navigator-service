@@ -108,7 +108,7 @@ watch(accordionIndex, () => {
                 Bring forward {{ getBringForwardDate(bf) }}:
                 <router-link
                   :to="{
-                    name: RouteNames.SUBMISSION,
+                    name: RouteNames.HOUSING_SUBMISSION,
                     query: { activityId: bf.activityId, initialTab: 3 },
                     hash: `#${bf.noteId}`
                   }"

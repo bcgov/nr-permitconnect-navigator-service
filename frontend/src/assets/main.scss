@@ -119,6 +119,10 @@ label {
   }
 }
 
+.app-primary-color {
+  color: $app-primary !important;
+}
+
 .app-error-color {
   color: $app-error !important;
 }

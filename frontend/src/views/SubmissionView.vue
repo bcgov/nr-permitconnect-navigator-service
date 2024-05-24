@@ -120,7 +120,7 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <router-link :to="{ name: RouteNames.SUBMISSIONS }">
+  <router-link :to="{ name: RouteNames.HOUSING_SUBMISSIONS }">
     <font-awesome-icon
       icon="fa fa-arrow-circle-left"
       class="mr-1"

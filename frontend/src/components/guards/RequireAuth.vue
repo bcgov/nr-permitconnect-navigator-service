@@ -19,7 +19,7 @@ const router = useRouter();
 
 onBeforeMount(async () => {
   if (!getIsAuthenticated.value) {
-    router.push({ name: RouteNames.LOGIN });
+    router.push({ name: RouteNames.OIDC_LOGIN });
   } else {
     ready.value = true;
   }
