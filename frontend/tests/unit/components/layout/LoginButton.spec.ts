@@ -71,7 +71,7 @@ describe('LoginButton.vue', () => {
 
     it('navigates to login on click', async () => {
       (useRoute as any).mockImplementation(() => ({
-        params: { name: RouteNames.LOGIN }
+        params: { name: RouteNames.OIDC_LOGIN }
       }));
 
       const push = vi.fn();
@@ -96,7 +96,7 @@ describe('LoginButton.vue', () => {
       const btn = wrapper.getComponent({ name: 'Button' });
       await btn.trigger('click');
       expect(push).toBeCalledTimes(1);
-      expect(push).toBeCalledWith({ name: RouteNames.LOGIN });
+      expect(push).toBeCalledWith({ name: RouteNames.OIDC_LOGIN });
     });
   });
 
@@ -121,7 +121,7 @@ describe('LoginButton.vue', () => {
 
     it('navigates to logout on click', async () => {
       (useRoute as any).mockImplementation(() => ({
-        params: { name: RouteNames.LOGOUT }
+        params: { name: RouteNames.OIDC_LOGOUT }
       }));
 
       const push = vi.fn();
@@ -146,7 +146,7 @@ describe('LoginButton.vue', () => {
       const btn = wrapper.getComponent({ name: 'Button' });
       await btn.trigger('click');
       expect(push).toBeCalledTimes(1);
-      expect(push).toBeCalledWith({ name: RouteNames.LOGOUT });
+      expect(push).toBeCalledWith({ name: RouteNames.OIDC_LOGOUT });
     });
   });
 });

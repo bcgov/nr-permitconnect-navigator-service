@@ -5,8 +5,8 @@ import { RouteNames } from '@/utils/constants';
 
 // Store
 const router = useRouter();
-const toStart = (): void => {
-  router.push({ name: RouteNames.START });
+const toHousing = (): void => {
+  router.push({ name: RouteNames.HOUSING });
 };
 </script>
 
@@ -17,8 +17,8 @@ const toStart = (): void => {
     <div class="text-left text-white-alpha-90">
       <h1 class="font-bold mb-0">Welcome to the</h1>
       <h1 class="font-bold underline mt-0">Permit Connect Services</h1>
-      <h2 class="mb-3">Choose an initiative</h2>
-      <Button @click="toStart">
+      <h2 class="mb-3">Choose your project type</h2>
+      <Button @click="toHousing">
         <font-awesome-icon
           icon="fa-solid fa-house"
           class="mr-1"

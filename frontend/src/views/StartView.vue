@@ -22,7 +22,10 @@ function getRoutePath(routeName: string) {
 }
 
 function onStartApplication() {
-  if (enquiryOrIntake.value?.includes(RouteNames.INTAKE) || enquiryOrIntake.value?.includes(RouteNames.ENQUIRY))
+  if (
+    enquiryOrIntake.value?.includes(RouteNames.HOUSING_INTAKE) ||
+    enquiryOrIntake.value?.includes(RouteNames.HOUSING_ENQUIRY)
+  )
     router.push({ name: enquiryOrIntake.value });
 }
 
@@ -60,7 +63,7 @@ onBeforeMount(() => {
           </p>
           <Button
             class="btn-apply"
-            @click="enquiryOrIntake = RouteNames.INTAKE"
+            @click="enquiryOrIntake = RouteNames.HOUSING_INTAKE"
           >
             Start application
           </Button>
@@ -80,7 +83,7 @@ onBeforeMount(() => {
           </p>
           <Button
             class="btn-apply"
-            @click="enquiryOrIntake = RouteNames.ENQUIRY"
+            @click="enquiryOrIntake = RouteNames.HOUSING_ENQUIRY"
           >
             Start enquiry
           </Button>
@@ -152,7 +155,7 @@ onBeforeMount(() => {
         </label>
       </div>
       <Button
-        :label="enquiryOrIntake.includes(RouteNames.INTAKE) ? 'Start application' : 'Start enquiry'"
+        :label="enquiryOrIntake.includes(RouteNames.HOUSING_INTAKE) ? 'Start application' : 'Start enquiry'"
         outlined
         class="ml-2"
         :disabled="!acceptDisclaimer"

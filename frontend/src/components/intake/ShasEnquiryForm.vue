@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
+import CollectionDisclaimer from '@/components/intake/CollectionDisclaimer.vue';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
@@ -49,6 +50,17 @@ const formSchema = object({
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
+
+function confirmLeave() {
+  confirm.require({
+    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
+    header: 'Leave this page?',
+    acceptLabel: 'Leave',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    accept: () => router.push({ name: RouteNames.HOUSING })
+  });
+}
 
 async function confirmNext(data: any) {
   const validateResult = await formRef?.value?.validate();
@@ -143,7 +155,7 @@ async function onSubmit(data: any) {
 
     if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
       router.push({
-        name: RouteNames.INTAKE,
+        name: RouteNames.HOUSING_INTAKE,
         query: {
           activityId: submissionResponse?.data.activityId,
           submissionId: submissionResponse?.data.submissionId
@@ -161,6 +173,20 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!assignedActivityId">
+    <Button
+      class="mb-3 p-0"
+      text
+      @click="confirmLeave"
+    >
+      <font-awesome-icon
+        icon="fa fa-arrow-circle-left"
+        class="mr-1"
+      />
+      <span>Back to Housing</span>
+    </Button>
+
+    <CollectionDisclaimer />
+
     <Form
       v-if="initialFormValues"
       v-slot="{ values }"
@@ -373,8 +399,8 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.no-shadow {
-  box-shadow: none;
+.disclaimer {
+  font-weight: 500;
 }
 
 .p-card {
