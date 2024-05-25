@@ -4,6 +4,7 @@ export { default as comsService } from './comsService';
 export { default as documentService } from './documentService';
 export { default as enquiryService } from './enquiryService';
 export { default as noteService } from './noteService';
+export { default as orgBookService } from './orgBookService';
 export { default as permitService } from './permitService';
 export { default as roadmapService } from './roadmapService';
 export { default as submissionService } from './submissionService';
