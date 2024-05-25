@@ -175,3 +175,5 @@ export const NumResidentialUnits = [
  */
 
 export const ProjectLocation = [PROJECT_LOCATION.LOCATION_COORDINATES, PROJECT_LOCATION.STREET_ADDRESS];
+
+export const ORG_BOOK_API_URL = 'https://orgbook.gov.bc.ca/api/v4/search/autocomplete';

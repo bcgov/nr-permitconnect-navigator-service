@@ -4,6 +4,8 @@ import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
 
 import FileUpload from '@/components/file/FileUpload.vue';
+import { EditableDropdown } from '@/components/form';
+
 import {
   Calendar,
   Checkbox,
@@ -29,7 +31,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { permitService, submissionService } from '@/services';
+import { orgBookService, permitService, submissionService } from '@/services';
 import { useTypeStore } from '@/store';
 import {
   ContactPreferenceList,
@@ -42,6 +44,7 @@ import {
 } from '@/utils/constants';
 import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
 
+import type { IInputEvent } from '@/interfaces';
 import type { Ref } from 'vue';
 
 // Props
@@ -71,6 +74,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors: Ref<string[]> = ref([]);
@@ -161,6 +165,21 @@ async function onSubmit(data: any) {
   }
 }
 
+const onRegisteredNameInput = async (e: IInputEvent) => {
+  const input = e.target.value;
+
+  if (input.length >= 3) {
+    const results = (await orgBookService.searchOrgBook(input))?.data?.results ?? [];
+    orgBookOptions.value = results.map((x: { [key: string]: string }) => x?.value);
+  } else {
+    orgBookOptions.value = [];
+  }
+};
+
+const getRegisteredNameLabel = (e: any) => {
+  return e;
+};
+
 onBeforeMount(async () => {
   let response;
   if (props.activityId) {
@@ -189,6 +208,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <div>{{ formRef?.values }}</div>
   <div v-if="!assignedActivityId">
     <Form
       v-if="initialFormValues"
@@ -334,15 +354,22 @@ onBeforeMount(async () => {
                       :disabled="!editable"
                       :options="YesNo"
                     />
-                    <InputText
-                      v-if="values.basic.isDevelopedInBC"
+                    <EditableDropdown
+                      v-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.YES"
                       class="col-6 pl-0"
                       name="basic.registeredName"
-                      :placeholder="
-                        values.basic.isDevelopedInBC === BASIC_RESPONSES.YES
-                          ? 'Type to search the B.C registered name'
-                          : 'Type the business/company/organization name'
-                      "
+                      :get-option-label="getRegisteredNameLabel"
+                      :options="orgBookOptions"
+                      :placeholder="'Type to search the B.C registered name'"
+                      :bold="false"
+                      :disabled="!editable"
+                      @on-input="onRegisteredNameInput"
+                    />
+                    <InputText
+                      v-else-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.NO"
+                      class="col-6 pl-0"
+                      name="basic.registeredName"
+                      :placeholder="'Type the business/company/organization name'"
                       :bold="false"
                       :disabled="!editable"
                     />
