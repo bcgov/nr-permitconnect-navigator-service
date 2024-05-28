@@ -18,11 +18,19 @@ export default {
   },
 
   /**
-   * @function getFormExport
+   * @function deleteSubmission
    * @returns {Promise} An axios response
    */
-  getSubmissions() {
-    return appAxios().get('submission');
+  deleteSubmission(submissionId: string) {
+    return appAxios().delete(`submission/${submissionId}`);
+  },
+
+  /**
+   * @function getSubmissions
+   * @returns {Promise} An axios response
+   */
+  getSubmissions(self?: boolean) {
+    return appAxios().get('submission', { params: { self } });
   },
 
   /**
@@ -37,8 +45,8 @@ export default {
    * @function getSubmission
    * @returns {Promise} An axios response
    */
-  getSubmission(activityId: string) {
-    return appAxios().get(`submission/${activityId}`);
+  getSubmission(submissionId: string) {
+    return appAxios().get(`submission/${submissionId}`);
   },
 
   /**

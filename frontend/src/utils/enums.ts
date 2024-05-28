@@ -15,7 +15,7 @@ export const ACCESS_ROLES = Object.freeze({
   PCNS_ADMIN: 'PCNS_ADMIN',
   PCNS_DEVELOPER: 'PCNS_DEVELOPER',
   PCNS_NAVIGATOR: 'PCNS_NAVIGATOR',
-  PCNS_OTHER: 'PCNS_OTHER'
+  PCNS_SUPERVISOR: 'PCNS_SUPERVISOR'
 });
 
 /**
@@ -49,7 +49,8 @@ export const enum INTAKE_FORM_CATEGORIES {
 export const enum INTAKE_STATUS_LIST {
   SUBMITTED = 'Submitted',
   ASSIGNED = 'Assigned',
-  COMPLETED = 'Completed'
+  COMPLETED = 'Completed',
+  DRAFT = 'Draft'
 }
 
 export const enum PROJECT_RELATIONSHIP_LIST {

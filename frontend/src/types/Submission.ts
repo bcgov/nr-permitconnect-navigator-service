@@ -1,3 +1,5 @@
+import type { IStamps } from '@/interfaces';
+
 export type Submission = {
   formId?: string;
   submissionId: string;
@@ -42,4 +44,4 @@ export type Submission = {
   inquiry: boolean;
   emergencyAssist: boolean;
   inapplicable: boolean;
-};
+} & Partial<IStamps>;

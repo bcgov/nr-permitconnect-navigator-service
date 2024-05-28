@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { Header, Footer } from '@/components/layout';
+import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
+import { useAuthStore } from '@/store';
+import { ACCESS_ROLES } from '@/utils/enums';
+
+// Store
+const authStore = useAuthStore();
 </script>
 
 <template>
   <div class="flex flex-column h-screen">
     <!-- Header/Nav -->
     <div class="layout-head">
+      <DevelopmentRoleOverride
+        v-if="authStore.getIsAuthenticated && authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER], false)"
+      />
       <Header />
       <slot name="nav" />
     </div>

@@ -1,4 +1,5 @@
 export { default as AppLayout } from './AppLayout.vue';
+export { default as DevelopmentRoleOverride } from './DevelopmentRoleOverride.vue';
 export { default as Footer } from './Footer.vue';
 export { default as Header } from './Header.vue';
 export { default as LoginButton } from './LoginButton.vue';

@@ -1,8 +1,8 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 
-import ShasIntakeForm from '@/components/intake/ShasIntakeForm.vue';
-import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
+import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
+import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 
 import { permitService } from '@/services';
 import { StorageKey } from '@/utils/constants';

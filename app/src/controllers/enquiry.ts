@@ -1,7 +1,7 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { Initiatives, NOTE_TYPE_LIST } from '../components/constants';
-import { getCurrentIdentity } from '../components/utils';
+import { INTAKE_STATUS_LIST, Initiatives, NOTE_TYPE_LIST } from '../components/constants';
+import { getCurrentIdentity, isTruthy } from '../components/utils';
 import { activityService, enquiryService, noteService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -68,7 +68,8 @@ const controller = {
       activityId: activityId,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username
+      submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+      intakeStatus: data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
     };
   },
 
@@ -88,6 +89,40 @@ const controller = {
       }
 
       res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await enquiryService.deleteEnquiry(req.params.enquiryId);
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getEnquiries: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+    try {
+      // Pull from PCNS database
+      let response = await enquiryService.getEnquiries();
+
+      if (isTruthy(req.query.self)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getEnquiry: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await enquiryService.getEnquiry(req.params.activityId);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

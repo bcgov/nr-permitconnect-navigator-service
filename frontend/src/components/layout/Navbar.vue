@@ -1,70 +1,113 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
 import { useAuthStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
+import { ACCESS_ROLES } from '@/utils/enums';
 
-const { getIsAuthenticated } = storeToRefs(useAuthStore());
+import type { Ref } from 'vue';
 
-const items = ref([
-  {
-    label: 'Home',
-    route: RouteNames.HOME
-  },
-  {
-    label: 'Housing',
-    items: [
-      {
-        label: 'Work with a Housing Navigator',
-        route: RouteNames.HOUSING_INTAKE
-      },
-      {
-        label: 'Submit an enquiry',
-        route: RouteNames.HOUSING_ENQUIRY
-      },
-      {
-        label: 'Drafts and submissions'
-      },
-      {
-        label: 'Status of application/permit'
-      }
-    ]
-  }
-]);
+// Types
+type NavItem = {
+  label: string;
+  route?: string;
+  public?: boolean;
+  role?: Array<string>;
+  items?: Array<NavItem>;
+};
+
+// Store
+const authStore = useAuthStore();
+
+// State
+const items: Ref<Array<NavItem>> = ref([]);
+
+onMounted(() => {
+  items.value = [
+    {
+      label: 'Home',
+      route: RouteNames.HOME,
+      public: true
+    },
+    {
+      label: 'Housing',
+      items: [
+        {
+          label: 'Work with a Housing Navigator',
+          route: RouteNames.HOUSING_INTAKE
+        },
+        {
+          label: 'Submit an enquiry',
+          route: RouteNames.HOUSING_ENQUIRY
+        },
+        {
+          label: 'Drafts and submissions',
+          route: RouteNames.HOUSING_SUBMISSIONS
+        },
+        {
+          label: 'Status of application/permit'
+        }
+      ],
+      role: undefined
+    },
+    {
+      label: 'Submissions',
+      route: RouteNames.HOUSING_SUBMISSIONS,
+      role: [ACCESS_ROLES.PCNS_ADMIN, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR]
+    },
+    {
+      label: 'User Management',
+      role: [ACCESS_ROLES.PCNS_ADMIN, ACCESS_ROLES.PCNS_SUPERVISOR]
+    },
+    {
+      label: 'Developer',
+      route: RouteNames.DEVELOPER,
+      role: [ACCESS_ROLES.PCNS_DEVELOPER]
+    }
+  ];
+});
 </script>
 
 <template>
   <nav class="navigation-main pl-2 lg:pl-6">
     <Menubar :model="items">
       <template #item="{ item, props, hasSubmenu }">
-        <router-link
-          v-if="item.route"
-          v-slot="{ href, navigate }"
-          :to="{ name: item.route }"
-          custom
+        <span
+          v-if="
+            item.public ||
+            (!item.role && !authStore.userHasRole()) ||
+            (item.role && authStore.userIsRole(item.role)) ||
+            authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER])
+          "
         >
+          <router-link
+            v-if="item.route"
+            v-slot="{ href, navigate }"
+            :to="{ name: item.route }"
+            custom
+          >
+            <a
+              :href="href"
+              v-bind="props.action"
+              @click="navigate"
+            >
+              <span class="flex">{{ item.label }}</span>
+            </a>
+          </router-link>
           <a
-            :href="href"
+            v-else
+            :href="item.url"
+            :target="item.target"
             v-bind="props.action"
-            @click="navigate"
           >
             <span class="flex">{{ item.label }}</span>
+            <span
+              v-if="hasSubmenu"
+              class="pi pi-angle-down mt-1 ml-1"
+            />
           </a>
-        </router-link>
-        <a
-          v-else
-          :href="item.url"
-          :target="item.target"
-          v-bind="props.action"
-        >
-          <span class="flex">{{ item.label }}</span>
-          <span
-            v-if="hasSubmenu"
-            class="pi pi-angle-down mt-1 ml-1"
-          />
-        </a>
+        </span>
       </template>
     </Menubar>
   </nav>

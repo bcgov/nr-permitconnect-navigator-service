@@ -20,8 +20,8 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import CollectionDisclaimer from '@/components/intake/CollectionDisclaimer.vue';
-import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
+import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
+import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -45,7 +45,7 @@ import {
   YesNo,
   YesNoUnsure
 } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
+import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST, PROJECT_LOCATION } from '@/utils/enums';
 
 import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -242,8 +242,9 @@ function getRegisteredNameLabel(e: any) {
 
 onBeforeMount(async () => {
   let response;
-  if (props.activityId) {
-    response = (await submissionService.getSubmission(props.activityId)).data;
+  if (props.submissionId) {
+    response = (await submissionService.getSubmission(props.submissionId)).data;
+    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
   }
 
   // Default form values
@@ -257,6 +258,11 @@ onBeforeMount(async () => {
       email: response?.contactEmail,
       relationshipToProject: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
+    },
+    basic: {
+      isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+      isDevelopedInBC: response?.isDevelopedInBC,
+      registeredName: response?.companyNameRegistered
     },
     location: {
       province: 'BC'
@@ -1216,6 +1222,7 @@ onBeforeMount(async () => {
                             <div class="col-12">
                               <Button
                                 class="w-full flex justify-content-center font-bold"
+                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined,
@@ -1341,6 +1348,7 @@ onBeforeMount(async () => {
                             <div class="col-12">
                               <Button
                                 class="w-full flex justify-content-center font-bold"
+                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined

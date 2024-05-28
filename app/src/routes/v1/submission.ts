@@ -8,12 +8,12 @@ import type { NextFunction, Request, Response } from '../../interfaces/IExpress'
 const router = express.Router();
 router.use(requireSomeAuth);
 
-// Submissions endpoint
+/** Gets a list of submissions */
 router.get('/', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.getSubmissions(req, res, next);
 });
 
-// Statistics endpoint
+/** Gets submission statistics*/
 router.get(
   '/statistics',
   submissionValidator.getStatistics,
@@ -22,30 +22,40 @@ router.get(
   }
 );
 
-// Submission create draft endpoint
+/** Creates a submission with Draft status */
 router.put('/draft', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createDraft(req, res, next);
 });
 
-// Submission update draft endpoint
-router.put('/draft/:activityId', (req: Request, res: Response, next: NextFunction): void => {
+/** Updates a submission with Draft status */
+router.put('/draft/:submissionId', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.updateDraft(req, res, next);
 });
 
-// Submission create endpoint
+/** Creates a submission */
 router.put('/', submissionValidator.createSubmission, (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createSubmission(req, res, next);
 });
 
+/** Deletes a submission */
+router.delete(
+  '/:submissionId',
+  submissionValidator.deleteSubmission,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.deleteSubmission(req, res, next);
+  }
+);
+
+/** Gets a specific submission */
 router.get(
-  '/:activityId',
+  '/:submissionId',
   submissionValidator.getSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.getSubmission(req, res, next);
   }
 );
 
-// Submission update endpoint
+/** Updates a submission*/
 router.put(
   '/:submissionId',
   submissionValidator.updateSubmission,
