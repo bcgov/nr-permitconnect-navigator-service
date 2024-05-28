@@ -10,7 +10,7 @@ import {
   YES_NO,
   YES_NO_UNSURE
 } from '../components/constants';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, toTitleCase } from '../components/utils';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
 import { activityService, submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -325,6 +325,15 @@ const controller = {
     }
   },
 
+  deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionService.deleteSubmission(req.params.submissionId);
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getStatistics: async (
     req: Request<never, { dateFrom: string; dateTo: string; monthYear: string; userId: string }>,
     res: Response,
@@ -338,22 +347,28 @@ const controller = {
     }
   },
 
-  getSubmission: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+  getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getSubmission(req.params.activityId);
+      const response = await submissionService.getSubmission(req.params.submissionId);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();
 
       // Pull from PCNS database
-      const response = await submissionService.getSubmissions();
+      let response = await submissionService.getSubmissions();
+
+      if (isTruthy(req.query.self)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

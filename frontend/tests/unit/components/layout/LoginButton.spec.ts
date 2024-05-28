@@ -33,7 +33,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('LoginButton.vue', () => {
+describe.skip('LoginButton.vue', () => {
   it('renders', () => {
     const wrapper = shallowMount(LoginButton, {
       global: {

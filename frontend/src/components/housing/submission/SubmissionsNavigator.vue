@@ -4,21 +4,22 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
-import SubmissionList from '@/components/submission/SubmissionList.vue';
-import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
+import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
+import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
+import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { noteService, submissionService } from '@/services';
 import { useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
-import { BRING_FORWARD_TYPES } from '@/utils/enums';
+import { ACCESS_ROLES, BRING_FORWARD_TYPES } from '@/utils/enums';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { BringForward, Statistics, Submission } from '@/types';
 
 // Store
-const { getProfile } = storeToRefs(useAuthStore());
+const authStore = useAuthStore();
+const { getProfile } = storeToRefs(authStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
@@ -86,11 +87,12 @@ watch(accordionIndex, () => {
 </script>
 
 <template>
-  <h1>Submissions</h1>
-
-  <TabView>
+  <TabView v-if="!loading">
     <TabPanel header="List">
       <Accordion
+        v-if="
+          authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])
+        "
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -120,7 +122,7 @@ watch(accordionIndex, () => {
           </div>
         </AccordionTab>
       </Accordion>
-      <SubmissionList
+      <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
       />
@@ -139,7 +141,12 @@ watch(accordionIndex, () => {
         <span v-else>Failed to load statistics.</span>
       </div>
     </TabPanel>
-    <TabPanel header="Bring Forward Calendar">
+    <TabPanel
+      v-if="
+        authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])
+      "
+      header="Bring Forward Calendar"
+    >
       <SubmissionBringForwardCalendar :bring-forward="bringForward" />
     </TabPanel>
   </TabView>

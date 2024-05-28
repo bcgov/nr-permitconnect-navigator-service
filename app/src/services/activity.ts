@@ -29,6 +29,23 @@ const service = {
   },
 
   /**
+   * @function deleteActivity
+   * Delete an activity
+   * This action will cascade delete across all linked items
+   * @param {string} activityId Unique activity ID
+   * @returns {Promise<Activity | null>} The result of running the findFirst operation
+   */
+  deleteActivity: async (activityId: string) => {
+    const response = await prisma.activity.delete({
+      where: {
+        activity_id: activityId
+      }
+    });
+
+    return activity.fromPrismaModel(response);
+  },
+
+  /**
    * @function getActivity
    * Get an activity
    * @param {string} activityId Unique activity ID

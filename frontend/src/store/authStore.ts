@@ -16,6 +16,7 @@ export type AuthStoreState = {
   isAuthenticated: Ref<boolean>;
   profile: Ref<IdTokenClaims | undefined>;
   refreshToken: Ref<string | undefined>;
+  roleOverride: Ref<string | undefined>;
   scope: Ref<string | undefined>;
   user: Ref<User | null>;
 };
@@ -34,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated: ref(false),
     profile: ref(undefined),
     refreshToken: ref(undefined),
+    roleOverride: ref(undefined),
     scope: ref(undefined),
     user: ref(null)
   };
@@ -47,6 +49,7 @@ export const useAuthStore = defineStore('auth', () => {
     getIsAuthenticated: computed(() => state.isAuthenticated.value),
     getProfile: computed(() => state.profile.value),
     getRefreshToken: computed(() => state.refreshToken.value),
+    getRoleOverride: computed(() => state.roleOverride.value),
     getScope: computed(() => state.scope.value),
     getUser: computed(() => state.user.value)
   };
@@ -101,6 +104,30 @@ export const useAuthStore = defineStore('auth', () => {
     return authService.logout();
   }
 
+  function setRoleOverride(role: string | undefined) {
+    state.roleOverride.value = role;
+  }
+
+  function userHasRole(allowOverride = true) {
+    if (allowOverride && state.roleOverride.value) {
+      if (state.roleOverride.value === 'NONE') return false;
+      return true;
+    }
+
+    return (state.user.value?.profile?.client_roles as [])?.length > 0;
+  }
+
+  function userIsRole(roles: Array<string>, allowOverride = true) {
+    if (allowOverride && state.roleOverride.value) {
+      return roles.includes(state.roleOverride.value);
+    }
+
+    return (
+      (state.user.value?.profile?.client_roles as [])?.length > 0 &&
+      (state.user.value?.profile?.client_roles as string[])?.some((r) => roles.includes(r))
+    );
+  }
+
   return {
     // State
     ...state,
@@ -114,7 +141,10 @@ export const useAuthStore = defineStore('auth', () => {
     init,
     login,
     loginCallback,
-    logout
+    logout,
+    setRoleOverride,
+    userHasRole,
+    userIsRole
   };
 });
 

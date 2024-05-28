@@ -11,8 +11,8 @@ import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
-import SubmissionForm from '@/components/submission/SubmissionForm.vue';
-import { Button, Column, DataTable, TabPanel, TabView, IconField, InputIcon, InputText } from '@/lib/primevue';
+import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
+import { Button, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
@@ -24,6 +24,7 @@ import type { Ref } from 'vue';
 type Props = {
   activityId: string;
   initialTab?: string;
+  submissionId: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -63,7 +64,7 @@ const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 onMounted(async () => {
   const [submission, documents, notes, permits, permitTypes] = (
     await Promise.all([
-      submissionService.getSubmission(props.activityId),
+      submissionService.getSubmission(props.submissionId),
       documentService.listDocuments(props.activityId),
       noteService.listNotes(props.activityId),
       permitService.listPermits(props.activityId),

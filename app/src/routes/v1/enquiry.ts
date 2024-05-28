@@ -22,7 +22,22 @@ const decideValidation = (validator: Middleware) => {
   };
 };
 
-// Submission create draft endpoint
+/** Gets a list of enquiries */
+router.get('/', (req: Request, res: Response, next: NextFunction): void => {
+  enquiryController.getEnquiries(req, res, next);
+});
+
+/** Gets a specific enquiry */
+router.get('/:enquiryId', (req: Request, res: Response, next: NextFunction): void => {
+  enquiryController.getEnquiry(req, res, next);
+});
+
+/** Deletes an enquiry */
+router.delete('/:enquiryId', (req: Request, res: Response, next: NextFunction): void => {
+  enquiryController.deleteEnquiry(req, res, next);
+});
+
+/** Creates an enquiry with Draft status */
 router.put(
   '/draft',
   decideValidation(enquiryValidator.createDraft),
@@ -31,9 +46,9 @@ router.put(
   }
 );
 
-// Submission update draft endpoint
+/** Updates an enquiry with Draft status */
 router.put(
-  '/draft/:activityId',
+  '/draft/:enquiryId',
   decideValidation(enquiryValidator.updateDraft),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateDraft(req, res, next);

@@ -31,7 +31,8 @@ export default {
       is_related: input.isRelated,
       related_activity_id: input.relatedActivityId,
       enquiry_description: input.enquiryDescription,
-      apply_for_permit_connect: input.applyForPermitConnect
+      apply_for_permit_connect: input.applyForPermitConnect,
+      intake_status: input.intakeStatus
     };
   },
 
@@ -52,6 +53,8 @@ export default {
       relatedActivityId: input.related_activity_id,
       enquiryDescription: input.enquiry_description,
       applyForPermitConnect: input.apply_for_permit_connect,
+      intakeStatus: input.intake_status,
+      updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };
   },

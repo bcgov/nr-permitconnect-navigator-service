@@ -16,11 +16,13 @@ import {
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
+import { useAuthStore } from '@/store';
 import { RouteNames } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
+import { ACCESS_ROLES } from '@/utils/enums';
 
 // Props
 type Props = {
@@ -99,6 +101,7 @@ const filters = ref({
     <template #header>
       <div class="flex justify-content-between">
         <Button
+          v-if="useAuthStore().userIsRole([ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
@@ -124,7 +127,7 @@ const filters = ref({
           <router-link
             :to="{
               name: RouteNames.HOUSING_SUBMISSION,
-              query: { activityId: data.activityId }
+              query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >
             {{ data.activityId }}

@@ -1,10 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { AuthService } from '@/services';
-import { useAppStore } from '@/store';
+import { useAppStore, useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 
 import type { RouteRecordRaw } from 'vue-router';
+import { ACCESS_ROLES } from '@/utils/enums';
 
 /**
  * @function createProps
@@ -20,14 +21,13 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: RouteNames.HOME,
-    component: () => import('../views/HomeView.vue'),
-    meta: { title: 'Home' }
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/developer',
     name: RouteNames.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
-    meta: { requiresAuth: true, title: 'Developer' }
+    meta: { requiresAuth: true, requiresRole: [ACCESS_ROLES.PCNS_DEVELOPER] }
   },
   {
     path: '/forbidden',
@@ -43,29 +43,38 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: RouteNames.HOUSING,
-        component: () => import('../views/HousingView.vue')
+        component: () => import('../views/housing/HousingView.vue')
       },
       {
         path: 'enquiry',
         name: RouteNames.HOUSING_ENQUIRY,
-        component: () => import('../views/ShasEnquiryView.vue')
+        component: () => import('../views/housing/ShasEnquiryView.vue'),
+        props: createProps
       },
       {
         path: 'intake',
         name: RouteNames.HOUSING_INTAKE,
-        component: () => import('../views/ShasIntakeView.vue'),
+        component: () => import('@/views/housing/ShasIntakeView.vue'),
         props: createProps
       },
       {
         path: 'submission',
         name: RouteNames.HOUSING_SUBMISSION,
-        component: () => import('@/views/SubmissionView.vue'),
-        props: createProps
+        component: () => import('@/views/housing/SubmissionView.vue'),
+        props: createProps,
+        meta: {
+          requiresRole: [
+            ACCESS_ROLES.PCNS_ADMIN,
+            ACCESS_ROLES.PCNS_DEVELOPER,
+            ACCESS_ROLES.PCNS_NAVIGATOR,
+            ACCESS_ROLES.PCNS_SUPERVISOR
+          ]
+        }
       },
       {
         path: 'submissions',
         name: RouteNames.HOUSING_SUBMISSIONS,
-        component: () => import('@/views/SubmissionsView.vue')
+        component: () => import('@/views/housing/SubmissionsView.vue')
       }
     ]
   },
@@ -140,11 +149,21 @@ export default function getRouter() {
       if (!user || user.expired) {
         window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
         router.replace({ name: RouteNames.OIDC_LOGIN });
+        return;
       }
+    }
 
-      // Forbid if user does not have at least one assigned role
-      if (user && (!user?.profile?.client_roles || (user?.profile?.client_roles as []).length === 0)) {
+    if (to.meta.requiresRole) {
+      if (!useAuthStore().userIsRole(to.meta.requiresRole as Array<string>)) {
         router.replace({ name: RouteNames.FORBIDDEN });
+        return;
+      }
+    }
+
+    if (to.name === RouteNames.HOUSING) {
+      if (useAuthStore().userHasRole()) {
+        router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
+        return;
       }
     }
   });

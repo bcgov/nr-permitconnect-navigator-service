@@ -138,6 +138,7 @@ export default {
       housingCoopDescription: input.housing_coop_description,
       contactFirstName: input.contact_first_name,
       contactLastName: input.contact_last_name,
+      updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };
   },

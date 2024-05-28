@@ -37,6 +37,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('related_activity_id');
           table.text('enquiry_description');
           table.text('apply_for_permit_connect');
+          table.text('intake_status');
           stamps(knex, table);
         })
       )
@@ -73,14 +74,8 @@ export async function down(knex: Knex): Promise<void> {
       // Drop public schema table triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_enquiry_trigger ON "enquiry"'))
 
-      // Revert table alters
-      .then(() =>
-        knex.schema.alterTable('submission', function (table) {
-          table.dropColumn('contact_first_name');
-          table.dropColumn('contact_last_name');
-        })
-      )
-
+      // Not reverting submission table alters
+      // This migration is destructive and would result in data loss
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('enquiry'))
   );

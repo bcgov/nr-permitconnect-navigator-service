@@ -95,6 +95,33 @@ const service = {
   },
 
   /**
+   * @function deleteSubmission
+   * Deletes the submission, followed by the associated activity
+   * This action will cascade delete across all linked items
+   * @param {string} submissionId Submission ID
+   * @returns {Promise<Submission>} The result of running the delete operation
+   */
+  deleteSubmission: async (submissionId: string) => {
+    const response = await prisma.$transaction(async (trx) => {
+      const del = await trx.submission.delete({
+        where: {
+          submission_id: submissionId
+        }
+      });
+
+      await trx.activity.delete({
+        where: {
+          activity_id: del.activity_id
+        }
+      });
+
+      return del;
+    });
+
+    return submission.fromPrismaModel(response);
+  },
+
+  /**
    * @function getSubmission
    * Gets a full data export for the requested CHEFS form
    * @param {string} formId CHEFS form id
@@ -142,11 +169,11 @@ const service = {
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<Submission | null>} The result of running the findFirst operation
    */
-  getSubmission: async (activityId: string) => {
+  getSubmission: async (submissionId: string) => {
     try {
       const result = await prisma.submission.findFirst({
         where: {
-          activity_id: activityId
+          submission_id: submissionId
         }
       });
 

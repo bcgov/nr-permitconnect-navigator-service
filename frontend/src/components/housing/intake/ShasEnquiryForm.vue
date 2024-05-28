@@ -5,13 +5,24 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
-import CollectionDisclaimer from '@/components/intake/CollectionDisclaimer.vue';
+import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES } from '@/utils/enums';
+import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST } from '@/utils/enums';
 
 import type { Ref } from 'vue';
+
+// Props
+type Props = {
+  activityId?: string;
+  enquiryId?: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  activityId: undefined,
+  enquiryId: undefined
+});
 
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
@@ -166,8 +177,25 @@ async function onSubmit(data: any) {
 }
 
 onBeforeMount(async () => {
+  let response;
+  if (props.activityId) {
+    response = (await enquiryService.getEnquiry(props.activityId)).data;
+    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
+  }
+
   // Default form values
-  initialFormValues.value = {};
+  initialFormValues.value = {
+    activityId: response?.activityId,
+    enquiryId: response?.enquiryId,
+    applicant: {
+      firstName: response?.contactFirstName,
+      lastName: response?.contactLastName,
+      phoneNumber: response?.contactPhoneNumber,
+      email: response?.contactEmail,
+      relationshipToProject: response?.contactApplicantRelationship,
+      contactPreference: response?.contactPreference
+    }
+  };
 });
 </script>
 

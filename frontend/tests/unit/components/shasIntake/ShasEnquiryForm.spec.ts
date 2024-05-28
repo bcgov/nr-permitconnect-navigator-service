@@ -2,7 +2,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-import ShasEnquiryForm from '@/components/intake/ShasEnquiryForm.vue';
+import ShasEnquiryForm from '@/components/housing/intake/ShasEnquiryForm.vue';
 
 import { StorageKey } from '@/utils/constants';
 import {
