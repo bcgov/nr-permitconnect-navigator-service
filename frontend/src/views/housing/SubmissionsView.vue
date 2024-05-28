@@ -4,31 +4,23 @@ import { computed } from 'vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
 import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
 
-import { useAuthStore } from '@/store';
-
-import { ACCESS_ROLES } from '@/utils/enums';
+import { PermissionService } from '@/services';
+import { PERMISSIONS } from '@/services/permissionService';
 
 // Store
-const authStore = useAuthStore();
+const permissionService = new PermissionService();
 
 // Actions
-const getTitle = computed(() => (authStore.userHasRole() ? 'Submissions' : 'My drafts and submissions'));
+const getTitle = computed(() =>
+  permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and submissions'
+);
 </script>
 
 <template>
   <h1>{{ getTitle }}</h1>
 
   <!-- Navigator view -->
-  <SubmissionsNavigator
-    v-if="
-      authStore.userIsRole([
-        ACCESS_ROLES.PCNS_ADMIN,
-        ACCESS_ROLES.PCNS_DEVELOPER,
-        ACCESS_ROLES.PCNS_NAVIGATOR,
-        ACCESS_ROLES.PCNS_SUPERVISOR
-      ])
-    "
-  />
+  <SubmissionsNavigator v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_READ)" />
 
   <!-- Proponent view -->
   <SubmissionsProponent v-else />

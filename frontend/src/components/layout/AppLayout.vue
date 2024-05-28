@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
+import { PermissionService } from '@/services';
+import { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
-import { ACCESS_ROLES } from '@/utils/enums';
 
 // Store
 const authStore = useAuthStore();
+
+const permissionService = new PermissionService();
 </script>
 
 <template>
@@ -12,7 +15,11 @@ const authStore = useAuthStore();
     <!-- Header/Nav -->
     <div class="layout-head">
       <DevelopmentRoleOverride
-        v-if="authStore.getIsAuthenticated && authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER], false)"
+        v-if="
+          authStore.getIsAuthenticated &&
+          permissionService.can(PERMISSIONS.TESTING_ROLE_OVERRIDE, false) &&
+          permissionService.getRoleOverride()
+        "
       />
       <Header />
       <slot name="nav" />

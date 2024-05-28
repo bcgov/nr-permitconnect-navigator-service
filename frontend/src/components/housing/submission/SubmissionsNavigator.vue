@@ -9,6 +9,7 @@ import SubmissionListNavigator from '@/components/housing/submission/SubmissionL
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { noteService, submissionService } from '@/services';
+import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 import { ACCESS_ROLES, BRING_FORWARD_TYPES } from '@/utils/enums';
@@ -30,6 +31,8 @@ const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
+const permissionService = new PermissionService();
+
 function getBringForwardDate(bf: BringForward) {
   const { pastOrToday } = getBringForwardInterval(bf);
   return pastOrToday ? 'today' : formatDate(bf.bringForwardDate);
@@ -90,9 +93,7 @@ watch(accordionIndex, () => {
   <TabView v-if="!loading">
     <TabPanel header="List">
       <Accordion
-        v-if="
-          authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])
-        "
+        v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -142,9 +143,7 @@ watch(accordionIndex, () => {
       </div>
     </TabPanel>
     <TabPanel
-      v-if="
-        authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])
-      "
+      v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
       header="Bring Forward Calendar"
     >
       <SubmissionBringForwardCalendar :bring-forward="bringForward" />

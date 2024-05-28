@@ -2,9 +2,8 @@
 import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { useAuthStore } from '@/store';
+import { PERMISSIONS, default as PermissionService } from '@/services/permissionService';
 import { RouteNames } from '@/utils/constants';
-import { ACCESS_ROLES } from '@/utils/enums';
 
 import type { Ref } from 'vue';
 
@@ -13,15 +12,14 @@ type NavItem = {
   label: string;
   route?: string;
   public?: boolean;
-  role?: Array<string>;
+  access?: string;
   items?: Array<NavItem>;
 };
 
-// Store
-const authStore = useAuthStore();
-
 // State
 const items: Ref<Array<NavItem>> = ref([]);
+
+const permissionService = new PermissionService();
 
 onMounted(() => {
   items.value = [
@@ -35,35 +33,39 @@ onMounted(() => {
       items: [
         {
           label: 'Work with a Housing Navigator',
-          route: RouteNames.HOUSING_INTAKE
+          route: RouteNames.HOUSING_INTAKE,
+          access: PERMISSIONS.NAVIGATION_HOUSING
         },
         {
           label: 'Submit an enquiry',
-          route: RouteNames.HOUSING_ENQUIRY
+          route: RouteNames.HOUSING_ENQUIRY,
+          access: PERMISSIONS.NAVIGATION_HOUSING
         },
         {
           label: 'Drafts and submissions',
-          route: RouteNames.HOUSING_SUBMISSIONS
+          route: RouteNames.HOUSING_SUBMISSIONS,
+          access: PERMISSIONS.NAVIGATION_HOUSING
         },
         {
-          label: 'Status of application/permit'
+          label: 'Status of application/permit',
+          access: PERMISSIONS.NAVIGATION_HOUSING
         }
       ],
-      role: undefined
+      access: PERMISSIONS.NAVIGATION_HOUSING
     },
     {
       label: 'Submissions',
       route: RouteNames.HOUSING_SUBMISSIONS,
-      role: [ACCESS_ROLES.PCNS_ADMIN, ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR]
+      access: PERMISSIONS.NAVIGATION_SUBMISSIONS
     },
     {
       label: 'User Management',
-      role: [ACCESS_ROLES.PCNS_ADMIN, ACCESS_ROLES.PCNS_SUPERVISOR]
+      access: PERMISSIONS.NAVIGATION_USER_MANAGEMENT
     },
     {
       label: 'Developer',
       route: RouteNames.DEVELOPER,
-      role: [ACCESS_ROLES.PCNS_DEVELOPER]
+      access: PERMISSIONS.NAVIGATION_DEVELOPER
     }
   ];
 });
@@ -73,14 +75,7 @@ onMounted(() => {
   <nav class="navigation-main pl-2 lg:pl-6">
     <Menubar :model="items">
       <template #item="{ item, props, hasSubmenu }">
-        <span
-          v-if="
-            item.public ||
-            (!item.role && !authStore.userHasRole()) ||
-            (item.role && authStore.userIsRole(item.role)) ||
-            authStore.userIsRole([ACCESS_ROLES.PCNS_DEVELOPER])
-          "
-        >
+        <span v-if="item.public || permissionService.can(item.access)">
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"

@@ -2,18 +2,28 @@
 import { storeToRefs } from 'pinia';
 
 import { CopyToClipboard } from '@/components/form';
-import { Dropdown } from '@/lib/primevue';
+import { Button, Dropdown } from '@/lib/primevue';
 import { useAuthStore, useConfigStore } from '@/store';
 import { BUTTON_MODE } from '@/utils/enums';
 import { AccessRoles, RouteNames } from '@/utils/constants';
 import { useRouter } from 'vue-router';
+import { PermissionService } from '@/services';
 
 // Store
 const authStore = useAuthStore();
 const { getAccessToken, getProfile } = storeToRefs(authStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
+const permissionService = new PermissionService();
 const router = useRouter();
+
+async function ssoRequestBasicAccess() {
+  await permissionService.requestBasicAccess();
+}
+
+async function ssGetRoles() {
+  await permissionService.getRoles();
+}
 </script>
 
 <template>
@@ -24,10 +34,10 @@ const router = useRouter();
       <div class="w-2 mr-2">
         <Dropdown
           class="w-full"
-          :options="[...AccessRoles, 'NONE']"
+          :options="AccessRoles"
           @change="
             (e) => {
-              authStore.setRoleOverride(e.value);
+              permissionService.setRoleOverride(e.value);
               router.push({ name: RouteNames.HOME });
             }
           "
@@ -70,6 +80,16 @@ const router = useRouter();
       </div>
     </div>
     {{ getProfile }}
+
+    <div class="flex align-items-center mt-3">
+      <h3 class="mr-2">SSO Test</h3>
+      <div>
+        <Button @click="ssoRequestBasicAccess">SSO Test</Button>
+      </div>
+      <div>
+        <Button @click="ssGetRoles">SSO Test 2</Button>
+      </div>
+    </div>
   </div>
 </template>
 

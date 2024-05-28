@@ -16,13 +16,12 @@ import {
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
-import { useAuthStore } from '@/store';
+import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { RouteNames } from '@/utils/constants';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
-import { ACCESS_ROLES } from '@/utils/enums';
 
 // Props
 type Props = {
@@ -37,6 +36,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
 
 // Actions
 const confirmDialog = useConfirm();
+const permissionService = new PermissionService();
 const router = useRouter();
 const toast = useToast();
 
@@ -101,7 +101,7 @@ const filters = ref({
     <template #header>
       <div class="flex justify-content-between">
         <Button
-          v-if="useAuthStore().userIsRole([ACCESS_ROLES.PCNS_NAVIGATOR, ACCESS_ROLES.PCNS_SUPERVISOR])"
+          v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
