@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { AuthService } from '@/services';
+import { AuthService, PermissionService } from '@/services';
 import { useAppStore, useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 
 import type { RouteRecordRaw } from 'vue-router';
 import { ACCESS_ROLES } from '@/utils/enums';
+import { PERMISSIONS } from '@/services/permissionService';
 
 /**
  * @function createProps
@@ -63,12 +64,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/housing/SubmissionView.vue'),
         props: createProps,
         meta: {
-          requiresRole: [
-            ACCESS_ROLES.PCNS_ADMIN,
-            ACCESS_ROLES.PCNS_DEVELOPER,
-            ACCESS_ROLES.PCNS_NAVIGATOR,
-            ACCESS_ROLES.PCNS_SUPERVISOR
-          ]
+          access: PERMISSIONS.HOUSING_SUBMISSION_READ
         }
       },
       {
@@ -113,6 +109,7 @@ const routes: Array<RouteRecordRaw> = [
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
+  const permissionService = new PermissionService();
   const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -153,15 +150,15 @@ export default function getRouter() {
       }
     }
 
-    if (to.meta.requiresRole) {
-      if (!useAuthStore().userIsRole(to.meta.requiresRole as Array<string>)) {
+    if (to.meta.access) {
+      if (!permissionService.can(to.meta.access as string)) {
         router.replace({ name: RouteNames.FORBIDDEN });
         return;
       }
     }
 
     if (to.name === RouteNames.HOUSING) {
-      if (useAuthStore().userHasRole()) {
+      if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
         router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
         return;
       }

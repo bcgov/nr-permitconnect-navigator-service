@@ -43,13 +43,13 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const getters = {
     getAccessToken: computed(() => state.accessToken.value),
+    getClientRoles: computed(() => state.user.value?.profile.client_roles as string[]),
     getExpiresAt: computed(() => state.expiresAt.value),
     getIdentityId: computed(() => state.identityId.value),
     getIdToken: computed(() => state.idToken.value),
     getIsAuthenticated: computed(() => state.isAuthenticated.value),
     getProfile: computed(() => state.profile.value),
     getRefreshToken: computed(() => state.refreshToken.value),
-    getRoleOverride: computed(() => state.roleOverride.value),
     getScope: computed(() => state.scope.value),
     getUser: computed(() => state.user.value)
   };
@@ -104,30 +104,6 @@ export const useAuthStore = defineStore('auth', () => {
     return authService.logout();
   }
 
-  function setRoleOverride(role: string | undefined) {
-    state.roleOverride.value = role;
-  }
-
-  function userHasRole(allowOverride = true) {
-    if (allowOverride && state.roleOverride.value) {
-      if (state.roleOverride.value === 'NONE') return false;
-      return true;
-    }
-
-    return (state.user.value?.profile?.client_roles as [])?.length > 0;
-  }
-
-  function userIsRole(roles: Array<string>, allowOverride = true) {
-    if (allowOverride && state.roleOverride.value) {
-      return roles.includes(state.roleOverride.value);
-    }
-
-    return (
-      (state.user.value?.profile?.client_roles as [])?.length > 0 &&
-      (state.user.value?.profile?.client_roles as string[])?.some((r) => roles.includes(r))
-    );
-  }
-
   return {
     // State
     ...state,
@@ -141,10 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
     init,
     login,
     loginCallback,
-    logout,
-    setRoleOverride,
-    userHasRole,
-    userIsRole
+    logout
   };
 });
 

@@ -11,7 +11,7 @@ import { createApp } from 'vue';
 
 import App from '@/App.vue';
 import getRouter from '@/router';
-import { AuthService, ConfigService } from '@/services';
+import { AuthService, ConfigService, PermissionService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
 import 'primevue/resources/themes/saga-blue/theme.css';
@@ -55,6 +55,7 @@ function initializeApp(): void {
 async function initializeServices(next?: Function): Promise<void> {
   await ConfigService.init();
   await AuthService.init();
+  await PermissionService.init();
   if (next) next();
 }
 

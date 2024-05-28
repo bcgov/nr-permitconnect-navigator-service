@@ -26,7 +26,8 @@ export const AccessRoles = Object.freeze({
   PCNS_ADMIN: 'PCNS_ADMIN',
   PCNS_DEVELOPER: 'PCNS_DEVELOPER',
   PCNS_NAVIGATOR: 'PCNS_NAVIGATOR',
-  PCNS_OTHER: 'PCNS_OTHER'
+  PCNS_PROPONENT: 'PCNS_PROPONENT',
+  PCNS_SUPERVISOR: 'PCNS_SUPERVISOR'
 });
 
 /** Current initiative types*/
