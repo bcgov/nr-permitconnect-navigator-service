@@ -34,17 +34,17 @@ onMounted(() => {
         {
           label: 'Work with a Housing Navigator',
           route: RouteNames.HOUSING_INTAKE,
-          access: PERMISSIONS.NAVIGATION_HOUSING
+          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
           route: RouteNames.HOUSING_ENQUIRY,
-          access: PERMISSIONS.NAVIGATION_HOUSING
+          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
         },
         {
           label: 'Drafts and submissions',
           route: RouteNames.HOUSING_SUBMISSIONS,
-          access: PERMISSIONS.NAVIGATION_HOUSING
+          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB
         },
         {
           label: 'Status of application/permit',
@@ -56,7 +56,7 @@ onMounted(() => {
     {
       label: 'Submissions',
       route: RouteNames.HOUSING_SUBMISSIONS,
-      access: PERMISSIONS.NAVIGATION_SUBMISSIONS
+      access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS
     },
     {
       label: 'User Management',

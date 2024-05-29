@@ -184,6 +184,7 @@ model submission {
   other_units_description            String?
   rental_units                       String?
   project_location                   String?
+  project_location_description       String?
   locality                           String?
   province                           String?
   has_applied_provincial_permits     String?

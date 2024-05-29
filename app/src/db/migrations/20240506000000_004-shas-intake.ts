@@ -11,6 +11,7 @@ export async function up(knex: Knex): Promise<void> {
         table.text('other_units_description');
         table.text('rental_units');
         table.text('project_location');
+        table.text('project_location_description');
         table.text('locality');
         table.text('province');
         table.text('has_applied_provincial_permits');

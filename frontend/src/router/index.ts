@@ -1,12 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { AuthService, PermissionService } from '@/services';
+import { PERMISSIONS } from '@/services/permissionService';
 import { useAppStore, useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 
 import type { RouteRecordRaw } from 'vue-router';
-import { ACCESS_ROLES } from '@/utils/enums';
-import { PERMISSIONS } from '@/services/permissionService';
 
 /**
  * @function createProps
@@ -28,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/developer',
     name: RouteNames.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
-    meta: { requiresAuth: true, requiresRole: [ACCESS_ROLES.PCNS_DEVELOPER] }
+    meta: { requiresAuth: true, access: PERMISSIONS.NAVIGATION_DEVELOPER }
   },
   {
     path: '/forbidden',
@@ -44,19 +43,28 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: RouteNames.HOUSING,
-        component: () => import('../views/housing/HousingView.vue')
+        component: () => import('../views/housing/HousingView.vue'),
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING
+        }
       },
       {
         path: 'enquiry',
         name: RouteNames.HOUSING_ENQUIRY,
         component: () => import('../views/housing/ShasEnquiryView.vue'),
-        props: createProps
+        props: createProps,
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+        }
       },
       {
         path: 'intake',
         name: RouteNames.HOUSING_INTAKE,
         component: () => import('@/views/housing/ShasIntakeView.vue'),
-        props: createProps
+        props: createProps,
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+        }
       },
       {
         path: 'submission',
@@ -64,13 +72,16 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/housing/SubmissionView.vue'),
         props: createProps,
         meta: {
-          access: PERMISSIONS.HOUSING_SUBMISSION_READ
+          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION
         }
       },
       {
         path: 'submissions',
         name: RouteNames.HOUSING_SUBMISSIONS,
-        component: () => import('@/views/housing/SubmissionsView.vue')
+        component: () => import('@/views/housing/SubmissionsView.vue'),
+        meta: {
+          access: [PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS, PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
+        }
       }
     ]
   },
@@ -106,6 +117,20 @@ const routes: Array<RouteRecordRaw> = [
   }
 ];
 
+function waitForRoles(): Promise<string[] | undefined> {
+  let attempts = 0;
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  return new Promise(function (resolve, reject) {
+    (function _waitForRoles() {
+      const r = useAuthStore().getClientRoles;
+      if (r) return resolve(r);
+      if (attempts > 10) resolve(undefined);
+      setTimeout(_waitForRoles, 100);
+      attempts++;
+    })();
+  });
+}
+
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
@@ -140,7 +165,7 @@ export default function getRouter() {
       });
     }
 
-    // Authentication Guard
+    // Authentication guard
     if (to.meta.requiresAuth) {
       const user = await authService.getUser();
       if (!user || user.expired) {
@@ -150,16 +175,21 @@ export default function getRouter() {
       }
     }
 
-    if (to.meta.access) {
-      if (!permissionService.can(to.meta.access as string)) {
-        router.replace({ name: RouteNames.FORBIDDEN });
+    // Check for reroutes
+    if (to.name === RouteNames.HOUSING) {
+      if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
+        router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
         return;
       }
     }
 
-    if (to.name === RouteNames.HOUSING) {
-      if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
-        router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
+    // Check access
+    if (to.meta.access) {
+      // Until we can figure out the race condition happening during hard url navigation and browser refresh
+      // this prevents the app throwing you to the forbidden page
+      await waitForRoles();
+      if (!permissionService.can(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
+        router.replace({ name: RouteNames.FORBIDDEN });
         return;
       }
     }
