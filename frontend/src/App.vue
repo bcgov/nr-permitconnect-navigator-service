@@ -42,7 +42,15 @@ onErrorCaptured((e: Error) => {
 
   <AppLayout>
     <template #nav>
-      <Navbar v-if="router.currentRoute.value.name !== RouteNames.HOME" />
+      <Navbar
+        v-if="
+          router.currentRoute.value.name &&
+          router.currentRoute.value.name !== RouteNames.HOME &&
+          ![RouteNames.OIDC_LOGIN, RouteNames.OIDC_CALLBACK, RouteNames.OIDC_LOGOUT].includes(
+            router.currentRoute.value.name as any
+          )
+        "
+      />
     </template>
     <template #main>
       <Message

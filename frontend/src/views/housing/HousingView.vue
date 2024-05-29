@@ -7,7 +7,7 @@ import { RouteNames } from '@/utils/constants';
 const items = ref([
   {
     top: 'Start a new project investigation with a Navigator',
-    bottom: 'Find out what permits are needed for your project with a Navigator.',
+    bottom: 'Find out what permits may be needed for your project.',
     icon: 'fa-file-circle-check',
     route: RouteNames.HOUSING_INTAKE
   },

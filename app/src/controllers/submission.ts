@@ -223,6 +223,7 @@ const controller = {
       location = {
         naturalDisaster: data.location.naturalDisaster === YES_NO.YES,
         projectLocation: data.location.projectLocation,
+        projectLocationDescription: data.location.projectLocationDescription,
         locationPIDs: data.location.ltsaPIDLookup,
         latitude: data.location.latitude,
         longitude: data.location.longitude,

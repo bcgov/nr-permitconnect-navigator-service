@@ -12,7 +12,7 @@ const permissionService = new PermissionService();
 
 // Actions
 const getTitle = computed(() =>
-  permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and submissions'
+  permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_NAVIGATOR_READ) ? 'Submissions' : 'My drafts and submissions'
 );
 </script>
 
@@ -20,8 +20,8 @@ const getTitle = computed(() =>
   <h1>{{ getTitle }}</h1>
 
   <!-- Navigator view -->
-  <SubmissionsNavigator v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_READ)" />
+  <SubmissionsNavigator v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_NAVIGATOR_READ)" />
 
   <!-- Proponent view -->
-  <SubmissionsProponent v-else />
+  <SubmissionsProponent v-else-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_PROPONENT_READ)" />
 </template>

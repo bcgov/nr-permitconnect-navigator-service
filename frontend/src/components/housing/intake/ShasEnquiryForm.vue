@@ -237,7 +237,7 @@ onBeforeMount(async () => {
 
       <Card>
         <template #title>
-          <span class="section-header">Applicant Info</span>
+          <span class="section-header">Who is the primary contact regarding this project?</span>
           <Divider type="solid" />
         </template>
         <template #content>
@@ -293,7 +293,7 @@ onBeforeMount(async () => {
       <Card>
         <template #title>
           <span class="section-header">
-            Is this enquiry related to an existing PermitConnect Housing Navigator Service application?
+            Is this enquiry related to an existing project that you are working on with a Navigator?
           </span>
           <Divider type="solid" />
         </template>
@@ -313,7 +313,7 @@ onBeforeMount(async () => {
         <template #title>
           <div class="flex">
             <span class="section-header">
-              Enter the confirmation ID of your PermitConnect Housing Navigator Service application
+              Enter the confirmation ID given to you when you registered your project with a Navigator
             </span>
             <div
               v-tooltip.right="
@@ -355,9 +355,7 @@ onBeforeMount(async () => {
       <Card v-if="values.basic?.isRelated === BASIC_RESPONSES.NO">
         <template #title>
           <div class="flex">
-            <span class="section-header">
-              Would you like to apply for the PermitConnect Housing Navigator Service application?
-            </span>
+            <span class="section-header">Would you like to register for Navigator assistance with a project?</span>
             <div v-tooltip.right="`Consider applying if you are working or getting started on a housing project.`">
               <font-awesome-icon icon="fa-solid fa-circle-question" />
             </div>

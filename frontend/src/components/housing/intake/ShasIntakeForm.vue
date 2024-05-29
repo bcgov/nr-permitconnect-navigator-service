@@ -344,7 +344,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Applicant Info</span>
+                <span class="section-header">Who is the primary contact regarding this project?</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -1077,6 +1077,25 @@ onBeforeMount(async () => {
                     </Card>
                   </AccordionTab>
                 </Accordion>
+              </template>
+            </Card>
+            <Card>
+              <template #title>
+                <div class="flex align-items-center">
+                  <div class="flex flex-grow-1">
+                    <span class="section-header">
+                      Is there anything else you would like to tell us about this project's location?
+                    </span>
+                  </div>
+                </div>
+                <Divider type="solid" />
+              </template>
+              <template #content>
+                <TextArea
+                  class="col-12"
+                  name="housing.projectLocationDescription"
+                  :disabled="!editable"
+                />
               </template>
             </Card>
 
