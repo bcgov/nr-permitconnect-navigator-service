@@ -7,6 +7,7 @@ import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
 
 import {
+  AutoComplete,
   Calendar,
   Checkbox,
   Dropdown,
@@ -31,7 +32,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { orgBookService, permitService, submissionService } from '@/services';
+import { externalApiService, permitService, submissionService } from '@/services';
 import { useTypeStore } from '@/store';
 import {
   ContactPreferenceList,
@@ -46,6 +47,14 @@ import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/uti
 
 import type { IInputEvent } from '@/interfaces';
 import type { Ref } from 'vue';
+import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+
+// Types
+type GeocoderEntry = {
+  geometry: { coordinates: Array<number>; [key: string]: any };
+  properties: { [key: string]: string };
+};
 
 // Props
 type Props = {
@@ -68,6 +77,7 @@ const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const activeStep: Ref<number> = ref(0);
+const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -93,14 +103,49 @@ function displayErrors(a: any) {
 }
 
 function confirmSubmit(data: any) {
+  const tempData = Object.assign({}, data);
+  delete tempData['addressSearch'];
+
   confirm.require({
     message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
-    accept: () => onSubmit(data)
+    accept: () => onSubmit(tempData)
   });
 }
+
+const getAddressSearchLabel = (e: GeocoderEntry) => {
+  return e?.properties?.fullAddress;
+};
+
+function handleProjectLocationClick() {
+  formRef?.value?.setFieldValue('location.latitude', null);
+  formRef?.value?.setFieldValue('location.longitude', null);
+}
+
+const onAddressSearchInput = async (e: IInputEvent) => {
+  const input = e.target.value;
+  addressGeocoderOptions.value =
+    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+};
+
+const onAddressSelect = async (e: DropdownChangeEvent) => {
+  if (e.originalEvent instanceof InputEvent) return;
+
+  if (e.value as GeocoderEntry) {
+    const properties = e.value?.properties;
+    const geometry = e.value?.geometry;
+
+    formRef.value?.setFieldValue(
+      'location.streetAddress',
+      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
+    );
+    formRef.value?.setFieldValue('location.locality', properties?.localityName);
+    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
+    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+  }
+};
 
 function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BASIC_RESPONSES.YES || e === BASIC_RESPONSES.UNSURE) {
@@ -119,12 +164,15 @@ function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, pus
 async function onSaveDraft(data: any) {
   editable.value = false;
 
+  const tempData = Object.assign({}, data);
+  delete tempData['addressSearch'];
+
   try {
     let response;
     if (data.submissionId) {
-      response = await submissionService.updateDraft(data.submissionId, data);
+      response = await submissionService.updateDraft(tempData.submissionId, tempData);
     } else {
-      response = await submissionService.createDraft(data);
+      response = await submissionService.createDraft(tempData);
     }
 
     if (response.data.submissionId && response.data.activityId) {
@@ -165,14 +213,12 @@ async function onSubmit(data: any) {
   }
 }
 
-const onRegisteredNameInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  if (input.length >= 3) {
-    const results = (await orgBookService.searchOrgBook(input))?.data?.results ?? [];
-    orgBookOptions.value = results.map((x: { [key: string]: string }) => x?.value);
-  } else {
-    orgBookOptions.value = [];
+const onRegisteredNameInput = async (e: AutoCompleteCompleteEvent) => {
+  if (e?.query?.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    orgBookOptions.value = results
+      .filter((x: { [key: string]: string }) => x.type === 'name')
+      .map((x: { [key: string]: string }) => x?.value);
   }
 };
 
@@ -353,17 +399,20 @@ onBeforeMount(async () => {
                       :bold="false"
                       :disabled="!editable"
                       :options="YesNo"
+                      @on-change="() => setFieldValue('basic.registeredName', null)"
                     />
-                    <EditableDropdown
+                    <AutoComplete
                       v-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.YES"
                       class="col-6 pl-0"
                       name="basic.registeredName"
-                      :get-option-label="getRegisteredNameLabel"
-                      :options="orgBookOptions"
-                      :placeholder="'Type to search the B.C registered name'"
                       :bold="false"
                       :disabled="!editable"
-                      @on-input="onRegisteredNameInput"
+                      :editable="true"
+                      :force-selection="true"
+                      :get-option-label="getRegisteredNameLabel"
+                      :placeholder="'Type to search the B.C registered name'"
+                      :suggestions="orgBookOptions"
+                      @on-complete="onRegisteredNameInput"
                     />
                     <InputText
                       v-else-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.NO"
@@ -808,6 +857,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="ProjectLocation"
+                    @click="handleProjectLocationClick"
                   />
                   <div
                     v-if="values.location?.projectLocation === PROJECT_LOCATION.STREET_ADDRESS"
@@ -816,41 +866,46 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="grid nested-grid">
-                          <InputText
+                          <EditableDropdown
                             class="col-12"
-                            name="location.addressSearch"
+                            name="addressSearch"
+                            :get-option-label="getAddressSearchLabel"
+                            :options="addressGeocoderOptions"
+                            :placeholder="'Search the address of your housing project'"
+                            :bold="false"
                             :disabled="!editable"
-                            placeholder="Search the address of your housing project"
+                            @on-input="onAddressSearchInput"
+                            @on-change="onAddressSelect"
                           />
                           <InputText
                             class="col-4"
                             name="location.streetAddress"
-                            :disabled="!editable"
+                            disabled
                             placeholder="Street address"
                           />
                           <InputText
                             class="col-4"
                             name="location.locality"
-                            :disabled="!editable"
+                            disabled
                             placeholder="Locality"
                           />
                           <InputText
                             class="col-4"
                             name="location.province"
-                            :disabled="!editable"
+                            disabled
                             placeholder="Province"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.latitude"
-                            :disabled="!editable"
+                            disabled
                             help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.longitude"
-                            :disabled="!editable"
+                            disabled
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
                           />
