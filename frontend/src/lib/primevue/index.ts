@@ -1,6 +1,7 @@
 // Add imports as needed
 export { default as Accordion } from 'primevue/accordion';
 export { default as AccordionTab } from 'primevue/accordiontab';
+export { default as AutoComplete } from 'primevue/autocomplete';
 export { FilterMatchMode } from 'primevue/api';
 export { default as Breadcrumb } from 'primevue/breadcrumb';
 export { default as Button } from 'primevue/button';
