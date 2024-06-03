@@ -8,14 +8,16 @@
       "apiPath": "FRONTEND_COMS_APIPATH",
       "bucketId": "FRONTEND_COMS_BUCKETID"
     },
-    "externalApi": {
-      "geocoderApi": "FRONTEND_GEOCODER_APIPATH",
-      "orgBookApi": "FRONTEND_ORGBOOK_APIPATH"
+    "geocoder": {
+      "apiPath": "FRONTEND_GEOCODER_APIPATH"
     },
     "notificationBanner": "FRONTEND_NOTIFICATION_BANNER",
     "oidc": {
       "authority": "FRONTEND_OIDC_AUTHORITY",
       "clientId": "FRONTEND_OIDC_CLIENTID"
+    },
+    "orgbook": {
+      "apiPath": "FRONTEND_ORGBOOK_APIPATH"
     }
   },
   "server": {

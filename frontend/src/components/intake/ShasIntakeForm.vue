@@ -46,9 +46,9 @@ import {
 import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
 
 import type { IInputEvent } from '@/interfaces';
-import type { Ref } from 'vue';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { Ref } from 'vue';
 
 // Types
 type GeocoderEntry = {
@@ -213,18 +213,18 @@ async function onSubmit(data: any) {
   }
 }
 
-const onRegisteredNameInput = async (e: AutoCompleteCompleteEvent) => {
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
       .filter((x: { [key: string]: string }) => x.type === 'name')
       .map((x: { [key: string]: string }) => x?.value);
   }
-};
+}
 
-const getRegisteredNameLabel = (e: any) => {
+function getRegisteredNameLabel(e: any) {
   return e;
-};
+}
 
 onBeforeMount(async () => {
   let response;
@@ -254,7 +254,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div>{{ formRef?.values }}</div>
   <div v-if="!assignedActivityId">
     <Form
       v-if="initialFormValues"
@@ -409,7 +408,6 @@ onBeforeMount(async () => {
                       :disabled="!editable"
                       :editable="true"
                       :force-selection="true"
-                      :get-option-label="getRegisteredNameLabel"
                       :placeholder="'Type to search the B.C registered name'"
                       :suggestions="orgBookOptions"
                       @on-complete="onRegisteredNameInput"

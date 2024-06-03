@@ -79,7 +79,7 @@ export function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  */
 export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().externalApi.geocoderApi,
+    baseURL: new ConfigService().getConfig().geocoder.apiPath,
     timeout: 10000,
     paramsSerializer,
     ...options
@@ -105,7 +105,7 @@ export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  */
 export function orgBookAxios(options: AxiosRequestConfig = {}): AxiosInstance {
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().externalApi.orgBookApi,
+    baseURL: new ConfigService().getConfig().orgbook.apiPath,
     timeout: 10000,
     paramsSerializer,
     ...options
