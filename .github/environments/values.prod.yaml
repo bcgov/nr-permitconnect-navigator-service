@@ -6,6 +6,8 @@ config:
     FRONTEND_CHES_BCC: Housing.Authorizations@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 0089d041-5aab-485e-842d-8875475d0ed6
+    FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
+    FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
     FRONTEND_OIDC_AUTHORITY: https://loginproxy.gov.bc.ca/auth/realms/standard
     FRONTEND_OIDC_CLIENTID: nr-permit-connect-navigator-service-5188
     SERVER_APIPATH: /api/v1

@@ -213,18 +213,18 @@ async function onSubmit(data: any) {
   }
 }
 
-const onRegisteredNameInput = async (e: AutoCompleteCompleteEvent) => {
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
       .filter((x: { [key: string]: string }) => x.type === 'name')
       .map((x: { [key: string]: string }) => x?.value);
   }
-};
+}
 
-const getRegisteredNameLabel = (e: any) => {
+function getRegisteredNameLabel(e: any) {
   return e;
-};
+}
 
 onBeforeMount(async () => {
   let response;
@@ -254,7 +254,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div>{{ formRef?.values }}</div>
   <div v-if="!assignedActivityId">
     <Form
       v-if="initialFormValues"

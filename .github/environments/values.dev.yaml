@@ -6,6 +6,8 @@ config:
     FRONTEND_CHES_BCC: NRM.PermittingAndData@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms-dev.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 1f9e1451-c130-4804-aeb0-b78b5b109c47
+    FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
+    FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
     FRONTEND_OIDC_AUTHORITY: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
     FRONTEND_OIDC_CLIENTID: nr-permit-connect-navigator-service-5188
     SERVER_APIPATH: /api/v1
