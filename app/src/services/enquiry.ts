@@ -63,14 +63,14 @@ const service = {
   /**
    * @function getEnquiry
    * Gets a specific enquiry from the PCNS database
-   * @param {string} activityId PCNS Activity ID
+   * @param {string} enquiryId Enquiry ID
    * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
    */
-  getEnquiry: async (activityId: string) => {
+  getEnquiry: async (enquiryId: string) => {
     try {
       const result = await prisma.enquiry.findFirst({
         where: {
-          activity_id: activityId
+          enquiry_id: enquiryId
         }
       });
 

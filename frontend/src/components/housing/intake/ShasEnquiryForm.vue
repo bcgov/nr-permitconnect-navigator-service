@@ -178,8 +178,8 @@ async function onSubmit(data: any) {
 
 onBeforeMount(async () => {
   let response;
-  if (props.activityId) {
-    response = (await enquiryService.getEnquiry(props.activityId)).data;
+  if (props.enquiryId) {
+    response = (await enquiryService.getEnquiry(props.enquiryId)).data;
     editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
   }
 
@@ -194,6 +194,12 @@ onBeforeMount(async () => {
       email: response?.contactEmail,
       relationshipToProject: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
+    },
+    basic: {
+      isRelated: response?.isRelated,
+      relatedActivityId: response?.relatedActivityId,
+      enquiryDescription: response?.enquiryDescription,
+      applyForPermitConnect: response?.applyForPermitConnect
     }
   };
 });

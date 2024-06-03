@@ -36,8 +36,8 @@ const items = ref([
       <img
         class="mr-3"
         src="@/assets/images/house.png"
-        width="147"
-        height="141"
+        width="67"
+        height="64"
         alt="Housing image"
       />
       <h1 class="app-primary-color">Housing</h1>

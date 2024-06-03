@@ -119,9 +119,9 @@ const controller = {
     }
   },
 
-  getEnquiry: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+  getEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await enquiryService.getEnquiry(req.params.activityId);
+      const response = await enquiryService.getEnquiry(req.params.enquiryId);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
