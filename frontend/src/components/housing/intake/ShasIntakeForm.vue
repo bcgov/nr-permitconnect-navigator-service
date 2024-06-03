@@ -493,8 +493,6 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
-            <CollectionDisclaimer />
-
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -515,7 +513,7 @@ onBeforeMount(async () => {
                   <InputText
                     class="col-6"
                     name="housing.projectName"
-                    label="Type in project name - well known title like Capital Park"
+                    label="Type in project - well known title like Capital Park"
                     :bold="false"
                     :disabled="!editable"
                   />
@@ -843,8 +841,6 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
-            <CollectionDisclaimer />
-
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -858,7 +854,9 @@ onBeforeMount(async () => {
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">Has the location of the project been affected by natural disaster?</span>
+                  <span class="section-header">
+                    Has the location of this project been affected by natural disaster?
+                  </span>
                 </div>
                 <Divider type="solid" />
               </template>
@@ -1006,11 +1004,20 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
+                          <div class="col-12">
+                            <label>
+                              <a
+                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                target="_blank"
+                              >
+                                LTSA PID Lookup
+                              </a>
+                            </label>
+                          </div>
                           <!-- eslint-disable max-len -->
                           <InputText
                             class="col-12"
                             name="location.ltsaPIDLookup"
-                            label="LTSA PID Lookup"
                             :bold="false"
                             :disabled="!editable"
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
@@ -1136,8 +1143,6 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ prevCallback }">
-            <CollectionDisclaimer />
-
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1425,7 +1430,7 @@ onBeforeMount(async () => {
       severity="success"
       :closable="false"
     >
-      Your application has been succesfully submitted.
+      Your application has been successfully submitted.
     </Message>
     <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>

@@ -80,7 +80,7 @@ async function confirmNext(data: any) {
   confirm.require({
     /* eslint-disable max-len */
     message:
-      'After confirming, your enquiry will get submitted, and you will be directed to the PermitConnect Navigator Service application.',
+      'After confirming, your enquiry will be submitted, and you will be directed to register your project with a Navigator.',
     /*eslint-enable max-len */
     header: 'Please confirm',
     acceptLabel: 'Confirm',
@@ -355,8 +355,8 @@ onBeforeMount(async () => {
       <Card v-if="values.basic?.isRelated === BASIC_RESPONSES.NO">
         <template #title>
           <div class="flex">
-            <span class="section-header">Would you like to register for Navigator assistance with a project?</span>
-            <div v-tooltip.right="`Consider applying if you are working or getting started on a housing project.`">
+            <span class="section-header">Would you like to register your project with a Navigator?</span>
+            <div v-tooltip.right="`Consider registering if you are working or getting started on a housing project.`">
               <font-awesome-icon icon="fa-solid fa-circle-question" />
             </div>
           </div>
@@ -375,7 +375,7 @@ onBeforeMount(async () => {
               v-if="values.basic?.applyForPermitConnect === BASIC_RESPONSES.YES"
               class="col-12 text-blue-500"
             >
-              Please proceed to the next page. It will take you to the Single Housing Application.
+              Please proceed to the next page to register your project with a Navigator.
             </div>
           </div>
         </template>
