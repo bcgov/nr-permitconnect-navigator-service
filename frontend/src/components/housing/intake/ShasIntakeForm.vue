@@ -45,12 +45,20 @@ import {
   YesNo,
   YesNoUnsure
 } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST, PROJECT_LOCATION } from '@/utils/enums';
+import {
+  BASIC_RESPONSES,
+  INTAKE_FORM_CATEGORIES,
+  INTAKE_STATUS_LIST,
+  PERMIT_NEEDED,
+  PERMIT_STATUS,
+  PROJECT_LOCATION
+} from '@/utils/enums';
 
 import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
+import type { Permit } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -241,9 +249,11 @@ function getRegisteredNameLabel(e: any) {
 }
 
 onBeforeMount(async () => {
-  let response;
-  if (props.submissionId) {
+  let response,
+    permits: Array<Permit> = [];
+  if (props.activityId && props.submissionId) {
     response = (await submissionService.getSubmission(props.submissionId)).data;
+    permits = (await permitService.listPermits(props.activityId)).data;
     editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
   }
 
@@ -264,9 +274,49 @@ onBeforeMount(async () => {
       isDevelopedInBC: response?.isDevelopedInBC,
       registeredName: response?.companyNameRegistered
     },
+    housing: {
+      projectName: response?.projectName,
+      projectDescription: response?.projectDescription,
+      singleFamilySelected: !!response?.singleFamilyUnits,
+      multiFamilySelected: !!response?.multiFamilyUnits,
+      singleFamilyUnits: response?.singleFamilyUnits,
+      multiFamilyUnits: response?.multiFamilyUnits,
+      otherSelected: !!response?.otherUnits,
+      otherUnitsDescription: response?.otherUnitsDescription,
+      otherUnits: response?.otherUnits,
+      hasRentalUnits: response?.hasRentalUnits,
+      rentalUnits: response?.rentalUnits,
+      financiallySupportedBC: response?.financiallySupportedBC,
+      financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+      indigenousDescription: response?.indigenousDescription,
+      financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+      nonProfitDescription: response?.nonProfitDescription,
+      financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+      housingCoopDescription: response?.housingCoopDescription
+    },
     location: {
-      province: 'BC'
-    }
+      naturalDisaster: response?.naturalDisaster,
+      projectLocation: response?.projectLocation,
+      streetAddress: response?.streetAddress,
+      locality: response?.locality,
+      province: response?.province,
+      latitude: response?.latitude,
+      longitude: response?.longitude,
+      ltsaPIDLookup: response?.locationPIDs,
+      geomarkUrl: response?.geomarkUrl,
+      projectLocationDescription: response?.projectLocationDescription
+    },
+    appliedPermits: permits
+      .filter((x: Permit) => x.status === PERMIT_STATUS.APPLIED)
+      .map((x: Permit) => ({
+        ...x,
+        statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+      })),
+    permits: {
+      hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
+      checkProvincialPermits: response?.checkProvincialPermits
+    },
+    investigatePermits: permits.filter((x: Permit) => x.needed === PERMIT_NEEDED.UNDER_INVESTIGATION)
   };
 
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
@@ -513,7 +563,7 @@ onBeforeMount(async () => {
                   <InputText
                     class="col-6"
                     name="housing.projectName"
-                    label="Type in project - well known title like Capital Park"
+                    label="Project name - well known title like Capital Park"
                     :bold="false"
                     :disabled="!editable"
                   />
@@ -1100,7 +1150,7 @@ onBeforeMount(async () => {
               <template #content>
                 <TextArea
                   class="col-12"
-                  name="housing.projectLocationDescription"
+                  name="location.projectLocationDescription"
                   :disabled="!editable"
                 />
               </template>
@@ -1251,7 +1301,7 @@ onBeforeMount(async () => {
                                   push({
                                     permitTypeId: undefined,
                                     trackingId: undefined,
-                                    status: undefined
+                                    statusLastVerified: undefined
                                   })
                                 "
                               >
@@ -1344,19 +1394,18 @@ onBeforeMount(async () => {
                               :index="idx"
                               class="w-full flex align-items-center"
                             >
-                              <Dropdown
-                                class="col-4"
-                                :name="`investigatePermits[${idx}].permitTypeId`"
-                                placeholder="Select Permit type"
-                                `
-                                :options="getPermitTypes"
-                                :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-                                option-value="permitTypeId"
-                                :loading="getPermitTypes === undefined"
-                              />
-                              <div class="col-1">
-                                <div class="flex justify-content-left">
-                                  <div class="flex align-items-center mb-3">
+                              <div class="col-4">
+                                <div class="flex justify-content-center">
+                                  <Dropdown
+                                    class="w-full"
+                                    :name="`investigatePermits[${idx}].permitTypeId`"
+                                    placeholder="Select Permit type"
+                                    :options="getPermitTypes"
+                                    :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                    option-value="permitTypeId"
+                                    :loading="getPermitTypes === undefined"
+                                  />
+                                  <div class="flex align-items-center ml-2 mb-4">
                                     <Button
                                       class="p-button-lg p-button-text p-button-danger p-0"
                                       aria-label="Delete"
@@ -1367,6 +1416,7 @@ onBeforeMount(async () => {
                                   </div>
                                 </div>
                               </div>
+
                               <div class="col" />
                             </div>
                             <div class="col-12">

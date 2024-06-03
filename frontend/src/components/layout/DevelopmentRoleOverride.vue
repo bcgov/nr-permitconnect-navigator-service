@@ -14,6 +14,18 @@ const router = useRouter();
 
 // State
 const role: Ref<string | undefined> = ref(permissionService.getRoleOverride());
+
+// Actions
+function clearRole() {
+  permissionService.setRoleOverride(undefined);
+  role.value = undefined;
+  router.push({ name: RouteNames.HOME });
+}
+
+function setRole(e: any) {
+  permissionService.setRoleOverride(e.value);
+  router.push({ name: RouteNames.HOME });
+}
 </script>
 
 <template>
@@ -27,24 +39,13 @@ const role: Ref<string | undefined> = ref(permissionService.getRoleOverride());
         v-model="role"
         class="w-full"
         :options="AccessRoles"
-        @change="
-          (e) => {
-            permissionService.setRoleOverride(e.value);
-            router.push({ name: RouteNames.HOME });
-          }
-        "
+        @change="(e) => setRole(e)"
       />
     </div>
     <div>
       <Button
         secondary
-        @click="
-          (e) => {
-            permissionService.setRoleOverride(undefined);
-            role = undefined;
-            router.push({ name: RouteNames.HOME });
-          }
-        "
+        @click="clearRole"
       >
         End
       </Button>
