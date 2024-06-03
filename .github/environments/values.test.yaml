@@ -6,8 +6,10 @@ config:
     FRONTEND_CHES_BCC: NRM.PermittingAndData@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms-test.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: a9eabd1d-5f77-4c60-bf6b-83ffa0e21c59
+    FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
     FRONTEND_OIDC_AUTHORITY: https://test.loginproxy.gov.bc.ca/auth/realms/standard
     FRONTEND_OIDC_CLIENTID: nr-permit-connect-navigator-service-5188
+    FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
     SERVER_APIPATH: /api/v1
     SERVER_BODYLIMIT: 30mb
     SERVER_CHEFS_APIPATH: https://submit.digital.gov.bc.ca/app/api/v1

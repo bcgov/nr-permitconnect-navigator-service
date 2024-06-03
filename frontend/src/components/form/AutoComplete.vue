@@ -15,7 +15,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   suggestions: Array<unknown>;
-  getOptionLabel: Function;
+  getOptionLabel?: Function;
   bold?: boolean;
   forceSelection?: boolean;
   loading?: boolean;
@@ -29,6 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: '',
   disabled: false,
+  getOptionLabel: (e: string) => e,
   bold: true,
   forceSelection: false,
   loading: false,

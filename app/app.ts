@@ -37,7 +37,9 @@ app.use(
         'default-src': [
           "'self'", // eslint-disable-line
           new URL(config.get('frontend.oidc.authority')).origin,
-          new URL(config.get('frontend.coms.apiPath')).origin
+          new URL(config.get('frontend.coms.apiPath')).origin,
+          new URL(config.get('frontend.geocoder.apiPath')).origin,
+          new URL(config.get('frontend.orgbook.apiPath')).origin
         ]
       }
     }
