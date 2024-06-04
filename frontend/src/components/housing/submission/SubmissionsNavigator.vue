@@ -4,11 +4,12 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 
 import { Spinner } from '@/components/layout';
+import EnquiryListNavigator from '@/components/housing/submission/EnquiryListNavigator.vue';
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
-import { noteService, submissionService } from '@/services';
+import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
@@ -16,7 +17,7 @@ import { BRING_FORWARD_TYPES } from '@/utils/enums';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Statistics, Submission } from '@/types';
+import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
 
 // Store
 const authStore = useAuthStore();
@@ -25,6 +26,7 @@ const { getProfile } = storeToRefs(authStore);
 // State
 const accordionIndex: Ref<number | null> = ref(null);
 const bringForward: Ref<Array<BringForward>> = ref([]);
+const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
@@ -60,8 +62,9 @@ function getBringForwardStyling(bf: BringForward) {
 }
 
 onMounted(async () => {
-  [submissions.value, statistics.value, bringForward.value] = (
+  [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
+      enquiryService.getEnquiries(),
       submissionService.getSubmissions(),
       submissionService.getStatistics(),
       noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED)
@@ -91,7 +94,7 @@ watch(accordionIndex, () => {
 
 <template>
   <TabView v-if="!loading">
-    <TabPanel header="List">
+    <TabPanel header="Projects">
       <Accordion
         v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
         v-model:active-index="accordionIndex"
@@ -126,6 +129,12 @@ watch(accordionIndex, () => {
       <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
+      />
+    </TabPanel>
+    <TabPanel header="Enquiries">
+      <EnquiryListNavigator
+        :loading="loading"
+        :enquiries="enquiries"
       />
     </TabPanel>
     <TabPanel header="Statistics">

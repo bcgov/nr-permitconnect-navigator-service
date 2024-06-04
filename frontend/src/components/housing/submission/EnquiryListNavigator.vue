@@ -3,33 +3,33 @@ import { ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
-import { submissionService } from '@/services';
+import { enquiryService } from '@/services';
 import { RouteNames } from '@/utils/constants';
-import { INTAKE_STATUS_LIST } from '@/utils/enums';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Submission } from '@/types';
+import type { Enquiry } from '@/types';
+import { INTAKE_STATUS_LIST } from '@/utils/enums';
 
 // Props
 type Props = {
   loading: boolean;
-  submissions: Array<Submission> | undefined;
+  enquiries: Array<Enquiry> | undefined;
 };
 
 const props = withDefaults(defineProps<Props>(), {});
 
 // Emit
-const emit = defineEmits(['submission:delete']);
+const emit = defineEmits(['enquiry:delete']);
 
 // State
-const selection: Ref<Submission | undefined> = ref(undefined);
+const selection: Ref<Enquiry | undefined> = ref(undefined);
 
 // Actions
 const confirm = useConfirm();
 const toast = useToast();
 
-function onDelete(submissionId: string) {
+function onDelete(enquiryId: string) {
   confirm.require({
     message: 'Please confirm that you want to delete this draft',
     header: 'Delete draft?',
@@ -37,13 +37,13 @@ function onDelete(submissionId: string) {
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
     accept: () => {
-      submissionService
-        .deleteSubmission(submissionId)
+      enquiryService
+        .deleteEnquiry(enquiryId)
         .then(() => {
-          emit('submission:delete', submissionId);
+          emit('enquiry:delete', enquiryId);
           toast.success('Draft deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete permit', e.message));
+        .catch((e: any) => toast.error('Failed to delete draft', e.message));
     }
   });
 }
@@ -53,8 +53,8 @@ function onDelete(submissionId: string) {
   <DataTable
     v-model:selection="selection"
     :loading="loading"
-    :value="props.submissions"
-    data-key="submissionId"
+    :value="props.enquiries"
+    data-key="enquiryId"
     scrollable
     responsive-layout="scroll"
     :paginator="true"
@@ -84,8 +84,8 @@ function onDelete(submissionId: string) {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteNames.HOUSING_INTAKE,
-              query: { activityId: data.activityId, submissionId: data.submissionId }
+              name: RouteNames.HOUSING_ENQUIRY,
+              query: { activityId: data.activityId, enquiryId: data.enquiryId }
             }"
           >
             {{ data.activityId }}
@@ -94,8 +94,20 @@ function onDelete(submissionId: string) {
       </template>
     </Column>
     <Column
-      field="projectName"
-      header="Project Name"
+      field="contactName"
+      header="Contact"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="contactPhoneNumber"
+      header="Contact phone"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="contactEmail"
+      header="Contact email"
       :sortable="true"
       style="min-width: 200px"
     />
@@ -137,7 +149,7 @@ function onDelete(submissionId: string) {
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
           :disabled="data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT"
-          @click="onDelete(data.submissionId)"
+          @click="onDelete(data.enquiryId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
         </Button>

@@ -204,11 +204,10 @@ label {
   .p-paginator {
     justify-content: right;
   }
-  .action-buttons .p-button.p-button-lg {
-    padding: 0;
-    margin-left: 1rem;
-    font-size: 150%;
-  }
+}
+
+.header-right .p-column-header-content {
+  justify-content: right;
 }
 
 /* modal */
