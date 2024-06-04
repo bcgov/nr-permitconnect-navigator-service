@@ -2,7 +2,6 @@ import { appAxios } from './interceptors';
 
 import { useAuthStore } from '@/store';
 import { ACCESS_ROLES } from '../utils/enums';
-import AuthService from './authService';
 
 export const enum PERMISSIONS {
   HOUSING_BRINGFORWARD_READ = 'permission.housing.bringforward.read',

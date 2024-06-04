@@ -12,8 +12,10 @@ const PATH = '/object';
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
 const putSpy = vi.fn();
-const windowSpy = vi.spyOn(window, 'open');
+const createObjectURLSpy = vi.spyOn(window.URL, 'createObjectURL');
+const revokeObjectURLSpy = vi.spyOn(window.URL, 'revokeObjectURL');
 const testObjectId = 'testObjectId';
+const testFilename = 'testFilename';
 const testVersionId = 'testObjectId';
 const testData = 'testDatas';
 
@@ -26,7 +28,8 @@ vi.mocked(comsAxios).mockReturnValue({
 
 beforeEach(() => {
   vi.clearAllMocks();
-  windowSpy.mockImplementation(() => vi.fn() as any);
+  createObjectURLSpy.mockImplementation(() => vi.fn() as any);
+  revokeObjectURLSpy.mockImplementation(() => vi.fn() as any);
 });
 
 describe('comsService test', () => {
@@ -129,30 +132,30 @@ describe('comsService test', () => {
 
   it('gets an object with versionId', async () => {
     const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await comsService.getObject(testObjectId, testVersionId);
+    await comsService.getObject(testObjectId, testFilename, testVersionId);
 
-    expect(windowSpy).toBeCalledTimes(1);
-    expect(windowSpy).toHaveBeenCalledWith(testData, '_blank');
+    expect(createObjectURLSpy).toBeCalledTimes(1);
+    expect(revokeObjectURLSpy).toBeCalledTimes(1);
     expect(comsSpy).toBeCalledTimes(1);
     expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: testVersionId,
-        download: 'url'
+        download: 'proxy'
       }
     });
   });
 
   it('gets an object without versionId', async () => {
     const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await comsService.getObject(testObjectId);
+    await comsService.getObject(testObjectId, testFilename);
 
-    expect(windowSpy).toBeCalledTimes(1);
-    expect(windowSpy).toHaveBeenCalledWith(testData, '_blank');
+    expect(createObjectURLSpy).toBeCalledTimes(1);
+    expect(revokeObjectURLSpy).toBeCalledTimes(1);
     expect(comsSpy).toBeCalledTimes(1);
     expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
       params: {
         versionId: undefined,
-        download: 'url'
+        download: 'proxy'
       }
     });
   });

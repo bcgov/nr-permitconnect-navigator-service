@@ -139,20 +139,22 @@ describe('noteService test', () => {
 
   it('downloads a document by id with no version', async () => {
     const testId = 'testDocumentId';
+    const filename = 'filename';
     comsGetSpy.mockResolvedValue();
-    await documentService.downloadDocument(testId);
+    await documentService.downloadDocument(testId, filename);
 
     expect(comsGetSpy).toHaveBeenCalledTimes(1);
-    expect(comsGetSpy).toHaveBeenCalledWith(testId, undefined);
+    expect(comsGetSpy).toHaveBeenCalledWith(testId, filename, undefined);
   });
 
   it('downloads a document by id with version', async () => {
     const testId = 'testDocumentId';
     const versionId = 'testVersionId';
+    const filename = 'filename';
     comsGetSpy.mockResolvedValue();
-    await documentService.downloadDocument(testId, versionId);
+    await documentService.downloadDocument(testId, filename, versionId);
     expect(comsGetSpy).toHaveBeenCalledTimes(1);
-    expect(comsGetSpy).toHaveBeenCalledWith(testId, versionId);
+    expect(comsGetSpy).toHaveBeenCalledWith(testId, filename, versionId);
   });
 
   it('deletes a document by id with no version', async () => {

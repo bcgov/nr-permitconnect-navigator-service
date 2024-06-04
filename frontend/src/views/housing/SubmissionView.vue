@@ -248,7 +248,7 @@ const filteredDocuments = computed(() => {
               <DocumentCard
                 :document="document"
                 class="hover-hand hover-shadow"
-                @click="documentService.downloadDocument(document.documentId)"
+                @click="documentService.downloadDocument(document.documentId, document.filename)"
               />
             </div>
           </div>
