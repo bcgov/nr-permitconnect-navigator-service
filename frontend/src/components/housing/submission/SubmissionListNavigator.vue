@@ -78,7 +78,6 @@ const filters = ref({
     :loading="loading"
     :value="props.submissions"
     data-key="submissionId"
-    class="p-datatable-sm"
     scrollable
     responsive-layout="scroll"
     :paginator="true"

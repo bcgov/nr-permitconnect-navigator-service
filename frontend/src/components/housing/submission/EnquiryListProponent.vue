@@ -55,7 +55,6 @@ function onDelete(enquiryId: string) {
     :loading="loading"
     :value="props.enquiries"
     data-key="enquiryId"
-    class="p-datatable-sm"
     scrollable
     responsive-layout="scroll"
     :paginator="true"
@@ -102,7 +101,7 @@ function onDelete(enquiryId: string) {
     />
     <Column
       field="updatedAt"
-      header="Last editted"
+      header="Last edited"
       :sortable="true"
       style="min-width: 150px"
     >
@@ -123,12 +122,13 @@ function onDelete(enquiryId: string) {
     <Column
       field="action"
       header="Action"
-      :sortable="true"
+      header-class="header-right"
+      class="text-right"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger"
+          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
           :disabled="data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT"
           @click="onDelete(data.enquiryId)"
