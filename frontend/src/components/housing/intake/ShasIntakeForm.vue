@@ -358,7 +358,7 @@ onBeforeMount(async () => {
         @update:active-step="checkSubmittable"
       >
         <!--
-      Basic info
+      Contact Information
       -->
         <StepperPanel>
           <template #header="{ index, clickCallback }">
@@ -366,7 +366,7 @@ onBeforeMount(async () => {
               :index="index"
               :active-step="activeStep"
               :click-callback="clickCallback"
-              title="Basic info"
+              title="Contact Information"
               icon="fa-user"
               :class="{
                 'app-error-color':
