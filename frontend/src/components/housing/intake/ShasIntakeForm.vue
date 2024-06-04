@@ -244,10 +244,6 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function getRegisteredNameLabel(e: any) {
-  return e;
-}
-
 onBeforeMount(async () => {
   let response,
     permits: Array<Permit> = [];
