@@ -175,3 +175,26 @@ export const NumResidentialUnits = [
  */
 
 export const ProjectLocation = [PROJECT_LOCATION.LOCATION_COORDINATES, PROJECT_LOCATION.STREET_ADDRESS];
+
+/**
+ * External API configuration params
+ */
+export const ADDRESS_CODER_QUERY_PARAMS = {
+  echo: false,
+  brief: false,
+  minScore: 55,
+  onlyCivic: true,
+  maxResults: 15,
+  autoComplete: true,
+  matchAccuracy: 100,
+  matchPrecision: 'occupant, unit, site, civic_number, intersection, block, street, locality, province',
+  precisionPoints: 100
+};
+
+export const ORG_BOOK_QUERY_PARAMS = {
+  limit: 100,
+  skip: 0,
+  latest: true,
+  inactive: false,
+  revoked: false
+};
