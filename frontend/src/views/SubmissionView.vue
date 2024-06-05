@@ -145,10 +145,7 @@ const filteredDocuments = computed(() => {
     </TabPanel>
     <TabPanel header="Files">
       <div class="mb-3 border-dashed file-upload border-round-md">
-        <FileUpload
-          :activity-id="props.activityId"
-          class=""
-        />
+        <FileUpload :activity-id="props.activityId" />
       </div>
       <div class="flex flex-row justify-content-between pb-3">
         <div class="flex align-items-center">
