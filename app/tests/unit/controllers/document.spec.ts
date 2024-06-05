@@ -1,5 +1,8 @@
+import { NIL } from 'uuid';
+
 import { documentController } from '../../../src/controllers';
-import { documentService } from '../../../src/services';
+import { documentService, userService } from '../../../src/services';
+import * as utils from '../../../src/components/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -28,6 +31,8 @@ describe('createDocument', () => {
 
   // Mock service calls
   const createSpy = jest.spyOn(documentService, 'createDocument');
+  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
+  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 201 if all good', async () => {
     const req = {
@@ -40,21 +45,32 @@ describe('createDocument', () => {
       activityId: '1',
       filename: 'testfile',
       mimeType: 'imgjpg',
-      filesize: 1234567
+      filesize: 1234567,
+      createdByFullName: 'testuser'
     };
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     createSpy.mockResolvedValue(created);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await documentController.createDocument(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
       req.body.documentId,
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.length
+      req.body.length,
+      USR_ID
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
@@ -66,20 +82,30 @@ describe('createDocument', () => {
       currentUser: CURRENT_USER
     };
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     createSpy.mockImplementationOnce(() => {
       throw new Error();
     });
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await documentController.createDocument(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
       req.body.documentId,
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.length
+      req.body.length,
+      USR_ID
     );
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
@@ -103,7 +129,8 @@ describe('deleteDocument', () => {
       activityId: '1',
       filename: 'testfile',
       mimeType: 'imgjpg',
-      filesize: 1234567
+      filesize: 1234567,
+      createdByFullName: 'testuser'
     };
 
     deleteSpy.mockResolvedValue(deleted);
@@ -155,7 +182,8 @@ describe('listDocuments', () => {
         activityId: '1',
         filename: 'testfile',
         mimeType: 'imgjpg',
-        filesize: 1234567
+        filesize: 1234567,
+        createdByFullName: 'testuser'
       }
     ];
 

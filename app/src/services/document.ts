@@ -17,7 +17,8 @@ const service = {
     activityId: string,
     filename: string,
     mimeType: string,
-    filesize: number
+    filesize: number,
+    userId: string //userId added to track who uploaded the document
   ) => {
     const response = await prisma.document.create({
       data: {
@@ -25,11 +26,21 @@ const service = {
         activity_id: activityId,
         filename: filename,
         mime_type: mimeType,
-        filesize: filesize
+        filesize: filesize,
+        created_by: userId //created_by added to track who uploaded the document
       }
     });
-
-    return document.fromPrismaModel(response);
+    const doc = document.fromPrismaModel(response);
+    if (response.created_by) {
+      // getting uploaded by information for the new document
+      const user = await prisma.user.findFirst({
+        where: {
+          user_id: response.created_by
+        }
+      });
+      doc.createdByFullName = user ? `${user.full_name}` : '';
+    }
+    return doc;
   },
 
   /**
@@ -64,7 +75,20 @@ const service = {
       }
     });
 
-    return response.map((x) => document.fromPrismaModel(x));
+    const documents = response.map((x) => document.fromPrismaModel(x));
+    if (documents && Array.isArray(documents)) {
+      for (let i = 0; i < documents.length; i++) {
+        if (documents[i].createdBy) {
+          const user = await prisma.user.findFirst({
+            where: {
+              user_id: documents[i].createdBy as string
+            }
+          });
+          documents[i].createdByFullName = user ? user.full_name : '';
+        }
+      }
+    }
+    return documents;
   }
 };
 

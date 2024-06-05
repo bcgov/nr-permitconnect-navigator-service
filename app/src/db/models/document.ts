@@ -21,16 +21,16 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaGraphDocument | null): Document | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaGraphDocument): Document {
     return {
       documentId: input.document_id,
       activityId: input.activity_id,
       filename: input.filename,
       mimeType: input.mime_type,
       filesize: Number(input.filesize),
-      createdAt: input.created_at?.toISOString()
+      createdAt: input.created_at?.toISOString(),
+      createdBy: input.created_by,
+      createdByFullName: null
     };
   }
 };

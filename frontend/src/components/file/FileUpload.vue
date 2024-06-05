@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
-import { FileUpload, useToast } from '@/lib/primevue';
+import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { useConfigStore, useSubmissionStore } from '@/store';
 
@@ -23,6 +23,7 @@ const submissionStore = useSubmissionStore();
 
 // State
 const fileInput: Ref<any> = ref(null);
+const uploading: Ref<Boolean> = ref(false);
 
 // Actions
 const toast = useToast();
@@ -49,6 +50,7 @@ const onUpload = async (files: Array<File>) => {
   await Promise.allSettled(
     files.map(async (file: File) => {
       try {
+        uploading.value = true;
         const response = (await documentService.createDocument(file, props.activityId, getConfig.value.coms.bucketId))
           ?.data;
 
@@ -58,6 +60,8 @@ const onUpload = async (files: Array<File>) => {
         }
       } catch (e: any) {
         toast.error('Failed to upload document', e);
+      } finally {
+        uploading.value = false;
       }
     })
   );
@@ -65,7 +69,19 @@ const onUpload = async (files: Array<File>) => {
 </script>
 
 <template>
-  <div class="hover-hand hover-shadow">
+  <div
+    v-if="uploading"
+    class="h-4rem align-content-center pl-2 pr-2"
+  >
+    <ProgressBar
+      mode="indeterminate"
+      class="align-self-center progress-bar"
+    />
+  </div>
+  <div
+    v-if="!uploading"
+    class="hover-hand hover-shadow"
+  >
     <FileUpload
       name="fileUpload"
       :multiple="true"
@@ -73,16 +89,20 @@ const onUpload = async (files: Array<File>) => {
       :auto="true"
       :disabled="props.disabled"
       @uploader="onFileUploadDragAndDrop"
-      @click="onFileUploadClick"
     >
       <template #empty>
         <div class="flex align-items-center justify-content-center flex-column">
-          <font-awesome-icon
-            icon="fa-solid fa-upload"
-            class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
-          />
-          <p class="font-bold">Upload</p>
-          <p>Click or drag-and-drop</p>
+          <Button
+            aria-label="Upload"
+            class="justify-content-center w-full h-4rem border-none"
+            @click="onFileUploadClick"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-upload"
+            />
+            Click or drag-and-drop
+          </Button>
         </div>
       </template>
       <template #content="{ files }">
@@ -102,7 +122,7 @@ const onUpload = async (files: Array<File>) => {
     <input
       ref="fileInput"
       type="file"
-      style="display: none"
+      class="hidden"
       accept="*"
       multiple
       @change="(event: any) => onUpload(Array.from(event.target.files))"
@@ -115,9 +135,18 @@ const onUpload = async (files: Array<File>) => {
 :deep(.p-fileupload-buttonbar) {
   display: none;
 }
-
 :deep(.p-fileupload-content) {
-  padding: 1rem;
-  border-style: dashed;
+  padding: 0;
+  border: none;
+}
+.file-input {
+  display: none;
+}
+.p-button.p-component {
+  background-color: transparent;
+  color: var(--text-color);
+}
+.progress-bar {
+  height: 0.3rem;
 }
 </style>
