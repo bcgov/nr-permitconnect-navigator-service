@@ -68,8 +68,8 @@ export default {
    * @function downloadDocument
    * @returns {Promise} An axios response
    */
-  async downloadDocument(documentId: string, versionId?: string) {
-    await comsService.getObject(documentId, versionId);
+  async downloadDocument(documentId: string, filename: string, versionId?: string) {
+    await comsService.getObject(documentId, filename, versionId);
   },
 
   /**

@@ -18,5 +18,6 @@ export type Enquiry = {
   relatedActivityId: string | null;
   enquiryDescription: string | null;
   applyForPermitConnect: string | null;
+  intakeStatus: string | null;
   user: User | null;
 } & Partial<IStamps>;

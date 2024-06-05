@@ -19,7 +19,7 @@ const paramsSerializer = {
  */
 export function appAxios(options: AxiosRequestConfig = {}): AxiosInstance {
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().apiPath,
+    baseURL: window.location.origin + `/${new ConfigService().getConfig().apiPath}`,
     timeout: 10000,
     ...options
   });

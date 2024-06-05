@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
@@ -19,7 +20,8 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import { intakeSchema } from '@/components/intake/ShasIntakeSchema';
+import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
+import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -43,12 +45,20 @@ import {
   YesNo,
   YesNoUnsure
 } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
+import {
+  BASIC_RESPONSES,
+  INTAKE_FORM_CATEGORIES,
+  INTAKE_STATUS_LIST,
+  PERMIT_NEEDED,
+  PERMIT_STATUS,
+  PROJECT_LOCATION
+} from '@/utils/enums';
 
 import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
+import type { Permit } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -91,15 +101,22 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Actions
 const confirm = useConfirm();
+const router = useRouter();
 const toast = useToast();
 
 const checkSubmittable = (stepNumber: number) => {
   if (stepNumber === 3) isSubmittable.value = true;
 };
 
-function displayErrors(a: any) {
-  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+function confirmLeave() {
+  confirm.require({
+    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
+    header: 'Leave this page?',
+    acceptLabel: 'Leave',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    accept: () => router.push({ name: RouteNames.HOUSING })
+  });
 }
 
 function confirmSubmit(data: any) {
@@ -146,6 +163,11 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
   }
 };
+
+function displayErrors(a: any) {
+  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+}
 
 function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BASIC_RESPONSES.YES || e === BASIC_RESPONSES.UNSURE) {
@@ -222,14 +244,13 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function getRegisteredNameLabel(e: any) {
-  return e;
-}
-
 onBeforeMount(async () => {
-  let response;
-  if (props.activityId) {
-    response = (await submissionService.getSubmission(props.activityId)).data;
+  let response,
+    permits: Array<Permit> = [];
+  if (props.activityId && props.submissionId) {
+    response = (await submissionService.getSubmission(props.submissionId)).data;
+    permits = (await permitService.listPermits(props.activityId)).data;
+    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
   }
 
   // Default form values
@@ -244,9 +265,54 @@ onBeforeMount(async () => {
       relationshipToProject: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
     },
+    basic: {
+      isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+      isDevelopedInBC: response?.isDevelopedInBC,
+      registeredName: response?.companyNameRegistered
+    },
+    housing: {
+      projectName: response?.projectName,
+      projectDescription: response?.projectDescription,
+      singleFamilySelected: !!response?.singleFamilyUnits,
+      multiFamilySelected: !!response?.multiFamilyUnits,
+      singleFamilyUnits: response?.singleFamilyUnits,
+      multiFamilyUnits: response?.multiFamilyUnits,
+      otherSelected: !!response?.otherUnits,
+      otherUnitsDescription: response?.otherUnitsDescription,
+      otherUnits: response?.otherUnits,
+      hasRentalUnits: response?.hasRentalUnits,
+      rentalUnits: response?.rentalUnits,
+      financiallySupportedBC: response?.financiallySupportedBC,
+      financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+      indigenousDescription: response?.indigenousDescription,
+      financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+      nonProfitDescription: response?.nonProfitDescription,
+      financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+      housingCoopDescription: response?.housingCoopDescription
+    },
     location: {
-      province: 'BC'
-    }
+      naturalDisaster: response?.naturalDisaster,
+      projectLocation: response?.projectLocation,
+      streetAddress: response?.streetAddress,
+      locality: response?.locality,
+      province: response?.province,
+      latitude: response?.latitude,
+      longitude: response?.longitude,
+      ltsaPIDLookup: response?.locationPIDs,
+      geomarkUrl: response?.geomarkUrl,
+      projectLocationDescription: response?.projectLocationDescription
+    },
+    appliedPermits: permits
+      .filter((x: Permit) => x.status === PERMIT_STATUS.APPLIED)
+      .map((x: Permit) => ({
+        ...x,
+        statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+      })),
+    permits: {
+      hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
+      checkProvincialPermits: response?.checkProvincialPermits
+    },
+    investigatePermits: permits.filter((x: Permit) => x.needed === PERMIT_NEEDED.UNDER_INVESTIGATION)
   };
 
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
@@ -255,6 +321,18 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!assignedActivityId">
+    <Button
+      class="p-0"
+      text
+      @click="confirmLeave"
+    >
+      <font-awesome-icon
+        icon="fa fa-arrow-circle-left"
+        class="mr-1"
+      />
+      <span>Back to Housing</span>
+    </Button>
+
     <Form
       v-if="initialFormValues"
       id="form"
@@ -280,7 +358,7 @@ onBeforeMount(async () => {
         @update:active-step="checkSubmittable"
       >
         <!--
-      Basic info
+      Contact Information
       -->
         <StepperPanel>
           <template #header="{ index, clickCallback }">
@@ -288,7 +366,7 @@ onBeforeMount(async () => {
               :index="index"
               :active-step="activeStep"
               :click-callback="clickCallback"
-              title="Basic info"
+              title="Contact Information"
               icon="fa-user"
               :class="{
                 'app-error-color':
@@ -298,6 +376,8 @@ onBeforeMount(async () => {
             />
           </template>
           <template #content="{ nextCallback }">
+            <CollectionDisclaimer />
+
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -307,9 +387,10 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
-                <span class="section-header">Applicant Info</span>
+                <span class="section-header">Who is the primary contact regarding this project?</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -467,6 +548,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <span class="section-header">Help us learn more about your housing project</span>
@@ -477,7 +559,7 @@ onBeforeMount(async () => {
                   <InputText
                     class="col-6"
                     name="housing.projectName"
-                    label="Type in project name - well known title like Capital Park"
+                    label="Project name - well known title like Capital Park"
                     :bold="false"
                     :disabled="!editable"
                   />
@@ -814,10 +896,13 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">Has the location of the project been affected by natural disaster?</span>
+                  <span class="section-header">
+                    Has the location of this project been affected by natural disaster?
+                  </span>
                 </div>
                 <Divider type="solid" />
               </template>
@@ -965,11 +1050,20 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
+                          <div class="col-12">
+                            <label>
+                              <a
+                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                target="_blank"
+                              >
+                                LTSA PID Lookup
+                              </a>
+                            </label>
+                          </div>
                           <!-- eslint-disable max-len -->
                           <InputText
                             class="col-12"
                             name="location.ltsaPIDLookup"
-                            label="LTSA PID Lookup"
                             :bold="false"
                             :disabled="!editable"
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
@@ -1038,6 +1132,25 @@ onBeforeMount(async () => {
                 </Accordion>
               </template>
             </Card>
+            <Card>
+              <template #title>
+                <div class="flex align-items-center">
+                  <div class="flex flex-grow-1">
+                    <span class="section-header">
+                      Is there anything else you would like to tell us about this project's location?
+                    </span>
+                  </div>
+                </div>
+                <Divider type="solid" />
+              </template>
+              <template #content>
+                <TextArea
+                  class="col-12"
+                  name="location.projectLocationDescription"
+                  :disabled="!editable"
+                />
+              </template>
+            </Card>
 
             <StepperNavigation
               :editable="editable"
@@ -1085,6 +1198,7 @@ onBeforeMount(async () => {
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
+
             <Card>
               <template #title>
                 <div class="flex">
@@ -1178,11 +1292,12 @@ onBeforeMount(async () => {
                             <div class="col-12">
                               <Button
                                 class="w-full flex justify-content-center font-bold"
+                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined,
                                     trackingId: undefined,
-                                    status: undefined
+                                    statusLastVerified: undefined
                                   })
                                 "
                               >
@@ -1275,19 +1390,18 @@ onBeforeMount(async () => {
                               :index="idx"
                               class="w-full flex align-items-center"
                             >
-                              <Dropdown
-                                class="col-4"
-                                :name="`investigatePermits[${idx}].permitTypeId`"
-                                placeholder="Select Permit type"
-                                `
-                                :options="getPermitTypes"
-                                :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-                                option-value="permitTypeId"
-                                :loading="getPermitTypes === undefined"
-                              />
-                              <div class="col-1">
-                                <div class="flex justify-content-left">
-                                  <div class="flex align-items-center mb-3">
+                              <div class="col-4">
+                                <div class="flex justify-content-center">
+                                  <Dropdown
+                                    class="w-full"
+                                    :name="`investigatePermits[${idx}].permitTypeId`"
+                                    placeholder="Select Permit type"
+                                    :options="getPermitTypes"
+                                    :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                    option-value="permitTypeId"
+                                    :loading="getPermitTypes === undefined"
+                                  />
+                                  <div class="flex align-items-center ml-2 mb-4">
                                     <Button
                                       class="p-button-lg p-button-text p-button-danger p-0"
                                       aria-label="Delete"
@@ -1298,11 +1412,13 @@ onBeforeMount(async () => {
                                   </div>
                                 </div>
                               </div>
+
                               <div class="col" />
                             </div>
                             <div class="col-12">
                               <Button
                                 class="w-full flex justify-content-center font-bold"
+                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined
@@ -1360,7 +1476,7 @@ onBeforeMount(async () => {
       severity="success"
       :closable="false"
     >
-      Your application has been succesfully submitted.
+      Your application has been successfully submitted.
     </Message>
     <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
@@ -1415,5 +1531,26 @@ onBeforeMount(async () => {
 
 :deep(.p-message-wrapper) {
   padding: 0.5rem;
+}
+
+:deep(.p-stepper-header:first-child) {
+  padding-left: 0;
+
+  .p-button {
+    padding-left: 0;
+  }
+}
+
+:deep(.p-stepper-header:last-child) {
+  padding-right: 0;
+
+  .p-button {
+    padding-right: 0;
+  }
+}
+
+:deep(.p-stepper-panels) {
+  padding-left: 0;
+  padding-right: 0;
 }
 </style>

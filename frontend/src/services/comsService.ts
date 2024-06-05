@@ -75,20 +75,31 @@ export default {
    * @function getObject
    * Get an object
    * @param {string} objectId The id for the object to get
+   * @param {string} filename The filename to be given to the object
    * @param {string} versionId An optional versionId
    */
-  getObject(objectId: string, versionId?: string) {
-    // Running in 'url' download mode only, could add options for other modes if needed
-    return comsAxios()
+  getObject(objectId: string, filename: string, versionId?: string) {
+    // Running in 'proxy' download mode only, could add options for other modes if needed
+    return comsAxios({ responseType: 'arraybuffer' })
       .get(`${PATH}/${objectId}`, {
         params: {
           versionId: versionId,
-          download: 'url'
+          download: 'proxy'
         }
       })
       .then((response) => {
-        const url = response.data;
-        window.open(url, '_blank');
+        const blob = new Blob([response.data], {
+          type: 'attachment'
+        });
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
       });
   }
 };

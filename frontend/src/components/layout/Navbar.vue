@@ -1,27 +1,110 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { onMounted, ref } from 'vue';
 
-import { Toolbar } from '@/lib/primevue';
-import { useAuthStore } from '@/store';
+import { Menubar } from '@/lib/primevue';
+import { PERMISSIONS, default as PermissionService } from '@/services/permissionService';
 import { RouteNames } from '@/utils/constants';
 
-const { getIsAuthenticated } = storeToRefs(useAuthStore());
+import type { Ref } from 'vue';
+
+// Types
+type NavItem = {
+  label: string;
+  route?: string;
+  public?: boolean;
+  access?: string;
+  items?: Array<NavItem>;
+};
+
+// State
+const items: Ref<Array<NavItem>> = ref([]);
+
+const permissionService = new PermissionService();
+
+onMounted(() => {
+  items.value = [
+    {
+      label: 'Home',
+      route: RouteNames.HOME,
+      public: true
+    },
+    {
+      label: 'Housing',
+      items: [
+        {
+          label: 'Work with a Housing Navigator',
+          route: RouteNames.HOUSING_INTAKE,
+          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+        },
+        {
+          label: 'Submit an enquiry',
+          route: RouteNames.HOUSING_ENQUIRY,
+          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+        },
+        {
+          label: 'Drafts and submissions',
+          route: RouteNames.HOUSING_SUBMISSIONS,
+          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB
+        },
+        {
+          label: 'Status of application/permit',
+          access: PERMISSIONS.NAVIGATION_HOUSING
+        }
+      ],
+      access: PERMISSIONS.NAVIGATION_HOUSING
+    },
+    {
+      label: 'Submissions',
+      route: RouteNames.HOUSING_SUBMISSIONS,
+      access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS
+    },
+    {
+      label: 'User Management',
+      access: PERMISSIONS.NAVIGATION_USER_MANAGEMENT
+    },
+    {
+      label: 'Developer',
+      route: RouteNames.DEVELOPER,
+      access: PERMISSIONS.NAVIGATION_DEVELOPER
+    }
+  ];
+});
 </script>
 
 <template>
   <nav class="navigation-main pl-2 lg:pl-6">
-    <Toolbar>
-      <template #start>
-        <ol class="list-none m-0 p-0 flex flex-row align-items-center font-semibold">
-          <li>
-            <router-link :to="{ name: RouteNames.HOME }">Home</router-link>
-          </li>
-          <li v-if="getIsAuthenticated">
-            <router-link :to="{ name: RouteNames.SUBMISSIONS }">Submissions</router-link>
-          </li>
-        </ol>
+    <Menubar :model="items">
+      <template #item="{ item, props, hasSubmenu }">
+        <span v-if="item.public || permissionService.can(item.access)">
+          <router-link
+            v-if="item.route"
+            v-slot="{ href, navigate }"
+            :to="{ name: item.route }"
+            custom
+          >
+            <a
+              :href="href"
+              v-bind="props.action"
+              @click="navigate"
+            >
+              <span class="flex">{{ item.label }}</span>
+            </a>
+          </router-link>
+          <a
+            v-else
+            :href="item.url"
+            :target="item.target"
+            v-bind="props.action"
+          >
+            <span class="flex">{{ item.label }}</span>
+            <span
+              v-if="hasSubmenu"
+              class="pi pi-angle-down mt-1 ml-1"
+            />
+          </a>
+        </span>
       </template>
-    </Toolbar>
+    </Menubar>
   </nav>
 </template>
 
@@ -34,43 +117,73 @@ const { getIsAuthenticated } = storeToRefs(useAuthStore());
   box-shadow: 0 6px 8px -4px #b3b1b3;
   -webkit-box-shadow: 0 6px 8px -4px #b3b1b3;
   -moz-box-shadow: 0 6px 8px -4px #b3b1b3;
-  .p-toolbar {
-    background-color: #38598a !important;
+
+  .p-menubar {
     border: none;
     padding: 0;
-    ol {
+
+    :deep(.p-menuitem-content) {
+      background-color: #38598a;
+      border-radius: 0;
+      padding: 0;
+    }
+
+    :deep(.p-submenu-list) {
+      border-radius: 0;
+      padding: 0;
+    }
+
+    :deep(.p-menuitem-link) {
+      padding: 0.5rem 0.8rem 0.7rem 0.8rem;
+
+      &:hover {
+        background-color: #5a7da9;
+      }
+    }
+
+    :deep(.p-menuitem.p-highlight > .p-menuitem-content) {
+      background-color: #5a7da9;
+    }
+
+    :deep(.p-menuitem .p-focus) {
+      background-color: #38598a;
+      border-radius: 0;
+    }
+
+    ul {
       display: flex;
       flex-direction: row;
       margin: 0;
       color: #ffffff;
       list-style: none;
+
       li {
         margin-right: 1em;
-        a {
+
+        a,
+        p {
           display: flex;
           font-weight: normal;
           min-height: 2rem;
           color: #ffffff;
-          padding: 0.5rem 0.8rem 0.7rem 0.8rem;
+          padding: 0;
+          margin: 0;
           text-decoration: none;
+        }
+      }
+    }
 
-          &:focus {
-            outline: none;
-            outline-offset: 0;
-          }
-          &:hover {
-            text-decoration: underline;
-          }
-        }
-        & ~ li {
-          margin-left: -0.6rem;
-        }
+    :deep(.p-submenu-list) {
+      background-color: #38598a !important;
+      width: 250px;
+
+      .p-menuitem:first-child {
+        border-top: 2px solid #fcba19;
       }
-      .router-link-exact-active {
-        background-color: #7ba2cc80;
-        border-bottom: 2px solid #fcba19;
-        font-weight: bold;
-      }
+    }
+
+    :deep(.pi) {
+      color: #ffffff;
     }
   }
 }

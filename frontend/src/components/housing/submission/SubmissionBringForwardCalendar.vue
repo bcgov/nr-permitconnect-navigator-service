@@ -43,7 +43,7 @@ watchEffect(() => {
         <span class="font-bold">Show only mine</span>
       </div>
       <DataTable
-        class="p-datatable-sm text-left w-full"
+        class="text-left w-full"
         :value="
           bringForwards.filter((x) => {
             return filterToUser ? x.createdByFullName === getProfile?.name : x;
@@ -64,7 +64,7 @@ watchEffect(() => {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: RouteNames.SUBMISSION,
+                  name: RouteNames.HOUSING_SUBMISSION,
                   query: { activityId: data.activityId, initialTab: 3 },
                   hash: `#${data.noteId}`
                 }"

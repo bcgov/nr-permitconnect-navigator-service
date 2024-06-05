@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import ShasIntakeForm from '@/components/intake/ShasIntakeForm.vue';
+import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
 
 import type { Ref } from 'vue';
 

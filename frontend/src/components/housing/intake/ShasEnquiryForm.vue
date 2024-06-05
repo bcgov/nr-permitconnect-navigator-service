@@ -5,12 +5,24 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
+import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES } from '@/utils/enums';
+import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST } from '@/utils/enums';
 
 import type { Ref } from 'vue';
+
+// Props
+type Props = {
+  activityId?: string;
+  enquiryId?: string;
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  activityId: undefined,
+  enquiryId: undefined
+});
 
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
@@ -50,6 +62,17 @@ const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
 
+function confirmLeave() {
+  confirm.require({
+    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
+    header: 'Leave this page?',
+    acceptLabel: 'Leave',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    accept: () => router.push({ name: RouteNames.HOUSING })
+  });
+}
+
 async function confirmNext(data: any) {
   const validateResult = await formRef?.value?.validate();
   if (!validateResult?.valid) return;
@@ -57,7 +80,7 @@ async function confirmNext(data: any) {
   confirm.require({
     /* eslint-disable max-len */
     message:
-      'After confirming, your enquiry will get submitted, and you will be directed to the PermitConnect Navigator Service application.',
+      'After confirming, your enquiry will be submitted, and you will be directed to register your project with a Navigator.',
     /*eslint-enable max-len */
     header: 'Please confirm',
     acceptLabel: 'Confirm',
@@ -114,7 +137,7 @@ async function onSubmit(data: any) {
 
   try {
     // Need to first create the submission to relate to if asking to apply
-    if (data.basic.applyForPermitConnect) {
+    if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
       submissionResponse = await submissionService.createDraft({ applicant: data.applicant });
       if (submissionResponse.data.activityId) {
         formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
@@ -143,7 +166,7 @@ async function onSubmit(data: any) {
 
     if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
       router.push({
-        name: RouteNames.INTAKE,
+        name: RouteNames.HOUSING_INTAKE,
         query: {
           activityId: submissionResponse?.data.activityId,
           submissionId: submissionResponse?.data.submissionId
@@ -154,13 +177,50 @@ async function onSubmit(data: any) {
 }
 
 onBeforeMount(async () => {
+  let response;
+  if (props.enquiryId) {
+    response = (await enquiryService.getEnquiry(props.enquiryId)).data;
+    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
+  }
+
   // Default form values
-  initialFormValues.value = {};
+  initialFormValues.value = {
+    activityId: response?.activityId,
+    enquiryId: response?.enquiryId,
+    applicant: {
+      firstName: response?.contactFirstName,
+      lastName: response?.contactLastName,
+      phoneNumber: response?.contactPhoneNumber,
+      email: response?.contactEmail,
+      relationshipToProject: response?.contactApplicantRelationship,
+      contactPreference: response?.contactPreference
+    },
+    basic: {
+      isRelated: response?.isRelated,
+      relatedActivityId: response?.relatedActivityId,
+      enquiryDescription: response?.enquiryDescription,
+      applyForPermitConnect: response?.applyForPermitConnect
+    }
+  };
 });
 </script>
 
 <template>
   <div v-if="!assignedActivityId">
+    <Button
+      class="mb-3 p-0"
+      text
+      @click="confirmLeave"
+    >
+      <font-awesome-icon
+        icon="fa fa-arrow-circle-left"
+        class="mr-1"
+      />
+      <span>Back to Housing</span>
+    </Button>
+
+    <CollectionDisclaimer />
+
     <Form
       v-if="initialFormValues"
       v-slot="{ values }"
@@ -183,7 +243,7 @@ onBeforeMount(async () => {
 
       <Card>
         <template #title>
-          <span class="section-header">Applicant Info</span>
+          <span class="section-header">Who is the primary contact regarding this project?</span>
           <Divider type="solid" />
         </template>
         <template #content>
@@ -239,7 +299,7 @@ onBeforeMount(async () => {
       <Card>
         <template #title>
           <span class="section-header">
-            Is this enquiry related to an existing PermitConnect Housing Navigator Service application?
+            Is this enquiry related to an existing project that you are working on with a Navigator?
           </span>
           <Divider type="solid" />
         </template>
@@ -259,7 +319,7 @@ onBeforeMount(async () => {
         <template #title>
           <div class="flex">
             <span class="section-header">
-              Enter the confirmation ID of your PermitConnect Housing Navigator Service application
+              Enter the confirmation ID given to you when you registered your project with a Navigator
             </span>
             <div
               v-tooltip.right="
@@ -301,10 +361,8 @@ onBeforeMount(async () => {
       <Card v-if="values.basic?.isRelated === BASIC_RESPONSES.NO">
         <template #title>
           <div class="flex">
-            <span class="section-header">
-              Would you like to apply for the PermitConnect Housing Navigator Service application?
-            </span>
-            <div v-tooltip.right="`Consider applying if you are working or getting started on a housing project.`">
+            <span class="section-header">Would you like to register your project with a Navigator?</span>
+            <div v-tooltip.right="`Consider registering if you are working or getting started on a housing project.`">
               <font-awesome-icon icon="fa-solid fa-circle-question" />
             </div>
           </div>
@@ -323,7 +381,7 @@ onBeforeMount(async () => {
               v-if="values.basic?.applyForPermitConnect === BASIC_RESPONSES.YES"
               class="col-12 text-blue-500"
             >
-              Please proceed to the next page. It will take you to the Single Housing Application.
+              Please proceed to the next page to register your project with a Navigator.
             </div>
           </div>
         </template>
@@ -373,8 +431,8 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.no-shadow {
-  box-shadow: none;
+.disclaimer {
+  font-weight: 500;
 }
 
 .p-card {

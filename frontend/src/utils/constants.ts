@@ -32,19 +32,19 @@ export const Regex = Object.freeze({
  * Route names
  */
 export const RouteNames = Object.freeze({
-  CALLBACK: 'callback',
   DEVELOPER: 'developer',
-  ENQUIRY: 'enquiry',
   FORBIDDEN: 'forbidden',
   HOME: 'home',
-  INITIATIVES: 'initiatives',
-  INTAKE: 'intake',
-  LOGIN: 'login',
-  LOGOUT: 'logout',
-  START: 'start',
-  SUBMISSION: 'submission',
-  SUBMISSIONS: 'submissions',
-  STYLINGS: 'stylings'
+
+  HOUSING: 'housing',
+  HOUSING_ENQUIRY: 'housing_enquiry',
+  HOUSING_INTAKE: 'housing_intake',
+  HOUSING_SUBMISSION: 'housing_submission',
+  HOUSING_SUBMISSIONS: 'housing_submissions',
+
+  OIDC_CALLBACK: 'oidc_callback',
+  OIDC_LOGIN: 'oidc_login',
+  OIDC_LOGOUT: 'oidc_logout'
 });
 
 /**
@@ -76,12 +76,13 @@ export const YesNoUnsure = [BASIC_RESPONSES.YES, BASIC_RESPONSES.NO, BASIC_RESPO
 /**
  * Route names
  */
-export const AccessRoles = Object.freeze({
-  PCNS_ADMIN: ACCESS_ROLES.PCNS_ADMIN,
-  PCNS_DEVELOPER: ACCESS_ROLES.PCNS_DEVELOPER,
-  PCNS_NAVIGATOR: ACCESS_ROLES.PCNS_NAVIGATOR,
-  PCNS_OTHER: ACCESS_ROLES.PCNS_OTHER
-});
+export const AccessRoles = [
+  ACCESS_ROLES.PCNS_ADMIN,
+  ACCESS_ROLES.PCNS_DEVELOPER,
+  ACCESS_ROLES.PCNS_NAVIGATOR,
+  ACCESS_ROLES.PCNS_PROPONENT,
+  ACCESS_ROLES.PCNS_SUPERVISOR
+];
 
 /**
  * CHEFS form constants

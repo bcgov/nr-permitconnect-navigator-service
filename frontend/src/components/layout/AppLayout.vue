@@ -1,11 +1,26 @@
 <script setup lang="ts">
-import { Header, Footer } from '@/components/layout';
+import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
+import { PermissionService } from '@/services';
+import { PERMISSIONS } from '@/services/permissionService';
+import { useAuthStore } from '@/store';
+
+// Store
+const authStore = useAuthStore();
+
+const permissionService = new PermissionService();
 </script>
 
 <template>
-  <div class="w-full min-h-screen flex flex-column">
+  <div class="flex flex-column h-screen">
     <!-- Header/Nav -->
     <div class="layout-head">
+      <DevelopmentRoleOverride
+        v-if="
+          authStore.getIsAuthenticated &&
+          permissionService.can(PERMISSIONS.TESTING_ROLE_OVERRIDE, false) &&
+          permissionService.getRoleOverride()
+        "
+      />
       <Header />
       <slot name="nav" />
     </div>

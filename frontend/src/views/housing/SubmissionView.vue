@@ -9,7 +9,7 @@ import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
-import SubmissionForm from '@/components/submission/SubmissionForm.vue';
+import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -21,6 +21,7 @@ import type { Ref } from 'vue';
 type Props = {
   activityId: string;
   initialTab?: string;
+  submissionId: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -43,7 +44,7 @@ const permitModalVisible: Ref<boolean> = ref(false);
 onMounted(async () => {
   const [submission, documents, notes, permits, permitTypes] = (
     await Promise.all([
-      submissionService.getSubmission(props.activityId),
+      submissionService.getSubmission(props.submissionId),
       documentService.listDocuments(props.activityId),
       noteService.listNotes(props.activityId),
       permitService.listPermits(props.activityId),
@@ -62,7 +63,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <router-link :to="{ name: RouteNames.SUBMISSIONS }">
+  <router-link :to="{ name: RouteNames.HOUSING_SUBMISSIONS }">
     <font-awesome-icon
       icon="fa fa-arrow-circle-left"
       class="mr-1"
@@ -105,7 +106,7 @@ onMounted(async () => {
               <DocumentCard
                 :document="document"
                 class="hover-hand hover-shadow"
-                @click="documentService.downloadDocument(document.documentId)"
+                @click="documentService.downloadDocument(document.documentId, document.filename)"
               />
             </div>
           </div>

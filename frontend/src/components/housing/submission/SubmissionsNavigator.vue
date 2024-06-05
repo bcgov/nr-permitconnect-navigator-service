@@ -4,31 +4,37 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
-import SubmissionList from '@/components/submission/SubmissionList.vue';
-import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
+import EnquiryListNavigator from '@/components/housing/submission/EnquiryListNavigator.vue';
+import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
+import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
+import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
-import { noteService, submissionService } from '@/services';
+import { enquiryService, noteService, submissionService } from '@/services';
+import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 import { BRING_FORWARD_TYPES } from '@/utils/enums';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Statistics, Submission } from '@/types';
+import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
 
 // Store
-const { getProfile } = storeToRefs(useAuthStore());
+const authStore = useAuthStore();
+const { getProfile } = storeToRefs(authStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
 const bringForward: Ref<Array<BringForward>> = ref([]);
+const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
+const permissionService = new PermissionService();
+
 function getBringForwardDate(bf: BringForward) {
   const { pastOrToday } = getBringForwardInterval(bf);
   return pastOrToday ? 'today' : formatDate(bf.bringForwardDate);
@@ -56,8 +62,9 @@ function getBringForwardStyling(bf: BringForward) {
 }
 
 onMounted(async () => {
-  [submissions.value, statistics.value, bringForward.value] = (
+  [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
+      enquiryService.getEnquiries(),
       submissionService.getSubmissions(),
       submissionService.getStatistics(),
       noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED)
@@ -86,11 +93,10 @@ watch(accordionIndex, () => {
 </script>
 
 <template>
-  <h1>Submissions</h1>
-
-  <TabView>
-    <TabPanel header="List">
+  <TabView v-if="!loading">
+    <TabPanel header="Projects">
       <Accordion
+        v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -108,7 +114,7 @@ watch(accordionIndex, () => {
                 Bring forward {{ getBringForwardDate(bf) }}:
                 <router-link
                   :to="{
-                    name: RouteNames.SUBMISSION,
+                    name: RouteNames.HOUSING_SUBMISSION,
                     query: { activityId: bf.activityId, initialTab: 3 },
                     hash: `#${bf.noteId}`
                   }"
@@ -120,9 +126,15 @@ watch(accordionIndex, () => {
           </div>
         </AccordionTab>
       </Accordion>
-      <SubmissionList
+      <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
+      />
+    </TabPanel>
+    <TabPanel header="Enquiries">
+      <EnquiryListNavigator
+        :loading="loading"
+        :enquiries="enquiries"
       />
     </TabPanel>
     <TabPanel header="Statistics">
@@ -139,7 +151,10 @@ watch(accordionIndex, () => {
         <span v-else>Failed to load statistics.</span>
       </div>
     </TabPanel>
-    <TabPanel header="Bring Forward Calendar">
+    <TabPanel
+      v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
+      header="Bring Forward Calendar"
+    >
       <SubmissionBringForwardCalendar :bring-forward="bringForward" />
     </TabPanel>
   </TabView>

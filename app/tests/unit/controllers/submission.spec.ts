@@ -767,7 +767,7 @@ describe('getSubmission', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      params: { activityId: 'ACT_ID' },
+      params: { submissionId: 'SOMEID' },
       currentUser: CURRENT_USER
     };
 
@@ -778,14 +778,14 @@ describe('getSubmission', () => {
     await submissionController.getSubmission(req as any, res as any, next);
 
     expect(submissionSpy).toHaveBeenCalledTimes(1);
-    expect(submissionSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(submissionSpy).toHaveBeenCalledWith(req.params.submissionId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(SUBMISSION_1);
   });
 
   it('calls next if the submission service fails to get submission', async () => {
     const req = {
-      params: { activityId: 'ACT_ID' },
+      params: { submissionId: 'SOMEID' },
       currentUser: CURRENT_USER
     };
 
@@ -797,7 +797,7 @@ describe('getSubmission', () => {
     await submissionController.getSubmission(req as any, res as any, next);
 
     expect(submissionSpy).toHaveBeenCalledTimes(1);
-    expect(submissionSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(submissionSpy).toHaveBeenCalledWith(req.params.submissionId);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -814,7 +814,8 @@ describe('getSubmissions', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentUser: CURRENT_USER,
+      query: {}
     };
 
     checkAndStoreSpy.mockResolvedValue();

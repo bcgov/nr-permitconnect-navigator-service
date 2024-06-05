@@ -1,7 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { AuthService } from '@/services';
-import { useAppStore } from '@/store';
+import { AuthService, PermissionService } from '@/services';
+import { PERMISSIONS } from '@/services/permissionService';
+import { useAppStore, useAuthStore } from '@/store';
 import { RouteNames, StorageKey } from '@/utils/constants';
 
 import type { RouteRecordRaw } from 'vue-router';
@@ -20,52 +21,69 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     name: RouteNames.HOME,
-    component: () => import('../views/HomeView.vue'),
-    meta: { title: 'Home' }
-  },
-  {
-    path: '/initiatives',
-    name: RouteNames.INITIATIVES,
-    component: () => import('../views/InitiativesView.vue'),
-    meta: { requiresAuth: true, title: 'Initiatives' }
-  },
-  {
-    path: '/enquiry',
-    name: RouteNames.ENQUIRY,
-    component: () => import('../views/ShasEnquiryView.vue'),
-    meta: { requiresAuth: true, title: 'Enquiry' }
-  },
-  {
-    path: '/intake',
-    name: RouteNames.INTAKE,
-    component: () => import('../views/ShasIntakeView.vue'),
-    meta: { requiresAuth: true, title: 'Intake' },
-    props: createProps
-  },
-  {
-    path: '/start',
-    name: RouteNames.START,
-    component: () => import('../views/StartView.vue'),
-    meta: { requiresAuth: true, title: 'Start' }
-  },
-  {
-    path: '/submission',
-    name: RouteNames.SUBMISSION,
-    component: () => import('@/views/SubmissionView.vue'),
-    meta: { requiresAuth: true, title: 'Submission' },
-    props: createProps
-  },
-  {
-    path: '/submissions',
-    name: RouteNames.SUBMISSIONS,
-    component: () => import('@/views/SubmissionsView.vue'),
-    meta: { requiresAuth: true, title: 'Submissions' }
+    component: () => import('../views/HomeView.vue')
   },
   {
     path: '/developer',
     name: RouteNames.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
-    meta: { requiresAuth: true, title: 'Developer' }
+    meta: { requiresAuth: true, access: PERMISSIONS.NAVIGATION_DEVELOPER }
+  },
+  {
+    path: '/forbidden',
+    name: RouteNames.FORBIDDEN,
+    component: () => import('@/views/Forbidden.vue'),
+    meta: { title: 'Forbidden' }
+  },
+  {
+    path: '/housing',
+    component: () => import('@/views/GenericView.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: RouteNames.HOUSING,
+        component: () => import('../views/housing/HousingView.vue'),
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING
+        }
+      },
+      {
+        path: 'enquiry',
+        name: RouteNames.HOUSING_ENQUIRY,
+        component: () => import('../views/housing/ShasEnquiryView.vue'),
+        props: createProps,
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+        }
+      },
+      {
+        path: 'intake',
+        name: RouteNames.HOUSING_INTAKE,
+        component: () => import('@/views/housing/ShasIntakeView.vue'),
+        props: createProps,
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+        }
+      },
+      {
+        path: 'submission',
+        name: RouteNames.HOUSING_SUBMISSION,
+        component: () => import('@/views/housing/SubmissionView.vue'),
+        props: createProps,
+        meta: {
+          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION
+        }
+      },
+      {
+        path: 'submissions',
+        name: RouteNames.HOUSING_SUBMISSIONS,
+        component: () => import('@/views/housing/SubmissionsView.vue'),
+        meta: {
+          access: [PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS, PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
+        }
+      }
+    ]
   },
   {
     path: '/oidc',
@@ -73,33 +91,23 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'callback',
-        name: RouteNames.CALLBACK,
+        name: RouteNames.OIDC_CALLBACK,
         component: () => import('@/views/oidc/OidcCallbackView.vue'),
         meta: { title: 'Authenticating...' }
       },
       {
         path: 'login',
-        name: RouteNames.LOGIN,
+        name: RouteNames.OIDC_LOGIN,
         component: () => import('@/views/oidc/OidcLoginView.vue'),
-        meta: { title: 'Logging in...' },
-        beforeEnter: () => {
-          const entrypoint = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-          window.sessionStorage.setItem(StorageKey.AUTH, entrypoint);
-        }
+        meta: { title: 'Logging in...' }
       },
       {
         path: 'logout',
-        name: RouteNames.LOGOUT,
+        name: RouteNames.OIDC_LOGOUT,
         component: () => import('@/views/oidc/OidcLogoutView.vue'),
         meta: { title: 'Logging out...' }
       }
     ]
-  },
-  {
-    path: '/forbidden',
-    name: RouteNames.FORBIDDEN,
-    component: () => import('@/views/Forbidden.vue'),
-    meta: { title: 'Forbidden' }
   },
   {
     path: '/:pathMatch(.*)*',
@@ -109,9 +117,24 @@ const routes: Array<RouteRecordRaw> = [
   }
 ];
 
+function waitForRoles(): Promise<string[] | undefined> {
+  let attempts = 0;
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  return new Promise(function (resolve, reject) {
+    (function _waitForRoles() {
+      const r = useAuthStore().getClientRoles;
+      if (r) return resolve(r);
+      if (attempts > 10) resolve(undefined);
+      setTimeout(_waitForRoles, 100);
+      attempts++;
+    })();
+  });
+}
+
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
+  const permissionService = new PermissionService();
   const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -142,26 +165,37 @@ export default function getRouter() {
       });
     }
 
-    // Authentication Guard
+    // Authentication guard
     if (to.meta.requiresAuth) {
       const user = await authService.getUser();
       if (!user || user.expired) {
-        router.replace({ name: RouteNames.LOGIN });
+        window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
+        router.replace({ name: RouteNames.OIDC_LOGIN });
+        return;
       }
+    }
 
-      // Forbid if user does not have at least one assigned role
-      if (user && (!user?.profile?.client_roles || (user?.profile?.client_roles as []).length === 0)) {
+    // Check for reroutes
+    if (to.name === RouteNames.HOUSING) {
+      if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
+        router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
+        return;
+      }
+    }
+
+    // Check access
+    if (to.meta.access) {
+      // Until we can figure out the race condition happening during hard url navigation and browser refresh
+      // this prevents the app throwing you to the forbidden page
+      await waitForRoles();
+      if (!permissionService.can(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
         router.replace({ name: RouteNames.FORBIDDEN });
+        return;
       }
     }
   });
 
-  router.afterEach((to) => {
-    // Update document title
-    document.title = to.meta.title
-      ? `NR PermitConnect Navigator Service - ${to.meta.title}`
-      : 'NR PermitConnect Navigator Service';
-
+  router.afterEach(() => {
     appStore.endDeterminateLoading();
   });
 

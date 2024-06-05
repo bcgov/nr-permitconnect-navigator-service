@@ -19,6 +19,68 @@ const service = {
   },
 
   /**
+   * @function deleteEnquiry
+   * Deletes the enquiry, followed by the associated activity
+   * This action will cascade delete across all linked items
+   * @param {string} enquiryId Enquiry ID
+   * @returns {Promise<Enquiry>} The result of running the delete operation
+   */
+  deleteEnquiry: async (enquiryId: string) => {
+    const response = await prisma.$transaction(async (trx) => {
+      const del = await trx.enquiry.delete({
+        where: {
+          enquiry_id: enquiryId
+        }
+      });
+
+      await trx.activity.delete({
+        where: {
+          activity_id: del.activity_id
+        }
+      });
+
+      return del;
+    });
+
+    return enquiry.fromPrismaModel(response);
+  },
+
+  /**
+   * @function getEnquiries
+   * Gets a list of enquiries
+   * @returns {Promise<(Enquiry | null)[]>} The result of running the findMany operation
+   */
+  getEnquiries: async () => {
+    try {
+      const result = await prisma.enquiry.findMany({ include: { user: true } });
+
+      return result.map((x) => enquiry.fromPrismaModelWithUser(x));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
+   * @function getEnquiry
+   * Gets a specific enquiry from the PCNS database
+   * @param {string} enquiryId Enquiry ID
+   * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
+   */
+  getEnquiry: async (enquiryId: string) => {
+    try {
+      const result = await prisma.enquiry.findFirst({
+        where: {
+          enquiry_id: enquiryId
+        }
+      });
+
+      return result ? enquiry.fromPrismaModel(result) : null;
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
    * @function updateEnquiry
    * Updates a specific enquiry
    * @param {Enquiry} data Enquiry to update

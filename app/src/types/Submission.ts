@@ -53,6 +53,7 @@ export type Submission = {
   otherUnitsDescription: string | null;
   rentalUnits: string | null;
   projectLocation: string | null;
+  projectLocationDescription: string | null;
   locality: string | null;
   province: string | null;
   hasAppliedProvincialPermits: string | null;
