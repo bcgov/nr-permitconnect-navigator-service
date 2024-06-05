@@ -6,7 +6,7 @@ import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useTypeStore } from '@/store';
-import { formatDate } from '@/utils/formatters';
+import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitType } from '@/types';
@@ -52,6 +52,10 @@ watchEffect(() => {
       <div class="flex align-items-center">
         <div class="flex-grow-1">
           <h3 class="mb-0">{{ permitType?.name }}</h3>
+          <p class="text-xs font-italic pt-2 darkgrey">
+            <span>Last updated:</span>
+            <span>{{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}</span>
+          </p>
         </div>
         <Button
           class="p-button-outlined"
@@ -73,26 +77,9 @@ watchEffect(() => {
         <div class="col-12 md:col-6 lg:col-4">
           <div class="grid">
             <p class="col-12">
-              <span class="key font-bold">Last updated:</span>
-              {{ cardData.updatedAt ? formatDate(cardData.updatedAt) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Updated by:</span>
-              {{ cardUpdatedBy }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Needed:</span>
-              {{ cardData.needed }}
-            </p>
-            <p class="col-12">
               <span class="key font-bold">Permit state:</span>
               {{ cardData.status }}
             </p>
-          </div>
-        </div>
-        <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Agency:</span>
               {{ permitType?.agency }}
@@ -105,9 +92,26 @@ watchEffect(() => {
               <span class="key font-bold">Source system:</span>
               {{ permitType?.sourceSystem }}
             </p>
+          </div>
+        </div>
+        <!-- Middle column -->
+        <div class="col-12 md:col-6 lg:col-4">
+          <div class="grid">
             <p class="col-12">
-              <span class="key font-bold">Permit ID:</span>
-              {{ cardData.issuedPermitId }}
+              <span class="key font-bold">Needed:</span>
+              {{ cardData.needed }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Submitted date:</span>
+              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Authorization Status:</span>
+              {{ cardData.authStatus }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Last verified date:</span>
+              {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
             </p>
           </div>
         </div>
@@ -119,16 +123,16 @@ watchEffect(() => {
               {{ cardData.trackingId }}
             </p>
             <p class="col-12">
-              <span class="key font-bold">Auth status:</span>
-              {{ cardData.authStatus }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Submitted date:</span>
-              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
-            </p>
-            <p class="col-12">
               <span class="key font-bold">Adjudication date:</span>
               {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Issued Permit ID:</span>
+              {{ cardData.issuedPermitId }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Updated by:</span>
+              {{ cardUpdatedBy }}
             </p>
           </div>
         </div>
@@ -160,5 +164,9 @@ p {
   :deep(.p-card-content) {
     padding-bottom: 0;
   }
+}
+
+.darkgrey {
+  color: darkgrey;
 }
 </style>

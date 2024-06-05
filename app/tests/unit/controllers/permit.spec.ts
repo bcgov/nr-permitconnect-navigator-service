@@ -96,6 +96,7 @@ describe('createPermit', () => {
         issuedPermitId: '1',
         trackingId: '2',
         authStatus: 'ACTIVE',
+        statusLastVerified: now.toISOString(),
         needed: 'true',
         status: 'FOO',
         submittedDate: now,
