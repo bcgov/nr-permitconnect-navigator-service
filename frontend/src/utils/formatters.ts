@@ -46,6 +46,16 @@ export function formatDateLong(value: string) {
 }
 
 /**
+ * @function formatDateTime
+ * Converts a date to an 'MMMM D yyyy, h:mm a' formatted string
+ * @param {String} value A string representation of a date
+ * @returns {String} A string representation of `value`
+ */
+export function formatDateTime(value: string) {
+  return _dateFnsFormat(value, 'MMMM d yyyy, h:mm a');
+}
+
+/**
  * @function formatJwtUsername
  * Formats a JWT username to a presentable value
  * @param {String} value A string representation of a JWT username
