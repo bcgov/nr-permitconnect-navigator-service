@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Breadcrumb, Button, Card, RadioButton } from '@/lib/primevue';
@@ -9,10 +9,7 @@ import type { Ref } from 'vue';
 
 // State
 const acceptDisclaimer: Ref<boolean> = ref(false);
-const crumbItems = ref([
-  { label: 'Home', url: getRoutePath(RouteNames.HOME) },
-  { label: 'PermitConnect Housing Navigator Service' }
-]);
+const crumbItems: Ref<Array<{ label: string; url?: string }>> = ref([]);
 const enquiryOrIntake: Ref<string | undefined> = ref(undefined);
 
 // Actions
@@ -28,6 +25,13 @@ const handleStartApplication = () => {
   if (enquiryOrIntake.value?.includes(RouteNames.INTAKE) || enquiryOrIntake.value?.includes(RouteNames.ENQUIRY))
     router.push({ name: enquiryOrIntake.value });
 };
+
+onMounted(() => {
+  crumbItems.value = [
+    { label: 'Home', url: getRoutePath(RouteNames.HOME) },
+    { label: 'PermitConnect Housing Navigator Service' }
+  ];
+});
 </script>
 
 <template>
