@@ -137,7 +137,7 @@ async function onSubmit(data: any) {
 
   try {
     // Need to first create the submission to relate to if asking to apply
-    if (data.basic.applyForPermitConnect) {
+    if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
       submissionResponse = await submissionService.createDraft({ applicant: data.applicant });
       if (submissionResponse.data.activityId) {
         formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
