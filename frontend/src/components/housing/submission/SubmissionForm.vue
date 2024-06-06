@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ErrorMessage, Form } from 'vee-validate';
+import { Form } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { boolean, mixed, number, object, string } from 'yup';
+import { boolean, number, object, string } from 'yup';
 
 import {
   Calendar,
@@ -13,19 +13,23 @@ import {
   InputText,
   TextArea
 } from '@/components/form';
-import { Button, useToast } from '@/lib/primevue';
+import { Button, Divider, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import {
   ApplicationStatusList,
   ContactPreferenceList,
   IntakeStatusList,
+  NumResidentialUnits,
+  ProjectRelationshipList,
   QueuePriority,
   Regex,
-  RentalStatusList
+  YesNo,
+  YesNoUnsure
 } from '@/utils/constants';
-import { INTAKE_STATUS_LIST } from '@/utils/enums';
+import { BASIC_RESPONSES, INTAKE_STATUS_LIST, SUBMISSION_TYPES } from '@/utils/enums';
 import { formatJwtUsername } from '@/utils/formatters';
+import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -48,60 +52,81 @@ const submissionStore = useSubmissionStore();
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(props.editable);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const submissionTypes: Ref<Array<string>> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
-  atsClientNumber: string()
-    .when('addedToATS', {
-      is: true,
-      then: (schema) => schema.required(),
-      otherwise: (schema) => schema.notRequired()
-    })
-    .label('ATS Client Number'),
-  activityId: string().required().label('Activity ID'),
-  contactEmail: string().required().email().label('Contact Email'),
-  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
-  companyNameRegistered: string().notRequired().label('Company'),
-  isRentalUnit: string().oneOf(RentalStatusList).label('Rental units'),
-  latitude: number().notRequired().min(48).max(60).label('Latitude'),
-  longitude: number().notRequired().min(-139).max(-114).label('Longitude'),
-  projectName: string().notRequired().label('Project Name'),
   queuePriority: number()
     .required()
-    .min(0)
     .integer()
+    .min(0)
+    .max(3)
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  submissionTypes: object({
-    guidance: boolean(),
-    statusRequest: boolean(),
-    inquiry: boolean(),
-    emergencyAssistance: boolean(),
-    inapplicable: boolean()
-  })
-    .test('at-least-one-true', 'At least one submission type must be selected', (input) => {
-      return Object.values(input).some((value) => value);
-    })
-    .label('Submission Types'),
-  user: mixed()
-    .when('intakeStatus', {
-      is: (val: string) => val === INTAKE_STATUS_LIST.SUBMITTED,
-      then: (schema) =>
-        schema
-          .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
-            if (typeof obj === 'object') return true;
-            if (typeof obj === 'string') {
-              return obj === null || obj === undefined || obj.length === 0;
-            }
-          })
-          .nullable(),
-      otherwise: (schema) =>
-        schema.test('expect-user', 'Assigned to must be a selected user', (obj) => {
-          return typeof obj === 'object';
-        })
-    })
-    .label('Assigned to')
+  submissionType: string()
+    .required()
+    .oneOf([SUBMISSION_TYPES.GUIDANCE, SUBMISSION_TYPES.INAPPLICABLE])
+    .label('Submission type'),
+  submittedAt: string().required().label('Submission date'),
+  relatedEnquiries: string().notRequired().label('Related enquiries'),
+  ...applicantValidator,
+  companyNameRegistered: string().required().label('Company'),
+  isDevelopedInBC: string().required().oneOf(YesNo).label('Company registered in B.C'),
+  projectName: string().required().label('Project Name'),
+  projectDescription: string().notRequired().label('Additional information about project'),
+  singleFamilyUnits: string().notRequired().oneOf(NumResidentialUnits).label('Single family units'),
+  multiFamilyUnits: string().notRequired().oneOf(NumResidentialUnits).label('Multi-family units'),
+  otherUnitsDescription: string().notRequired().max(255).label('Other type'),
+  otherUnits: string().when('otherUnitsDescription', {
+    is: (val: string) => val === BASIC_RESPONSES.YES,
+    then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Other type units'),
+    otherwise: () => string().notRequired()
+  }),
+  hasRentalUnits: string().required().oneOf(YesNoUnsure).label('Rental included'),
+  rentalUnits: string().when('hasRentalUnits', {
+    is: (val: string) => val === BASIC_RESPONSES.YES,
+    then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Rental units'),
+    otherwise: () => string().notRequired()
+  }),
+  financiallySupportedBC: string().required().oneOf(YesNoUnsure).label('BC Housing'),
+  financiallySupportedIndigenous: string().required().oneOf(YesNoUnsure).label('Indigenous Housing Provider'),
+  indigenousDescription: string().when('financiallySupportedIndigenous', {
+    is: (val: string) => val === BASIC_RESPONSES.YES,
+    then: (schema) => schema.required().max(255).label('Name of Indigenous Housing Provider'),
+    otherwise: () => string().notRequired()
+  }),
+  financiallySupportedNonProfit: string().required().oneOf(YesNoUnsure).label('Non-profit housing society'),
+  nonProfitDescription: string().when('financiallySupportedNonProfit', {
+    is: (val: string) => val === BASIC_RESPONSES.YES,
+    then: (schema) => schema.required().max(255).label('Name of Non-profit housing society'),
+    otherwise: () => string().notRequired()
+  }),
+  financiallySupportedHousingCoop: string().required().oneOf(YesNoUnsure).label('Housing co-operative'),
+  housingCoopDescription: string().when('financiallySupportedHousingCoop', {
+    is: (val: string) => val === BASIC_RESPONSES.YES,
+    then: (schema) => schema.required().max(255).label('Name of Housing co-operative'),
+    otherwise: () => string().notRequired()
+  }),
+  streetAddress: string().required().max(255).label('Location address'),
+  locationPIDs: string().required().max(255).label('Location PID(s)'),
+  latitude: latitudeValidator,
+  longitude: longitudeValidator,
+  geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
+  naturalDisaster: string().oneOf(YesNo).required().label('Affected by natural disaster'),
+  addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
+  atsClientNumber: string().when('addedToATS', {
+    is: (val: boolean) => val,
+    then: (schema) => schema.required().max(255).label('ATS Client #'),
+    otherwise: () => string().notRequired()
+  }),
+  ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
+  bcOnlineCompleted: boolean().required().label('BC Online completed'),
+  aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
+  astNotes: string().notRequired().max(255).label('AST notes'),
+  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
+  user: assignedToValidator('intakeStatus', INTAKE_STATUS_LIST.SUBMITTED),
+  applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
+  waitingOn: string().notRequired().max(255).label('waiting on')
 });
 
 // Actions
@@ -182,41 +207,92 @@ onBeforeMount(async () => {
     activityId: props.submission.activityId,
     user: assigneeOptions.value[0] ?? null
   };
+
+  submissionTypes.value = [SUBMISSION_TYPES.GUIDANCE, SUBMISSION_TYPES.INAPPLICABLE];
 });
 </script>
 
 <template>
   <Form
     v-if="initialFormValues"
-    v-slot="{ handleReset, values, errors }"
+    v-slot="{ handleReset, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="onSubmit"
   >
     <div class="formgrid grid">
-      <InputText
-        class="col-4"
-        name="activityId"
-        label="Activity"
-        :disabled="true"
-      />
-      <InputText
-        class="col-4"
-        name="projectName"
-        label="Project Name"
+      <Dropdown
+        class="col-3"
+        name="queuePriority"
+        label="Priority"
         :disabled="!editable"
+        :options="QueuePriority"
+      />
+      <Dropdown
+        class="col-3"
+        name="submissionType"
+        label="Submission type"
+        :disabled="!editable"
+        :options="submissionTypes"
       />
       <Calendar
-        class="col-4"
+        class="col-3"
         name="submittedAt"
         label="Submission date"
         :disabled="true"
       />
       <InputText
         class="col-3"
-        name="contactName"
-        label="Contact"
+        name="relatedEnquiries"
+        label="Related enquiries"
+        :disabled="true"
+      />
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Basic information</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
+        </div>
+      </div>
+
+      <InputText
+        class="col-3"
+        name="contactFirstName"
+        label="First name"
         :disabled="!editable"
+      />
+      <InputText
+        class="col-3"
+        name="contactLastName"
+        label="Last name"
+        :disabled="!editable"
+      />
+      <InputText
+        class="col-3"
+        name="companyNameRegistered"
+        label="Company"
+        :disabled="!editable"
+      />
+      <Dropdown
+        class="col-3"
+        name="isDevelopedInBC"
+        label="Company registered in B.C?"
+        :disabled="!editable"
+        :options="YesNo"
+      />
+      <Dropdown
+        class="col-3"
+        name="contactApplicantRelationship"
+        label="Relationship to project"
+        :disabled="!editable"
+        :options="ProjectRelationshipList"
+      />
+      <Dropdown
+        class="col-3"
+        name="contactPreference"
+        label="Preferred contact method"
+        :disabled="!editable"
+        :options="ContactPreferenceList"
       />
       <InputMask
         class="col-3"
@@ -231,235 +307,243 @@ onBeforeMount(async () => {
         label="Contact email"
         :disabled="!editable"
       />
-      <Dropdown
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Housing</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
+        </div>
+      </div>
+
+      <InputText
         class="col-3"
-        name="contactPreference"
-        label="Preferred contact method"
-        :disabled="!editable"
-        :options="ContactPreferenceList"
-      />
-      <InputText
-        class="col-6"
-        name="contactApplicantRelationship"
-        label="Relationship to activity"
+        name="projectName"
+        label="Project name"
         :disabled="!editable"
       />
-      <InputText
-        class="col-6"
-        name="companyNameRegistered"
-        label="Company"
-        :disabled="!editable"
-      />
+      <div class="col-9" />
       <TextArea
         class="col-12"
         name="projectDescription"
-        label="Activity information"
+        label="Additional information about project"
+        :disabled="!editable"
+      />
+      <Dropdown
+        class="col-3"
+        name="singleFamilyUnits"
+        label="Single family units"
+        :disabled="!editable"
+        :options="NumResidentialUnits"
+      />
+      <Dropdown
+        class="col-3"
+        name="multiFamilyUnits"
+        label="Multi-family units"
+        :disabled="!editable"
+        :options="NumResidentialUnits"
+      />
+      <InputText
+        class="col-3"
+        name="otherUnitsDescription"
+        label="Other type"
+        :disabled="!editable"
+      />
+      <Dropdown
+        class="col-3"
+        name="otherUnits"
+        label="Other type units"
+        :disabled="!editable || !values.otherUnitsDescription"
+        :options="NumResidentialUnits"
+      />
+      <Dropdown
+        class="col-3"
+        name="hasRentalUnits"
+        label="Rental included?"
+        :disabled="!editable"
+        :options="YesNoUnsure"
+      />
+      <Dropdown
+        class="col-3"
+        name="rentalUnits"
+        label="Rental units"
+        :disabled="!editable || values.hasRentalUnits !== BASIC_RESPONSES.YES"
+        :options="NumResidentialUnits"
+      />
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Financially supported</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
+        </div>
+      </div>
+
+      <Dropdown
+        class="col-3"
+        name="financiallySupportedBC"
+        label="BC Housing"
+        :disabled="!editable"
+        :options="YesNoUnsure"
+      />
+      <div class="col-9" />
+      <Dropdown
+        class="col-3"
+        name="financiallySupportedIndigenous"
+        label="Indigenous Housing Provider"
+        :disabled="!editable"
+        :options="YesNoUnsure"
+      />
+      <InputText
+        class="col-3"
+        name="indigenousDescription"
+        label="Name of Indigenous Housing Provider"
+        :disabled="!editable || values.financiallySupportedIndigenous !== BASIC_RESPONSES.YES"
+      />
+      <div class="col-6" />
+      <Dropdown
+        class="col-3"
+        name="financiallySupportedNonProfit"
+        label="Non-profit housing society"
+        :disabled="!editable"
+        :options="YesNoUnsure"
+      />
+      <InputText
+        class="col-3"
+        name="nonProfitDescription"
+        label="Name of Non-profit housing society"
+        :disabled="!editable || values.financiallySupportedNonProfit !== BASIC_RESPONSES.YES"
+      />
+      <div class="col-6" />
+      <Dropdown
+        class="col-3"
+        name="financiallySupportedHousingCoop"
+        label="Housing co-operative"
+        :disabled="!editable"
+        :options="YesNoUnsure"
+      />
+      <InputText
+        class="col-3"
+        name="housingCoopDescription"
+        label="Name of Housing co-operative"
+        :disabled="!editable || values.financiallySupportedHousingCoop !== BASIC_RESPONSES.YES"
+      />
+      <div class="col-6" />
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Location</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
+        </div>
+      </div>
+
+      <InputText
+        class="col-3"
+        name="streetAddress"
+        label="Location address"
         :disabled="!editable"
       />
       <InputText
-        class="col-4"
+        class="col-3"
         name="locationPIDs"
         label="Location PID(s)"
         :disabled="!editable"
-        autofocus
       />
       <InputNumber
-        class="col-4"
+        class="col-3"
         name="latitude"
         label="Location latitude"
         help-text="Optionally provide a number between 48 and 60"
         :disabled="!editable"
       />
       <InputNumber
-        class="col-4"
+        class="col-3"
         name="longitude"
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
         :disabled="!editable"
       />
       <InputText
-        class="col-4"
-        name="streetAddress"
-        label="Location address"
-        :disabled="!editable"
-      />
-      <InputText
-        class="col-4"
-        name="singleFamilyUnits"
-        label="Units"
+        class="col-3"
+        name="geomarkUrl"
+        label="Geomark URL"
         :disabled="!editable"
       />
       <Dropdown
-        class="col-4"
-        name="hasRentalUnits"
-        label="Rental units"
+        class="col-3"
+        name="naturalDisaster"
+        label="Affected by natural disaster?"
         :disabled="!editable"
-        :options="RentalStatusList"
+        :options="YesNo"
       />
-      <Dropdown
-        class="col-2"
-        name="queuePriority"
-        label="Priority"
+      <div class="col-6" />
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Other</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
+        </div>
+      </div>
+
+      <Checkbox
+        class="col-12"
+        name="addedToATS"
+        label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
-        :options="QueuePriority"
+        :bold="true"
       />
-      <div class="col" />
+
+      <div
+        v-if="values.addedToATS"
+        class="w-full"
+      >
+        <InputText
+          class="col-3"
+          name="atsClientNumber"
+          label="ATS Client #"
+          :disabled="!editable"
+        />
+        <div class="col-9" />
+      </div>
+      <Checkbox
+        class="col-12"
+        name="ltsaCompleted"
+        label="Land Title Survey Authority (LTSA) completed"
+        :disabled="!editable"
+      />
+      <Checkbox
+        class="col-12"
+        name="bcOnlineCompleted"
+        label="BC Online completed"
+        :disabled="!editable"
+      />
+      <Checkbox
+        class="col-12"
+        name="aaiUpdated"
+        label="Authorization and Approvals Insight (AAI) updated"
+        :disabled="!editable"
+      />
       <TextArea
         class="col-12"
         name="astNotes"
         label="AST notes"
         :disabled="!editable"
       />
-      <div class="col-6 p-0">
-        <Checkbox
-          class="col-12"
-          name="astUpdated"
-          label="Automated Status Tool (AST)"
-          :disabled="!editable"
-        />
-        <Checkbox
-          class="col-12"
-          name="addedToATS"
-          label="Authorized Tracking System (ATS) updated"
-          :disabled="!editable"
-          :bold="true"
-        />
-        <div
-          v-if="values.addedToATS"
-          class="pl-4 col-12 flex"
-        >
-          <div>
-            <p
-              class="client-number align-items-center"
-              style="color: #38598a"
-            >
-              ATS Client #
-            </p>
-          </div>
-          <div class="col">
-            <InputText
-              class="col-4 align-items-center"
-              name="atsClientNumber"
-              :disabled="!editable"
-            />
-          </div>
-        </div>
-        <Checkbox
-          class="col-12"
-          name="ltsaCompleted"
-          label="Land Title Survey Authority (LTSA) completed"
-          :disabled="!editable"
-        />
-        <Checkbox
-          class="col-12"
-          name="bcOnlineCompleted"
-          label="BC Online completed"
-          :disabled="!editable"
-        />
-        <Checkbox
-          class="col-12"
-          name="naturalDisaster"
-          label="Location affected by natural disaster"
-          :disabled="!editable"
-        />
-        <Checkbox
-          class="col-12"
-          name="financiallySupported"
-          label="Financially supported"
-          :disabled="!editable"
-        />
-        <Checkbox
-          v-if="values.financiallySupported"
-          class="pl-4 col-12"
-          name="financiallySupportedBC"
-          label="BC Housing"
-          :disabled="!editable"
-          :bold="false"
-        />
-        <Checkbox
-          v-if="values.financiallySupported"
-          class="pl-4 col-12"
-          name="financiallySupportedIndigenous"
-          label="Indigenous Housing Provider"
-          :disabled="!editable"
-          :bold="false"
-        />
-        <Checkbox
-          v-if="values.financiallySupported"
-          class="pl-4 col-12"
-          name="financiallySupportedNonProfit"
-          label="Non-profit housing society"
-          :disabled="!editable"
-          :bold="false"
-        />
-        <Checkbox
-          v-if="values.financiallySupported"
-          class="pl-4 col-12"
-          name="financiallySupportedHousingCoop"
-          label="Housing co-operative"
-          :disabled="!editable"
-          :bold="false"
-        />
-        <Checkbox
-          class="col-12"
-          name="aaiUpdated"
-          label="Authorization and Approvals Insight (AAI) updated"
-          :disabled="!editable"
-        />
-      </div>
-      <div class="col-6 p-0">
-        <h4 class="col-12">Submission Types:</h4>
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.guidance"
-          label="Guidance"
-          :disabled="!editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.inquiry"
-          label="General Enquiry"
-          :disabled="!editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.statusRequest"
-          label="Status Request"
-          :disabled="!editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.emergencyAssist"
-          label="Escalation Request"
-          :disabled="!editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <Checkbox
-          class="col-12"
-          name="submissionTypes.inapplicable"
-          label="Inapplicable"
-          :disabled="!editable"
-          :invalid="props.editable && !!errors.submissionTypes"
-        />
-        <div
-          v-if="props.editable"
-          class="col-12 mb-3"
-        >
-          <ErrorMessage name="submissionTypes" />
+
+      <div class="col-12 mb-3">
+        <div class="flex">
+          <h4 class="flex-none flex align-items-center m-0">Submission state</h4>
+          <Divider class="flex-grow-1 flex ml-4" />
         </div>
       </div>
-      <InputText
-        class="col-4"
-        name="waitingOn"
-        label="Waiting on"
+
+      <Dropdown
+        class="col-3"
+        name="intakeStatus"
+        label="Intake state"
         :disabled="!editable"
+        :options="IntakeStatusList"
       />
-      <div class="col-8" />
       <EditableDropdown
-        class="col-4"
+        class="col-3"
         name="user"
         label="Assigned to"
         :disabled="!editable"
@@ -468,22 +552,22 @@ onBeforeMount(async () => {
         @on-input="onAssigneeInput"
       />
       <Dropdown
-        class="col-4"
-        name="intakeStatus"
-        label="Intake state"
-        :disabled="!editable"
-        :options="IntakeStatusList"
-      />
-      <Dropdown
-        class="col-4"
+        class="col-3"
         name="applicationStatus"
         label="Activity state"
         :disabled="!editable"
         :options="ApplicationStatusList"
       />
+      <InputText
+        class="col-3"
+        name="waitingOn"
+        label="Waiting on"
+        :disabled="!editable"
+      />
+
       <div
         v-if="props.editable"
-        class="field col-12"
+        class="field col-12 mt-5"
       >
         <Button
           label="Save"
@@ -507,9 +591,3 @@ onBeforeMount(async () => {
     </div>
   </Form>
 </template>
-
-<style scoped lang="scss">
-.client-number {
-  margin-top: 8px;
-}
-</style>
