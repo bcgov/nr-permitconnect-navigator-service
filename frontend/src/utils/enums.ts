@@ -130,3 +130,14 @@ export const enum PROJECT_LOCATION {
   STREET_ADDRESS = 'Street address',
   LOCATION_COORDINATES = 'Location coordinates'
 }
+
+/**
+ * Project location selection
+ */
+export const enum SUBMISSION_TYPES {
+  ESCALATION = 'Escalation',
+  GENERAL_ENQUIRY = 'General enquiry',
+  GUIDANCE = 'Guidance',
+  INAPPLICABLE = 'Inapplicable',
+  STATUS_REQUEST = 'Status request'
+}

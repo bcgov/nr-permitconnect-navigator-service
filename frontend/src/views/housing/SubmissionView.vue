@@ -71,7 +71,7 @@ onMounted(async () => {
     <span>Back to Submissions</span>
   </router-link>
   <h1>
-    Activity submission:
+    Activity Submission:
     <span
       v-if="getSubmission?.activityId"
       class="mr-1"
@@ -85,7 +85,7 @@ onMounted(async () => {
   </h1>
 
   <TabView v-model:activeIndex="activeTab">
-    <TabPanel header="Info">
+    <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
         <SubmissionForm :submission="getSubmission" />
       </span>
