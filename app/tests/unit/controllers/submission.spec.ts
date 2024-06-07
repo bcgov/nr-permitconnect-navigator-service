@@ -1,12 +1,13 @@
 import config from 'config';
 import { NIL } from 'uuid';
 
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, Initiatives } from '../../../src/components/constants';
 import submissionController from '../../../src/controllers/submission';
 import { activityService, permitService, submissionService, userService } from '../../../src/services';
-import * as utils from '../../../src/components/utils';
+import * as utils from '../../../src/utils/utils';
 
 import type { Permit, Submission } from '../../../src/types';
+import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/housing';
+import { Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -139,7 +140,7 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
   submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: '5183f223',
-  applicationStatus: APPLICATION_STATUS_LIST.NEW,
+  applicationStatus: ApplicationStatus.NEW,
   companyNameRegistered: 'COMPANY',
   contactEmail: 'abc@dot.com',
   contactPhoneNumber: '1234567890',
@@ -171,7 +172,7 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
     submissionId: 'c8b7d976-3d05-4e67-a813-b10888585b59',
     activityId: 'c8b7d976',
-    applicationStatus: APPLICATION_STATUS_LIST.NEW,
+    applicationStatus: ApplicationStatus.NEW,
     companyNameRegistered: 'BIGBUILD',
     contactEmail: 'joe@dot.com',
     contactPhoneNumber: '1114448888',
@@ -388,7 +389,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -426,7 +427,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -444,8 +445,8 @@ describe('createDraft', () => {
         submissionId: expect.any(String),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.DRAFT,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.DRAFT,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
   });
@@ -469,7 +470,7 @@ describe('createDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED
+        intakeStatus: IntakeStatus.SUBMITTED
       })
     );
   });
@@ -505,7 +506,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 
@@ -561,7 +562,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -599,7 +600,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -617,8 +618,8 @@ describe('createSubmission', () => {
         submissionId: expect.any(String),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.SUBMITTED,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
   });
@@ -654,7 +655,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 
@@ -959,8 +960,8 @@ describe('updateDraft', () => {
         submissionId: '11111111',
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.DRAFT,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.DRAFT,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -987,7 +988,7 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED
+        intakeStatus: IntakeStatus.SUBMITTED
       })
     );
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);

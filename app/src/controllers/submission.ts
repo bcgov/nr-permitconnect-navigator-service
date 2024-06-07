@@ -1,20 +1,13 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import {
-  APPLICATION_STATUS_LIST,
-  INTAKE_STATUS_LIST,
-  Initiatives,
-  PERMIT_NEEDED,
-  PERMIT_STATUS,
-  YES_NO,
-  YES_NO_UNSURE
-} from '../components/constants';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
-import { activityService, emailService, submissionService, permitService, userService } from '../services';
+import { activityService, submissionService, permitService, userService } from '../services';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Email, Submission, ChefsSubmissionExport, Permit } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../utils/enums/housing';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -46,16 +39,18 @@ const controller = {
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
             const financiallySupportedValues = {
-              financiallySupportedBC: data.isBCHousingSupported ? toTitleCase(data.isBCHousingSupported) : YES_NO.NO,
+              financiallySupportedBC: data.isBCHousingSupported
+                ? toTitleCase(data.isBCHousingSupported)
+                : BasicResponse.NO,
               financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
                 ? toTitleCase(data.isIndigenousHousingProviderSupported)
-                : YES_NO.NO,
+                : BasicResponse.NO,
               financiallySupportedNonProfit: data.isNonProfitSupported
                 ? toTitleCase(data.isNonProfitSupported)
-                : YES_NO.NO,
+                : BasicResponse.NO,
               financiallySupportedHousingCoop: data.isHousingCooperativeSupported
                 ? toTitleCase(data.isHousingCooperativeSupported)
-                : YES_NO.NO
+                : BasicResponse.NO
             };
 
             // Get greatest of multiple Units data
@@ -122,7 +117,7 @@ const controller = {
               formId: x.id,
               submissionId: data.form.submissionId,
               activityId: data.form.confirmationId,
-              applicationStatus: APPLICATION_STATUS_LIST.NEW,
+              applicationStatus: ApplicationStatus.NEW,
               companyNameRegistered: data.companyNameRegistered,
               contactEmail: data.contactEmail,
               contactPreference: camelCaseToTitleCase(data.contactPreference),
@@ -131,7 +126,7 @@ const controller = {
               contactPhoneNumber: data.contactPhoneNumber,
               contactName: `${data.contactFirstName} ${data.contactLastName}`,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
-              financiallySupported: Object.values(financiallySupportedValues).includes(YES_NO.YES),
+              financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
               locationPIDs: data.parcelID,
@@ -142,7 +137,7 @@ const controller = {
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : YES_NO_UNSURE.UNSURE,
+                : BasicResponse.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
@@ -171,7 +166,7 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiatives.HOUSING))?.activityId;
+    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
 
     let applicant, basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
@@ -221,7 +216,7 @@ const controller = {
 
     if (data.location) {
       location = {
-        naturalDisaster: data.location.naturalDisaster === YES_NO.YES,
+        naturalDisaster: data.location.naturalDisaster,
         projectLocation: data.location.projectLocation,
         projectLocationDescription: data.location.projectLocationDescription,
         locationPIDs: data.location.ltsaPIDLookup,
@@ -247,7 +242,7 @@ const controller = {
         permitTypeId: x.permitTypeId,
         activityId: activityId,
         trackingId: x.trackingId,
-        status: PERMIT_STATUS.APPLIED,
+        status: PermitStatus.APPLIED,
         statusLastVerified: x.statusLastVerified
       }));
     }
@@ -257,7 +252,7 @@ const controller = {
         permitId: x.permitId,
         permitTypeId: x.permitTypeId,
         activityId: activityId,
-        needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: x.statusLastVerified
       }));
     }
@@ -276,7 +271,7 @@ const controller = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
         intakeStatus: intakeStatus,
-        applicationStatus: data.applicationStatus ?? APPLICATION_STATUS_LIST.NEW
+        applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW
       },
       appliedPermits,
       investigatePermits
@@ -290,7 +285,7 @@ const controller = {
 
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Create new submission
@@ -309,7 +304,7 @@ const controller = {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        INTAKE_STATUS_LIST.SUBMITTED
+        IntakeStatus.SUBMITTED
       );
 
       // Create new submission
@@ -382,11 +377,11 @@ const controller = {
 
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Update submission
-      const result = await submissionService.updateSubmission(submission as Submission);
+      const result = await submissionService.updateSubmission(submission);
 
       // Remove already existing permits for this activity
       await permitService.deletePermitsByActivity(submission.activityId);
@@ -404,6 +399,7 @@ const controller = {
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+
       const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
       res.status(200).json(response);
     } catch (e: unknown) {

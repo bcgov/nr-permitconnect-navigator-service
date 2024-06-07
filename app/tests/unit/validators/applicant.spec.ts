@@ -1,4 +1,4 @@
-import { applicantSchema } from '../../../src/validators/applicant';
+import { applicant as applicantSchema } from '../../../src/validators/applicant';
 
 describe('applicantSchema', () => {
   it('should only accept string values for each field', () => {

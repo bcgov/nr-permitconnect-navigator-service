@@ -74,8 +74,13 @@ export async function down(knex: Knex): Promise<void> {
       // Drop public schema table triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_enquiry_trigger ON "enquiry"'))
 
-      // Not reverting submission table alters
-      // This migration is destructive and would result in data loss
+      .then(() =>
+        knex.schema.alterTable('submission', function (table) {
+          table.dropColumn('contact_last_name');
+          table.dropColumn('contact_first_name');
+        })
+      )
+
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('enquiry'))
   );

@@ -1,11 +1,12 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { INTAKE_STATUS_LIST, Initiatives, NOTE_TYPE_LIST } from '../components/constants';
-import { getCurrentIdentity, isTruthy } from '../components/utils';
 import { activityService, enquiryService, noteService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
+import { Initiative } from '../utils/enums/application';
+import { IntakeStatus, NoteType } from '../utils/enums/housing';
+import { getCurrentIdentity, isTruthy } from '../utils/utils';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {
@@ -18,7 +19,7 @@ const controller = {
           activityId: data.relatedActivityId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
           note: `Added by ${(req.currentUser?.tokenPayload as any)?.idir_username}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
-          noteType: NOTE_TYPE_LIST.ENQUIRY,
+          noteType: NoteType.ENQUIRY,
           title: 'Enquiry',
           bringForwardDate: null,
           bringForwardState: null,
@@ -34,7 +35,7 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiatives.HOUSING))?.activityId;
+    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
 
     let applicant, basic;
 
@@ -69,7 +70,7 @@ const controller = {
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
-      intakeStatus: data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+      intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
     };
   },
 

@@ -2,10 +2,11 @@
 import axios from 'axios';
 import config from 'config';
 
-import { APPLICATION_STATUS_LIST, Initiatives } from '../components/constants';
-import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
+import { Initiative } from '../utils/enums/application';
+import { ApplicationStatus } from '../utils/enums/housing';
+import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { Submission, SubmissionSearchParameters } from '../types';
@@ -49,7 +50,7 @@ const service = {
     await prisma.$transaction(async (trx) => {
       const initiative = await trx.initiative.findFirstOrThrow({
         where: {
-          code: Initiatives.HOUSING
+          code: Initiative.HOUSING
         }
       });
 
@@ -64,7 +65,7 @@ const service = {
         data: submissions.map((x) => ({
           submission_id: x.submissionId as string,
           activity_id: x.activityId as string,
-          application_status: APPLICATION_STATUS_LIST.NEW,
+          application_status: ApplicationStatus.NEW,
           company_name_registered: x.companyNameRegistered,
           contact_email: x.contactEmail,
           contact_phone_number: x.contactPhoneNumber,

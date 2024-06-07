@@ -1,11 +1,11 @@
 import Joi from 'joi';
 
-import { PERMIT_STATUS } from '../components/constants';
+import { PERMIT_STATUS_LIST } from '../utils/constants/housing';
 
-export const appliedPermitsSchema = Joi.object({
+export const appliedPermit = Joi.object({
   permitTypeId: Joi.number().required(),
   status: Joi.string()
-    .valid(...Object.values(PERMIT_STATUS))
+    .valid(...PERMIT_STATUS_LIST)
     .allow(null),
   statusLastVerified: Joi.date().max('now').allow(null),
   trackingId: Joi.string().allow(null)

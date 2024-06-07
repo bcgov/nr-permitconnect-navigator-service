@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { activityId, emailJoi, uuidv4 } from './common';
+import { activityId, email, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 
 const schema = {
@@ -9,16 +9,16 @@ const schema = {
       activityId: activityId,
       selectedFileIds: Joi.array().items(uuidv4),
       emailData: Joi.object().keys({
-        bcc: Joi.array().items(emailJoi),
+        bcc: Joi.array().items(email),
         bodyType: Joi.string().required(),
         body: Joi.string().required(),
-        cc: Joi.array().items(emailJoi),
+        cc: Joi.array().items(email),
         delayTS: Joi.number(),
-        from: emailJoi.required(),
+        from: email.required(),
         priority: Joi.string(),
         subject: Joi.string().required(),
         tag: Joi.string(),
-        to: Joi.array().items(emailJoi).required()
+        to: Joi.array().items(email).required()
       })
     })
   }

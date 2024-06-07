@@ -1,34 +1,34 @@
-import { YES_NO, YES_NO_UNSURE } from '../../../src/components/constants';
-import { permitsSchema } from '../../../src/validators/permits';
+import { BasicResponse } from '../../../src/utils/enums/application';
+import { permits } from '../../../src/validators/permits';
 
 describe('permitsSchema', () => {
   it('should validate checkProvincialPermits when hasAppliedProvincialPermits is YES', () => {
     const data = {
-      hasAppliedProvincialPermits: YES_NO_UNSURE.YES,
-      checkProvincialPermits: YES_NO.YES
+      hasAppliedProvincialPermits: BasicResponse.YES,
+      checkProvincialPermits: BasicResponse.YES
     };
 
-    const result = permitsSchema.validate(data);
+    const result = permits.validate(data);
     expect(result.error).toBeUndefined();
   });
 
   it('should validate checkProvincialPermits when hasAppliedProvincialPermits is UNSURE', () => {
     const data = {
-      hasAppliedProvincialPermits: YES_NO_UNSURE.UNSURE,
-      checkProvincialPermits: YES_NO.YES
+      hasAppliedProvincialPermits: BasicResponse.UNSURE,
+      checkProvincialPermits: BasicResponse.YES
     };
 
-    const result = permitsSchema.validate(data);
+    const result = permits.validate(data);
     expect(result.error).toBeUndefined();
   });
 
   it('should not validate checkProvincialPermits when hasAppliedProvincialPermits is NO', () => {
     const data = {
-      hasAppliedProvincialPermits: YES_NO_UNSURE.NO,
-      checkProvincialPermits: YES_NO.YES
+      hasAppliedProvincialPermits: BasicResponse.NO,
+      checkProvincialPermits: BasicResponse.YES
     };
 
-    const result = permitsSchema.validate(data);
+    const result = permits.validate(data);
     expect(result.error).toBeDefined();
   });
 });

@@ -42,11 +42,11 @@ const validationErrors: Ref<string[]> = ref([]);
 // Form validation schema
 const formSchema = object({
   [IntakeFormCategory.APPLICANT]: object({
-    firstName: string().required().max(255).label('First name'),
-    lastName: string().required().max(255).label('Last name'),
-    phoneNumber: string().required().max(255).label('Phone number'),
-    email: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    relationshipToProject: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+    contactFirstName: string().required().max(255).label('First name'),
+    contactLastName: string().required().max(255).label('Last name'),
+    contactPhoneNumber: string().required().max(255).label('Phone number'),
+    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
     contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
   }),
   [IntakeFormCategory.BASIC]: object({
@@ -198,11 +198,11 @@ onBeforeMount(async () => {
     activityId: response?.activityId,
     enquiryId: response?.enquiryId,
     applicant: {
-      firstName: response?.contactFirstName,
-      lastName: response?.contactLastName,
-      phoneNumber: response?.contactPhoneNumber,
-      email: response?.contactEmail,
-      relationshipToProject: response?.contactApplicantRelationship,
+      contactFirstName: response?.contactFirstName,
+      contactLastName: response?.contactLastName,
+      contactPhoneNumber: response?.contactPhoneNumber,
+      contactEmail: response?.contactEmail,
+      contactApplicantRelationship: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
     },
     basic: {
@@ -278,21 +278,21 @@ async function emailConfirmation(activityId: string) {
           <div class="formgrid grid">
             <InputText
               class="col-6"
-              name="applicant.firstName"
+              name="applicant.contactFirstName"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
               class="col-6"
-              name="applicant.lastName"
+              name="applicant.contactLastName"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
               class="col-6"
-              name="applicant.phoneNumber"
+              name="applicant.contactPhoneNumber"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
@@ -300,14 +300,14 @@ async function emailConfirmation(activityId: string) {
             />
             <InputText
               class="col-6"
-              name="applicant.email"
+              name="applicant.contactEmail"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Dropdown
               class="col-6"
-              name="applicant.relationshipToProject"
+              name="applicant.contactApplicantRelationship"
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"

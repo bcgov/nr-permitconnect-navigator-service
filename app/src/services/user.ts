@@ -4,7 +4,7 @@ import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
-import { parseIdentityKeyClaims } from '../components/utils';
+import { parseIdentityKeyClaims } from '../utils/utils';
 
 import type { User, UserSearchParameters } from '../types';
 

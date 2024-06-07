@@ -1,21 +1,27 @@
 import Joi from 'joi';
 
-import { YES_NO_UNSURE } from '../components/constants';
-import { stringRequiredYesNo, stringRequiredYesNoUnsure } from './common';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
+import { BasicResponse } from '../utils/enums/application';
 
-export const permitsSchema = Joi.object({
+export const permits = Joi.object({
   checkProvincialPermits: Joi.when('hasAppliedProvincialPermits', {
     switch: [
       {
-        is: YES_NO_UNSURE.YES,
-        then: stringRequiredYesNo
+        is: BasicResponse.YES,
+        then: Joi.string()
+          .required()
+          .valid(...YES_NO_LIST)
       },
       {
-        is: YES_NO_UNSURE.UNSURE,
-        then: stringRequiredYesNo
+        is: BasicResponse.UNSURE,
+        then: Joi.string()
+          .required()
+          .valid(...YES_NO_LIST)
       }
     ],
     otherwise: Joi.forbidden()
   }),
-  hasAppliedProvincialPermits: stringRequiredYesNoUnsure
+  hasAppliedProvincialPermits: Joi.string()
+    .required()
+    .valid(...YES_NO_UNSURE_LIST)
 });

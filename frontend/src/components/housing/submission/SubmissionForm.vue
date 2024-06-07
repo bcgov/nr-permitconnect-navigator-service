@@ -149,31 +149,15 @@ const onAssigneeInput = async (e: IInputEvent) => {
 const onSubmit = async (values: any) => {
   editable.value = false;
 
-  // Ensure child values are reset if parent not set
-  if (!values.addedToATS) {
-    values.atsClientNumber = undefined;
-  }
-
-  if (!values.financiallySupported) {
-    values.financiallySupportedBC = false;
-    values.financiallySupportedIndigenous = false;
-    values.financiallySupportedNonProfit = false;
-    values.financiallySupportedHousingCoop = false;
-  }
-
-  const submissionDataTransform = {
-    ...values,
-    assignedUserId: values.user?.userId ?? undefined,
-    ...values.submissionTypes
-  };
-
-  delete submissionDataTransform.submissionTypes;
-  delete submissionDataTransform.user;
-
   try {
     const submissionData = {
-      ...submissionDataTransform
+      ...values,
+      assignedUserId: values.user?.userId ?? undefined,
+      ...values.submissionTypes
     };
+
+    delete submissionData.user;
+
     await submissionService.updateSubmission(submissionData.submissionId, submissionData);
 
     submissionStore.setSubmission(submissionData);
@@ -191,19 +175,51 @@ onBeforeMount(async () => {
 
   // Default form values
   initialFormValues.value = {
-    ...props.submission,
-    applicationStatus: props.submission.applicationStatus,
-    submittedAt: new Date(props.submission.submittedAt),
-    submittedBy: formatJwtUsername(props.submission.submittedBy),
-    submissionTypes: {
-      emergencyAssist: props.submission.emergencyAssist,
-      guidance: props.submission.guidance,
-      inapplicable: props.submission.inapplicable,
-      inquiry: props.submission.inquiry,
-      statusRequest: props.submission.statusRequest
-    },
     activityId: props.submission.activityId,
-    user: assigneeOptions.value[0] ?? null
+    submissionId: props.submission.submissionId,
+    queuePriority: props.submission.queuePriority,
+    submissionType: props.submission.submissionType,
+    submittedAt: new Date(props.submission.submittedAt),
+    relatedEnquiries: props.submission.relatedEnquiries,
+    contactFirstName: props.submission.contactFirstName,
+    contactLastName: props.submission.contactLastName,
+    companyNameRegistered: props.submission.companyNameRegistered,
+    isDevelopedInBC: props.submission.isDevelopedInBC,
+    contactApplicantRelationship: props.submission.contactApplicantRelationship,
+    contactPreference: props.submission.contactPreference,
+    contactPhoneNumber: props.submission.contactPhoneNumber,
+    contactEmail: props.submission.contactEmail,
+    projectName: props.submission.projectName,
+    projectDescription: props.submission.projectDescription,
+    singleFamilyUnits: props.submission.singleFamilyUnits,
+    multiFamilyUnits: props.submission.multiFamilyUnits,
+    otherUnitsDescription: props.submission.otherUnitsDescription,
+    otherUnits: props.submission.otherUnits,
+    hasRentalUnits: props.submission.hasRentalUnits,
+    rentalUnits: props.submission.rentalUnits,
+    financiallySupportedBC: props.submission.financiallySupportedBC,
+    financiallySupportedIndigenous: props.submission.financiallySupportedIndigenous,
+    indigenousDescription: props.submission.indigenousDescription,
+    financiallySupportedNonProfit: props.submission.financiallySupportedNonProfit,
+    nonProfitDescription: props.submission.nonProfitDescription,
+    financiallySupportedHousingCoop: props.submission.financiallySupportedHousingCoop,
+    housingCoopDescription: props.submission.housingCoopDescription,
+    streetAddress: props.submission.streetAddress,
+    locationPIDs: props.submission.locationPIDs,
+    latitude: props.submission.latitude,
+    longitude: props.submission.longitude,
+    geomarkUrl: props.submission.geomarkUrl,
+    naturalDisaster: props.submission.naturalDisaster,
+    addedToATS: props.submission.addedToATS,
+    atsClientNumber: props.submission.atsClientNumber,
+    ltsaCompleted: props.submission.ltsaCompleted,
+    bcOnlineCompleted: props.submission.bcOnlineCompleted,
+    aaiUpdated: props.submission.aaiUpdated,
+    astNotes: props.submission.astNotes,
+    intakeStatus: props.submission.intakeStatus,
+    user: assigneeOptions.value[0] ?? null,
+    applicationStatus: props.submission.applicationStatus,
+    waitingOn: props.submission.waitingOn
   };
 });
 </script>
@@ -211,7 +227,7 @@ onBeforeMount(async () => {
 <template>
   <Form
     v-if="initialFormValues"
-    v-slot="{ handleReset, values }"
+    v-slot="{ handleReset, setFieldValue, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @submit="onSubmit"
@@ -343,6 +359,14 @@ onBeforeMount(async () => {
         name="otherUnitsDescription"
         label="Other type"
         :disabled="!editable"
+        @on-change="
+          (e) => {
+            if (!e.target.value) {
+              setFieldValue('otherUnitsDescription', null);
+              setFieldValue('otherUnits', null);
+            }
+          }
+        "
       />
       <Dropdown
         class="col-3"
@@ -357,6 +381,11 @@ onBeforeMount(async () => {
         label="Rental included?"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
+        @on-change="
+          (e) => {
+            if (e.value !== BasicResponse.YES) setFieldValue('rentalUnits', null);
+          }
+        "
       />
       <Dropdown
         class="col-3"
@@ -387,6 +416,11 @@ onBeforeMount(async () => {
         label="Indigenous Housing Provider"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
+        @on-change="
+          (e) => {
+            if (e.value !== BasicResponse.YES) setFieldValue('indigenousDescription', null);
+          }
+        "
       />
       <InputText
         class="col-3"
@@ -401,6 +435,11 @@ onBeforeMount(async () => {
         label="Non-profit housing society"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
+        @on-change="
+          (e) => {
+            if (e.value !== BasicResponse.YES) setFieldValue('nonProfitDescription', null);
+          }
+        "
       />
       <InputText
         class="col-3"
@@ -415,6 +454,11 @@ onBeforeMount(async () => {
         label="Housing co-operative"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
+        @on-change="
+          (e) => {
+            if (e.value !== BasicResponse.YES) setFieldValue('housingCoopDescription', null);
+          }
+        "
       />
       <InputText
         class="col-3"
