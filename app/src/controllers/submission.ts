@@ -132,7 +132,7 @@ const controller = {
               locationPIDs: data.parcelID,
               latitude: data.latitude,
               longitude: data.longitude,
-              naturalDisaster: data.naturalDisasterInd,
+              naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
@@ -381,7 +381,7 @@ const controller = {
       );
 
       // Update submission
-      const result = await submissionService.updateSubmission(submission);
+      const result = await submissionService.updateSubmission(submission as Submission);
 
       // Remove already existing permits for this activity
       await permitService.deletePermitsByActivity(submission.activityId);

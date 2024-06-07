@@ -135,7 +135,10 @@ watchEffect(async () => {
   const permitStateCompleted = getPermitTypeNamesByStatus(PermitStatus.COMPLETED);
 
   const body = roadmapTemplate({
-    '{{ contactName }}': submission?.contactName ?? '',
+    '{{ contactName }}':
+      submission?.contactFirstName && submission?.contactLastName
+        ? `${submission?.contactFirstName} ${submission?.contactLastName}`
+        : '',
     '{{ locationAddress }}': submission?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,

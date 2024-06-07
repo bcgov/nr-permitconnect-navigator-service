@@ -27,7 +27,6 @@ import {
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
 import { IntakeStatus, SubmissionType } from '@/utils/enums/housing';
-import { formatJwtUsername } from '@/utils/formatters';
 import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
@@ -171,7 +170,9 @@ const onSubmit = async (values: any) => {
 };
 
 onBeforeMount(async () => {
-  assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+  if (props.submission.assignedUserId) {
+    assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+  }
 
   // Default form values
   initialFormValues.value = {

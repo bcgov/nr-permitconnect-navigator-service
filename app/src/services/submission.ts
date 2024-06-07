@@ -4,7 +4,7 @@ import config from 'config';
 
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
-import { Initiative } from '../utils/enums/application';
+import { BasicResponse, Initiative } from '../utils/enums/application';
 import { ApplicationStatus } from '../utils/enums/housing';
 import { getChefsApiKey } from '../utils/utils';
 
@@ -81,7 +81,7 @@ const service = {
           location_pids: x.locationPIDs,
           latitude: parseFloat(x.latitude as unknown as string),
           longitude: parseFloat(x.longitude as unknown as string),
-          natural_disaster: x.naturalDisaster,
+          natural_disaster: x.naturalDisaster === BasicResponse.YES ? true : false,
           project_name: x.projectName,
           project_description: x.projectDescription,
           queue_priority: x.queuePriority,

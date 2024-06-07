@@ -7,7 +7,7 @@ import * as utils from '../../../src/utils/utils';
 
 import type { Permit, Submission } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/housing';
-import { Initiative } from '../../../src/utils/enums/application';
+import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -156,7 +156,7 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   locationPIDs: '132',
   latitude: -48,
   longitude: 160,
-  naturalDisaster: true,
+  naturalDisaster: BasicResponse.YES,
   projectName: 'PROJ',
   queuePriority: 3,
   singleFamilyUnits: '1-49',
@@ -188,7 +188,7 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     locationPIDs: '132',
     latitude: -59,
     longitude: 178,
-    naturalDisaster: true,
+    naturalDisaster: BasicResponse.YES,
     projectName: 'BIG',
     projectDescription: 'some project description here',
     queuePriority: 3,
