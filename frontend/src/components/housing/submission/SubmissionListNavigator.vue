@@ -54,7 +54,10 @@ function handleCreateNewActivity() {
       try {
         const response = (await submissionService.createSubmission()).data;
         if (response?.activityId) {
-          router.push({ name: RouteName.HOUSING_SUBMISSION, query: { activityId: response.activityId } });
+          router.push({
+            name: RouteName.HOUSING_SUBMISSION,
+            query: { activityId: response.activityId, submissionId: response.submissionId }
+          });
         }
       } catch (e: any) {
         toast.error('Failed to create new submission', e.message);
