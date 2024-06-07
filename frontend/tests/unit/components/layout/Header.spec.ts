@@ -1,9 +1,9 @@
 import { createTestingPinia } from '@pinia/testing';
+import PrimeVue from 'primevue/config';
 import { shallowMount } from '@vue/test-utils';
 
-import PrimeVue from 'primevue/config';
 import Header from '@/components/layout/Header.vue';
-import { StorageKey } from '@/utils/constants';
+import { StorageKey } from '@/utils/enums/application';
 
 // Mock router calls
 vi.mock('vue-router', () => ({

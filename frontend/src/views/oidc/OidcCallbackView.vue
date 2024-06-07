@@ -3,9 +3,9 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { useAuthStore } from '@/store';
-import { StorageKey } from '@/utils/constants';
 import { PermissionService } from '@/services';
+import { useAuthStore } from '@/store';
+import { StorageKey } from '@/utils/enums/application';
 
 const authStore = useAuthStore();
 const router = useRouter();

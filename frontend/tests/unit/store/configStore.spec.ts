@@ -2,7 +2,7 @@ import { setActivePinia, createPinia } from 'pinia';
 
 import { ConfigService } from '@/services';
 import { useConfigStore } from '@/store';
-import { StorageKey } from '@/utils/constants';
+import { StorageKey } from '@/utils/enums/application';
 
 import type { StoreGeneric } from 'pinia';
 import type { SpyInstance } from 'vitest';

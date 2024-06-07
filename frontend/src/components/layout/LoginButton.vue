@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 import { Button } from '@/lib/primevue';
 import { useAuthStore } from '@/store/authStore';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 // Store
 const authStore = useAuthStore();
@@ -17,18 +17,18 @@ function isLoginEnabled() {
   return (
     !getIsAuthenticated &&
     router.currentRoute.value.name &&
-    ![RouteNames.HOME, RouteNames.OIDC_LOGIN, RouteNames.OIDC_CALLBACK, RouteNames.OIDC_LOGOUT].includes(
+    ![RouteName.HOME, RouteName.OIDC_LOGIN, RouteName.OIDC_CALLBACK, RouteName.OIDC_LOGOUT].includes(
       router.currentRoute.value.name as any
     )
   );
 }
 
 function login() {
-  router.push({ name: RouteNames.OIDC_LOGIN });
+  router.push({ name: RouteName.OIDC_LOGIN });
 }
 
 function logout() {
-  router.push({ name: RouteNames.OIDC_LOGOUT });
+  router.push({ name: RouteName.OIDC_LOGOUT });
 }
 </script>
 

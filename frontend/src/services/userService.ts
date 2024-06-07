@@ -1,9 +1,8 @@
 import { appAxios } from './interceptors';
+import { SYSTEM_USER } from '@/utils/constants/application';
 
 import type { AxiosResponse } from 'axios';
 import type { UserSearchParameters } from '@/types';
-
-import { SYSTEM_USER } from '@/utils/constants';
 
 const PATH = 'user';
 

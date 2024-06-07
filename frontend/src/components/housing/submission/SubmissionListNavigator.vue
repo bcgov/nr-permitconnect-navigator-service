@@ -17,7 +17,7 @@ import {
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -54,7 +54,7 @@ function handleCreateNewActivity() {
       try {
         const response = (await submissionService.createSubmission()).data;
         if (response?.activityId) {
-          router.push({ name: RouteNames.HOUSING_SUBMISSION, query: { activityId: response.activityId } });
+          router.push({ name: RouteName.HOUSING_SUBMISSION, query: { activityId: response.activityId } });
         }
       } catch (e: any) {
         toast.error('Failed to create new submission', e.message);
@@ -125,7 +125,7 @@ const filters = ref({
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteNames.HOUSING_SUBMISSION,
+              name: RouteName.HOUSING_SUBMISSION,
               query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >

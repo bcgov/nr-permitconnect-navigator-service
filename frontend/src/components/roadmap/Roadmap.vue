@@ -9,7 +9,7 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
-import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails } from '@/utils/utils';
 
@@ -125,14 +125,14 @@ watchEffect(async () => {
   }
 
   // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
-    getPermitTypeNamesByNeeded(PERMIT_NEEDED.YES).includes(value)
+  const permitStateNew = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PermitNeeded.YES).includes(value)
   );
-  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
-    getPermitTypeNamesByNeeded(PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
+  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PermitNeeded.UNDER_INVESTIGATION).includes(value)
   );
-  const permitStateApplied = getPermitTypeNamesByStatus(PERMIT_STATUS.APPLIED);
-  const permitStateCompleted = getPermitTypeNamesByStatus(PERMIT_STATUS.COMPLETED);
+  const permitStateApplied = getPermitTypeNamesByStatus(PermitStatus.APPLIED);
+  const permitStateCompleted = getPermitTypeNamesByStatus(PermitStatus.COMPLETED);
 
   const body = roadmapTemplate({
     '{{ contactName }}': submission?.contactName ?? '',

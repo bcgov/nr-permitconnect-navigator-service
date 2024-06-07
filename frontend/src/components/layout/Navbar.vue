@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
 import { PERMISSIONS, default as PermissionService } from '@/services/permissionService';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -25,7 +25,7 @@ onMounted(() => {
   items.value = [
     {
       label: 'Home',
-      route: RouteNames.HOME,
+      route: RouteName.HOME,
       public: true
     },
     {
@@ -33,17 +33,17 @@ onMounted(() => {
       items: [
         {
           label: 'Work with a Housing Navigator',
-          route: RouteNames.HOUSING_INTAKE,
+          route: RouteName.HOUSING_INTAKE,
           access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
-          route: RouteNames.HOUSING_ENQUIRY,
+          route: RouteName.HOUSING_ENQUIRY,
           access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
         },
         {
           label: 'Drafts and submissions',
-          route: RouteNames.HOUSING_SUBMISSIONS,
+          route: RouteName.HOUSING_SUBMISSIONS,
           access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB
         },
         {
@@ -55,7 +55,7 @@ onMounted(() => {
     },
     {
       label: 'Submissions',
-      route: RouteNames.HOUSING_SUBMISSIONS,
+      route: RouteName.HOUSING_SUBMISSIONS,
       access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS
     },
     {
@@ -64,7 +64,7 @@ onMounted(() => {
     },
     {
       label: 'Developer',
-      route: RouteNames.DEVELOPER,
+      route: RouteName.DEVELOPER,
       access: PERMISSIONS.NAVIGATION_DEVELOPER
     }
   ];

@@ -1,7 +1,6 @@
 import { externalApiService } from '@/services';
 import { geocoderAxios, orgBookAxios } from '@/services/interceptors';
-
-import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants';
+import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({

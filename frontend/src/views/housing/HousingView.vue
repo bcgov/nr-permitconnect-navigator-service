@@ -2,30 +2,30 @@
 import { ref } from 'vue';
 
 import { Button } from '@/lib/primevue';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 const items = ref([
   {
     top: 'Start a new project investigation with a Navigator',
     bottom: 'Find out what permits may be needed for your project.',
     icon: 'fa-file-circle-check',
-    route: RouteNames.HOUSING_INTAKE
+    route: RouteName.HOUSING_INTAKE
   },
   {
     top: 'Submit an enquiry',
     bottom: 'For general questions, requests, or updates on your application.',
     icon: 'fa-circle-question',
-    route: RouteNames.HOUSING_ENQUIRY
+    route: RouteName.HOUSING_ENQUIRY
   },
   {
     top: 'View my drafts and submissions',
     icon: 'fa-pen-to-square',
-    route: RouteNames.HOUSING_SUBMISSIONS
+    route: RouteName.HOUSING_SUBMISSIONS
   },
   {
     top: 'Check the status of your applications and/or permits',
     icon: 'fa-bars-progress',
-    route: RouteNames.HOME
+    route: RouteName.HOME
   }
 ]);
 </script>

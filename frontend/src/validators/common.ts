@@ -1,6 +1,6 @@
 import { mixed, number, string } from 'yup';
 
-import { Regex } from '@/utils/constants';
+import { Regex } from '@/utils/enums/application';
 
 export const assignedToValidator = (when: string, is: any) =>
   mixed()

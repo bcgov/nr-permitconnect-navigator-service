@@ -4,8 +4,8 @@ import { storeToRefs } from 'pinia';
 import { CopyToClipboard } from '@/components/form';
 import { Button, Dropdown } from '@/lib/primevue';
 import { useAuthStore, useConfigStore } from '@/store';
-import { BUTTON_MODE } from '@/utils/enums';
-import { AccessRoles, RouteNames } from '@/utils/constants';
+import { ButtonMode, RouteName } from '@/utils/enums/application';
+import { ACCESS_ROLES_LIST } from '@/utils/constants/application';
 import { useRouter } from 'vue-router';
 import { PermissionService } from '@/services';
 
@@ -34,11 +34,11 @@ async function ssGetRoles() {
       <div class="w-2 mr-2">
         <Dropdown
           class="w-full"
-          :options="AccessRoles"
+          :options="ACCESS_ROLES_LIST"
           @change="
             (e) => {
               permissionService.setRoleOverride(e.value);
-              router.push({ name: RouteNames.HOME });
+              router.push({ name: RouteName.HOME });
             }
           "
         />
@@ -49,7 +49,7 @@ async function ssGetRoles() {
       <h3 class="mr-2">Config</h3>
       <div>
         <CopyToClipboard
-          :mode="BUTTON_MODE.ICON"
+          :mode="ButtonMode.ICON"
           :to-copy="JSON.stringify(getConfig)"
         />
       </div>
@@ -60,7 +60,7 @@ async function ssGetRoles() {
       <h3 class="mr-2">Token</h3>
       <div>
         <CopyToClipboard
-          :mode="BUTTON_MODE.ICON"
+          :mode="ButtonMode.ICON"
           :to-copy="getAccessToken"
         />
       </div>
@@ -74,7 +74,7 @@ async function ssGetRoles() {
       <h3 class="mr-2">Profile</h3>
       <div>
         <CopyToClipboard
-          :mode="BUTTON_MODE.ICON"
+          :mode="ButtonMode.ICON"
           :to-copy="JSON.stringify(getProfile)"
         />
       </div>

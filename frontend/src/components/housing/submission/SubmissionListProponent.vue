@@ -4,8 +4,8 @@ import { ref } from 'vue';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
 import { submissionService } from '@/services';
-import { RouteNames } from '@/utils/constants';
-import { INTAKE_STATUS_LIST } from '@/utils/enums';
+import { RouteName } from '@/utils/enums/application';
+import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -84,7 +84,7 @@ function onDelete(submissionId: string) {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteNames.HOUSING_INTAKE,
+              name: RouteName.HOUSING_INTAKE,
               query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >
@@ -122,7 +122,7 @@ function onDelete(submissionId: string) {
       style="min-width: 200px"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
       </template>
     </Column>
     <Column
@@ -136,7 +136,7 @@ function onDelete(submissionId: string) {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
-          :disabled="data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT"
+          :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
           @click="onDelete(data.submissionId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />

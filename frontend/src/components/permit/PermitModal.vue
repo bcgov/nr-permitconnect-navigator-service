@@ -8,8 +8,8 @@ import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/constants';
-import { PERMIT_STATUS } from '@/utils/enums';
+import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
+import { PermitStatus } from '@/utils/enums/housing';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
@@ -41,7 +41,7 @@ let initialFormValues: PermitForm = {
   permitId: props.permit?.permitId,
   permitType: permitType.value,
   needed: props.permit?.needed,
-  status: props.permit?.status ?? PERMIT_STATUS.NEW,
+  status: props.permit?.status ?? PermitStatus.NEW,
   agency: permitType.value?.agency,
   trackingId: props.permit?.trackingId,
   businessDomain: permitType.value?.businessDomain,
@@ -183,6 +183,18 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           autofocus
           @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
         />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="needed"
+          label="Needed"
+          :options="PERMIT_NEEDED_LIST"
+        />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="status"
+          label="Permit state"
+          :options="PERMIT_STATUS_LIST"
+        />
         <InputText
           class="col-12 lg:col-6"
           name="agency"
@@ -194,6 +206,12 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           name="businessDomain"
           label="Business domain"
           :disabled="true"
+        />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="authStatus"
+          label="Authorization status"
+          :options="PERMIT_AUTHORIZATION_STATUS_LIST"
         />
         <InputText
           class="col-12 lg:col-6"

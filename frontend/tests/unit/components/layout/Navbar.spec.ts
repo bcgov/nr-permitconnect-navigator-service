@@ -1,9 +1,9 @@
 import { createTestingPinia } from '@pinia/testing';
+import PrimeVue from 'primevue/config';
 import { mount, shallowMount, RouterLinkStub } from '@vue/test-utils';
 
 import Navbar from '@/components/layout/Navbar.vue';
-import { StorageKey } from '@/utils/constants';
-import PrimeVue from 'primevue/config';
+import { StorageKey } from '@/utils/enums/application';
 
 beforeEach(() => {
   sessionStorage.setItem(
