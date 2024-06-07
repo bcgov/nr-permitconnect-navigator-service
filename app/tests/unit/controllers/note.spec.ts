@@ -2,7 +2,7 @@ import { NIL } from 'uuid';
 
 import { noteController } from '../../../src/controllers';
 import { noteService, submissionService, userService } from '../../../src/services';
-import * as utils from '../../../src/components/utils';
+import * as utils from '../../../src/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

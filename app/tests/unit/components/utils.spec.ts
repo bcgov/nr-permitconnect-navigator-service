@@ -1,4 +1,4 @@
-import { getGitRevision, readIdpList } from '../../../src/components/utils';
+import { getGitRevision, readIdpList } from '../../../src/utils/utils';
 
 beforeEach(() => {
   jest.resetAllMocks();

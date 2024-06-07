@@ -1,7 +1,7 @@
 import { NIL } from 'uuid';
 
-import { getCurrentIdentity } from '../components/utils';
 import { comsService, emailService, noteService, userService } from '../services';
+import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';

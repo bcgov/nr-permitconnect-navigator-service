@@ -30,7 +30,7 @@ export type Submission = {
   atsClientNumber: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
-  naturalDisaster: boolean;
+  naturalDisaster: string;
   financiallySupported: boolean;
   financiallySupportedBC: string | null;
   financiallySupportedIndigenous: string | null;

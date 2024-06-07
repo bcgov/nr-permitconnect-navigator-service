@@ -1,11 +1,15 @@
 import Joi from 'joi';
-import { emailJoi, phoneNumberJoi, stringRequiredMaxLengthTrim } from './common';
 
-export const applicantSchema = Joi.object({
-  contactPreference: stringRequiredMaxLengthTrim,
-  email: emailJoi.required(),
-  firstName: stringRequiredMaxLengthTrim,
-  lastName: stringRequiredMaxLengthTrim,
-  phoneNumber: phoneNumberJoi.required(),
-  relationshipToProject: stringRequiredMaxLengthTrim
+import { email, phoneNumber } from './common';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/housing';
+
+export const applicant = Joi.object({
+  contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
+  contactEmail: email.required(),
+  contactFirstName: Joi.string().required().max(255),
+  contactLastName: Joi.string().required().max(255),
+  contactPhoneNumber: phoneNumber.required(),
+  contactApplicantRelationship: Joi.string()
+    .required()
+    .valid(...PROJECT_RELATIONSHIP_LIST)
 });

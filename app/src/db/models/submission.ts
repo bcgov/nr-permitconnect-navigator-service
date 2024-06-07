@@ -4,6 +4,7 @@ import user from './user';
 
 import type { Stamps } from '../stamps';
 import type { Submission } from '../../types';
+import { BasicResponse } from '../../utils/enums/application';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
@@ -44,7 +45,7 @@ export default {
       ats_client_number: input.atsClientNumber,
       ltsa_completed: input.ltsaCompleted,
       bc_online_completed: input.bcOnlineCompleted,
-      natural_disaster: input.naturalDisaster,
+      natural_disaster: input.naturalDisaster === BasicResponse.YES ? true : false,
       financially_supported: input.financiallySupported,
       financially_supported_bc: input.financiallySupportedBC,
       financially_supported_indigenous: input.financiallySupportedIndigenous,
@@ -108,7 +109,7 @@ export default {
       atsClientNumber: input.ats_client_number,
       ltsaCompleted: input.ltsa_completed,
       bcOnlineCompleted: input.bc_online_completed,
-      naturalDisaster: input.natural_disaster,
+      naturalDisaster: input.natural_disaster ? BasicResponse.YES : BasicResponse.NO,
       financiallySupported: input.financially_supported,
       financiallySupportedBC: input.financially_supported_bc,
       financiallySupportedIndigenous: input.financially_supported_indigenous,

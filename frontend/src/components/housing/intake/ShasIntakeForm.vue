@@ -155,6 +155,7 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     formRef.value?.setFieldValue('location.locality', properties?.localityName);
     formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
   }
 };
 

@@ -17,6 +17,9 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// Emits
+const emit = defineEmits(['onChange']);
+
 // State
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 const fieldActive = defineModel<boolean>('fieldActive');
@@ -39,5 +42,6 @@ const fieldActive = defineModel<boolean>('fieldActive');
     :disabled="disabled"
     @focus="fieldActive = true"
     @blur="fieldActive = false"
+    @change="(e) => emit('onChange', e)"
   />
 </template>
