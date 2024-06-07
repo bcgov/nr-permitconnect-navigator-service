@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router';
 import { Button } from '@/lib/primevue';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 // Store
 const router = useRouter();
 const toHousing = (): void => {
-  router.push({ name: RouteNames.HOUSING });
+  router.push({ name: RouteName.HOUSING });
 };
 </script>
 

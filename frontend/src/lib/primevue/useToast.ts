@@ -1,6 +1,8 @@
-import { ToastTimeout } from '@/utils/constants';
-import type { ToastMessageOptions } from 'primevue/toast';
 import { useToast as useToastPrimevue } from 'primevue/usetoast';
+
+import { ToastTimeout } from '@/utils/enums/application';
+
+import type { ToastMessageOptions } from 'primevue/toast';
 
 export const useToast = () => {
   const toast = useToastPrimevue();

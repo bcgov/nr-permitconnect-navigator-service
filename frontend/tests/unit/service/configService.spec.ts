@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import { ConfigService } from '@/services';
-import { StorageKey } from '@/utils/constants';
+import { StorageKey } from '@/utils/enums/application';
 
 const storageType = window.sessionStorage;
 

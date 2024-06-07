@@ -1,20 +1,14 @@
 import { createTestingPinia } from '@pinia/testing';
-import { mount, RouterLinkStub } from '@vue/test-utils';
-import { nextTick } from 'vue';
-
-import ShasEnquiryForm from '@/components/housing/intake/ShasEnquiryForm.vue';
-
-import { StorageKey } from '@/utils/constants';
-import {
-  BASIC_RESPONSES,
-  CONTACT_PREFERENCE_LIST,
-  INTAKE_FORM_CATEGORIES,
-  PROJECT_RELATIONSHIP_LIST
-} from '@/utils/enums';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { mount, RouterLinkStub } from '@vue/test-utils';
+import { nextTick } from 'vue';
+
+import ShasEnquiryForm from '@/components/housing/intake/ShasEnquiryForm.vue';
+import { BasicResponse, StorageKey } from '@/utils/enums/application';
+import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -47,8 +41,8 @@ function basicValidFormValues(): FormValues {
       lastName: 'testLast',
       email: 'test@email.com',
       phoneNumber: '1234567890',
-      relationshipToProject: PROJECT_RELATIONSHIP_LIST.OWNER,
-      contactPreference: CONTACT_PREFERENCE_LIST.EMAIL
+      relationshipToProject: ProjectRelationship.OWNER,
+      contactPreference: ContactPreference.EMAIL
     },
     basic: {
       isRelated: 'Yes',
@@ -223,8 +217,8 @@ describe('ShasIntakeForm validation tests', () => {
       ...basicValidFormValues()
     };
 
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].isRelated = BASIC_RESPONSES.NO;
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].applyForPermitConnect = BASIC_RESPONSES.NO;
+    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
     formRef.setValues(modifiedFormValues);
 
     const result = await formRef?.validate();
@@ -240,8 +234,8 @@ describe('ShasIntakeForm validation tests', () => {
       ...basicValidFormValues()
     };
 
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].isRelated = BASIC_RESPONSES.NO;
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].applyForPermitConnect = BASIC_RESPONSES.NO;
+    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
     formRef.setValues(modifiedFormValues);
 
     const result = await formRef?.validate();
@@ -257,12 +251,12 @@ describe('ShasIntakeForm validation tests', () => {
       ...basicValidFormValues()
     };
 
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.APPLICANT].email = 'bad@email';
+    modifiedFormValues[IntakeFormCategory.APPLICANT].email = 'bad@email';
     formRef.setValues(modifiedFormValues);
 
     const result = await formRef?.validate();
     expect(Object.keys(result.errors).length).toBe(1);
-    expect(result.errors[`${[INTAKE_FORM_CATEGORIES.APPLICANT]}.email`]).toBeTruthy();
+    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.email`]).toBeTruthy();
   });
 
   it('form generates missing first and last name missing error', async () => {
@@ -274,15 +268,15 @@ describe('ShasIntakeForm validation tests', () => {
       ...basicValidFormValues()
     };
 
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.APPLICANT].firstName = '';
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.APPLICANT].lastName = '';
+    modifiedFormValues[IntakeFormCategory.APPLICANT].firstName = '';
+    modifiedFormValues[IntakeFormCategory.APPLICANT].lastName = '';
 
     formRef.setValues(modifiedFormValues);
 
     const result = await formRef?.validate();
     expect(Object.keys(result.errors).length).toBe(2);
-    expect(result.errors[`${[INTAKE_FORM_CATEGORIES.APPLICANT]}.firstName`]).toBeTruthy();
-    expect(result.errors[`${[INTAKE_FORM_CATEGORIES.APPLICANT]}.lastName`]).toBeTruthy();
+    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.firstName`]).toBeTruthy();
+    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.lastName`]).toBeTruthy();
   });
 
   it('form generates errors for isRelated', async () => {
@@ -294,13 +288,13 @@ describe('ShasIntakeForm validation tests', () => {
       ...basicValidFormValues()
     };
 
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].isRelated = 'test';
+    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = 'test';
 
     formRef.setValues(modifiedFormValues);
 
     const result1 = await formRef?.validate();
     expect(Object.keys(result1.errors).length).toBe(1);
-    expect(result1.errors[`${[INTAKE_FORM_CATEGORIES.BASIC]}.isRelated`]).toBeTruthy();
+    expect(result1.errors[`${[IntakeFormCategory.BASIC]}.isRelated`]).toBeTruthy();
   });
 
   it('form generates errors for applyForPermitConnect', async () => {
@@ -311,13 +305,13 @@ describe('ShasIntakeForm validation tests', () => {
     const modifiedFormValues = {
       ...basicValidFormValues()
     };
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].isRelated = BASIC_RESPONSES.NO;
-    modifiedFormValues[INTAKE_FORM_CATEGORIES.BASIC].applyForPermitConnect = 'test';
+    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = 'test';
 
     formRef.setValues(modifiedFormValues);
 
     const result2 = await formRef?.validate();
     expect(Object.keys(result2.errors).length).toBe(1);
-    expect(result2.errors[`${[INTAKE_FORM_CATEGORIES.BASIC]}.applyForPermitConnect`]).toBeTruthy();
+    expect(result2.errors[`${[IntakeFormCategory.BASIC]}.applyForPermitConnect`]).toBeTruthy();
   });
 });

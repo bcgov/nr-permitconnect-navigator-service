@@ -10,8 +10,10 @@ import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaim
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
-import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST } from '@/utils/enums';
+import { YES_NO_LIST } from '@/utils/constants/application';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
+import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
@@ -39,26 +41,26 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  [INTAKE_FORM_CATEGORIES.APPLICANT]: object({
+  [IntakeFormCategory.APPLICANT]: object({
     firstName: string().required().max(255).label('First name'),
     lastName: string().required().max(255).label('Last name'),
     phoneNumber: string().required().max(255).label('Phone number'),
     email: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    relationshipToProject: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
-    contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference')
+    relationshipToProject: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
   }),
-  [INTAKE_FORM_CATEGORIES.BASIC]: object({
-    isRelated: string().required().oneOf(YesNo).label('Related to existing application'),
+  [IntakeFormCategory.BASIC]: object({
+    isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
-      is: (isRelated: string) => isRelated === BASIC_RESPONSES.YES,
+      is: (isRelated: string) => isRelated === BasicResponse.YES,
       then: (schema) => schema.required().max(255).label('Confirmation ID')
     }),
     enquiryDescription: string().required().label('Enquiry'),
     applyForPermitConnect: string()
       .label('Service application')
       .when('isRelated', {
-        is: (isRelated: string) => isRelated === BASIC_RESPONSES.NO,
-        then: (schema) => schema.required().oneOf(YesNo)
+        is: (isRelated: string) => isRelated === BasicResponse.NO,
+        then: (schema) => schema.required().oneOf(YES_NO_LIST)
       })
   })
 });
@@ -75,7 +77,7 @@ function confirmLeave() {
     acceptLabel: 'Leave',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
-    accept: () => router.push({ name: RouteNames.HOUSING })
+    accept: () => router.push({ name: RouteName.HOUSING })
   });
 }
 
@@ -143,7 +145,7 @@ async function onSubmit(data: any) {
 
   try {
     // Need to first create the submission to relate to if asking to apply
-    if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
+    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
       submissionResponse = await submissionService.createDraft({ applicant: data.applicant });
       if (submissionResponse.data.activityId) {
         formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
@@ -172,9 +174,9 @@ async function onSubmit(data: any) {
   } finally {
     editable.value = true;
 
-    if (data.basic.applyForPermitConnect === BASIC_RESPONSES.YES) {
+    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
       router.push({
-        name: RouteNames.HOUSING_INTAKE,
+        name: RouteName.HOUSING_INTAKE,
         query: {
           activityId: submissionResponse?.data.activityId,
           submissionId: submissionResponse?.data.submissionId
@@ -188,7 +190,7 @@ onBeforeMount(async () => {
   let response;
   if (props.enquiryId) {
     response = (await enquiryService.getEnquiry(props.enquiryId)).data;
-    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
+    editable.value = response.intakeStatus === IntakeStatus.DRAFT;
   }
 
   // Default form values
@@ -309,7 +311,7 @@ async function emailConfirmation(activityId: string) {
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"
-              :options="ProjectRelationshipList"
+              :options="PROJECT_RELATIONSHIP_LIST"
             />
             <Dropdown
               class="col-6"
@@ -317,7 +319,7 @@ async function emailConfirmation(activityId: string) {
               label="Preferred contact method"
               :bold="false"
               :disabled="!editable"
-              :options="ContactPreferenceList"
+              :options="CONTACT_PREFERENCE_LIST"
             />
           </div>
         </template>
@@ -336,12 +338,12 @@ async function emailConfirmation(activityId: string) {
               name="basic.isRelated"
               :bold="false"
               :disabled="!editable"
-              :options="YesNo"
+              :options="YES_NO_LIST"
             />
           </div>
         </template>
       </Card>
-      <Card v-if="values.basic?.isRelated === BASIC_RESPONSES.YES">
+      <Card v-if="values.basic?.isRelated === BasicResponse.YES">
         <template #title>
           <div class="flex">
             <span class="section-header">
@@ -384,7 +386,7 @@ async function emailConfirmation(activityId: string) {
           </div>
         </template>
       </Card>
-      <Card v-if="values.basic?.isRelated === BASIC_RESPONSES.NO">
+      <Card v-if="values.basic?.isRelated === BasicResponse.NO">
         <template #title>
           <div class="flex">
             <span class="section-header">Would you like to register your project with a Navigator?</span>
@@ -401,10 +403,10 @@ async function emailConfirmation(activityId: string) {
               name="basic.applyForPermitConnect"
               :bold="false"
               :disabled="!editable"
-              :options="YesNo"
+              :options="YES_NO_LIST"
             />
             <div
-              v-if="values.basic?.applyForPermitConnect === BASIC_RESPONSES.YES"
+              v-if="values.basic?.applyForPermitConnect === BasicResponse.YES"
               class="col-12 text-blue-500"
             >
               Please proceed to the next page to register your project with a Navigator.
@@ -416,7 +418,7 @@ async function emailConfirmation(activityId: string) {
         :editable="editable"
         :next-callback="() => confirmNext(values)"
         :prev-disabled="true"
-        :next-disabled="values.basic?.applyForPermitConnect !== BASIC_RESPONSES.YES"
+        :next-disabled="values.basic?.applyForPermitConnect !== BasicResponse.YES"
       >
         <template #content>
           <Button
@@ -433,7 +435,7 @@ async function emailConfirmation(activityId: string) {
           label="Submit"
           type="submit"
           icon="pi pi-upload"
-          :disabled="!editable || values.basic?.applyForPermitConnect === BASIC_RESPONSES.YES"
+          :disabled="!editable || values.basic?.applyForPermitConnect === BasicResponse.YES"
         />
       </div>
     </Form>
@@ -452,7 +454,7 @@ async function emailConfirmation(activityId: string) {
       A Housing Navigator will review your submission and contact you. Please check your email for the confirmation
       email and keep the confirmation ID for future reference.
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteNames.HOME }">Go to Homepage</router-link></div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
   </div>
 </template>
 

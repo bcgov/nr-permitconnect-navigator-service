@@ -12,8 +12,8 @@ import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
-import { RouteNames, StorageKey } from '@/utils/constants';
-import { BRING_FORWARD_TYPES } from '@/utils/enums';
+import { RouteName, StorageKey } from '@/utils/enums/application';
+import { BringForwardType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -67,7 +67,7 @@ onMounted(async () => {
       enquiryService.getEnquiries(),
       submissionService.getSubmissions(),
       submissionService.getStatistics(),
-      noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED)
+      noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
   ).map((r) => r.data);
 
@@ -114,7 +114,7 @@ watch(accordionIndex, () => {
                 Bring forward {{ getBringForwardDate(bf) }}:
                 <router-link
                   :to="{
-                    name: RouteNames.HOUSING_SUBMISSION,
+                    name: RouteName.HOUSING_SUBMISSION,
                     query: { activityId: bf.activityId, initialTab: 3 },
                     hash: `#${bf.noteId}`
                   }"

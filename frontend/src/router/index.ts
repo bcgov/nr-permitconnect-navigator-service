@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { AuthService, PermissionService } from '@/services';
 import { PERMISSIONS } from '@/services/permissionService';
 import { useAppStore, useAuthStore } from '@/store';
-import { RouteNames, StorageKey } from '@/utils/constants';
+import { RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
 
@@ -20,18 +20,18 @@ function createProps(route: { query: any; params: any }): object {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: RouteNames.HOME,
+    name: RouteName.HOME,
     component: () => import('../views/HomeView.vue')
   },
   {
     path: '/developer',
-    name: RouteNames.DEVELOPER,
+    name: RouteName.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
     meta: { requiresAuth: true, access: PERMISSIONS.NAVIGATION_DEVELOPER }
   },
   {
     path: '/forbidden',
-    name: RouteNames.FORBIDDEN,
+    name: RouteName.FORBIDDEN,
     component: () => import('@/views/Forbidden.vue'),
     meta: { title: 'Forbidden' }
   },
@@ -42,7 +42,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: '',
-        name: RouteNames.HOUSING,
+        name: RouteName.HOUSING,
         component: () => import('../views/housing/HousingView.vue'),
         meta: {
           access: PERMISSIONS.NAVIGATION_HOUSING
@@ -50,7 +50,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'enquiry',
-        name: RouteNames.HOUSING_ENQUIRY,
+        name: RouteName.HOUSING_ENQUIRY,
         component: () => import('../views/housing/ShasEnquiryView.vue'),
         props: createProps,
         meta: {
@@ -59,7 +59,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'intake',
-        name: RouteNames.HOUSING_INTAKE,
+        name: RouteName.HOUSING_INTAKE,
         component: () => import('@/views/housing/ShasIntakeView.vue'),
         props: createProps,
         meta: {
@@ -68,7 +68,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'submission',
-        name: RouteNames.HOUSING_SUBMISSION,
+        name: RouteName.HOUSING_SUBMISSION,
         component: () => import('@/views/housing/SubmissionView.vue'),
         props: createProps,
         meta: {
@@ -77,7 +77,7 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'submissions',
-        name: RouteNames.HOUSING_SUBMISSIONS,
+        name: RouteName.HOUSING_SUBMISSIONS,
         component: () => import('@/views/housing/SubmissionsView.vue'),
         meta: {
           access: [PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS, PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
@@ -91,19 +91,19 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'callback',
-        name: RouteNames.OIDC_CALLBACK,
+        name: RouteName.OIDC_CALLBACK,
         component: () => import('@/views/oidc/OidcCallbackView.vue'),
         meta: { title: 'Authenticating...' }
       },
       {
         path: 'login',
-        name: RouteNames.OIDC_LOGIN,
+        name: RouteName.OIDC_LOGIN,
         component: () => import('@/views/oidc/OidcLoginView.vue'),
         meta: { title: 'Logging in...' }
       },
       {
         path: 'logout',
-        name: RouteNames.OIDC_LOGOUT,
+        name: RouteName.OIDC_LOGOUT,
         component: () => import('@/views/oidc/OidcLogoutView.vue'),
         meta: { title: 'Logging out...' }
       }
@@ -170,15 +170,15 @@ export default function getRouter() {
       const user = await authService.getUser();
       if (!user || user.expired) {
         window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
-        router.replace({ name: RouteNames.OIDC_LOGIN });
+        router.replace({ name: RouteName.OIDC_LOGIN });
         return;
       }
     }
 
     // Check for reroutes
-    if (to.name === RouteNames.HOUSING) {
+    if (to.name === RouteName.HOUSING) {
       if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
-        router.replace({ name: RouteNames.HOUSING_SUBMISSIONS });
+        router.replace({ name: RouteName.HOUSING_SUBMISSIONS });
         return;
       }
     }
@@ -189,7 +189,7 @@ export default function getRouter() {
       // this prevents the app throwing you to the forbidden page
       await waitForRoles();
       if (!permissionService.can(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
-        router.replace({ name: RouteNames.FORBIDDEN });
+        router.replace({ name: RouteName.FORBIDDEN });
         return;
       }
     }

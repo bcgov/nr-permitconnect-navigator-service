@@ -4,7 +4,7 @@ import { ref, watch } from 'vue';
 
 import { Calendar, Dropdown } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
-import { Regex } from '@/utils/constants';
+import { Regex } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';

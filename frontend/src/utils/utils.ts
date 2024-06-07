@@ -1,6 +1,7 @@
 import { toRaw, isRef, isReactive, isProxy } from 'vue';
 
-import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
+import { DELIMITER } from '@/utils/constants/application';
+import { FileCategory } from '@/utils/enums/application';
 
 /**
  * @function deepToRaw
@@ -62,35 +63,35 @@ export function getFileCategory(mimeType: string): string {
     case mimeType.includes('/vnd.shx'):
     case mimeType.includes('/dbase'):
     case mimeType.includes('/dbf'):
-      return FILE_CATEGORIES.SHAPE;
+      return FileCategory.SHAPE;
     case mimeType.includes('/msword'):
     case mimeType.includes('/vnd.ms-word'):
     case mimeType.includes('/vnd.oasis.opendocument.text'):
     case mimeType.includes('/vnd.openxmlformats-officedocument.wordprocessingml'):
-      return FILE_CATEGORIES.DOC;
+      return FileCategory.DOC;
     case mimeType.includes('/vnd.pdf'):
     case mimeType.includes('/pdf'):
     case mimeType.includes('/x-pdf'):
-      return FILE_CATEGORIES.PDF;
+      return FileCategory.PDF;
     case mimeType.includes('/vnd.ms-excel'):
     case mimeType.includes('/vnd.openxmlformats-officedocument.spreadsheetml'):
     case mimeType.includes('/vnd.oasis.opendocument.spreadsheet'):
-      return FILE_CATEGORIES.SPREADSHEET;
+      return FileCategory.SPREADSHEET;
     case mimeType.includes('image/'):
-      return FILE_CATEGORIES.IMAGE;
+      return FileCategory.IMAGE;
     case mimeType.includes('/vnd.seemail'):
     case mimeType.includes('/vnd.omads-email+xml'):
     case mimeType.includes('message/'):
-      return FILE_CATEGORIES.EMAIL;
+      return FileCategory.EMAIL;
     case mimeType.includes('/gzip'):
     case mimeType.includes('/zip'):
     case mimeType.includes('/x-gzip'):
     case mimeType.includes('/x-zip'):
     case mimeType.includes('/x-7z'):
     case mimeType.includes('/x-rar'):
-      return FILE_CATEGORIES.COMPRESSED;
+      return FileCategory.COMPRESSED;
     default:
-      return FILE_CATEGORIES.FILE;
+      return FileCategory.FILE;
   }
 }
 

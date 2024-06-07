@@ -4,12 +4,12 @@ import { ref } from 'vue';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
+import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
-import { INTAKE_STATUS_LIST } from '@/utils/enums';
 
 // Props
 type Props = {
@@ -84,7 +84,7 @@ function onDelete(enquiryId: string) {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteNames.HOUSING_ENQUIRY,
+              name: RouteName.HOUSING_ENQUIRY,
               query: { activityId: data.activityId, enquiryId: data.enquiryId }
             }"
           >
@@ -134,7 +134,7 @@ function onDelete(enquiryId: string) {
       style="min-width: 200px"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
       </template>
     </Column>
     <Column
@@ -148,7 +148,7 @@ function onDelete(enquiryId: string) {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
-          :disabled="data.intakeStatus !== INTAKE_STATUS_LIST.DRAFT"
+          :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
           @click="onDelete(data.enquiryId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />

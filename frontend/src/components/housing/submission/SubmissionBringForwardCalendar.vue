@@ -4,7 +4,7 @@ import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, InputSwitch } from '@/lib/primevue';
 import { useAuthStore } from '@/store';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -64,7 +64,7 @@ watchEffect(() => {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: RouteNames.HOUSING_SUBMISSION,
+                  name: RouteName.HOUSING_SUBMISSION,
                   query: { activityId: data.activityId, initialTab: 3 },
                   hash: `#${data.noteId}`
                 }"

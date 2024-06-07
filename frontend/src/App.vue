@@ -6,7 +6,7 @@ import { RouterView, useRouter } from 'vue-router';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthStore, useConfigStore } from '@/store';
-import { RouteNames, ToastTimeout } from '@/utils/constants';
+import { RouteName, ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -45,8 +45,8 @@ onErrorCaptured((e: Error) => {
       <Navbar
         v-if="
           router.currentRoute.value.name &&
-          router.currentRoute.value.name !== RouteNames.HOME &&
-          ![RouteNames.OIDC_LOGIN, RouteNames.OIDC_CALLBACK, RouteNames.OIDC_LOGOUT].includes(
+          router.currentRoute.value.name !== RouteName.HOME &&
+          ![RouteName.OIDC_LOGIN, RouteName.OIDC_CALLBACK, RouteName.OIDC_LOGOUT].includes(
             router.currentRoute.value.name as any
           )
         "

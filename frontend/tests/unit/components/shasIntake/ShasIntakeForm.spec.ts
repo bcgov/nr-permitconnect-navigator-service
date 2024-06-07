@@ -1,19 +1,17 @@
 import { createTestingPinia } from '@pinia/testing';
-import { mount, RouterLinkStub } from '@vue/test-utils';
-
-import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
-import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
-
-import { permitService } from '@/services';
-import { StorageKey } from '@/utils/constants';
-import { NumResidentialUnits } from '@/utils/constants';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { mount, RouterLinkStub } from '@vue/test-utils';
+
+import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
+import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import { permitService } from '@/services';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
-import { BASIC_RESPONSES } from '@/utils/enums';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -144,8 +142,8 @@ describe('ShasIntakeForm tests', () => {
 
     const basicTest = intakeSchema.validateAt('basic', {
       basic: {
-        isDevelopedByCompanyOrOrg: BASIC_RESPONSES.NO,
-        isDevelopedInBC: BASIC_RESPONSES.NO,
+        isDevelopedByCompanyOrOrg: BasicResponse.NO,
+        isDevelopedInBC: BasicResponse.NO,
         registeredName: 'testString3'
       }
     });
@@ -159,12 +157,12 @@ describe('ShasIntakeForm tests', () => {
         financiallySupportedIndigenous: 'No',
         financiallySupportedNonProfit: 'No',
         financiallySupportedHousingCoop: 'No',
-        rentalUnits: NumResidentialUnits[0],
+        rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
         indigenousDescription: 'No',
         nonProfitDescription: 'No',
         housingCoopDescription: 'No',
         singleFamilySelected: true,
-        singleFamilyUnits: NumResidentialUnits[0],
+        singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
         multiFamilyUnits: 'No',
         otherUnitsDescription: 'No',
         otherUnits: 'No'
@@ -187,7 +185,7 @@ describe('ShasIntakeForm tests', () => {
 
     const permitsTest = intakeSchema.validateAt('permits', {
       permits: {
-        hasAppliedProvincialPermits: BASIC_RESPONSES.NO,
+        hasAppliedProvincialPermits: BasicResponse.NO,
         checkProvincialPermits: 'testString2'
       }
     });
@@ -265,7 +263,7 @@ describe('ShasIntakeForm tests', () => {
 
     const permitsTestFail = intakeSchema.validateAt('permits', {
       permits: {
-        hasAppliedProvincialPermits: BASIC_RESPONSES.YES,
+        hasAppliedProvincialPermits: BasicResponse.YES,
         checkProvincialPermits: 'testString2'
       }
     });

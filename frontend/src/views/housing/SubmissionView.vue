@@ -13,7 +13,7 @@ import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -63,7 +63,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <router-link :to="{ name: RouteNames.HOUSING_SUBMISSIONS }">
+  <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">
     <font-awesome-icon
       icon="fa fa-arrow-circle-left"
       class="mr-1"

@@ -16,18 +16,17 @@ import {
 import { Button, Divider, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
-  ApplicationStatusList,
-  ContactPreferenceList,
-  IntakeStatusList,
-  NumResidentialUnits,
-  ProjectRelationshipList,
-  QueuePriority,
-  Regex,
-  YesNo,
-  YesNoUnsure
-} from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_STATUS_LIST, SUBMISSION_TYPES } from '@/utils/enums';
+  APPLICATION_STATUS_LIST,
+  CONTACT_PREFERENCE_LIST,
+  INTAKE_STATUS_LIST,
+  NUM_RESIDENTIAL_UNITS_LIST,
+  PROJECT_RELATIONSHIP_LIST,
+  QUEUE_PRIORITY
+} from '@/utils/constants/housing';
+import { BasicResponse, Regex } from '@/utils/enums/application';
+import { IntakeStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatJwtUsername } from '@/utils/formatters';
 import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
@@ -52,7 +51,6 @@ const submissionStore = useSubmissionStore();
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(props.editable);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const submissionTypes: Ref<Array<string>> = ref([]);
 
 // Form validation schema
 const formSchema = object({
@@ -65,45 +63,45 @@ const formSchema = object({
     .label('Queue Priority'),
   submissionType: string()
     .required()
-    .oneOf([SUBMISSION_TYPES.GUIDANCE, SUBMISSION_TYPES.INAPPLICABLE])
+    .oneOf([SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE])
     .label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...applicantValidator,
   companyNameRegistered: string().required().label('Company'),
-  isDevelopedInBC: string().required().oneOf(YesNo).label('Company registered in B.C'),
+  isDevelopedInBC: string().required().oneOf(YES_NO_LIST).label('Company registered in B.C'),
   projectName: string().required().label('Project Name'),
   projectDescription: string().notRequired().label('Additional information about project'),
-  singleFamilyUnits: string().notRequired().oneOf(NumResidentialUnits).label('Single family units'),
-  multiFamilyUnits: string().notRequired().oneOf(NumResidentialUnits).label('Multi-family units'),
+  singleFamilyUnits: string().notRequired().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Single family units'),
+  multiFamilyUnits: string().notRequired().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Multi-family units'),
   otherUnitsDescription: string().notRequired().max(255).label('Other type'),
   otherUnits: string().when('otherUnitsDescription', {
-    is: (val: string) => val === BASIC_RESPONSES.YES,
-    then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Other type units'),
+    is: (val: string) => val === BasicResponse.YES,
+    then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Other type units'),
     otherwise: () => string().notRequired()
   }),
-  hasRentalUnits: string().required().oneOf(YesNoUnsure).label('Rental included'),
+  hasRentalUnits: string().required().oneOf(YES_NO_UNSURE_LIST).label('Rental included'),
   rentalUnits: string().when('hasRentalUnits', {
-    is: (val: string) => val === BASIC_RESPONSES.YES,
-    then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Rental units'),
+    is: (val: string) => val === BasicResponse.YES,
+    then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Rental units'),
     otherwise: () => string().notRequired()
   }),
-  financiallySupportedBC: string().required().oneOf(YesNoUnsure).label('BC Housing'),
-  financiallySupportedIndigenous: string().required().oneOf(YesNoUnsure).label('Indigenous Housing Provider'),
+  financiallySupportedBC: string().required().oneOf(YES_NO_UNSURE_LIST).label('BC Housing'),
+  financiallySupportedIndigenous: string().required().oneOf(YES_NO_UNSURE_LIST).label('Indigenous Housing Provider'),
   indigenousDescription: string().when('financiallySupportedIndigenous', {
-    is: (val: string) => val === BASIC_RESPONSES.YES,
+    is: (val: string) => val === BasicResponse.YES,
     then: (schema) => schema.required().max(255).label('Name of Indigenous Housing Provider'),
     otherwise: () => string().notRequired()
   }),
-  financiallySupportedNonProfit: string().required().oneOf(YesNoUnsure).label('Non-profit housing society'),
+  financiallySupportedNonProfit: string().required().oneOf(YES_NO_UNSURE_LIST).label('Non-profit housing society'),
   nonProfitDescription: string().when('financiallySupportedNonProfit', {
-    is: (val: string) => val === BASIC_RESPONSES.YES,
+    is: (val: string) => val === BasicResponse.YES,
     then: (schema) => schema.required().max(255).label('Name of Non-profit housing society'),
     otherwise: () => string().notRequired()
   }),
-  financiallySupportedHousingCoop: string().required().oneOf(YesNoUnsure).label('Housing co-operative'),
+  financiallySupportedHousingCoop: string().required().oneOf(YES_NO_UNSURE_LIST).label('Housing co-operative'),
   housingCoopDescription: string().when('financiallySupportedHousingCoop', {
-    is: (val: string) => val === BASIC_RESPONSES.YES,
+    is: (val: string) => val === BasicResponse.YES,
     then: (schema) => schema.required().max(255).label('Name of Housing co-operative'),
     otherwise: () => string().notRequired()
   }),
@@ -112,7 +110,7 @@ const formSchema = object({
   latitude: latitudeValidator,
   longitude: longitudeValidator,
   geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
-  naturalDisaster: string().oneOf(YesNo).required().label('Affected by natural disaster'),
+  naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
   atsClientNumber: string().when('addedToATS', {
     is: (val: boolean) => val,
@@ -123,9 +121,9 @@ const formSchema = object({
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
   astNotes: string().notRequired().max(255).label('AST notes'),
-  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
-  user: assignedToValidator('intakeStatus', INTAKE_STATUS_LIST.SUBMITTED),
-  applicationStatus: string().oneOf(ApplicationStatusList).label('Activity state'),
+  intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
+  user: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
+  applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   waitingOn: string().notRequired().max(255).label('waiting on')
 });
 
@@ -207,8 +205,6 @@ onBeforeMount(async () => {
     activityId: props.submission.activityId,
     user: assigneeOptions.value[0] ?? null
   };
-
-  submissionTypes.value = [SUBMISSION_TYPES.GUIDANCE, SUBMISSION_TYPES.INAPPLICABLE];
 });
 </script>
 
@@ -226,14 +222,14 @@ onBeforeMount(async () => {
         name="queuePriority"
         label="Priority"
         :disabled="!editable"
-        :options="QueuePriority"
+        :options="QUEUE_PRIORITY"
       />
       <Dropdown
         class="col-3"
         name="submissionType"
         label="Submission type"
         :disabled="!editable"
-        :options="submissionTypes"
+        :options="[SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE]"
       />
       <Calendar
         class="col-3"
@@ -278,21 +274,21 @@ onBeforeMount(async () => {
         name="isDevelopedInBC"
         label="Company registered in B.C?"
         :disabled="!editable"
-        :options="YesNo"
+        :options="YES_NO_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to project"
         :disabled="!editable"
-        :options="ProjectRelationshipList"
+        :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
-        :options="ContactPreferenceList"
+        :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
@@ -333,14 +329,14 @@ onBeforeMount(async () => {
         name="singleFamilyUnits"
         label="Single family units"
         :disabled="!editable"
-        :options="NumResidentialUnits"
+        :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="multiFamilyUnits"
         label="Multi-family units"
         :disabled="!editable"
-        :options="NumResidentialUnits"
+        :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <InputText
         class="col-3"
@@ -353,21 +349,21 @@ onBeforeMount(async () => {
         name="otherUnits"
         label="Other type units"
         :disabled="!editable || !values.otherUnitsDescription"
-        :options="NumResidentialUnits"
+        :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="hasRentalUnits"
         label="Rental included?"
         :disabled="!editable"
-        :options="YesNoUnsure"
+        :options="YES_NO_UNSURE_LIST"
       />
       <Dropdown
         class="col-3"
         name="rentalUnits"
         label="Rental units"
-        :disabled="!editable || values.hasRentalUnits !== BASIC_RESPONSES.YES"
-        :options="NumResidentialUnits"
+        :disabled="!editable || values.hasRentalUnits !== BasicResponse.YES"
+        :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
 
       <div class="col-12 mb-3">
@@ -382,7 +378,7 @@ onBeforeMount(async () => {
         name="financiallySupportedBC"
         label="BC Housing"
         :disabled="!editable"
-        :options="YesNoUnsure"
+        :options="YES_NO_UNSURE_LIST"
       />
       <div class="col-9" />
       <Dropdown
@@ -390,13 +386,13 @@ onBeforeMount(async () => {
         name="financiallySupportedIndigenous"
         label="Indigenous Housing Provider"
         :disabled="!editable"
-        :options="YesNoUnsure"
+        :options="YES_NO_UNSURE_LIST"
       />
       <InputText
         class="col-3"
         name="indigenousDescription"
         label="Name of Indigenous Housing Provider"
-        :disabled="!editable || values.financiallySupportedIndigenous !== BASIC_RESPONSES.YES"
+        :disabled="!editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
@@ -404,13 +400,13 @@ onBeforeMount(async () => {
         name="financiallySupportedNonProfit"
         label="Non-profit housing society"
         :disabled="!editable"
-        :options="YesNoUnsure"
+        :options="YES_NO_UNSURE_LIST"
       />
       <InputText
         class="col-3"
         name="nonProfitDescription"
         label="Name of Non-profit housing society"
-        :disabled="!editable || values.financiallySupportedNonProfit !== BASIC_RESPONSES.YES"
+        :disabled="!editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
@@ -418,13 +414,13 @@ onBeforeMount(async () => {
         name="financiallySupportedHousingCoop"
         label="Housing co-operative"
         :disabled="!editable"
-        :options="YesNoUnsure"
+        :options="YES_NO_UNSURE_LIST"
       />
       <InputText
         class="col-3"
         name="housingCoopDescription"
         label="Name of Housing co-operative"
-        :disabled="!editable || values.financiallySupportedHousingCoop !== BASIC_RESPONSES.YES"
+        :disabled="!editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
       />
       <div class="col-6" />
 
@@ -472,7 +468,7 @@ onBeforeMount(async () => {
         name="naturalDisaster"
         label="Affected by natural disaster?"
         :disabled="!editable"
-        :options="YesNo"
+        :options="YES_NO_LIST"
       />
       <div class="col-6" />
 
@@ -540,7 +536,7 @@ onBeforeMount(async () => {
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
-        :options="IntakeStatusList"
+        :options="INTAKE_STATUS_LIST"
       />
       <EditableDropdown
         class="col-3"
@@ -556,7 +552,7 @@ onBeforeMount(async () => {
         name="applicationStatus"
         label="Activity state"
         :disabled="!editable"
-        :options="ApplicationStatusList"
+        :options="APPLICATION_STATUS_LIST"
       />
       <InputText
         class="col-3"

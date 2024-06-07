@@ -5,8 +5,9 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import NoteModal from '@/components/note/NoteModal.vue';
-import { StorageKey } from '@/utils/constants';
-import { NOTE_TYPES } from '@/utils/enums';
+
+import { StorageKey } from '@/utils/enums/application';
+import { NoteType } from '@/utils/enums/housing';
 
 import type { Note } from '@/types';
 
@@ -22,7 +23,7 @@ const testNote: Note = {
   noteId: 'noteUUID',
   activityId: 'activityUUID',
   note: 'note contents text',
-  noteType: NOTE_TYPES.GENERAL,
+  noteType: NoteType.GENERAL,
   title: 'note contents title',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
