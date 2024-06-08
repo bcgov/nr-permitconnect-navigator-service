@@ -72,11 +72,6 @@ const FORM_EXPORT_1 = {
   multiFamilyUnits1: '',
   isRentalUnit: 'unsureunsure',
   streetAddress: '123 Some Street',
-  guidance: true,
-  statusRequest: true,
-  inquiry: true,
-  emergencyAssist: true,
-  inapplicable: true,
   createdAt: new Date().toISOString(),
   createdBy: 'USERABC',
 
@@ -122,11 +117,6 @@ const FORM_EXPORT_2 = {
   multiFamilyUnits1: '',
   isRentalUnit: 'yes',
   streetAddress: '112 Other Road',
-  guidance: true,
-  statusRequest: true,
-  inquiry: true,
-  emergencyAssist: true,
-  inapplicable: true,
   createdAt: new Date().toISOString(),
   createdBy: 'USERABC',
 
@@ -144,7 +134,8 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   companyNameRegistered: 'COMPANY',
   contactEmail: 'abc@dot.com',
   contactPhoneNumber: '1234567890',
-  contactName: 'ABC DEF',
+  contactFirstName: 'ABC',
+  contactLastName: 'DEF',
   contactPreference: 'Phone Call',
   contactApplicantRelationship: 'Agent',
   financiallySupported: true,
@@ -176,7 +167,8 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     companyNameRegistered: 'BIGBUILD',
     contactEmail: 'joe@dot.com',
     contactPhoneNumber: '1114448888',
-    contactName: 'Joe Smith',
+    contactFirstName: 'Joe',
+    contactLastName: 'Smith',
     contactPreference: 'Email',
     contactApplicantRelationship: 'Agent',
     financiallySupported: true,
@@ -226,7 +218,8 @@ const SUBMISSION_1 = {
   submittedBy: '100-100',
   locationPIDs: null,
   companyNameRegistered: null,
-  contactName: null,
+  contactFirstName: null,
+  contactLastName: null,
   contactPhoneNumber: null,
   contactEmail: null,
   contactPreference: null,
@@ -259,11 +252,6 @@ const SUBMISSION_1 = {
   submissions: null,
   intakeStatus: null,
   applicationStatus: null,
-  guidance: false,
-  statusRequest: false,
-  inquiry: false,
-  emergencyAssist: false,
-  inapplicable: false,
   user: null
 };
 
@@ -407,8 +395,8 @@ describe('createDraft', () => {
     const req = {
       body: {
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User'
         },
         basic: {
           isDevelopedByCompanyOrOrg: true
@@ -437,7 +425,8 @@ describe('createDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contacFirstName: `${req.body.applicant.contactFirstName}`,
+        contactLastName: `${req.body.applicant.contactLastName}`,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -580,8 +569,8 @@ describe('createSubmission', () => {
     const req = {
       body: {
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User'
         },
         basic: {
           isDevelopedByCompanyOrOrg: true
@@ -610,7 +599,8 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contactFirstName: req.body.applicant.contactFirstName,
+        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -922,8 +912,8 @@ describe('updateDraft', () => {
         activityId: '00000000',
         submissionId: '11111111',
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User'
         },
         basic: {
           isDevelopedByCompanyOrOrg: true
@@ -952,7 +942,8 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contactFirstName: req.body.applicant.contactFirstName,
+        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',

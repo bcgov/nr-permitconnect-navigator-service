@@ -26,7 +26,9 @@ export default {
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
       location_pids: input.locationPIDs,
-      contact_name: input.contactName,
+      contact_name: `${input.contactFirstName} ${input.contactLastName}`,
+      contact_first_name: input.contactFirstName,
+      contact_last_name: input.contactLastName,
       contact_applicant_relationship: input.contactApplicantRelationship,
       contact_phone_number: input.contactPhoneNumber,
       contact_email: input.contactEmail,
@@ -55,11 +57,6 @@ export default {
       waiting_on: input.waitingOn,
       intake_status: input.intakeStatus,
       application_status: input.applicationStatus,
-      guidance: input.guidance,
-      status_request: input.statusRequest,
-      inquiry: input.inquiry,
-      emergency_assist: input.emergencyAssist,
-      inapplicable: input.inapplicable,
       is_developed_by_company_or_org: input.isDevelopedByCompanyOrOrg,
       is_developed_in_bc: input.isDevelopedInBC,
       multi_family_units: input.multiFamilyUnits,
@@ -75,8 +72,7 @@ export default {
       indigenous_description: input.indigenousDescription,
       non_profit_description: input.nonProfitDescription,
       housing_coop_description: input.housingCoopDescription,
-      contact_first_name: input.contactFirstName,
-      contact_last_name: input.contactLastName
+      submission_type: input.submissionType
     };
   },
 
@@ -88,7 +84,6 @@ export default {
       submittedAt: input.submitted_at?.toISOString() as string,
       submittedBy: input.submitted_by,
       locationPIDs: input.location_pids,
-      contactName: input.contact_name,
       contactApplicantRelationship: input.contact_applicant_relationship,
       contactPhoneNumber: input.contact_phone_number,
       contactEmail: input.contact_email,
@@ -119,11 +114,6 @@ export default {
       waitingOn: input.waiting_on,
       intakeStatus: input.intake_status,
       applicationStatus: input.application_status,
-      guidance: input.guidance,
-      statusRequest: input.status_request,
-      inquiry: input.inquiry,
-      emergencyAssist: input.emergency_assist,
-      inapplicable: input.inapplicable,
       isDevelopedByCompanyOrOrg: input.is_developed_by_company_or_org,
       isDevelopedInBC: input.is_developed_in_bc,
       multiFamilyUnits: input.multi_family_units,
@@ -141,6 +131,7 @@ export default {
       housingCoopDescription: input.housing_coop_description,
       contactFirstName: input.contact_first_name,
       contactLastName: input.contact_last_name,
+      submissionType: input.submission_type,
       updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };

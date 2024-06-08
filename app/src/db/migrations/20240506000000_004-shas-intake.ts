@@ -1,9 +1,11 @@
+/* eslint-disable max-len */
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return Promise.resolve()
     .then(() =>
       knex.schema.alterTable('submission', function (table) {
+        // Add new columns
         table.text('is_developed_by_company_or_org');
         table.text('is_developed_in_bc');
         table.text('multi_family_units');
@@ -19,8 +21,20 @@ export async function up(knex: Knex): Promise<void> {
         table.text('indigenous_description');
         table.text('non_profit_description');
         table.text('housing_coop_description');
+        table.text('submission_type');
+
+        // Rename columns
         table.renameColumn('is_rental_unit', 'has_rental_units');
+
+        // Change column types
         table.setNullable('has_rental_units');
+
+        // Drop columns
+        table.dropColumn('guidance');
+        table.dropColumn('status_request');
+        table.dropColumn('inquiry');
+        table.dropColumn('emergency_assist');
+        table.dropColumn('inapplicable');
       })
     )
 
@@ -98,6 +112,73 @@ export async function up(knex: Knex): Promise<void> {
     )
 
     .then(() =>
+      knex.schema.raw(`drop function public.get_activity_statistics(
+        date_from text,
+        date_to text,
+        month_year text,
+        user_id uuid
+      )`)
+    )
+
+    .then(() =>
+      knex.schema.raw(`create or replace function public.get_activity_statistics(
+        date_from text,
+        date_to text,
+        month_year text,
+        user_id uuid
+      )
+      returns table (
+        total_submissions bigint,
+        total_submissions_between bigint,
+        total_submissions_monthyear bigint,
+        total_submissions_assignedto bigint,
+        intake_submitted bigint,
+        intake_assigned bigint,
+        intake_completed bigint,
+        state_new bigint,
+        state_inprogress bigint,
+        state_delayed bigint,
+        state_completed bigint,
+        waiting_on bigint,
+        queue_1 bigint,
+        queue_2 bigint,
+        queue_3 bigint,
+        escalation bigint,
+        general_enquiry bigint,
+        guidance bigint,
+        inapplicable bigint,
+        status_request bigint
+      )
+      language plpgsql
+      as $$
+      begin
+          return query
+          select
+            count(*),
+            (select count(*) from public.submission where "submitted_at" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+            (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submitted_at") and extract(year from cast(month_year as timestamp)) = extract(year from "submitted_at")),
+            (select count(*) from public.submission where "assigned_user_id" = user_id),
+            count(*) filter (where s."intake_status" = 'Submitted'),
+            count(*) filter (where s."intake_status" = 'Assigned'),
+            count(*) filter (where s."intake_status" = 'Completed'),
+            count(*) filter (where s."application_status" = 'New'),
+            count(*) filter (where s."application_status" = 'In Progress'),
+            count(*) filter (where s."application_status" = 'Delayed'),
+            count(*) filter (where s."application_status" = 'Completed'),
+            count(*) filter (where s."waiting_on" is not null),
+            count(*) filter (where s."queue_priority" = 1),
+            count(*) filter (where s."queue_priority" = 2),
+            count(*) filter (where s."queue_priority" = 3),
+            count(*) filter (where s."submission_type" = 'Escalation'),
+            count(*) filter (where s."submission_type" = 'General enquiry'),
+            count(*) filter (where s."submission_type" = 'Guidance'),
+            count(*) filter (where s."submission_type" = 'Inapplicable'),
+            count(*) filter (where s."submission_type" = 'Status request')
+          from public.submission s;
+      end; $$`)
+    )
+
+    .then(() =>
       knex.schema.alterTable('permit', function (table) {
         table.timestamp('status_last_verified', { useTz: true });
       })
@@ -111,6 +192,79 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.alterTable('permit', function (table) {
           table.dropColumn('status_last_verified');
         })
+      )
+
+      .then(() =>
+        knex.schema.raw(`drop function public.get_activity_statistics(
+          date_from text,
+          date_to text,
+          month_year text,
+          user_id uuid
+        )`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
+          date_from text,
+          date_to text,
+          month_year text,
+          user_id uuid
+        )
+        returns table (
+          total_submissions bigint,
+          total_submissions_between bigint,
+          total_submissions_monthyear bigint,
+          total_submissions_assignedto bigint,
+          intake_submitted bigint,
+          intake_assigned bigint,
+          intake_completed bigint,
+          state_new bigint,
+          state_inprogress bigint,
+          state_delayed bigint,
+          state_completed bigint,
+          waiting_on bigint,
+          queue_0 bigint,
+          queue_1 bigint,
+          queue_2 bigint,
+          queue_3 bigint,
+          queue_4 bigint,
+          queue_5 bigint,
+          guidance bigint,
+          status_request bigint,
+          inquiry bigint,
+          emergency_assist bigint,
+          inapplicable bigint
+        )
+        language plpgsql
+        as $$
+        begin
+            return query
+            select
+              count(*),
+              (select count(*) from public.submission where "submitted_at" between cast(date_from as timestamp) and cast(date_to as timestamp)),
+              (select count(*) from public.submission where extract(month from cast(month_year as timestamp)) = extract(month from "submitted_at") and extract(year from cast(month_year as timestamp)) = extract(year from "submitted_at")),
+              (select count(*) from public.submission where "assigned_user_id" = user_id),
+              count(*) filter (where s."intake_status" = 'Submitted'),
+              count(*) filter (where s."intake_status" = 'Assigned'),
+              count(*) filter (where s."intake_status" = 'Completed'),
+              count(*) filter (where s."application_status" = 'New'),
+              count(*) filter (where s."application_status" = 'In Progress'),
+              count(*) filter (where s."application_status" = 'Delayed'),
+              count(*) filter (where s."application_status" = 'Completed'),
+              count(*) filter (where s."waiting_on" is not null),
+              count(*) filter (where s."queue_priority" = 0),
+              count(*) filter (where s."queue_priority" = 1),
+              count(*) filter (where s."queue_priority" = 2),
+              count(*) filter (where s."queue_priority" = 3),
+              count(*) filter (where s."queue_priority" = 4),
+              count(*) filter (where s."queue_priority" = 5),
+              count(*) filter (where s."guidance" = true),
+              count(*) filter (where s."status_request" = true),
+              count(*) filter (where s."inquiry" = true),
+              count(*) filter (where s."emergency_assist" = true),
+              count(*) filter (where s."inapplicable" = true)
+            from public.submission s;
+        end; $$`)
       )
 
       .then(() =>
@@ -174,8 +328,17 @@ export async function down(knex: Knex): Promise<void> {
 
       .then(() =>
         knex.schema.alterTable('submission', function (table) {
+          table.boolean('guidance');
+          table.boolean('status_request');
+          table.boolean('inquiry');
+          table.boolean('emergency_assist');
+          table.boolean('inapplicable');
+
           table.dropNullable('has_rental_units');
+
           table.renameColumn('has_rental_units', 'is_rental_unit');
+
+          table.dropColumn('submission_type');
           table.dropColumn('housing_coop_description');
           table.dropColumn('non_profit_description');
           table.dropColumn('indigenous_description');
@@ -183,6 +346,7 @@ export async function down(knex: Knex): Promise<void> {
           table.dropColumn('has_applied_provincial_permits');
           table.dropColumn('province');
           table.dropColumn('locality');
+          table.dropColumn('project_location_description');
           table.dropColumn('project_location');
           table.dropColumn('rental_units');
           table.dropColumn('other_units_description');
