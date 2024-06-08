@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { onBeforeMount, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
@@ -8,8 +9,10 @@ import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea 
 import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
+import { useConfigStore } from '@/store';
 import { ContactPreferenceList, ProjectRelationshipList, Regex, RouteNames, YesNo } from '@/utils/constants';
 import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, INTAKE_STATUS_LIST } from '@/utils/enums';
+import { confirmationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 
@@ -23,6 +26,9 @@ const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
   enquiryId: undefined
 });
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
@@ -156,6 +162,8 @@ async function onSubmit(data: any) {
       assignedActivityId.value = enquiryResponse.data.activityId;
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId);
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
     }
@@ -203,6 +211,24 @@ onBeforeMount(async () => {
     }
   };
 });
+
+async function emailConfirmation(activityId: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const body = confirmationTemplate({
+    '{{ contactName }}': formRef.value?.values.applicant.firstName,
+    '{{ activityId }}': activityId
+  });
+  let applicantEmail = formRef.value?.values.applicant.email;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    bodyType: 'text',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
+}
 </script>
 
 <template>

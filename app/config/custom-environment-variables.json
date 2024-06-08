@@ -2,7 +2,12 @@
   "frontend": {
     "apiPath": "FRONTEND_APIPATH",
     "ches": {
-      "bcc": "FRONTEND_CHES_BCC"
+      "roadmap": {
+        "bcc": "FRONTEND_CHES_ROADMAP_BCC"
+      },
+      "submission": {
+        "cc": "FRONTEND_CHES_SUBMISSION_CC"
+      }
     },
     "coms": {
       "apiPath": "FRONTEND_COMS_APIPATH",

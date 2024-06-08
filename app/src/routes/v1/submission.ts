@@ -32,6 +32,15 @@ router.put('/draft/:submissionId', (req: Request, res: Response, next: NextFunct
   submissionController.updateDraft(req, res, next);
 });
 
+// Send an email with the confirmation of submission
+router.put(
+  '/emailConfirmation',
+  submissionValidator.emailConfirmation,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.emailConfirmation(req, res, next);
+  }
+);
+
 /** Creates a submission */
 router.put('/', submissionValidator.createSubmission, (req: Request, res: Response, next: NextFunction): void => {
   submissionController.createSubmission(req, res, next);

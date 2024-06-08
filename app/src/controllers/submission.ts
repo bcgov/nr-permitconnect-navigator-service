@@ -11,10 +11,10 @@ import {
   YES_NO_UNSURE
 } from '../components/constants';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
-import { activityService, submissionService, permitService, userService } from '../services';
+import { activityService, emailService, submissionService, permitService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Email, Submission, ChefsSubmissionExport, Permit } from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -299,7 +299,6 @@ const controller = {
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
       await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
-
       res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
@@ -407,6 +406,18 @@ const controller = {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
       res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+  /**
+   * @function emailConfirmation
+   * Send an email with the confirmation of submission
+   */
+  emailConfirmation: async (req: Request<never, never, { emailData: Email }>, res: Response, next: NextFunction) => {
+    try {
+      const { data, status } = await emailService.email(req.body.emailData);
+      res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
     }
