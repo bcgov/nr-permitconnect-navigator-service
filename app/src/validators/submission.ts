@@ -95,6 +95,19 @@ const schema = {
     params: Joi.object({
       submissionId: uuidv4.required()
     })
+  },
+  emailConfirmation: {
+    body: Joi.object({
+      emailData: Joi.object().keys({
+        bcc: Joi.array().items(emailJoi).allow(null),
+        bodyType: Joi.string().required().allow(null),
+        body: Joi.string().required(),
+        cc: Joi.array().items(emailJoi),
+        from: emailJoi.required(),
+        subject: Joi.string().required(),
+        to: Joi.array().items(emailJoi).required()
+      })
+    })
   }
 };
 
@@ -104,5 +117,6 @@ export default {
   deleteSubmission: validate(schema.deleteSubmission),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
-  updateSubmission: validate(schema.updateSubmission)
+  updateSubmission: validate(schema.updateSubmission),
+  emailConfirmation: validate(schema.emailConfirmation)
 };

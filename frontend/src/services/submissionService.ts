@@ -1,4 +1,7 @@
 import { appAxios } from './interceptors';
+import { delimitEmails } from '@/utils/utils';
+
+import type { Email } from '@/types';
 
 export default {
   /**
@@ -63,5 +66,20 @@ export default {
    */
   updateSubmission(submissionId: string, data: any) {
     return appAxios().put(`submission/${submissionId}`, data);
+  },
+
+  /**
+   * @function send
+   * Send an email with the submission confirmation data
+   * @returns {Promise} An axios response
+   */
+  emailConfirmation(emailData: Email) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = delimitEmails(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = delimitEmails(emailData.cc);
+    }
+    return appAxios().put('submission/emailConfirmation', { emailData });
   }
 };

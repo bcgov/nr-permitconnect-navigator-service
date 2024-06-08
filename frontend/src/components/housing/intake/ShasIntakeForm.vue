@@ -35,7 +35,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { externalApiService, permitService, submissionService } from '@/services';
-import { useTypeStore } from '@/store';
+import { useConfigStore, useTypeStore } from '@/store';
 import {
   ContactPreferenceList,
   NumResidentialUnits,
@@ -53,6 +53,7 @@ import {
   PERMIT_STATUS,
   PROJECT_LOCATION
 } from '@/utils/enums';
+import { confirmationTemplate } from '@/utils/templates';
 
 import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -84,6 +85,7 @@ const VALIDATION_BANNER_TEXT =
 // Store
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
+const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const activeStep: Ref<number> = ref(0);
@@ -225,6 +227,8 @@ async function onSubmit(data: any) {
     if (response.data.activityId) {
       assignedActivityId.value = response.data.activityId;
       formRef.value?.setFieldValue('activityId', response.data.activityId);
+      // Send confirmation email
+      emailConfirmation(response.data.activityId);
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -233,6 +237,24 @@ async function onSubmit(data: any) {
   } finally {
     editable.value = true;
   }
+}
+
+async function emailConfirmation(activityId: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const body = confirmationTemplate({
+    '{{ contactName }}': formRef.value?.values.applicant.firstName,
+    '{{ activityId }}': activityId
+  });
+  let applicantEmail = formRef.value?.values.applicant.email;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    bodyType: 'text',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
 }
 
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
