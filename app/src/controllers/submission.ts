@@ -124,7 +124,8 @@ const controller = {
               projectName: data.projectName,
               projectDescription: data.projectDescription,
               contactPhoneNumber: data.contactPhoneNumber,
-              contactName: `${data.contactFirstName} ${data.contactLastName}`,
+              contactFirstName: data.contactFirstName,
+              contactLastName: data.contactLastName,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
               financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
@@ -175,10 +176,11 @@ const controller = {
     // Create applicant information
     if (data.applicant) {
       applicant = {
-        contactName: `${data.applicant.firstName} ${data.applicant.lastName}`,
-        contactPhoneNumber: data.applicant.phoneNumber,
-        contactEmail: data.applicant.email,
-        contactApplicantRelationship: data.applicant.relationshipToProject,
+        contactFirstName: data.contactFirstName,
+        contactLastName: data.contactLastName,
+        contactPhoneNumber: data.applicant.contactPhoneNumber,
+        contactEmail: data.applicant.contactEmail,
+        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
         contactPreference: data.applicant.contactPreference
       };
     }

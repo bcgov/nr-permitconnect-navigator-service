@@ -10,7 +10,6 @@ export type Submission = {
   submittedBy: string;
   locationPIDs: string | null;
   companyNameRegistered: string | null;
-  contactName: string | null;
   contactApplicantRelationship: string | null;
   contactPhoneNumber: string | null;
   contactEmail: string | null;
@@ -40,11 +39,6 @@ export type Submission = {
   waitingOn: string | null;
   intakeStatus: string | null;
   applicationStatus: string | null;
-  guidance: boolean;
-  statusRequest: boolean;
-  inquiry: boolean;
-  emergencyAssist: boolean;
-  inapplicable: boolean;
 
   isDevelopedByCompanyOrOrg: string | null;
   isDevelopedInBC: string | null;
@@ -63,6 +57,7 @@ export type Submission = {
   housingCoopDescription: string | null;
   contactFirstName: string | null;
   contactLastName: string | null;
+  submissionType: string | null;
 
   user: User | null;
 } & Partial<IStamps>;

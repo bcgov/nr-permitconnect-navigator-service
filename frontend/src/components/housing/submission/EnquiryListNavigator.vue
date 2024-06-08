@@ -94,8 +94,14 @@ function onDelete(enquiryId: string) {
       </template>
     </Column>
     <Column
-      field="contactName"
-      header="Contact"
+      field="contactFirstName"
+      header="Contact first name"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="contactLastName"
+      header="Contact last name"
       :sortable="true"
       style="min-width: 200px"
     />

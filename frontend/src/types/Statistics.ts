@@ -11,15 +11,12 @@ export type Statistics = {
   state_delayed: number;
   state_completed: number;
   waiting_on: number;
-  queue_0: number;
   queue_1: number;
   queue_2: number;
   queue_3: number;
-  queue_4: number;
-  queue_5: number;
+  escalation: number;
+  general_enquiry: number;
   guidance: number;
-  status_request: number;
-  inquiry: number;
-  emergency_assist: number;
   inapplicable: number;
+  status_request: number;
 };
