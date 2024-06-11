@@ -3,7 +3,11 @@ import stamps from '../stamps';
 import type { Knex } from 'knex';
 
 /*
- * Not included in this migration is a manual destructive operation
+ * !! This migration WILL result in data loss if down migrating !!
+ *
+ * The manual migration script manual-20240516000000_005-shas-enquiry.sql to be
+ * run after the automated migration is completed
+ *
  * submission.contact_name will be split into two new parts
  * submission.contact_first_name
  * submission.contact_last_name

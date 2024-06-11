@@ -1,10 +1,11 @@
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+
 import user from './user';
+import { BasicResponse } from '../../utils/enums/application';
 
 import type { Stamps } from '../stamps';
 import type { Submission } from '../../types';
-import { BasicResponse } from '../../utils/enums/application';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
