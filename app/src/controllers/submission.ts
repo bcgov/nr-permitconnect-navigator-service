@@ -173,11 +173,10 @@ const controller = {
     let appliedPermits: Array<Permit> = [],
       investigatePermits: Array<Permit> = [];
 
-    // Create applicant information
     if (data.applicant) {
       applicant = {
-        contactFirstName: data.contactFirstName,
-        contactLastName: data.contactLastName,
+        contactFirstName: data.applicant.contactFirstName,
+        contactLastName: data.applicant.contactLastName,
         contactPhoneNumber: data.applicant.contactPhoneNumber,
         contactEmail: data.applicant.contactEmail,
         contactApplicantRelationship: data.applicant.contactApplicantRelationship,
@@ -197,11 +196,8 @@ const controller = {
       housing = {
         projectName: data.housing.projectName,
         projectDescription: data.housing.projectDescription,
-        //singleFamilySelected: true, // not necessary to save - check if singleFamilyUnits not null
-        //multiFamilySelected: true, // not necessary to save - check if multiFamilyUnits not null
         singleFamilyUnits: data.housing.singleFamilyUnits,
         multiFamilyUnits: data.housing.multiFamilyUnits,
-        //otherSelected: true, // not necessary to save - check if otherUnits not null
         otherUnitsDescription: data.housing.otherUnitsDescription,
         otherUnits: data.housing.otherUnits,
         hasRentalUnits: data.housing.hasRentalUnits,
@@ -224,7 +220,6 @@ const controller = {
         locationPIDs: data.location.ltsaPIDLookup,
         latitude: data.location.latitude,
         longitude: data.location.longitude,
-        //addressSearch: 'Search address', // not necessary to save - client side search field
         streetAddress: data.location.streetAddress,
         locality: data.location.locality,
         province: data.location.province

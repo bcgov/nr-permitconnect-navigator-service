@@ -6,7 +6,13 @@ import { activityService, permitService, submissionService, userService } from '
 import * as utils from '../../../src/utils/utils';
 
 import type { Permit, Submission } from '../../../src/types';
-import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/housing';
+import {
+  ApplicationStatus,
+  ContactPreference,
+  IntakeStatus,
+  NumResidentialUnits,
+  ProjectRelationship
+} from '../../../src/utils/enums/housing';
 import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -396,19 +402,41 @@ describe('createDraft', () => {
       body: {
         applicant: {
           contactFirstName: 'Test',
-          contactLastName: 'User'
+          contactLastName: 'User',
+          contactPhoneNumber: '1234567890',
+          contactEmail: 'test@user.com',
+          contactApplicantRelationship: ProjectRelationship.AGENT,
+          contactPreference: ContactPreference.EITHER
         },
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: true,
+          isDevelopedInBC: true,
+          companyNameRegistered: 'ABC'
         },
         housing: {
-          projectName: 'TheProject'
+          projectName: 'TheProject',
+          projectDescription: 'Description',
+          singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+          hasRentalUnits: false,
+          financiallySupportedBC: true,
+          financiallySupportedIndigenous: false,
+          financiallySupportedNonProfit: false,
+          financiallySupportedHousingCoop: false
         },
         location: {
-          projectLocation: 'Some place'
+          naturalDisaster: BasicResponse.NO,
+          projectLocation: 'Some place',
+          projectLocationDescription: 'Description',
+          locationPIDs: '123, 456',
+          latitude: 48,
+          longitude: -114,
+          streetAddress: '123 Test St',
+          locality: 'City',
+          province: 'BC'
         },
         permits: {
-          hasAppliedProvincialPermits: true
+          hasAppliedProvincialPermits: true,
+          checkProvincialPermits: true
         }
       },
       currentUser: CURRENT_USER
@@ -425,7 +453,7 @@ describe('createDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contacFirstName: `${req.body.applicant.contactFirstName}`,
+        contactFirstName: `${req.body.applicant.contactFirstName}`,
         contactLastName: `${req.body.applicant.contactLastName}`,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
