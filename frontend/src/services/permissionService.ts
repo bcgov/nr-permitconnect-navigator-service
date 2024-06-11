@@ -11,6 +11,9 @@ export const enum PERMISSIONS {
   HOUSING_ENQUIRY_UPDATE = 'permission.housing.enquiry.update',
   HOUSING_ENQUIRY_DELETE = 'permission.housing.enquiry.delete',
 
+  // HOUSING_SUBMISSION_NAVIGATOR_READ = 'permission.housing.enquiry.navigator.read',
+  // HOUSING_SUBMISSION_PROPONENT_READ = 'permission.housing.enquiry.proponent.read',
+
   // HOUSING_INTAKE
 
   // HOUSING_FILES
