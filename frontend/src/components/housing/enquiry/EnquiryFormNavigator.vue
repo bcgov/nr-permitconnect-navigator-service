@@ -84,7 +84,10 @@ onBeforeMount(async () => {
     <div class="mt-2">{{ getNotes }}</div>
     <TabView>
       <TabPanel header="Info">
-        <EnquiryEditForm />
+        <EnquiryEditForm
+          :activity-id="props?.activityId"
+          :enquiry-id="props?.enquiryId"
+        />
       </TabPanel>
       <TabPanel header="Notes">
         <div>Notes</div>
