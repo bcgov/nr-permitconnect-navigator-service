@@ -29,8 +29,8 @@ export default {
    * @function getEnquiry
    * @returns {Promise} An axios response
    */
-  getEnquiry(activityId: string) {
-    return appAxios().get(`enquiry/${activityId}`);
+  getEnquiry(enquiryId: string) {
+    return appAxios().get(`enquiry/${enquiryId}`);
   },
 
   /**
