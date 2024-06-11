@@ -37,7 +37,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       {{ label }}
     </label>
     <Textarea
-      v-model.trim="value"
+      v-model="value"
       :aria-describedby="`${name}-help`"
       :name="name"
       :placeholder="placeholder"

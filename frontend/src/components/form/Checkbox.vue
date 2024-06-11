@@ -30,7 +30,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <div class="field col">
     <div class="flex align-items-center">
       <Checkbox
-        v-model.trim="value"
+        v-model="value"
         binary
         :aria-describedby="`${name}-help`"
         :name="name"
