@@ -9,6 +9,7 @@ export type PermitForm = {
   trackingId?: string;
   businessDomain?: string;
   authStatus?: string;
+  statusLastVerified?: Date;
   sourceSystem?: string;
   submittedDate?: Date;
   issuedPermitId?: string;

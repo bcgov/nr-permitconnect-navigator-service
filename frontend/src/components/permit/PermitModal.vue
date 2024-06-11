@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
-import { object, string } from 'yup';
+import { date, object, string } from 'yup';
 
 import { Calendar, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
@@ -46,6 +46,7 @@ let initialFormValues: PermitForm = {
   trackingId: props.permit?.trackingId,
   businessDomain: permitType.value?.businessDomain,
   authStatus: props.permit?.authStatus,
+  statusLastVerified: props.permit?.statusLastVerified ? new Date(props.permit.statusLastVerified) : undefined,
   sourceSystem: permitType.value?.sourceSystem ?? permitType.value?.sourceSystemAcronym,
   submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
   issuedPermitId: props.permit?.issuedPermitId,
@@ -59,6 +60,15 @@ const formSchema = object({
   status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
   businessDomain: string().required().label('Business domain'),
+  statusLastVerified: date()
+    .max(new Date(), 'Last verified date cannot be in the future')
+    .nullable()
+    .label('Last verified date'),
+  submittedDate: date().max(new Date(), 'Submitted date cannot be in the future').nullable().label('Submitted date'),
+  adjudicationDate: date()
+    .max(new Date(), 'Adjudication date cannot be in the future')
+    .nullable()
+    .label('Adjudication date'),
   sourceSystem: string().required().label('Source system')
 });
 
@@ -173,18 +183,6 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           autofocus
           @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="needed"
-          label="Needed"
-          :options="PermitNeeded"
-        />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="status"
-          label="Permit state"
-          :options="PermitStatus"
-        />
         <InputText
           class="col-12 lg:col-6"
           name="agency"
@@ -193,20 +191,9 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         />
         <InputText
           class="col-12 lg:col-6"
-          name="trackingId"
-          label="Tracking ID"
-        />
-        <InputText
-          class="col-12 lg:col-6"
           name="businessDomain"
           label="Business domain"
           :disabled="true"
-        />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="authStatus"
-          label="Authorization status"
-          :options="PermitAuthorizationStatus"
         />
         <InputText
           class="col-12 lg:col-6"
@@ -214,20 +201,52 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Source system"
           :disabled="true"
         />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="status"
+          label="Permit state"
+          :options="PermitStatus"
+        />
         <Calendar
           class="col-12 lg:col-6"
           name="submittedDate"
           label="Submitted date"
+          :max-date="new Date()"
         />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="authStatus"
+          label="Authorization status"
+          :options="PermitAuthorizationStatus"
+        />
+        <Calendar
+          class="col-12 lg:col-6"
+          name="statusLastVerified"
+          label="Last verified date"
+          :max-date="new Date()"
+        />
+
         <InputText
           class="col-12 lg:col-6"
-          name="issuedPermitId"
-          label="Permit ID"
+          name="trackingId"
+          label="Tracking ID"
         />
         <Calendar
           class="col-12 lg:col-6"
           name="adjudicationDate"
           label="Adjudication date"
+          :max-date="new Date()"
+        />
+        <InputText
+          class="col-12 lg:col-6"
+          name="issuedPermitId"
+          label="Issued Permit ID"
+        />
+        <Dropdown
+          class="col-12 lg:col-6"
+          name="needed"
+          label="Needed"
+          :options="PermitNeeded"
         />
         <div class="field col-12 flex">
           <div class="flex-auto">
