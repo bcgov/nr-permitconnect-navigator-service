@@ -183,18 +183,6 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           autofocus
           @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="needed"
-          label="Needed"
-          :options="PERMIT_NEEDED_LIST"
-        />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="status"
-          label="Permit state"
-          :options="PERMIT_STATUS_LIST"
-        />
         <InputText
           class="col-12 lg:col-6"
           name="agency"
@@ -207,12 +195,6 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Business domain"
           :disabled="true"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="authStatus"
-          label="Authorization status"
-          :options="PERMIT_AUTHORIZATION_STATUS_LIST"
-        />
         <InputText
           class="col-12 lg:col-6"
           name="sourceSystem"
@@ -223,7 +205,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           class="col-12 lg:col-6"
           name="status"
           label="Permit state"
-          :options="PermitStatus"
+          :options="PERMIT_STATUS_LIST"
         />
         <Calendar
           class="col-12 lg:col-6"
@@ -241,7 +223,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           class="col-12 lg:col-6"
           name="authStatus"
           label="Authorization status"
-          :options="PermitAuthorizationStatus"
+          :options="PERMIT_AUTHORIZATION_STATUS_LIST"
         />
         <Calendar
           class="col-12 lg:col-6"

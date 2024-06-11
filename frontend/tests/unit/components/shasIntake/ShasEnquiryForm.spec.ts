@@ -19,11 +19,11 @@ vi.mock('vue-router', () => ({
 
 interface FormValues {
   applicant: {
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-    email?: string;
-    relationshipToProject?: string;
+    contactFirstName?: string;
+    contactLastName?: string;
+    contactPhoneNumber?: string;
+    contactEmail?: string;
+    contactApplicantRelationship?: string;
     contactPreference?: string;
   };
   basic: {
@@ -37,11 +37,11 @@ interface FormValues {
 function basicValidFormValues(): FormValues {
   return {
     applicant: {
-      firstName: 'testFirst',
-      lastName: 'testLast',
-      email: 'test@email.com',
-      phoneNumber: '1234567890',
-      relationshipToProject: ProjectRelationship.OWNER,
+      contactFirstName: 'testFirst',
+      contactLastName: 'testLast',
+      contactEmail: 'test@email.com',
+      contactPhoneNumber: '1234567890',
+      contactApplicantRelationship: ProjectRelationship.OWNER,
       contactPreference: ContactPreference.EMAIL
     },
     basic: {
@@ -95,223 +95,225 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('ShasIntakeForm component tests', () => {
-  it('renders component', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-    expect(wrapper.isVisible()).toBeTruthy();
+describe('ShasEnquiryForm', () => {
+  describe('component', async () => {
+    it('renders component', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      expect(wrapper.isVisible()).toBeTruthy();
+    });
+
+    it('renders initial form fields', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+
+      const firstNameInput = wrapper.get('[name="applicant.contactFirstName"]');
+      const lastNameInput = wrapper.get('[name="applicant.contactLastName"]');
+      const phoneInput = wrapper.get('[name="applicant.contactPhoneNumber"]');
+      const emailInput = wrapper.get('[name="applicant.contactEmail"]');
+      const relationsInput = wrapper.get('[name="applicant.contactApplicantRelationship"]');
+      const contactInput = wrapper.get('[name="applicant.contactPreference"]');
+      const relatedInput = wrapper.findAll('[name="basic.isRelated"]');
+
+      expect(firstNameInput.isVisible()).toBeTruthy();
+      expect(lastNameInput.isVisible()).toBeTruthy();
+      expect(phoneInput.isVisible()).toBeTruthy();
+      expect(emailInput.isVisible()).toBeTruthy();
+      expect(relationsInput.isVisible()).toBeTruthy();
+      expect(contactInput.isVisible()).toBeTruthy();
+      expect(relatedInput[0].isVisible()).toBeTruthy();
+      expect(relatedInput[1].isVisible()).toBeTruthy();
+
+      const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
+      expect(descriptionInput.exists()).toBe(false);
+    });
+
+    it('renders the right input fields when isRelated is set to Yes', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
+      relatedRadio[0].setValue('Yes');
+      await nextTick();
+
+      const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
+      const activityIdInput = wrapper.find('[name="basic.relatedActivityId"]');
+
+      expect(descriptionInput.isVisible()).toBeTruthy();
+      expect(activityIdInput.isVisible()).toBeTruthy();
+    });
+
+    it('renders the right input fields when isRelated is set to No', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
+      relatedRadio[1].setValue('No');
+      await nextTick();
+
+      const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
+      const applyInput = wrapper.find('[name="basic.applyForPermitConnect"]');
+
+      expect(descriptionInput.isVisible()).toBeTruthy();
+      expect(applyInput.exists()).toBe(true);
+    });
+
+    it('disables submit when isRelated to existing application is No and applying to PCNS is Yes', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
+      relatedRadio[1].setValue('No');
+      await nextTick();
+
+      const applyInput = wrapper.findAll('[name="basic.applyForPermitConnect"]');
+      applyInput[0].setValue('Yes');
+      await nextTick();
+
+      const submitBtn = wrapper.get('[type="submit"]');
+      expect(submitBtn.attributes('disabled')).toBeDefined();
+    });
+
+    test('submit is enabled when isRelated to existing application is No applying to PCNS is No', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
+      relatedRadio[1].setValue('No');
+      await nextTick();
+
+      const applyInput = wrapper.findAll('[name="basic.applyForPermitConnect"]');
+      applyInput[1].setValue('No');
+      await nextTick();
+
+      const submitBtn = wrapper.get('[type="submit"]');
+      expect(submitBtn.attributes('disabled')).not.toBeDefined();
+    });
+
+    test('submit is enabled when Yes, No, or not selected for isRelated', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+
+      const submitBtn = wrapper.get('[type="submit"]');
+      await nextTick();
+      expect(submitBtn.attributes('disabled')).not.toBeDefined();
+
+      const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
+      relatedRadio[0].setValue('Yes');
+      await nextTick();
+      expect(submitBtn.attributes('disabled')).not.toBeDefined();
+
+      relatedRadio[1].setValue('No');
+      await nextTick();
+      expect(submitBtn.attributes('disabled')).not.toBeDefined();
+    });
   });
 
-  it('renders initial form fields', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+  describe('validation', () => {
+    it('accepts valid values (isRelated: Yes)', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    const firstNameInput = wrapper.get('[name="applicant.firstName"]');
-    const lastNameInput = wrapper.get('[name="applicant.lastName"]');
-    const phoneInput = wrapper.get('[name="applicant.phoneNumber"]');
-    const emailInput = wrapper.get('[name="applicant.email"]');
-    const relationsInput = wrapper.get('[name="applicant.relationshipToProject"]');
-    const contactInput = wrapper.get('[name="applicant.contactPreference"]');
-    const relatedInput = wrapper.findAll('[name="basic.isRelated"]');
+      const formRef = (wrapper.vm as any)?.formRef;
+      formRef.setValues(basicValidFormValues());
 
-    expect(firstNameInput.isVisible()).toBeTruthy();
-    expect(lastNameInput.isVisible()).toBeTruthy();
-    expect(phoneInput.isVisible()).toBeTruthy();
-    expect(emailInput.isVisible()).toBeTruthy();
-    expect(relationsInput.isVisible()).toBeTruthy();
-    expect(contactInput.isVisible()).toBeTruthy();
-    expect(relatedInput[0].isVisible()).toBeTruthy();
-    expect(relatedInput[1].isVisible()).toBeTruthy();
+      const result = await formRef?.validate();
+      expect(Object.keys(result.errors).length).toBe(0);
+    });
 
-    const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
-    expect(descriptionInput.exists()).toBe(false);
-  });
+    it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-  it('renders the right input fields when isRelated is set to Yes', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-    const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
-    relatedRadio[0].setValue('Yes');
-    await nextTick();
+      const formRef = (wrapper.vm as any)?.formRef;
 
-    const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
-    const activityIdInput = wrapper.find('[name="basic.relatedActivityId"]');
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
 
-    expect(descriptionInput.isVisible()).toBeTruthy();
-    expect(activityIdInput.isVisible()).toBeTruthy();
-  });
+      modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+      modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
+      formRef.setValues(modifiedFormValues);
 
-  it('renders the right input fields when isRelated is set to No', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-    const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
-    relatedRadio[1].setValue('No');
-    await nextTick();
+      const result = await formRef?.validate();
+      expect(Object.keys(result.errors).length).toBe(0);
+    });
 
-    const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
-    const applyInput = wrapper.find('[name="basic.applyForPermitConnect"]');
+    it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    expect(descriptionInput.isVisible()).toBeTruthy();
-    expect(applyInput.exists()).toBe(true);
-  });
+      const formRef = (wrapper.vm as any)?.formRef;
 
-  it('disables submit when isRelated to existing application is No and applying to PCNS is Yes', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-    const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
-    relatedRadio[1].setValue('No');
-    await nextTick();
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
 
-    const applyInput = wrapper.findAll('[name="basic.applyForPermitConnect"]');
-    applyInput[0].setValue('Yes');
-    await nextTick();
+      modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+      modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
+      formRef.setValues(modifiedFormValues);
 
-    const submitBtn = wrapper.get('[type="submit"]');
-    expect(submitBtn.attributes('disabled')).toBeDefined();
-  });
+      const result = await formRef?.validate();
+      expect(Object.keys(result.errors).length).toBe(0);
+    });
 
-  it('submit is enabled when isRelated to existing application is No applying to PCNS is No', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-    const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
-    relatedRadio[1].setValue('No');
-    await nextTick();
+    it('generates email error', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    const applyInput = wrapper.findAll('[name="basic.applyForPermitConnect"]');
-    applyInput[1].setValue('No');
-    await nextTick();
+      const formRef = (wrapper.vm as any)?.formRef;
 
-    const submitBtn = wrapper.get('[type="submit"]');
-    expect(submitBtn.attributes('disabled')).not.toBeDefined();
-  });
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
 
-  it('submit is enabled when Yes, No, or not selected for isRelated', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      modifiedFormValues[IntakeFormCategory.APPLICANT].contactEmail = 'bad@email';
+      formRef.setValues(modifiedFormValues);
 
-    const submitBtn = wrapper.get('[type="submit"]');
-    await nextTick();
-    expect(submitBtn.attributes('disabled')).not.toBeDefined();
+      const result = await formRef?.validate();
+      expect(Object.keys(result.errors).length).toBe(1);
+      expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.contactEmail`]).toBeTruthy();
+    });
 
-    const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
-    relatedRadio[0].setValue('Yes');
-    await nextTick();
-    expect(submitBtn.attributes('disabled')).not.toBeDefined();
+    it('generates missing first and last name missing error', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    relatedRadio[1].setValue('No');
-    await nextTick();
-    expect(submitBtn.attributes('disabled')).not.toBeDefined();
-  });
-});
+      const formRef = (wrapper.vm as any)?.formRef;
 
-describe('ShasIntakeForm validation tests', () => {
-  it('accepts valid values (isRelated: Yes)', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
 
-    const formRef = (wrapper.vm as any)?.formRef;
-    formRef.setValues(basicValidFormValues());
+      modifiedFormValues[IntakeFormCategory.APPLICANT].contactFirstName = '';
+      modifiedFormValues[IntakeFormCategory.APPLICANT].contactLastName = '';
 
-    const result = await formRef?.validate();
-    expect(Object.keys(result.errors).length).toBe(0);
-  });
+      formRef.setValues(modifiedFormValues);
 
-  it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const result = await formRef?.validate();
+      expect(Object.keys(result.errors).length).toBe(2);
+      expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.contactFirstName`]).toBeTruthy();
+      expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.contactLastName`]).toBeTruthy();
+    });
 
-    const formRef = (wrapper.vm as any)?.formRef;
+    it('generates errors for isRelated', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
+      const formRef = (wrapper.vm as any)?.formRef;
 
-    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
-    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
-    formRef.setValues(modifiedFormValues);
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
 
-    const result = await formRef?.validate();
-    expect(Object.keys(result.errors).length).toBe(0);
-  });
+      modifiedFormValues[IntakeFormCategory.BASIC].isRelated = 'test';
 
-  it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      formRef.setValues(modifiedFormValues);
 
-    const formRef = (wrapper.vm as any)?.formRef;
+      const result1 = await formRef?.validate();
+      expect(Object.keys(result1.errors).length).toBe(1);
+      expect(result1.errors[`${[IntakeFormCategory.BASIC]}.isRelated`]).toBeTruthy();
+    });
 
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
+    it('generates errors for applyForPermitConnect', async () => {
+      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
 
-    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
-    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = BasicResponse.NO;
-    formRef.setValues(modifiedFormValues);
+      const formRef = (wrapper.vm as any)?.formRef;
 
-    const result = await formRef?.validate();
-    expect(Object.keys(result.errors).length).toBe(0);
-  });
+      const modifiedFormValues = {
+        ...basicValidFormValues()
+      };
+      modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
+      modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = 'test';
 
-  it('form generates email error', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      formRef.setValues(modifiedFormValues);
 
-    const formRef = (wrapper.vm as any)?.formRef;
-
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
-
-    modifiedFormValues[IntakeFormCategory.APPLICANT].email = 'bad@email';
-    formRef.setValues(modifiedFormValues);
-
-    const result = await formRef?.validate();
-    expect(Object.keys(result.errors).length).toBe(1);
-    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.email`]).toBeTruthy();
-  });
-
-  it('form generates missing first and last name missing error', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-
-    const formRef = (wrapper.vm as any)?.formRef;
-
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
-
-    modifiedFormValues[IntakeFormCategory.APPLICANT].firstName = '';
-    modifiedFormValues[IntakeFormCategory.APPLICANT].lastName = '';
-
-    formRef.setValues(modifiedFormValues);
-
-    const result = await formRef?.validate();
-    expect(Object.keys(result.errors).length).toBe(2);
-    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.firstName`]).toBeTruthy();
-    expect(result.errors[`${[IntakeFormCategory.APPLICANT]}.lastName`]).toBeTruthy();
-  });
-
-  it('form generates errors for isRelated', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-
-    const formRef = (wrapper.vm as any)?.formRef;
-
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
-
-    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = 'test';
-
-    formRef.setValues(modifiedFormValues);
-
-    const result1 = await formRef?.validate();
-    expect(Object.keys(result1.errors).length).toBe(1);
-    expect(result1.errors[`${[IntakeFormCategory.BASIC]}.isRelated`]).toBeTruthy();
-  });
-
-  it('form generates errors for applyForPermitConnect', async () => {
-    const wrapper = mount(ShasEnquiryForm, wrapperSettings());
-
-    const formRef = (wrapper.vm as any)?.formRef;
-
-    const modifiedFormValues = {
-      ...basicValidFormValues()
-    };
-    modifiedFormValues[IntakeFormCategory.BASIC].isRelated = BasicResponse.NO;
-    modifiedFormValues[IntakeFormCategory.BASIC].applyForPermitConnect = 'test';
-
-    formRef.setValues(modifiedFormValues);
-
-    const result2 = await formRef?.validate();
-    expect(Object.keys(result2.errors).length).toBe(1);
-    expect(result2.errors[`${[IntakeFormCategory.BASIC]}.applyForPermitConnect`]).toBeTruthy();
+      const result2 = await formRef?.validate();
+      expect(Object.keys(result2.errors).length).toBe(1);
+      expect(result2.errors[`${[IntakeFormCategory.BASIC]}.applyForPermitConnect`]).toBeTruthy();
+    });
   });
 });
