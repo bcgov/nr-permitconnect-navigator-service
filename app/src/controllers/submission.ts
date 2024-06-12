@@ -7,7 +7,7 @@ import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTit
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
 import { BasicResponse, Initiative } from '../utils/enums/application';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../utils/enums/housing';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -268,7 +268,8 @@ const controller = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
         intakeStatus: intakeStatus,
-        applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW
+        applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
+        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
       },
       appliedPermits,
       investigatePermits

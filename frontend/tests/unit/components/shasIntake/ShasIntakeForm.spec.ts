@@ -6,12 +6,13 @@ import Tooltip from 'primevue/tooltip';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 
 import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
-import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import { shasIntakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 import { permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -129,18 +130,18 @@ describe('ShasIntakeForm tests', () => {
   });
 
   it('checks categories for valid data', async () => {
-    const applicantTest = intakeSchema.validateAt('applicant', {
+    const applicantTest = shasIntakeSchema.validateAt('applicant', {
       applicant: {
-        firstName: 'testFirstName',
-        lastName: 'testLastName',
-        phoneNumber: '2501234567',
-        email: 'test@test.com',
-        relationshipToProject: 'Owner',
-        contactPreference: 'Email'
+        contactFirstName: 'testcontactFirstName',
+        contactLastName: 'testcontactLastName',
+        contactPhoneNumber: '2501234567',
+        contactEmail: 'test@test.com',
+        contactApplicantRelationship: ProjectRelationship.AGENT,
+        contactPreference: ContactPreference.PHONE_CALL
       }
     });
 
-    const basicTest = intakeSchema.validateAt('basic', {
+    const basicTest = shasIntakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: BasicResponse.NO,
         isDevelopedInBC: BasicResponse.NO,
@@ -148,7 +149,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTest = intakeSchema.validateAt('housing', {
+    const housingTest = shasIntakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -169,7 +170,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTest = intakeSchema.validateAt('location', {
+    const locationTest = shasIntakeSchema.validateAt('location', {
       location: {
         naturalDisaster: 'Yes',
         projectLocation: 'testString1',
@@ -183,14 +184,14 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const permitsTest = intakeSchema.validateAt('permits', {
+    const permitsTest = shasIntakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BasicResponse.NO,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTest = intakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTest = shasIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: 1,
@@ -209,18 +210,18 @@ describe('ShasIntakeForm tests', () => {
   });
 
   it('checks categories for successful fail', async () => {
-    const applicantTestFail = intakeSchema.validateAt('applicant', {
+    const applicantTestFail = shasIntakeSchema.validateAt('applicant', {
       applicant: {
-        firstName: '',
-        lastName: 'testLastName',
-        phoneNumber: '2501234567',
-        email: 'test@test.com',
-        relationshipToProject: 'Owner',
-        contactPreference: 'Email'
+        contactFirstName: '',
+        contactLastName: 'testcontactLastName',
+        contactPhoneNumber: '2501234567',
+        contactEmail: 'test@test.com',
+        contactApplicantRelationship: ProjectRelationship.AGENT,
+        contactPreference: ContactPreference.PHONE_CALL
       }
     });
 
-    const basicTestFail = intakeSchema.validateAt('basic', {
+    const basicTestFail = shasIntakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: 'testString1',
         isDevelopedInBC: 'testString2',
@@ -228,7 +229,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTestFail = intakeSchema.validateAt('housing', {
+    const housingTestFail = shasIntakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -248,7 +249,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTestFail = intakeSchema.validateAt('location', {
+    const locationTestFail = shasIntakeSchema.validateAt('location', {
       location: {
         projectLocation: '',
         streetAddress: 'testString2',
@@ -261,14 +262,14 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const permitsTestFail = intakeSchema.validateAt('permits', {
+    const permitsTestFail = shasIntakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BasicResponse.YES,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTestFail = intakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTestFail = shasIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: '',

@@ -42,11 +42,11 @@ const controller = {
     // Create applicant information
     if (data.applicant) {
       applicant = {
-        contactFirstName: data.applicant.firstName,
-        contactLastName: data.applicant.lastName,
-        contactPhoneNumber: data.applicant.phoneNumber,
-        contactEmail: data.applicant.email,
-        contactApplicantRelationship: data.applicant.relationshipToProject,
+        contactFirstName: data.applicant.contactFirstName,
+        contactLastName: data.applicant.contactLastName,
+        contactPhoneNumber: data.applicant.contactPhoneNumber,
+        contactEmail: data.applicant.contactEmail,
+        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
         contactPreference: data.applicant.contactPreference
       };
     }
