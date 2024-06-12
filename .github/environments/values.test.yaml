@@ -3,7 +3,8 @@ config:
   enabled: true
   configMap:
     FRONTEND_APIPATH: api/v1
-    FRONTEND_CHES_BCC: NRM.PermittingAndData@gov.bc.ca
+    FRONTEND_CHES_ROADMAP_BCC: NRM.PermittingAndData@gov.bc.ca
+    FRONTEND_CHES_SUBMISSION_CC: NRM.PermittingAndData@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms-test.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: a9eabd1d-5f77-4c60-bf6b-83ffa0e21c59
     FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca

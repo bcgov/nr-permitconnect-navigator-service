@@ -107,7 +107,7 @@ watchEffect(async () => {
   const submission = getSubmission.value;
 
   // Get navigator details
-  const configBCC = getConfig.value.ches?.bcc;
+  const configBCC = getConfig.value.ches?.roadmap?.bcc;
   let bcc = configBCC;
   let navigator = {
     email: configBCC ?? '',

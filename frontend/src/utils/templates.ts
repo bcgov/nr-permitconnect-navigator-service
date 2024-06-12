@@ -58,3 +58,14 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   }
   return newText;
 };
+
+export const confirmationTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+  const baseTemplate =
+    'Dear {{ contactName }},\n\n' +
+    'The confirmation ID for your submission is: {{ activityId }}.\n\n' +
+    // eslint-disable-next-line max-len
+    'A Housing Navigator will review your submission and contact you. Keep the Confirmation ID for future reference.\n\n' +
+    'Regards,\n\n' +
+    'Permit Connect Navigator Service';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
