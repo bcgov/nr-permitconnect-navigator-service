@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 import type { PermitType } from '@/types';
@@ -26,7 +26,7 @@ export const useTypeStore = defineStore('type', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,
