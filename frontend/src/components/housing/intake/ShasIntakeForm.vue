@@ -100,6 +100,7 @@ const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors: Ref<string[]> = ref([]);
+const formUpdated: Ref<boolean> = ref(false);
 
 // Actions
 const confirm = useConfirm();
@@ -169,6 +170,7 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
 function displayErrors(a: any) {
   validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+  formUpdated.value = false;
 }
 
 function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, push: Function, setFieldValue: Function) {
@@ -364,6 +366,7 @@ onBeforeMount(async () => {
       :validation-schema="intakeSchema"
       @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
+      @change="formUpdated = true"
     >
       <input
         type="hidden"
@@ -392,8 +395,9 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLICANT) ||
-                  validationErrors.includes(INTAKE_FORM_CATEGORIES.BASIC)
+                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLICANT) ||
+                    validationErrors.includes(INTAKE_FORM_CATEGORIES.BASIC)) &&
+                  !formUpdated
               }"
             />
           </template>
@@ -401,7 +405,7 @@ onBeforeMount(async () => {
             <CollectionDisclaimer />
 
             <Message
-              v-if="validationErrors.length"
+              v-if="validationErrors.length && !formUpdated"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -557,12 +561,12 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{ 'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.HOUSING) }"
+              :class="{ 'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.HOUSING) && !formUpdated }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length"
+              v-if="validationErrors.length && !formUpdated"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -904,13 +908,13 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.LOCATION)
+                'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.LOCATION) && !formUpdated
               }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length"
+              v-if="validationErrors.length && !formUpdated"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1205,14 +1209,15 @@ onBeforeMount(async () => {
               icon="fa-file"
               :class="{
                 'app-error-color':
-                  validationErrors.includes(INTAKE_FORM_CATEGORIES.PERMITS) ||
-                  validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLIED_PERMITS)
+                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.PERMITS) ||
+                    validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLIED_PERMITS)) &&
+                  !formUpdated
               }"
             />
           </template>
           <template #content="{ prevCallback }">
             <Message
-              v-if="validationErrors.length"
+              v-if="validationErrors.length && !formUpdated"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
