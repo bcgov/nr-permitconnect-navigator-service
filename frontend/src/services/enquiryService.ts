@@ -39,5 +39,13 @@ export default {
    */
   updateDraft(enquiryId: string, data?: any) {
     return appAxios().put(`enquiry/draft/${enquiryId}`, data);
+  },
+
+  /**
+   * @function updateEnquiry
+   * @returns {Promise} An axios response
+   */
+  updateEnquiry(enquiryId: string, data?: any) {
+    return appAxios().put(`enquiry/${enquiryId}`, data);
   }
 };

@@ -1,58 +1,59 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref, toRaw } from 'vue';
+import { onMounted, ref } from 'vue';
+import { array, boolean, mixed, number, object, string } from 'yup';
 
-import { Dropdown, EditableDropdown, InputMask, RadioList, InputText, TextArea } from '@/components/form';
-import { Button, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, submissionService, userService } from '@/services';
+import { Dropdown, EditableDropdown, InputText, TextArea } from '@/components/form';
+import { Button, useToast } from '@/lib/primevue';
+import { formatDate } from '@/utils/formatters';
+import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 
-import {
-  ApplicationStatusList,
-  ContactPreferenceList,
-  IntakeStatusList,
-  QueuePriority,
-  Regex,
-  RentalStatusList
-} from '@/utils/constants';
+import { ContactPreferenceList, IntakeStatusList, ProjectRelationshipList, Regex } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Submission, User } from '@/types';
-import { CONTACT_PREFERENCE_LIST } from '@/utils/enums';
+import type { User } from '@/types';
+
+// Constants (MOVE TO REFACTOR ENUMS AFTER REBASE)
+enum ENQUIRY_TYPES {
+  GENERAL_ENQUIRY = 'General enquiry',
+  STATUS_REQUEST = 'Status request',
+  ESCALATION_REQUEST = 'Escalation request',
+  INAPPLICABLE = 'Inapplicable'
+}
 
 // Props
 type Props = {
-  activityId?: string;
-  enquiryId?: string;
+  enquiry: any;
 };
 
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  enquiryId: undefined
+const props = withDefaults(defineProps<Props>(), {});
+
+// Form validation schema
+// const YesNoUnsureSchema = string().required().oneOf(YesNoUnsure);
+const stringRequiredSchema = string().required().max(255);
+
+const intakeSchema = object({
+  contactFirstName: stringRequiredSchema.label('First name'),
+  contactLastName: stringRequiredSchema.label('Last name'),
+  contactPhoneNumber: stringRequiredSchema.label('Phone number'),
+  contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+  contactApplicantRelationship: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
+  contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference'),
+  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state')
 });
 
 // State
+
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(true);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Actions
-const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
-// const router = useRouter();
 const toast = useToast();
-
-const confirmSubmit = (data: any) => {
-  confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
-    header: 'Please confirm submission',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
-    accept: () => onSubmit(data)
-  });
-};
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
@@ -72,52 +73,57 @@ const onAssigneeInput = async (e: IInputEvent) => {
 
 const onSubmit = async (data: any) => {
   editable.value = false;
+
+  const enquiryData = Object.assign({}, data);
+  enquiryData['assignedUserId'] = enquiryData.assignedUserId?.userId ?? undefined;
+  delete enquiryData['user'];
+
   try {
-    if (data.enquiryId) {
-      await enquiryService.updateDraft(data.enquiryId, { ...data, submit: true });
-    } else {
-      await enquiryService.createDraft({ ...data, submit: true });
-    }
+    const result = await enquiryService.updateEnquiry(data.enquiryId, { ...enquiryData });
+    enquiryStore.setEnquiry(result.data);
+
+    toast.success('Form saved');
   } catch (e: any) {
-    toast.error('Failed to save intake', e);
+    toast.error('Failed to edit enquiry', e);
   } finally {
     editable.value = true;
   }
 };
 
-onBeforeMount(async () => {
-  // assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
-  initialFormValues.value = enquiryStore.getEnquiry;
+onMounted(async () => {
+  if (props.enquiry?.assignedUserId) {
+    assigneeOptions.value = (await userService.searchUsers({ userId: [props.enquiry.assignedUserId] })).data;
+  }
+  initialFormValues.value = {
+    ...props.enquiry,
+    submittedAt: formatDate(props.enquiry?.submittedAt),
+    user: assigneeOptions.value[0] ?? null
+  };
 });
 </script>
 
 <template>
   <Form
+    v-if="initialFormValues"
     v-slot="{ handleReset }"
-    :validation-schema="{}"
+    ref="formRef"
+    :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
-    @submit="confirmSubmit"
+    @submit="onSubmit"
   >
     <div class="formgrid grid">
-      <InputText
-        class="col-3"
-        name="activityId"
-        label="Activity"
-        :bold="false"
-        :disabled="true"
-      />
       <Dropdown
         class="col-3"
-        name="enquiryType"
-        label="Enquiry Type"
+        name="submissionType"
+        label="Submission Type"
         :bold="false"
         :disabled="!editable"
-        :options="[]"
+        :options="Object.values(ENQUIRY_TYPES)"
       />
       <InputText
         class="col-3"
-        name="contactFirstName"
-        label="Contact name"
+        name="submittedAt"
+        label="Submission Date"
         :bold="false"
         :disabled="!editable"
       />
@@ -126,27 +132,28 @@ onBeforeMount(async () => {
         name="relatedActivityId"
         label="Related submission"
         :bold="false"
-        :disabled="true"
+        :disabled="!editable"
       />
-
+      <div class="col-3" />
+      <div class="col-12 mb-2">Basic information</div>
       <InputText
         class="col-3"
         name="contactFirstName"
-        label="Contact"
-        :bold="false"
-        :disabled="!editable"
-      />
-      <InputText
-        class="col-3"
-        name="contactPhoneNumber"
-        label="Enquiry Type"
-        :bold="false"
-        :disabled="!editable"
-      />
-      <InputText
-        class="col-3"
-        name="contactEmail"
         label="First name"
+        :bold="false"
+        :disabled="!editable"
+      />
+      <InputText
+        class="col-3"
+        name="contactLastName"
+        label="Last name"
+        :bold="false"
+        :disabled="!editable"
+      />
+      <InputText
+        class="col-3"
+        name="contactApplicantRelationship"
+        label="Relationship to activity"
         :bold="false"
         :disabled="!editable"
       />
@@ -159,19 +166,20 @@ onBeforeMount(async () => {
         :options="ContactPreferenceList"
       />
       <InputText
-        class="col-6"
-        name="relationshipToProject"
-        label="Relationship to activity"
+        class="col-3"
+        name="contactPhoneNumber"
+        label="Contact phone"
         :bold="false"
         :disabled="!editable"
       />
       <InputText
-        class="col-6"
-        name="waitingOn"
-        label="Waiting On"
+        class="col-3"
+        name="contactEmail"
+        label="Contact email"
         :bold="false"
         :disabled="!editable"
       />
+      <div class="col-6" />
       <TextArea
         class="col-12"
         name="enquiryDescription"
@@ -195,18 +203,8 @@ onBeforeMount(async () => {
         :disabled="!editable"
         :options="IntakeStatusList"
       />
-      <Dropdown
-        class="col-4"
-        name="applicationStatus"
-        label="Activity state"
-        :disabled="!editable"
-        :options="ApplicationStatusList"
-      />
     </div>
-    <div
-      v-if="editable"
-      class="field col-12"
-    >
+    <div class="field col-12">
       <Button
         label="Save"
         type="submit"
@@ -216,7 +214,7 @@ onBeforeMount(async () => {
       <Button
         label="Cancel"
         outlined
-        class="ml-2"
+        class="ml-2 p-button-danger"
         icon="pi pi-times"
         :disabled="!editable"
         @click="
