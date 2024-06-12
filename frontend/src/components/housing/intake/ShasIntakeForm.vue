@@ -21,7 +21,7 @@ import {
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
-import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import { shasIntakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -274,11 +274,11 @@ onBeforeMount(async () => {
     activityId: response?.activityId,
     submissionId: response?.submissionId,
     applicant: {
-      firstName: response?.firstName,
-      lastName: response?.lastName,
-      phoneNumber: response?.contactPhoneNumber,
-      email: response?.contactEmail,
-      relationshipToProject: response?.contactApplicantRelationship,
+      contactFirstName: response?.contactFirstName,
+      contactLastName: response?.contactLastName,
+      contactPhoneNumber: response?.contactPhoneNumber,
+      contactEmail: response?.contactEmail,
+      contactApplicantRelationship: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
     },
     basic: {
@@ -355,7 +355,7 @@ onBeforeMount(async () => {
       v-slot="{ setFieldValue, values }"
       ref="formRef"
       :initial-values="initialFormValues"
-      :validation-schema="intakeSchema"
+      :validation-schema="shasIntakeSchema"
       @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
       @change="formUpdated = true"
@@ -415,21 +415,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    name="applicant.firstName"
+                    name="applicant.contactFirstName"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.lastName"
+                    name="applicant.contactLastName"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    name="applicant.phoneNumber"
+                    name="applicant.contactPhoneNumber"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -437,14 +437,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.email"
+                    name="applicant.contactEmail"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.relationshipToProject"
+                    name="applicant.contactApplicantRelationship"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"

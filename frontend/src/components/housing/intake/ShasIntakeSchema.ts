@@ -12,13 +12,13 @@ import { array, boolean, mixed, number, object, string } from 'yup';
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
-export const intakeSchema = object({
+export const shasIntakeSchema = object({
   [IntakeFormCategory.APPLICANT]: object({
-    firstName: stringRequiredSchema.label('First name'),
-    lastName: stringRequiredSchema.label('Last name'),
-    phoneNumber: stringRequiredSchema.label('Phone number'),
-    email: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    relationshipToProject: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+    contactFirstName: stringRequiredSchema.label('First name'),
+    contactLastName: stringRequiredSchema.label('Last name'),
+    contactPhoneNumber: stringRequiredSchema.label('Phone number'),
+    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
     contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
   }),
   [IntakeFormCategory.BASIC]: object({
