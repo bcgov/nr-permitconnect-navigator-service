@@ -129,6 +129,23 @@ const controller = {
     }
   },
 
+  updateEnquiry: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const result = await enquiryService.updateEnquiry({
+        ...data,
+        updatedBy: userId
+      } as Enquiry);
+
+      res.status(200).json(result);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   updateDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
