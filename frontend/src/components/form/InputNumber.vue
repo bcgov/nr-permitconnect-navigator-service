@@ -28,6 +28,9 @@ const props = withDefaults(defineProps<Props>(), {
 // State
 const { errorMessage, value } = useField<number>(toRef(props, 'name'));
 const fieldActive: Ref<boolean> = ref(false);
+
+// Emits
+const emit = defineEmits(['blur', 'focus']);
 </script>
 
 <template>
@@ -48,8 +51,18 @@ const fieldActive: Ref<boolean> = ref(false);
       :disabled="disabled"
       :min-fraction-digits="0"
       :max-fraction-digits="6"
-      @focus="fieldActive = true"
-      @blur="fieldActive = false"
+      @focus="
+        () => {
+          fieldActive = true;
+          emit('focus');
+        }
+      "
+      @blur="
+        () => {
+          fieldActive = true;
+          emit('blur');
+        }
+      "
     />
     <small
       v-if="fieldActive"

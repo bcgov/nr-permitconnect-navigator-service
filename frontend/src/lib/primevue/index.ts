@@ -25,6 +25,7 @@ export { default as InputSwitch } from 'primevue/inputswitch';
 export { default as InputText } from 'primevue/inputtext';
 export { default as Menubar } from 'primevue/menubar';
 export { default as Message } from 'primevue/message';
+export { default as Panel } from 'primevue/panel';
 export { default as Password } from 'primevue/password';
 export { default as ProgressBar } from 'primevue/progressbar';
 export { default as ProgressSpinner } from 'primevue/progressspinner';
