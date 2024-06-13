@@ -257,3 +257,141 @@ describe('listNotes', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('deleteNote', () => {
+  const next = jest.fn();
+
+  // Mock service calls
+  const deleteNoteSpy = jest.spyOn(noteService, 'deleteNote');
+
+  it('should return 200 if deletion is successful', async () => {
+    const req = {
+      params: { noteId: '123-123' },
+      currentUser: CURRENT_USER
+    };
+
+    const deletedNote = {
+      noteId: '123-123',
+      activityId: '123',
+      bringForwardDate: null,
+      bringForwardState: null,
+      note: 'Some not text',
+      noteType: 'GENERAL',
+      title: 'Note title',
+      isDeleted: true
+    };
+
+    deleteNoteSpy.mockResolvedValue(deletedNote);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await noteController.deleteNote(req as any, res as any, next);
+
+    expect(deleteNoteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(deletedNote);
+  });
+
+  it('calls next if the note service fails to delete the note', async () => {
+    const req = {
+      params: { noteId: '123-123' },
+      currentUser: CURRENT_USER
+    };
+
+    deleteNoteSpy.mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await noteController.deleteNote(req as any, res as any, next);
+
+    expect(deleteNoteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId);
+    expect(res.status).toHaveBeenCalledTimes(0);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+describe('updateNote', () => {
+  const next = jest.fn();
+
+  // Mock service calls
+  const updateNoteSpy = jest.spyOn(noteService, 'updateNote');
+  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
+  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
+
+  it('should return 200 if update is successful', async () => {
+    const req = {
+      body: {
+        noteId: '123-123',
+        activityId: '123',
+        bringForwardDate: null,
+        bringForwardState: null,
+        note: 'Updated note text',
+        noteType: 'GENERAL',
+        title: 'Updated Note title'
+      },
+      currentUser: CURRENT_USER
+    };
+
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
+    const updated = {
+      noteId: '123-123',
+      activityId: '123',
+      bringForwardDate: null,
+      bringForwardState: null,
+      note: 'Updated note text',
+      noteType: 'GENERAL',
+      title: 'Updated Note title',
+      isDeleted: false
+    };
+
+    updateNoteSpy.mockResolvedValue(updated);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await noteController.updateNote(req as any, res as any, next);
+
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
+    expect(updateNoteSpy).toHaveBeenCalledTimes(1);
+    expect(updateNoteSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID, updatedAt: expect.any(String) });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(updated);
+  });
+
+  it('calls next if the note service fails to update the note', async () => {
+    const req = {
+      body: {
+        noteId: '123-123',
+        activityId: '123',
+        bringForwardDate: null,
+        bringForwardState: null,
+        note: 'Updated note text',
+        noteType: 'GENERAL',
+        title: 'Updated Note title'
+      },
+      currentUser: CURRENT_USER
+    };
+
+    const USR_ID = 'abc-123';
+
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
+
+    updateNoteSpy.mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await noteController.updateNote(req as any, res as any, next);
+
+    expect(updateNoteSpy).toHaveBeenCalledTimes(1);
+    expect(updateNoteSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID, updatedAt: expect.any(String) });
+    expect(res.status).toHaveBeenCalledTimes(0);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+});
