@@ -1,5 +1,5 @@
-import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants';
 import { geocoderAxios, orgBookAxios } from './interceptors';
+import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
 import type { AxiosResponse } from 'axios';
 

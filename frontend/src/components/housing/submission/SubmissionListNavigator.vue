@@ -17,7 +17,7 @@ import {
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -54,7 +54,10 @@ function handleCreateNewActivity() {
       try {
         const response = (await submissionService.createSubmission()).data;
         if (response?.activityId) {
-          router.push({ name: RouteNames.HOUSING_SUBMISSION, query: { activityId: response.activityId } });
+          router.push({
+            name: RouteName.HOUSING_SUBMISSION,
+            query: { activityId: response.activityId, submissionId: response.submissionId }
+          });
         }
       } catch (e: any) {
         toast.error('Failed to create new submission', e.message);
@@ -116,7 +119,7 @@ const filters = ref({
       </div>
     </template>
     <Column
-      field="activity.activityId"
+      field="activityId"
       header="Activity"
       :sortable="true"
       frozen
@@ -125,7 +128,7 @@ const filters = ref({
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteNames.HOUSING_SUBMISSION,
+              name: RouteName.HOUSING_SUBMISSION,
               query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >
@@ -141,8 +144,14 @@ const filters = ref({
       style="min-width: 200px"
     />
     <Column
-      field="contactName"
-      header="Contact"
+      field="contactFirstName"
+      header="Contact first name"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="contactLastName"
+      header="Contact last name"
       :sortable="true"
       style="min-width: 200px"
     />

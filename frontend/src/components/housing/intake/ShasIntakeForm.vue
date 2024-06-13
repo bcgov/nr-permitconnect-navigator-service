@@ -21,7 +21,7 @@ import {
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
-import { intakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import { shasIntakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -36,30 +36,22 @@ import {
 } from '@/lib/primevue';
 import { externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useTypeStore } from '@/store';
-import {
-  ContactPreferenceList,
-  NumResidentialUnits,
-  ProjectLocation,
-  ProjectRelationshipList,
-  RouteNames,
-  YesNo,
-  YesNoUnsure
-} from '@/utils/constants';
-import {
-  BASIC_RESPONSES,
-  INTAKE_FORM_CATEGORIES,
-  INTAKE_STATUS_LIST,
-  PERMIT_NEEDED,
-  PERMIT_STATUS,
-  PROJECT_LOCATION
-} from '@/utils/enums';
-import { confirmationTemplate } from '@/utils/templates';
 
 import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { IntakeFormCategory, IntakeStatus, PermitNeeded, PermitStatus, ProjectLocation } from '@/utils/enums/housing';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import {
+  CONTACT_PREFERENCE_LIST,
+  NUM_RESIDENTIAL_UNITS_LIST,
+  PROJECT_LOCATION_LIST,
+  PROJECT_RELATIONSHIP_LIST
+} from '@/utils/constants/housing';
+import { confirmationTemplate } from '@/utils/templates';
 
 // Types
 type GeocoderEntry = {
@@ -118,7 +110,7 @@ function confirmLeave() {
     acceptLabel: 'Leave',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
-    accept: () => router.push({ name: RouteNames.HOUSING })
+    accept: () => router.push({ name: RouteName.HOUSING })
   });
 }
 
@@ -164,6 +156,7 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     formRef.value?.setFieldValue('location.locality', properties?.localityName);
     formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
   }
 };
 
@@ -173,8 +166,8 @@ function displayErrors(a: any) {
   formUpdated.value = false;
 }
 
-function onPermitsHasAppliedChange(e: BASIC_RESPONSES, fieldsLength: number, push: Function, setFieldValue: Function) {
-  if (e === BASIC_RESPONSES.YES || e === BASIC_RESPONSES.UNSURE) {
+function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
+  if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
     if (fieldsLength === 0) {
       push({
         permitTypeId: undefined,
@@ -244,7 +237,7 @@ async function onSubmit(data: any) {
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplate({
-    '{{ contactName }}': formRef.value?.values.applicant.firstName,
+    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
     '{{ activityId }}': activityId
   });
   let applicantEmail = formRef.value?.values.applicant.email;
@@ -274,7 +267,7 @@ onBeforeMount(async () => {
   if (props.activityId && props.submissionId) {
     response = (await submissionService.getSubmission(props.submissionId)).data;
     permits = (await permitService.listPermits(props.activityId)).data;
-    editable.value = response.intakeStatus === INTAKE_STATUS_LIST.DRAFT;
+    editable.value = response.intakeStatus === IntakeStatus.DRAFT;
   }
 
   // Default form values
@@ -282,11 +275,11 @@ onBeforeMount(async () => {
     activityId: response?.activityId,
     submissionId: response?.submissionId,
     applicant: {
-      firstName: response?.firstName,
-      lastName: response?.lastName,
-      phoneNumber: response?.contactPhoneNumber,
-      email: response?.contactEmail,
-      relationshipToProject: response?.contactApplicantRelationship,
+      contactFirstName: response?.contactFirstName,
+      contactLastName: response?.contactLastName,
+      contactPhoneNumber: response?.contactPhoneNumber,
+      contactEmail: response?.contactEmail,
+      contactApplicantRelationship: response?.contactApplicantRelationship,
       contactPreference: response?.contactPreference
     },
     basic: {
@@ -327,7 +320,7 @@ onBeforeMount(async () => {
       projectLocationDescription: response?.projectLocationDescription
     },
     appliedPermits: permits
-      .filter((x: Permit) => x.status === PERMIT_STATUS.APPLIED)
+      .filter((x: Permit) => x.status === PermitStatus.APPLIED)
       .map((x: Permit) => ({
         ...x,
         statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
@@ -336,7 +329,7 @@ onBeforeMount(async () => {
       hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
       checkProvincialPermits: response?.checkProvincialPermits
     },
-    investigatePermits: permits.filter((x: Permit) => x.needed === PERMIT_NEEDED.UNDER_INVESTIGATION)
+    investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
   };
 
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
@@ -363,7 +356,7 @@ onBeforeMount(async () => {
       v-slot="{ setFieldValue, values }"
       ref="formRef"
       :initial-values="initialFormValues"
-      :validation-schema="intakeSchema"
+      :validation-schema="shasIntakeSchema"
       @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
       @change="formUpdated = true"
@@ -395,8 +388,8 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLICANT) ||
-                    validationErrors.includes(INTAKE_FORM_CATEGORIES.BASIC)) &&
+                  (validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                    validationErrors.includes(IntakeFormCategory.BASIC)) &&
                   !formUpdated
               }"
             />
@@ -423,21 +416,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    name="applicant.firstName"
+                    name="applicant.contactFirstName"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.lastName"
+                    name="applicant.contactLastName"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    name="applicant.phoneNumber"
+                    name="applicant.contactPhoneNumber"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -445,18 +438,18 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.email"
+                    name="applicant.contactEmail"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.relationshipToProject"
+                    name="applicant.contactApplicantRelationship"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
-                    :options="ProjectRelationshipList"
+                    :options="PROJECT_RELATIONSHIP_LIST"
                   />
                   <Dropdown
                     class="col-6"
@@ -464,7 +457,7 @@ onBeforeMount(async () => {
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
-                    :options="ContactPreferenceList"
+                    :options="CONTACT_PREFERENCE_LIST"
                   />
                 </div>
               </template>
@@ -483,11 +476,11 @@ onBeforeMount(async () => {
                     name="basic.isDevelopedByCompanyOrOrg"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNo"
+                    :options="YES_NO_LIST"
                   />
 
                   <span
-                    v-if="values.basic?.isDevelopedByCompanyOrOrg === BASIC_RESPONSES.YES"
+                    v-if="values.basic?.isDevelopedByCompanyOrOrg === BasicResponse.YES"
                     class="col-12"
                   >
                     <div class="flex align-items-center">
@@ -504,11 +497,11 @@ onBeforeMount(async () => {
                       name="basic.isDevelopedInBC"
                       :bold="false"
                       :disabled="!editable"
-                      :options="YesNo"
+                      :options="YES_NO_LIST"
                       @on-change="() => setFieldValue('basic.registeredName', null)"
                     />
                     <AutoComplete
-                      v-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.YES"
+                      v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
                       class="col-6 pl-0"
                       name="basic.registeredName"
                       :bold="false"
@@ -520,7 +513,7 @@ onBeforeMount(async () => {
                       @on-complete="onRegisteredNameInput"
                     />
                     <InputText
-                      v-else-if="values.basic.isDevelopedInBC === BASIC_RESPONSES.NO"
+                      v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
                       class="col-6 pl-0"
                       name="basic.registeredName"
                       :placeholder="'Type the business/company/organization name'"
@@ -561,7 +554,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{ 'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.HOUSING) && !formUpdated }"
+              :class="{ 'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formUpdated }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -661,14 +654,14 @@ onBeforeMount(async () => {
                     class="col-6"
                     name="housing.singleFamilyUnits"
                     :disabled="!editable || !values.housing.singleFamilySelected"
-                    :options="NumResidentialUnits"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
                   <Dropdown
                     class="col-6"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
-                    :options="NumResidentialUnits"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
                   <Checkbox
@@ -690,7 +683,7 @@ onBeforeMount(async () => {
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
-                    :options="NumResidentialUnits"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
                   <div class="col-12">
@@ -724,14 +717,14 @@ onBeforeMount(async () => {
                     name="housing.hasRentalUnits"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNoUnsure"
+                    :options="YES_NO_UNSURE_LIST"
                   />
                   <Dropdown
-                    v-if="values.housing.hasRentalUnits === BASIC_RESPONSES.YES"
+                    v-if="values.housing.hasRentalUnits === BasicResponse.YES"
                     class="col-6"
                     name="housing.rentalUnits"
                     :disabled="!editable"
-                    :options="NumResidentialUnits"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
                 </div>
@@ -750,10 +743,10 @@ onBeforeMount(async () => {
                     outlined
                     @click="
                       () => {
-                        setFieldValue('housing.financiallySupportedBC', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.financiallySupportedIndigenous', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.financiallySupportedNonProfit', BASIC_RESPONSES.NO);
-                        setFieldValue('housing.financiallySupportedHousingCoop', BASIC_RESPONSES.NO);
+                        setFieldValue('housing.financiallySupportedBC', BasicResponse.NO);
+                        setFieldValue('housing.financiallySupportedIndigenous', BasicResponse.NO);
+                        setFieldValue('housing.financiallySupportedNonProfit', BasicResponse.NO);
+                        setFieldValue('housing.financiallySupportedHousingCoop', BasicResponse.NO);
                       }
                     "
                   >
@@ -794,7 +787,7 @@ onBeforeMount(async () => {
                     name="housing.financiallySupportedBC"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNoUnsure"
+                    :options="YES_NO_UNSURE_LIST"
                   />
                   <div class="col mb-2">
                     <label>
@@ -811,11 +804,11 @@ onBeforeMount(async () => {
                     name="housing.financiallySupportedIndigenous"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNoUnsure"
+                    :options="YES_NO_UNSURE_LIST"
                   />
                   <div class="col-12">
                     <InputText
-                      v-if="values.housing?.financiallySupportedIndigenous === BASIC_RESPONSES.YES"
+                      v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
                       class="col-6 pl-0"
                       name="housing.indigenousDescription"
                       :disabled="!editable"
@@ -837,11 +830,11 @@ onBeforeMount(async () => {
                     name="housing.financiallySupportedNonProfit"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNoUnsure"
+                    :options="YES_NO_UNSURE_LIST"
                   />
                   <div class="col-12">
                     <InputText
-                      v-if="values.housing?.financiallySupportedNonProfit === BASIC_RESPONSES.YES"
+                      v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
                       class="col-6 pl-0"
                       name="housing.nonProfitDescription"
                       :disabled="!editable"
@@ -863,11 +856,11 @@ onBeforeMount(async () => {
                     name="housing.financiallySupportedHousingCoop"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNoUnsure"
+                    :options="YES_NO_UNSURE_LIST"
                   />
                   <div class="col-12">
                     <InputText
-                      v-if="values.housing?.financiallySupportedHousingCoop === BASIC_RESPONSES.YES"
+                      v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
                       class="col-6 pl-0"
                       name="housing.housingCoopDescription"
                       :disabled="!editable"
@@ -908,7 +901,7 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.LOCATION) && !formUpdated
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formUpdated
               }"
             />
           </template>
@@ -939,7 +932,7 @@ onBeforeMount(async () => {
                     name="location.naturalDisaster"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNo"
+                    :options="YES_NO_LIST"
                   />
                 </div>
               </template>
@@ -965,11 +958,11 @@ onBeforeMount(async () => {
                     name="location.projectLocation"
                     :bold="false"
                     :disabled="!editable"
-                    :options="ProjectLocation"
+                    :options="PROJECT_LOCATION_LIST"
                     @click="handleProjectLocationClick"
                   />
                   <div
-                    v-if="values.location?.projectLocation === PROJECT_LOCATION.STREET_ADDRESS"
+                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
                     class="col-12"
                   >
                     <Card class="no-shadow">
@@ -1027,7 +1020,7 @@ onBeforeMount(async () => {
                     </Card>
                   </div>
                   <div
-                    v-if="values.location?.projectLocation === PROJECT_LOCATION.LOCATION_COORDINATES"
+                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
                     class="col-12"
                   >
                     <Card class="no-shadow">
@@ -1209,8 +1202,8 @@ onBeforeMount(async () => {
               icon="fa-file"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.PERMITS) ||
-                    validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLIED_PERMITS)) &&
+                  (validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                    validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)) &&
                   !formUpdated
               }"
             />
@@ -1252,13 +1245,13 @@ onBeforeMount(async () => {
                       name="permits.hasAppliedProvincialPermits"
                       :bold="false"
                       :disabled="!editable"
-                      :options="YesNoUnsure"
+                      :options="YES_NO_UNSURE_LIST"
                       @on-change="(e) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
                     />
                     <div
                       v-if="
-                        values.permits?.hasAppliedProvincialPermits === BASIC_RESPONSES.YES ||
-                        values.permits?.hasAppliedProvincialPermits === BASIC_RESPONSES.UNSURE
+                        values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+                        values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
                       "
                       class="col-12"
                     >
@@ -1345,8 +1338,8 @@ onBeforeMount(async () => {
             </Card>
             <Card
               v-if="
-                values.permits?.hasAppliedProvincialPermits === BASIC_RESPONSES.YES ||
-                values.permits?.hasAppliedProvincialPermits === BASIC_RESPONSES.UNSURE
+                values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+                values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
               "
             >
               <template #title>
@@ -1362,7 +1355,7 @@ onBeforeMount(async () => {
                     name="permits.checkProvincialPermits"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YesNo"
+                    :options="YES_NO_LIST"
                   />
                 </div>
               </template>
@@ -1510,7 +1503,7 @@ onBeforeMount(async () => {
       Your submission will be reviewed by a Housing Navigator. You may be contacted if needed. Please check your email
       for the confirmation email and keep the confirmation ID for future reference.
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteNames.HOME }">Go to Homepage</router-link></div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
   </div>
 </template>
 

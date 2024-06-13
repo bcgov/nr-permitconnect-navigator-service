@@ -13,6 +13,15 @@ router.get('/', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.getSubmissions(req, res, next);
 });
 
+/** Search submissions */
+router.get(
+  '/search',
+  submissionValidator.searchSubmissions,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.searchSubmissions(req, res, next);
+  }
+);
+
 /** Gets submission statistics*/
 router.get(
   '/statistics',

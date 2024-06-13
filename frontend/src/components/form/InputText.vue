@@ -28,6 +28,9 @@ const props = withDefaults(defineProps<Props>(), {
   bold: true
 });
 
+// Emits
+const emit = defineEmits(['onChange']);
+
 // State
 const fieldActive: Ref<boolean> = ref(false);
 </script>
@@ -35,12 +38,16 @@ const fieldActive: Ref<boolean> = ref(false);
 <template>
   <div class="field">
     <FloatLabel v-if="props.floatLabel">
-      <InputTextInternal v-bind="props" />
+      <InputTextInternal
+        v-bind="props"
+        @on-change="(e) => emit('onChange', e)"
+      />
     </FloatLabel>
     <InputTextInternal
       v-else
       v-model:fieldActive="fieldActive"
       v-bind="props"
+      @on-change="(e) => emit('onChange', e)"
     />
 
     <small

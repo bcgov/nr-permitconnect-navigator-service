@@ -4,7 +4,7 @@ import { ref, watch } from 'vue';
 
 import { Calendar, Dropdown } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
-import { Regex } from '@/utils/constants';
+import { Regex } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -197,14 +197,6 @@ watch(
       <tr>
         <td class="col-9">
           Submissions at priority:
-          <span class="font-bold">0</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.queue_0 }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.queue_0) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Submissions at priority:
           <span class="font-bold">1</span>
         </td>
         <td class="col-1 text-right">{{ statistics.queue_1 }}</td>
@@ -228,20 +220,21 @@ watch(
       </tr>
       <tr>
         <td class="col-9">
-          Submissions at priority:
-          <span class="font-bold">4</span>
+          Type:
+          <span class="font-bold">Escalation</span>
         </td>
-        <td class="col-1 text-right">{{ statistics.queue_4 }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.queue_4) }}%</td>
+        <td class="col-1 text-right">{{ statistics.escalation }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.escalation) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
-          Submissions at priority:
-          <span class="font-bold">5</span>
+          Type:
+          <span class="font-bold">General Enquiry</span>
         </td>
-        <td class="col-1 text-right">{{ statistics.queue_5 }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.queue_5) }}%</td>
+        <td class="col-1 text-right">{{ statistics.general_enquiry }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.general_enquiry) }}%</td>
       </tr>
+
       <tr>
         <td class="col-9">
           Type:
@@ -253,10 +246,10 @@ watch(
       <tr>
         <td class="col-9">
           Type:
-          <span class="font-bold">General Enquiry</span>
+          <span class="font-bold">Inapplicable</span>
         </td>
-        <td class="col-1 text-right">{{ statistics.inquiry }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.inquiry) }}%</td>
+        <td class="col-1 text-right">{{ statistics.inapplicable }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
@@ -265,22 +258,6 @@ watch(
         </td>
         <td class="col-1 text-right">{{ statistics.status_request }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Type:
-          <span class="font-bold">Escalation Request</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.emergency_assist }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.emergency_assist) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Type:
-          <span class="font-bold">Inapplicable</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.inapplicable }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
       </tr>
     </table>
   </div>

@@ -2,19 +2,19 @@ import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import {
-  APPLICATION_STATUS_LIST,
-  INTAKE_STATUS_LIST,
-  Initiatives,
-  PERMIT_NEEDED,
-  PERMIT_STATUS,
-  YES_NO,
-  YES_NO_UNSURE
-} from '../components/constants';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
-import { activityService, emailService, submissionService, permitService, userService } from '../services';
+  activityService,
+  emailService,
+  enquiryService,
+  submissionService,
+  permitService,
+  userService
+} from '../services';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Email, Submission, ChefsSubmissionExport, Permit } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -46,16 +46,18 @@ const controller = {
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
             const financiallySupportedValues = {
-              financiallySupportedBC: data.isBCHousingSupported ? toTitleCase(data.isBCHousingSupported) : YES_NO.NO,
+              financiallySupportedBC: data.isBCHousingSupported
+                ? toTitleCase(data.isBCHousingSupported)
+                : BasicResponse.NO,
               financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
                 ? toTitleCase(data.isIndigenousHousingProviderSupported)
-                : YES_NO.NO,
+                : BasicResponse.NO,
               financiallySupportedNonProfit: data.isNonProfitSupported
                 ? toTitleCase(data.isNonProfitSupported)
-                : YES_NO.NO,
+                : BasicResponse.NO,
               financiallySupportedHousingCoop: data.isHousingCooperativeSupported
                 ? toTitleCase(data.isHousingCooperativeSupported)
-                : YES_NO.NO
+                : BasicResponse.NO
             };
 
             // Get greatest of multiple Units data
@@ -122,27 +124,28 @@ const controller = {
               formId: x.id,
               submissionId: data.form.submissionId,
               activityId: data.form.confirmationId,
-              applicationStatus: APPLICATION_STATUS_LIST.NEW,
+              applicationStatus: ApplicationStatus.NEW,
               companyNameRegistered: data.companyNameRegistered,
               contactEmail: data.contactEmail,
               contactPreference: camelCaseToTitleCase(data.contactPreference),
               projectName: data.projectName,
               projectDescription: data.projectDescription,
               contactPhoneNumber: data.contactPhoneNumber,
-              contactName: `${data.contactFirstName} ${data.contactLastName}`,
+              contactFirstName: data.contactFirstName,
+              contactLastName: data.contactLastName,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
-              financiallySupported: Object.values(financiallySupportedValues).includes(YES_NO.YES),
+              financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
               longitude: data.longitude,
-              naturalDisaster: data.naturalDisasterInd,
+              naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : YES_NO_UNSURE.UNSURE,
+                : BasicResponse.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
@@ -171,19 +174,19 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiatives.HOUSING))?.activityId;
+    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
 
     let applicant, basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
       investigatePermits: Array<Permit> = [];
 
-    // Create applicant information
     if (data.applicant) {
       applicant = {
-        contactName: `${data.applicant.firstName} ${data.applicant.lastName}`,
-        contactPhoneNumber: data.applicant.phoneNumber,
-        contactEmail: data.applicant.email,
-        contactApplicantRelationship: data.applicant.relationshipToProject,
+        contactFirstName: data.applicant.contactFirstName,
+        contactLastName: data.applicant.contactLastName,
+        contactPhoneNumber: data.applicant.contactPhoneNumber,
+        contactEmail: data.applicant.contactEmail,
+        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
         contactPreference: data.applicant.contactPreference
       };
     }
@@ -200,11 +203,8 @@ const controller = {
       housing = {
         projectName: data.housing.projectName,
         projectDescription: data.housing.projectDescription,
-        //singleFamilySelected: true, // not necessary to save - check if singleFamilyUnits not null
-        //multiFamilySelected: true, // not necessary to save - check if multiFamilyUnits not null
         singleFamilyUnits: data.housing.singleFamilyUnits,
         multiFamilyUnits: data.housing.multiFamilyUnits,
-        //otherSelected: true, // not necessary to save - check if otherUnits not null
         otherUnitsDescription: data.housing.otherUnitsDescription,
         otherUnits: data.housing.otherUnits,
         hasRentalUnits: data.housing.hasRentalUnits,
@@ -221,13 +221,12 @@ const controller = {
 
     if (data.location) {
       location = {
-        naturalDisaster: data.location.naturalDisaster === YES_NO.YES,
+        naturalDisaster: data.location.naturalDisaster,
         projectLocation: data.location.projectLocation,
         projectLocationDescription: data.location.projectLocationDescription,
         locationPIDs: data.location.ltsaPIDLookup,
         latitude: data.location.latitude,
         longitude: data.location.longitude,
-        //addressSearch: 'Search address', // not necessary to save - client side search field
         streetAddress: data.location.streetAddress,
         locality: data.location.locality,
         province: data.location.province
@@ -247,7 +246,7 @@ const controller = {
         permitTypeId: x.permitTypeId,
         activityId: activityId,
         trackingId: x.trackingId,
-        status: PERMIT_STATUS.APPLIED,
+        status: PermitStatus.APPLIED,
         statusLastVerified: x.statusLastVerified
       }));
     }
@@ -257,7 +256,7 @@ const controller = {
         permitId: x.permitId,
         permitTypeId: x.permitTypeId,
         activityId: activityId,
-        needed: PERMIT_NEEDED.UNDER_INVESTIGATION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: x.statusLastVerified
       }));
     }
@@ -276,7 +275,8 @@ const controller = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
         intakeStatus: intakeStatus,
-        applicationStatus: data.applicationStatus ?? APPLICATION_STATUS_LIST.NEW
+        applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
+        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
       },
       appliedPermits,
       investigatePermits
@@ -290,7 +290,7 @@ const controller = {
 
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Create new submission
@@ -309,7 +309,7 @@ const controller = {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        INTAKE_STATUS_LIST.SUBMITTED
+        IntakeStatus.SUBMITTED
       );
 
       // Create new submission
@@ -350,6 +350,12 @@ const controller = {
   getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
+
+      if (response?.activityId) {
+        const relatedEnquiries = await enquiryService.getRelatedEnquiries(response.activityId);
+        if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -375,6 +381,30 @@ const controller = {
     }
   },
 
+  searchSubmissions: async (
+    req: Request<
+      never,
+      {
+        activityId?: Array<string>;
+        submissionId?: Array<string>;
+        intakeStatus?: Array<string>;
+        includeUser?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await submissionService.searchSubmissions({
+        ...req.query,
+        includeUser: isTruthy(req.query.includeUser)
+      });
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   updateDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -382,7 +412,7 @@ const controller = {
 
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? INTAKE_STATUS_LIST.SUBMITTED : INTAKE_STATUS_LIST.DRAFT
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Update submission
@@ -404,6 +434,7 @@ const controller = {
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+
       const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
       res.status(200).json(response);
     } catch (e: unknown) {

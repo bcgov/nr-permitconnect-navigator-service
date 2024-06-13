@@ -1,14 +1,14 @@
 import { createTestingPinia } from '@pinia/testing';
+import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import NoteCard from '@/components/note/NoteCard.vue';
 import { userService } from '@/services';
-import { StorageKey } from '@/utils/constants';
-import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
+import { StorageKey } from '@/utils/enums/application';
+import { BringForwardType, NoteType } from '@/utils/enums/housing';
 import { formatDate, formatDateShort } from '@/utils/formatters';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 
 import type { AxiosResponse } from 'axios';
 import type { Note } from '@/types';
@@ -39,7 +39,7 @@ const testNote: Note = {
   noteId: 'noteUUID',
   activityId: 'activityUUID',
   note: 'note contents text',
-  noteType: NOTE_TYPES.GENERAL,
+  noteType: NoteType.GENERAL,
   title: 'note contents title',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
@@ -52,9 +52,9 @@ const testNoteUnresolved: Note = {
   noteId: 'noteUUID',
   activityId: 'activityUUID',
   bringForwardDate: tomorrowDate,
-  bringForwardState: BRING_FORWARD_TYPES.UNRESOLVED,
+  bringForwardState: BringForwardType.UNRESOLVED,
   note: 'note contents text',
-  noteType: NOTE_TYPES.BRING_FORWARD,
+  noteType: NoteType.BRING_FORWARD,
   title: 'note contents title',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
@@ -67,9 +67,9 @@ const testNoteResolved: Note = {
   noteId: 'noteUUID',
   activityId: 'activityUUID',
   bringForwardDate: yesterdayDate,
-  bringForwardState: BRING_FORWARD_TYPES.RESOLVED,
+  bringForwardState: BringForwardType.RESOLVED,
   note: 'note contents text',
-  noteType: NOTE_TYPES.BRING_FORWARD,
+  noteType: NoteType.BRING_FORWARD,
   title: 'note contents title',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

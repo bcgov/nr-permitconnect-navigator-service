@@ -41,11 +41,6 @@ export type ChefsSubmissionExport = {
   multiFamilyUnits1: string;
   isRentalUnit: string;
   streetAddress: string;
-  guidance: boolean;
-  statusRequest: boolean;
-  inquiry: boolean;
-  emergencyAssist: boolean;
-  inapplicable: boolean;
   createdAt: string;
   createdBy: string;
 

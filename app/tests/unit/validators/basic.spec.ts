@@ -1,67 +1,67 @@
-import { basicIntakeSchema, basicEnquirySchema } from '../../../src/validators/basic';
-import { YES_NO } from '../../../src/components/constants';
+import { BasicResponse } from '../../../src/utils/enums/application';
+import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
 
 describe('basicIntakeSchema', () => {
   it('should validate when isDevelopedByCompanyOrOrg and isDevelopedInBC are valid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: YES_NO.YES,
-      isDevelopedInBC: YES_NO.YES,
+      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedInBC: BasicResponse.YES,
       registeredName: 'My Company'
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeUndefined();
   });
 
   it('should throw an error when isDevelopedByCompanyOrOrg is invalid', () => {
     const data = {
       isDevelopedByCompanyOrOrg: 'invalid',
-      isDevelopedInBC: YES_NO.YES,
+      isDevelopedInBC: BasicResponse.YES,
       registeredName: 'My Company'
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 
   it('should throw an error when isDevelopedInBC is invalid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: YES_NO.YES,
+      isDevelopedByCompanyOrOrg: BasicResponse.YES,
       isDevelopedInBC: 'invalid'
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 
   it('should throw an error when isDevelopedInBC is YES but registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: YES_NO.YES,
-      isDevelopedInBC: YES_NO.YES
+      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedInBC: BasicResponse.YES
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 
   it('should not throw an error when isDevelopedInBC is NO and registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: YES_NO.YES,
-      isDevelopedInBC: YES_NO.NO
+      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedInBC: BasicResponse.NO
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeUndefined();
   });
 
   it('should throw an error when isDevelopedInBC is NO but registeredName is provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: YES_NO.YES,
-      isDevelopedInBC: YES_NO.NO,
+      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedInBC: BasicResponse.NO,
       registeredName: 'My Company'
     };
 
-    const result = basicIntakeSchema.validate(data);
+    const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 });
@@ -77,7 +77,7 @@ function validEnquiryData() {
 
 describe('basicEnquirySchema', () => {
   it('should not throw errors for valid data', () => {
-    const result = basicEnquirySchema.validate(validEnquiryData());
+    const result = basicEnquiry.validate(validEnquiryData());
     expect(result.error).toBeUndefined();
   });
 
@@ -89,7 +89,7 @@ describe('basicEnquirySchema', () => {
       applyForPermitConnect: 123
     };
 
-    const result = basicEnquirySchema.validate(testData);
+    const result = basicEnquiry.validate(testData);
     expect(result.error).toBeDefined();
   });
 
@@ -99,14 +99,14 @@ describe('basicEnquirySchema', () => {
     };
     testData.relatedActivityId = 'a'.repeat(256);
 
-    const result = basicEnquirySchema.validate(testData);
+    const result = basicEnquiry.validate(testData);
     expect(result.error).toBeDefined();
   });
 
   it('should not be empty', () => {
     const testData = {};
 
-    const result = basicEnquirySchema.validate(testData);
+    const result = basicEnquiry.validate(testData);
     expect(result.error).toBeDefined();
   });
 });

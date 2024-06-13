@@ -12,8 +12,8 @@ import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
-import { RouteNames, StorageKey } from '@/utils/constants';
-import { BRING_FORWARD_TYPES } from '@/utils/enums';
+import { RouteName, StorageKey } from '@/utils/enums/application';
+import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -62,12 +62,18 @@ function getBringForwardStyling(bf: BringForward) {
 }
 
 onMounted(async () => {
+  // To pull data from CHEFS
+  await submissionService.getSubmissions();
+
   [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
-      submissionService.getSubmissions(),
+      submissionService.searchSubmissions({
+        includeUser: true,
+        intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
+      }),
       submissionService.getStatistics(),
-      noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED)
+      noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
   ).map((r) => r.data);
 
@@ -114,7 +120,7 @@ watch(accordionIndex, () => {
                 Bring forward {{ getBringForwardDate(bf) }}:
                 <router-link
                   :to="{
-                    name: RouteNames.HOUSING_SUBMISSION,
+                    name: RouteName.HOUSING_SUBMISSION,
                     query: { activityId: bf.activityId, initialTab: 3 },
                     hash: `#${bf.noteId}`
                   }"

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import { AuthService, ConfigService } from '@/services';
 
@@ -106,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,

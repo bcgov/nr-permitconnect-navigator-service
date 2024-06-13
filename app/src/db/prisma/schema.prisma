@@ -164,11 +164,6 @@ model submission {
   waiting_on                         String?
   intake_status                      String?
   application_status                 String?
-  guidance                           Boolean   @default(false)
-  status_request                     Boolean   @default(false)
-  inquiry                            Boolean   @default(false)
-  emergency_assist                   Boolean   @default(false)
-  inapplicable                       Boolean   @default(false)
   created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
   created_at                         DateTime? @default(now()) @db.Timestamptz(6)
   updated_by                         String?
@@ -192,6 +187,7 @@ model submission {
   indigenous_description             String?
   non_profit_description             String?
   housing_coop_description           String?
+  submission_type                    String?
   contact_first_name                 String?
   contact_last_name                  String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")

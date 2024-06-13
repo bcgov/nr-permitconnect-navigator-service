@@ -7,8 +7,8 @@ import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { useSubmissionStore } from '@/store';
-import { BringForwardTypes, NoteTypes } from '@/utils/constants';
-import { BRING_FORWARD_TYPES, NOTE_TYPES } from '@/utils/enums';
+import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
+import { BringForwardType, NoteType } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
@@ -28,7 +28,7 @@ const submissionStore = useSubmissionStore();
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const showBringForward: Ref<boolean> = ref(props.note?.noteType === NOTE_TYPES.BRING_FORWARD);
+const showBringForward: Ref<boolean> = ref(props.note?.noteType === NoteType.BRING_FORWARD);
 const visible = defineModel<boolean>('visible');
 
 // Default form values
@@ -39,7 +39,7 @@ let initialFormValues: any = {
   createdAt: props.note?.createdAt ? new Date(props.note.createdAt) : new Date(),
   note: props.note?.note,
   noteId: props.note?.noteId,
-  noteType: props.note?.noteType ?? NOTE_TYPES.GENERAL,
+  noteType: props.note?.noteType ?? NoteType.GENERAL,
   title: props.note?.title
 };
 
@@ -48,7 +48,7 @@ const formSchema = object({
   bringForwardDate: mixed()
     .nullable()
     .when('noteType', {
-      is: (noteType: string) => noteType === NOTE_TYPES.BRING_FORWARD,
+      is: (noteType: string) => noteType === NoteType.BRING_FORWARD,
       then: (schema) =>
         schema.test(
           'bring forward required',
@@ -60,13 +60,13 @@ const formSchema = object({
     .label('Bring forward date'),
   bringForwardState: mixed()
     .when('noteType', {
-      is: (noteType: string) => noteType === NOTE_TYPES.BRING_FORWARD,
-      then: () => string().oneOf(BringForwardTypes),
+      is: (noteType: string) => noteType === NoteType.BRING_FORWARD,
+      then: () => string().oneOf(BRING_FORWARD_TYPE_LIST),
       otherwise: () => mixed().nullable()
     })
     .label('Bring forward state'),
   note: string().required().label('Note'),
-  noteType: string().oneOf(NoteTypes).label('Note type'),
+  noteType: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
   title: string().required().max(255, 'Title too long').label('Title')
 });
 
@@ -100,8 +100,8 @@ function onDelete() {
 }
 
 const onNoteTypeChange = (e: { OriginalEvent: Event; value: string }) => {
-  if (e.value === NOTE_TYPES.BRING_FORWARD) {
-    formRef.value?.setFieldValue('bringForwardState', BRING_FORWARD_TYPES.UNRESOLVED);
+  if (e.value === NoteType.BRING_FORWARD) {
+    formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
     showBringForward.value = true;
   } else {
     formRef.value?.setFieldValue('bringForwardDate', null);
@@ -168,7 +168,7 @@ async function onSubmit(data: any, { resetForm }) {
           class="col-6"
           name="noteType"
           label="Note type"
-          :options="NoteTypes"
+          :options="NOTE_TYPE_LIST"
           @on-change="(e) => onNoteTypeChange(e)"
         />
         <Calendar
@@ -191,7 +191,7 @@ async function onSubmit(data: any, { resetForm }) {
           class="col-6"
           name="bringForwardState"
           label="Bring forward state"
-          :options="BringForwardTypes"
+          :options="BRING_FORWARD_TYPE_LIST"
         />
         <div
           v-else
@@ -217,7 +217,7 @@ async function onSubmit(data: any, { resetForm }) {
               @click="
                 () => {
                   handleReset();
-                  showBringForward = props.note?.noteType === NOTE_TYPES.BRING_FORWARD;
+                  showBringForward = props.note?.noteType === NoteType.BRING_FORWARD;
                   visible = false;
                 }
               "

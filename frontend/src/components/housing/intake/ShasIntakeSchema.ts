@@ -1,40 +1,38 @@
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import {
+  CONTACT_PREFERENCE_LIST,
+  NUM_RESIDENTIAL_UNITS_LIST,
+  PROJECT_RELATIONSHIP_LIST
+} from '@/utils/constants/housing';
+import { BasicResponse, Regex } from '@/utils/enums/application';
+import { IntakeFormCategory, ProjectLocation } from '@/utils/enums/housing';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
-import {
-  ContactPreferenceList,
-  NumResidentialUnits,
-  ProjectRelationshipList,
-  Regex,
-  YesNo,
-  YesNoUnsure
-} from '@/utils/constants';
-import { BASIC_RESPONSES, INTAKE_FORM_CATEGORIES, PROJECT_LOCATION } from '@/utils/enums';
-
 // Form validation schema
-const YesNoUnsureSchema = string().required().oneOf(YesNoUnsure);
+const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
-export const intakeSchema = object({
-  [INTAKE_FORM_CATEGORIES.APPLICANT]: object({
-    firstName: stringRequiredSchema.label('First name'),
-    lastName: stringRequiredSchema.label('Last name'),
-    phoneNumber: stringRequiredSchema.label('Phone number'),
-    email: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    relationshipToProject: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
-    contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference')
+export const shasIntakeSchema = object({
+  [IntakeFormCategory.APPLICANT]: object({
+    contactFirstName: stringRequiredSchema.label('First name'),
+    contactLastName: stringRequiredSchema.label('Last name'),
+    contactPhoneNumber: stringRequiredSchema.label('Phone number'),
+    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
   }),
-  [INTAKE_FORM_CATEGORIES.BASIC]: object({
-    isDevelopedByCompanyOrOrg: string().required().oneOf(YesNo).label('Project developed'),
+  [IntakeFormCategory.BASIC]: object({
+    isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
     isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
-      is: (previousQuestion: string) => previousQuestion === BASIC_RESPONSES.YES,
-      then: (schema) => schema.required().oneOf(YesNo).label('Registered in BC')
+      is: (value: string) => value === BasicResponse.YES,
+      then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC')
     }),
     registeredName: string().when('isDevelopedInBC', {
-      is: (previousQuestion: string) => previousQuestion,
+      is: (value: string) => value,
       then: (schema) => schema.required().max(255).label('Business name')
     })
   }),
-  [INTAKE_FORM_CATEGORIES.HOUSING]: object().shape(
+  [IntakeFormCategory.HOUSING]: object().shape(
     {
       projectName: stringRequiredSchema.label('Project name'),
       projectDescription: string().required().label('Project description'),
@@ -44,22 +42,22 @@ export const intakeSchema = object({
       financiallySupportedNonProfit: YesNoUnsureSchema.label('Non-profit housing society'),
       financiallySupportedHousingCoop: YesNoUnsureSchema.label('Housing co-operative'),
       rentalUnits: string().when('hasRentalUnits', {
-        is: (value: string) => value === BASIC_RESPONSES.YES,
-        then: () => string().oneOf(NumResidentialUnits).required().label('Expected rental units'),
+        is: (value: string) => value === BasicResponse.YES,
+        then: () => string().oneOf(NUM_RESIDENTIAL_UNITS_LIST).required().label('Expected rental units'),
         otherwise: () => string().nullable()
       }),
       indigenousDescription: string().when('financiallySupportedIndigenous', {
-        is: (value: string) => value === BASIC_RESPONSES.YES,
+        is: (value: string) => value === BasicResponse.YES,
         then: () => stringRequiredSchema.label('Indigenous housing provider'),
         otherwise: () => string().nullable()
       }),
       nonProfitDescription: string().when('financiallySupportedNonProfit', {
-        is: (value: string) => value === BASIC_RESPONSES.YES,
+        is: (value: string) => value === BasicResponse.YES,
         then: () => stringRequiredSchema.label('Non-profit housing society'),
         otherwise: () => string().nullable()
       }),
       housingCoopDescription: string().when('financiallySupportedHousingCoop', {
-        is: (value: string) => value === BASIC_RESPONSES.YES,
+        is: (value: string) => value === BasicResponse.YES,
         then: () => stringRequiredSchema.label('Housing co-operative'),
         otherwise: () => string().nullable()
       }),
@@ -74,8 +72,9 @@ export const intakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       singleFamilyUnits: string().when('singleFamilySelected', {
-        is: (prev: boolean) => prev,
-        then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of single-family units'),
+        is: (value: boolean) => value,
+        then: (schema) =>
+          schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of single-family units'),
         otherwise: () => string().nullable()
       }),
       multiFamilySelected: boolean().when(['singleFamilySelected', 'otherSelected'], {
@@ -89,8 +88,9 @@ export const intakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       multiFamilyUnits: string().when('multiFamilySelected', {
-        is: (prev: boolean) => prev,
-        then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of multi-family units'),
+        is: (value: boolean) => value,
+        then: (schema) =>
+          schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of multi-family units'),
         otherwise: () => string().nullable()
       }),
       otherSelected: boolean().when(['singleFamilySelected', 'multiFamilySelected'], {
@@ -104,13 +104,13 @@ export const intakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       otherUnitsDescription: string().when('otherSelected', {
-        is: (prev: boolean) => prev,
+        is: (value: boolean) => value,
         then: (schema) => schema.required().label('Description of units'),
         otherwise: () => string().nullable()
       }),
       otherUnits: string().when('otherSelected', {
-        is: (prev: boolean) => prev,
-        then: (schema) => schema.required().oneOf(NumResidentialUnits).label('Expected number of other units'),
+        is: (value: boolean) => value,
+        then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of other units'),
         otherwise: () => string().nullable()
       })
     },
@@ -120,46 +120,46 @@ export const intakeSchema = object({
       ['singleFamilySelected', 'multiFamilySelected']
     ]
   ),
-  [INTAKE_FORM_CATEGORIES.LOCATION]: object({
-    naturalDisaster: string().oneOf(YesNo).required().label('Natural disaster'),
+  [IntakeFormCategory.LOCATION]: object({
+    naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Natural disaster'),
     projectLocation: string().required().label('Location'),
     streetAddress: string().when('projectLocation', {
-      is: (value: string) => value === PROJECT_LOCATION.STREET_ADDRESS,
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
       then: () => stringRequiredSchema.label('Street address'),
       otherwise: () => string().nullable()
     }),
     locality: string().when('projectLocation', {
-      is: (value: string) => value === PROJECT_LOCATION.STREET_ADDRESS,
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
       then: () => stringRequiredSchema.label('Locality'),
       otherwise: () => string().nullable()
     }),
     province: string().when('projectLocation', {
-      is: (value: string) => value === PROJECT_LOCATION.STREET_ADDRESS,
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
       then: () => stringRequiredSchema.label('Province'),
       otherwise: () => string().nullable()
     }),
     latitude: number().when('projectLocation', {
-      is: (value: string) => value === PROJECT_LOCATION.LOCATION_COORDINATES,
+      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
       then: () => number().required().min(48).max(60).label('Latitude'),
       otherwise: () => number().nullable().min(48).max(60).label('Latitude')
     }),
     longitude: number().when('projectLocation', {
-      is: (value: string) => value === PROJECT_LOCATION.LOCATION_COORDINATES,
+      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
       then: () => number().required().min(-139).max(-114).label('Longitude'),
       otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
     }),
     ltsaPIDLookup: string().max(255).label('Parcel ID'),
     geomarkUrl: string().max(255).label('Geomark web service url')
   }),
-  [INTAKE_FORM_CATEGORIES.PERMITS]: object({
-    hasAppliedProvincialPermits: string().oneOf(YesNoUnsure).required().label('Applied permits'),
+  [IntakeFormCategory.PERMITS]: object({
+    hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits'),
     checkProvincialPermits: string().when('hasAppliedProvincialPermits', {
-      is: (value: string) => value === BASIC_RESPONSES.YES || value === BASIC_RESPONSES.UNSURE,
-      then: (schema) => schema.oneOf(YesNo).required().label('Check permits'),
+      is: (value: string) => value === BasicResponse.YES || value === BasicResponse.UNSURE,
+      then: (schema) => schema.oneOf(YES_NO_LIST).required().label('Check permits'),
       otherwise: (schema) => schema.nullable()
     })
   }),
-  [INTAKE_FORM_CATEGORIES.APPLIED_PERMITS]: array().of(
+  [IntakeFormCategory.APPLIED_PERMITS]: array().of(
     object({
       permitTypeId: number().required().label('Permit type'),
       statusLastVerified: mixed()

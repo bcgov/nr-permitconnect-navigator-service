@@ -1,5 +1,5 @@
-import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../components/utils';
 import { userService } from '../services';
+import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 

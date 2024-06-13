@@ -3,7 +3,11 @@ import stamps from '../stamps';
 import type { Knex } from 'knex';
 
 /*
- * Not included in this migration is a manual destructive operation
+ * !! This migration WILL result in data loss if down migrating !!
+ *
+ * The manual migration script manual-20240516000000_005-shas-enquiry.sql to be
+ * run after the automated migration is completed
+ *
  * submission.contact_name will be split into two new parts
  * submission.contact_first_name
  * submission.contact_last_name
@@ -74,8 +78,13 @@ export async function down(knex: Knex): Promise<void> {
       // Drop public schema table triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_enquiry_trigger ON "enquiry"'))
 
-      // Not reverting submission table alters
-      // This migration is destructive and would result in data loss
+      .then(() =>
+        knex.schema.alterTable('submission', function (table) {
+          table.dropColumn('contact_last_name');
+          table.dropColumn('contact_first_name');
+        })
+      )
+
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('enquiry'))
   );

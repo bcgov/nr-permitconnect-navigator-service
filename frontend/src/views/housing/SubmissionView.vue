@@ -13,7 +13,7 @@ import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -63,7 +63,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <router-link :to="{ name: RouteNames.HOUSING_SUBMISSIONS }">
+  <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">
     <font-awesome-icon
       icon="fa fa-arrow-circle-left"
       class="mr-1"
@@ -71,7 +71,7 @@ onMounted(async () => {
     <span>Back to Submissions</span>
   </router-link>
   <h1>
-    Activity submission:
+    Activity Submission:
     <span
       v-if="getSubmission?.activityId"
       class="mr-1"
@@ -85,7 +85,7 @@ onMounted(async () => {
   </h1>
 
   <TabView v-model:activeIndex="activeTab">
-    <TabPanel header="Info">
+    <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
         <SubmissionForm :submission="getSubmission" />
       </span>

@@ -1,36 +1,36 @@
-import { appliedPermitsSchema } from '../../../src/validators/appliedPermits';
-import { PERMIT_STATUS } from '../../../src/components/constants';
+import { PermitStatus } from '../../../src/utils/enums/housing';
+import { appliedPermit } from '../../../src/validators/appliedPermit';
 
 describe('appliedPermitsSchema', () => {
   it('should only accept numbers for permitTypeId', () => {
     const appliedPermits = {
       permitTypeId: '123AC!',
-      status: PERMIT_STATUS.NEW,
+      status: PermitStatus.NEW,
       statusLastVerified: '2021-01-01',
       trackingId: 'test'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
   it('should not accept null for permitTypeId', () => {
     const appliedPermits = {
-      status: PERMIT_STATUS.APPLIED,
+      status: PermitStatus.APPLIED,
       statusLastVerified: '2021-01-01',
       trackingId: 'test tracking id'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
   it('should be a valid schema', () => {
     const appliedPermits = {
       permitTypeId: 123,
-      status: PERMIT_STATUS.COMPLETED,
+      status: PermitStatus.COMPLETED,
       statusLastVerified: '2021-01-01',
       trackingId: 'test'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeUndefined();
   });
 
@@ -41,29 +41,29 @@ describe('appliedPermitsSchema', () => {
       statusLastVerified: '2021-01-01',
       trackingId: 'test'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
   it('should only accept a valid date for statusLastVerified', () => {
     const appliedPermits = {
       permitTypeId: 123,
-      status: PERMIT_STATUS.APPLIED,
+      status: PermitStatus.APPLIED,
       statusLastVerified: 'not-a-date',
       trackingId: 'test'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
   it('should only accept a date lower than current date', () => {
     const appliedPermits = {
       permitTypeId: 123,
-      status: PERMIT_STATUS.APPLIED,
+      status: PermitStatus.APPLIED,
       statusLastVerified: new Date(Date.now() + 1000).toISOString(),
       trackingId: 'test'
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
@@ -71,7 +71,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123
     };
-    const result = appliedPermitsSchema.validate(appliedPermits);
+    const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeUndefined();
   });
 });

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { AccessRoles } from '../components/constants';
+import { AccessRole } from '../utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
 
@@ -55,7 +55,7 @@ const service = {
       const integration = config.get('server.sso.integration');
       const { data, status } = await ssoAxios().post(`/integrations/${integration}/dev/users/${username}/roles`, [
         {
-          name: AccessRoles.PCNS_PROPONENT
+          name: AccessRole.PCNS_PROPONENT
         }
       ]);
       return { data: data.data, status };

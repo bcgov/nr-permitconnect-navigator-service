@@ -2,10 +2,11 @@
 import axios from 'axios';
 import config from 'config';
 
-import { APPLICATION_STATUS_LIST, Initiatives } from '../components/constants';
-import { getChefsApiKey } from '../components/utils';
 import prisma from '../db/dataConnection';
 import { submission } from '../db/models';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { ApplicationStatus } from '../utils/enums/housing';
+import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { Submission, SubmissionSearchParameters } from '../types';
@@ -49,7 +50,7 @@ const service = {
     await prisma.$transaction(async (trx) => {
       const initiative = await trx.initiative.findFirstOrThrow({
         where: {
-          code: Initiatives.HOUSING
+          code: Initiative.HOUSING
         }
       });
 
@@ -64,11 +65,12 @@ const service = {
         data: submissions.map((x) => ({
           submission_id: x.submissionId as string,
           activity_id: x.activityId as string,
-          application_status: APPLICATION_STATUS_LIST.NEW,
+          application_status: ApplicationStatus.NEW,
           company_name_registered: x.companyNameRegistered,
           contact_email: x.contactEmail,
           contact_phone_number: x.contactPhoneNumber,
-          contact_name: x.contactName,
+          contact_first_name: x.contactFirstName,
+          contact_last_name: x.contactLastName,
           contact_preference: x.contactPreference,
           contact_applicant_relationship: x.contactApplicantRelationship,
           financially_supported: x.financiallySupported,
@@ -80,7 +82,7 @@ const service = {
           location_pids: x.locationPIDs,
           latitude: parseFloat(x.latitude as unknown as string),
           longitude: parseFloat(x.longitude as unknown as string),
-          natural_disaster: x.naturalDisaster,
+          natural_disaster: x.naturalDisaster === BasicResponse.YES ? true : false,
           project_name: x.projectName,
           project_description: x.projectDescription,
           queue_priority: x.queuePriority,
@@ -203,23 +205,33 @@ const service = {
    * Search and filter for specific submission
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
+   * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
+   * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
     const result = await prisma.submission.findMany({
+      include: { user: params.includeUser },
       where: {
-        OR: [
+        AND: [
           {
             activity_id: { in: params.activityId }
           },
           {
             submission_id: { in: params.submissionId }
+          },
+          {
+            intake_status: { in: params.intakeStatus }
           }
         ]
       }
     });
 
-    return result.map((x) => submission.fromPrismaModel(x));
+    const submissions = params.includeUser
+      ? result.map((x) => submission.fromPrismaModelWithUser(x))
+      : result.map((x) => submission.fromPrismaModel(x));
+
+    return submissions;
   },
 
   /**

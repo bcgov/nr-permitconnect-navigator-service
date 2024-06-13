@@ -4,8 +4,8 @@ import { useRouter } from 'vue-router';
 
 import { Button, Dropdown } from '@/lib/primevue';
 import { PermissionService } from '@/services';
-import { AccessRoles } from '@/utils/constants';
-import { RouteNames } from '@/utils/constants';
+import { ACCESS_ROLES_LIST } from '@/utils/constants/application';
+import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -19,12 +19,12 @@ const role: Ref<string | undefined> = ref(permissionService.getRoleOverride());
 function clearRole() {
   permissionService.setRoleOverride(undefined);
   role.value = undefined;
-  router.push({ name: RouteNames.HOME });
+  router.push({ name: RouteName.HOME });
 }
 
 function setRole(e: any) {
   permissionService.setRoleOverride(e.value);
-  router.push({ name: RouteNames.HOME });
+  router.push({ name: RouteName.HOME });
 }
 </script>
 
@@ -38,7 +38,7 @@ function setRole(e: any) {
       <Dropdown
         v-model="role"
         class="w-full"
-        :options="AccessRoles"
+        :options="ACCESS_ROLES_LIST"
         @change="(e) => setRole(e)"
       />
     </div>

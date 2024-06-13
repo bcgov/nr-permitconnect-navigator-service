@@ -1,12 +1,19 @@
 import config from 'config';
 import { NIL } from 'uuid';
 
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, Initiatives } from '../../../src/components/constants';
 import submissionController from '../../../src/controllers/submission';
-import { activityService, permitService, submissionService, userService } from '../../../src/services';
-import * as utils from '../../../src/components/utils';
+import { activityService, enquiryService, permitService, submissionService, userService } from '../../../src/services';
+import * as utils from '../../../src/utils/utils';
 
 import type { Permit, Submission } from '../../../src/types';
+import {
+  ApplicationStatus,
+  ContactPreference,
+  IntakeStatus,
+  NumResidentialUnits,
+  ProjectRelationship
+} from '../../../src/utils/enums/housing';
+import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -71,11 +78,6 @@ const FORM_EXPORT_1 = {
   multiFamilyUnits1: '',
   isRentalUnit: 'unsureunsure',
   streetAddress: '123 Some Street',
-  guidance: true,
-  statusRequest: true,
-  inquiry: true,
-  emergencyAssist: true,
-  inapplicable: true,
   createdAt: new Date().toISOString(),
   createdBy: 'USERABC',
 
@@ -121,11 +123,6 @@ const FORM_EXPORT_2 = {
   multiFamilyUnits1: '',
   isRentalUnit: 'yes',
   streetAddress: '112 Other Road',
-  guidance: true,
-  statusRequest: true,
-  inquiry: true,
-  emergencyAssist: true,
-  inapplicable: true,
   createdAt: new Date().toISOString(),
   createdBy: 'USERABC',
 
@@ -139,11 +136,12 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
   submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: '5183f223',
-  applicationStatus: APPLICATION_STATUS_LIST.NEW,
+  applicationStatus: ApplicationStatus.NEW,
   companyNameRegistered: 'COMPANY',
   contactEmail: 'abc@dot.com',
   contactPhoneNumber: '1234567890',
-  contactName: 'ABC DEF',
+  contactFirstName: 'ABC',
+  contactLastName: 'DEF',
   contactPreference: 'Phone Call',
   contactApplicantRelationship: 'Agent',
   financiallySupported: true,
@@ -155,7 +153,7 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   locationPIDs: '132',
   latitude: -48,
   longitude: 160,
-  naturalDisaster: true,
+  naturalDisaster: BasicResponse.YES,
   projectName: 'PROJ',
   queuePriority: 3,
   singleFamilyUnits: '1-49',
@@ -171,11 +169,12 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
     submissionId: 'c8b7d976-3d05-4e67-a813-b10888585b59',
     activityId: 'c8b7d976',
-    applicationStatus: APPLICATION_STATUS_LIST.NEW,
+    applicationStatus: ApplicationStatus.NEW,
     companyNameRegistered: 'BIGBUILD',
     contactEmail: 'joe@dot.com',
     contactPhoneNumber: '1114448888',
-    contactName: 'Joe Smith',
+    contactFirstName: 'Joe',
+    contactLastName: 'Smith',
     contactPreference: 'Email',
     contactApplicantRelationship: 'Agent',
     financiallySupported: true,
@@ -187,7 +186,7 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     locationPIDs: '132',
     latitude: -59,
     longitude: 178,
-    naturalDisaster: true,
+    naturalDisaster: BasicResponse.YES,
     projectName: 'BIG',
     projectDescription: 'some project description here',
     queuePriority: 3,
@@ -225,7 +224,8 @@ const SUBMISSION_1 = {
   submittedBy: '100-100',
   locationPIDs: null,
   companyNameRegistered: null,
-  contactName: null,
+  contactFirstName: null,
+  contactLastName: null,
   contactPhoneNumber: null,
   contactEmail: null,
   contactPreference: null,
@@ -258,11 +258,6 @@ const SUBMISSION_1 = {
   submissions: null,
   intakeStatus: null,
   applicationStatus: null,
-  guidance: false,
-  statusRequest: false,
-  inquiry: false,
-  emergencyAssist: false,
-  inapplicable: false,
   user: null
 };
 
@@ -388,7 +383,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -406,27 +401,49 @@ describe('createDraft', () => {
     const req = {
       body: {
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User',
+          contactPhoneNumber: '1234567890',
+          contactEmail: 'test@user.com',
+          contactApplicantRelationship: ProjectRelationship.AGENT,
+          contactPreference: ContactPreference.EITHER
         },
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: true,
+          isDevelopedInBC: true,
+          companyNameRegistered: 'ABC'
         },
         housing: {
-          projectName: 'TheProject'
+          projectName: 'TheProject',
+          projectDescription: 'Description',
+          singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+          hasRentalUnits: false,
+          financiallySupportedBC: true,
+          financiallySupportedIndigenous: false,
+          financiallySupportedNonProfit: false,
+          financiallySupportedHousingCoop: false
         },
         location: {
-          projectLocation: 'Some place'
+          naturalDisaster: BasicResponse.NO,
+          projectLocation: 'Some place',
+          projectLocationDescription: 'Description',
+          locationPIDs: '123, 456',
+          latitude: 48,
+          longitude: -114,
+          streetAddress: '123 Test St',
+          locality: 'City',
+          province: 'BC'
         },
         permits: {
-          hasAppliedProvincialPermits: true
+          hasAppliedProvincialPermits: true,
+          checkProvincialPermits: true
         }
       },
       currentUser: CURRENT_USER
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -436,7 +453,8 @@ describe('createDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contactFirstName: `${req.body.applicant.contactFirstName}`,
+        contactLastName: `${req.body.applicant.contactLastName}`,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -444,8 +462,8 @@ describe('createDraft', () => {
         submissionId: expect.any(String),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.DRAFT,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.DRAFT,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
   });
@@ -469,7 +487,7 @@ describe('createDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED
+        intakeStatus: IntakeStatus.SUBMITTED
       })
     );
   });
@@ -505,7 +523,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 
@@ -561,7 +579,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -579,8 +597,8 @@ describe('createSubmission', () => {
     const req = {
       body: {
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User'
         },
         basic: {
           isDevelopedByCompanyOrOrg: true
@@ -599,7 +617,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -609,7 +627,8 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contactFirstName: req.body.applicant.contactFirstName,
+        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -617,8 +636,8 @@ describe('createSubmission', () => {
         submissionId: expect.any(String),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.SUBMITTED,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
   });
@@ -654,7 +673,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiatives.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 
@@ -764,6 +783,7 @@ describe('getSubmission', () => {
 
   // Mock service calls
   const submissionSpy = jest.spyOn(submissionService, 'getSubmission');
+  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -773,6 +793,7 @@ describe('getSubmission', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submissionSpy.mockResolvedValue(SUBMISSION_1 as any);
+    getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmission(req as any, res as any, next);
@@ -921,8 +942,8 @@ describe('updateDraft', () => {
         activityId: '00000000',
         submissionId: '11111111',
         applicant: {
-          firstName: 'Test',
-          lastName: 'User'
+          contactFirstName: 'Test',
+          contactLastName: 'User'
         },
         basic: {
           isDevelopedByCompanyOrOrg: true
@@ -951,7 +972,8 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactName: `${req.body.applicant.firstName} ${req.body.applicant.lastName}`,
+        contactFirstName: req.body.applicant.contactFirstName,
+        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -959,8 +981,8 @@ describe('updateDraft', () => {
         submissionId: '11111111',
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: INTAKE_STATUS_LIST.DRAFT,
-        applicationStatus: APPLICATION_STATUS_LIST.NEW
+        intakeStatus: IntakeStatus.DRAFT,
+        applicationStatus: ApplicationStatus.NEW
       })
     );
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -987,7 +1009,7 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        intakeStatus: INTAKE_STATUS_LIST.SUBMITTED
+        intakeStatus: IntakeStatus.SUBMITTED
       })
     );
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);

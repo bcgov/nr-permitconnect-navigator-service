@@ -2,8 +2,8 @@ import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-import { AuthType } from './constants';
-import { getLogger } from './log';
+import { getLogger } from '../components/log';
+import { AuthType } from './enums/application';
 
 import type { JwtPayload } from 'jsonwebtoken';
 import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser } from '../types';

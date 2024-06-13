@@ -1,6 +1,6 @@
 import { noteService } from '@/services';
 import { appAxios } from '@/services/interceptors';
-import { BRING_FORWARD_TYPES } from '@/utils/enums';
+import { BringForwardType } from '@/utils/enums/housing';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -54,20 +54,20 @@ describe('noteService', () => {
     });
 
     it('adds Unresolved to query when given as parameter', async () => {
-      await noteService.listBringForward(BRING_FORWARD_TYPES.UNRESOLVED);
+      await noteService.listBringForward(BringForwardType.UNRESOLVED);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
-        params: { bringForwardState: BRING_FORWARD_TYPES.UNRESOLVED }
+        params: { bringForwardState: BringForwardType.UNRESOLVED }
       });
     });
 
     it('adds Resolved to query when given as parameter', async () => {
-      await noteService.listBringForward(BRING_FORWARD_TYPES.RESOLVED);
+      await noteService.listBringForward(BringForwardType.RESOLVED);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
-        params: { bringForwardState: BRING_FORWARD_TYPES.RESOLVED }
+        params: { bringForwardState: BringForwardType.RESOLVED }
       });
     });
   });

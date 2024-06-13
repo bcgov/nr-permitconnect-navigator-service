@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { activityService } from '../../services';
-import { uuidToActivityId } from '../../components/utils';
+import { uuidToActivityId } from '../../utils/utils';
 /**
  * @function generateUniqueActivityId
  * Generate a new activityId, which are truncated UUIDs

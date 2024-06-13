@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 import type { Document, Note, Permit, Submission } from '@/types';
@@ -82,7 +82,7 @@ export const useSubmissionStore = defineStore('submission', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,

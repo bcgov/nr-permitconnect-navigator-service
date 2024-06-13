@@ -2,13 +2,6 @@
 import { filesize } from 'filesize';
 import { ref } from 'vue';
 
-import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { documentService } from '@/services';
-import { useSubmissionStore } from '@/store';
-import { FILE_CATEGORIES } from '@/utils/constants';
-import { formatDateLong } from '@/utils/formatters';
-import { getFileCategory } from '@/utils/utils';
-
 import compressed from '@/assets/images/compressed.svg';
 import doc from '@/assets/images/doc.svg';
 import email from '@/assets/images/email.svg';
@@ -17,6 +10,12 @@ import image from '@/assets/images/image.svg';
 import pdf from '@/assets/images/pdf.svg';
 import shape from '@/assets/images/shape.svg';
 import spreadsheet from '@/assets/images/spreadsheet.svg';
+import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
+import { documentService } from '@/services';
+import { useSubmissionStore } from '@/store';
+import { FileCategory } from '@/utils/enums/application';
+import { formatDateLong } from '@/utils/formatters';
+import { getFileCategory } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
@@ -72,19 +71,19 @@ const displayIcon = (mimeType = '') => {
   const icon = getFileCategory(mimeType);
 
   switch (icon) {
-    case FILE_CATEGORIES.DOC:
+    case FileCategory.DOC:
       return doc;
-    case FILE_CATEGORIES.SHAPE:
+    case FileCategory.SHAPE:
       return shape;
-    case FILE_CATEGORIES.PDF:
+    case FileCategory.PDF:
       return pdf;
-    case FILE_CATEGORIES.SPREADSHEET:
+    case FileCategory.SPREADSHEET:
       return spreadsheet;
-    case FILE_CATEGORIES.IMAGE:
+    case FileCategory.IMAGE:
       return image;
-    case FILE_CATEGORIES.EMAIL:
+    case FileCategory.EMAIL:
       return email;
-    case FILE_CATEGORIES.COMPRESSED:
+    case FileCategory.COMPRESSED:
       return compressed;
     default:
       return file;

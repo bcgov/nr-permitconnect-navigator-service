@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 
@@ -61,7 +61,7 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,
