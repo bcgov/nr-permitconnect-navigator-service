@@ -56,7 +56,7 @@ onMounted(async () => {
       </span>
     </h1>
     <TabView>
-      <TabPanel header="Info">
+      <TabPanel header="Information">
         <Message
           v-if="relatedSubmission"
           severity="info"
@@ -76,7 +76,7 @@ onMounted(async () => {
         <EnquiryEditForm :enquiry="props.enquiry" />
       </TabPanel>
       <TabPanel header="Notes">
-        <div>Notes</div>
+        <div>Notes - Coming soon</div>
       </TabPanel>
     </TabView>
   </div>

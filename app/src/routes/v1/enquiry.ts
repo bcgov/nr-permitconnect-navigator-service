@@ -56,7 +56,7 @@ router.put(
 );
 
 /** Updates an enquiry */
-router.put('/:enquiryId', (req: Request, res: Response, next: NextFunction): void => {
+router.put('/:enquiryId', enquiryValidator.updateEnquiry, (req: Request, res: Response, next: NextFunction): void => {
   enquiryController.updateEnquiry(req, res, next);
 });
 
