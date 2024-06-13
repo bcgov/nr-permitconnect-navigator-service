@@ -62,6 +62,9 @@ function getBringForwardStyling(bf: BringForward) {
 }
 
 onMounted(async () => {
+  // To pull data from CHEFS
+  await submissionService.getSubmissions();
+
   [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
