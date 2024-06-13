@@ -1,13 +1,20 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { activityService, submissionService, permitService, userService } from '../services';
+import {
+  activityService,
+  emailService,
+  enquiryService,
+  submissionService,
+  permitService,
+  userService
+} from '../services';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -343,6 +350,12 @@ const controller = {
   getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
+
+      if (response?.activityId) {
+        const relatedEnquiries = await enquiryService.getRelatedEnquiries(response.activityId);
+        if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -362,6 +375,30 @@ const controller = {
         response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
       }
 
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  searchSubmissions: async (
+    req: Request<
+      never,
+      {
+        activityId?: Array<string>;
+        submissionId?: Array<string>;
+        intakeStatus?: Array<string>;
+        includeUser?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await submissionService.searchSubmissions({
+        ...req.query,
+        includeUser: isTruthy(req.query.includeUser)
+      });
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

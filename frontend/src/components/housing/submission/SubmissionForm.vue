@@ -67,8 +67,12 @@ const formSchema = object({
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...applicantValidator,
-  companyNameRegistered: string().required().label('Company'),
-  isDevelopedInBC: string().required().oneOf(YES_NO_LIST).label('Company registered in B.C'),
+  companyNameRegistered: string().notRequired().max(255).label('Company'),
+  isDevelopedInBC: string().when('companyNameRegistered', {
+    is: (val: string) => val,
+    then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Company registered in B.C'),
+    otherwise: () => string().notRequired()
+  }),
   projectName: string().required().label('Project Name'),
   projectDescription: string().notRequired().label('Additional information about project'),
   singleFamilyUnits: string().notRequired().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Single family units'),
@@ -105,7 +109,7 @@ const formSchema = object({
     otherwise: () => string().notRequired()
   }),
   streetAddress: string().required().max(255).label('Location address'),
-  locationPIDs: string().required().max(255).label('Location PID(s)'),
+  locationPIDs: string().notRequired().max(255).label('Location PID(s)'),
   latitude: latitudeValidator,
   longitude: longitudeValidator,
   geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
@@ -285,12 +289,20 @@ onBeforeMount(async () => {
         name="companyNameRegistered"
         label="Company"
         :disabled="!editable"
+        @on-change="
+          (e) => {
+            if (!e.value) {
+              setFieldValue('companyNameRegistered', null);
+              setFieldValue('isDevelopedInBC', null);
+            }
+          }
+        "
       />
       <Dropdown
         class="col-3"
         name="isDevelopedInBC"
         label="Company registered in B.C?"
-        :disabled="!editable"
+        :disabled="!editable || !values.companyNameRegistered"
         :options="YES_NO_LIST"
       />
       <Dropdown

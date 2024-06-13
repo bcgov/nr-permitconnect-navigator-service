@@ -2,7 +2,7 @@ import config from 'config';
 import { NIL } from 'uuid';
 
 import submissionController from '../../../src/controllers/submission';
-import { activityService, permitService, submissionService, userService } from '../../../src/services';
+import { activityService, enquiryService, permitService, submissionService, userService } from '../../../src/services';
 import * as utils from '../../../src/utils/utils';
 
 import type { Permit, Submission } from '../../../src/types';
@@ -783,6 +783,7 @@ describe('getSubmission', () => {
 
   // Mock service calls
   const submissionSpy = jest.spyOn(submissionService, 'getSubmission');
+  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -792,6 +793,7 @@ describe('getSubmission', () => {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submissionSpy.mockResolvedValue(SUBMISSION_1 as any);
+    getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmission(req as any, res as any, next);

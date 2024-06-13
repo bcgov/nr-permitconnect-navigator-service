@@ -84,4 +84,4 @@ export const PERMIT_STATUS_LIST = [PermitStatus.NEW, PermitStatus.APPLIED, Permi
 
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
 
-export const QUEUE_PRIORITY = [0, 1, 2, 3];
+export const QUEUE_PRIORITY = [1, 2, 3];

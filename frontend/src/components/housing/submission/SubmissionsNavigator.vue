@@ -13,7 +13,7 @@ import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { PERMISSIONS } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteName, StorageKey } from '@/utils/enums/application';
-import { BringForwardType } from '@/utils/enums/housing';
+import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -65,7 +65,10 @@ onMounted(async () => {
   [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
-      submissionService.getSubmissions(),
+      submissionService.searchSubmissions({
+        includeUser: true,
+        intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
+      }),
       submissionService.getStatistics(),
       noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
