@@ -5,42 +5,25 @@ import type { Ref } from 'vue';
 import type { Enquiry, Note } from '@/types';
 
 export type EnquiryStoreState = {
-  // documents: Ref<Array<Document>>;
   notes: Ref<Array<Note>>;
-  // permits: Ref<Array<Permit>>;
   enquiry: Ref<Enquiry | undefined>;
 };
 
 export const useEnquiryStore = defineStore('enquiry', () => {
   // State
   const state: EnquiryStoreState = {
-    // documents: ref([]),
     notes: ref([]),
-    // permits: ref([]),
     enquiry: ref(undefined)
   };
 
   // Getters
   const getters = {
-    // getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
-    // getPermits: computed(() => state.permits.value),
     getEnquiry: computed(() => state.enquiry.value)
   };
 
   // Actions
-  // function addDocument(data: Document) {
-  //   state.documents.value.push(data);
-  // }
-
-  // function removeDocument(data: Document) {
-  //   state.documents.value = state.documents.value.filter((x) => x.documentId !== data.documentId);
-  // }
-
-  // function setDocuments(data: Array<Document>) {
-  //   state.documents.value = data;
-  // }
-
+  /* Notes */
   function addNote(data: Note, prepend: boolean = false) {
     if (prepend) state.notes.value.unshift(data);
     else state.notes.value.push(data);
@@ -59,25 +42,13 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     if (idx >= 0) state.notes.value[idx] = newData;
   }
 
-  // function addPermit(data: Permit) {
-  //   state.permits.value.push(data);
-  // }
-
-  // function removePermit(data: Permit) {
-  //   state.permits.value = state.permits.value.filter((x) => x.permitId !== data.permitId);
-  // }
-
-  // function setPermits(data: Array<Permit>) {
-  //   state.permits.value = data;
-  // }
-
-  // function updatePermit(data: Permit) {
-  //   const idx = state.permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
-  //   if (idx >= 0) state.permits.value[idx] = data;
-  // }
-
+  /* Enquiries */
   function setEnquiry(data: Enquiry | undefined) {
     state.enquiry.value = data;
+  }
+
+  function removeEnquiry() {
+    state.enquiry.value = undefined;
   }
 
   return {
@@ -88,18 +59,11 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     ...getters,
 
     // Actions
-    // addDocument,
-    // removeDocument,
-    // setDocuments,
     addNote,
     removeNote,
     setNotes,
     updateNote,
-    // addPermit,
-    // removePermit,
-    // setPermits,
-    // updatePermit,
-    // setSubmission
+    removeEnquiry,
     setEnquiry
   };
 });

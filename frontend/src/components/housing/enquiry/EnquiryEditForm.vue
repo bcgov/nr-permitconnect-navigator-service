@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { onMounted, ref } from 'vue';
-import { array, boolean, mixed, number, object, string } from 'yup';
+import { date, mixed, object, string } from 'yup';
 
-import { Dropdown, EditableDropdown, InputText, TextArea } from '@/components/form';
-import { Button, useToast } from '@/lib/primevue';
-import { formatDate } from '@/utils/formatters';
+import { Calendar, Dropdown, EditableDropdown, InputMask, InputText, TextArea } from '@/components/form';
+import { Button, Divider, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-
+import { INTAKE_STATUS_LIST } from '@/utils/enums';
 import { ContactPreferenceList, IntakeStatusList, ProjectRelationshipList, Regex } from '@/utils/constants';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { User } from '@/types';
+import type { Enquiry, User } from '@/types';
 
-// Constants (MOVE TO REFACTOR ENUMS AFTER REBASE)
+interface EnquiryForm extends Enquiry {
+  user?: User;
+}
+
+// Constants (MOVE TO REFACTOR ENUMS AFTER REBASE), IntakeStatusList as well
 enum ENQUIRY_TYPES {
   GENERAL_ENQUIRY = 'General enquiry',
   STATUS_REQUEST = 'Status request',
@@ -31,24 +34,41 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // Form validation schema
-// const YesNoUnsureSchema = string().required().oneOf(YesNoUnsure);
 const stringRequiredSchema = string().required().max(255);
 
 const intakeSchema = object({
+  submissionType: string().oneOf(Object.values(ENQUIRY_TYPES)).label('Submission type'),
+  submittedAt: date().required().label('Submission date'),
+  relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   contactFirstName: stringRequiredSchema.label('First name'),
   contactLastName: stringRequiredSchema.label('Last name'),
-  contactPhoneNumber: stringRequiredSchema.label('Phone number'),
-  contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
   contactApplicantRelationship: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
   contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference'),
-  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state')
+  contactPhoneNumber: stringRequiredSchema.label('Phone number'),
+  contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+  enquiryDescription: string().required().label('Enquiry detail'),
+  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
+  user: mixed()
+    .nullable()
+    .when('intakeStatus', {
+      is: (val: string) => val === INTAKE_STATUS_LIST.SUBMITTED,
+      then: (schema) =>
+        schema
+          .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
+            if (obj == null || (obj as User)?.userId || (typeof obj == 'string' && obj.length === 0)) return true;
+          })
+          .nullable(),
+      otherwise: (schema) =>
+        schema.test('expect-user', 'Assigned to must be a selected user', (obj) => {
+          return obj !== null && !!(obj as User)?.userId;
+        })
+    })
+    .label('Assigned to')
 });
 
 // State
-
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(true);
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Actions
@@ -74,8 +94,8 @@ const onAssigneeInput = async (e: IInputEvent) => {
 const onSubmit = async (data: any) => {
   editable.value = false;
 
-  const enquiryData = Object.assign({}, data);
-  enquiryData['assignedUserId'] = enquiryData.assignedUserId?.userId ?? undefined;
+  const enquiryData: EnquiryForm = Object.assign({}, data);
+  enquiryData['assignedUserId'] = enquiryData.user?.userId ?? undefined;
   delete enquiryData['user'];
 
   try {
@@ -96,7 +116,7 @@ onMounted(async () => {
   }
   initialFormValues.value = {
     ...props.enquiry,
-    submittedAt: formatDate(props.enquiry?.submittedAt),
+    submittedAt: new Date(props.enquiry?.submittedAt),
     user: assigneeOptions.value[0] ?? null
   };
 });
@@ -105,8 +125,8 @@ onMounted(async () => {
 <template>
   <Form
     v-if="initialFormValues"
-    v-slot="{ handleReset }"
     ref="formRef"
+    v-slot="{ handleReset }"
     :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
     @submit="onSubmit"
@@ -115,77 +135,86 @@ onMounted(async () => {
       <Dropdown
         class="col-3"
         name="submissionType"
-        label="Submission Type"
-        :bold="false"
+        label="Submission type"
         :disabled="!editable"
         :options="Object.values(ENQUIRY_TYPES)"
       />
-      <InputText
+      <Calendar
         class="col-3"
         name="submittedAt"
-        label="Submission Date"
-        :bold="false"
+        label="Submission date"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="relatedActivityId"
         label="Related submission"
-        :bold="false"
         :disabled="!editable"
       />
       <div class="col-3" />
-      <div class="col-12 mb-2">Basic information</div>
+      <div class="col-12 mb-2 flex align-items-center">
+        <div class="font-bold white-space-nowrap mr-3">Basic information</div>
+        <Divider />
+      </div>
       <InputText
         class="col-3"
         name="contactFirstName"
         label="First name"
-        :bold="false"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="contactLastName"
         label="Last name"
-        :bold="false"
         :disabled="!editable"
       />
-      <InputText
+      <Dropdown
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to activity"
-        :bold="false"
         :disabled="!editable"
+        :options="ProjectRelationshipList"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
-        :bold="false"
         :disabled="!editable"
         :options="ContactPreferenceList"
       />
-      <InputText
+      <InputMask
         class="col-3"
         name="contactPhoneNumber"
-        label="Contact phone"
-        :bold="false"
+        mask="(999) 999-9999"
+        label="Phone number"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="contactEmail"
         label="Contact email"
-        :bold="false"
         :disabled="!editable"
       />
-      <div class="col-6" />
+      <div class="col-12 mb-2 flex align-items-center">
+        <div class="font-bold white-space-nowrap mr-3">Enquiry detail</div>
+        <Divider />
+      </div>
       <TextArea
         class="col-12"
         name="enquiryDescription"
-        label="Waiting On"
-        :bold="false"
+        label=""
         :disabled="!editable"
+      />
+      <div class="col-12 mb-2 flex align-items-center">
+        <div class="font-bold white-space-nowrap mr-3">Submission state</div>
+        <Divider />
+      </div>
+      <Dropdown
+        class="col-4"
+        name="intakeStatus"
+        label="Intake state"
+        :disabled="!editable"
+        :options="IntakeStatusList"
       />
       <EditableDropdown
         class="col-4"
@@ -196,33 +225,26 @@ onMounted(async () => {
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
       />
-      <Dropdown
-        class="col-4"
-        name="intakeStatus"
-        label="Intake state"
-        :disabled="!editable"
-        :options="IntakeStatusList"
-      />
-    </div>
-    <div class="field col-12">
-      <Button
-        label="Save"
-        type="submit"
-        icon="pi pi-check"
-        :disabled="!editable"
-      />
-      <Button
-        label="Cancel"
-        outlined
-        class="ml-2 p-button-danger"
-        icon="pi pi-times"
-        :disabled="!editable"
-        @click="
-          () => {
-            handleReset();
-          }
-        "
-      />
+      <div class="col-12">
+        <Button
+          label="Save"
+          type="submit"
+          icon="pi pi-check"
+          :disabled="!editable"
+        />
+        <Button
+          label="Cancel"
+          outlined
+          class="ml-2 p-button-danger"
+          icon="pi pi-times"
+          :disabled="!editable"
+          @click="
+            () => {
+              handleReset();
+            }
+          "
+        />
+      </div>
     </div>
   </Form>
 </template>
