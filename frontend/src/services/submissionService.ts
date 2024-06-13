@@ -53,6 +53,14 @@ export default {
   },
 
   /**
+   * @function searchSubmissions
+   * @returns {Promise} An axios response
+   */
+  searchSubmissions(filters?: any) {
+    return appAxios().get('submission/search', { params: { ...filters } });
+  },
+
+  /**
    * @function updateDraft
    * @returns {Promise} An axios response
    */

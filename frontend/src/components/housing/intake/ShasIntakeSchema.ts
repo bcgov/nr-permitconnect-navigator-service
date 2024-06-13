@@ -24,11 +24,11 @@ export const shasIntakeSchema = object({
   [IntakeFormCategory.BASIC]: object({
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
     isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
-      is: (previousQuestion: string) => previousQuestion === BasicResponse.YES,
+      is: (value: string) => value === BasicResponse.YES,
       then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC')
     }),
     registeredName: string().when('isDevelopedInBC', {
-      is: (previousQuestion: string) => previousQuestion,
+      is: (value: string) => value,
       then: (schema) => schema.required().max(255).label('Business name')
     })
   }),
@@ -72,7 +72,7 @@ export const shasIntakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       singleFamilyUnits: string().when('singleFamilySelected', {
-        is: (prev: boolean) => prev,
+        is: (value: boolean) => value,
         then: (schema) =>
           schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of single-family units'),
         otherwise: () => string().nullable()
@@ -88,7 +88,7 @@ export const shasIntakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       multiFamilyUnits: string().when('multiFamilySelected', {
-        is: (prev: boolean) => prev,
+        is: (value: boolean) => value,
         then: (schema) =>
           schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of multi-family units'),
         otherwise: () => string().nullable()
@@ -104,12 +104,12 @@ export const shasIntakeSchema = object({
         otherwise: (schema) => schema.notRequired()
       }),
       otherUnitsDescription: string().when('otherSelected', {
-        is: (prev: boolean) => prev,
+        is: (value: boolean) => value,
         then: (schema) => schema.required().label('Description of units'),
         otherwise: () => string().nullable()
       }),
       otherUnits: string().when('otherSelected', {
-        is: (prev: boolean) => prev,
+        is: (value: boolean) => value,
         then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of other units'),
         otherwise: () => string().nullable()
       })

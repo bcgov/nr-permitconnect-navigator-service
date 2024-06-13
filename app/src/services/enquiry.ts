@@ -81,6 +81,29 @@ const service = {
   },
 
   /**
+   * @function getRelatedEnquiries
+   * Gets list of enquiries related to the given activityId
+   * @param {string} activityId Activity ID
+   * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
+   */
+  getRelatedEnquiries: async (activityId: string) => {
+    try {
+      const result = await prisma.enquiry.findMany({
+        where: {
+          related_activity_id: activityId
+        },
+        orderBy: {
+          created_at: 'asc'
+        }
+      });
+
+      return result.map((x) => enquiry.fromPrismaModel(x));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
    * @function updateEnquiry
    * Updates a specific enquiry
    * @param {Enquiry} data Enquiry to update

@@ -217,7 +217,7 @@ onBeforeMount(async () => {
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplate({
-    '{{ contactName }}': formRef.value?.values.applicant.firstName,
+    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
     '{{ activityId }}': activityId
   });
   let applicantEmail = formRef.value?.values.applicant.email;

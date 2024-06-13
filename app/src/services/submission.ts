@@ -205,23 +205,33 @@ const service = {
    * Search and filter for specific submission
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
+   * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
+   * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
     const result = await prisma.submission.findMany({
+      include: { user: params.includeUser },
       where: {
-        OR: [
+        AND: [
           {
             activity_id: { in: params.activityId }
           },
           {
             submission_id: { in: params.submissionId }
+          },
+          {
+            intake_status: { in: params.intakeStatus }
           }
         ]
       }
     });
 
-    return result.map((x) => submission.fromPrismaModel(x));
+    const submissions = params.includeUser
+      ? result.map((x) => submission.fromPrismaModelWithUser(x))
+      : result.map((x) => submission.fromPrismaModel(x));
+
+    return submissions;
   },
 
   /**

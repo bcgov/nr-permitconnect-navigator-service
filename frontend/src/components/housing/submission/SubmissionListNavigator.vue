@@ -119,7 +119,7 @@ const filters = ref({
       </div>
     </template>
     <Column
-      field="activity.activityId"
+      field="activityId"
       header="Activity"
       :sortable="true"
       frozen

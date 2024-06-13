@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { applicant } from './applicant';
 import { appliedPermit } from './appliedPermit';
 import { basicIntake } from './basic';
-import { activityId, uuidv4 } from './common';
+import { activityId, email, uuidv4 } from './common';
 
 import { housing } from './housing';
 import { permits } from './permits';
@@ -31,6 +31,19 @@ const schema = {
       permits: permits
     })
   },
+  emailConfirmation: {
+    body: Joi.object({
+      emailData: Joi.object().keys({
+        bcc: Joi.array().items(email).allow(null),
+        bodyType: Joi.string().required().allow(null),
+        body: Joi.string().required(),
+        cc: Joi.array().items(email),
+        from: email.required(),
+        subject: Joi.string().required(),
+        to: Joi.array().items(email).required()
+      })
+    })
+  },
   deleteSubmission: {
     params: Joi.object({
       submissionId: uuidv4.required()
@@ -49,6 +62,14 @@ const schema = {
       submissionId: uuidv4.required()
     })
   },
+  searchSubmissions: {
+    query: Joi.object({
+      activityId: Joi.array().items(Joi.string()),
+      submissionId: Joi.array().items(uuidv4),
+      intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
+      includeUser: Joi.boolean()
+    })
+  },
   updateSubmission: {
     body: Joi.object({
       submissionId: uuidv4.required(),
@@ -57,10 +78,14 @@ const schema = {
       submissionType: Joi.string().required().valid(SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE),
       submittedAt: Joi.string().required(),
       relatedEnquiries: Joi.string().allow(null),
-      companyNameRegistered: Joi.string().required(),
-      isDevelopedInBC: Joi.string()
-        .required()
-        .valid(...YES_NO_LIST),
+      companyNameRegistered: Joi.string().allow(null),
+      isDevelopedInBC: Joi.when('companyNameRegistered', {
+        is: Joi.string(),
+        then: Joi.string()
+          .required()
+          .valid(...YES_NO_LIST),
+        otherwise: Joi.string().allow(null)
+      }),
       projectName: Joi.string().required(),
       projectDescription: Joi.string().allow(null),
       singleFamilyUnits: Joi.string()
@@ -115,7 +140,7 @@ const schema = {
         otherwise: Joi.string().allow(null)
       }),
       streetAddress: Joi.string().required().max(255),
-      locationPIDs: Joi.string().required().max(255),
+      locationPIDs: Joi.string().allow(null).max(255),
       latitude: Joi.number().max(255),
       longitude: Joi.number().max(255),
       geomarkUrl: Joi.string().allow(null).max(255),
@@ -144,28 +169,16 @@ const schema = {
     params: Joi.object({
       submissionId: uuidv4.required()
     })
-  },
-  emailConfirmation: {
-    body: Joi.object({
-      emailData: Joi.object().keys({
-        bcc: Joi.array().items(emailJoi).allow(null),
-        bodyType: Joi.string().required().allow(null),
-        body: Joi.string().required(),
-        cc: Joi.array().items(emailJoi),
-        from: emailJoi.required(),
-        subject: Joi.string().required(),
-        to: Joi.array().items(emailJoi).required()
-      })
-    })
   }
 };
 
 export default {
   createDraft: validate(schema.createDraft),
   createSubmission: validate(schema.createSubmission),
+  emailConfirmation: validate(schema.emailConfirmation),
   deleteSubmission: validate(schema.deleteSubmission),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
-  updateSubmission: validate(schema.updateSubmission),
-  emailConfirmation: validate(schema.emailConfirmation)
+  searchSubmissions: validate(schema.searchSubmissions),
+  updateSubmission: validate(schema.updateSubmission)
 };

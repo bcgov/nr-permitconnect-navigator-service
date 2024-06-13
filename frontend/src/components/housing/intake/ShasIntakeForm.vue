@@ -51,6 +51,7 @@ import {
   PROJECT_LOCATION_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
+import { confirmationTemplate } from '@/utils/templates';
 
 // Types
 type GeocoderEntry = {
@@ -236,7 +237,7 @@ async function onSubmit(data: any) {
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplate({
-    '{{ contactName }}': formRef.value?.values.applicant.firstName,
+    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
     '{{ activityId }}': activityId
   });
   let applicantEmail = formRef.value?.values.applicant.email;
@@ -387,8 +388,8 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLICANT) ||
-                    validationErrors.includes(INTAKE_FORM_CATEGORIES.BASIC)) &&
+                  (validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                    validationErrors.includes(IntakeFormCategory.BASIC)) &&
                   !formUpdated
               }"
             />
@@ -553,7 +554,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{ 'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.HOUSING) && !formUpdated }"
+              :class="{ 'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formUpdated }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -900,7 +901,7 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(INTAKE_FORM_CATEGORIES.LOCATION) && !formUpdated
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formUpdated
               }"
             />
           </template>
@@ -1201,8 +1202,8 @@ onBeforeMount(async () => {
               icon="fa-file"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(INTAKE_FORM_CATEGORIES.PERMITS) ||
-                    validationErrors.includes(INTAKE_FORM_CATEGORIES.APPLIED_PERMITS)) &&
+                  (validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                    validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)) &&
                   !formUpdated
               }"
             />

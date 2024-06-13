@@ -58,6 +58,7 @@ export type Submission = {
   contactFirstName: string | null;
   contactLastName: string | null;
   submissionType: string | null;
+  relatedEnquiries: string | null;
 
   user: User | null;
 } & Partial<IStamps>;
