@@ -217,7 +217,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           class="col-12 lg:col-6"
           name="needed"
           label="Needed"
-          :options="PermitNeeded"
+          :options="PERMIT_NEEDED_LIST"
         />
         <Dropdown
           class="col-12 lg:col-6"

@@ -291,7 +291,7 @@ onBeforeMount(async () => {
         :disabled="!editable"
         @on-change="
           (e) => {
-            if (!e.value) {
+            if (!e.target.value) {
               setFieldValue('companyNameRegistered', null);
               setFieldValue('isDevelopedInBC', null);
             }
