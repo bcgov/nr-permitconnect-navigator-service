@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 
 import EnquiryEditForm from '@/components/housing/enquiry/EnquiryEditForm.vue';
 import { Button, Message, TabPanel, TabView } from '@/lib/primevue';
-import { submissionService } from '@/services';
+import { enquiryService, noteService, PermissionService, submissionService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Submission } from '@/types';
@@ -18,17 +18,34 @@ const props = withDefaults(defineProps<Props>(), {});
 
 // State
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
+const loading: Ref<boolean> = ref(true);
+
+// Store
+const enquiryStore = useEnquiryStore();
+const { getEnquiry } = storeToRefs(enquiryStore);
+const permissionService = new PermissionService();
 
 // Actions
 const router = useRouter();
 
 onMounted(async () => {
-  if (props?.enquiry?.relatedActivityId) {
-    relatedSubmission.value = (
-      await submissionService.searchSubmissions({
-        activityId: [props.enquiry.relatedActivityId]
-      })
-    ).data[0];
+  if (props.enquiryId && props.activityId) {
+    const [enquiry, notes] = (
+      await Promise.all([enquiryService.getEnquiry(props?.enquiryId), noteService.listNotes(props?.activityId)])
+    ).map((r) => r.data);
+    enquiryStore.setEnquiry(enquiry);
+    enquiryStore.setNotes(notes);
+
+    if (enquiry?.relatedActivityId) {
+      relatedSubmission.value = (
+        await submissionService.searchSubmissions({
+          activityId: [enquiry.relatedActivityId]
+        })
+      ).data[0];
+    }
+    loading.value = false;
+  } else {
+    loading.value = false;
   }
 });
 </script>
@@ -73,7 +90,7 @@ onMounted(async () => {
             {{ relatedSubmission.activityId }}
           </router-link>
         </Message>
-        <EnquiryEditForm :enquiry="props.enquiry" />
+        <EnquiryEditForm :enquiry="getEnquiry" />
       </TabPanel>
       <TabPanel header="Notes">
         <div>Notes - Coming soon</div>
@@ -81,50 +98,3 @@ onMounted(async () => {
     </TabView>
   </div>
 </template>
-
-<style scoped lang="scss">
-.disclaimer {
-  font-weight: 500;
-}
-
-.p-card {
-  border-color: rgb(242, 241, 241);
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 1px;
-  margin-bottom: 1rem;
-
-  .section-header {
-    padding-left: 1rem;
-    padding-right: 0.5rem;
-  }
-
-  :deep(.p-card-title) {
-    font-size: 1rem;
-  }
-
-  :deep(.p-card-body) {
-    padding-bottom: 0.5rem;
-
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-    padding-top: 0;
-
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-:deep(.p-message-wrapper) {
-  padding: 0.5rem;
-}
-
-:deep(.p-invalid),
-:deep(.p-card.p-component:has(.p-invalid)) {
-  border-color: $app-error !important;
-}
-</style>

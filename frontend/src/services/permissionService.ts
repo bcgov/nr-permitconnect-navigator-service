@@ -11,8 +11,8 @@ export const enum PERMISSIONS {
   HOUSING_ENQUIRY_UPDATE = 'permission.housing.enquiry.update',
   HOUSING_ENQUIRY_DELETE = 'permission.housing.enquiry.delete',
 
-  // HOUSING_SUBMISSION_NAVIGATOR_READ = 'permission.housing.enquiry.navigator.read',
-  // HOUSING_SUBMISSION_PROPONENT_READ = 'permission.housing.enquiry.proponent.read',
+  HOUSING_ENQUIRY_NAVIGATOR_READ = 'permission.housing.enquiry.navigator.read',
+  HOUSING_ENQUIRY_PROPONENT_READ = 'permission.housing.enquiry.proponent.read',
 
   // HOUSING_INTAKE
 
@@ -68,6 +68,14 @@ const PermissionMap = [
   },
   {
     name: PERMISSIONS.HOUSING_ENQUIRY_DELETE,
+    roles: [AccessRole.PCNS_DEVELOPER, AccessRole.PCNS_PROPONENT]
+  },
+  {
+    name: PERMISSIONS.HOUSING_ENQUIRY_NAVIGATOR_READ,
+    roles: [AccessRole.PCNS_ADMIN, AccessRole.PCNS_DEVELOPER, AccessRole.PCNS_NAVIGATOR, AccessRole.PCNS_SUPERVISOR]
+  },
+  {
+    name: PERMISSIONS.HOUSING_ENQUIRY_PROPONENT_READ,
     roles: [AccessRole.PCNS_DEVELOPER, AccessRole.PCNS_PROPONENT]
   },
 
