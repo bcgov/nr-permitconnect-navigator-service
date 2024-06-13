@@ -61,9 +61,9 @@ const formSchema = object({
   agency: string().required().label('Agency'),
   businessDomain: string().required().label('Business domain'),
   statusLastVerified: date()
-    .max(new Date(), 'Last verified date cannot be in the future')
+    .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()
-    .label('Last verified date'),
+    .label('Status verified date'),
   submittedDate: date().max(new Date(), 'Submitted date cannot be in the future').nullable().label('Submitted date'),
   adjudicationDate: date()
     .max(new Date(), 'Adjudication date cannot be in the future')
@@ -215,6 +215,12 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         />
         <Dropdown
           class="col-12 lg:col-6"
+          name="needed"
+          label="Needed"
+          :options="PermitNeeded"
+        />
+        <Dropdown
+          class="col-12 lg:col-6"
           name="authStatus"
           label="Authorization status"
           :options="PermitAuthorizationStatus"
@@ -222,7 +228,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         <Calendar
           class="col-12 lg:col-6"
           name="statusLastVerified"
-          label="Last verified date"
+          label="Status verified date"
           :max-date="new Date()"
         />
 
@@ -241,12 +247,6 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           class="col-12 lg:col-6"
           name="issuedPermitId"
           label="Issued Permit ID"
-        />
-        <Dropdown
-          class="col-12 lg:col-6"
-          name="needed"
-          label="Needed"
-          :options="PermitNeeded"
         />
         <div class="field col-12 flex">
           <div class="flex-auto">
