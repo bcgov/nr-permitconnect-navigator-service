@@ -7,8 +7,9 @@ import { Calendar, Dropdown, EditableDropdown, InputMask, InputText, TextArea } 
 import { Button, Divider, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { INTAKE_STATUS_LIST } from '@/utils/enums';
-import { ContactPreferenceList, IntakeStatusList, ProjectRelationshipList, Regex } from '@/utils/constants';
+import { Regex } from '@/utils/enums/application';
+import { IntakeStatus } from '@/utils/enums/housing';
+import { CONTACT_PREFERENCE_LIST, INTAKE_STATUS_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -42,16 +43,16 @@ const intakeSchema = object({
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   contactFirstName: stringRequiredSchema.label('First name'),
   contactLastName: stringRequiredSchema.label('Last name'),
-  contactApplicantRelationship: string().required().oneOf(ProjectRelationshipList).label('Relationship to project'),
-  contactPreference: string().required().oneOf(ContactPreferenceList).label('Contact Preference'),
+  contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+  contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference'),
   contactPhoneNumber: stringRequiredSchema.label('Phone number'),
   contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
   enquiryDescription: string().required().label('Enquiry detail'),
-  intakeStatus: string().oneOf(IntakeStatusList).label('Intake state'),
+  intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: mixed()
     .nullable()
     .when('intakeStatus', {
-      is: (val: string) => val === INTAKE_STATUS_LIST.SUBMITTED,
+      is: (val: string) => val === IntakeStatus.SUBMITTED,
       then: (schema) =>
         schema
           .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
@@ -173,14 +174,14 @@ onMounted(async () => {
         name="contactApplicantRelationship"
         label="Relationship to activity"
         :disabled="!editable"
-        :options="ProjectRelationshipList"
+        :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
-        :options="ContactPreferenceList"
+        :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
@@ -214,7 +215,7 @@ onMounted(async () => {
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
-        :options="IntakeStatusList"
+        :options="INTAKE_STATUS_LIST"
       />
       <EditableDropdown
         class="col-4"
