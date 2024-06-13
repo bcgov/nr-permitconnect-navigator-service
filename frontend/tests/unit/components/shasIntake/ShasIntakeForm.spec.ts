@@ -88,7 +88,8 @@ const wrapperSettings = () => ({
     ],
     stubs: {
       RouterLink: RouterLinkStub,
-      'font-awesome-icon': true
+      'font-awesome-icon': true,
+      Map: true
     },
     directives: {
       Tooltip: Tooltip

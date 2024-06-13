@@ -21,6 +21,9 @@
       "authority": "FRONTEND_OIDC_AUTHORITY",
       "clientId": "FRONTEND_OIDC_CLIENTID"
     },
+    "openStreetMap": {
+      "apiPath": "FRONTEND_OPENSTREETMAP_APIPATH"
+    },
     "orgbook": {
       "apiPath": "FRONTEND_ORGBOOK_APIPATH"
     }

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import Map from '@/components/housing/maps/Map.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
 
@@ -53,11 +54,7 @@ import {
 } from '@/utils/constants/housing';
 import { confirmationTemplate } from '@/utils/templates';
 
-// Types
-type GeocoderEntry = {
-  geometry: { coordinates: Array<number>; [key: string]: any };
-  properties: { [key: string]: string };
-};
+import type { GeocoderEntry } from '@/types';
 
 // Props
 type Props = {
@@ -86,6 +83,9 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
+const mapLatitude: Ref<number | undefined> = ref(undefined);
+const mapLongitude: Ref<number | undefined> = ref(undefined);
+const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
 const isSubmittable: Ref<boolean> = ref(false);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const orgBookOptions: Ref<Array<any>> = ref([]);
@@ -100,6 +100,8 @@ const router = useRouter();
 const toast = useToast();
 
 const checkSubmittable = (stepNumber: number) => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
   if (stepNumber === 3) isSubmittable.value = true;
 };
 
@@ -149,6 +151,9 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     const properties = e.value?.properties;
     const geometry = e.value?.geometry;
 
+    mapLatitude.value = geometry.coordinates[1];
+    mapLongitude.value = geometry.coordinates[0];
+
     formRef.value?.setFieldValue(
       'location.streetAddress',
       `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
@@ -157,6 +162,15 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
     formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
     formRef.value?.setFieldValue('location.province', properties?.provinceCode);
+  }
+};
+
+const onLatLongInput = async () => {
+  const focus = await formRef?.value;
+
+  if (focus?.values?.location?.latitude && focus?.values?.location?.longitude) {
+    mapLatitude.value = focus?.values?.location?.latitude;
+    mapLongitude.value = focus?.values?.location?.longitude;
   }
 };
 
@@ -1032,6 +1046,7 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
+                            @blur="onLatLongInput"
                           />
                           <InputNumber
                             class="col-4"
@@ -1039,6 +1054,7 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
+                            @blur="onLatLongInput"
                           />
                           <div class="col-12 text-blue-500">
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
@@ -1049,6 +1065,11 @@ onBeforeMount(async () => {
                     </Card>
                   </div>
                 </div>
+                <Map
+                  ref="mapRef"
+                  :latitude="mapLatitude"
+                  :longitude="mapLongitude"
+                />
               </template>
             </Card>
             <Card>

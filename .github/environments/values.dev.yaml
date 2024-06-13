@@ -10,6 +10,7 @@ config:
     FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
     FRONTEND_OIDC_AUTHORITY: https://dev.loginproxy.gov.bc.ca/auth/realms/standard
     FRONTEND_OIDC_CLIENTID: nr-permit-connect-navigator-service-5188
+    FRONTEND_OPENSTREETMAP_APIPATH: https://tile.openstreetmap.org
     FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
     SERVER_APIPATH: /api/v1
     SERVER_BODYLIMIT: 30mb
