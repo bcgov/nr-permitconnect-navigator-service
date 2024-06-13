@@ -110,7 +110,7 @@ watchEffect(() => {
               {{ cardData.authStatus }}
             </p>
             <p class="col-12">
-              <span class="key font-bold">Last verified date:</span>
+              <span class="key font-bold">Status verified date:</span>
               {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
             </p>
           </div>
