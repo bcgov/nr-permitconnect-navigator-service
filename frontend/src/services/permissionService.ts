@@ -118,7 +118,13 @@ const PermissionMap = [
   },
   {
     name: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY,
-    roles: [AccessRole.PCNS_DEVELOPER, AccessRole.PCNS_PROPONENT]
+    roles: [
+      AccessRole.PCNS_ADMIN,
+      AccessRole.PCNS_DEVELOPER,
+      AccessRole.PCNS_NAVIGATOR,
+      AccessRole.PCNS_PROPONENT,
+      AccessRole.PCNS_SUPERVISOR
+    ]
   },
   {
     name: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION,

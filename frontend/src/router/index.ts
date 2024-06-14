@@ -50,30 +50,49 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'enquiry',
-        name: RouteName.HOUSING_ENQUIRY,
-        component: () => import('../views/housing/ShasEnquiryView.vue'),
-        props: createProps,
-        meta: {
-          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
-        }
-      },
-      {
-        path: 'intake',
-        name: RouteName.HOUSING_INTAKE,
-        component: () => import('@/views/housing/ShasIntakeView.vue'),
-        props: createProps,
-        meta: {
-          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
-        }
+        children: [
+          {
+            path: '',
+            name: RouteName.HOUSING_ENQUIRY,
+            component: () => import('../views/housing/enquiry/EnquiryView.vue'),
+            props: createProps,
+            meta: {
+              access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+            }
+          },
+          {
+            path: 'intake',
+            name: RouteName.HOUSING_ENQUIRY_INTAKE,
+            component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+            props: createProps,
+            meta: {
+              access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+            }
+          }
+        ]
       },
       {
         path: 'submission',
-        name: RouteName.HOUSING_SUBMISSION,
-        component: () => import('@/views/housing/SubmissionView.vue'),
-        props: createProps,
-        meta: {
-          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION
-        }
+        children: [
+          {
+            path: '',
+            name: RouteName.HOUSING_SUBMISSION,
+            component: () => import('@/views/housing/submission/SubmissionView.vue'),
+            props: createProps,
+            meta: {
+              access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION
+            }
+          },
+          {
+            path: 'intake',
+            name: RouteName.HOUSING_SUBMISSION_INTAKE,
+            component: () => import('@/views/housing/submission/SubmissionIntakeView.vue'),
+            props: createProps,
+            meta: {
+              access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+            }
+          }
+        ]
       },
       {
         path: 'submissions',
@@ -111,7 +130,7 @@ const routes: Array<RouteRecordRaw> = [
   },
   {
     path: '/:pathMatch(.*)*',
-    name: 'NotFound',
+    name: RouteName.NOT_FOUND,
     component: () => import('@/views/NotFound.vue'),
     meta: { title: 'Not Found' }
   }
@@ -186,10 +205,10 @@ export default function getRouter() {
     // Check access
     if (to.meta.access) {
       // Until we can figure out the race condition happening during hard url navigation and browser refresh
-      // this prevents the app throwing you to the forbidden page
+      // this prevents the app throwing you to the not found page
       await waitForRoles();
       if (!permissionService.can(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
-        router.replace({ name: RouteName.FORBIDDEN });
+        router.replace({ name: RouteName.NOT_FOUND });
         return;
       }
     }

@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
-import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
+import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
@@ -176,7 +176,7 @@ async function onSubmit(data: any) {
 
     if (data.basic.applyForPermitConnect === BasicResponse.YES) {
       router.push({
-        name: RouteName.HOUSING_INTAKE,
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
         query: {
           activityId: submissionResponse?.data.activityId,
           submissionId: submissionResponse?.data.submissionId

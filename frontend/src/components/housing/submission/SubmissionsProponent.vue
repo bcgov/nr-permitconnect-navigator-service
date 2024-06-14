@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import EnquiryListProponent from '@/components/housing/submission/EnquiryListProponent.vue';
+import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import SubmissionListProponent from '@/components/housing/submission/SubmissionListProponent.vue';
 import { TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';

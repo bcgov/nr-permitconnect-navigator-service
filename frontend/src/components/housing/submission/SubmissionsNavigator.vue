@@ -4,7 +4,7 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import EnquiryListNavigator from '@/components/housing/submission/EnquiryListNavigator.vue';
+import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';

@@ -9,9 +9,14 @@ import { housing } from './housing';
 import { permits } from './permits';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
+import {
+  APPLICATION_STATUS_LIST,
+  INTAKE_STATUS_LIST,
+  NUM_RESIDENTIAL_UNITS_LIST,
+  SUBMISSION_TYPE_LIST
+} from '../utils/constants/housing';
 import { BasicResponse } from '../utils/enums/application';
-import { IntakeStatus, SubmissionType } from '../utils/enums/housing';
+import { IntakeStatus } from '../utils/enums/housing';
 
 const schema = {
   createDraft: {
@@ -75,7 +80,9 @@ const schema = {
       submissionId: uuidv4.required(),
       activityId: activityId,
       queuePriority: Joi.number().required().integer().min(0).max(3),
-      submissionType: Joi.string().required().valid(SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE),
+      submissionType: Joi.string()
+        .required()
+        .valid(...SUBMISSION_TYPE_LIST),
       submittedAt: Joi.string().required(),
       relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),

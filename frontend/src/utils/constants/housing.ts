@@ -13,7 +13,8 @@ import {
   PermitNeeded,
   PermitStatus,
   ProjectLocation,
-  ProjectRelationship
+  ProjectRelationship,
+  SubmissionType
 } from '../enums/housing';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
@@ -35,13 +36,20 @@ export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.COMPLETED
 ];
 
+export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
+
 export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,
   ContactPreference.EMAIL,
   ContactPreference.EITHER
 ];
 
-export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
+export const ENQUIRY_TYPE_LIST = [
+  SubmissionType.GENERAL_ENQUIRY,
+  SubmissionType.STATUS_REQUEST,
+  SubmissionType.ESCALATION,
+  SubmissionType.INAPPLICABLE
+];
 
 export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
@@ -85,3 +93,5 @@ export const PERMIT_STATUS_LIST = [PermitStatus.NEW, PermitStatus.APPLIED, Permi
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
 
 export const QUEUE_PRIORITY = [1, 2, 3];
+
+export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];

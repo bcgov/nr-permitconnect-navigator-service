@@ -33,12 +33,12 @@ onMounted(() => {
       items: [
         {
           label: 'Work with a Housing Navigator',
-          route: RouteName.HOUSING_INTAKE,
+          route: RouteName.HOUSING_SUBMISSION_INTAKE,
           access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
-          route: RouteName.HOUSING_ENQUIRY,
+          route: RouteName.HOUSING_ENQUIRY_INTAKE,
           access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
         },
         {

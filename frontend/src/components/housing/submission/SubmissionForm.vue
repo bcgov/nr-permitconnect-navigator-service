@@ -11,9 +11,10 @@ import {
   InputMask,
   InputNumber,
   InputText,
+  SectionHeader,
   TextArea
 } from '@/components/form';
-import { Button, Divider, useToast } from '@/lib/primevue';
+import { Button, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -23,10 +24,11 @@ import {
   INTAKE_STATUS_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
   PROJECT_RELATIONSHIP_LIST,
-  QUEUE_PRIORITY
+  QUEUE_PRIORITY,
+  SUBMISSION_TYPE_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
-import { IntakeStatus, SubmissionType } from '@/utils/enums/housing';
+import { IntakeStatus } from '@/utils/enums/housing';
 import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
@@ -60,10 +62,7 @@ const formSchema = object({
     .max(3)
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  submissionType: string()
-    .required()
-    .oneOf([SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE])
-    .label('Submission type'),
+  submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...applicantValidator,
@@ -250,7 +249,7 @@ onBeforeMount(async () => {
         name="submissionType"
         label="Submission type"
         :disabled="!editable"
-        :options="[SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE]"
+        :options="SUBMISSION_TYPE_LIST"
       />
       <Calendar
         class="col-3"
@@ -265,12 +264,7 @@ onBeforeMount(async () => {
         :disabled="true"
       />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Basic information</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Basic information" />
 
       <InputText
         class="col-3"
@@ -333,12 +327,7 @@ onBeforeMount(async () => {
         :disabled="!editable"
       />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Housing</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Housing" />
 
       <InputText
         class="col-3"
@@ -408,12 +397,7 @@ onBeforeMount(async () => {
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Financially supported</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Financially supported" />
 
       <Dropdown
         class="col-3"
@@ -481,12 +465,7 @@ onBeforeMount(async () => {
       />
       <div class="col-6" />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Location</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Location" />
 
       <InputText
         class="col-3"
@@ -529,12 +508,7 @@ onBeforeMount(async () => {
       />
       <div class="col-6" />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Other</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Other" />
 
       <Checkbox
         class="col-12"
@@ -581,12 +555,7 @@ onBeforeMount(async () => {
         :disabled="!editable"
       />
 
-      <div class="col-12 mb-3">
-        <div class="flex">
-          <h4 class="flex-none flex align-items-center m-0">Submission state</h4>
-          <Divider class="flex-grow-1 flex ml-4" />
-        </div>
-      </div>
+      <SectionHeader title="Submission state" />
 
       <Dropdown
         class="col-3"

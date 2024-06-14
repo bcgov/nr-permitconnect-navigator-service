@@ -11,6 +11,7 @@ export { default as InputNumber } from './InputNumber.vue';
 export { default as InputText } from './InputText.vue';
 export { default as Password } from './Password.vue';
 export { default as RadioList } from './RadioList.vue';
+export { default as SectionHeader } from './SectionHeader.vue';
 export { default as StepperHeader } from './StepperHeader.vue';
 export { default as StepperNavigation } from './StepperNavigation.vue';
 export { default as TextArea } from './TextArea.vue';
