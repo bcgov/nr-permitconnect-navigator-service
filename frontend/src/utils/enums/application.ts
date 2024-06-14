@@ -41,9 +41,12 @@ export enum RouteName {
 
   HOUSING = 'housing',
   HOUSING_ENQUIRY = 'housing_enquiry',
-  HOUSING_INTAKE = 'housing_intake',
+  HOUSING_ENQUIRY_INTAKE = 'housing_enquiry_intake',
   HOUSING_SUBMISSION = 'housing_submission',
+  HOUSING_SUBMISSION_INTAKE = 'housing_submission_intake',
   HOUSING_SUBMISSIONS = 'housing_submissions',
+
+  NOT_FOUND = 'not_found',
 
   OIDC_CALLBACK = 'oidc_callback',
   OIDC_LOGIN = 'oidc_login',

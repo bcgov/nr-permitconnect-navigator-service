@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { computed, onMounted, ref } from 'vue';
 
+import BackButton from '@/components/common/BackButton.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -120,13 +121,11 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">
-    <font-awesome-icon
-      icon="fa fa-arrow-circle-left"
-      class="mr-1"
-    />
-    <span>Back to Submissions</span>
-  </router-link>
+  <BackButton
+    :route-name="RouteName.HOUSING_SUBMISSIONS"
+    text="Back to Submissions"
+  />
+
   <h1>
     Activity Submission:
     <span

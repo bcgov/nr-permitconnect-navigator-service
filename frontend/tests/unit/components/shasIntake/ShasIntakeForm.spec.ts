@@ -5,8 +5,8 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 
-import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
-import { shasIntakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import SubmissionIntakeForm from '@/components/housing/intake/SubmissionIntakeForm.vue';
+import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import { permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
@@ -116,21 +116,21 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('ShasIntakeForm tests', () => {
+describe('SubmissionIntakeForm tests', () => {
   it('renders component', async () => {
-    const wrapper = mount(ShasIntakeForm, wrapperSettings());
+    const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 
   it('checks submit btn disabled conditions', async () => {
-    const wrapper = mount(ShasIntakeForm, wrapperSettings());
+    const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
 
     const submitButton = wrapper.find('[type="submit"]');
     expect(submitButton.attributes('disabled')).toBeDefined();
   });
 
   it('checks categories for valid data', async () => {
-    const applicantTest = shasIntakeSchema.validateAt('applicant', {
+    const applicantTest = submissionIntakeSchema.validateAt('applicant', {
       applicant: {
         contactFirstName: 'testcontactFirstName',
         contactLastName: 'testcontactLastName',
@@ -141,7 +141,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const basicTest = shasIntakeSchema.validateAt('basic', {
+    const basicTest = submissionIntakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: BasicResponse.NO,
         isDevelopedInBC: BasicResponse.NO,
@@ -149,7 +149,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTest = shasIntakeSchema.validateAt('housing', {
+    const housingTest = submissionIntakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -170,7 +170,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTest = shasIntakeSchema.validateAt('location', {
+    const locationTest = submissionIntakeSchema.validateAt('location', {
       location: {
         naturalDisaster: 'Yes',
         projectLocation: 'testString1',
@@ -184,14 +184,14 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const permitsTest = shasIntakeSchema.validateAt('permits', {
+    const permitsTest = submissionIntakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BasicResponse.NO,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTest = shasIntakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTest = submissionIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: 1,
@@ -210,7 +210,7 @@ describe('ShasIntakeForm tests', () => {
   });
 
   it('checks categories for successful fail', async () => {
-    const applicantTestFail = shasIntakeSchema.validateAt('applicant', {
+    const applicantTestFail = submissionIntakeSchema.validateAt('applicant', {
       applicant: {
         contactFirstName: '',
         contactLastName: 'testcontactLastName',
@@ -221,7 +221,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const basicTestFail = shasIntakeSchema.validateAt('basic', {
+    const basicTestFail = submissionIntakeSchema.validateAt('basic', {
       basic: {
         isDevelopedByCompanyOrOrg: 'testString1',
         isDevelopedInBC: 'testString2',
@@ -229,7 +229,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const housingTestFail = shasIntakeSchema.validateAt('housing', {
+    const housingTestFail = submissionIntakeSchema.validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -249,7 +249,7 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const locationTestFail = shasIntakeSchema.validateAt('location', {
+    const locationTestFail = submissionIntakeSchema.validateAt('location', {
       location: {
         projectLocation: '',
         streetAddress: 'testString2',
@@ -262,14 +262,14 @@ describe('ShasIntakeForm tests', () => {
       }
     });
 
-    const permitsTestFail = shasIntakeSchema.validateAt('permits', {
+    const permitsTestFail = submissionIntakeSchema.validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BasicResponse.YES,
         checkProvincialPermits: 'testString2'
       }
     });
 
-    const appliedPermitsTestFail = shasIntakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTestFail = submissionIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: '',

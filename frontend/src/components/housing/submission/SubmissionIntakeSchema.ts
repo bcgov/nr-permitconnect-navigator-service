@@ -12,7 +12,7 @@ import { array, boolean, mixed, number, object, string } from 'yup';
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
-export const shasIntakeSchema = object({
+export const submissionIntakeSchema = object({
   [IntakeFormCategory.APPLICANT]: object({
     contactFirstName: stringRequiredSchema.label('First name'),
     contactLastName: stringRequiredSchema.label('Last name'),

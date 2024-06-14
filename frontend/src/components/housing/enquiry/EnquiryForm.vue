@@ -3,13 +3,18 @@ import { Form } from 'vee-validate';
 import { onMounted, ref } from 'vue';
 import { date, mixed, object, string } from 'yup';
 
-import { Calendar, Dropdown, EditableDropdown, InputMask, InputText, TextArea } from '@/components/form';
-import { Button, Divider, useToast } from '@/lib/primevue';
+import { Calendar, Dropdown, EditableDropdown, InputMask, InputText, SectionHeader, TextArea } from '@/components/form';
+import { Button, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { Regex } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
-import { CONTACT_PREFERENCE_LIST, INTAKE_STATUS_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import {
+  CONTACT_PREFERENCE_LIST,
+  ENQUIRY_TYPE_LIST,
+  INTAKE_STATUS_LIST,
+  PROJECT_RELATIONSHIP_LIST
+} from '@/utils/constants/housing';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -17,14 +22,6 @@ import type { Enquiry, User } from '@/types';
 
 interface EnquiryForm extends Enquiry {
   user?: User;
-}
-
-// Constants (MOVE TO REFACTOR ENUMS AFTER REBASE), IntakeStatusList as well
-enum ENQUIRY_TYPES {
-  GENERAL_ENQUIRY = 'General enquiry',
-  STATUS_REQUEST = 'Status request',
-  ESCALATION_REQUEST = 'Escalation request',
-  INAPPLICABLE = 'Inapplicable'
 }
 
 // Props
@@ -38,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {});
 const stringRequiredSchema = string().required().max(255);
 
 const intakeSchema = object({
-  submissionType: string().oneOf(Object.values(ENQUIRY_TYPES)).label('Submission type'),
+  submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   contactFirstName: stringRequiredSchema.label('First name'),
@@ -138,7 +135,7 @@ onMounted(async () => {
         name="submissionType"
         label="Submission type"
         :disabled="!editable"
-        :options="Object.values(ENQUIRY_TYPES)"
+        :options="ENQUIRY_TYPE_LIST"
       />
       <Calendar
         class="col-3"
@@ -153,10 +150,9 @@ onMounted(async () => {
         :disabled="!editable"
       />
       <div class="col-3" />
-      <div class="col-12 mb-2 flex align-items-center">
-        <div class="font-bold white-space-nowrap mr-3">Basic information</div>
-        <Divider />
-      </div>
+
+      <SectionHeader title="Basic information" />
+
       <InputText
         class="col-3"
         name="contactFirstName"
@@ -196,29 +192,27 @@ onMounted(async () => {
         label="Contact email"
         :disabled="!editable"
       />
-      <div class="col-12 mb-2 flex align-items-center">
-        <div class="font-bold white-space-nowrap mr-3">Enquiry detail</div>
-        <Divider />
-      </div>
+
+      <SectionHeader title="Enquiry detail" />
+
       <TextArea
         class="col-12"
         name="enquiryDescription"
         label=""
         :disabled="!editable"
       />
-      <div class="col-12 mb-2 flex align-items-center">
-        <div class="font-bold white-space-nowrap mr-3">Submission state</div>
-        <Divider />
-      </div>
+
+      <SectionHeader title="Submission state" />
+
       <Dropdown
-        class="col-4"
+        class="col-3"
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
       <EditableDropdown
-        class="col-4"
+        class="col-3"
         name="user"
         label="Assigned to"
         :disabled="!editable"

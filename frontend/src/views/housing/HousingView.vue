@@ -9,13 +9,13 @@ const items = ref([
     top: 'Start a new project investigation with a Navigator',
     bottom: 'Find out what permits may be needed for your project.',
     icon: 'fa-file-circle-check',
-    route: RouteName.HOUSING_INTAKE
+    route: RouteName.HOUSING_SUBMISSION_INTAKE
   },
   {
     top: 'Submit an enquiry',
     bottom: 'For general questions, requests, or updates on your application.',
     icon: 'fa-circle-question',
-    route: RouteName.HOUSING_ENQUIRY
+    route: RouteName.HOUSING_ENQUIRY_INTAKE
   },
   {
     top: 'View my drafts and submissions',

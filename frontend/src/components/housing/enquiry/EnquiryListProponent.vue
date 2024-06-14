@@ -84,7 +84,7 @@ function onDelete(enquiryId: string) {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_ENQUIRY,
+              name: RouteName.HOUSING_ENQUIRY_INTAKE,
               query: { activityId: data.activityId, enquiryId: data.enquiryId }
             }"
           >

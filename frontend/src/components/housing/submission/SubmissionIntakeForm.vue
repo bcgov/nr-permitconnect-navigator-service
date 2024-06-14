@@ -4,9 +4,9 @@ import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import BackButton from '@/components/common/BackButton.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
-
 import {
   AutoComplete,
   Calendar,
@@ -20,8 +20,8 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import CollectionDisclaimer from '@/components/housing/intake/CollectionDisclaimer.vue';
-import { shasIntakeSchema } from '@/components/housing/intake/ShasIntakeSchema';
+import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
   AccordionTab,
@@ -36,14 +36,6 @@ import {
 } from '@/lib/primevue';
 import { externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useTypeStore } from '@/store';
-
-import type { IInputEvent } from '@/interfaces';
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
-import type { Ref } from 'vue';
-import type { Permit } from '@/types';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { IntakeFormCategory, IntakeStatus, PermitNeeded, PermitStatus, ProjectLocation } from '@/utils/enums/housing';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
@@ -51,7 +43,15 @@ import {
   PROJECT_LOCATION_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { IntakeFormCategory, IntakeStatus, PermitNeeded, PermitStatus, ProjectLocation } from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
+
+import type { Ref } from 'vue';
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { IInputEvent } from '@/interfaces';
+import type { Permit } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -102,17 +102,6 @@ const toast = useToast();
 const checkSubmittable = (stepNumber: number) => {
   if (stepNumber === 3) isSubmittable.value = true;
 };
-
-function confirmLeave() {
-  confirm.require({
-    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
-    header: 'Leave this page?',
-    acceptLabel: 'Leave',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    accept: () => router.push({ name: RouteName.HOUSING })
-  });
-}
 
 function confirmSubmit(data: any) {
   const tempData = Object.assign({}, data);
@@ -338,17 +327,13 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!assignedActivityId">
-    <Button
-      class="p-0"
-      text
-      @click="confirmLeave"
-    >
-      <font-awesome-icon
-        icon="fa fa-arrow-circle-left"
-        class="mr-1"
-      />
-      <span>Back to Housing</span>
-    </Button>
+    <BackButton
+      :confirm-leave="true"
+      confirm-message="Are you sure you want to leave this page?
+      Any unsaved changes will be lost. Please save as draft first."
+      :route-name="RouteName.HOUSING"
+      text="Back to Housing"
+    />
 
     <Form
       v-if="initialFormValues"
@@ -356,7 +341,7 @@ onBeforeMount(async () => {
       v-slot="{ setFieldValue, values }"
       ref="formRef"
       :initial-values="initialFormValues"
-      :validation-schema="shasIntakeSchema"
+      :validation-schema="submissionIntakeSchema"
       @invalid-submit="(e) => displayErrors(e)"
       @submit="confirmSubmit"
       @change="formUpdated = true"
@@ -1574,3 +1559,4 @@ onBeforeMount(async () => {
   padding-right: 0;
 }
 </style>
+@/components/housing/intake/SubmissionIntakeSchema

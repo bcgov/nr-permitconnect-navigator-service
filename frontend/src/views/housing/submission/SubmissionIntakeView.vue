@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import ShasIntakeForm from '@/components/housing/intake/ShasIntakeForm.vue';
+import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 
 import type { Ref } from 'vue';
 
@@ -26,7 +26,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ShasIntakeForm
+  <SubmissionIntakeForm
     v-if="!loading"
     :activity-id="props.activityId"
     :submission-id="props.submissionId"
