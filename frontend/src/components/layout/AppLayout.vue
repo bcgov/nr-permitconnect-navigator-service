@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
 import { PermissionService } from '@/services';
-import { PERMISSIONS } from '@/services/permissionService';
+import { Permissions } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 
 // Store
@@ -17,7 +17,7 @@ const permissionService = new PermissionService();
       <DevelopmentRoleOverride
         v-if="
           authStore.getIsAuthenticated &&
-          permissionService.can(PERMISSIONS.TESTING_ROLE_OVERRIDE, false) &&
+          permissionService.can(Permissions.TESTING_ROLE_OVERRIDE, false) &&
           permissionService.getRoleOverride()
         "
       />

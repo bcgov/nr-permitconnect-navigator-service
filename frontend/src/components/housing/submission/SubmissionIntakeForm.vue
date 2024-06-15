@@ -2,7 +2,6 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import BackButton from '@/components/common/BackButton.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -96,7 +95,6 @@ const formUpdated: Ref<boolean> = ref(false);
 
 // Actions
 const confirm = useConfirm();
-const router = useRouter();
 const toast = useToast();
 
 const checkSubmittable = (stepNumber: number) => {

@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 
-import SubmissionIntakeForm from '@/components/housing/intake/SubmissionIntakeForm.vue';
+import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import { permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';

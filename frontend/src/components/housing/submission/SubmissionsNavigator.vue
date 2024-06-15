@@ -10,7 +10,7 @@ import SubmissionListNavigator from '@/components/housing/submission/SubmissionL
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
-import PermissionService, { PERMISSIONS } from '@/services/permissionService';
+import PermissionService, { Permissions } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
@@ -102,7 +102,7 @@ watch(accordionIndex, () => {
   <TabView v-if="!loading">
     <TabPanel header="Projects">
       <Accordion
-        v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
+        v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -158,7 +158,7 @@ watch(accordionIndex, () => {
       </div>
     </TabPanel>
     <TabPanel
-      v-if="permissionService.can(PERMISSIONS.HOUSING_BRINGFORWARD_READ)"
+      v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
       header="Bring Forward Calendar"
     >
       <SubmissionBringForwardCalendar :bring-forward="bringForward" />
