@@ -6,7 +6,7 @@ import Tooltip from 'primevue/tooltip';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-import ShasEnquiryForm from '@/components/housing/intake/ShasEnquiryForm.vue';
+import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
 
@@ -95,15 +95,15 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('ShasEnquiryForm', () => {
+describe('EnquiryIntakeForm', () => {
   describe('component', async () => {
     it('renders component', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       expect(wrapper.isVisible()).toBeTruthy();
     });
 
     it('renders initial form fields', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const firstNameInput = wrapper.get('[name="applicant.contactFirstName"]');
       const lastNameInput = wrapper.get('[name="applicant.contactLastName"]');
@@ -127,7 +127,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('renders the right input fields when isRelated is set to Yes', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[0].setValue('Yes');
       await nextTick();
@@ -140,7 +140,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('renders the right input fields when isRelated is set to No', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -153,7 +153,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('disables submit when isRelated to existing application is No and applying to PCNS is Yes', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -167,7 +167,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     test('submit is enabled when isRelated to existing application is No applying to PCNS is No', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -181,7 +181,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     test('submit is enabled when Yes, No, or not selected for isRelated', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const submitBtn = wrapper.get('[type="submit"]');
       await nextTick();
@@ -200,7 +200,7 @@ describe('ShasEnquiryForm', () => {
 
   describe('validation', () => {
     it('accepts valid values (isRelated: Yes)', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
       formRef.setValues(basicValidFormValues());
@@ -210,7 +210,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -227,7 +227,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -244,7 +244,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('generates email error', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -261,7 +261,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('generates missing first and last name missing error', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -281,7 +281,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('generates errors for isRelated', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -299,7 +299,7 @@ describe('ShasEnquiryForm', () => {
     });
 
     it('generates errors for applyForPermitConnect', async () => {
-      const wrapper = mount(ShasEnquiryForm, wrapperSettings());
+      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
       const formRef = (wrapper.vm as any)?.formRef;
 

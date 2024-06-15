@@ -16,7 +16,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
-import PermissionService, { PERMISSIONS } from '@/services/permissionService';
+import PermissionService, { Permissions } from '@/services/permissionService';
 import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
@@ -103,7 +103,7 @@ const filters = ref({
     <template #header>
       <div class="flex justify-content-between">
         <Button
-          v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSION_CREATE)"
+          v-if="permissionService.can(Permissions.HOUSING_SUBMISSION_CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"

@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { PERMISSIONS, default as PermissionService } from '@/services/permissionService';
+import { Permissions, default as PermissionService } from '@/services/permissionService';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -34,38 +34,38 @@ onMounted(() => {
         {
           label: 'Work with a Housing Navigator',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
-          access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+          access: Permissions.NAVIGATION_HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
           route: RouteName.HOUSING_ENQUIRY_INTAKE,
-          access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+          access: Permissions.NAVIGATION_HOUSING_ENQUIRY
         },
         {
           label: 'Drafts and submissions',
           route: RouteName.HOUSING_SUBMISSIONS,
-          access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB
+          access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB
         },
         {
           label: 'Status of application/permit',
-          access: PERMISSIONS.NAVIGATION_HOUSING
+          access: Permissions.NAVIGATION_HOUSING
         }
       ],
-      access: PERMISSIONS.NAVIGATION_HOUSING
+      access: Permissions.NAVIGATION_HOUSING
     },
     {
       label: 'Submissions',
       route: RouteName.HOUSING_SUBMISSIONS,
-      access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS
+      access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS
     },
     {
       label: 'User Management',
-      access: PERMISSIONS.NAVIGATION_USER_MANAGEMENT
+      access: Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
     },
     {
       label: 'Developer',
       route: RouteName.DEVELOPER,
-      access: PERMISSIONS.NAVIGATION_DEVELOPER
+      access: Permissions.NAVIGATION_DEVELOPER
     }
   ];
 });

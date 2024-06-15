@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { AuthService, PermissionService } from '@/services';
-import { PERMISSIONS } from '@/services/permissionService';
+import { Permissions } from '@/services/permissionService';
 import { useAppStore, useAuthStore } from '@/store';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
     path: '/developer',
     name: RouteName.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
-    meta: { requiresAuth: true, access: PERMISSIONS.NAVIGATION_DEVELOPER }
+    meta: { requiresAuth: true, access: Permissions.NAVIGATION_DEVELOPER }
   },
   {
     path: '/forbidden',
@@ -45,7 +45,7 @@ const routes: Array<RouteRecordRaw> = [
         name: RouteName.HOUSING,
         component: () => import('../views/housing/HousingView.vue'),
         meta: {
-          access: PERMISSIONS.NAVIGATION_HOUSING
+          access: Permissions.NAVIGATION_HOUSING
         }
       },
       {
@@ -57,7 +57,7 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('../views/housing/enquiry/EnquiryView.vue'),
             props: createProps,
             meta: {
-              access: PERMISSIONS.NAVIGATION_HOUSING_ENQUIRY
+              access: Permissions.NAVIGATION_HOUSING_ENQUIRY
             }
           },
           {
@@ -66,7 +66,7 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
             props: createProps,
             meta: {
-              access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+              access: Permissions.NAVIGATION_HOUSING_INTAKE
             }
           }
         ]
@@ -80,7 +80,7 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('@/views/housing/submission/SubmissionView.vue'),
             props: createProps,
             meta: {
-              access: PERMISSIONS.NAVIGATION_HOUSING_SUBMISSION
+              access: Permissions.NAVIGATION_HOUSING_SUBMISSION
             }
           },
           {
@@ -89,7 +89,7 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('@/views/housing/submission/SubmissionIntakeView.vue'),
             props: createProps,
             meta: {
-              access: PERMISSIONS.NAVIGATION_HOUSING_INTAKE
+              access: Permissions.NAVIGATION_HOUSING_INTAKE
             }
           }
         ]
@@ -99,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
         name: RouteName.HOUSING_SUBMISSIONS,
         component: () => import('@/views/housing/SubmissionsView.vue'),
         meta: {
-          access: [PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS, PERMISSIONS.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
+          access: [Permissions.NAVIGATION_HOUSING_SUBMISSIONS, Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
         }
       }
     ]
@@ -196,7 +196,7 @@ export default function getRouter() {
 
     // Check for reroutes
     if (to.name === RouteName.HOUSING) {
-      if (!permissionService.can(PERMISSIONS.NAVIGATION_HOUSING)) {
+      if (!permissionService.can(Permissions.NAVIGATION_HOUSING)) {
         router.replace({ name: RouteName.HOUSING_SUBMISSIONS });
         return;
       }

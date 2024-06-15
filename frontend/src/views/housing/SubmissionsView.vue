@@ -5,14 +5,14 @@ import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNav
 import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
 
 import { PermissionService } from '@/services';
-import { PERMISSIONS } from '@/services/permissionService';
+import { Permissions } from '@/services/permissionService';
 
 // Store
 const permissionService = new PermissionService();
 
 // Actions
 const getTitle = computed(() =>
-  permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_NAVIGATOR_READ) ? 'Submissions' : 'My drafts and submissions'
+  permissionService.can(Permissions.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and submissions'
 );
 </script>
 
@@ -20,8 +20,8 @@ const getTitle = computed(() =>
   <h1>{{ getTitle }}</h1>
 
   <!-- Navigator view -->
-  <SubmissionsNavigator v-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_NAVIGATOR_READ)" />
+  <SubmissionsNavigator v-if="permissionService.can(Permissions.HOUSING_SUBMISSION_READ)" />
 
   <!-- Proponent view -->
-  <SubmissionsProponent v-else-if="permissionService.can(PERMISSIONS.HOUSING_SUBMISSIONS_PROPONENT_READ)" />
+  <SubmissionsProponent v-else-if="permissionService.can(Permissions.HOUSING_SUBMISSION_READ_SELF)" />
 </template>
