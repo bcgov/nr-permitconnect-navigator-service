@@ -154,6 +154,23 @@ export function joinPath(...items: Array<string>): string {
 }
 
 /**
+ * @function omit
+ * Omits the given set of keys from the given object
+ * @param {object} data The object to copy and manipulate
+ * @param {string[]} keys Array of keys to remove
+ * @returns {object} A new object with the given keys removed
+ */
+export function omit<Data extends object, Keys extends keyof Data>(data: Data, keys: Keys[]): Omit<Data, Keys> {
+  const result = { ...data };
+
+  for (const key of keys) {
+    delete result[key];
+  }
+
+  return result as Omit<Data, Keys>;
+}
+
+/**
  * @function parseCSV
  * Converts a comma separated value string into an array of string values
  * @param {string} value The CSV string to parse
@@ -205,4 +222,22 @@ export function setDispositionHeader(filename: string) {
   } else {
     return dispositionHeader.concat(`; filename*=UTF-8''${encodedFilename}`);
   }
+}
+
+/**
+ * @function setEmptyStringsToNull
+ * Converts empty string values to null values
+ * @param  {object} data The object to change
+ * @returns {object} The object with the remapped values
+ */
+export function setEmptyStringsToNull(data: any) {
+  Object.keys(data).forEach((key) => {
+    const keyWithType = key as keyof typeof data;
+    const value = data[keyWithType];
+    if (typeof value === 'string' && value === '') {
+      data = { ...data, [keyWithType]: null };
+    }
+  });
+
+  return data;
 }

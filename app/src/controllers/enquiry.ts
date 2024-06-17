@@ -1,12 +1,12 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { activityService, enquiryService, noteService, userService } from '../services';
+import { Initiative } from '../utils/enums/application';
+import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
+import { getCurrentIdentity, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
-import { Initiative } from '../utils/enums/application';
-import { IntakeStatus, NoteType } from '../utils/enums/housing';
-import { getCurrentIdentity, isTruthy } from '../utils/utils';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {
@@ -70,7 +70,9 @@ const controller = {
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
-      intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+      intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
+      enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
+      enquiryType: data?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
     };
   },
 

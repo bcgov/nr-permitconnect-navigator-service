@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 import type { Enquiry, Note } from '@/types';
@@ -53,7 +53,7 @@ export const useEnquiryStore = defineStore('enquiry', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,

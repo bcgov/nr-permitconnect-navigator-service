@@ -23,5 +23,5 @@ export const basicEnquiry = Joi.object({
     .required(),
   applyForPermitConnect: Joi.string().valid(...YES_NO_LIST),
   enquiryDescription: Joi.string().required(),
-  relatedActivityId: Joi.string().max(255)
+  relatedActivityId: Joi.string().max(255).allow(null)
 });

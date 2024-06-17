@@ -29,6 +29,7 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
           table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
+          table.text('enquiry_type');
           table.timestamp('submitted_at', { useTz: true }).notNullable();
           table.text('submitted_by').notNullable();
           table.text('contact_first_name');
@@ -42,6 +43,8 @@ export async function up(knex: Knex): Promise<void> {
           table.text('enquiry_description');
           table.text('apply_for_permit_connect');
           table.text('intake_status');
+          table.text('enquiry_status');
+          table.text('waiting_on');
           stamps(knex, table);
         })
       )

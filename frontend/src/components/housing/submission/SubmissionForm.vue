@@ -5,16 +5,18 @@ import { boolean, number, object, string } from 'yup';
 
 import {
   Calendar,
+  CancelButton,
   Checkbox,
   Dropdown,
   EditableDropdown,
+  FormNavigationGuard,
   InputMask,
   InputNumber,
   InputText,
   SectionHeader,
   TextArea
 } from '@/components/form';
-import { Button, useToast } from '@/lib/primevue';
+import { Button, Message, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -34,6 +36,12 @@ import { applicantValidator, assignedToValidator, latitudeValidator, longitudeVa
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission, User } from '@/types';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
+
+// Interfacefs
+interface SubmissionForm extends Submission {
+  user?: User;
+}
 
 // Props
 type Props = {
@@ -51,7 +59,9 @@ const submissionStore = useSubmissionStore();
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(props.editable);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
 const formSchema = object({
@@ -148,21 +158,52 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
+function onCancel() {
+  formRef.value?.resetForm();
+  showCancelMessage.value = true;
+
+  setTimeout(() => {
+    document.getElementById('cancelMessage')?.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+  setTimeout(() => {
+    showCancelMessage.value = false;
+  }, 6000);
+}
+
+function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  // Scrolls to the top-most error
+  let first: Element | null = null;
+
+  for (let error of errors) {
+    const el = document.querySelector(`[name="${error}"]`);
+    const rect = el?.getBoundingClientRect();
+
+    if (rect) {
+      if (!first) first = el;
+      else if (rect.top < first.getBoundingClientRect().top) first = el;
+    }
+  }
+
+  first?.scrollIntoView({ behavior: 'smooth' });
+}
+
 const onSubmit = async (values: any) => {
-  editable.value = false;
-
   try {
-    const submissionData = {
-      ...values,
-      assignedUserId: values.user?.userId ?? undefined,
-      ...values.submissionTypes
-    };
+    editable.value = false;
 
-    delete submissionData.user;
+    const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['user']);
+    submitData.assignedUserId = values.user?.userId ?? undefined;
 
-    await submissionService.updateSubmission(submissionData.submissionId, submissionData);
-
-    submissionStore.setSubmission(submissionData);
+    const result = await submissionService.updateSubmission(values.submissionId, submitData);
+    submissionStore.setSubmission(result.data);
+    formRef.value?.resetForm({
+      values: {
+        ...submitData,
+        user: values.user
+      }
+    });
 
     toast.success('Form saved');
   } catch (e: any) {
@@ -229,13 +270,26 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <Message
+    v-if="showCancelMessage"
+    id="cancelMessage"
+    severity="warn"
+    :closable="false"
+    :life="5500"
+  >
+    Your changes have not been saved.
+  </Message>
   <Form
     v-if="initialFormValues"
-    v-slot="{ handleReset, setFieldValue, values }"
+    v-slot="{ setFieldValue, values }"
+    ref="formRef"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
+    @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
+    <FormNavigationGuard />
+
     <div class="formgrid grid">
       <Dropdown
         class="col-3"
@@ -597,17 +651,9 @@ onBeforeMount(async () => {
           icon="pi pi-check"
           :disabled="!editable"
         />
-        <Button
-          label="Cancel"
-          outlined
-          class="ml-2"
-          icon="pi pi-times"
-          :disabled="!editable"
-          @click="
-            () => {
-              handleReset();
-            }
-          "
+        <CancelButton
+          :editable="props.editable"
+          @clicked="onCancel"
         />
       </div>
     </div>

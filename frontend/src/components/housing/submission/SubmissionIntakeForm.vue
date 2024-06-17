@@ -147,8 +147,8 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
   }
 };
 
-function displayErrors(a: any) {
-  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+function onInvalidSubmit(e: any) {
+  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
   formUpdated.value = false;
 }
@@ -340,7 +340,7 @@ onBeforeMount(async () => {
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
-      @invalid-submit="(e) => displayErrors(e)"
+      @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
       @change="formUpdated = true"
     >

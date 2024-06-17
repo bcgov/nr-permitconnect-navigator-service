@@ -5,7 +5,7 @@ import { basicEnquiry } from './basic';
 import { email, phoneNumber, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST } from '../utils/constants/application';
-import { INTAKE_STATUS_LIST } from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
   createDraft: {
@@ -28,8 +28,8 @@ const schema = {
     body: Joi.object({
       enquiryId: Joi.string().required(),
       activityId: Joi.string().required(),
+      enquiryType: Joi.string().allow(null),
       submittedAt: Joi.date(),
-      updatedAt: Joi.date(),
       submittedBy: Joi.string().max(255).required(),
       contactFirstName: Joi.string().max(255).required(),
       contactLastName: Joi.string().max(255).required(),
@@ -40,7 +40,7 @@ const schema = {
       isRelated: Joi.string()
         .valid(...Object.values(YES_NO_LIST))
         .allow(null),
-      relatedActivityId: Joi.string().max(256).allow(null),
+      relatedActivityId: Joi.string().max(255).allow(null),
       enquiryDescription: Joi.string().min(0).allow(null),
       applyForPermitConnect: Joi.string()
         .valid(...Object.values(YES_NO_LIST))
@@ -49,7 +49,9 @@ const schema = {
         .valid(...Object.values(INTAKE_STATUS_LIST))
         .allow(null),
       assignedUserId: uuidv4.allow(null),
-      submissionType: Joi.string().allow(null)
+      enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      waitingOn: Joi.string().allow(null).max(255),
+      updatedAt: Joi.date()
     })
   }
 };
