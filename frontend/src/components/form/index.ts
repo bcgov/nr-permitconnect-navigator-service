@@ -1,10 +1,12 @@
 export { default as AutoComplete } from './AutoComplete.vue';
 export { default as Calendar } from './Calendar.vue';
+export { default as CancelButton } from './CancelButton.vue';
 export { default as Checkbox } from './Checkbox.vue';
 export { default as CopyToClipboard } from './CopyToClipboard.vue';
 export { default as Dropdown } from './Dropdown.vue';
 export { default as EditableDropdown } from './EditableDropdown.vue';
 export { default as Editor } from './Editor.vue';
+export { default as FormNavigationGuard } from './FormNavigationGuard.vue';
 export { default as GridRow } from './GridRow.vue';
 export { default as InputMask } from './InputMask.vue';
 export { default as InputNumber } from './InputNumber.vue';

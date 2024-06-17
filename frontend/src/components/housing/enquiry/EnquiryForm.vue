@@ -3,39 +3,62 @@ import { Form } from 'vee-validate';
 import { onMounted, ref } from 'vue';
 import { date, mixed, object, string } from 'yup';
 
-import { Calendar, Dropdown, EditableDropdown, InputMask, InputText, SectionHeader, TextArea } from '@/components/form';
-import { Button, useToast } from '@/lib/primevue';
+import {
+  Calendar,
+  CancelButton,
+  Dropdown,
+  EditableDropdown,
+  FormNavigationGuard,
+  InputMask,
+  InputText,
+  SectionHeader,
+  TextArea
+} from '@/components/form';
+import { Button, Message, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { Regex } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
 import {
+  APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
   ENQUIRY_TYPE_LIST,
   INTAKE_STATUS_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Enquiry, User } from '@/types';
 
+// Interfaces
 interface EnquiryForm extends Enquiry {
   user?: User;
 }
 
 // Props
 type Props = {
+  editable?: boolean;
   enquiry: any;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  editable: true
+});
+
+// State
+const assigneeOptions: Ref<Array<User>> = ref([]);
+const editable: Ref<boolean> = ref(props.editable);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<any | undefined> = ref(undefined);
+const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
 const stringRequiredSchema = string().required().max(255);
 
 const intakeSchema = object({
-  submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
+  enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   contactFirstName: stringRequiredSchema.label('First name'),
@@ -61,13 +84,10 @@ const intakeSchema = object({
           return obj !== null && !!(obj as User)?.userId;
         })
     })
-    .label('Assigned to')
+    .label('Assigned to'),
+  applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
+  waitingOn: string().notRequired().max(255).label('waiting on')
 });
-
-// State
-const assigneeOptions: Ref<Array<User>> = ref([]);
-const editable: Ref<boolean> = ref(true);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Actions
 const enquiryStore = useEnquiryStore();
@@ -89,20 +109,57 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-const onSubmit = async (data: any) => {
-  editable.value = false;
+function onCancel() {
+  formRef.value?.resetForm();
+  showCancelMessage.value = true;
 
-  const enquiryData: EnquiryForm = Object.assign({}, data);
-  enquiryData['assignedUserId'] = enquiryData.user?.userId ?? undefined;
-  delete enquiryData['user'];
+  setTimeout(() => {
+    document.getElementById('cancelMessage')?.scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+  setTimeout(() => {
+    showCancelMessage.value = false;
+  }, 6000);
+}
 
+function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  // Scrolls to the top-most error
+  let first: Element | null = null;
+
+  for (let error of errors) {
+    const el = document.querySelector(`[name="${error}"]`);
+    const rect = el?.getBoundingClientRect();
+
+    if (rect) {
+      if (!first) first = el;
+      else if (rect.top < first.getBoundingClientRect().top) first = el;
+    }
+  }
+
+  first?.scrollIntoView({ behavior: 'smooth' });
+}
+
+const onSubmit = async (values: any) => {
   try {
-    const result = await enquiryService.updateEnquiry(data.enquiryId, { ...enquiryData });
+    editable.value = false;
+
+    const submitData: Enquiry = omit(setEmptyStringsToNull(values) as EnquiryForm, ['user']);
+    submitData.assignedUserId = values.user?.userId ?? undefined;
+
+    const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);
+    formRef.value?.resetForm({
+      values: {
+        ...submitData,
+        submittedAt: new Date(submitData.submittedAt),
+        user: values.user
+      }
+    });
 
     toast.success('Form saved');
   } catch (e: any) {
-    toast.error('Failed to edit enquiry', e);
+    toast.error('Failed to save enquiry', e);
   } finally {
     editable.value = true;
   }
@@ -121,18 +178,29 @@ onMounted(async () => {
 </script>
 
 <template>
+  <Message
+    v-if="showCancelMessage"
+    id="cancelMessage"
+    severity="warn"
+    :closable="false"
+    :life="5500"
+  >
+    Your changes have not been saved.
+  </Message>
   <Form
     v-if="initialFormValues"
     ref="formRef"
-    v-slot="{ handleReset }"
     :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
+    @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
+    <FormNavigationGuard />
+
     <div class="formgrid grid">
       <Dropdown
         class="col-3"
-        name="submissionType"
+        name="enquiryType"
         label="Submission type"
         :disabled="!editable"
         :options="ENQUIRY_TYPE_LIST"
@@ -220,73 +288,35 @@ onMounted(async () => {
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
       />
-      <div class="col-12">
+      <Dropdown
+        class="col-3"
+        name="enquiryStatus"
+        label="Activity state"
+        :disabled="!editable"
+        :options="APPLICATION_STATUS_LIST"
+      />
+      <InputText
+        class="col-3"
+        name="waitingOn"
+        label="Waiting on"
+        :disabled="!editable"
+      />
+
+      <div
+        v-if="props.editable"
+        class="field col-12 mt-5"
+      >
         <Button
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!editable"
+          :disabled="!props.editable"
         />
-        <Button
-          label="Cancel"
-          outlined
-          class="ml-2 p-button-danger"
-          icon="pi pi-times"
-          :disabled="!editable"
-          @click="
-            () => {
-              handleReset();
-            }
-          "
+        <CancelButton
+          :editable="props.editable"
+          @clicked="onCancel"
         />
       </div>
     </div>
   </Form>
 </template>
-
-<style scoped lang="scss">
-.disclaimer {
-  font-weight: 500;
-}
-
-.p-card {
-  border-color: rgb(242, 241, 241);
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 1px;
-  margin-bottom: 1rem;
-
-  .section-header {
-    padding-left: 1rem;
-    padding-right: 0.5rem;
-  }
-
-  :deep(.p-card-title) {
-    font-size: 1rem;
-  }
-
-  :deep(.p-card-body) {
-    padding-bottom: 0.5rem;
-
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-    padding-top: 0;
-
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-:deep(.p-message-wrapper) {
-  padding: 0.5rem;
-}
-
-:deep(.p-invalid),
-:deep(.p-card.p-component:has(.p-invalid)) {
-  border-color: $app-error !important;
-}
-</style>

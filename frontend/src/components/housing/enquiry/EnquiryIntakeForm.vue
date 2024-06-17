@@ -53,14 +53,16 @@ const formSchema = object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
       is: (isRelated: string) => isRelated === BasicResponse.YES,
-      then: (schema) => schema.required().max(255).label('Confirmation ID')
+      then: (schema) => schema.required().max(255).label('Confirmation ID'),
+      otherwise: (schema) => schema.notRequired().label('Confirmation ID')
     }),
     enquiryDescription: string().required().label('Enquiry'),
     applyForPermitConnect: string()
       .label('Service application')
       .when('isRelated', {
         is: (isRelated: string) => isRelated === BasicResponse.NO,
-        then: (schema) => schema.required().oneOf(YES_NO_LIST)
+        then: (schema) => schema.required().oneOf(YES_NO_LIST),
+        otherwise: (schema) => schema.notRequired()
       })
   })
 });
@@ -107,8 +109,9 @@ function confirmSubmit(data: any) {
   });
 }
 
-function displayErrors(a: any) {
-  validationErrors.value = Array.from(new Set(a.errors ? Object.keys(a.errors).map((x) => x.split('.')[0]) : []));
+function onInvalidSubmit(e: any) {
+  console.log(e);
+  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
@@ -116,6 +119,8 @@ async function onSaveDraft(data: any) {
   editable.value = false;
 
   try {
+    console.log('1');
+
     let response;
     if (data.enquiryId) {
       response = await enquiryService.updateDraft(data.enquiryId, data);
@@ -256,7 +261,7 @@ async function emailConfirmation(activityId: string) {
       keep-values
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
-      @invalid-submit="(e) => displayErrors(e)"
+      @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
     >
       <input

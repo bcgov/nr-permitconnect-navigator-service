@@ -20,6 +20,7 @@ export default {
       enquiry_id: input.enquiryId,
       activity_id: input.activityId,
       assigned_user_id: input.assignedUserId,
+      enquiry_type: input.enquiryType,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
       contact_first_name: input.contactFirstName,
@@ -32,7 +33,9 @@ export default {
       related_activity_id: input.relatedActivityId,
       enquiry_description: input.enquiryDescription,
       apply_for_permit_connect: input.applyForPermitConnect,
-      intake_status: input.intakeStatus
+      intake_status: input.intakeStatus,
+      waiting_on: input.waitingOn,
+      enquiry_status: input.enquiryStatus
     };
   },
 
@@ -41,6 +44,7 @@ export default {
       enquiryId: input.enquiry_id,
       activityId: input.activity_id,
       assignedUserId: input.assigned_user_id,
+      enquiryType: input.enquiry_type,
       submittedAt: input.submitted_at?.toISOString() as string,
       submittedBy: input.submitted_by,
       contactFirstName: input.contact_first_name,
@@ -54,6 +58,8 @@ export default {
       enquiryDescription: input.enquiry_description,
       applyForPermitConnect: input.apply_for_permit_connect,
       intakeStatus: input.intake_status,
+      enquiryStatus: input.enquiry_status,
+      waitingOn: input.waiting_on,
       updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };

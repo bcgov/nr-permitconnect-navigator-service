@@ -116,7 +116,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('SubmissionIntakeForm tests', () => {
+describe('SubmissionIntakeForm', () => {
   it('renders component', async () => {
     const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
