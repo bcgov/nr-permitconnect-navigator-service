@@ -1,50 +1,87 @@
 /* eslint-disable max-len */
 import type { Knex } from 'knex';
+import stamps from '../stamps';
 
 export async function up(knex: Knex): Promise<void> {
-  return Promise.resolve()
-    .then(() =>
-      knex.schema.alterTable('submission', function (table) {
-        // Add new columns
-        table.text('is_developed_by_company_or_org');
-        table.text('is_developed_in_bc');
-        table.text('multi_family_units');
-        table.text('other_units');
-        table.text('other_units_description');
-        table.text('rental_units');
-        table.text('project_location');
-        table.text('project_location_description');
-        table.text('locality');
-        table.text('province');
-        table.text('has_applied_provincial_permits');
-        table.text('check_provincial_permits');
-        table.text('indigenous_description');
-        table.text('non_profit_description');
-        table.text('housing_coop_description');
-        table.text('submission_type');
+  return (
+    Promise.resolve()
+      // Create public schema tables
+      .then(() =>
+        knex.schema.createTable('enquiry', (table) => {
+          table.uuid('enquiry_id').primary();
+          table
+            .text('activity_id')
+            .notNullable()
+            .references('activity_id')
+            .inTable('activity')
+            .onUpdate('CASCADE')
+            .onDelete('CASCADE');
+          table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
+          table.text('enquiry_type');
+          table.timestamp('submitted_at', { useTz: true }).notNullable();
+          table.text('submitted_by').notNullable();
+          table.text('contact_first_name');
+          table.text('contact_last_name');
+          table.text('contact_phone_number');
+          table.text('contact_email');
+          table.text('contact_preference');
+          table.text('contact_applicant_relationship');
+          table.text('is_related');
+          table.text('related_activity_id');
+          table.text('enquiry_description');
+          table.text('apply_for_permit_connect');
+          table.text('intake_status');
+          table.text('enquiry_status');
+          table.text('waiting_on');
+          stamps(knex, table);
+        })
+      )
 
-        // Rename columns
-        table.renameColumn('is_rental_unit', 'has_rental_units');
+      // Alter public schema tables
+      .then(() =>
+        knex.schema.alterTable('submission', function (table) {
+          // Add new columns
+          table.text('is_developed_by_company_or_org');
+          table.text('is_developed_in_bc');
+          table.text('multi_family_units');
+          table.text('other_units');
+          table.text('other_units_description');
+          table.text('rental_units');
+          table.text('project_location');
+          table.text('project_location_description');
+          table.text('locality');
+          table.text('province');
+          table.text('has_applied_provincial_permits');
+          table.text('check_provincial_permits');
+          table.text('indigenous_description');
+          table.text('non_profit_description');
+          table.text('housing_coop_description');
+          table.text('submission_type');
+          table.text('contact_first_name');
+          table.text('contact_last_name');
 
-        // Change column types
-        table.setNullable('has_rental_units');
+          // Rename columns
+          table.renameColumn('is_rental_unit', 'has_rental_units');
 
-        // Drop columns
-        table.dropColumn('guidance');
-        table.dropColumn('status_request');
-        table.dropColumn('inquiry');
-        table.dropColumn('emergency_assist');
-        table.dropColumn('inapplicable');
-      })
-    )
+          // Change column types
+          table.setNullable('has_rental_units');
 
-    .then(() =>
-      knex.schema.raw(`alter table public.submission
+          // Drop columns
+          table.dropColumn('guidance');
+          table.dropColumn('status_request');
+          table.dropColumn('inquiry');
+          table.dropColumn('emergency_assist');
+          table.dropColumn('inapplicable');
+        })
+      )
+
+      .then(() =>
+        knex.schema.raw(`alter table public.submission
         alter column has_rental_units drop default;`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`alter table public.submission
+      .then(() =>
+        knex.schema.raw(`alter table public.submission
         alter column financially_supported_bc drop default,
         alter column financially_supported_bc drop not null,
         alter column financially_supported_bc set data type text
@@ -58,10 +95,10 @@ export async function up(knex: Knex): Promise<void> {
             else true
           end
         );`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`alter table public.submission
+      .then(() =>
+        knex.schema.raw(`alter table public.submission
         alter column financially_supported_indigenous drop default,
         alter column financially_supported_indigenous drop not null,
         alter column financially_supported_indigenous set data type text
@@ -75,10 +112,10 @@ export async function up(knex: Knex): Promise<void> {
             else true
           end
         );`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`alter table public.submission
+      .then(() =>
+        knex.schema.raw(`alter table public.submission
         alter column financially_supported_non_profit drop default,
         alter column financially_supported_non_profit drop not null,
         alter column financially_supported_non_profit set data type text
@@ -92,10 +129,10 @@ export async function up(knex: Knex): Promise<void> {
             else true
           end
         );`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`alter table public.submission
+      .then(() =>
+        knex.schema.raw(`alter table public.submission
         alter column financially_supported_housing_coop drop default,
         alter column financially_supported_housing_coop drop not null,
         alter column financially_supported_housing_coop set data type text
@@ -109,19 +146,27 @@ export async function up(knex: Knex): Promise<void> {
             else true
           end
         );`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`drop function public.get_activity_statistics(
+      .then(() =>
+        knex.schema.alterTable('permit', function (table) {
+          table.timestamp('status_last_verified', { useTz: true });
+        })
+      )
+
+      // Drop public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function public.get_activity_statistics(
         date_from text,
         date_to text,
         month_year text,
         user_id uuid
       )`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.raw(`create or replace function public.get_activity_statistics(
+      // Create public schema functions
+      .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
         date_from text,
         date_to text,
         month_year text,
@@ -176,23 +221,32 @@ export async function up(knex: Knex): Promise<void> {
             count(*) filter (where s."submission_type" = 'Status request')
           from public.submission s;
       end; $$`)
-    )
+      )
 
-    .then(() =>
-      knex.schema.alterTable('permit', function (table) {
-        table.timestamp('status_last_verified', { useTz: true });
-      })
-    );
+      // Create public schema table triggers
+      .then(() =>
+        knex.schema.raw(`create trigger before_update_enquiry_trigger
+    before update on "enquiry"
+    for each row execute procedure public.set_updated_at();`)
+      )
+
+      // Create audit triggers
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_enquiry_trigger
+      AFTER UPDATE OR DELETE ON enquiry
+      FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+  );
 }
 
 export async function down(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
-      .then(() =>
-        knex.schema.alterTable('permit', function (table) {
-          table.dropColumn('status_last_verified');
-        })
-      )
+      // Drop audit triggers
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_enquiry_trigger ON permit'))
+
+      // Drop public schema table triggers
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_enquiry_trigger ON "enquiry"'))
 
       .then(() =>
         knex.schema.raw(`drop function public.get_activity_statistics(
@@ -267,6 +321,13 @@ export async function down(knex: Knex): Promise<void> {
         end; $$`)
       )
 
+      // Alter public schema tablegs
+      .then(() =>
+        knex.schema.alterTable('permit', function (table) {
+          table.dropColumn('status_last_verified');
+        })
+      )
+
       .then(() =>
         knex.schema.raw(`alter table public.submission
         drop constraint submission_financially_supported_housing_coop_check,
@@ -328,6 +389,9 @@ export async function down(knex: Knex): Promise<void> {
 
       .then(() =>
         knex.schema.alterTable('submission', function (table) {
+          table.dropColumn('contact_last_name');
+          table.dropColumn('contact_first_name');
+
           table.boolean('guidance');
           table.boolean('status_request');
           table.boolean('inquiry');
@@ -356,5 +420,8 @@ export async function down(knex: Knex): Promise<void> {
           table.dropColumn('is_developed_by_company_or_org');
         })
       )
+
+      // Drop public schema tables
+      .then(() => knex.schema.dropTableIfExists('enquiry'))
   );
 }
