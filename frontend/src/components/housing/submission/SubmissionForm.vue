@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
 import {
@@ -40,6 +40,7 @@ import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 // Interfacefs
 interface SubmissionForm extends Submission {
+  locationAddress: string;
   user?: User;
 }
 
@@ -117,7 +118,9 @@ const formSchema = object({
     then: (schema) => schema.required().max(255).label('Name of Housing co-operative'),
     otherwise: () => string().notRequired()
   }),
-  streetAddress: string().required().max(255).label('Location address'),
+  streetAddress: string().notRequired().max(255).label('Street address'),
+  locality: string().notRequired().max(255).label('Locality'),
+  province: string().notRequired().max(255).label('Province'),
   locationPIDs: string().notRequired().max(255).label('Location PID(s)'),
   latitude: latitudeValidator,
   longitude: longitudeValidator,
@@ -132,7 +135,7 @@ const formSchema = object({
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
-  astNotes: string().notRequired().max(255).label('AST notes'),
+  astNotes: string().notRequired().max(255).label('Automated Status Tool (AST) Notes'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
@@ -193,7 +196,7 @@ const onSubmit = async (values: any) => {
   try {
     editable.value = false;
 
-    const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['user']);
+    const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
 
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
@@ -201,6 +204,7 @@ const onSubmit = async (values: any) => {
     formRef.value?.resetForm({
       values: {
         ...submitData,
+        locationAddress: values.locationAddress,
         user: values.user
       }
     });
@@ -213,7 +217,19 @@ const onSubmit = async (values: any) => {
   }
 };
 
-onBeforeMount(async () => {
+function updateLocationAddress(values: any, setFieldValue?: Function) {
+  const locationAddress = [];
+  if (values.streetAddress?.length) locationAddress.push(values.streetAddress);
+  if (values.locality?.length) locationAddress.push(values.locality);
+  if (values.province?.length) locationAddress.push(values.province);
+
+  const locationAddressStr = locationAddress.join(', ');
+  if (setFieldValue) setFieldValue('locationAddress', locationAddressStr);
+
+  return locationAddressStr;
+}
+
+onMounted(async () => {
   if (props.submission.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
   }
@@ -249,7 +265,10 @@ onBeforeMount(async () => {
     nonProfitDescription: props.submission.nonProfitDescription,
     financiallySupportedHousingCoop: props.submission.financiallySupportedHousingCoop,
     housingCoopDescription: props.submission.housingCoopDescription,
+    locationAddress: updateLocationAddress(props.submission),
     streetAddress: props.submission.streetAddress,
+    locality: props.submission.locality,
+    province: props.submission.province,
     locationPIDs: props.submission.locationPIDs,
     latitude: props.submission.latitude,
     longitude: props.submission.longitude,
@@ -295,14 +314,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="queuePriority"
         label="Priority"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="QUEUE_PRIORITY"
       />
       <Dropdown
         class="col-3"
         name="submissionType"
         label="Submission type"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="SUBMISSION_TYPE_LIST"
       />
       <Calendar
@@ -324,19 +343,19 @@ onBeforeMount(async () => {
         class="col-3"
         name="contactFirstName"
         label="First name"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputText
         class="col-3"
         name="contactLastName"
         label="Last name"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputText
         class="col-3"
         name="companyNameRegistered"
         label="Company"
-        :disabled="!editable"
+        :disabled="!props.editable"
         @on-change="
           (e) => {
             if (!e.target.value) {
@@ -350,21 +369,21 @@ onBeforeMount(async () => {
         class="col-3"
         name="isDevelopedInBC"
         label="Company registered in B.C?"
-        :disabled="!editable || !values.companyNameRegistered"
+        :disabled="!props.editable || !values.companyNameRegistered"
         :options="YES_NO_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to project"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
@@ -372,13 +391,13 @@ onBeforeMount(async () => {
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputText
         class="col-3"
         name="contactEmail"
         label="Contact email"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
 
       <SectionHeader title="Housing" />
@@ -387,34 +406,34 @@ onBeforeMount(async () => {
         class="col-3"
         name="projectName"
         label="Project name"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <div class="col-9" />
       <TextArea
         class="col-12"
         name="projectDescription"
         label="Additional information about project"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <Dropdown
         class="col-3"
         name="singleFamilyUnits"
         label="Single family units"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="multiFamilyUnits"
         label="Multi-family units"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <InputText
         class="col-3"
         name="otherUnitsDescription"
         label="Other type"
-        :disabled="!editable"
+        :disabled="!props.editable"
         @on-change="
           (e) => {
             if (!e.target.value) {
@@ -428,14 +447,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="otherUnits"
         label="Other type units"
-        :disabled="!editable || !values.otherUnitsDescription"
+        :disabled="!props.editable || !values.otherUnitsDescription"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="hasRentalUnits"
         label="Rental included?"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -447,7 +466,7 @@ onBeforeMount(async () => {
         class="col-3"
         name="rentalUnits"
         label="Rental units"
-        :disabled="!editable || values.hasRentalUnits !== BasicResponse.YES"
+        :disabled="!props.editable || values.hasRentalUnits !== BasicResponse.YES"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
 
@@ -457,7 +476,7 @@ onBeforeMount(async () => {
         class="col-3"
         name="financiallySupportedBC"
         label="BC Housing"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_UNSURE_LIST"
       />
       <div class="col-9" />
@@ -465,7 +484,7 @@ onBeforeMount(async () => {
         class="col-3"
         name="financiallySupportedIndigenous"
         label="Indigenous Housing Provider"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -477,14 +496,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="indigenousDescription"
         label="Name of Indigenous Housing Provider"
-        :disabled="!editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
+        :disabled="!props.editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
         class="col-3"
         name="financiallySupportedNonProfit"
         label="Non-profit housing society"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -496,14 +515,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="nonProfitDescription"
         label="Name of Non-profit housing society"
-        :disabled="!editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
+        :disabled="!props.editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
         class="col-3"
         name="financiallySupportedHousingCoop"
         label="Housing co-operative"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -515,7 +534,7 @@ onBeforeMount(async () => {
         class="col-3"
         name="housingCoopDescription"
         label="Name of Housing co-operative"
-        :disabled="!editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
+        :disabled="!props.editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
       />
       <div class="col-6" />
 
@@ -523,41 +542,62 @@ onBeforeMount(async () => {
 
       <InputText
         class="col-3"
-        name="streetAddress"
+        name="locationAddress"
         label="Location address"
-        :disabled="!editable"
+        :disabled="true"
+      />
+      <InputText
+        class="col-3"
+        name="streetAddress"
+        label="Street address"
+        :disabled="!props.editable"
+        @on-change="updateLocationAddress(values, setFieldValue)"
+      />
+      <InputText
+        class="col-3"
+        name="locality"
+        label="Locality"
+        :disabled="!props.editable"
+        @on-change="updateLocationAddress(values, setFieldValue)"
+      />
+      <InputText
+        class="col-3"
+        name="province"
+        label="Province"
+        :disabled="!props.editable"
+        @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
         class="col-3"
         name="locationPIDs"
         label="Location PID(s)"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputNumber
         class="col-3"
         name="latitude"
         label="Location latitude"
         help-text="Optionally provide a number between 48 and 60"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputNumber
         class="col-3"
         name="longitude"
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <InputText
         class="col-3"
         name="geomarkUrl"
         label="Geomark URL"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <Dropdown
         class="col-3"
         name="naturalDisaster"
         label="Affected by natural disaster?"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="YES_NO_LIST"
       />
       <div class="col-6" />
@@ -568,7 +608,7 @@ onBeforeMount(async () => {
         class="col-12"
         name="addedToATS"
         label="Authorized Tracking System (ATS) updated"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :bold="true"
       />
 
@@ -580,7 +620,7 @@ onBeforeMount(async () => {
           class="col-3"
           name="atsClientNumber"
           label="ATS Client #"
-          :disabled="!editable"
+          :disabled="!props.editable"
         />
         <div class="col-9" />
       </div>
@@ -588,25 +628,25 @@ onBeforeMount(async () => {
         class="col-12"
         name="ltsaCompleted"
         label="Land Title Survey Authority (LTSA) completed"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <Checkbox
         class="col-12"
         name="bcOnlineCompleted"
         label="BC Online completed"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <Checkbox
         class="col-12"
         name="aaiUpdated"
         label="Authorization and Approvals Insight (AAI) updated"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
       <TextArea
         class="col-12"
         name="astNotes"
-        label="AST notes"
-        :disabled="!editable"
+        label="Automated Status Tool (AST) Notes"
+        :disabled="!props.editable"
       />
 
       <SectionHeader title="Submission state" />
@@ -615,14 +655,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="intakeStatus"
         label="Intake state"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="INTAKE_STATUS_LIST"
       />
       <EditableDropdown
         class="col-3"
         name="user"
         label="Assigned to"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
@@ -631,14 +671,14 @@ onBeforeMount(async () => {
         class="col-3"
         name="applicationStatus"
         label="Activity state"
-        :disabled="!editable"
+        :disabled="!props.editable"
         :options="APPLICATION_STATUS_LIST"
       />
       <InputText
         class="col-3"
         name="waitingOn"
         label="Waiting on"
-        :disabled="!editable"
+        :disabled="!props.editable"
       />
 
       <div
@@ -649,7 +689,7 @@ onBeforeMount(async () => {
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!editable"
+          :disabled="!props.editable"
         />
         <CancelButton
           :editable="props.editable"

@@ -33,3 +33,5 @@ onBeforeRouteLeave((to) => {
   return true;
 });
 </script>
+
+<template><div /></template>
