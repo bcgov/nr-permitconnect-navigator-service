@@ -86,9 +86,6 @@ onUpdated(async () => {
 </template>
 
 <style scoped lang="scss">
-.max-width-1500 {
-  max-width: 1500px;
-}
 #map {
   height: 400px;
   width: 100%;

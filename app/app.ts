@@ -41,10 +41,7 @@ app.use(
           new URL(config.get('frontend.geocoder.apiPath')).origin,
           new URL(config.get('frontend.orgbook.apiPath')).origin
         ],
-        'img-src': [
-          "'self'", // eslint-disable-line
-          new URL(config.get('frontend.openStreetMap.apiPath')).origin
-        ]
+        'img-src': ["'self'", 'https: data:'] // eslint-disable-line
       }
     }
   })
