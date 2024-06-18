@@ -31,6 +31,8 @@ export type Submission = {
   financiallySupportedHousingCoop: string;
   housingCoopDescription: string;
   streetAddress: string;
+  locality: string;
+  province: string;
   locationPIDs: string;
   latitude: number;
   longitude: number;
