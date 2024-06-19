@@ -19,6 +19,7 @@ import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
+import { formatDateLong } from '@/utils/formatters';
 
 // Props
 type Props = {
@@ -76,7 +77,6 @@ onMounted(async () => {
   submissionStore.setDocuments(documents);
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
-  submissionStore.setPermitTypes(permitTypes);
   typeStore.setPermitTypes(permitTypes);
 
   loading.value = false;
@@ -267,7 +267,7 @@ const filteredDocuments = computed(() => {
           <template #body="{ data }">
             <a
               href="#"
-              @click="documentService.downloadDocument(data.documentId)"
+              @click="documentService.downloadDocument(data.documentId, data.filename)"
             >
               {{ data.filename }}
             </a>

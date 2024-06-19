@@ -110,7 +110,6 @@ function confirmSubmit(data: any) {
 }
 
 function onInvalidSubmit(e: any) {
-  console.log(e);
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
@@ -119,8 +118,6 @@ async function onSaveDraft(data: any) {
   editable.value = false;
 
   try {
-    console.log('1');
-
     let response;
     if (data.enquiryId) {
       response = await enquiryService.updateDraft(data.enquiryId, data);
