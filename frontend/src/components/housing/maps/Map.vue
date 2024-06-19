@@ -4,10 +4,15 @@ import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
 
+import {
+  BC_BOUNDARIES_LOWER,
+  BC_BOUNDARIES_UPPER,
+  MAP_ICON_OPTIONS_RED,
+  MAP_INITIAL_START_POINT,
+  OSM_TILE_LAYER_OPTIONS,
+  OSM_URL_TEMPLATE
+} from '@/utils/constants/housing';
 import { onMounted, onUpdated } from 'vue';
-
-// Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
-// Parent component needs to trigger nextTick().then(() => mapRef?.value?.resizeMap()
 
 type Props = {
   latitude?: number;
@@ -23,6 +28,8 @@ const props = withDefaults(defineProps<Props>(), {
 let marker: L.Marker;
 let map: L.Map;
 
+// Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
+// Parent component needs to trigger nextTick().then(() => mapRef?.value?.resizeMap()
 function resizeMap() {
   if (map) map.invalidateSize();
 }
@@ -30,32 +37,21 @@ function resizeMap() {
 function setAddressMarker(coords: any) {
   if (marker) map.removeLayer(marker);
   // Custom(-ish) markers courtesy of https://github.com/pointhi/leaflet-color-markers
-  const redIcon = new L.Icon({
-    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    shadowSize: [41, 41]
-  });
+  const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);
   marker = L.marker(coords, { icon: redIcon });
   map.addLayer(marker);
 }
 
 async function initMap() {
-  const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-  });
+  const osm = L.tileLayer(OSM_URL_TEMPLATE, OSM_TILE_LAYER_OPTIONS);
 
   map = L.map('map', {
-    center: [48.428, -123.365],
-    zoom: 13,
+    ...MAP_INITIAL_START_POINT,
     layers: [osm]
   });
 
   // Don't allow dragging outside BC
-  const bcBounds = new L.LatLngBounds([44, -140], [63, -109]);
+  const bcBounds = new L.LatLngBounds(BC_BOUNDARIES_LOWER, BC_BOUNDARIES_UPPER);
   map.setMaxBounds(bcBounds);
   map.on('drag', function () {
     map.panInsideBounds(bcBounds, { animate: false });
@@ -77,7 +73,7 @@ onUpdated(async () => {
 });
 </script>
 <template>
-  <div class="grid nested-grid max-width-1500">
+  <div class="grid nested-grid">
     <div class="col-12">
       <!-- map -->
       <div id="map" />

@@ -17,6 +17,8 @@ import {
   SubmissionType
 } from '../enums/housing';
 
+import type { BaseIconOptions, LatLngExpression } from 'leaflet';
+
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,
   brief: false,
@@ -101,3 +103,31 @@ export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, Proj
 export const QUEUE_PRIORITY = [1, 2, 3];
 
 export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
+
+/*
+ * Mapping constants
+ */
+export const MAP_ICON_OPTIONS_RED: BaseIconOptions = {
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+};
+
+export const OSM_URL_TEMPLATE = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+export const OSM_TILE_LAYER_OPTIONS = {
+  maxZoom: 19,
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+};
+
+// Lat/Long for Victoria
+export const MAP_INITIAL_START_POINT: { center: LatLngExpression; zoom: number } = {
+  center: [48.428, -123.365],
+  zoom: 13
+};
+
+export const BC_BOUNDARIES_LOWER: LatLngExpression = [44, -140];
+export const BC_BOUNDARIES_UPPER: LatLngExpression = [63, -109];
