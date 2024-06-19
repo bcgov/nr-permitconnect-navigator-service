@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form, FieldArray, ErrorMessage } from 'vee-validate';
+import { Form, FieldArray, ErrorMessage, useForm } from 'vee-validate';
 import { onBeforeMount, nextTick, ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
@@ -151,12 +150,14 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
   }
 };
 
-const onLatLongInput = async () => {
-  const focus = await formRef?.value;
+const onLatLongInputClick = async () => {
+  const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
+  const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
 
-  if (focus?.values?.location?.latitude && focus?.values?.location?.longitude) {
-    mapLatitude.value = focus?.values?.location?.latitude;
-    mapLongitude.value = focus?.values?.location?.longitude;
+  if (validLat && validLong) {
+    const location = formRef?.value?.values?.location;
+    mapLatitude.value = location.latitude;
+    mapLongitude.value = location.longitude;
   }
 };
 
@@ -1028,7 +1029,6 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
-                            @blur="onLatLongInput"
                           />
                           <InputNumber
                             class="col-4"
@@ -1036,8 +1036,14 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
-                            @blur="onLatLongInput"
                           />
+                          <Button
+                            class="lat-long-btn"
+                            label="Show on map"
+                            @click="onLatLongInputClick"
+                          />
+                        </div>
+                        <div class="grid nested-grid">
                           <div class="col-12 text-blue-500">
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
@@ -1576,5 +1582,8 @@ onBeforeMount(async () => {
   padding-left: 0;
   padding-right: 0;
 }
+
+.lat-long-btn {
+  height: 2.3rem;
+}
 </style>
-@/components/housing/intake/SubmissionIntakeSchema
