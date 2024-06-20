@@ -1,12 +1,20 @@
 import config from 'config';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { APPLICATION_STATUS_LIST, RENTAL_STATUS_LIST } from '../components/constants';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../components/utils';
-import { submissionService, permitService, userService } from '../services';
+import {
+  activityService,
+  emailService,
+  enquiryService,
+  submissionService,
+  permitService,
+  userService
+} from '../services';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -38,10 +46,18 @@ const controller = {
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
             const financiallySupportedValues = {
-              financiallySupportedBC: isTruthy(data.isBCHousingSupported),
-              financiallySupportedIndigenous: isTruthy(data.isIndigenousHousingProviderSupported),
-              financiallySupportedNonProfit: isTruthy(data.isNonProfitSupported),
-              financiallySupportedHousingCoop: isTruthy(data.isHousingCooperativeSupported)
+              financiallySupportedBC: data.isBCHousingSupported
+                ? toTitleCase(data.isBCHousingSupported)
+                : BasicResponse.NO,
+              financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
+                ? toTitleCase(data.isIndigenousHousingProviderSupported)
+                : BasicResponse.NO,
+              financiallySupportedNonProfit: data.isNonProfitSupported
+                ? toTitleCase(data.isNonProfitSupported)
+                : BasicResponse.NO,
+              financiallySupportedHousingCoop: data.isHousingCooperativeSupported
+                ? toTitleCase(data.isHousingCooperativeSupported)
+                : BasicResponse.NO
             };
 
             // Get greatest of multiple Units data
@@ -108,27 +124,28 @@ const controller = {
               formId: x.id,
               submissionId: data.form.submissionId,
               activityId: data.form.confirmationId,
-              applicationStatus: APPLICATION_STATUS_LIST.NEW,
+              applicationStatus: ApplicationStatus.NEW,
               companyNameRegistered: data.companyNameRegistered,
               contactEmail: data.contactEmail,
               contactPreference: camelCaseToTitleCase(data.contactPreference),
               projectName: data.projectName,
               projectDescription: data.projectDescription,
               contactPhoneNumber: data.contactPhoneNumber,
-              contactName: `${data.contactFirstName} ${data.contactLastName}`,
+              contactFirstName: data.contactFirstName,
+              contactLastName: data.contactLastName,
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
-              financiallySupported: Object.values(financiallySupportedValues).includes(true),
+              financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
               intakeStatus: toTitleCase(data.form.status),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
               longitude: data.longitude,
-              naturalDisaster: data.naturalDisasterInd,
+              naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: maxUnits,
-              isRentalUnit: data.isRentalUnit
+              hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : RENTAL_STATUS_LIST.UNSURE,
+                : BasicResponse.UNSURE,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
@@ -153,23 +170,165 @@ const controller = {
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  createEmptySubmission: async (req: Request, res: Response, next: NextFunction) => {
-    let testSubmissionId;
-    let submissionQuery;
+  generateSubmissionData: async (req: Request, intakeStatus: string) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = req.body;
 
-    // Testing for activityId collisions, which are truncated UUIDs
-    // If a collision is detected, generate new UUID and test again
-    do {
-      testSubmissionId = uuidv4();
-      submissionQuery = await submissionService.getSubmission(testSubmissionId.substring(0, 8).toUpperCase());
-    } while (submissionQuery);
+    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
 
+    let applicant, basic, housing, location, permits;
+    let appliedPermits: Array<Permit> = [],
+      investigatePermits: Array<Permit> = [];
+
+    if (data.applicant) {
+      applicant = {
+        contactFirstName: data.applicant.contactFirstName,
+        contactLastName: data.applicant.contactLastName,
+        contactPhoneNumber: data.applicant.contactPhoneNumber,
+        contactEmail: data.applicant.contactEmail,
+        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
+        contactPreference: data.applicant.contactPreference
+      };
+    }
+
+    if (data.basic) {
+      basic = {
+        isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
+        isDevelopedInBC: data.basic.isDevelopedInBC,
+        companyNameRegistered: data.basic.registeredName
+      };
+    }
+
+    if (data.housing) {
+      housing = {
+        projectName: data.housing.projectName,
+        projectDescription: data.housing.projectDescription,
+        singleFamilyUnits: data.housing.singleFamilyUnits,
+        multiFamilyUnits: data.housing.multiFamilyUnits,
+        otherUnitsDescription: data.housing.otherUnitsDescription,
+        otherUnits: data.housing.otherUnits,
+        hasRentalUnits: data.housing.hasRentalUnits,
+        financiallySupportedBC: data.housing.financiallySupportedBC,
+        financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
+        financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
+        financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
+        rentalUnits: data.housing.rentalUnits,
+        indigenousDescription: data.housing.indigenousDescription,
+        nonProfitDescription: data.housing.nonProfitDescription,
+        housingCoopDescription: data.housing.housingCoopDescription
+      };
+    }
+
+    if (data.location) {
+      location = {
+        naturalDisaster: data.location.naturalDisaster,
+        projectLocation: data.location.projectLocation,
+        projectLocationDescription: data.location.projectLocationDescription,
+        locationPIDs: data.location.ltsaPIDLookup,
+        latitude: data.location.latitude,
+        longitude: data.location.longitude,
+        streetAddress: data.location.streetAddress,
+        locality: data.location.locality,
+        province: data.location.province
+      };
+    }
+
+    if (data.permits) {
+      permits = {
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+        checkProvincialPermits: data.permits.checkProvincialPermits
+      };
+    }
+
+    if (data.appliedPermits && data.appliedPermits.length) {
+      appliedPermits = data.appliedPermits.map((x: Permit) => ({
+        permitId: x.permitId,
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        trackingId: x.trackingId,
+        status: PermitStatus.APPLIED,
+        statusLastVerified: x.statusLastVerified
+      }));
+    }
+
+    if (data.investigatePermits && data.investigatePermits.length) {
+      investigatePermits = data.investigatePermits.flatMap((x: Permit) => ({
+        permitId: x.permitId,
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        statusLastVerified: x.statusLastVerified
+      }));
+    }
+
+    // Put new submission together
+    return {
+      submission: {
+        ...applicant,
+        ...basic,
+        ...housing,
+        ...location,
+        ...permits,
+        submissionId: data.submissionId ?? uuidv4(),
+        activityId: activityId,
+        submittedAt: data.submittedAt ?? new Date().toISOString(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+        intakeStatus: intakeStatus,
+        applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
+        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
+      },
+      appliedPermits,
+      investigatePermits
+    };
+  },
+
+  createDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const submitter = (req.currentUser?.tokenPayload as any)?.idir_username;
-      const result = await submissionService.createEmptySubmission(testSubmissionId, submitter);
+      const data: any = req.body;
 
-      res.status(201).json({ activityId: result.activity_id });
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+      );
+
+      // Create new submission
+      const result = await submissionService.createSubmission(submission);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  createSubmission: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        IntakeStatus.SUBMITTED
+      );
+
+      // Create new submission
+      const result = await submissionService.createSubmission(submission);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionService.deleteSubmission(req.params.submissionId);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -188,23 +347,91 @@ const controller = {
     }
   },
 
-  getSubmission: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+  getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getSubmission(req.params.activityId);
+      const response = await submissionService.getSubmission(req.params.submissionId);
+
+      if (response?.activityId) {
+        const relatedEnquiries = await enquiryService.getRelatedEnquiries(response.activityId);
+        if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();
 
       // Pull from PCNS database
-      const response = await submissionService.getSubmissions();
+      let response = await submissionService.getSubmissions();
+
+      if (isTruthy(req.query.self)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+      }
+
       res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  searchSubmissions: async (
+    req: Request<
+      never,
+      {
+        activityId?: Array<string>;
+        submissionId?: Array<string>;
+        intakeStatus?: Array<string>;
+        includeUser?: string;
+      }
+    >,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await submissionService.searchSubmissions({
+        ...req.query,
+        includeUser: isTruthy(req.query.includeUser)
+      });
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  updateDraft: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+      );
+
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+
+      // Update submission
+      const result = await submissionService.updateSubmission({
+        ...(submission as Submission),
+        updatedAt: new Date().toISOString(),
+        updatedBy: userId
+      });
+
+      // Remove already existing permits for this activity
+      await permitService.deletePermitsByActivity(submission.activityId);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+
+      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
     }
@@ -213,8 +440,25 @@ const controller = {
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
+
+      const response = await submissionService.updateSubmission({
+        ...(req.body as Submission),
+        updatedAt: new Date().toISOString(),
+        updatedBy: userId
+      });
       res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+  /**
+   * @function emailConfirmation
+   * Send an email with the confirmation of submission
+   */
+  emailConfirmation: async (req: Request<never, never, { emailData: Email }>, res: Response, next: NextFunction) => {
+    try {
+      const { data, status } = await emailService.email(req.body.emailData);
+      res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
     }

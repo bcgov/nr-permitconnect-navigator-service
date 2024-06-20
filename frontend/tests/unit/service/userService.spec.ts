@@ -1,6 +1,6 @@
 import { userService } from '@/services';
 import { appAxios } from '@/services/interceptors';
-import { SYSTEM_USER } from '@/utils/constants';
+import { SYSTEM_USER } from '@/utils/constants/application';
 
 import type { AxiosResponse } from 'axios';
 import type { UserSearchParameters } from '@/types/UserSearchParameters';

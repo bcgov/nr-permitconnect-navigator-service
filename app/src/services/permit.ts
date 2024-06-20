@@ -33,7 +33,7 @@ const service = {
    * @function deletePermit
    * Delete a permit
    * @param {string} permitId Permit ID
-   * @returns {Promise<Permit | null>} The result of running the delete operation
+   * @returns {Promise<Permit>} The result of running the delete operation
    */
   deletePermit: async (permitId: string) => {
     const response = await prisma.permit.delete({
@@ -46,6 +46,22 @@ const service = {
     });
 
     return permit.fromPrismaModel(response);
+  },
+
+  /**
+   * @function deletePermitByActivity
+   * Delete a permit
+   * @param {string} activityId Activity ID to remove permits from
+   * @returns {number} The result of running the deleteMany operation
+   */
+  deletePermitsByActivity: async (activityId: string) => {
+    const response = await prisma.permit.deleteMany({
+      where: {
+        activity_id: activityId
+      }
+    });
+
+    return response.count;
   },
 
   /**
@@ -66,7 +82,7 @@ const service = {
    * @function listPermits
    * Retrieve a list of permits associated with a given activity
    * @param {string} activityId PCNS Activity ID
-   * @returns {Promise<(Permit | null)[]>} The result of running the findMany operation
+   * @returns {Promise<Permit[]>} The result of running the findMany operation
    */
   listPermits: async (activityId: string) => {
     const response = await prisma.permit.findMany({

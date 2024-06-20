@@ -25,7 +25,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <label
       :class="{ 'font-bold': bold }"
       :for="props.name"
@@ -45,7 +45,10 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     />
     <small :id="`${name}-help`">{{ helptext }}</small>
     <div>
-      <ErrorMessage :name="props.name" />
+      <ErrorMessage
+        :name="props.name"
+        class="app-error-message"
+      />
     </div>
   </div>
 </template>

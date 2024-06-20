@@ -8,8 +8,8 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useSubmissionStore } from '@/store';
-import { PERMIT_NEEDED, PERMIT_STATUS } from '@/utils/enums';
+import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails } from '@/utils/utils';
 
@@ -25,7 +25,9 @@ const props = withDefaults(defineProps<Props>(), {});
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getPermitTypes, getSubmission } = storeToRefs(useSubmissionStore());
+const typeStore = useTypeStore();
+const { getDocuments, getPermits, getSubmission } = storeToRefs(useSubmissionStore());
+const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);
@@ -105,7 +107,7 @@ watchEffect(async () => {
   const submission = getSubmission.value;
 
   // Get navigator details
-  const configBCC = getConfig.value.ches?.bcc;
+  const configBCC = getConfig.value.ches?.roadmap?.bcc;
   let bcc = configBCC;
   let navigator = {
     email: configBCC ?? '',
@@ -123,17 +125,20 @@ watchEffect(async () => {
   }
 
   // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
-    getPermitTypeNamesByNeeded(PERMIT_NEEDED.YES).includes(value)
+  const permitStateNew = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PermitNeeded.YES).includes(value)
   );
-  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PERMIT_STATUS.NEW).filter((value) =>
-    getPermitTypeNamesByNeeded(PERMIT_NEEDED.UNDER_INVESTIGATION).includes(value)
+  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+    getPermitTypeNamesByNeeded(PermitNeeded.UNDER_INVESTIGATION).includes(value)
   );
-  const permitStateApplied = getPermitTypeNamesByStatus(PERMIT_STATUS.APPLIED);
-  const permitStateCompleted = getPermitTypeNamesByStatus(PERMIT_STATUS.COMPLETED);
+  const permitStateApplied = getPermitTypeNamesByStatus(PermitStatus.APPLIED);
+  const permitStateCompleted = getPermitTypeNamesByStatus(PermitStatus.COMPLETED);
 
   const body = roadmapTemplate({
-    '{{ contactName }}': submission?.contactName ?? '',
+    '{{ contactName }}':
+      submission?.contactFirstName && submission?.contactLastName
+        ? `${submission?.contactFirstName} ${submission?.contactLastName}`
+        : '',
     '{{ locationAddress }}': submission?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,

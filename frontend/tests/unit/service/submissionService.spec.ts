@@ -7,7 +7,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const PATH = 'submission/';
+const PATH = 'submission';
 const getSpy = vi.fn();
 const putSpy = vi.fn();
 
@@ -21,45 +21,74 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('submissionService test', () => {
-  it('gets submissions', async () => {
-    await submissionService.getSubmissions();
+describe('submissionService', () => {
+  describe('createSubmission', async () => {
+    it('calls correct endpoint', async () => {
+      await submissionService.createSubmission();
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(PATH);
+      expect(putSpy).toHaveBeenCalledTimes(1);
+      expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
+    });
+
+    it('passes parameters', async () => {
+      await submissionService.createSubmission({ foo: 'bar' });
+
+      expect(putSpy).toHaveBeenCalledTimes(1);
+      expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
+    });
   });
 
-  it('gets statistics', async () => {
-    const testFilter = {
-      dateFrom: '02/02/2022',
-      dateTo: '03/03/2022',
-      monthYear: '04/2022',
-      userId: 'testUserId'
-    };
-    await submissionService.getStatistics(testFilter);
+  describe('getSubmissions', async () => {
+    it('calls correct endpoint', async () => {
+      await submissionService.getSubmissions();
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}statistics`, { params: testFilter });
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith(
+        PATH,
+        expect.objectContaining({
+          params: expect.anything()
+        })
+      );
+    });
   });
 
-  it('gets a single submission', async () => {
-    const testActivityId = 'testActivityId';
-    await submissionService.getSubmission(testActivityId);
+  describe('getStatistics', async () => {
+    it('calls correct endpoint', async () => {
+      const testFilter = {
+        dateFrom: '02/02/2022',
+        dateTo: '03/03/2022',
+        monthYear: '04/2022',
+        userId: 'testUserId'
+      };
+      await submissionService.getStatistics(testFilter);
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}${testActivityId}`);
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith(`${PATH}/statistics`, { params: testFilter });
+    });
   });
 
-  it('updates a submission', async () => {
-    const testActivityId = 'testActivityId';
-    const testObj = {
-      field1: 'testField1',
-      date1: new Date().toISOString(),
-      field2: 'testField2'
-    };
-    await submissionService.updateSubmission(testActivityId, testObj);
+  describe('getSubmission', async () => {
+    it('calls correct endpoint', async () => {
+      const testActivityId = 'testActivityId';
+      await submissionService.getSubmission(testActivityId);
 
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(`${PATH}${testActivityId}`, testObj);
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
+    });
+  });
+
+  describe('updateSubmission', async () => {
+    it('calls correct endpoint', async () => {
+      const testActivityId = 'testActivityId';
+      const testObj = {
+        field1: 'testField1',
+        date1: new Date().toISOString(),
+        field2: 'testField2'
+      };
+      await submissionService.updateSubmission(testActivityId, testObj);
+
+      expect(putSpy).toHaveBeenCalledTimes(1);
+      expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);
+    });
   });
 });

@@ -75,6 +75,8 @@ a:visited {
 
 label {
   color: #38598a;
+  display: inline-block;
+  margin-bottom: 0.5rem;
 }
 
 .wrap-block {
@@ -117,6 +119,19 @@ label {
   }
 }
 
+.app-primary-color {
+  color: $app-primary !important;
+}
+
+.app-error-color {
+  color: $app-error !important;
+}
+
+.app-error-message {
+  color: $app-error;
+  font-size: 0.8rem;
+}
+
 /* ---------- primevue overrides ------------ */
 
 /* buttons */
@@ -157,7 +172,7 @@ label {
 }
 
 .p-checkbox.p-highlight .p-checkbox-box,
-.p-radiobutton-checked .p-radiobutton-box,
+.p-radiobutton.p-highlight .p-radiobutton-box,
 .p-inputswitch-checked .p-inputswitch-slider:not(.p-disabled) {
   background: $app-primary;
   border-color: $app-primary;
@@ -189,11 +204,10 @@ label {
   .p-paginator {
     justify-content: right;
   }
-  .action-buttons .p-button.p-button-lg {
-    padding: 0;
-    margin-left: 1rem;
-    font-size: 150%;
-  }
+}
+
+.header-right .p-column-header-content {
+  justify-content: right;
 }
 
 /* modal */

@@ -2,7 +2,7 @@ import { NIL } from 'uuid';
 
 import { permitController } from '../../../src/controllers';
 import { permitService, userService } from '../../../src/services';
-import * as utils from '../../../src/components/utils';
+import * as utils from '../../../src/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -65,7 +65,8 @@ describe('createPermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     createSpy.mockResolvedValue(created);
@@ -95,6 +96,7 @@ describe('createPermit', () => {
         issuedPermitId: '1',
         trackingId: '2',
         authStatus: 'ACTIVE',
+        statusLastVerified: now.toISOString(),
         needed: 'true',
         status: 'FOO',
         submittedDate: now,
@@ -144,7 +146,8 @@ describe('deletePermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     deleteSpy.mockResolvedValue(deleted);
@@ -261,7 +264,8 @@ describe('listPermits', () => {
         needed: 'true',
         status: 'FOO',
         submittedDate: now.toISOString(),
-        adjudicationDate: now.toISOString()
+        adjudicationDate: now.toISOString(),
+        statusLastVerified: now.toISOString()
       }
     ];
 
@@ -335,7 +339,8 @@ describe('updatePermit', () => {
       needed: 'true',
       status: 'FOO',
       submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString()
+      adjudicationDate: now.toISOString(),
+      statusLastVerified: now.toISOString()
     };
 
     updateSpy.mockResolvedValue(updated);

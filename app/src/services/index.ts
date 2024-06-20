@@ -1,7 +1,10 @@
+export { default as activityService } from './activity';
 export { default as comsService } from './coms';
 export { default as documentService } from './document';
 export { default as emailService } from './email';
+export { default as enquiryService } from './enquiry';
 export { default as noteService } from './note';
 export { default as permitService } from './permit';
+export { default as ssoService } from './sso';
 export { default as submissionService } from './submission';
 export { default as userService } from './user';

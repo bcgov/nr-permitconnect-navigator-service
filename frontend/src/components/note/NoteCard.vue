@@ -130,6 +130,7 @@ p {
     padding-bottom: 0;
   }
 }
+
 .note-content {
   white-space: pre;
   text-wrap: balance;

@@ -1,7 +1,7 @@
 // @ts-expect-error api-problem lacks a defined interface; code still works fine
 import Problem from 'api-problem';
 
-import { AccessRoles } from '../components/constants';
+import { ACCESS_ROLES_LIST } from '../utils/constants/application';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
@@ -19,7 +19,7 @@ export const hasAccess = async (req: Request, res: Response, next: NextFunction)
     // TODO: Can we expand tokenPayload to include client_roles?
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const roles = (req.currentUser?.tokenPayload as any)?.client_roles;
-    if (!roles || !Object.values(AccessRoles).some((r) => roles.includes(r))) {
+    if (!roles || ACCESS_ROLES_LIST.some((r) => roles.includes(r))) {
       throw new Error('Invalid role authorization');
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,7 +1,7 @@
 import { NIL } from 'uuid';
 
 import { permitService, userService } from '../services';
-import { getCurrentIdentity } from '../components/utils';
+import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Permit } from '../types';

@@ -1,4 +1,33 @@
-import { DELIMITER, FILE_CATEGORIES } from '@/utils/constants';
+import { toRaw, isRef, isReactive, isProxy } from 'vue';
+
+import { DELIMITER } from '@/utils/constants/application';
+import { FileCategory } from '@/utils/enums/application';
+
+/**
+ * @function deepToRaw
+ * Recursively converts a Vue-created proxy object to a raw JSON object
+ * @param {T} sourceObj Source object
+ * @returns {T} Raw object from the given proxy sourceObj
+ */
+export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
+  const objectIterator = (input: any): any => {
+    if (Array.isArray(input)) {
+      return input.map((item) => objectIterator(item));
+    }
+    if (isRef(input) || isReactive(input) || isProxy(input)) {
+      return objectIterator(toRaw(input));
+    }
+    if (input && typeof input === 'object') {
+      return Object.keys(input).reduce((acc, key) => {
+        acc[key as keyof typeof acc] = objectIterator(input[key]);
+        return acc;
+      }, {} as T);
+    }
+    return input;
+  };
+
+  return objectIterator(sourceObj);
+}
 
 /**
  * @function delimitEmails
@@ -34,45 +63,36 @@ export function getFileCategory(mimeType: string): string {
     case mimeType.includes('/vnd.shx'):
     case mimeType.includes('/dbase'):
     case mimeType.includes('/dbf'):
-      return FILE_CATEGORIES.SHAPE;
+      return FileCategory.SHAPE;
     case mimeType.includes('/msword'):
     case mimeType.includes('/vnd.ms-word'):
     case mimeType.includes('/vnd.oasis.opendocument.text'):
     case mimeType.includes('/vnd.openxmlformats-officedocument.wordprocessingml'):
-      return FILE_CATEGORIES.DOC;
+      return FileCategory.DOC;
     case mimeType.includes('/vnd.pdf'):
     case mimeType.includes('/pdf'):
     case mimeType.includes('/x-pdf'):
-      return FILE_CATEGORIES.PDF;
+      return FileCategory.PDF;
     case mimeType.includes('/vnd.ms-excel'):
     case mimeType.includes('/vnd.openxmlformats-officedocument.spreadsheetml'):
     case mimeType.includes('/vnd.oasis.opendocument.spreadsheet'):
-      return FILE_CATEGORIES.SPREADSHEET;
+      return FileCategory.SPREADSHEET;
     case mimeType.includes('image/'):
-      return FILE_CATEGORIES.IMAGE;
+      return FileCategory.IMAGE;
     case mimeType.includes('/vnd.seemail'):
     case mimeType.includes('/vnd.omads-email+xml'):
     case mimeType.includes('message/'):
-      return FILE_CATEGORIES.EMAIL;
+      return FileCategory.EMAIL;
     case mimeType.includes('/gzip'):
     case mimeType.includes('/zip'):
     case mimeType.includes('/x-gzip'):
     case mimeType.includes('/x-zip'):
     case mimeType.includes('/x-7z'):
     case mimeType.includes('/x-rar'):
-      return FILE_CATEGORIES.COMPRESSED;
+      return FileCategory.COMPRESSED;
     default:
-      return FILE_CATEGORIES.FILE;
+      return FileCategory.FILE;
   }
-}
-
-/**
- * @function isDebugMode
- * Checks if the app is currently running in debug mode
- * @returns {boolean} True if in debug, false otherwise
- */
-export function isDebugMode(): boolean {
-  return import.meta.env.MODE.toUpperCase() === 'DEBUG';
 }
 
 /**
@@ -92,6 +112,29 @@ export function getFilenameAndExtension(filename: string): { filename: string; e
 }
 
 /**
+ * @function isDebugMode
+ * Checks if the app is currently running in debug mode
+ * @returns {boolean} True if in debug, false otherwise
+ */
+export function isDebugMode(): boolean {
+  return import.meta.env.MODE.toUpperCase() === 'DEBUG';
+}
+
+/**
+ * @function isTruthy
+ * Returns true if the element name in the object contains a truthy value
+ * @param {object} value The object to evaluate
+ * @returns {boolean} True if truthy, false if not, and undefined if undefined
+ */
+export function isTruthy(value: unknown) {
+  if (value === undefined) return value;
+
+  const isStr = typeof value === 'string' || value instanceof String;
+  const trueStrings = ['true', 't', 'yes', 'y', '1'];
+  return value === true || value === 1 || (isStr && trueStrings.includes(value.toLowerCase()));
+}
+
+/**
  * @function joinPath
  * Joins a set of string arguments to yield a string path
  * @param  {...string} items The strings to join on
@@ -108,6 +151,23 @@ export function joinPath(...items: Array<string>): string {
     });
     return parts.join(DELIMITER);
   } else return '';
+}
+
+/**
+ * @function omit
+ * Omits the given set of keys from the given object
+ * @param {object} data The object to copy and manipulate
+ * @param {string[]} keys Array of keys to remove
+ * @returns {object} A new object with the given keys removed
+ */
+export function omit<Data extends object, Keys extends keyof Data>(data: Data, keys: Keys[]): Omit<Data, Keys> {
+  const result = { ...data };
+
+  for (const key of keys) {
+    delete result[key];
+  }
+
+  return result as Omit<Data, Keys>;
 }
 
 /**
@@ -162,4 +222,22 @@ export function setDispositionHeader(filename: string) {
   } else {
     return dispositionHeader.concat(`; filename*=UTF-8''${encodedFilename}`);
   }
+}
+
+/**
+ * @function setEmptyStringsToNull
+ * Converts empty string values to null values
+ * @param  {object} data The object to change
+ * @returns {object} The object with the remapped values
+ */
+export function setEmptyStringsToNull(data: any) {
+  Object.keys(data).forEach((key) => {
+    const keyWithType = key as keyof typeof data;
+    const value = data[keyWithType];
+    if (typeof value === 'string' && value === '') {
+      data = { ...data, [keyWithType]: null };
+    }
+  });
+
+  return data;
 }

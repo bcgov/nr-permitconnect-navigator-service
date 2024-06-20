@@ -4,7 +4,7 @@ import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { useAuthStore } from '@/store';
-import { RouteNames } from '@/utils/constants';
+import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -19,7 +19,7 @@ const router = useRouter();
 
 onBeforeMount(async () => {
   if (!getIsAuthenticated.value) {
-    router.push({ name: RouteNames.LOGIN });
+    router.push({ name: RouteName.OIDC_LOGIN });
   } else {
     ready.value = true;
   }

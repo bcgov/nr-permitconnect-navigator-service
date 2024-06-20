@@ -12,6 +12,8 @@ type Props = {
   disabled?: boolean;
   showTime?: boolean;
   bold?: boolean;
+  placeholder?: string;
+  maxDate?: Date;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,14 +22,16 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   disabled: false,
   showTime: false,
-  bold: true
+  bold: true,
+  placeholder: '',
+  maxDate: undefined
 });
 
 const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
 </script>
 
 <template>
-  <div class="field col">
+  <div class="field">
     <label
       :class="{ 'font-bold': bold }"
       :for="name"
@@ -46,6 +50,8 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
       show-icon
       icon-display="input"
       date-format="yy/mm/dd"
+      :placeholder="props.placeholder"
+      :max-date="props.maxDate"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

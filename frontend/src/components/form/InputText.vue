@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
-import { useField, ErrorMessage } from 'vee-validate';
+import { ErrorMessage } from 'vee-validate';
+import { ref } from 'vue';
 
-import { InputText } from '@/lib/primevue';
+import InputTextInternal from './internal/InputTextInternal.vue';
+import { FloatLabel } from '@/lib/primevue';
+
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -12,6 +15,7 @@ type Props = {
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
+  floatLabel?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
@@ -20,32 +24,43 @@ const props = withDefaults(defineProps<Props>(), {
   label: '',
   placeholder: '',
   disabled: false,
+  floatLabel: false,
   bold: true
 });
 
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+// Emits
+const emit = defineEmits(['onChange']);
+
+// State
+const fieldActive: Ref<boolean> = ref(false);
 </script>
 
 <template>
-  <div class="field col">
-    <label
-      :class="{ 'font-bold': bold }"
-      :for="name"
-    >
-      {{ label }}
-    </label>
-    <InputText
-      v-model="value"
-      :aria-describedby="`${name}-help`"
-      :name="name"
-      :placeholder="placeholder"
-      class="w-full"
-      :class="{ 'p-invalid': errorMessage }"
-      :disabled="disabled"
+  <div class="field">
+    <FloatLabel v-if="props.floatLabel">
+      <InputTextInternal
+        v-bind="props"
+        @on-change="(e) => emit('onChange', e)"
+      />
+    </FloatLabel>
+    <InputTextInternal
+      v-else
+      v-model:fieldActive="fieldActive"
+      v-bind="props"
+      @on-change="(e) => emit('onChange', e)"
     />
-    <small :id="`${name}-help`">{{ helpText }}</small>
-    <div>
-      <ErrorMessage :name="name" />
+
+    <small
+      v-if="fieldActive"
+      :id="`${name}-help`"
+    >
+      {{ helpText }}
+    </small>
+    <div class="mt-2">
+      <ErrorMessage
+        :name="name"
+        class="app-error-message"
+      />
     </div>
   </div>
 </template>

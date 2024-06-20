@@ -2,16 +2,27 @@
   "frontend": {
     "apiPath": "FRONTEND_APIPATH",
     "ches": {
-      "bcc": "FRONTEND_CHES_BCC"
+      "roadmap": {
+        "bcc": "FRONTEND_CHES_ROADMAP_BCC"
+      },
+      "submission": {
+        "cc": "FRONTEND_CHES_SUBMISSION_CC"
+      }
     },
     "coms": {
       "apiPath": "FRONTEND_COMS_APIPATH",
       "bucketId": "FRONTEND_COMS_BUCKETID"
     },
+    "geocoder": {
+      "apiPath": "FRONTEND_GEOCODER_APIPATH"
+    },
     "notificationBanner": "FRONTEND_NOTIFICATION_BANNER",
     "oidc": {
       "authority": "FRONTEND_OIDC_AUTHORITY",
       "clientId": "FRONTEND_OIDC_CLIENTID"
+    },
+    "orgbook": {
+      "apiPath": "FRONTEND_ORGBOOK_APIPATH"
     }
   },
   "server": {

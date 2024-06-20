@@ -1,20 +1,25 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, onErrorCaptured, ref } from 'vue';
-import { RouterView } from 'vue-router';
+import { RouterView, useRouter } from 'vue-router';
+
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthStore, useConfigStore } from '@/store';
-import { ToastTimeout } from '@/utils/constants';
+import { RouteName, ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
+// Store
 const appStore = useAppStore();
+const router = useRouter();
 const { getIsLoading } = storeToRefs(appStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
+// State
 const ready: Ref<boolean> = ref(false);
 
+// Actions
 onBeforeMount(async () => {
   appStore.beginDeterminateLoading();
   await useConfigStore().init();
@@ -31,35 +36,31 @@ onErrorCaptured((e: Error) => {
 </script>
 
 <template>
-  <div class="container">
-    <ConfirmDialog />
-    <ProgressLoader v-if="getIsLoading" />
-    <Toast />
+  <ConfirmDialog />
+  <ProgressLoader v-if="getIsLoading" />
+  <Toast />
 
-    <AppLayout>
-      <template #nav>
-        <Navbar />
-      </template>
-      <template #main>
-        <Message
-          v-if="getConfig?.notificationBanner"
-          severity="warn"
-          class="text-center"
-        >
-          {{ getConfig?.notificationBanner }}
-        </Message>
-        <RouterView v-if="ready" />
-      </template>
-    </AppLayout>
-  </div>
+  <AppLayout>
+    <template #nav>
+      <Navbar
+        v-if="
+          router.currentRoute.value.name &&
+          router.currentRoute.value.name !== RouteName.HOME &&
+          ![RouteName.OIDC_LOGIN, RouteName.OIDC_CALLBACK, RouteName.OIDC_LOGOUT].includes(
+            router.currentRoute.value.name as any
+          )
+        "
+      />
+    </template>
+    <template #main>
+      <Message
+        v-if="getConfig?.notificationBanner"
+        severity="warn"
+        class="text-center"
+      >
+        {{ getConfig?.notificationBanner }}
+      </Message>
+      <RouterView v-if="ready" />
+    </template>
+  </AppLayout>
 </template>
-
-<style scoped>
-.container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  width: 100%;
-}
-</style>

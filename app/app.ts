@@ -9,9 +9,9 @@ import Problem from 'api-problem';
 import querystring from 'querystring';
 
 import { name as appName, version as appVersion } from './package.json';
-import { DEFAULTCORS } from './src/components/constants';
 import { getLogger, httpLogger } from './src/components/log';
-import { getGitRevision, readIdpList } from './src/components/utils';
+import { DEFAULTCORS } from './src/utils/constants/application';
+import { getGitRevision, readIdpList } from './src/utils/utils';
 import v1Router from './src/routes/v1';
 
 import type { Request, Response } from 'express';
@@ -37,7 +37,9 @@ app.use(
         'default-src': [
           "'self'", // eslint-disable-line
           new URL(config.get('frontend.oidc.authority')).origin,
-          new URL(config.get('frontend.coms.apiPath')).origin
+          new URL(config.get('frontend.coms.apiPath')).origin,
+          new URL(config.get('frontend.geocoder.apiPath')).origin,
+          new URL(config.get('frontend.orgbook.apiPath')).origin
         ]
       }
     }

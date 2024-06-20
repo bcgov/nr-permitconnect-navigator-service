@@ -26,10 +26,10 @@ export type ChefsSubmissionExport = {
   contactApplicantRelationship: string;
   financiallySupported: boolean;
   intakeStatus: string;
-  isBCHousingSupported: boolean;
-  isIndigenousHousingProviderSupported: boolean;
-  isNonProfitSupported: boolean;
-  isHousingCooperativeSupported: boolean;
+  isBCHousingSupported: string;
+  isIndigenousHousingProviderSupported: string;
+  isNonProfitSupported: string;
+  isHousingCooperativeSupported: string;
   parcelID: string;
   latitude: number;
   longitude: number;
@@ -41,11 +41,6 @@ export type ChefsSubmissionExport = {
   multiFamilyUnits1: string;
   isRentalUnit: string;
   streetAddress: string;
-  guidance: boolean;
-  statusRequest: boolean;
-  inquiry: boolean;
-  emergencyAssist: boolean;
-  inapplicable: boolean;
   createdAt: string;
   createdBy: string;
 

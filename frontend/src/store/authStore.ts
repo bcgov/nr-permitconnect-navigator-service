@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, readonly, ref } from 'vue';
 
 import { AuthService, ConfigService } from '@/services';
 
@@ -16,6 +16,7 @@ export type AuthStoreState = {
   isAuthenticated: Ref<boolean>;
   profile: Ref<IdTokenClaims | undefined>;
   refreshToken: Ref<string | undefined>;
+  roleOverride: Ref<string | undefined>;
   scope: Ref<string | undefined>;
   user: Ref<User | null>;
 };
@@ -34,6 +35,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated: ref(false),
     profile: ref(undefined),
     refreshToken: ref(undefined),
+    roleOverride: ref(undefined),
     scope: ref(undefined),
     user: ref(null)
   };
@@ -41,6 +43,7 @@ export const useAuthStore = defineStore('auth', () => {
   // Getters
   const getters = {
     getAccessToken: computed(() => state.accessToken.value),
+    getClientRoles: computed(() => state.user.value?.profile.client_roles as string[]),
     getExpiresAt: computed(() => state.expiresAt.value),
     getIdentityId: computed(() => state.identityId.value),
     getIdToken: computed(() => state.idToken.value),
@@ -103,7 +106,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     // State
-    ...state,
+    state: readonly(state),
 
     // Getters
     ...getters,

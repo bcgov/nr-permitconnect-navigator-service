@@ -1,6 +1,6 @@
 {
   "name": "nr-permitting-navigator-service-frontend",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "description": "",
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
@@ -37,8 +37,9 @@
     "pinia-plugin-persistedstate": "^3.2.1",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
-    "primevue": "3.50.0",
+    "primevue": "3.52.0",
     "qrcode.vue": "^3.4.1",
+    "quill": "^2.0.0",
     "uuid": "^9.0.1",
     "vee-validate": "^4.12.6",
     "vue": "^3.4.21",

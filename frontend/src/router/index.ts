@@ -1,8 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { AuthService } from '@/services';
-import { useAppStore } from '@/store';
-import { RouteNames, StorageKey } from '@/utils/constants';
+import { AuthService, PermissionService } from '@/services';
+import { Permissions } from '@/services/permissionService';
+import { useAppStore, useAuthStore } from '@/store';
+import { RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
 
@@ -19,52 +20,93 @@ function createProps(route: { query: any; params: any }): object {
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: RouteNames.HOME,
-    component: () => import('../views/HomeView.vue'),
-    meta: { title: 'Home' }
+    name: RouteName.HOME,
+    component: () => import('../views/HomeView.vue')
   },
   {
-    path: '/initiatives',
-    name: RouteNames.INITIATIVES,
-    component: () => import('../views/InitiativesView.vue'),
-    meta: { requiresAuth: true, title: 'Initiatives' }
-  },
-  {
-    path: '/start',
-    name: RouteNames.START,
-    component: () => import('../views/StartView.vue'),
-    meta: { title: 'Start' }
-  },
-  {
-    path: '/enquiry',
-    name: RouteNames.ENQUIRY,
-    component: () => import('../views/EnquiryView.vue'),
-    meta: { title: 'Enquiry' }
-  },
-  {
-    path: '/intakeform',
-    name: RouteNames.INTAKE,
-    component: () => import('../views/IntakeFormView.vue'),
-    meta: { title: 'Intake Form Stub' }
-  },
-  {
-    path: '/submission',
-    name: RouteNames.SUBMISSION,
-    component: () => import('@/views/SubmissionView.vue'),
-    meta: { requiresAuth: true, title: 'Submission' },
-    props: createProps
-  },
-  {
-    path: '/submissions',
-    name: RouteNames.SUBMISSIONS,
-    component: () => import('@/views/SubmissionsView.vue'),
-    meta: { requiresAuth: true, title: 'Submissions' }
+    path: '/soon',
+    name: RouteName.COMING_SOON,
+    component: () => import('@/views/ComingSoon.vue')
   },
   {
     path: '/developer',
-    name: RouteNames.DEVELOPER,
+    name: RouteName.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
-    meta: { requiresAuth: true, title: 'Developer' }
+    meta: { requiresAuth: true, access: Permissions.NAVIGATION_DEVELOPER }
+  },
+  {
+    path: '/forbidden',
+    name: RouteName.FORBIDDEN,
+    component: () => import('@/views/Forbidden.vue')
+  },
+  {
+    path: '/housing',
+    component: () => import('@/views/GenericView.vue'),
+    meta: { requiresAuth: true },
+    children: [
+      {
+        path: '',
+        name: RouteName.HOUSING,
+        component: () => import('../views/housing/HousingView.vue'),
+        meta: {
+          access: Permissions.NAVIGATION_HOUSING
+        }
+      },
+      {
+        path: 'enquiry',
+        children: [
+          {
+            path: '',
+            name: RouteName.HOUSING_ENQUIRY,
+            component: () => import('../views/housing/enquiry/EnquiryView.vue'),
+            props: createProps,
+            meta: {
+              access: Permissions.NAVIGATION_HOUSING_ENQUIRY
+            }
+          },
+          {
+            path: 'intake',
+            name: RouteName.HOUSING_ENQUIRY_INTAKE,
+            component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+            props: createProps,
+            meta: {
+              access: Permissions.NAVIGATION_HOUSING_INTAKE
+            }
+          }
+        ]
+      },
+      {
+        path: 'submission',
+        children: [
+          {
+            path: '',
+            name: RouteName.HOUSING_SUBMISSION,
+            component: () => import('@/views/housing/submission/SubmissionView.vue'),
+            props: createProps,
+            meta: {
+              access: Permissions.NAVIGATION_HOUSING_SUBMISSION
+            }
+          },
+          {
+            path: 'intake',
+            name: RouteName.HOUSING_SUBMISSION_INTAKE,
+            component: () => import('@/views/housing/submission/SubmissionIntakeView.vue'),
+            props: createProps,
+            meta: {
+              access: Permissions.NAVIGATION_HOUSING_INTAKE
+            }
+          }
+        ]
+      },
+      {
+        path: 'submissions',
+        name: RouteName.HOUSING_SUBMISSIONS,
+        component: () => import('@/views/housing/SubmissionsView.vue'),
+        meta: {
+          access: [Permissions.NAVIGATION_HOUSING_SUBMISSIONS, Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
+        }
+      }
+    ]
   },
   {
     path: '/oidc',
@@ -72,45 +114,49 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'callback',
-        name: RouteNames.CALLBACK,
+        name: RouteName.OIDC_CALLBACK,
         component: () => import('@/views/oidc/OidcCallbackView.vue'),
         meta: { title: 'Authenticating...' }
       },
       {
         path: 'login',
-        name: RouteNames.LOGIN,
+        name: RouteName.OIDC_LOGIN,
         component: () => import('@/views/oidc/OidcLoginView.vue'),
-        meta: { title: 'Logging in...' },
-        beforeEnter: () => {
-          const entrypoint = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-          window.sessionStorage.setItem(StorageKey.AUTH, entrypoint);
-        }
+        meta: { title: 'Logging in...' }
       },
       {
         path: 'logout',
-        name: RouteNames.LOGOUT,
+        name: RouteName.OIDC_LOGOUT,
         component: () => import('@/views/oidc/OidcLogoutView.vue'),
         meta: { title: 'Logging out...' }
       }
     ]
   },
   {
-    path: '/forbidden',
-    name: RouteNames.FORBIDDEN,
-    component: () => import('@/views/Forbidden.vue'),
-    meta: { title: 'Forbidden' }
-  },
-  {
     path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/NotFound.vue'),
-    meta: { title: 'Not Found' }
+    name: RouteName.NOT_FOUND,
+    component: () => import('@/views/NotFound.vue')
   }
 ];
+
+function waitForRoles(): Promise<string[] | undefined> {
+  let attempts = 0;
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  return new Promise(function (resolve, reject) {
+    (function _waitForRoles() {
+      const r = useAuthStore().getClientRoles;
+      if (r) return resolve(r);
+      if (attempts > 10) resolve(undefined);
+      setTimeout(_waitForRoles, 100);
+      attempts++;
+    })();
+  });
+}
 
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
+  const permissionService = new PermissionService();
   const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -141,26 +187,37 @@ export default function getRouter() {
       });
     }
 
-    // Authentication Guard
+    // Authentication guard
     if (to.meta.requiresAuth) {
       const user = await authService.getUser();
       if (!user || user.expired) {
-        router.replace({ name: RouteNames.LOGIN });
+        window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
+        router.replace({ name: RouteName.OIDC_LOGIN });
+        return;
       }
+    }
 
-      // Forbid if user does not have at least one assigned role
-      if (user && (!user?.profile?.client_roles || (user?.profile?.client_roles as []).length === 0)) {
-        router.replace({ name: RouteNames.FORBIDDEN });
+    // Check for reroutes
+    if (to.name === RouteName.HOUSING) {
+      if (!permissionService.can(Permissions.NAVIGATION_HOUSING)) {
+        router.replace({ name: RouteName.HOUSING_SUBMISSIONS });
+        return;
+      }
+    }
+
+    // Check access
+    if (to.meta.access) {
+      // Until we can figure out the race condition happening during hard url navigation and browser refresh
+      // this prevents the app throwing you to the not found page
+      await waitForRoles();
+      if (!permissionService.can(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
+        router.replace({ name: RouteName.NOT_FOUND });
+        return;
       }
     }
   });
 
-  router.afterEach((to) => {
-    // Update document title
-    document.title = to.meta.title
-      ? `NR PermitConnect Navigator Service - ${to.meta.title}`
-      : 'NR PermitConnect Navigator Service';
-
+  router.afterEach(() => {
     appStore.endDeterminateLoading();
   });
 

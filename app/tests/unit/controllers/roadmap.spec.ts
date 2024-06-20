@@ -1,8 +1,8 @@
 import { NIL } from 'uuid';
 
-import * as utils from '../../../src/components/utils';
 import { roadmapController } from '../../../src/controllers';
 import { comsService, emailService, noteService, userService } from '../../../src/services';
+import * as utils from '../../../src/utils/utils';
 
 import type { Note } from '../../../src/types';
 

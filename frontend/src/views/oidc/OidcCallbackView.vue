@@ -3,14 +3,20 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
+import { PermissionService } from '@/services';
 import { useAuthStore } from '@/store';
-import { StorageKey } from '@/utils/constants';
+import { StorageKey } from '@/utils/enums/application';
 
 const authStore = useAuthStore();
 const router = useRouter();
 
 onMounted(async () => {
   await authStore.loginCallback();
+
+  // Request basic access if the logged in user has no roles
+  if (!authStore.getClientRoles || !authStore.getClientRoles.length) {
+    await new PermissionService().requestBasicAccess();
+  }
 
   // Return user back to original login entrypoint if specified
   const entrypoint = window.sessionStorage.getItem(StorageKey.AUTH);

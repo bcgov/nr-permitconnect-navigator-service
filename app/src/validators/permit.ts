@@ -11,10 +11,11 @@ const sharedPermitSchema = {
   issuedPermitId: Joi.string().min(0).max(255).allow(null),
   trackingId: Joi.string().min(0).max(255).allow(null),
   authStatus: Joi.string().max(255).allow(null),
+  statusLastVerified: Joi.date().iso().max('now'),
   needed: Joi.string().max(255).required(),
   status: Joi.string().max(255).required(),
-  submittedDate: Joi.date().iso(),
-  adjudicationDate: Joi.date().iso()
+  submittedDate: Joi.date().iso().max('now'),
+  adjudicationDate: Joi.date().iso().max('now')
 };
 
 const schema = {
