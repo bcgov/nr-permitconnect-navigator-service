@@ -10,6 +10,8 @@ import image from '@/assets/images/image.svg';
 import pdf from '@/assets/images/pdf.svg';
 import shape from '@/assets/images/shape.svg';
 import spreadsheet from '@/assets/images/spreadsheet.svg';
+
+import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import { Card } from '@/lib/primevue';
 import { FileCategory } from '@/utils/enums/application';
 import { formatDateLong } from '@/utils/formatters';

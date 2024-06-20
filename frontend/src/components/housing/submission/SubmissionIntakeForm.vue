@@ -227,7 +227,7 @@ async function emailConfirmation(activityId: string) {
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
     '{{ activityId }}': activityId
   });
-  let applicantEmail = formRef.value?.values.applicant.email;
+  let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
     from: configCC,
     to: [applicantEmail],

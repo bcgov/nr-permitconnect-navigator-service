@@ -86,6 +86,7 @@ export const PERMIT_AUTHORIZATION_STATUS_LIST = [
   PermitAuthorizationStatus.IN_REVIEW,
   PermitAuthorizationStatus.NONE
 ];
+
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 
 export const PERMIT_STATUS_LIST = [PermitStatus.NEW, PermitStatus.APPLIED, PermitStatus.COMPLETED];

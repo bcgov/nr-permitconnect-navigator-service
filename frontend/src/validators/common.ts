@@ -23,6 +23,9 @@ export const assignedToValidator = (when: string, is: any) =>
           .required()
     })
     .label('Assigned to');
+
 export const emailValidator = (message: string) => string().matches(new RegExp(Regex.EMAIL), message);
-export const latitudeValidator = number().required().min(48).max(60).label('Latitude');
-export const longitudeValidator = number().required().min(-139).max(-114).label('Longitude');
+
+export const latitudeValidator = number().notRequired().min(48).max(60).label('Latitude');
+
+export const longitudeValidator = number().notRequired().min(-139).max(-114).label('Longitude');

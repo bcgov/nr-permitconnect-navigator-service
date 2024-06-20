@@ -40,6 +40,8 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
+const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
 const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
 
 const FORM_EXPORT_1 = {
@@ -258,6 +260,7 @@ const SUBMISSION_1 = {
   submissions: null,
   intakeStatus: null,
   applicationStatus: null,
+  updatedAt: new Date().toISOString(),
   user: null
 };
 
@@ -913,6 +916,8 @@ describe('updateDraft', () => {
   const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
+  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
+  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('updates submission with the given activity ID', async () => {
     const req = {
@@ -921,12 +926,19 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -935,8 +947,6 @@ describe('updateDraft', () => {
   });
 
   it('populates data from body if it exists', async () => {
-    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
     const req = {
       body: {
         activityId: '00000000',
@@ -962,12 +972,19 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
@@ -999,12 +1016,19 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
@@ -1035,9 +1059,14 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
@@ -1045,6 +1074,8 @@ describe('updateDraft', () => {
     const deleteOrder = deletePermitsByActivitySpy.mock.invocationCallOrder[0];
     const createOrder = createPermitSpy.mock.invocationCallOrder[0];
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -1094,13 +1125,20 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
+    const USR_IDENTITY = 'xxxy';
+    const USR_ID = 'abc-123';
+
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
+    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
+    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -1169,7 +1207,11 @@ describe('updateSubmission', () => {
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({ ...req.body, updatedBy: USR_ID });
+    expect(updateSpy).toHaveBeenCalledWith({
+      ...req.body,
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: USR_ID
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
   });
@@ -1192,8 +1234,12 @@ describe('updateSubmission', () => {
     await submissionController.updateSubmission(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect(updateSpy).toHaveBeenCalledWith({ ...(req.body as any), updatedBy: USR_ID });
+
+    expect(updateSpy).toHaveBeenCalledWith({
+      ...(req.body as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: USR_ID
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });

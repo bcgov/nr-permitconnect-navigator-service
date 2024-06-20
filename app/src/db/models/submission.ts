@@ -139,9 +139,7 @@ export default {
     };
   },
 
-  fromPrismaModelWithUser(input: PrismaGraphSubmissionUser | null): Submission | null {
-    if (!input) return null;
-
+  fromPrismaModelWithUser(input: PrismaGraphSubmissionUser): Submission {
     const submission = this.fromPrismaModel(input);
     if (submission && input.user) {
       submission.user = user.fromPrismaModel(input.user);

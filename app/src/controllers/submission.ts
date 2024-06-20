@@ -415,8 +415,14 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+
       // Update submission
-      const result = await submissionService.updateSubmission(submission as Submission);
+      const result = await submissionService.updateSubmission({
+        ...(submission as Submission),
+        updatedAt: new Date().toISOString(),
+        updatedBy: userId
+      });
 
       // Remove already existing permits for this activity
       await permitService.deletePermitsByActivity(submission.activityId);
@@ -435,7 +441,11 @@ const controller = {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
 
-      const response = await submissionService.updateSubmission({ ...(req.body as Submission), updatedBy: userId });
+      const response = await submissionService.updateSubmission({
+        ...(req.body as Submission),
+        updatedAt: new Date().toISOString(),
+        updatedBy: userId
+      });
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

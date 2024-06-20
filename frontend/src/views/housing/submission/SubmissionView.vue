@@ -13,7 +13,7 @@ import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
-import { Button, TabPanel, TabView } from '@/lib/primevue';
+import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';

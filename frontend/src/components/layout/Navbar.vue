@@ -48,6 +48,7 @@ onMounted(() => {
         },
         {
           label: 'Status of application/permit',
+          route: RouteName.COMING_SOON,
           access: Permissions.NAVIGATION_HOUSING
         }
       ],

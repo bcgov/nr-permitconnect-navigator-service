@@ -24,6 +24,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/HomeView.vue')
   },
   {
+    path: '/soon',
+    name: RouteName.COMING_SOON,
+    component: () => import('@/views/ComingSoon.vue')
+  },
+  {
     path: '/developer',
     name: RouteName.DEVELOPER,
     component: () => import('@/views/DeveloperView.vue'),
@@ -32,8 +37,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/forbidden',
     name: RouteName.FORBIDDEN,
-    component: () => import('@/views/Forbidden.vue'),
-    meta: { title: 'Forbidden' }
+    component: () => import('@/views/Forbidden.vue')
   },
   {
     path: '/housing',
@@ -131,8 +135,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/:pathMatch(.*)*',
     name: RouteName.NOT_FOUND,
-    component: () => import('@/views/NotFound.vue'),
-    meta: { title: 'Not Found' }
+    component: () => import('@/views/NotFound.vue')
   }
 ];
 

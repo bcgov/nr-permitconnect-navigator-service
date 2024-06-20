@@ -25,7 +25,7 @@ const items = ref([
   {
     top: 'Check the status of your applications and/or permits',
     icon: 'fa-bars-progress',
-    route: RouteName.HOME
+    route: RouteName.COMING_SOON
   }
 ]);
 </script>

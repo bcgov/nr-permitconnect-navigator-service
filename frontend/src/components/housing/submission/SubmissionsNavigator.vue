@@ -121,7 +121,7 @@ watch(accordionIndex, () => {
                 <router-link
                   :to="{
                     name: RouteName.HOUSING_SUBMISSION,
-                    query: { activityId: bf.activityId, initialTab: 3 },
+                    query: { activityId: bf.activityId, initialTab: 3, submissionId: bf.submissionId },
                     hash: `#${bf.noteId}`
                   }"
                 >

@@ -150,8 +150,8 @@ const schema = {
       locality: Joi.string().allow(null).max(255),
       province: Joi.string().allow(null).max(255),
       locationPIDs: Joi.string().allow(null).max(255),
-      latitude: Joi.number().required().max(255),
-      longitude: Joi.number().required().max(255),
+      latitude: Joi.number().allow(null).max(255),
+      longitude: Joi.number().allow(null).max(255),
       geomarkUrl: Joi.string().allow(null).max(255),
       naturalDisaster: Joi.string()
         .valid(...YES_NO_LIST)

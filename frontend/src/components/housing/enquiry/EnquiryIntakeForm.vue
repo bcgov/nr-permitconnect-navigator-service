@@ -222,7 +222,7 @@ async function emailConfirmation(activityId: string) {
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
     '{{ activityId }}': activityId
   });
-  let applicantEmail = formRef.value?.values.applicant.email;
+  let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
@@ -449,7 +449,7 @@ async function emailConfirmation(activityId: string) {
       severity="success"
       :closable="false"
     >
-      Your enquiry has been succesfully submitted.
+      Your enquiry has been successfully submitted.
     </Message>
     <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>

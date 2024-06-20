@@ -2,7 +2,17 @@
 import { ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
+import {
+  Button,
+  Column,
+  DataTable,
+  FilterMatchMode,
+  IconField,
+  InputIcon,
+  InputText,
+  useConfirm,
+  useToast
+} from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
@@ -47,10 +57,16 @@ function onDelete(enquiryId: string) {
     }
   });
 }
+
+// Datatable filter(s)
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
 </script>
 
 <template>
   <DataTable
+    v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
     :value="props.enquiries"
@@ -73,6 +89,17 @@ function onDelete(enquiryId: string) {
     </template>
     <template #loading>
       <Spinner />
+    </template>
+    <template #header>
+      <div class="flex justify-content-end">
+        <IconField icon-position="left">
+          <InputIcon class="pi pi-search" />
+          <InputText
+            v-model="filters['global'].value"
+            placeholder="Search all"
+          />
+        </IconField>
+      </div>
     </template>
     <Column
       field="activity.activityId"

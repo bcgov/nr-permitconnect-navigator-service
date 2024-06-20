@@ -65,7 +65,7 @@ watchEffect(() => {
               <router-link
                 :to="{
                   name: RouteName.HOUSING_SUBMISSION,
-                  query: { activityId: data.activityId, initialTab: 3 },
+                  query: { activityId: data.activityId, initialTab: 3, submissionId: data.submissionId },
                   hash: `#${data.noteId}`
                 }"
               >

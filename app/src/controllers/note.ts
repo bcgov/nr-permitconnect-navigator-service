@@ -50,8 +50,9 @@ const controller = {
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,
+          submissionId: submissions.find((s) => s.activityId === note.activityId)?.submissionId as string,
           title: note.title,
-          projectName: submissions.find((s) => s?.activityId === note.activityId)?.projectName ?? null,
+          projectName: submissions.find((s) => s.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
           bringForwardDate: note.bringForwardDate as string
         }));
