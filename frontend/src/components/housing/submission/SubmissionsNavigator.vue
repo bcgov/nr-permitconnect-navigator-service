@@ -19,12 +19,20 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
 
+//Constants
+const TAB_INDEX = {
+  SUBMISSIONS: 0,
+  ENQUIRIES: 1
+};
+
 // Store
 const authStore = useAuthStore();
 const { getProfile } = storeToRefs(authStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
+// For setting the active tab when the user deletes a submission or enquiry
+const activeIndex: Ref<number | null> = ref(null);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
@@ -60,8 +68,12 @@ function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
-function onEnquiryDelete(enquiryId: string) {
+function onEnquiryDelete(enquiryId: string, activityId: string) {
   enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+  // Set the active tab to Enquiries
+  activeIndex.value = TAB_INDEX.ENQUIRIES;
 }
 
 onMounted(async () => {
@@ -92,8 +104,25 @@ onMounted(async () => {
   if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
 });
 
-function onSubmissionDelete(submissionId: string) {
+function onSubmissionDelete(submissionId: string, activityId: string) {
   submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+  // Set the active tab to Submissions
+  activeIndex.value = TAB_INDEX.SUBMISSIONS;
+}
+
+function refreshStatistics() {
+  loading.value = true;
+  submissionService
+    .getStatistics()
+    .then((response) => {
+      statistics.value = response.data;
+      loading.value = false;
+    })
+    .catch(() => {
+      loading.value = false;
+    });
 }
 
 watch(accordionIndex, () => {
@@ -106,7 +135,10 @@ watch(accordionIndex, () => {
 </script>
 
 <template>
-  <TabView v-if="!loading">
+  <TabView
+    v-if="!loading"
+    :active-index="activeIndex ?? TAB_INDEX.SUBMISSIONS"
+  >
     <TabPanel header="Projects">
       <Accordion
         v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"

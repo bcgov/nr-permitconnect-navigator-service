@@ -53,10 +53,12 @@ describe('enquiryService', () => {
   });
 
   it('calls deleteEnquiry with correct data', async () => {
-    await enquiryService.deleteEnquiry(testEnquiry.enquiryId);
+    await enquiryService.deleteEnquiry(testEnquiry.enquiryId, true);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
+    expect(deleteSpy).toHaveBeenCalledWith('enquiry', {
+      params: { enquiryId: testEnquiry.enquiryId, hardDelete: true }
+    });
   });
 
   it('calls getEnquiries w/ undefined param', async () => {

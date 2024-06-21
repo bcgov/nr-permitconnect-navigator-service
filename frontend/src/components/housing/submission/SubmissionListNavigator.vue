@@ -76,7 +76,7 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-function onDelete(submissionId: string) {
+function onDelete(submissionId: string, activityId: string) {
   confirmDialog.require({
     message: 'Please confirm that you want to delete this project',
     header: 'Delete project?',
@@ -87,7 +87,8 @@ function onDelete(submissionId: string) {
       submissionService
         .deleteSubmission(submissionId)
         .then(() => {
-          emit('submission:delete', submissionId);
+          emit('submission:delete', submissionId, activityId);
+          selection.value = undefined;
           toast.success('Project deleted');
         })
         .catch((e: any) => toast.error('Failed to delete project', e.message));
@@ -430,15 +431,17 @@ function onDelete(submissionId: string) {
     <Column
       field="action"
       header="Action"
-      header-class="header-right"
-      class="text-right"
+      class="text-center header-center"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete draft"
-          @click="onDelete(data.submissionId)"
+          @click="
+            onDelete(data.submissionId, data.activityId);
+            selection = data;
+          "
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
         </Button>
@@ -446,3 +449,8 @@ function onDelete(submissionId: string) {
     </Column>
   </DataTable>
 </template>
+<style scoped lang="scss">
+:deep(.header-center .p-column-header-content) {
+  justify-content: center;
+}
+</style>

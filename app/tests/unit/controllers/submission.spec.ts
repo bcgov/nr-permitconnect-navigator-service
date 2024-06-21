@@ -386,7 +386,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -446,7 +446,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -526,7 +526,7 @@ describe('createDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 
@@ -582,7 +582,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -620,7 +620,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -676,7 +676,7 @@ describe('createSubmission', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING });
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
 

@@ -39,7 +39,7 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
 const confirm = useConfirm();
 const toast = useToast();
 
-function onDelete(enquiryId: string) {
+function onDelete(enquiryId: string, activityId: string) {
   confirm.require({
     message: 'Please confirm that you want to delete this enquiry',
     header: 'Delete enquiry?',
@@ -50,7 +50,8 @@ function onDelete(enquiryId: string) {
       enquiryService
         .deleteEnquiry(enquiryId)
         .then(() => {
-          emit('enquiry:delete', enquiryId);
+          emit('enquiry:delete', enquiryId, activityId);
+          selection.value = undefined;
           toast.success('Draft deleted');
         })
         .catch((e: any) => toast.error('Failed to delete enquiry', e.message));
@@ -173,15 +174,17 @@ const filters = ref({
     <Column
       field="action"
       header="Action"
-      header-class="header-right"
-      class="text-right"
+      class="text-center header-center"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete draft"
-          @click="onDelete(data.enquiryId)"
+          @click="
+            onDelete(data.enquiryId, data.activityId);
+            selection = data;
+          "
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
         </Button>
@@ -189,3 +192,8 @@ const filters = ref({
     </Column>
   </DataTable>
 </template>
+<style scoped lang="scss">
+:deep(.header-center .p-column-header-content) {
+  justify-content: center;
+}
+</style>
