@@ -13,8 +13,8 @@ export default {
    * @function deleteEnquiry
    * @returns {Promise} An axios response
    */
-  deleteEnquiry(enquiryId: string) {
-    return appAxios().delete(`enquiry/${enquiryId}`);
+  deleteEnquiry(enquiryId: string, hardDelete?: boolean) {
+    return appAxios().delete('enquiry', { params: { enquiryId, hardDelete } });
   },
 
   /**

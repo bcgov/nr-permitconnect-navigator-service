@@ -97,9 +97,10 @@ const controller = {
     }
   },
 
-  deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
+  deleteEnquiry: async (req: Request<{ enquiryId: string; hardDelete: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await enquiryService.deleteEnquiry(req.params.enquiryId);
+      const { enquiryId, hardDelete } = req.query;
+      const response = await enquiryService.deleteEnquiry(enquiryId, hardDelete);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

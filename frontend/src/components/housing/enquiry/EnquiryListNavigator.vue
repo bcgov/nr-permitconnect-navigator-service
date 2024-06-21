@@ -41,8 +41,8 @@ const toast = useToast();
 
 function onDelete(enquiryId: string) {
   confirm.require({
-    message: 'Please confirm that you want to delete this draft',
-    header: 'Delete draft?',
+    message: 'Please confirm that you want to delete this enquiry',
+    header: 'Delete enquiry?',
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
@@ -53,7 +53,7 @@ function onDelete(enquiryId: string) {
           emit('enquiry:delete', enquiryId);
           toast.success('Draft deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete draft', e.message));
+        .catch((e: any) => toast.error('Failed to delete enquiry', e.message));
     }
   });
 }
@@ -181,7 +181,6 @@ const filters = ref({
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
-          :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
           @click="onDelete(data.enquiryId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />

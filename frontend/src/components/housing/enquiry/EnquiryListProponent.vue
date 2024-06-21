@@ -38,7 +38,7 @@ function onDelete(enquiryId: string) {
     rejectLabel: 'Cancel',
     accept: () => {
       enquiryService
-        .deleteEnquiry(enquiryId)
+        .deleteEnquiry(enquiryId, true)
         .then(() => {
           emit('enquiry:delete', enquiryId);
           toast.success('Draft deleted');

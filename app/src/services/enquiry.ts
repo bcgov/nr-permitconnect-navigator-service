@@ -25,24 +25,41 @@ const service = {
    * @param {string} enquiryId Enquiry ID
    * @returns {Promise<Enquiry>} The result of running the delete operation
    */
-  deleteEnquiry: async (enquiryId: string) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const del = await trx.enquiry.delete({
+  deleteEnquiry: async (enquiryId: string, hardDelete: string) => {
+    if (hardDelete) {
+      const response = await prisma.$transaction(async (trx) => {
+        const del = await trx.enquiry.delete({
+          where: {
+            enquiry_id: enquiryId
+          }
+        });
+
+        await trx.activity.delete({
+          where: {
+            activity_id: del.activity_id
+          }
+        });
+
+        return del;
+      });
+
+      return enquiry.fromPrismaModel(response);
+    } else {
+      const deleteEnquiry = await prisma.enquiry.findUnique({
         where: {
           enquiry_id: enquiryId
         }
       });
-
-      await trx.activity.delete({
-        where: {
-          activity_id: del.activity_id
-        }
-      });
-
-      return del;
-    });
-
-    return enquiry.fromPrismaModel(response);
+      if (deleteEnquiry) {
+        await prisma.activity.update({
+          data: { is_deleted: true },
+          where: {
+            activity_id: deleteEnquiry?.activity_id
+          }
+        });
+        return enquiry.fromPrismaModel(deleteEnquiry);
+      }
+    }
   },
 
   /**
@@ -52,7 +69,11 @@ const service = {
    */
   getEnquiries: async () => {
     try {
-      const result = await prisma.enquiry.findMany({ include: { user: true } });
+      let result = await prisma.enquiry.findMany({ include: { user: true } });
+      const softDeletedActivities = await prisma.activity.findMany({ where: { is_deleted: true } });
+      // Remove soft deleted enquiries
+      if (softDeletedActivities.length)
+        result = result.filter((x) => !softDeletedActivities.some((y) => y.activity_id === x.activity_id));
 
       return result.map((x) => enquiry.fromPrismaModelWithUser(x));
     } catch (e: unknown) {

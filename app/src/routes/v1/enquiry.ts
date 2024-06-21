@@ -33,7 +33,7 @@ router.get('/:enquiryId', (req: Request, res: Response, next: NextFunction): voi
 });
 
 /** Deletes an enquiry */
-router.delete('/:enquiryId', (req: Request, res: Response, next: NextFunction): void => {
+router.delete('/', (req: Request, res: Response, next: NextFunction): void => {
   enquiryController.deleteEnquiry(req, res, next);
 });
 
