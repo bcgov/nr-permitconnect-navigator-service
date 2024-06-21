@@ -12,7 +12,8 @@ export default {
   toPrismaModel(input: Activity): PrismaRelationActivity {
     return {
       activity_id: input.activityId,
-      initiative_id: input.initiativeId
+      initiative_id: input.initiativeId,
+      is_deleted: input.isDeleted
     };
   },
 
@@ -21,7 +22,8 @@ export default {
 
     return {
       activityId: input.activity_id,
-      initiativeId: input.initiative_id
+      initiativeId: input.initiative_id,
+      isDeleted: input.is_deleted
     };
   }
 };
