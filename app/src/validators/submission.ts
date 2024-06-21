@@ -50,8 +50,9 @@ const schema = {
     })
   },
   deleteSubmission: {
-    params: Joi.object({
-      submissionId: uuidv4.required()
+    query: Joi.object({
+      submissionId: uuidv4.required(),
+      hardDelete: Joi.boolean().allow(null)
     })
   },
   getStatistics: {

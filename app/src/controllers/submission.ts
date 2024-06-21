@@ -155,10 +155,12 @@ const controller = {
         })
       ).then((x) => x.filter((y) => y.length).flat());
 
-    // Get a list of all activity IDs currently in our DB
+    // Get a list of all activity IDs currently in our DB including deleted
+    // This is to prevent duplicate submissions
     const stored = (
       await submissionService.searchSubmissions({
-        activityId: exportData.map((x) => x.activityId as string)
+        activityId: exportData.map((x) => x.activityId as string),
+        includeDeleted: true
       })
     ).map((x) => x?.activityId);
 
@@ -325,9 +327,14 @@ const controller = {
     }
   },
 
-  deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  deleteSubmission: async (
+    req: Request<{ submissionId: string; hardDelete?: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const response = await submissionService.deleteSubmission(req.params.submissionId);
+      const { submissionId, hardDelete } = req.query;
+      const response = await submissionService.deleteSubmission(submissionId, hardDelete);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

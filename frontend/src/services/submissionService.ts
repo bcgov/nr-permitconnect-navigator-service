@@ -24,8 +24,8 @@ export default {
    * @function deleteSubmission
    * @returns {Promise} An axios response
    */
-  deleteSubmission(submissionId: string) {
-    return appAxios().delete(`submission/${submissionId}`);
+  deleteSubmission(submissionId: string, hardDelete?: boolean) {
+    return appAxios().delete('submission', { params: { submissionId, hardDelete } });
   },
 
   /**

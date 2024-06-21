@@ -23,6 +23,9 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
 
+//Emits
+const emit = defineEmits(['submission:delete']);
+
 // Props
 type Props = {
   loading: boolean;
@@ -72,6 +75,25 @@ function handleCreateNewActivity() {
 const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+
+function onDelete(submissionId: string) {
+  confirmDialog.require({
+    message: 'Please confirm that you want to delete this project',
+    header: 'Delete project?',
+    acceptLabel: 'Confirm',
+    acceptClass: 'p-button-danger',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      submissionService
+        .deleteSubmission(submissionId)
+        .then(() => {
+          emit('submission:delete', submissionId);
+          toast.success('Project deleted');
+        })
+        .catch((e: any) => toast.error('Failed to delete project', e.message));
+    }
+  });
+}
 </script>
 
 <template>
@@ -405,5 +427,22 @@ const filters = ref({
       :sortable="true"
       style="min-width: 200px"
     />
+    <Column
+      field="action"
+      header="Action"
+      header-class="header-right"
+      class="text-right"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          aria-label="Delete draft"
+          @click="onDelete(data.submissionId)"
+        >
+          <font-awesome-icon icon="fa-solid fa-trash" />
+        </Button>
+      </template>
+    </Column>
   </DataTable>
 </template>

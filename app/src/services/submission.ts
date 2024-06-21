@@ -57,7 +57,8 @@ const service = {
       await trx.activity.createMany({
         data: submissions.map((x) => ({
           activity_id: x.activityId as string,
-          initiative_id: initiative.initiative_id
+          initiative_id: initiative.initiative_id,
+          is_deleted: false
         }))
       });
 
@@ -103,24 +104,45 @@ const service = {
    * @param {string} submissionId Submission ID
    * @returns {Promise<Submission>} The result of running the delete operation
    */
-  deleteSubmission: async (submissionId: string) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const del = await trx.submission.delete({
-        where: {
-          submission_id: submissionId
+  deleteSubmission: async (submissionId: string, hardDelete: string) => {
+    try {
+      if (hardDelete) {
+        const response = await prisma.$transaction(async (trx) => {
+          const del = await trx.submission.delete({
+            where: {
+              submission_id: submissionId
+            }
+          });
+
+          await trx.activity.delete({
+            where: {
+              activity_id: del.activity_id
+            }
+          });
+
+          return del;
+        });
+
+        return submission.fromPrismaModel(response);
+      } else {
+        const deleteSubmission = await prisma.submission.findUnique({
+          where: {
+            submission_id: submissionId
+          }
+        });
+        if (deleteSubmission) {
+          await prisma.activity.update({
+            data: { is_deleted: true },
+            where: {
+              activity_id: deleteSubmission?.activity_id
+            }
+          });
+          return submission.fromPrismaModel(deleteSubmission);
         }
-      });
-
-      await trx.activity.delete({
-        where: {
-          activity_id: del.activity_id
-        }
-      });
-
-      return del;
-    });
-
-    return submission.fromPrismaModel(response);
+      }
+    } catch (e: unknown) {
+      throw e;
+    }
   },
 
   /**
@@ -210,7 +232,7 @@ const service = {
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
-    const result = await prisma.submission.findMany({
+    let result = await prisma.submission.findMany({
       include: { user: params.includeUser },
       where: {
         AND: [
@@ -227,6 +249,13 @@ const service = {
       }
     });
 
+    if (!params.includeDeleted) {
+      const softDeletedActivities = await prisma.activity.findMany({ where: { is_deleted: true } });
+
+      // Remove soft deleted submissions
+      if (softDeletedActivities.length)
+        result = result.filter((x) => !softDeletedActivities.some((y) => y.activity_id === x.activity_id));
+    }
     const submissions = params.includeUser
       ? result.map((x) => submission.fromPrismaModelWithUser(x))
       : result.map((x) => submission.fromPrismaModel(x));

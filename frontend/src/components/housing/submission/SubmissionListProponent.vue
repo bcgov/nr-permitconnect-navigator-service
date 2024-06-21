@@ -38,12 +38,12 @@ function onDelete(submissionId: string) {
     rejectLabel: 'Cancel',
     accept: () => {
       submissionService
-        .deleteSubmission(submissionId)
+        .deleteSubmission(submissionId, true)
         .then(() => {
           emit('submission:delete', submissionId);
           toast.success('Draft deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete permit', e.message));
+        .catch((e: any) => toast.error('Failed to delete draft', e.message));
     }
   });
 }

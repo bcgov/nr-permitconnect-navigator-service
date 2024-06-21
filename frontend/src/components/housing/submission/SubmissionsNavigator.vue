@@ -60,6 +60,9 @@ function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
+function onEnquiryDelete(enquiryId: string) {
+  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
+}
 
 onMounted(async () => {
   // To pull data from CHEFS
@@ -88,6 +91,10 @@ onMounted(async () => {
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
 });
+
+function onSubmissionDelete(submissionId: string) {
+  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+}
 
 watch(accordionIndex, () => {
   if (accordionIndex.value !== null) {
@@ -135,12 +142,14 @@ watch(accordionIndex, () => {
       <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
+        @submission:delete="onSubmissionDelete"
       />
     </TabPanel>
     <TabPanel header="Enquiries">
       <EnquiryListNavigator
         :loading="loading"
         :enquiries="enquiries"
+        @enquiry:delete="onEnquiryDelete"
       />
     </TabPanel>
     <TabPanel header="Statistics">

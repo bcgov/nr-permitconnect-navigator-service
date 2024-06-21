@@ -56,13 +56,9 @@ router.put('/', submissionValidator.createSubmission, (req: Request, res: Respon
 });
 
 /** Deletes a submission */
-router.delete(
-  '/:submissionId',
-  submissionValidator.deleteSubmission,
-  (req: Request, res: Response, next: NextFunction): void => {
-    submissionController.deleteSubmission(req, res, next);
-  }
-);
+router.delete('/', submissionValidator.deleteSubmission, (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.deleteSubmission(req, res, next);
+});
 
 /** Gets a specific submission */
 router.get('/search', (req: Request, res: Response, next: NextFunction): void => {

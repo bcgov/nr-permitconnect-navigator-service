@@ -15,6 +15,12 @@ const schema = {
       submit: Joi.boolean()
     })
   },
+  deleteEnquiry: {
+    query: Joi.object({
+      enquiryId: uuidv4.required(),
+      hardDelete: Joi.boolean().allow(null)
+    })
+  },
   updateDraft: {
     body: Joi.object({
       applicant: applicant,
@@ -58,6 +64,7 @@ const schema = {
 
 export default {
   createDraft: validate(schema.createDraft),
+  deleteEnquiry: validate(schema.deleteEnquiry),
   updateDraft: validate(schema.updateDraft),
   updateEnquiry: validate(schema.updateEnquiry)
 };
