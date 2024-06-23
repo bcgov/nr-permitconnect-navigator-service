@@ -3,11 +3,13 @@ import { onMounted, ref } from 'vue';
 
 import BackButton from '@/components/common/BackButton.vue';
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
-import { Message, TabPanel, TabView } from '@/lib/primevue';
+import NoteCard from '@/components/note/NoteCard.vue';
+import NoteModal from '@/components/note/NoteModal.vue';
+import { Button, Message, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 
-import type { Submission } from '@/types';
+import type { Note, Submission } from '@/types';
 import type { Ref } from 'vue';
 import { useEnquiryStore } from '@/store';
 import { storeToRefs } from 'pinia';
@@ -23,10 +25,11 @@ const props = withDefaults(defineProps<Props>(), {});
 // State
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
+const noteModalVisible: Ref<boolean> = ref(false);
 
 // Store
 const enquiryStore = useEnquiryStore();
-const { getEnquiry } = storeToRefs(enquiryStore);
+const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // Actions
 onMounted(async () => {
@@ -48,6 +51,16 @@ onMounted(async () => {
 
   loading.value = false;
 });
+
+function onAddNote(note: Note) {
+  enquiryStore.addNote(note, true);
+}
+const onUpdateNote = (oldNote: Note, newNote: Note) => {
+  enquiryStore.updateNote(oldNote, newNote);
+};
+const onDeleteNote = (note: Note) => {
+  enquiryStore.removeNote(note);
+};
 </script>
 
 <template>
@@ -88,7 +101,39 @@ onMounted(async () => {
       </span>
     </TabPanel>
     <TabPanel header="Notes">
-      <div>Notes - Coming soon</div>
+      <div class="flex align-items-center pb-2">
+        <div class="flex-grow-1">
+          <p class="font-bold">Notes ({{ getNotes.length }})</p>
+        </div>
+        <Button
+          aria-label="Add note"
+          @click="noteModalVisible = true"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-plus"
+          />
+          Add note
+        </Button>
+      </div>
+      <div
+        v-for="(note, index) in getNotes"
+        :key="note.noteId"
+        :index="index"
+        class="col-12"
+      >
+        <NoteCard
+          :note="note"
+          @delete-note="onDeleteNote"
+          @update-note="onUpdateNote"
+        />
+      </div>
+      <NoteModal
+        v-if="noteModalVisible"
+        v-model:visible="noteModalVisible"
+        :activity-id="props.activityId"
+        @add-note="onAddNote"
+      />
     </TabPanel>
   </TabView>
 </template>
