@@ -6,7 +6,6 @@ import { mixed, object, string } from 'yup';
 import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
-import { useSubmissionStore } from '@/store';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
 import { BringForwardType, NoteType } from '@/utils/enums/housing';
 
@@ -23,8 +22,8 @@ const props = withDefaults(defineProps<Props>(), {
   note: undefined
 });
 
-// Store
-const submissionStore = useSubmissionStore();
+// Emits
+const emit = defineEmits(['addNote', 'updateNote', 'deleteNote']);
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -86,7 +85,7 @@ function onDelete() {
         noteService
           .deleteNote(props.note?.noteId as string)
           .then(() => {
-            submissionStore.removeNote(props.note as Note);
+            emit('deleteNote', props.note as Note);
             toast.success('Note deleted');
           })
           .catch((e: any) => toast.error('Failed to delete note', e.message))
@@ -116,11 +115,11 @@ async function onSubmit(data: any, { resetForm }) {
   try {
     if (!props.note) {
       const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
-      submissionStore.addNote(result, true);
+      emit('addNote', result);
       resetForm();
     } else {
       const result = (await noteService.updateNote({ ...data, activityId: props.activityId })).data;
-      submissionStore.updateNote(props.note, result);
+      emit('updateNote', props.note, result);
       initialFormValues = data;
     }
     toast.success('Note saved');
