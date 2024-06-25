@@ -17,12 +17,14 @@ import { storeToRefs } from 'pinia';
 // Props
 type Props = {
   activityId: string;
+  initialTab?: string;
   enquiryId: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), { initialTab: '0' });
 
 // State
+const activeTab: Ref<number> = ref(Number(props.initialTab));
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
@@ -78,7 +80,7 @@ const onDeleteNote = (note: Note) => {
       {{ getEnquiry.activityId }}
     </span>
   </h1>
-  <TabView>
+  <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Information">
       <Message
         v-if="relatedSubmission"

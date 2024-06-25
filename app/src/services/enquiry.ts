@@ -2,7 +2,7 @@
 import prisma from '../db/dataConnection';
 import { enquiry } from '../db/models';
 
-import type { Enquiry } from '../types';
+import type { Enquiry, EnquirySearchParameters } from '../types';
 
 const service = {
   /**
@@ -75,6 +75,40 @@ const service = {
       });
 
       return result ? enquiry.fromPrismaModel(result) : null;
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
+   * @function searchEnquiries
+   * Search and filter for specific submission
+   * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
+   * @param {string[]} [params.enquiry_id] Optional array of uuids representing the enquiry ID
+   * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
+   * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
+   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
+   */
+  searchEnquiries: async (params: EnquirySearchParameters) => {
+    try {
+      const result = await prisma.enquiry.findMany({
+        include: { user: params.includeUser },
+        where: {
+          AND: [
+            {
+              activity_id: { in: params.activityId }
+            },
+            {
+              enquiry_id: { in: params.enquiryId }
+            },
+            {
+              intake_status: { in: params.intakeStatus }
+            }
+          ]
+        }
+      });
+
+      return result.map((x) => enquiry.fromPrismaModel(x));
     } catch (e: unknown) {
       throw e;
     }

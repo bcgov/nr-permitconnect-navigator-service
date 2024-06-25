@@ -1,7 +1,7 @@
 import { NIL } from 'uuid';
 
 import { noteController } from '../../../src/controllers';
-import { noteService, submissionService, userService } from '../../../src/services';
+import { enquiryService, noteService, submissionService, userService } from '../../../src/services';
 import * as utils from '../../../src/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -117,6 +117,7 @@ describe('listBringForward', () => {
   // Mock service calls
   const listSpy = jest.spyOn(noteService, 'listBringForward');
   const searchSubmissionsSpy = jest.spyOn(submissionService, 'searchSubmissions');
+  const searchEnquiries = jest.spyOn(enquiryService, 'searchEnquiries');
   const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
 
   it('should return 200 if all good', async () => {
@@ -139,6 +140,13 @@ describe('listBringForward', () => {
       }
     ];
 
+    const enquiriesList = [
+      {
+        activityId: '123',
+        projectName: 'Project ABC'
+      }
+    ];
+
     const submissionList = [
       {
         activityId: '123',
@@ -156,6 +164,7 @@ describe('listBringForward', () => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     listSpy.mockResolvedValue(noteList);
     searchSubmissionsSpy.mockResolvedValue(submissionList as any);
+    searchEnquiries.mockResolvedValue(enquiriesList as any);
     searchUsersSpy.mockResolvedValue(userList as any);
 
     await noteController.listBringForward(req as any, res as any, next);
