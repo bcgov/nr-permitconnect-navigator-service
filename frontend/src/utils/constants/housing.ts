@@ -51,6 +51,11 @@ export const ENQUIRY_TYPE_LIST = [
   SubmissionType.INAPPLICABLE
 ];
 
+export const HOUSING_CONTACT = {
+  email: 'Housing.Authorizations@gov.bc.ca',
+  subject: 'Assistance with Permit Connect Navigator Service'
+};
+
 export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];

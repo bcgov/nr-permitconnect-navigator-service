@@ -3,6 +3,8 @@ import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
 import { Permissions, default as PermissionService } from '@/services/permissionService';
+import { PCNS_CONTACT } from '@/utils/constants/application';
+import { HOUSING_CONTACT } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -14,6 +16,7 @@ type NavItem = {
   public?: boolean;
   access?: string;
   items?: Array<NavItem>;
+  mailTo?: string;
 };
 
 // State
@@ -67,6 +70,27 @@ onMounted(() => {
       label: 'Developer',
       route: RouteName.DEVELOPER,
       access: Permissions.NAVIGATION_DEVELOPER
+    },
+    {
+      label: 'Help',
+      items: [
+        {
+          label: 'Contact a Navigator',
+          mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
+          access: Permissions.NAVIGATION_HOUSING_INTAKE
+        },
+        {
+          label: 'Report a problem',
+          mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
+          public: true
+        },
+        {
+          label: 'User Guide',
+          route: RouteName.HOUSING_GUIDE,
+          access: Permissions.NAVIGATION_HOUSING_INTAKE
+        }
+      ],
+      public: true
     }
   ];
 });
@@ -91,6 +115,13 @@ onMounted(() => {
               <span class="flex">{{ item.label }}</span>
             </a>
           </router-link>
+          <a
+            v-else-if="item.mailTo"
+            :href="item.mailTo"
+            class="mail-link"
+          >
+            <span class="flex">{{ item.label }}</span>
+          </a>
           <a
             v-else
             :href="item.url"
@@ -149,6 +180,13 @@ onMounted(() => {
     :deep(.p-menuitem .p-focus) {
       background-color: #38598a;
       border-radius: 0;
+    }
+
+    .mail-link {
+      padding: 0.5rem 0.8rem 0.7rem 0.8rem;
+      &:hover {
+        background-color: #5a7da9;
+      }
     }
 
     ul {

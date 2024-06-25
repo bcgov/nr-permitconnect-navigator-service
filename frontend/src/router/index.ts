@@ -105,6 +105,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
           access: [Permissions.NAVIGATION_HOUSING_SUBMISSIONS, Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB]
         }
+      },
+      {
+        path: '/guide',
+        name: RouteName.HOUSING_GUIDE,
+        component: () => import('@/views/ComingSoon.vue'),
+        meta: { access: Permissions.NAVIGATION_HOUSING }
       }
     ]
   },
