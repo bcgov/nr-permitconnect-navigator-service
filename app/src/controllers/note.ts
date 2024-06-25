@@ -1,6 +1,6 @@
 import { NIL } from 'uuid';
 
-import { noteService, submissionService, userService } from '../services';
+import { enquiryService, noteService, submissionService, userService } from '../services';
 import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -47,10 +47,14 @@ const controller = {
             .filter((x) => !!x)
             .map((x) => x as string)
         });
+        const enquiries = await enquiryService.searchEnquiries({
+          activityId: notes.map((x) => x.activityId)
+        });
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,
           submissionId: submissions.find((s) => s.activityId === note.activityId)?.submissionId as string,
+          enquiryId: enquiries.find((s) => s.activityId === note.activityId)?.enquiryId as string,
           title: note.title,
           projectName: submissions.find((s) => s.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
