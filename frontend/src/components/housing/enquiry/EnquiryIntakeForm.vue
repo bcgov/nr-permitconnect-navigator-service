@@ -22,18 +22,20 @@ import type { Ref } from 'vue';
 type Props = {
   activityId?: string;
   enquiryId?: string;
+  assignedActivityId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  assignedActivityId: undefined
 });
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const assignedActivityId: Ref<string | undefined> = ref(undefined);
+const assignedActivityId: Ref<string | undefined> = ref(props.assignedActivityId);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);

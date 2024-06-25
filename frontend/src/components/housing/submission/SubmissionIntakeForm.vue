@@ -21,6 +21,7 @@ import {
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
@@ -356,7 +357,7 @@ onBeforeMount(async () => {
     <Form
       v-if="initialFormValues"
       id="form"
-      v-slot="{ setFieldValue, values }"
+      v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
@@ -364,6 +365,11 @@ onBeforeMount(async () => {
       @submit="confirmSubmit"
       @change="formUpdated = true"
     >
+      <SubmissionAssistance
+        :form-errors="errors"
+        :form-values="values"
+      />
+
       <input
         type="hidden"
         name="submissionId"
