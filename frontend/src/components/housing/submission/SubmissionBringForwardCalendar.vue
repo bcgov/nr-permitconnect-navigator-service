@@ -5,10 +5,17 @@ import { ref, watchEffect } from 'vue';
 import { Column, DataTable, InputSwitch } from '@/lib/primevue';
 import { useAuthStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
+import { SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { BringForward } from '@/types';
+
+// Constants
+const NOTES_TAB_INDEX = {
+  ENQUIRY: 1,
+  SUBMISSION: 3
+};
 
 // Props
 type Props = {
@@ -30,6 +37,22 @@ const filterToUser: Ref<boolean> = ref(false);
 watchEffect(() => {
   bringForwards.value = props.bringForward;
 });
+
+// return the query object for the router link based on the submission type
+function getQueryObject(bf: BringForward) {
+  if (bf.submissionId) {
+    return {
+      activityId: bf.activityId,
+      initialTab: NOTES_TAB_INDEX.SUBMISSION,
+      submissionId: bf.submissionId
+    };
+  }
+  return {
+    activityId: bf.activityId,
+    initialTab: NOTES_TAB_INDEX.ENQUIRY,
+    enquiryId: bf.enquiryId
+  };
+}
 </script>
 
 <template>
@@ -64,8 +87,8 @@ watchEffect(() => {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: RouteName.HOUSING_SUBMISSION,
-                  query: { activityId: data.activityId, initialTab: 3, submissionId: data.submissionId },
+                  name: data.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                  query: getQueryObject(data),
                   hash: `#${data.noteId}`
                 }"
               >
@@ -78,7 +101,11 @@ watchEffect(() => {
           field="projectName"
           header="Project Name"
           :sortable="true"
-        />
+        >
+          <template #body="{ data }">
+            {{ data.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
+          </template>
+        </Column>
         <Column
           field="createdByFullName"
           header="Navigator"
