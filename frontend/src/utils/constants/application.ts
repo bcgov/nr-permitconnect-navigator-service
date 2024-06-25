@@ -15,6 +15,11 @@ export const ACCESS_ROLES_LIST = [
 
 export const DELIMITER = '/';
 
+export const PCNS_CONTACT = {
+  email: 'NRM.PermittingAndData@gov.bc.ca',
+  subject: 'Reporting an Issue with PCNS'
+};
+
 export const SYSTEM_USER = NIL;
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];

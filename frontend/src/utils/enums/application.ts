@@ -43,6 +43,7 @@ export enum RouteName {
   HOUSING = 'housing',
   HOUSING_ENQUIRY = 'housing_enquiry',
   HOUSING_ENQUIRY_INTAKE = 'housing_enquiry_intake',
+  HOUSING_GUIDE = 'housing_guide',
   HOUSING_SUBMISSION = 'housing_submission',
   HOUSING_SUBMISSION_INTAKE = 'housing_submission_intake',
   HOUSING_SUBMISSIONS = 'housing_submissions',
