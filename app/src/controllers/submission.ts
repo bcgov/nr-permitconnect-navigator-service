@@ -16,6 +16,8 @@ import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTit
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
+let count = 1;
+
 const controller = {
   checkAndStoreNewSubmissions: async () => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
@@ -45,6 +47,12 @@ const controller = {
       await Promise.all(
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
+            // console.log(' ');
+            // console.log(' ');
+            // console.log(' ');
+            // console.log(' ');
+            // console.log(' ');
+            // console.log('DATA: ', data);
             const financiallySupportedValues = {
               financiallySupportedBC: data.isBCHousingSupported
                 ? toTitleCase(data.isBCHousingSupported)
@@ -142,6 +150,7 @@ const controller = {
               longitude: data.longitude,
               naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
               queuePriority: parseInt(data.queuePriority),
+              // queuePriority: controller.assignPriorityToCHEFS(data, 'from check and store new sumbissions'),
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
@@ -262,7 +271,7 @@ const controller = {
     }
 
     // Put new submission together
-    return {
+    let submissionData = {
       submission: {
         ...applicant,
         ...basic,
@@ -281,6 +290,16 @@ const controller = {
       appliedPermits,
       investigatePermits
     };
+
+    console.log('BEFORE: ', submissionData.submission);
+
+    if (data.submit) {
+      controller.assignPriority(submissionData.submission);
+    }
+
+    console.log('AFTER: ', submissionData.submission);
+
+    return submissionData;
   },
 
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
@@ -451,6 +470,7 @@ const controller = {
       next(e);
     }
   },
+
   /**
    * @function emailConfirmation
    * Send an email with the confirmation of submission
@@ -462,7 +482,107 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
+  },
+
+  /**
+   * @function assignPriority
+   * assigns a priority level to a submission based on given criteria
+   * criteria defined below
+   */
+  assignPriority: (submission: any) => {
+    console.log('Middle: ', submission);
+    const matchesPriorityOneCriteria = // Priority 1 Criteria:
+      submission.singleFamilyUnits === '50-500' || // 1. More than 50 units of any type
+      submission.singleFamilyUnits === '>500' ||
+      submission.multiFamilyUnits === '50-500' ||
+      submission.multiFamilyUnits === '>500' ||
+      submission.otherUnits === '50-500' ||
+      submission.otherUnits === '>500' ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+
+    console.log('Priority 1?: ', matchesPriorityOneCriteria);
+    console.log(submission.singleFamilyUnits);
+    console.log(submission.singleFamilyUnits);
+    console.log(submission.multiFamilyUnits);
+    console.log(submission.multiFamilyUnits);
+    console.log(submission.otherUnits);
+    console.log(submission.otherUnits);
+    console.log(submission.hasRentalUnits);
+    console.log(submission.financiallySupportedBC);
+    console.log(submission.financiallySupportedIndigenous);
+
+    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
+      submission.singleFamilyUnits === '10-49' || // 1. Single Family homes w/ >9 Units
+      submission.multiFamilyUnits || // 2. Has 1 or more MultiFamily Units
+      submission.otherUnits; // 3. Has 1 or more Other Units
+
+    console.log('Priority 2?: ', matchesPriorityTwoCriteria);
+    console.log(submission.singleFamilyUnits);
+    console.log(submission.multiFamilyUnits);
+    console.log(submission.otherUnits);
+
+    if (matchesPriorityOneCriteria) {
+      submission.queuePriority = 1;
+    } else if (matchesPriorityTwoCriteria) {
+      submission.queuePriority = 2;
+    } else {
+      // Prioriy 3 Criteria:
+      submission.queuePriority = 3; // Everything Else
+    }
   }
+
+  /**
+   * @function assignPriorityToCHEFS
+   * assigns a priority level to a submission from CHEFS data
+   */
+  // assignPriorityToCHEFS: (submission: ChefsSubmissionExport, devNote: String) => {
+  //   // console.log('Submission type', typeof submission);
+  //   // console.log('before', submission);
+  //   // console.log(devNote);
+  //   let priority = 3;
+  //   const hasProjectSupport = submission.projectSupport !== undefined;
+
+  //   if (
+  //     hasProjectSupport &&
+  //     (submission.projectSupport.isBCHousingSupported ||
+  //       submission.projectSupport.IndigenousHousing ||
+  //       submission.projectSupport.indigenousHousing)
+  //   ) {
+  //     console.log('HAS PROJECT SUPPORT SOCIAL || INDEGINOUS HOUSING');
+  //     priority = 1;
+  //     count += 1;
+  //   } else if (submission.isIndigenousHousingProviderSupported || submission.isBCHousingSupported) {
+  //     console.log('IS SOCIAL || INDEGINOUS HOUSING');
+  //     priority = 1;
+  //     count += 1;
+  //   } else if (submission.whatIsTheExpectedNumberOfRentalUnitsToBeDeveloped || submission.isRentalUnit) {
+  //     console.log('HAS RENTAL UNITS');
+  //     priority = 1;
+  //     count += 1;
+  //   } else if (submission.whatIsTheExpectedNumberOfUnitsToBeDeveloped > 100) {
+  //     priority = 1;
+  //     count += 1;
+  //   } else {
+  //     console.log('Not Priority 1', submission);
+  //   }
+
+  //   // console.log('after', submission.priority);
+
+  //   // pseudo code
+  //   // if Indigenous Led OR Social Housing OR Support Rental Unit OR #units > 100
+  //   //   priority = 1
+  //   // else if #units > 2 AND #units < 100 AND NOT a Single Family Home
+  //   //   priority = 2
+  //   // else
+  //   //   priority = 3
+  //   console.log('COUNT: ', count);
+  //   return priority;
+  // }
+
+  // TODO: add separate function that does same as assignPriority but for CHEFS
+  // (to be deleted after moving on from CHEFS)
 };
 
 export default controller;
