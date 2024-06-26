@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form, FieldArray, ErrorMessage, useForm } from 'vee-validate';
+import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { onBeforeMount, nextTick, ref } from 'vue';
 
 import BackButton from '@/components/common/BackButton.vue';

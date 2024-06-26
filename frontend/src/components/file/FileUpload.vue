@@ -69,65 +69,67 @@ const onUpload = async (files: Array<File>) => {
 </script>
 
 <template>
-  <div
-    v-if="uploading"
-    class="h-4rem align-content-center pl-2 pr-2"
-  >
-    <ProgressBar
-      mode="indeterminate"
-      class="align-self-center progress-bar"
-    />
-  </div>
-  <div
-    v-if="!uploading"
-    class="hover-hand hover-shadow"
-  >
-    <FileUpload
-      name="fileUpload"
-      :multiple="true"
-      :custom-upload="true"
-      :auto="true"
-      :disabled="props.disabled"
-      @uploader="onFileUploadDragAndDrop"
+  <div>
+    <div
+      v-if="uploading"
+      class="h-4rem align-content-center pl-2 pr-2"
     >
-      <template #empty>
-        <div class="flex align-items-center justify-content-center flex-column">
-          <Button
-            aria-label="Upload"
-            class="justify-content-center w-full h-4rem border-none"
-            @click="onFileUploadClick"
+      <ProgressBar
+        mode="indeterminate"
+        class="align-self-center progress-bar"
+      />
+    </div>
+    <div
+      v-if="!uploading"
+      class="hover-hand hover-shadow"
+    >
+      <FileUpload
+        name="fileUpload"
+        :multiple="true"
+        :custom-upload="true"
+        :auto="true"
+        :disabled="props.disabled"
+        @uploader="onFileUploadDragAndDrop"
+      >
+        <template #empty>
+          <div class="flex align-items-center justify-content-center flex-column">
+            <Button
+              aria-label="Upload"
+              class="justify-content-center w-full h-4rem border-none"
+              @click="onFileUploadClick"
+            >
+              <font-awesome-icon
+                class="pr-2"
+                icon="fa-solid fa-upload"
+              />
+              Click or drag-and-drop
+            </Button>
+          </div>
+        </template>
+        <template #content="{ files }">
+          <div
+            v-if="files.length > 0"
+            class="flex align-items-center justify-content-center flex-column"
           >
             <font-awesome-icon
-              class="pr-2"
               icon="fa-solid fa-upload"
+              class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
             />
-            Click or drag-and-drop
-          </Button>
-        </div>
-      </template>
-      <template #content="{ files }">
-        <div
-          v-if="files.length > 0"
-          class="flex align-items-center justify-content-center flex-column"
-        >
-          <font-awesome-icon
-            icon="fa-solid fa-upload"
-            class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
-          />
-          <p class="font-bold">Upload</p>
-          <p>Click or drag-and-drop</p>
-        </div>
-      </template>
-    </FileUpload>
-    <input
-      ref="fileInput"
-      type="file"
-      class="hidden"
-      accept="*"
-      multiple
-      @change="(event: any) => onUpload(Array.from(event.target.files))"
-      @click="(event: any) => (event.target.value = null)"
-    />
+            <p class="font-bold">Upload</p>
+            <p>Click or drag-and-drop</p>
+          </div>
+        </template>
+      </FileUpload>
+      <input
+        ref="fileInput"
+        type="file"
+        class="hidden"
+        accept="*"
+        multiple
+        @change="(event: any) => onUpload(Array.from(event.target.files))"
+        @click="(event: any) => (event.target.value = null)"
+      />
+    </div>
   </div>
 </template>
 
