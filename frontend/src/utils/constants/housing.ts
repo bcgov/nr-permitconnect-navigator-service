@@ -1,7 +1,8 @@
 /*
  * Housing initiative constants
  */
-
+import icon from '@/assets/images/marker-icon-red.png';
+import iconShadow from '@/assets/images/marker-shadow.png';
 import {
   ApplicationStatus,
   BringForwardType,
@@ -108,8 +109,8 @@ export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INA
  * Mapping constants
  */
 export const MAP_ICON_OPTIONS_RED: BaseIconOptions = {
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+  iconUrl: icon, //'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  shadowUrl: iconShadow, //'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
