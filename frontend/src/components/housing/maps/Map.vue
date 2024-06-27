@@ -3,6 +3,7 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
+import { onMounted, onUpdated } from 'vue';
 
 import {
   BC_BOUNDARIES_LOWER,
@@ -12,7 +13,6 @@ import {
   OSM_TILE_LAYER_OPTIONS,
   OSM_URL_TEMPLATE
 } from '@/utils/constants/housing';
-import { onMounted, onUpdated } from 'vue';
 
 type Props = {
   latitude?: number;
@@ -27,20 +27,6 @@ const props = withDefaults(defineProps<Props>(), {
 // Actions
 let marker: L.Marker;
 let map: L.Map;
-
-// Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
-// Parent component needs to trigger nextTick().then(() => mapRef?.value?.resizeMap()
-function resizeMap() {
-  if (map) map.invalidateSize();
-}
-
-function setAddressMarker(coords: any) {
-  if (marker) map.removeLayer(marker);
-  // Custom(-ish) markers courtesy of https://github.com/pointhi/leaflet-color-markers
-  const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);
-  marker = L.marker(coords, { icon: redIcon });
-  map.addLayer(marker);
-}
 
 async function initMap() {
   const osm = L.tileLayer(OSM_URL_TEMPLATE, OSM_TILE_LAYER_OPTIONS);
@@ -58,11 +44,25 @@ async function initMap() {
   });
 }
 
+// Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
+// Parent component needs to trigger nextTick().then(() => mapRef?.value?.resizeMap()
+function resizeMap() {
+  if (map) map.invalidateSize();
+}
+
+function setAddressMarker(coords: any) {
+  if (marker) map.removeLayer(marker);
+  // Custom(-ish) markers courtesy of https://github.com/pointhi/leaflet-color-markers
+  const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);
+  marker = L.marker(coords, { icon: redIcon });
+  map.addLayer(marker);
+}
+
+defineExpose({ resizeMap });
+
 onMounted(async () => {
   await initMap();
 });
-
-defineExpose({ resizeMap });
 
 onUpdated(async () => {
   if (props.latitude && props.longitude) {
@@ -72,6 +72,7 @@ onUpdated(async () => {
   }
 });
 </script>
+
 <template>
   <div class="grid nested-grid">
     <div class="col-12">

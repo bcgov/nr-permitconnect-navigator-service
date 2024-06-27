@@ -30,7 +30,7 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
 const fieldActive: Ref<boolean> = ref(false);
 
 // Emits
-const emit = defineEmits(['blur', 'focus']);
+const emit = defineEmits(['onBlur', 'onFocus']);
 </script>
 
 <template>
@@ -51,16 +51,16 @@ const emit = defineEmits(['blur', 'focus']);
       :disabled="disabled"
       :min-fraction-digits="0"
       :max-fraction-digits="6"
-      @focus="
-        () => {
-          fieldActive = true;
-          emit('focus');
-        }
-      "
       @blur="
         () => {
           fieldActive = true;
-          emit('blur');
+          emit('onBlur');
+        }
+      "
+      @focus="
+        () => {
+          fieldActive = true;
+          emit('onFocus');
         }
       "
     />
