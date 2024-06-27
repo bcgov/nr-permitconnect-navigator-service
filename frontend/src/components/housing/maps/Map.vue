@@ -12,7 +12,7 @@ import {
   MAP_INITIAL_START_POINT,
   OSM_TILE_LAYER_OPTIONS,
   OSM_URL_TEMPLATE
-} from '@/utils/constants/housing';
+} from '@/utils/constants/mapping';
 
 type Props = {
   latitude?: number;
