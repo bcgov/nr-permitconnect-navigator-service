@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 
 import { enquiryService } from '@/services';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { BasicResponse } from '@/utils/enums/application';
 import { IntakeFormCategory } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
@@ -22,7 +21,6 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
-const router = useRouter();
 const toast = useToast();
 
 const checkApplicantValuesValid = (
@@ -58,9 +56,11 @@ const confirmSubmit = (data: any) => {
   });
 };
 
+const emit = defineEmits(['onSubmitAssistance']);
+
 const onSubmit = async (values: any) => {
   try {
-    const tempData = Object.assign(
+    const formattedData = Object.assign(
       {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
@@ -72,14 +72,11 @@ const onSubmit = async (values: any) => {
       { applicant: values?.[IntakeFormCategory.APPLICANT] }
     );
 
-    const enquiryResponse = await enquiryService.createDraft(tempData);
+    const enquiryResponse = await enquiryService.createDraft(formattedData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
-      router.push({
-        name: RouteName.HOUSING_ENQUIRY_INTAKE,
-        query: { assignedActivityId: enquiryResponse.data.activityId }
-      });
+      emit('onSubmitAssistance', enquiryResponse.data.activityId);
     } else {
       toast.error('Failed to submit enquiry');
     }
