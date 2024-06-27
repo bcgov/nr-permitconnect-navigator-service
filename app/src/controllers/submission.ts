@@ -16,8 +16,6 @@ import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTit
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
-let count = 1;
-
 const controller = {
   checkAndStoreNewSubmissions: async () => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
@@ -480,7 +478,6 @@ const controller = {
    * criteria defined below
    */
   assignPriority: (submission: any) => {
-    console.log('Middle: ', submission);
     const matchesPriorityOneCriteria = // Priority 1 Criteria:
       submission.singleFamilyUnits === '50-500' || // 1. More than 50 units of any type
       submission.singleFamilyUnits === '>500' ||
@@ -492,26 +489,10 @@ const controller = {
       submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
       submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
 
-    console.log('Priority 1?: ', matchesPriorityOneCriteria);
-    console.log(submission.singleFamilyUnits);
-    console.log(submission.singleFamilyUnits);
-    console.log(submission.multiFamilyUnits);
-    console.log(submission.multiFamilyUnits);
-    console.log(submission.otherUnits);
-    console.log(submission.otherUnits);
-    console.log(submission.hasRentalUnits);
-    console.log(submission.financiallySupportedBC);
-    console.log(submission.financiallySupportedIndigenous);
-
     const matchesPriorityTwoCriteria = // Priority 2 Criteria:
       submission.singleFamilyUnits === '10-49' || // 1. Single Family homes w/ >9 Units
       submission.multiFamilyUnits || // 2. Has 1 or more MultiFamily Units
       submission.otherUnits; // 3. Has 1 or more Other Units
-
-    console.log('Priority 2?: ', matchesPriorityTwoCriteria);
-    console.log(submission.singleFamilyUnits);
-    console.log(submission.multiFamilyUnits);
-    console.log(submission.otherUnits);
 
     if (matchesPriorityOneCriteria) {
       submission.queuePriority = 1;
