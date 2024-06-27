@@ -51,7 +51,13 @@ import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { GeocoderEntry, Permit } from '@/types';
+import type { Permit } from '@/types';
+
+// Types
+type GeocoderEntry = {
+  geometry: { coordinates: Array<number>; [key: string]: any };
+  properties: { [key: string]: string };
+};
 
 // Props
 type Props = {
