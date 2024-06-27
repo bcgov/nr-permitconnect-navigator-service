@@ -17,6 +17,7 @@ export default {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
+    if (!emailData.cc) emailData.cc = [];
     if (emailData.bcc && !Array.isArray(emailData.bcc)) {
       emailData.bcc = delimitEmails(emailData.bcc);
     }
