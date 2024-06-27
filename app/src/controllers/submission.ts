@@ -263,7 +263,7 @@ const controller = {
     }
 
     // Put new submission together
-    let submissionData = {
+    const submissionData = {
       submission: {
         ...applicant,
         ...basic,
@@ -477,7 +477,7 @@ const controller = {
    * assigns a priority level to a submission based on given criteria
    * criteria defined below
    */
-  assignPriority: (submission: any) => {
+  assignPriority: (submission: Partial<Submission>) => {
     const matchesPriorityOneCriteria = // Priority 1 Criteria:
       submission.singleFamilyUnits === '50-500' || // 1. More than 50 units of any type
       submission.singleFamilyUnits === '>500' ||
