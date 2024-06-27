@@ -1,7 +1,6 @@
 /*
  * Housing initiative constants
  */
-
 import {
   ApplicationStatus,
   BringForwardType,

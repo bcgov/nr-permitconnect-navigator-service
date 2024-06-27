@@ -52,7 +52,7 @@ const wrapperSettings = () => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon']
+    stubs: ['font-awesome-icon', 'router-link']
   }
 });
 
