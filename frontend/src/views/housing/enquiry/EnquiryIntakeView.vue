@@ -9,13 +9,11 @@ import type { Ref } from 'vue';
 type Props = {
   activityId?: string;
   enquiryId?: string;
-  assignedActivityId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined,
-  assignedActivityId: undefined
+  enquiryId: undefined
 });
 
 // State
@@ -32,6 +30,5 @@ onMounted(async () => {
     v-if="!loading"
     :activity-id="props.activityId"
     :enquiry-id="props.enquiryId"
-    :assigned-activity-id="props.assignedActivityId"
   />
 </template>
