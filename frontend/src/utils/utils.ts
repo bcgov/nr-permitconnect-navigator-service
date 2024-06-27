@@ -36,7 +36,10 @@ export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
  * @returns {string[]} An array of string values
  */
 export function delimitEmails(value: string): Array<string> {
-  return value.split(/[\s;,]+/g).map((s) => s.trim());
+  return value
+    .split(/[\s;,]+/g)
+    .map((s) => s.trim())
+    .filter((s) => !!s);
 }
 
 /**

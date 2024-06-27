@@ -11,7 +11,7 @@ import { roadmapService, userService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
-import { delimitEmails } from '@/utils/utils';
+import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
@@ -36,19 +36,26 @@ const initialFormValues: Ref<any> = ref();
 const selectedFiles: Ref<Array<Document>> = ref([]);
 
 // Form schema
-const emailValidator = array()
-  .transform(function (value, originalValue) {
-    if (this.isType(value) && value !== null) {
-      return value;
-    }
-    return originalValue ? delimitEmails(originalValue) : [];
-  })
-  .of(string().email(({ value }) => `${value} is not a valid email`));
+const emailValidator = (min: number, message: string) => {
+  return array()
+    .transform(function (value, originalValue) {
+      if (this.isType(value) && value !== null) {
+        return value;
+      }
+      return originalValue ? delimitEmails(originalValue) : [];
+    })
+    .min(min, message)
+    .of(
+      string()
+        .trim()
+        .email(({ value }) => `${value} is not a valid email`)
+    );
+};
 
 const formSchema = object({
-  to: emailValidator,
-  cc: emailValidator,
-  bcc: emailValidator,
+  to: emailValidator(1, 'To is required'),
+  cc: emailValidator(0, 'CC is not required'),
+  bcc: emailValidator(1, 'BCC is required'),
   subject: string().required(),
   body: string().required()
 });
@@ -68,7 +75,7 @@ const confirmSubmit = (data: any) => {
         await roadmapService.send(
           props.activityId,
           selectedFiles.value.map((x: Document) => x.documentId),
-          data
+          setEmptyStringsToNull(data)
         );
         toast.success('Roadmap sent');
       } catch (e: any) {
