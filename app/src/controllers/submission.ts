@@ -47,12 +47,6 @@ const controller = {
       await Promise.all(
         Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
           return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
-            // console.log(' ');
-            // console.log(' ');
-            // console.log(' ');
-            // console.log(' ');
-            // console.log(' ');
-            // console.log('DATA: ', data);
             const financiallySupportedValues = {
               financiallySupportedBC: data.isBCHousingSupported
                 ? toTitleCase(data.isBCHousingSupported)
@@ -291,13 +285,9 @@ const controller = {
       investigatePermits
     };
 
-    console.log('BEFORE: ', submissionData.submission);
-
     if (data.submit) {
       controller.assignPriority(submissionData.submission);
     }
-
-    console.log('AFTER: ', submissionData.submission);
 
     return submissionData;
   },
@@ -532,57 +522,6 @@ const controller = {
       submission.queuePriority = 3; // Everything Else
     }
   }
-
-  /**
-   * @function assignPriorityToCHEFS
-   * assigns a priority level to a submission from CHEFS data
-   */
-  // assignPriorityToCHEFS: (submission: ChefsSubmissionExport, devNote: String) => {
-  //   // console.log('Submission type', typeof submission);
-  //   // console.log('before', submission);
-  //   // console.log(devNote);
-  //   let priority = 3;
-  //   const hasProjectSupport = submission.projectSupport !== undefined;
-
-  //   if (
-  //     hasProjectSupport &&
-  //     (submission.projectSupport.isBCHousingSupported ||
-  //       submission.projectSupport.IndigenousHousing ||
-  //       submission.projectSupport.indigenousHousing)
-  //   ) {
-  //     console.log('HAS PROJECT SUPPORT SOCIAL || INDEGINOUS HOUSING');
-  //     priority = 1;
-  //     count += 1;
-  //   } else if (submission.isIndigenousHousingProviderSupported || submission.isBCHousingSupported) {
-  //     console.log('IS SOCIAL || INDEGINOUS HOUSING');
-  //     priority = 1;
-  //     count += 1;
-  //   } else if (submission.whatIsTheExpectedNumberOfRentalUnitsToBeDeveloped || submission.isRentalUnit) {
-  //     console.log('HAS RENTAL UNITS');
-  //     priority = 1;
-  //     count += 1;
-  //   } else if (submission.whatIsTheExpectedNumberOfUnitsToBeDeveloped > 100) {
-  //     priority = 1;
-  //     count += 1;
-  //   } else {
-  //     console.log('Not Priority 1', submission);
-  //   }
-
-  //   // console.log('after', submission.priority);
-
-  //   // pseudo code
-  //   // if Indigenous Led OR Social Housing OR Support Rental Unit OR #units > 100
-  //   //   priority = 1
-  //   // else if #units > 2 AND #units < 100 AND NOT a Single Family Home
-  //   //   priority = 2
-  //   // else
-  //   //   priority = 3
-  //   console.log('COUNT: ', count);
-  //   return priority;
-  // }
-
-  // TODO: add separate function that does same as assignPriority but for CHEFS
-  // (to be deleted after moving on from CHEFS)
 };
 
 export default controller;
