@@ -7,7 +7,8 @@ import { object, string } from 'yup';
 
 import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import { Button, Card, Divider, Message, useConfirm, useToast } from '@/lib/primevue';
+import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
+import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
@@ -22,20 +23,18 @@ import type { Ref } from 'vue';
 type Props = {
   activityId?: string;
   enquiryId?: string;
-  assignedActivityId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined,
-  assignedActivityId: undefined
+  enquiryId: undefined
 });
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const assignedActivityId: Ref<string | undefined> = ref(props.assignedActivityId);
+const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
@@ -444,22 +443,10 @@ async function emailConfirmation(activityId: string) {
       </div>
     </Form>
   </div>
-  <div v-else>
-    <h2>Confirmation of Submission</h2>
-    <Message
-      class="border-none"
-      severity="success"
-      :closable="false"
-    >
-      Your enquiry has been successfully submitted.
-    </Message>
-    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
-    <div>
-      A Housing Navigator will review your submission and contact you. Please check your email for the confirmation
-      email and keep the confirmation ID for future reference.
-    </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
-  </div>
+  <EnquiryIntakeConfirmation
+    v-else
+    :assigned-activity-id="assignedActivityId"
+  />
 </template>
 
 <style scoped lang="scss">

@@ -21,7 +21,9 @@ import {
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
+import SubmissionIntakeConfirmation from '@/components/housing/submission/SubmissionIntakeConfirmation.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
@@ -84,6 +86,7 @@ const { getConfig } = storeToRefs(useConfigStore());
 const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
+const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
@@ -242,6 +245,10 @@ async function onSubmit(data: any) {
   }
 }
 
+async function onSubmitAssistance(activityId: string) {
+  assistanceAssignedActivityId.value = activityId;
+}
+
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplate({
@@ -345,7 +352,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!assignedActivityId">
+  <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
       :confirm-leave="true"
       confirm-message="Are you sure you want to leave this page?
@@ -368,6 +375,7 @@ onBeforeMount(async () => {
       <SubmissionAssistance
         :form-errors="errors"
         :form-values="values"
+        @on-submit-assistance="onSubmitAssistance"
       />
 
       <input
@@ -1510,22 +1518,14 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
-  <div v-else>
-    <h2>Confirmation of Submission</h2>
-    <Message
-      class="border-none"
-      severity="success"
-      :closable="false"
-    >
-      Your application has been successfully submitted.
-    </Message>
-    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
-    <div>
-      Your submission will be reviewed by a Housing Navigator. You may be contacted if needed. Please check your email
-      for the confirmation email and keep the confirmation ID for future reference.
-    </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
-  </div>
+  <SubmissionIntakeConfirmation
+    v-else-if="assignedActivityId"
+    :assigned-activity-id="assignedActivityId"
+  />
+  <EnquiryIntakeConfirmation
+    v-else-if="assistanceAssignedActivityId"
+    :assigned-activity-id="assistanceAssignedActivityId"
+  />
 </template>
 
 <style scoped lang="scss">
