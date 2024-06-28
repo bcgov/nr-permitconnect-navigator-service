@@ -52,7 +52,11 @@ const service = {
    */
   getEnquiries: async () => {
     try {
-      const result = await prisma.enquiry.findMany({ include: { user: true } });
+      let result = await prisma.enquiry.findMany({ include: { user: true } });
+      const softDeletedActivities = await prisma.activity.findMany({ where: { is_deleted: true } });
+      // Remove soft deleted enquiries
+      if (softDeletedActivities.length)
+        result = result.filter((x) => !softDeletedActivities.some((y) => y.activity_id === x.activity_id));
 
       return result.map((x) => enquiry.fromPrismaModelWithUser(x));
     } catch (e: unknown) {
@@ -121,6 +125,30 @@ const service = {
       return enquiry.fromPrismaModel(result);
     } catch (e: unknown) {
       throw e;
+    }
+  },
+
+  /**
+   * @function updateIsDeletedFlag
+   * Updates is_deleted flag for the corresponding activity
+   * @param {string} enquiryId Enquiry ID
+   * @param {string} isDeleted flag
+   * @returns {Promise<Enquiry>} The result of running the delete operation
+   */
+  updateIsDeletedFlag: async (enquiryId: string, isDeleted: boolean) => {
+    const deleteEnquiry = await prisma.enquiry.findUnique({
+      where: {
+        enquiry_id: enquiryId
+      }
+    });
+    if (deleteEnquiry) {
+      await prisma.activity.update({
+        data: { is_deleted: isDeleted },
+        where: {
+          activity_id: deleteEnquiry?.activity_id
+        }
+      });
+      return enquiry.fromPrismaModel(deleteEnquiry);
     }
   }
 };

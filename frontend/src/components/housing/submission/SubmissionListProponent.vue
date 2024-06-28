@@ -43,7 +43,7 @@ function onDelete(submissionId: string) {
           emit('submission:delete', submissionId);
           toast.success('Draft deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete permit', e.message));
+        .catch((e: any) => toast.error('Failed to delete draft', e.message));
     }
   });
 }

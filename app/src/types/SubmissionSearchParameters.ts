@@ -3,4 +3,5 @@ export type SubmissionSearchParameters = {
   submissionId?: Array<string>;
   intakeStatus?: Array<string>;
   includeUser?: boolean;
+  includeDeleted?: boolean;
 };

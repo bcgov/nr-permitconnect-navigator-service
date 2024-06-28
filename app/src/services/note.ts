@@ -50,7 +50,7 @@ const service = {
    * @returns {Promise<Note[]>} The result of running the findMany operation
    */
   listBringForward: async (bringForwardState?: string, isDeleted: boolean = false) => {
-    const response = await prisma.note.findMany({
+    let response = await prisma.note.findMany({
       orderBy: {
         bring_forward_date: 'asc'
       },
@@ -60,6 +60,16 @@ const service = {
         is_deleted: isDeleted
       }
     });
+    const softDeletedActivities = await prisma.activity.findMany({
+      where: {
+        is_deleted: true
+      }
+    });
+    // Remove notes linked to soft deleted activities
+    if (softDeletedActivities.length) {
+      response = response.filter((x) => !softDeletedActivities.some((y) => y.activity_id === x.activity_id));
+    }
+
     return response.map((x) => note.fromPrismaModel(x));
   },
 

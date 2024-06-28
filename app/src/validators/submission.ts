@@ -75,6 +75,14 @@ const schema = {
       includeUser: Joi.boolean()
     })
   },
+  updateIsDeletedFlag: {
+    params: Joi.object({
+      submissionId: uuidv4.required()
+    }),
+    body: Joi.object({
+      isDeleted: Joi.boolean().required()
+    })
+  },
   updateSubmission: {
     body: Joi.object({
       submissionId: uuidv4.required(),
@@ -189,5 +197,6 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
   searchSubmissions: validate(schema.searchSubmissions),
+  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateSubmission: validate(schema.updateSubmission)
 };

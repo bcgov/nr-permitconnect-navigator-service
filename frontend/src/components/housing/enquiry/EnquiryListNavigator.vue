@@ -39,21 +39,22 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
 const confirm = useConfirm();
 const toast = useToast();
 
-function onDelete(enquiryId: string) {
+function onDelete(enquiryId: string, activityId: string) {
   confirm.require({
-    message: 'Please confirm that you want to delete this draft',
-    header: 'Delete draft?',
+    message: 'Please confirm that you want to delete this enquiry',
+    header: 'Delete enquiry?',
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
     accept: () => {
       enquiryService
-        .deleteEnquiry(enquiryId)
+        .updateIsDeletedFlag(enquiryId, true)
         .then(() => {
-          emit('enquiry:delete', enquiryId);
-          toast.success('Draft deleted');
+          emit('enquiry:delete', enquiryId, activityId);
+          selection.value = undefined;
+          toast.success('Enquiry deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete draft', e.message));
+        .catch((e: any) => toast.error('Failed to delete enquiry', e.message));
     }
   });
 }
@@ -173,16 +174,17 @@ const filters = ref({
     <Column
       field="action"
       header="Action"
-      header-class="header-right"
-      class="text-right"
+      class="text-center header-center"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
-          aria-label="Delete draft"
-          :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
-          @click="onDelete(data.enquiryId)"
+          class="p-button-lg p-button-text p-button-danger p-0"
+          aria-label="Delete enquiry"
+          @click="
+            onDelete(data.enquiryId, data.activityId);
+            selection = data;
+          "
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
         </Button>
@@ -190,3 +192,8 @@ const filters = ref({
     </Column>
   </DataTable>
 </template>
+<style scoped lang="scss">
+:deep(.header-center .p-column-header-content) {
+  justify-content: center;
+}
+</style>
