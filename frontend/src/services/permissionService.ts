@@ -166,6 +166,14 @@ export default class PermissionService {
     return appAxios().post('sso/requestBasicAccess');
   }
 
+  public async searchIdirUsers(params?: any) {
+    return appAxios().get('sso/idir/users', { params: params });
+  }
+
+  public async searchBasicBceidUsers(params?: any) {
+    return appAxios().get('sso/basic-bceid/users', { params: params });
+  }
+
   public async getRoles() {
     return appAxios().get('sso/roles');
   }

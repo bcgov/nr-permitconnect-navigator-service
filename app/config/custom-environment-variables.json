@@ -59,6 +59,7 @@
       "port": "SERVER_DB_PORT",
       "username": "SERVER_DB_USERNAME"
     },
+    "env": "SERVER_ENV",
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
     "oidc": {

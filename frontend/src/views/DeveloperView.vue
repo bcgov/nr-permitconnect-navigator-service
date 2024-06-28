@@ -21,7 +21,15 @@ async function ssoRequestBasicAccess() {
   await permissionService.requestBasicAccess();
 }
 
-async function ssGetRoles() {
+async function searchIdirUsers() {
+  await permissionService.searchIdirUsers({ firstName: 'Kyle' });
+}
+
+async function searchBasicBceidUsers() {
+  await permissionService.searchBasicBceidUsers({ guid: 'tb914nlltlo4mz05viha1b4hdyi4xnad' });
+}
+
+async function ssoGetRoles() {
   await permissionService.getRoles();
 }
 </script>
@@ -84,10 +92,13 @@ async function ssGetRoles() {
     <div class="flex align-items-center mt-3">
       <h3 class="mr-2">SSO Test</h3>
       <div>
-        <Button @click="ssoRequestBasicAccess">SSO Test</Button>
+        <Button @click="searchIdirUsers">SSO search idir</Button>
       </div>
       <div>
-        <Button @click="ssGetRoles">SSO Test 2</Button>
+        <Button @click="searchBasicBceidUsers">SSO search basic bceid</Button>
+      </div>
+      <div>
+        <Button @click="ssoGetRoles">SSO get roles</Button>
       </div>
     </div>
   </div>

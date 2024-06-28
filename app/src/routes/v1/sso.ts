@@ -11,6 +11,14 @@ router.post('/requestBasicAccess', (req: Request, res: Response, next: NextFunct
   ssoController.requestBasicAccess(req, res, next);
 });
 
+router.get('/idir/users', (req: Request, res: Response, next: NextFunction): void => {
+  ssoController.searchIdirUsers(req, res, next);
+});
+
+router.get('/basic-bceid/users', (req: Request, res: Response, next: NextFunction): void => {
+  ssoController.searchBasicBceidUsers(req, res, next);
+});
+
 router.get('/roles', (req: Request, res: Response, next: NextFunction): void => {
   ssoController.getRoles(req, res, next);
 });
