@@ -42,6 +42,14 @@ export default {
   },
 
   /**
+   * @function updateIsDeletedFlag
+   * @returns {Promise} An axios response
+   */
+  updateIsDeletedFlag(enquiryId: string, isDeleted: boolean) {
+    return appAxios().patch(`enquiry/${enquiryId}/delete`, { isDeleted: isDeleted });
+  },
+
+  /**
    * @function updateEnquiry
    * @returns {Promise} An axios response
    */

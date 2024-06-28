@@ -85,4 +85,13 @@ router.put(
   }
 );
 
+/** Updates is_deleted flag for a submission */
+router.patch(
+  '/:submissionId/delete',
+  submissionValidator.updateIsDeletedFlag,
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.updateIsDeletedFlag(req, res, next);
+  }
+);
+
 export default router;

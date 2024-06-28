@@ -57,7 +57,10 @@ const service = {
       where: {
         note_type: 'Bring forward',
         bring_forward_state: bringForwardState,
-        is_deleted: isDeleted
+        is_deleted: isDeleted,
+        activity: {
+          is_deleted: false
+        }
       }
     });
     return response.map((x) => note.fromPrismaModel(x));

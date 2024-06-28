@@ -69,6 +69,14 @@ export default {
   },
 
   /**
+   * @function updateIsDeletedFlag
+   * @returns {Promise} An axios response
+   */
+  updateIsDeletedFlag(submissionId: string, isDeleted: boolean) {
+    return appAxios().patch(`submission/${submissionId}/delete`, { isDeleted: isDeleted });
+  },
+
+  /**
    * @function updateSubmission
    * @returns {Promise} An axios response
    */

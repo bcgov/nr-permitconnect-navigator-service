@@ -8,7 +8,7 @@ import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNaviga
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
-import { Accordion, AccordionTab, TabPanel, TabView } from '@/lib/primevue';
+import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { Permissions } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
@@ -41,6 +41,7 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
 const permissionService = new PermissionService();
+const toast = useToast();
 
 function getBringForwardDate(bf: BringForward) {
   const { pastOrToday } = getBringForwardInterval(bf);
@@ -66,6 +67,11 @@ function getBringForwardInterval(bf: BringForward) {
 function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
+}
+function onEnquiryDelete(enquiryId: string, activityId: string) {
+  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
 }
 
 // return the query object for the router link based on the submission type
@@ -111,6 +117,23 @@ onMounted(async () => {
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
 });
+
+function onSubmissionDelete(submissionId: string, activityId: string) {
+  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+}
+
+function refreshStatistics() {
+  submissionService
+    .getStatistics()
+    .then((response) => {
+      statistics.value = response.data;
+    })
+    .catch((e) => {
+      toast.error('Failed to refresh statistics', e.message);
+    });
+}
 
 watch(accordionIndex, () => {
   if (accordionIndex.value !== null) {
@@ -158,19 +181,20 @@ watch(accordionIndex, () => {
       <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
+        @submission:delete="onSubmissionDelete"
       />
     </TabPanel>
     <TabPanel header="Enquiries">
       <EnquiryListNavigator
         :loading="loading"
         :enquiries="enquiries"
+        @enquiry:delete="onEnquiryDelete"
       />
     </TabPanel>
     <TabPanel header="Statistics">
       <SubmissionStatistics
         v-if="statistics"
-        :loading="loading"
-        :initial-statistics="statistics"
+        v-model:statistics="statistics"
       />
       <div v-else>
         <span v-if="loading">

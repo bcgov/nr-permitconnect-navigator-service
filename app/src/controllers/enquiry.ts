@@ -167,6 +167,17 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
+  },
+
+  updateIsDeletedFlag: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+      const response = await enquiryService.updateIsDeletedFlag(req.params.enquiryId, data.isDeleted);
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
   }
 };
 

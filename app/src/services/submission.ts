@@ -57,7 +57,8 @@ const service = {
       await trx.activity.createMany({
         data: submissions.map((x) => ({
           activity_id: x.activityId as string,
-          initiative_id: initiative.initiative_id
+          initiative_id: initiative.initiative_id,
+          is_deleted: false
         }))
       });
 
@@ -210,8 +211,8 @@ const service = {
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
-    const result = await prisma.submission.findMany({
-      include: { user: params.includeUser },
+    let result = await prisma.submission.findMany({
+      include: { user: params.includeUser, activity: true },
       where: {
         AND: [
           {
@@ -227,11 +228,38 @@ const service = {
       }
     });
 
+    // Remove soft deleted submissions
+    if (!params.includeDeleted) result = result.filter((x) => !x.activity.is_deleted);
+
     const submissions = params.includeUser
       ? result.map((x) => submission.fromPrismaModelWithUser(x))
       : result.map((x) => submission.fromPrismaModel(x));
 
     return submissions;
+  },
+
+  /**
+   * @function updateIsDeletedFlag
+   * Updates is_deleted flag for the corresponding activity
+   * @param {string} submissionId Submission ID
+   * @param {string} isDeleted flag
+   * @returns {Promise<Submission>} The result of running the delete operation
+   */
+  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean) => {
+    const deleteSubmission = await prisma.submission.findUnique({
+      where: {
+        submission_id: submissionId
+      }
+    });
+    if (deleteSubmission) {
+      await prisma.activity.update({
+        data: { is_deleted: isDeleted },
+        where: {
+          activity_id: deleteSubmission?.activity_id
+        }
+      });
+      return submission.fromPrismaModel(deleteSubmission);
+    }
   },
 
   /**
