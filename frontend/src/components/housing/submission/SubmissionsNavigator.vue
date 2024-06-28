@@ -13,11 +13,18 @@ import { enquiryService, noteService, submissionService } from '@/services';
 import PermissionService, { Permissions } from '@/services/permissionService';
 import { useAuthStore } from '@/store';
 import { RouteName, StorageKey } from '@/utils/enums/application';
+import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
+
+// Constants
+const NOTES_TAB_INDEX = {
+  ENQUIRY: 1,
+  SUBMISSION: 3
+};
 
 // Store
 const authStore = useAuthStore();
@@ -59,6 +66,22 @@ function getBringForwardInterval(bf: BringForward) {
 function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
+}
+
+// return the query object for the router link based on the submission type
+function getQueryObject(bf: BringForward) {
+  if (bf.submissionId) {
+    return {
+      activityId: bf.activityId,
+      initialTab: NOTES_TAB_INDEX.SUBMISSION,
+      submissionId: bf.submissionId
+    };
+  }
+  return {
+    activityId: bf.activityId,
+    initialTab: NOTES_TAB_INDEX.ENQUIRY,
+    enquiryId: bf.enquiryId
+  };
 }
 
 onMounted(async () => {
@@ -120,12 +143,12 @@ watch(accordionIndex, () => {
                 Bring forward {{ getBringForwardDate(bf) }}:
                 <router-link
                   :to="{
-                    name: RouteName.HOUSING_SUBMISSION,
-                    query: { activityId: bf.activityId, initialTab: 3, submissionId: bf.submissionId },
+                    name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                    query: getQueryObject(bf),
                     hash: `#${bf.noteId}`
                   }"
                 >
-                  {{ bf.title }}, {{ bf.projectName }}
+                  {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
                 </router-link>
               </span>
             </div>

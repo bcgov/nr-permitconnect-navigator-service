@@ -17,9 +17,10 @@ import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, T
 import { submissionService, documentService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
+import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import { formatDateLong } from '@/utils/formatters';
+import type { Note } from '@/types';
 
 // Props
 type Props = {
@@ -118,6 +119,16 @@ const filteredDocuments = computed(() => {
   }
   return tempDocuments;
 });
+
+function onAddNote(note: Note) {
+  submissionStore.addNote(note, true);
+}
+const onUpdateNote = (oldNote: Note, newNote: Note) => {
+  submissionStore.updateNote(oldNote, newNote);
+};
+const onDeleteNote = (note: Note) => {
+  submissionStore.removeNote(note);
+};
 </script>
 
 <template>
@@ -369,13 +380,18 @@ const filteredDocuments = computed(() => {
         :index="index"
         class="col-12"
       >
-        <NoteCard :note="note" />
+        <NoteCard
+          :note="note"
+          @delete-note="onDeleteNote"
+          @update-note="onUpdateNote"
+        />
       </div>
 
       <NoteModal
         v-if="noteModalVisible"
         v-model:visible="noteModalVisible"
         :activity-id="props.activityId"
+        @add-note="onAddNote"
       />
     </TabPanel>
     <TabPanel header="Roadmap">

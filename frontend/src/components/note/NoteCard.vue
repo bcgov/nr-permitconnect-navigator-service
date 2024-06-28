@@ -16,6 +16,9 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
+// Emits
+const emit = defineEmits(['updateNote', 'deleteNote']);
+
 // State
 const noteModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string> = ref('');
@@ -109,6 +112,12 @@ onMounted(() => {
     v-model:visible="noteModalVisible"
     :activity-id="props.note.activityId"
     :note="props.note"
+    @delete-note="
+      (note: Note) => {
+        emit('deleteNote', note);
+      }
+    "
+    @update-note="(oldNote: Note, newNote: Note) => emit('updateNote', oldNote, newNote)"
   />
 </template>
 
