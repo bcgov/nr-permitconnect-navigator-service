@@ -262,7 +262,7 @@ const controller = {
     }
 
     // Put new submission together
-    return {
+    const submissionData = {
       submission: {
         ...applicant,
         ...basic,
@@ -281,6 +281,12 @@ const controller = {
       appliedPermits,
       investigatePermits
     };
+
+    if (data.submit) {
+      controller.assignPriority(submissionData.submission);
+    }
+
+    return submissionData;
   },
 
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
@@ -451,6 +457,7 @@ const controller = {
       next(e);
     }
   },
+
   /**
    * @function emailConfirmation
    * Send an email with the confirmation of submission
@@ -461,6 +468,38 @@ const controller = {
       res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
+    }
+  },
+
+  /**
+   * @function assignPriority
+   * assigns a priority level to a submission based on given criteria
+   * criteria defined below
+   */
+  assignPriority: (submission: Partial<Submission>) => {
+    const matchesPriorityOneCriteria = // Priority 1 Criteria:
+      submission.singleFamilyUnits === '50-500' || // 1. More than 50 units of any type
+      submission.singleFamilyUnits === '>500' ||
+      submission.multiFamilyUnits === '50-500' ||
+      submission.multiFamilyUnits === '>500' ||
+      submission.otherUnits === '50-500' ||
+      submission.otherUnits === '>500' ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+
+    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
+      submission.singleFamilyUnits === '10-49' || // 1. Single Family homes w/ >9 Units
+      submission.multiFamilyUnits || // 2. Has 1 or more MultiFamily Units
+      submission.otherUnits; // 3. Has 1 or more Other Units
+
+    if (matchesPriorityOneCriteria) {
+      submission.queuePriority = 1;
+    } else if (matchesPriorityTwoCriteria) {
+      submission.queuePriority = 2;
+    } else {
+      // Prioriy 3 Criteria:
+      submission.queuePriority = 3; // Everything Else
     }
   }
 };

@@ -1244,3 +1244,138 @@ describe('updateSubmission', () => {
     expect(next).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('assignPriority', () => {
+  it('assigns priority 1 when submission matches priority 1 criteria - 50 to 500 units', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '50-500',
+      hasRentalUnits: 'No',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'No'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 1 when submission matches priority 1 criteria - over 500 units', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '>500',
+      hasRentalUnits: 'No',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'No'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 1 when submission matches priority 1 criteria - Has Rental Units', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '1-9',
+      hasRentalUnits: 'Yes',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'No'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 1 when submission matches priority 1 criteria - Social Housing', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '1-9',
+      hasRentalUnits: 'No',
+      financiallySupportedBC: 'Yes',
+      financiallySupportedIndigenous: 'No'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 1 when submission matches priority 1 criteria - Indigenous Led', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '1-9',
+      hasRentalUnits: 'No',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'Yes'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 1 when submission matches priority 1 and priority 2 criteria', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '10-49',
+      hasRentalUnits: 'Yes',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'Yes',
+      multiFamilyUnits: '1-9',
+      otherUnits: ''
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(1);
+  });
+
+  it('assigns priority 2 when submission matches priority 2 criteria - 10-49 single family units', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '10-49'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(2);
+  });
+
+  it('assigns priority 2 if only multiFamilyUnits is provided', () => {
+    const submission: Partial<Submission> = {
+      multiFamilyUnits: '1-9'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(2);
+  });
+
+  it('assigns priority 2 if only otherUnits is provided', () => {
+    const submission: Partial<Submission> = {
+      otherUnits: '1-9'
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(2);
+  });
+
+  it('assigns priority 3 when submission matches neither priority 1 nor priority 2 criteria', () => {
+    const submission: Partial<Submission> = {
+      singleFamilyUnits: '1-9',
+      hasRentalUnits: 'No',
+      financiallySupportedBC: 'No',
+      financiallySupportedIndigenous: 'No',
+      multiFamilyUnits: '',
+      otherUnits: ''
+    };
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(3);
+  });
+
+  it('assigns priority 3 if no criteria are met/given', () => {
+    const submission: Partial<Submission> = {};
+
+    submissionController.assignPriority(submission);
+
+    expect(submission.queuePriority).toBe(3);
+  });
+});
