@@ -142,7 +142,6 @@ const controller = {
               longitude: data.longitude,
               naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
               queuePriority: parseInt(data.queuePriority),
-              // queuePriority: controller.assignPriorityToCHEFS(data, 'from check and store new sumbissions'),
               singleFamilyUnits: maxUnits,
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
