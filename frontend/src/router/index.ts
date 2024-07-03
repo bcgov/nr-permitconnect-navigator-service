@@ -139,6 +139,11 @@ const routes: Array<RouteRecordRaw> = [
     ]
   },
   {
+    path: '/user',
+    name: RouteName.USER_MANAGEMENT,
+    component: () => import('@/views/user/UserManagementView.vue')
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: RouteName.NOT_FOUND,
     component: () => import('@/views/NotFound.vue')

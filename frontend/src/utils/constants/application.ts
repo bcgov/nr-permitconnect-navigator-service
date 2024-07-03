@@ -12,6 +12,8 @@ export const PCNS_CONTACT = {
   subject: 'Reporting an Issue with PCNS'
 };
 
+export const ROLES = [Roles.NAVIGATOR, Roles.READ_ONLY];
+
 export const SYSTEM_USER = NIL;
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];

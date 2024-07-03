@@ -8,6 +8,8 @@ export type User = {
   identityId: string | null;
   idp: string;
   lastName: string;
+  role?: string;
+  status?: string;
   userId: string;
   username: string;
   elevatedRights: boolean;
