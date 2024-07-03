@@ -12,6 +12,8 @@ export const PCNS_CONTACT = {
   subject: 'Reporting an Issue with PCNS'
 };
 
+export const ROLES = [Roles.NAVIGATOR, Roles.READ_ONLY];
+
 export const SPATIAL_FILE_FORMATS = [
   '.cpg',
   '.dbf',
