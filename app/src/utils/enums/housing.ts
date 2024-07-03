@@ -84,6 +84,26 @@ export enum ProjectLocation {
   LOCATION_COORDINATES = 'Location coordinates'
 }
 
+export enum SubmissionPriorityOneCriteria {
+  HAS_RENTALS = 'Yes',
+  SOCIAL_HOUSING = 'Yes',
+  INDIGENOUS_LED = 'Yes',
+  SINGLE_FAM_UNITS_1 = '>500',
+  SINGLE_FAM_UNITS_2 = '50-500',
+  MULTI_FAM_UNITS_1 = '>500',
+  MULTI_FAM_UNITS_2 = '50-500',
+  OTHER_UNITS_1 = '>500',
+  OTHER_UNITS_2 = '50-500'
+}
+
+export enum SubmissionPriorityTwoCriteria {
+  SINGLE_FAM_UNITS = '10-49',
+  MULTI_FAM_UNITS_1 = '10-49',
+  MULTI_FAM_UNITS_2 = '1-9',
+  OTHER_UNITS_1 = '10-49',
+  OTHER_UNITS_2 = '1-9'
+}
+
 export enum SubmissionType {
   ESCALATION = 'Escalation',
   GENERAL_ENQUIRY = 'General enquiry',
