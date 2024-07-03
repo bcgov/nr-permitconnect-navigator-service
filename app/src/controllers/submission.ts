@@ -10,7 +10,14 @@ import {
   userService
 } from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus, SubmissionType } from '../utils/enums/housing';
+import {
+  ApplicationStatus,
+  IntakeStatus,
+  NumResidentialUnits,
+  PermitNeeded,
+  PermitStatus,
+  SubmissionType
+} from '../utils/enums/housing';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -262,7 +269,7 @@ const controller = {
     }
 
     // Put new submission together
-    return {
+    const submissionData = {
       submission: {
         ...applicant,
         ...basic,
@@ -281,6 +288,12 @@ const controller = {
       appliedPermits,
       investigatePermits
     };
+
+    if (data.submit) {
+      controller.assignPriority(submissionData.submission);
+    }
+
+    return submissionData;
   },
 
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
@@ -451,6 +464,7 @@ const controller = {
       next(e);
     }
   },
+
   /**
    * @function emailConfirmation
    * Send an email with the confirmation of submission
@@ -461,6 +475,40 @@ const controller = {
       res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
+    }
+  },
+
+  /**
+   * @function assignPriority
+   * assigns a priority level to a submission based on given criteria
+   * criteria defined below
+   */
+  assignPriority: (submission: Partial<Submission>) => {
+    const matchesPriorityOneCriteria = // Priority 1 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
+      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+
+    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
+      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
+      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
+      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
+      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
+
+    if (matchesPriorityOneCriteria) {
+      submission.queuePriority = 1;
+    } else if (matchesPriorityTwoCriteria) {
+      submission.queuePriority = 2;
+    } else {
+      // Prioriy 3 Criteria:
+      submission.queuePriority = 3; // Everything Else
     }
   }
 };
