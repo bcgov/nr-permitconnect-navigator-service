@@ -13,10 +13,9 @@ import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
   IntakeStatus,
+  NumResidentialUnits,
   PermitNeeded,
   PermitStatus,
-  SubmissionPriorityOneCriteria,
-  SubmissionPriorityTwoCriteria,
   SubmissionType
 } from '../utils/enums/housing';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
@@ -482,28 +481,26 @@ const controller = {
   /**
    * @function assignPriority
    * assigns a priority level to a submission based on given criteria
-   * criteria defined below and in /utils/enums/housing
+   * criteria defined below
    */
   assignPriority: (submission: Partial<Submission>) => {
-    const P1 = SubmissionPriorityOneCriteria;
     const matchesPriorityOneCriteria = // Priority 1 Criteria:
-      submission.singleFamilyUnits === P1.SINGLE_FAM_UNITS_1 || // 1. More than 50 units of any type
-      submission.singleFamilyUnits === P1.SINGLE_FAM_UNITS_2 ||
-      submission.multiFamilyUnits === P1.MULTI_FAM_UNITS_1 ||
-      submission.multiFamilyUnits === P1.MULTI_FAM_UNITS_2 ||
-      submission.otherUnits === P1.OTHER_UNITS_1 ||
-      submission.otherUnits === P1.OTHER_UNITS_2 ||
-      submission.hasRentalUnits === P1.HAS_RENTALS || // 2. Supports Rental Units
-      submission.financiallySupportedBC === P1.SOCIAL_HOUSING || // 3. Social Housing
-      submission.financiallySupportedIndigenous === P1.INDIGENOUS_LED; // 4. Indigenous Led
+      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
+      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
 
-    const P2 = SubmissionPriorityTwoCriteria;
     const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-      submission.singleFamilyUnits === P2.SINGLE_FAM_UNITS || // 1. Single Family homes w/ >9 Units
-      submission.multiFamilyUnits === P2.MULTI_FAM_UNITS_1 || // 2. Has 1 or more MultiFamily Units
-      submission.multiFamilyUnits === P2.MULTI_FAM_UNITS_2 ||
-      submission.otherUnits === P2.OTHER_UNITS_1 || // 3. Has 1 or more Other Units
-      submission.otherUnits === P2.OTHER_UNITS_2;
+      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
+      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
+      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
+      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
+      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
 
     if (matchesPriorityOneCriteria) {
       submission.queuePriority = 1;
