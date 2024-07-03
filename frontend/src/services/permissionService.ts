@@ -27,6 +27,7 @@ export enum Permissions {
   NAVIGATION_HOUSING_SUBMISSIONS_SUB = 'housing.submissions.sub',
   NAVIGATION_HOUSING_STATUS_TRACKER = 'housing.status.tracker',
   NAVIGATION_HOUSING_USER_MANAGEMENT = 'housing.usermanagement',
+  NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN = 'housing.usermanagementadmin',
   NAVIGATION_DEVELOPER = 'developer',
 
   TESTING_ROLE_OVERRIDE = 'testing.role.override'
@@ -46,7 +47,8 @@ const PermissionMap = [
       Permissions.NAVIGATION_HOUSING_STATUS_TRACKER,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
       Permissions.NAVIGATION_HOUSING_SUBMISSIONS,
-      Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
+      Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT,
+      Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN
     ]
   },
   {

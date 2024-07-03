@@ -64,6 +64,7 @@ onMounted(() => {
     },
     {
       label: 'User Management',
+      route: RouteName.USER_MANAGEMENT,
       access: Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
     },
     {
