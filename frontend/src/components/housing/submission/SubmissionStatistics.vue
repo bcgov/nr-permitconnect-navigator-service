@@ -18,17 +18,9 @@ type StatisticFilters = {
   userId?: string;
 };
 
-// Props
-type Props = {
-  loading: boolean;
-  initialStatistics: Statistics | undefined;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
-
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-const statistics: Ref<Statistics | undefined> = ref(props.initialStatistics);
+const statistics = defineModel<Statistics | undefined>('statistics');
 const statisticFilters: Ref<StatisticFilters> = ref({});
 
 // Actions

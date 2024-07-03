@@ -60,4 +60,13 @@ router.put('/:enquiryId', enquiryValidator.updateEnquiry, (req: Request, res: Re
   enquiryController.updateEnquiry(req, res, next);
 });
 
+/** Updates is_deleted flag for an enquiry */
+router.patch(
+  '/:enquiryId/delete',
+  enquiryValidator.updateIsDeletedFlag,
+  (req: Request, res: Response, next: NextFunction): void => {
+    enquiryController.updateIsDeletedFlag(req, res, next);
+  }
+);
+
 export default router;

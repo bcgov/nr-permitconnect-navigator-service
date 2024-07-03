@@ -162,10 +162,12 @@ const controller = {
         })
       ).then((x) => x.filter((y) => y.length).flat());
 
-    // Get a list of all activity IDs currently in our DB
+    // Get a list of all activity IDs currently in our DB including deleted
+    // This is to prevent duplicate submissions
     const stored = (
       await submissionService.searchSubmissions({
-        activityId: exportData.map((x) => x.activityId as string)
+        activityId: exportData.map((x) => x.activityId as string),
+        includeDeleted: true
       })
     ).map((x) => x?.activityId);
 
@@ -445,6 +447,17 @@ const controller = {
       await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
 
       res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  updateIsDeletedFlag: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const data: any = req.body;
+      const response = await submissionService.updateIsDeletedFlag(req.params.submissionId, data.isDeleted);
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

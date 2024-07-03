@@ -15,6 +15,11 @@ const schema = {
       submit: Joi.boolean()
     })
   },
+  deleteEnquiry: {
+    params: Joi.object({
+      enquiryId: uuidv4.required()
+    })
+  },
   updateDraft: {
     body: Joi.object({
       applicant: applicant,
@@ -22,6 +27,14 @@ const schema = {
       submit: Joi.boolean(),
       enquiryId: Joi.string().required(),
       activityId: Joi.string().required()
+    })
+  },
+  updateIsDeletedFlag: {
+    params: Joi.object({
+      enquiryId: uuidv4.required()
+    }),
+    body: Joi.object({
+      isDeleted: Joi.boolean().required()
     })
   },
   updateEnquiry: {
@@ -58,6 +71,8 @@ const schema = {
 
 export default {
   createDraft: validate(schema.createDraft),
+  deleteEnquiry: validate(schema.deleteEnquiry),
   updateDraft: validate(schema.updateDraft),
+  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateEnquiry: validate(schema.updateEnquiry)
 };
