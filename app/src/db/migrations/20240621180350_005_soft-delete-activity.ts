@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
@@ -7,15 +8,6 @@ export async function up(knex: Knex): Promise<void> {
       knex.schema.alterTable('activity', function (table) {
         table.boolean('is_deleted').notNullable().defaultTo(false);
       })
-    )
-    // Drop public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function public.get_activity_statistics(
-    date_from text,
-    date_to text,
-    month_year text,
-    user_id uuid
-  )`)
     )
 
     // Create public schema functions
