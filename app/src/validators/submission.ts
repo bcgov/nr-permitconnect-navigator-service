@@ -173,7 +173,7 @@ const schema = {
       ltsaCompleted: Joi.boolean().required(),
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),
-      astNotes: Joi.string().allow(null).max(255),
+      astNotes: Joi.string().allow(null).max(4000),
       intakeStatus: Joi.string().valid(...INTAKE_STATUS_LIST),
       assignedUserId: Joi.when('intakeStatus', {
         is: IntakeStatus.SUBMITTED,

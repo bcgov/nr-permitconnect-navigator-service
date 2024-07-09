@@ -45,6 +45,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
       :rows="rows"
+      maxlength="4000"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div class="mt-2">

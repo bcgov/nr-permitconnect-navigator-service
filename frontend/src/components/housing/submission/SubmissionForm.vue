@@ -135,7 +135,7 @@ const formSchema = object({
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
-  astNotes: string().notRequired().max(255).label('Automated Status Tool (AST) Notes'),
+  astNotes: string().notRequired().label('Automated Status Tool (AST) Notes'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
