@@ -52,10 +52,10 @@ onMounted(() => {
         {
           label: 'Status of application/permit',
           route: RouteName.COMING_SOON,
-          access: Permissions.NAVIGATION_HOUSING
+          access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
         }
       ],
-      access: Permissions.NAVIGATION_HOUSING
+      access: Permissions.NAVIGATION_HOUSING_DROPDOWN
     },
     {
       label: 'Submissions',

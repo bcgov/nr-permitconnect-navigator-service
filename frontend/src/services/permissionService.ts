@@ -19,11 +19,13 @@ export enum Permissions {
   HOUSING_SUBMISSION_DELETE = 'housing.submission.delete',
 
   NAVIGATION_HOUSING = 'housing',
+  NAVIGATION_HOUSING_DROPDOWN = 'housing.dropdown',
   NAVIGATION_HOUSING_ENQUIRY = 'housing.enquiry',
   NAVIGATION_HOUSING_INTAKE = 'housing.intake',
   NAVIGATION_HOUSING_SUBMISSION = 'housing.submission',
   NAVIGATION_HOUSING_SUBMISSIONS = 'housing.submissions',
   NAVIGATION_HOUSING_SUBMISSIONS_SUB = 'housing.submissions.sub',
+  NAVIGATION_HOUSING_STATUS_TRACKER = 'housing.status.tracker',
   NAVIGATION_HOUSING_USER_MANAGEMENT = 'housing.usermanagement',
   NAVIGATION_DEVELOPER = 'developer',
 
@@ -38,7 +40,10 @@ const PermissionMap = [
 
       Permissions.HOUSING_SUBMISSION_READ,
 
+      Permissions.NAVIGATION_HOUSING_DROPDOWN,
       Permissions.NAVIGATION_HOUSING_ENQUIRY,
+      Permissions.NAVIGATION_HOUSING_INTAKE,
+      Permissions.NAVIGATION_HOUSING_STATUS_TRACKER,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
       Permissions.NAVIGATION_HOUSING_SUBMISSIONS,
       Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
@@ -58,7 +63,10 @@ const PermissionMap = [
       Permissions.HOUSING_SUBMISSION_UPDATE,
       Permissions.HOUSING_SUBMISSION_DELETE,
 
+      Permissions.NAVIGATION_HOUSING_DROPDOWN,
       Permissions.NAVIGATION_HOUSING_ENQUIRY,
+      Permissions.NAVIGATION_HOUSING_INTAKE,
+      Permissions.NAVIGATION_HOUSING_STATUS_TRACKER,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
       Permissions.NAVIGATION_HOUSING_SUBMISSIONS
     ]
@@ -77,6 +85,7 @@ const PermissionMap = [
       Permissions.HOUSING_SUBMISSION_DELETE,
 
       Permissions.NAVIGATION_HOUSING,
+      Permissions.NAVIGATION_HOUSING_DROPDOWN,
       Permissions.NAVIGATION_HOUSING_ENQUIRY,
       Permissions.NAVIGATION_HOUSING_INTAKE,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
@@ -97,7 +106,10 @@ const PermissionMap = [
       Permissions.HOUSING_SUBMISSION_UPDATE,
       Permissions.HOUSING_SUBMISSION_DELETE,
 
+      Permissions.NAVIGATION_HOUSING_DROPDOWN,
       Permissions.NAVIGATION_HOUSING_ENQUIRY,
+      Permissions.NAVIGATION_HOUSING_INTAKE,
+      Permissions.NAVIGATION_HOUSING_STATUS_TRACKER,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
       Permissions.NAVIGATION_HOUSING_SUBMISSIONS,
       Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
