@@ -34,6 +34,7 @@ export type ChefsSubmissionExport = {
   latitude: number;
   longitude: number;
   naturalDisasterInd: boolean;
+  otherProjectType: string;
   companyNameRegistered: string;
   queuePriority: string;
   singleFamilyUnits: string;

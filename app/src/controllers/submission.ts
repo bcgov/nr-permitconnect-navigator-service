@@ -67,9 +67,8 @@ const controller = {
                 : BasicResponse.NO
             };
 
-            // Get greatest of multiple Units data
-            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1].sort();
-
+            // Get unit counts ready for parsing - single, multi and other
+            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
             // Replace text instances with symbols
             const parsedUnitData = unitData.map((element) => {
               if (typeof element === 'string') {
@@ -78,26 +77,6 @@ const controller = {
                 return element;
               }
             });
-
-            const maxUnits = parsedUnitData.reduce(
-              (ac, value) => {
-                // Unit types are in the form of '1-49' or '>500'
-                // .match() with regex '/(\d+)(?!.*\d)/' matches the last number in a string, puts it in array.
-                // Get max integer from last element of array.
-                let upperRange: number = 0;
-                if (value) {
-                  upperRange = parseInt(
-                    value
-                      .toString()
-                      .match(/(\d+)(?!.*\d)/)
-                      ?.pop() ?? '0'
-                  );
-                }
-                // Compare with accumulator
-                return upperRange > ac.upperRange ? { value: value, upperRange: upperRange } : ac;
-              },
-              { upperRange: 0, value: '' } // Initial value
-            ).value;
 
             // Attempt to create Permits defined in SHAS intake form
             // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
@@ -147,9 +126,12 @@ const controller = {
               locationPIDs: data.parcelID,
               latitude: data.latitude,
               longitude: data.longitude,
+              multiFamilyUnits: parsedUnitData[1],
               naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
+              otherUnitsDescription: data.otherProjectType,
+              otherUnits: parsedUnitData[2],
               queuePriority: parseInt(data.queuePriority),
-              singleFamilyUnits: maxUnits,
+              singleFamilyUnits: parsedUnitData[0],
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
                 : BasicResponse.UNSURE,
