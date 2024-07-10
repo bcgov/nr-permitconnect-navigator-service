@@ -56,7 +56,7 @@ export const housing = Joi.object({
     otherwise: Joi.forbidden()
   }),
   projectName: Joi.string().required().max(255).trim(),
-  projectDescription: Joi.string().max(255).allow(null),
+  projectDescription: Joi.string().max(4000).allow(null),
   rentalUnits: Joi.when('hasRentalUnits', {
     is: BasicResponse.YES,
     then: Joi.string()
