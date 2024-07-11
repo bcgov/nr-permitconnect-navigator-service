@@ -2,19 +2,21 @@
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  Promise.resolve()
-    // Drop public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function if exists public.get_activity_statistics(
-      date_from text,
-      date_to text,
-      month_year text,
-      user_id uuid
-    )`)
-    )
-    // Create public schema functions
-    .then(() =>
-      knex.schema.raw(`create or replace function public.get_activity_statistics(
+  return (
+    Promise.resolve()
+      // Drop public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function public.get_activity_statistics(
+    date_from text,
+    date_to text,
+    month_year text,
+    user_id uuid
+  )`)
+      )
+
+      // Create public schema functions
+      .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
         date_from text,
         date_to text,
         month_year text,
@@ -121,24 +123,26 @@ export async function up(knex: Knex): Promise<void> {
           (enquiry_counts.status_request_enquiry_count) AS status_request
       from submission_counts, enquiry_counts;
       end; $$`)
-    );
+      )
+  );
 }
 
 export async function down(knex: Knex): Promise<void> {
-  Promise.resolve()
-    // Drop public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function if exists public.get_activity_statistics(
+  return (
+    Promise.resolve()
+      // Drop public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function if exists public.get_activity_statistics(
     date_from text,
     date_to text,
     month_year text,
     user_id uuid
   )`)
-    )
+      )
 
-    // Create public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function if exists public.get_activity_statistics(
+      // Create public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function if exists public.get_activity_statistics(
       date_from text,
       date_to text,
       month_year text,
@@ -201,5 +205,6 @@ export async function down(knex: Knex): Promise<void> {
       join public.activity a on s.activity_id = a.activity_id
       where a.is_deleted = false;
   end; $$`)
-    );
+      )
+  );
 }
