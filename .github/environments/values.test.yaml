@@ -27,7 +27,6 @@ config:
     SERVER_PORT: "8080"
     SERVER_SSO_APIPATH: https://api.loginproxy.gov.bc.ca/api/v1
     SERVER_SSO_TOKENURL: https://loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token
-    SERVER_SSO_CLIENTID: service-account-team-1850-5484
     SERVER_SSO_INTEGRATION: "5138"
 
 patroni:
