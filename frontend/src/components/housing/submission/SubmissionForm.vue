@@ -126,6 +126,7 @@ const formSchema = object({
   longitude: longitudeValidator,
   geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
+  projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
   atsClientNumber: string().when('addedToATS', {
     is: (val: boolean) => val,
@@ -135,7 +136,7 @@ const formSchema = object({
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
-  astNotes: string().notRequired().label('Automated Status Tool (AST) Notes'),
+  astNotes: string().notRequired().max(4000).label('Automated Status Tool (AST) Notes'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
@@ -252,6 +253,7 @@ onMounted(async () => {
     contactEmail: props.submission.contactEmail,
     projectName: props.submission.projectName,
     projectDescription: props.submission.projectDescription,
+    projectLocationDescription: props.submission.projectLocationDescription,
     singleFamilyUnits: props.submission.singleFamilyUnits,
     multiFamilyUnits: props.submission.multiFamilyUnits,
     otherUnitsDescription: props.submission.otherUnitsDescription,
@@ -599,6 +601,12 @@ onMounted(async () => {
         label="Affected by natural disaster?"
         :disabled="!props.editable"
         :options="YES_NO_LIST"
+      />
+      <TextArea
+        class="col-12"
+        name="projectLocationDescription"
+        label="Additional information about location"
+        :disabled="!props.editable"
       />
       <div class="col-6" />
 
