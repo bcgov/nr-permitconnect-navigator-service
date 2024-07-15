@@ -69,7 +69,7 @@ watch(
   <div v-if="statistics">
     <table class="text-left">
       <thead>
-        <th class="col-9">Statistic</th>
+        <th class="col-9">Statistics</th>
         <th class="col-1 text-right">Number</th>
         <th class="col-2 text-right">Percentage of total</th>
       </thead>
@@ -182,33 +182,89 @@ watch(
         <td class="col-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
       </tr>
       <tr>
+        <td class="col-9">
+          Submissions by financially supported:
+          <span class="font-bold">BC Housing</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.supported_bc }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.supported_bc) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Submissions by financially supported:
+          <span class="font-bold">Indigenous</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.supported_indigenous }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.supported_indigenous) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Submissions by financially supported:
+          <span class="font-bold">Non-profit</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.supported_non_profit }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.supported_non_profit) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Submissions by financially supported:
+          <span class="font-bold">Co-operative</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.supported_housing_coop }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.supported_housing_coop) }}%</td>
+      </tr>
+      <tr>
         <td class="col-9">Submissions waiting on someone</td>
         <td class="col-1 text-right">{{ statistics.waiting_on }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.waiting_on) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
-          Submissions at priority:
-          <span class="font-bold">1</span>
+          Submissions at
+          <span class="font-bold">priority: 1</span>
         </td>
         <td class="col-1 text-right">{{ statistics.queue_1 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_1) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
-          Submissions at priority:
-          <span class="font-bold">2</span>
+          Submissions at
+          <span class="font-bold">priority: 2</span>
         </td>
         <td class="col-1 text-right">{{ statistics.queue_2 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_2) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
-          Submissions at priority:
-          <span class="font-bold">3</span>
+          Submissions at
+          <span class="font-bold">priority: 3</span>
         </td>
         <td class="col-1 text-right">{{ statistics.queue_3 }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.queue_3) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Type:
+          <span class="font-bold">Guidance</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.guidance }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.guidance) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Type:
+          <span class="font-bold">General Enquiry</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.general_enquiry }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.general_enquiry) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">
+          Type:
+          <span class="font-bold">Status Request</span>
+        </td>
+        <td class="col-1 text-right">{{ statistics.status_request }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
       </tr>
       <tr>
         <td class="col-9">
@@ -221,35 +277,10 @@ watch(
       <tr>
         <td class="col-9">
           Type:
-          <span class="font-bold">General Enquiry</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.general_enquiry }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.general_enquiry) }}%</td>
-      </tr>
-
-      <tr>
-        <td class="col-9">
-          Type:
-          <span class="font-bold">Guidance</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.guidance }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.guidance) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Type:
           <span class="font-bold">Inapplicable</span>
         </td>
         <td class="col-1 text-right">{{ statistics.inapplicable }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.inapplicable) }}%</td>
-      </tr>
-      <tr>
-        <td class="col-9">
-          Type:
-          <span class="font-bold">Status Request</span>
-        </td>
-        <td class="col-1 text-right">{{ statistics.status_request }}</td>
-        <td class="col-2 text-right">{{ getPercentage(statistics.status_request) }}%</td>
       </tr>
     </table>
   </div>

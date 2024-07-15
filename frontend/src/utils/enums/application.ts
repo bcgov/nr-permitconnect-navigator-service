@@ -52,7 +52,14 @@ export enum RouteName {
 
   OIDC_CALLBACK = 'oidc_callback',
   OIDC_LOGIN = 'oidc_login',
-  OIDC_LOGOUT = 'oidc_logout'
+  OIDC_LOGOUT = 'oidc_logout',
+
+  USER_MANAGEMENT = 'user_management'
+}
+
+export enum Roles {
+  NAVIGATOR = 'Navigator',
+  READ_ONLY = 'Read-only'
 }
 
 export enum StorageKey {

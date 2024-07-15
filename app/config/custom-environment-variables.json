@@ -59,6 +59,7 @@
       "port": "SERVER_DB_PORT",
       "username": "SERVER_DB_USERNAME"
     },
+    "env": "SERVER_ENV",
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
     "oidc": {
@@ -68,6 +69,13 @@
       "identityKey": "SERVER_OIDC_IDENTITYKEY",
       "publicKey": "SERVER_OIDC_PUBLICKEY"
     },
-    "port": "SERVER_PORT"
+    "port": "SERVER_PORT",
+    "sso": {
+      "apiPath": "SERVER_SSO_APIPATH",
+      "tokenUrl": "SERVER_SSO_TOKENURL",
+      "clientId": "SERVER_SSO_CLIENTID",
+      "clientSecret": "SERVER_SSO_CLIENTSECRET",
+      "integration": "SERVER_SSO_INTEGRATION"
+    }
   }
 }

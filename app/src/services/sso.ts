@@ -5,6 +5,18 @@ import { AccessRole } from '../utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
 
+// Types
+
+type IdirSearchParams = {
+  firstName: string;
+  lastName: string;
+  email: string;
+};
+
+type BCeIdSearchParams = {
+  guid: string;
+};
+
 /**
  * @function getToken
  * Gets Auth token using SSO credentials
@@ -52,8 +64,9 @@ function ssoAxios(): AxiosInstance {
 const service = {
   requestBasicAccess: async (username: string) => {
     try {
+      const env = config.get('server.env');
       const integration = config.get('server.sso.integration');
-      const { data, status } = await ssoAxios().post(`/integrations/${integration}/dev/users/${username}/roles`, [
+      const { data, status } = await ssoAxios().post(`/integrations/${integration}/${env}/users/${username}/roles`, [
         {
           name: AccessRole.PCNS_PROPONENT
         }
@@ -74,10 +87,51 @@ const service = {
     }
   },
 
+  searchIdirUsers: async (params?: IdirSearchParams) => {
+    try {
+      const env = config.get('server.env');
+      const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
+      return { data: data.data, status };
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        return {
+          data: e.response?.data.message,
+          status: e.response ? e.response.status : 500
+        };
+      } else {
+        return {
+          data: 'Error',
+          status: 500
+        };
+      }
+    }
+  },
+
+  searchBasicBceidUsers: async (params?: BCeIdSearchParams) => {
+    try {
+      const env = config.get('server.env');
+      const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
+      return { data: data.data, status };
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        return {
+          data: e.response?.data.message,
+          status: e.response ? e.response.status : 500
+        };
+      } else {
+        return {
+          data: 'Error',
+          status: 500
+        };
+      }
+    }
+  },
+
   getRoles: async () => {
     try {
+      const env = config.get('server.env');
       const integration = config.get('server.sso.integration');
-      const { data, status } = await ssoAxios().get(`/integrations/${integration}/dev/roles`);
+      const { data, status } = await ssoAxios().get(`/integrations/${integration}/${env}/roles`);
       return { data: data.data, status };
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {

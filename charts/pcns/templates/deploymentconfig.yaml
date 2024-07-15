@@ -160,6 +160,16 @@ spec:
                 secretKeyRef:
                   key: password
                   name: {{ include "pcns.configname" . }}-oidc
+            - name: SERVER_SSO_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-sso
+            - name: SERVER_SSO_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-sso
           envFrom:
             - configMapRef:
                 name: {{ include "pcns.configname" . }}-config

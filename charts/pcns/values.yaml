@@ -155,13 +155,20 @@ config:
     SERVER_DB_POOL_MIN: "2"
     SERVER_DB_POOL_MAX: "10"
 
+    SERVER_ENV: ~
+
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http
-    SERVER_PORT: "8080"
 
     SERVER_OIDC_AUTHORITY: ~
     SERVER_OIDC_IDENTITYKEY: ~
     SERVER_OIDC_PUBLICKEY: ~
+
+    SERVER_PORT: "8080"
+
+    SERVER_SSO_APIPATH: ~
+    SERVER_SSO_TOKENURL: ~
+    SERVER_SSO_INTEGRATION: ~
 
 # Modify the following variables if you need to acquire secret values from a custom-named resource
 dbSecretOverride:
@@ -177,6 +184,9 @@ chesSecretOverride:
   username: ~
   password: ~
 oidcSecretOverride:
+  username: ~
+  password: ~
+ssoSecretOverride:
   username: ~
   password: ~
 

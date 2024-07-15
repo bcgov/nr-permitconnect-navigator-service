@@ -10,6 +10,10 @@ export type Statistics = {
   state_inprogress: number;
   state_delayed: number;
   state_completed: number;
+  supported_bc: number;
+  supported_indigenous: number;
+  supported_non_profit: number;
+  supported_housing_coop: number;
   waiting_on: number;
   queue_1: number;
   queue_2: number;

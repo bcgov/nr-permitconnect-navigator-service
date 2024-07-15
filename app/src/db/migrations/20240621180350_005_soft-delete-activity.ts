@@ -1,26 +1,29 @@
+/* eslint-disable max-len */
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
-  Promise.resolve()
-    // Add is_deleted column to activity table
-    .then(() =>
-      knex.schema.alterTable('activity', function (table) {
-        table.boolean('is_deleted').notNullable().defaultTo(false);
-      })
-    )
-    // Drop public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function public.get_activity_statistics(
+  return (
+    Promise.resolve()
+      // Add is_deleted column to activity table
+      .then(() =>
+        knex.schema.alterTable('activity', function (table) {
+          table.boolean('is_deleted').notNullable().defaultTo(false);
+        })
+      )
+
+      // Drop public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function public.get_activity_statistics(
     date_from text,
     date_to text,
     month_year text,
     user_id uuid
   )`)
-    )
+      )
 
-    // Create public schema functions
-    .then(() =>
-      knex.schema.raw(`create or replace function public.get_activity_statistics(
+      // Create public schema functions
+      .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
     date_from text,
     date_to text,
     month_year text,
@@ -77,30 +80,32 @@ export async function up(knex: Knex): Promise<void> {
       join public.activity a on s.activity_id = a.activity_id
       where a.is_deleted = false;
   end; $$`)
-    );
+      )
+  );
 }
 
 export async function down(knex: Knex): Promise<void> {
-  Promise.resolve()
-    // Drop is_deleted column from activity table
-    .then(() =>
-      knex.schema.alterTable('activity', function (table) {
-        table.dropColumn('is_deleted');
-      })
-    )
-    // Drop public schema functions
-    .then(() =>
-      knex.schema.raw(`drop function public.get_activity_statistics(
+  return (
+    Promise.resolve()
+      // Drop is_deleted column from activity table
+      .then(() =>
+        knex.schema.alterTable('activity', function (table) {
+          table.dropColumn('is_deleted');
+        })
+      )
+      // Drop public schema functions
+      .then(() =>
+        knex.schema.raw(`drop function public.get_activity_statistics(
   date_from text,
   date_to text,
   month_year text,
   user_id uuid
 )`)
-    )
+      )
 
-    // Create public schema functions
-    .then(() =>
-      knex.schema.raw(`create or replace function public.get_activity_statistics(
+      // Create public schema functions
+      .then(() =>
+        knex.schema.raw(`create or replace function public.get_activity_statistics(
         date_from text,
         date_to text,
         month_year text,
@@ -155,5 +160,6 @@ export async function down(knex: Knex): Promise<void> {
             count(*) filter (where s."submission_type" = 'Status request')
           from public.submission s;
       end; $$`)
-    );
+      )
+  );
 }
