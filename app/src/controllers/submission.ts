@@ -68,7 +68,7 @@ const controller = {
             };
 
             // Get unit counts ready for parsing - single, multi and other
-            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1];
+            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1, data.rentalUnits];
             // Replace text instances with symbols
             const parsedUnitData = unitData.map((element) => {
               if (typeof element === 'string') {
@@ -122,19 +122,26 @@ const controller = {
               contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
               financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
+              housingCoopDescription: data.housingCoopName,
               intakeStatus: toTitleCase(data.form.status),
+              indigenousDescription: data.IndigenousHousingProviderName,
+              isDevelopedInBC: toTitleCase(data.isCompanyRegistered),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
+              locality: data.locality,
               longitude: data.longitude,
               multiFamilyUnits: parsedUnitData[1],
               naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
+              nonProfitDescription: data.nonProfitHousingSocietyName,
               otherUnitsDescription: data.otherProjectType,
               otherUnits: parsedUnitData[2],
+              province: data.province,
               queuePriority: parseInt(data.queuePriority),
               singleFamilyUnits: parsedUnitData[0],
               hasRentalUnits: data.isRentalUnit
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
                 : BasicResponse.UNSURE,
+              rentalUnits: parsedUnitData[3],
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
