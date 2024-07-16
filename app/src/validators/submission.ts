@@ -164,6 +164,7 @@ const schema = {
       naturalDisaster: Joi.string()
         .valid(...YES_NO_LIST)
         .required(),
+      projectLocationDescription: Joi.string().allow(null).max(4000),
       addedToATS: Joi.boolean().required(),
       atsClientNumber: Joi.when('addedToATS', {
         is: true,

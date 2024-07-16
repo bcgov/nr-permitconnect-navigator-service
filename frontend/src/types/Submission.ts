@@ -17,6 +17,7 @@ export type Submission = {
   contactEmail: string;
   projectName: string;
   projectDescription: string;
+  projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
   otherUnitsDescription: string;
