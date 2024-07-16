@@ -28,6 +28,14 @@ See `user.ts` and `document.ts` for examples of the differences.
 
 The `toPrismaModel` and `fromPrismaModel` functions are used to convert Prisma database models to application `src/types/` and vice versa. These functions should only ever be used in the application service layer.
 
+## Update Backup Container
+
+Follow the outlined steps [here](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki/Database-Backup-and-Restore#updating-the-backup-container-version).
+
+## Recovery Database
+
+Follow the outlined steps [here](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki/Database-Backup-and-Restore#recovery).
+
 ## Future Considerations
 
 Consider the use of namespaces/modules to wrap particular sections of the application. As more initiatives are added to the system there will be naming conflicts.
