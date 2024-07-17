@@ -161,7 +161,7 @@ function isFinanciallySupported(data: Submission) {
       frozen
     >
       <template #body="{ data }">
-        <div :data-activityId="data.activityId">
+        <div :data-projectName="data.projectName">
           <router-link
             :to="{
               name: RouteName.HOUSING_SUBMISSION,
@@ -179,7 +179,25 @@ function isFinanciallySupported(data: Submission) {
       :sortable="true"
       style="min-width: 125px"
       frozen
-    />
+    >
+      <template #body="{ data }">
+        <div :data-activityId="data.activityId">
+          <div v-if="data.projectName">
+            {{ data.activityId }}
+          </div>
+          <div v-else>
+            <router-link
+              :to="{
+                name: RouteName.HOUSING_SUBMISSION,
+                query: { activityId: data.activityId, submissionId: data.submissionId }
+              }"
+            >
+              {{ data.activityId }}
+            </router-link>
+          </div>
+        </div>
+      </template>
+    </Column>
     <Column
       field="contactFirstName"
       header="First name"
