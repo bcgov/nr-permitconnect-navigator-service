@@ -106,6 +106,8 @@ onMounted(async () => {
     ])
   ).map((r) => r.data);
 
+  assignEnquiries();
+
   myBringForward.value = bringForward.value.filter(
     (x) =>
       x.createdByFullName === getProfile.value?.name &&
@@ -133,6 +135,20 @@ function refreshStatistics() {
     .catch((e) => {
       toast.error('Failed to refresh statistics', e.message);
     });
+}
+
+function assignEnquiries() {
+  const relatedActivityIds = new Set();
+
+  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
+
+  submissions.value.forEach((sub) => {
+    if (relatedActivityIds.has(sub.activityId)) {
+      sub.hasRelatedEnquiry = true;
+    } else {
+      sub.hasRelatedEnquiry = false;
+    }
+  });
 }
 
 watch(accordionIndex, () => {
