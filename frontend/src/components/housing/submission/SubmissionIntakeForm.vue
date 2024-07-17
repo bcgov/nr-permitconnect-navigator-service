@@ -976,7 +976,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="PROJECT_LOCATION_LIST"
-                    @click="handleProjectLocationClick"
+                    @on-change="handleProjectLocationClick"
                   />
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
