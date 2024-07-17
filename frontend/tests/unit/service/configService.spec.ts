@@ -5,7 +5,7 @@ import { StorageKey } from '@/utils/enums/application';
 
 const storageType = window.sessionStorage;
 
-const testData = 'testData';
+const testData: string = 'testData';
 const PATH = '/config';
 const axiosConfig = {
   headers: {
@@ -43,11 +43,12 @@ afterEach(() => {
 describe('Config Store', () => {
   beforeEach(() => {
     storageType.clear();
-    vi.mocked(axios.get).mockImplementation(() =>
-      Promise.resolve({
-        data: testData
-      })
-    );
+    // vi.mocked(axios.get).mockImplementation(() =>
+    //   Promise.resolve({
+    //     data: testData
+    //   })
+    // );
+    vi.mocked(axios.get).mockResolvedValue({ data: testData });
   });
 
   describe('init', () => {
@@ -87,12 +88,10 @@ describe('Config Store', () => {
 
     it('getConfig fails to reaquire missing config', async () => {
       vi.mocked(axios.get)
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            data: testData
-          })
-        )
-        .mockImplementationOnce(() =>
+        .mockResolvedValueOnce({
+          data: testData
+        })
+        .mockRejectedValueOnce(() =>
           Promise.reject({
             data: testData
           })

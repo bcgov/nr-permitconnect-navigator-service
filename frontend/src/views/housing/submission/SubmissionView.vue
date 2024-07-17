@@ -204,8 +204,8 @@ const onDeleteNote = (note: Note) => {
           :sort-field="SORT_TYPES.CREATED_AT"
           :sort-order="SORT_ORDER.DESCENDING"
           @update:sort-order="
-            (order: number) => {
-              sortOrder = order;
+            (order: number | undefined) => {
+              sortOrder = order ?? SORT_ORDER.ASCENDING;
             }
           "
           @update:sort-field="
