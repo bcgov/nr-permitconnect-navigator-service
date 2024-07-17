@@ -43,17 +43,14 @@ afterEach(() => {
 describe('Config Store', () => {
   beforeEach(() => {
     storageType.clear();
-    // vi.mocked(axios.get).mockImplementation(() =>
-    //   Promise.resolve({
-    //     data: testData
-    //   })
-    // );
-    vi.mocked(axios.get).mockResolvedValue({ data: testData });
   });
 
   describe('init', () => {
     it('initializes with sessionStorage null', async () => {
+      vi.mocked(axios.get).mockResolvedValue({ data: testData });
+
       await ConfigService.init();
+
       expect(axios.get).toHaveBeenCalledOnce();
       expect(axios.get).toHaveBeenCalledWith(PATH, axiosConfig);
       expect(storageType.getItem(StorageKey.CONFIG)).toBe(`"${testData}"`);
@@ -62,7 +59,9 @@ describe('Config Store', () => {
     it('initializes with sessionStorage not null', async () => {
       const testData2 = 'testData2';
       storageType.setItem(StorageKey.CONFIG, testData2);
+
       await ConfigService.init();
+
       expect(axios.get).not.toHaveBeenCalled();
       expect(storageType.getItem(StorageKey.CONFIG)).toBe(`${testData2}`);
     });
@@ -76,12 +75,18 @@ describe('Config Store', () => {
     });
 
     it('gets information from getConfig()', async () => {
+      vi.mocked(axios.get).mockResolvedValue({ data: testData });
+
       const configService = await ConfigService.init();
+
       expect(configService.getConfig()).toBe(testData);
     });
 
     it('getConfig reaquires missing config', async () => {
+      vi.mocked(axios.get).mockResolvedValue({ data: testData });
+
       const configService = await ConfigService.init();
+
       storageType.removeItem(StorageKey.CONFIG);
       expect(configService.getConfig()).toBeNull();
     });
@@ -98,6 +103,7 @@ describe('Config Store', () => {
         );
 
       const configService = await ConfigService.init();
+
       storageType.removeItem(StorageKey.CONFIG);
       expect(configService.getConfig()).toBeNull();
     });
