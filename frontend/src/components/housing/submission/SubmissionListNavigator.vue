@@ -5,7 +5,6 @@ import { useRouter } from 'vue-router';
 import { Spinner } from '@/components/layout';
 import {
   Button,
-  Checkbox,
   Column,
   DataTable,
   FilterMatchMode,
@@ -17,7 +16,7 @@ import {
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import PermissionService, { Permissions } from '@/services/permissionService';
-import { RouteName } from '@/utils/enums/application';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -42,12 +41,6 @@ const confirmDialog = useConfirm();
 const permissionService = new PermissionService();
 const router = useRouter();
 const toast = useToast();
-
-const latLongFormat = (lat: number | null, long: number | null): string => {
-  if (!lat || !long) return '';
-
-  return `${lat}, ${long}`;
-};
 
 function handleCreateNewActivity() {
   confirmDialog.require({
@@ -94,6 +87,19 @@ function onDelete(submissionId: string, activityId: string) {
         .catch((e: any) => toast.error('Failed to delete project', e.message));
     }
   });
+}
+
+function isFinanciallySupported(data: Submission) {
+  if (
+    data.financiallySupportedBC === BasicResponse.YES ||
+    data.financiallySupportedHousingCoop === BasicResponse.YES ||
+    data.financiallySupportedIndigenous === BasicResponse.YES ||
+    data.financiallySupportedNonProfit === BasicResponse.YES
+  ) {
+    return BasicResponse.YES;
+  } else {
+    return BasicResponse.NO;
+  }
 }
 </script>
 
@@ -142,57 +148,81 @@ function onDelete(submissionId: string, activityId: string) {
       </div>
     </template>
     <Column
-      field="activityId"
-      header="Activity"
+      field="projectName"
+      header="Project name"
       :sortable="true"
+      style="min-width: 200px"
       frozen
     >
       <template #body="{ data }">
-        <div :data-activityId="data.activityId">
+        <div :data-projectName="data.projectName">
           <router-link
             :to="{
               name: RouteName.HOUSING_SUBMISSION,
               query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >
-            {{ data.activityId }}
+            {{ data.projectName }}
           </router-link>
         </div>
       </template>
     </Column>
     <Column
-      field="projectName"
-      header="Project Name"
+      field="activityId"
+      header="Activity"
       :sortable="true"
-      style="min-width: 200px"
-    />
+      style="min-width: 125px"
+      frozen
+    >
+      <template #body="{ data }">
+        <div :data-activityId="data.activityId">
+          <div v-if="data.projectName">
+            {{ data.activityId }}
+          </div>
+          <div v-else>
+            <router-link
+              :to="{
+                name: RouteName.HOUSING_SUBMISSION,
+                query: { activityId: data.activityId, submissionId: data.submissionId }
+              }"
+            >
+              {{ data.activityId }}
+            </router-link>
+          </div>
+        </div>
+      </template>
+    </Column>
     <Column
       field="contactFirstName"
-      header="Contact first name"
+      header="First name"
       :sortable="true"
-      style="min-width: 200px"
+      style="min-width: 150px"
     />
     <Column
       field="contactLastName"
-      header="Contact last name"
+      header="Last name"
       :sortable="true"
-      style="min-width: 200px"
+      style="min-width: 150px"
     />
     <Column
-      field="contactPhoneNumber"
-      header="Contact phone"
+      field="companyNameRegistered"
+      header="Company"
       :sortable="true"
-      style="min-width: 200px"
+      style="min-width: 150px"
     />
     <Column
-      field="contactEmail"
-      header="Contact email"
+      field="streetAddress"
+      header="Location address"
       :sortable="true"
-      style="min-width: 200px"
-    />
+      style="min-width: 250px"
+    >
+      <template #body="{ data }">
+        {{ [data.streetAddress, data.locality, data.province].filter((str) => str?.trim()).join(', ') }}
+      </template>
+    </Column>
     <Column
       field="submittedAt"
-      header="Submission date"
+      header="Submitted date"
       :sortable="true"
       style="min-width: 200px"
     >
@@ -200,6 +230,12 @@ function onDelete(submissionId: string, activityId: string) {
         {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
+    <Column
+      field="queuePriority"
+      header="Priority"
+      :sortable="true"
+      style="min-width: 125px"
+    />
     <Column
       field="assignedTo"
       header="Assigned to"
@@ -212,227 +248,74 @@ function onDelete(submissionId: string, activityId: string) {
       </template>
     </Column>
     <Column
-      field="intakeStatus"
-      header="Intake state"
+      field="hasRelatedEnquiry"
+      header="Related enquiry"
       :sortable="true"
-      style="min-width: 150px"
-    />
-    <Column
-      field="applicationStatus"
-      header="Activity state"
-      :sortable="true"
-      style="min-width: 150px"
-    />
+      style="min-width: 200px"
+    >
+      <template #body="{ data }">
+        {{ data.hasRelatedEnquiry ? BasicResponse.YES : BasicResponse.NO }}
+      </template>
+    </Column>
     <Column
       field="singleFamilyUnits"
-      header="Units"
+      header="Single family units"
       :sortable="true"
-      style="min-width: 100px"
+      style="min-width: 200px"
+    />
+    <Column
+      field="multiFamilyUnits"
+      header="Multi family units"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="otherUnitsDescription"
+      header="Other type"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
+      field="otherUnits"
+      header="Other type units"
+      :sortable="true"
+      style="min-width: 200px"
     />
     <Column
       field="hasRentalUnits"
-      header="Rental unit"
-      :sortable="true"
-      style="min-width: 100px"
-    />
-    <Column
-      field="streetAddress"
-      header="Location address"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="locationPIDs"
-      header="Location PID(s)"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="latitude"
-      header="Latitude & Longitude"
-      style="min-width: 100px"
-    >
-      <template #body="{ data }">
-        {{ latLongFormat(data.latitude, data.longitude) }}
-      </template>
-    </Column>
-    <Column
-      field="queuePriority"
-      header="Priority"
-      :sortable="true"
-      style="min-width: 100px"
-    />
-    <Column
-      field="guidance"
-      header="Type: Guidance"
-      :sortable="true"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.guidance"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="inquiry"
-      header="Type: General Enquiry"
+      header="Rental"
       :sortable="true"
       style="min-width: 125px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.inquiry"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="statusRequest"
-      header="Type: Status Request"
-      :sortable="true"
-      style="min-width: 125px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.statusRequest"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="emergencyAssist"
-      header="Type: Escalation Request"
-      :sortable="true"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.emergencyAssist"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="inapplicable"
-      header="Type: Inapplicable"
-      :sortable="true"
-      style="min-width: 100px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.inapplicable"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="astUpdated"
-      header="Automated Status Tool (AST)"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.astUpdated"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="addedToATS"
-      header="Authorized Tracking System (ATS) updated"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.addedToATS"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="atsClientNumber"
-      header="ATS Client #"
-      :sortable="true"
-      style="min-width: 200px"
     />
     <Column
-      field="ltsaCompleted"
-      header="Land Title Survey Authority (LTSA) completed"
+      field="rentalUnits"
+      header="Rental units"
       :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.ltsaCompleted"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="naturalDisaster"
-      header="Location affected by natural disaster"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.naturalDisaster"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
+      style="min-width: 150px"
+    />
     <Column
       field="financiallySupported"
       header="Financially supported"
       :sortable="true"
-      style="min-width: 150px"
+      style="min-width: 225px"
     >
       <template #body="{ data }">
-        <Checkbox
-          v-model="data.financiallySupported"
-          :binary="true"
-          disabled
-        />
+        {{ isFinanciallySupported(data) }}
       </template>
     </Column>
     <Column
-      field="aaiUpdated"
-      header="Authorization and Approvals Insight (AAI) updated"
+      field="naturalDisaster"
+      header="Affected by natural disaster"
       :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        <Checkbox
-          v-model="data.aaiUpdated"
-          :binary="true"
-          disabled
-        />
-      </template>
-    </Column>
-    <Column
-      field="waitingOn"
-      header="Waiting on"
-      :sortable="true"
-      style="min-width: 200px"
+      style="min-width: 275px"
     />
     <Column
       field="action"
       header="Action"
       class="text-center header-center"
-      style="min-width: 150px"
+      style="min-width: 75px"
+      frozen
+      align-frozen="right"
     >
       <template #body="{ data }">
         <Button

@@ -7,6 +7,7 @@ export type Submission = {
   submissionType: string;
   submittedAt: string;
   relatedEnquiries: string;
+  hasRelatedEnquiry: boolean;
   contactFirstName: string;
   contactLastName: string;
   companyNameRegistered: string;

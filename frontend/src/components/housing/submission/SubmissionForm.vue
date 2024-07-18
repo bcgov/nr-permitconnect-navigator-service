@@ -219,12 +219,10 @@ const onSubmit = async (values: any) => {
 };
 
 function updateLocationAddress(values: any, setFieldValue?: Function) {
-  const locationAddress = [];
-  if (values.streetAddress?.length) locationAddress.push(values.streetAddress);
-  if (values.locality?.length) locationAddress.push(values.locality);
-  if (values.province?.length) locationAddress.push(values.province);
+  const locationAddressStr = [values.streetAddress, values.locality, values.province]
+    .filter((str) => str?.trim())
+    .join(', ');
 
-  const locationAddressStr = locationAddress.join(', ');
   if (setFieldValue) setFieldValue('locationAddress', locationAddressStr);
 
   return locationAddressStr;

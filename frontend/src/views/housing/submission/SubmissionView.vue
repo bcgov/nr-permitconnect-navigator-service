@@ -138,16 +138,14 @@ const onDeleteNote = (note: Note) => {
   />
 
   <h1>
-    Activity Submission:
+    <span v-if="getSubmission?.projectName">
+      <span class="ml-1">{{ getSubmission.projectName + ': ' }}</span>
+    </span>
     <span
       v-if="getSubmission?.activityId"
       class="mr-1"
     >
       {{ getSubmission.activityId }}
-    </span>
-    <span v-if="getSubmission?.projectName">
-      -
-      <span class="ml-1">{{ getSubmission.projectName }}</span>
     </span>
   </h1>
 
