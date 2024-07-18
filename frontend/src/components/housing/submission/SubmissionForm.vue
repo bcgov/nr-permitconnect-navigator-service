@@ -219,8 +219,6 @@ const onSubmit = async (values: any) => {
 };
 
 function updateLocationAddress(values: any, setFieldValue?: Function) {
-  // const locationAddressStr = concatenateAddress(values.streetAddress, values.locality, values.province);
-
   const locationAddressStr = [values.streetAddress, values.locality, values.province]
     .filter((str) => str?.trim())
     .join(', ');
