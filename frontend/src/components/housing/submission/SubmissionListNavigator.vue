@@ -42,12 +42,6 @@ const permissionService = new PermissionService();
 const router = useRouter();
 const toast = useToast();
 
-const latLongFormat = (lat: number | null, long: number | null): string => {
-  if (!lat || !long) return '';
-
-  return `${lat}, ${long}`;
-};
-
 function handleCreateNewActivity() {
   confirmDialog.require({
     header: 'Confirm create submission',
