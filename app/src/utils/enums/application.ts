@@ -1,9 +1,9 @@
 export enum AccessRole {
-  PCNS_ADMIN = 'PCNS_ADMIN',
-  PCNS_DEVELOPER = 'PCNS_DEVELOPER',
-  PCNS_NAVIGATOR = 'PCNS_NAVIGATOR',
-  PCNS_PROPONENT = 'PCNS_PROPONENT',
-  PCNS_SUPERVISOR = 'PCNS_SUPERVISOR'
+  DEVELOPER = 'developer',
+  PROPONENT = 'proponent',
+  NAVIGATOR = 'navigator',
+  SUPERVISOR = 'supervisor',
+  ADMIN = 'admin'
 }
 
 export enum Action {

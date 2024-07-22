@@ -15,10 +15,13 @@ const service = {
       const result = await prisma.identity_role.findMany({
         where: {
           identity_id: identityId
+        },
+        include: {
+          role: true
         }
       });
 
-      return result.map((x) => ({ roleId: x.role_id }));
+      return result.map((x) => ({ roleId: x.role_id, userType: x.role.user_type }));
     } catch (e: unknown) {
       throw e;
     }

@@ -4,7 +4,7 @@ import Problem from 'api-problem';
 import { userService, yarsService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import { Initiative, Scope } from '../utils/enums/application';
+import { AccessRole, Initiative, Scope } from '../utils/enums/application';
 import { getCurrentIdentity } from '../utils/utils';
 import { NIL } from 'uuid';
 
@@ -32,31 +32,45 @@ export const hasPermission = (resource: string, action: string) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const roles = await yarsService.getIdentityRoles((req.currentUser?.tokenPayload as any).preferred_username);
 
-        const permissions = await Promise.all(
-          roles.map((x) =>
-            yarsService.getRolePermissionDetails(x.roleId, req.currentUser?.initiative as Initiative, resource, action)
-          )
-        ).then((x) => x.flat());
-
-        if (!permissions || permissions.length === 0) {
-          throw new Error('Invalid role authorization');
-        }
-
         const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
 
         if (!userId) {
           throw new Error('Invalid role user');
         }
 
-        const scopes = permissions
-          .filter((x) => !!x.scopeName)
-          .map((x) => ({ scopeName: x.scopeName as string, scopePriority: x.scopePriority as number }))
-          .sort((a, b) => (a.scopePriority > b.scopePriority ? 1 : -1));
+        // Permission/Scope checking for non developers
+        if (!roles.find((x) => x.userType === AccessRole.DEVELOPER)) {
+          const permissions = await Promise.all(
+            roles.map((x) =>
+              yarsService.getRolePermissionDetails(
+                x.roleId,
+                req.currentUser?.initiative as Initiative,
+                resource,
+                action
+              )
+            )
+          ).then((x) => x.flat());
 
-        req.currentUser.apiScope = {
-          name: scopes.length ? convertStringToScope(scopes[0].scopeName) ?? Scope.SELF : Scope.SELF,
-          userId: userId
-        };
+          if (!permissions || permissions.length === 0) {
+            throw new Error('Invalid role authorization');
+          }
+
+          const scopes = permissions
+            .filter((x) => !!x.scopeName)
+            .map((x) => ({ scopeName: x.scopeName as string, scopePriority: x.scopePriority as number }))
+            .sort((a, b) => (a.scopePriority > b.scopePriority ? 1 : -1));
+
+          req.currentUser.apiScope = {
+            name: scopes.length ? convertStringToScope(scopes[0].scopeName) ?? Scope.SELF : Scope.SELF,
+            userId: userId
+          };
+        } else {
+          // Allow all for developers
+          req.currentUser.apiScope = {
+            name: Scope.ALL,
+            userId: userId
+          };
+        }
       } else {
         throw new Error('No current user');
       }
