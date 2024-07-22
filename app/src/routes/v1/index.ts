@@ -1,5 +1,3 @@
-import { currentUser } from '../../middleware/authentication';
-
 import express from 'express';
 
 import activity from './activity';

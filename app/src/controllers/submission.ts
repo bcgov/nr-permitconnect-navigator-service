@@ -9,7 +9,7 @@ import {
   permitService,
   userService
 } from '../services';
-import { BasicResponse, Initiative } from '../utils/enums/application';
+import { BasicResponse, Initiative, Scope } from '../utils/enums/application';
 import {
   ApplicationStatus,
   IntakeStatus,
@@ -28,7 +28,15 @@ import {
 } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
+import type {
+  ChefsFormConfig,
+  ChefsFormConfigData,
+  Submission,
+  ChefsSubmissionExport,
+  Permit,
+  Email,
+  ApiScope
+} from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -385,13 +393,15 @@ const controller = {
 
   getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
     try {
+      const apiScope = req.currentUser?.apiScope as ApiScope;
+
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();
 
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
 
-      if (isTruthy(req.query.self)) {
+      if (apiScope.name === Scope.SELF) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
       }
@@ -417,11 +427,18 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      // TBD: Implement filtering so proponents can only search for their own submissions
-      const response = await submissionService.searchSubmissions({
+      const apiScope = req.currentUser?.apiScope as ApiScope;
+
+      let response = await submissionService.searchSubmissions({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
       });
+
+      if (apiScope.name === Scope.SELF) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

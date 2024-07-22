@@ -1,4 +1,5 @@
 export type { Activity } from './Activity';
+export type { ApiScope } from './ApiScope';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
