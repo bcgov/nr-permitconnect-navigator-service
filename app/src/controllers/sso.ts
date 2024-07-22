@@ -29,15 +29,6 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
-  },
-
-  getRoles: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await ssoService.getRoles();
-      res.status(response.status).json(response.data);
-    } catch (e: unknown) {
-      next(e);
-    }
   }
 };
 
