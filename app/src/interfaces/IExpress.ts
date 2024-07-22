@@ -1,6 +1,7 @@
 import * as core from 'express-serve-static-core';
 
 import type { CurrentUser } from '../types/CurrentUser';
+import { AuthType } from '../utils/enums/application';
 
 interface Query extends core.Query {}
 
