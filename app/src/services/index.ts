@@ -3,6 +3,7 @@ export { default as comsService } from './coms';
 export { default as documentService } from './document';
 export { default as emailService } from './email';
 export { default as enquiryService } from './enquiry';
+export { default as initiativeService } from './initiative';
 export { default as noteService } from './note';
 export { default as permitService } from './permit';
 export { default as ssoService } from './sso';
