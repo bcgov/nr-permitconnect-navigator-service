@@ -4,7 +4,7 @@ import Problem from 'api-problem';
 import { userService, yarsService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import { Scope } from '../utils/enums/application';
+import { Initiative, Scope } from '../utils/enums/application';
 import { getCurrentIdentity } from '../utils/utils';
 import { NIL } from 'uuid';
 
@@ -33,7 +33,9 @@ export const hasPermission = (resource: string, action: string) => {
         const roles = await yarsService.getIdentityRoles((req.currentUser?.tokenPayload as any).preferred_username);
 
         const permissions = await Promise.all(
-          roles.map((x) => yarsService.getRolePermissionDetails(x.roleId, resource, action))
+          roles.map((x) =>
+            yarsService.getRolePermissionDetails(x.roleId, req.currentUser?.initiative as Initiative, resource, action)
+          )
         ).then((x) => x.flat());
 
         if (!permissions || permissions.length === 0) {

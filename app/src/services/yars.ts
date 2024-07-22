@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-catch */
 
 import prisma from '../db/dataConnection';
+import { Initiative } from '../utils/enums/application';
 
 const service = {
   /**
@@ -23,11 +24,17 @@ const service = {
     }
   },
 
-  getRolePermissionDetails: async (roleId: number, resourceName: string, actionName: string) => {
+  getRolePermissionDetails: async (
+    roleId: number,
+    initiativeName: Initiative,
+    resourceName: string,
+    actionName: string
+  ) => {
     try {
       const result = await prisma.role_permission_vw.findMany({
         where: {
           role_id: roleId,
+          initiative_name: initiativeName.toLowerCase(),
           resource_name: resourceName,
           action_name: actionName
         }
