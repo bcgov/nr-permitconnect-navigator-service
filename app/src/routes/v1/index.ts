@@ -1,6 +1,6 @@
-import { currentUser } from '../../middleware/authentication';
-
 import express from 'express';
+
+import { currentUser } from '../../middleware/authentication';
 
 import document from './document';
 import enquiry from './enquiry';

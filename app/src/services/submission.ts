@@ -9,7 +9,7 @@ import { ApplicationStatus } from '../utils/enums/housing';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { Submission, SubmissionSearchParameters } from '../types';
+import type { ApiScope, Submission, SubmissionSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -196,7 +196,7 @@ const service = {
     }
   },
 
-  /**
+  /*
    * @function getSubmissions
    * Gets a list of submissions
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation

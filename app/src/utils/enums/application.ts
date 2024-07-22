@@ -6,6 +6,13 @@ export enum AccessRole {
   PCNS_SUPERVISOR = 'PCNS_SUPERVISOR'
 }
 
+export enum Action {
+  CREATE = 'create',
+  READ = 'read',
+  UPDATE = 'update',
+  DELETE = 'delete'
+}
+
 /** Current user authentication type */
 export enum AuthType {
   /** OIDC JWT Authentication header provided */
@@ -37,4 +44,20 @@ export enum Regex {
    */
   EMAIL = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$',
   PHONE_NUMBER = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$'
+}
+
+export enum Resource {
+  DOCUMENT = 'document',
+  ENQUIRY = 'enquiry',
+  NOTE = 'note',
+  PERMIT = 'permit',
+  ROADMAP = 'roadmap',
+  SSO = 'sso',
+  SUBMISSION = 'submission',
+  USER = 'user'
+}
+
+export enum Scope {
+  ALL = 'all',
+  SELF = 'self'
 }
