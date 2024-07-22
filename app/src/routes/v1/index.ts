@@ -1,5 +1,8 @@
 import express from 'express';
 
+import { currentUser } from '../../middleware/authentication';
+import { setInitiative } from '../../middleware/initiative';
+
 import activity from './activity';
 import document from './document';
 import enquiry from './enquiry';
@@ -9,9 +12,11 @@ import roadmap from './roadmap';
 import sso from './sso';
 import submission from './submission';
 import user from './user';
+import { Initiative } from '../../utils/enums/application';
 
 const router = express.Router();
 router.use(currentUser);
+router.use(setInitiative(Initiative.HOUSING));
 
 // Base v1 Responder
 router.get('/', (_req, res) => {
