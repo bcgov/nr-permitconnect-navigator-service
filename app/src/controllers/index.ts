@@ -7,3 +7,4 @@ export { default as roadmapController } from './roadmap';
 export { default as ssoController } from './sso';
 export { default as submissionController } from './submission';
 export { default as userController } from './user';
+export { default as yarsController } from './yars';
