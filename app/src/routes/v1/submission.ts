@@ -68,6 +68,7 @@ router.delete(
 router.get('/search', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.searchSubmissions(req, res, next);
 });
+
 router.get(
   '/:submissionId',
   submissionValidator.getSubmission,

@@ -94,4 +94,10 @@ export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, Proj
 
 export const QUEUE_PRIORITY = [1, 2, 3];
 
-export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
+export const SUBMISSION_TYPE_LIST = [
+  SubmissionType.ESCALATION,
+  SubmissionType.GENERAL_ENQUIRY,
+  SubmissionType.GUIDANCE,
+  SubmissionType.INAPPLICABLE,
+  SubmissionType.STATUS_REQUEST
+];

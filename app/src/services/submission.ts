@@ -215,9 +215,10 @@ const service = {
    * @function searchSubmissions
    * Search and filter for specific submission
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
-   * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
+   * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
+   * @param {string[]} [params.submissionType] Optional array of strings representing the submission type
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
@@ -229,10 +230,13 @@ const service = {
             activity_id: { in: params.activityId }
           },
           {
+            intake_status: { in: params.intakeStatus }
+          },
+          {
             submission_id: { in: params.submissionId }
           },
           {
-            intake_status: { in: params.intakeStatus }
+            submission_type: { in: params.submissionType }
           }
         ]
       }

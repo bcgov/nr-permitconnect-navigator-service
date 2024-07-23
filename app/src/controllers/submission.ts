@@ -397,9 +397,10 @@ const controller = {
       never,
       {
         activityId?: Array<string>;
-        submissionId?: Array<string>;
         intakeStatus?: Array<string>;
         includeUser?: string;
+        submissionId?: Array<string>;
+        submissionType?: Array<string>;
       }
     >,
     res: Response,
