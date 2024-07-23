@@ -30,12 +30,20 @@ export const hasPermission = (resource: string, action: string) => {
     try {
       if (req.currentUser) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const roles = await yarsService.getIdentityRoles((req.currentUser?.tokenPayload as any).preferred_username);
+        const identityId = (req.currentUser?.tokenPayload as any).preferred_username;
+
+        let roles = await yarsService.getIdentityRoles(identityId);
+
+        // Auto assign PROPONENT if user has no roles
+        if (roles && roles.length === 0) {
+          await yarsService.assignRole(identityId, AccessRole.PROPONENT);
+          roles = await yarsService.getIdentityRoles(identityId);
+        }
 
         const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
 
         if (!userId) {
-          throw new Error('Invalid role user');
+          throw new Error('Invalid user');
         }
 
         // Permission/Scope checking for non developers
