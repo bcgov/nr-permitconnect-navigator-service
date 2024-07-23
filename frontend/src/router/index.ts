@@ -99,6 +99,14 @@ const routes: Array<RouteRecordRaw> = [
         ]
       },
       {
+        path: 'projects',
+        name: RouteName.HOUSING_PROJECTS,
+        component: () => import('@/views/housing/ProjectsView.vue'),
+        meta: {
+          access: [Permissions.NAVIGATION_HOUSING]
+        }
+      },
+      {
         path: 'submissions',
         name: RouteName.HOUSING_SUBMISSIONS,
         component: () => import('@/views/housing/SubmissionsView.vue'),

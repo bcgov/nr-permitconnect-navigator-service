@@ -70,9 +70,10 @@ const schema = {
   searchSubmissions: {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
-      submissionId: Joi.array().items(uuidv4),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
-      includeUser: Joi.boolean()
+      includeUser: Joi.boolean(),
+      submissionId: Joi.array().items(uuidv4),
+      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
   updateIsDeletedFlag: {
