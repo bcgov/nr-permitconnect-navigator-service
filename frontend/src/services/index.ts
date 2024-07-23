@@ -11,3 +11,4 @@ export { default as permitService } from './permitService';
 export { default as roadmapService } from './roadmapService';
 export { default as submissionService } from './submissionService';
 export { default as userService } from './userService';
+export { default as yarsService } from './yarsService';

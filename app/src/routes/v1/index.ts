@@ -12,6 +12,8 @@ import roadmap from './roadmap';
 import sso from './sso';
 import submission from './submission';
 import user from './user';
+import yars from './yars';
+
 import { Initiative } from '../../utils/enums/application';
 
 const router = express.Router();
@@ -34,5 +36,6 @@ router.use('/roadmap', roadmap);
 router.use('/sso', sso);
 router.use('/submission', submission);
 router.use('/user', user);
+router.use('/yars', yars);
 
 export default router;
