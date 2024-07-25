@@ -101,7 +101,16 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'projects',
         name: RouteName.HOUSING_PROJECTS,
-        component: () => import('@/views/housing/ProjectsView.vue'),
+        component: () => import('@/views/housing/project/ProjectListView.vue'),
+        meta: {
+          access: [Permissions.NAVIGATION_HOUSING]
+        }
+      },
+      {
+        path: 'project',
+        name: RouteName.HOUSING_PROJECT,
+        component: () => import('@/views/housing/project/ProjectView.vue'),
+        props: createProps,
         meta: {
           access: [Permissions.NAVIGATION_HOUSING]
         }

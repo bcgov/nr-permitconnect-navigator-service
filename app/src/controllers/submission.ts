@@ -407,6 +407,7 @@ const controller = {
     next: NextFunction
   ) => {
     try {
+      // TBD: Implement filtering so proponents can only search for their own submissions
       const response = await submissionService.searchSubmissions({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)

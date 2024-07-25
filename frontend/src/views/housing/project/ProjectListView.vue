@@ -2,10 +2,10 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import ProjectsList from '@/components/housing/projects/ProjectsList.vue';
 import { Button } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus, SubmissionType } from '@/utils/enums/housing';
-import ProjectsList from '@/components/housing/projects/ProjectsList.vue';
 import { submissionService } from '@/services';
 
 import type { Ref } from 'vue';
@@ -70,21 +70,22 @@ onMounted(async () => {
     /
     <span class="font-bold">Applications and Permits</span>
   </div>
-  <h1>Application and Permits</h1>
-  <div class="mt-1 mb-3 flex justify-content-between">
-    <h3 class="mb-0">My Projects</h3>
-    <Button
-      class="p-button-sm"
-      outlined
-      label="+ New project investigation"
-      @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
-    />
+  <div class="app-primary-color">
+    <h1>Application and Permits</h1>
+    <div class="mt-1 mb-3 flex justify-content-between">
+      <h3 class="mb-0">My Projects</h3>
+      <Button
+        class="p-button-sm"
+        outlined
+        label="+ New project investigation"
+        @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
+      />
+    </div>
   </div>
   <ProjectsList
     :loading="loading"
     :submissions="submissions"
   />
-  <div>{{ submissions.map((x) => x.submittedAt) }}</div>
 </template>
 
 <style scoped lang="scss">

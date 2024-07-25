@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref, toRaw } from 'vue';
+import { onBeforeMount, onMounted, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
@@ -30,11 +30,13 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 // Props
 type Props = {
   activityId?: string;
+  confirmationId?: string;
   enquiryId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
+  confirmationId: undefined,
   enquiryId: undefined
 });
 
@@ -208,6 +210,11 @@ onBeforeMount(async () => {
   if (props.enquiryId) {
     response = (await enquiryService.getEnquiry(props.enquiryId)).data;
     editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+  } else if (props.confirmationId) {
+    response = {
+      isRelated: BasicResponse.YES,
+      relatedActivityId: props.confirmationId
+    };
   }
 
   // Default form values
@@ -230,6 +237,8 @@ onBeforeMount(async () => {
     }
   };
 });
+
+onMounted(() => {});
 
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;

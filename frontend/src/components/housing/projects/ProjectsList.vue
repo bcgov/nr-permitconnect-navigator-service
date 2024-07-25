@@ -2,14 +2,11 @@
 import { ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
-import { submissionService } from '@/services';
+import { Column, DataTable } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
-import { formatDate } from '@/utils/formatters';
 
-import type { Ref } from 'vue';
 import type { Submission } from '@/types';
+import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -23,13 +20,6 @@ const props = withDefaults(defineProps<Props>(), {});
 const selection: Ref<Submission | undefined> = ref(undefined);
 
 // Actions
-// const confirm = useConfirm();
-// const toast = useToast();
-
-const sortTest = (e = 'meh') => {
-  console.log('sorttest', e);
-  return -1;
-};
 </script>
 
 <template>
@@ -44,9 +34,7 @@ const sortTest = (e = 'meh') => {
     :rows="10"
   >
     <template #empty>
-      <div class="flex justify-content-center">
-        <h3>No active projects</h3>
-      </div>
+      <div>No active projects at the moment.</div>
     </template>
     <template #loading>
       <Spinner />
@@ -61,7 +49,7 @@ const sortTest = (e = 'meh') => {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_SUBMISSION_INTAKE,
+              name: RouteName.HOUSING_PROJECT,
               query: { activityId: data.activityId, submissionId: data.submissionId }
             }"
           >
@@ -88,11 +76,5 @@ const sortTest = (e = 'meh') => {
         <div>{{ data?.user?.firstName }} {{ data?.user?.lastName }}</div>
       </template>
     </Column>
-    <Column
-      field="submittedAt"
-      header="date"
-      :sortable="true"
-      style="min-width: 150px"
-    />
   </DataTable>
 </template>
