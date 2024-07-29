@@ -4,6 +4,7 @@ import { defineConfig } from 'vite';
 import { configDefaults } from 'vitest/config';
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import vueDevTools from 'vite-plugin-vue-devtools';
 
 const proxyObject = {
   target: 'http://localhost:8080',
@@ -21,7 +22,7 @@ export default defineConfig({
       }
     }
   },
-  plugins: [vue(), vueJsx()],
+  plugins: [vue(), vueDevTools(), vueJsx()],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
