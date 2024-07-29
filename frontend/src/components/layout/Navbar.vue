@@ -51,7 +51,7 @@ onMounted(() => {
         },
         {
           label: 'Status of application/permit',
-          route: RouteName.HOUSING_PROJECTS,
+          route: RouteName.HOUSING_PROJECTS_LIST,
           access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
         }
       ],

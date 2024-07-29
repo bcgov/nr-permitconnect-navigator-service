@@ -238,8 +238,6 @@ onBeforeMount(async () => {
   };
 });
 
-onMounted(() => {});
-
 async function emailConfirmation(activityId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplate({

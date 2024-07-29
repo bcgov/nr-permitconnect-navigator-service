@@ -27,7 +27,6 @@ type CombinedPermit = Permit & PermitType;
 
 // Props
 type Props = {
-  activityId: string;
   submissionId: string;
 };
 
@@ -115,13 +114,11 @@ function authStatusClass(authStat: string | undefined) {
 }
 
 onMounted(async () => {
-  const [submissionValue, permitsValue, permitTypesValue] = (
-    await Promise.all([
-      submissionService.getSubmission(props.submissionId),
-      permitService.listPermits(props.activityId),
-      permitService.getPermitTypes()
-    ])
+  const [submissionValue, permitTypesValue] = (
+    await Promise.all([submissionService.getSubmission(props.submissionId), permitService.getPermitTypes()])
   ).map((r) => r.data);
+
+  const permitsValue = (await permitService.listPermits(submissionValue.activityId)).data;
 
   submissionStore.setSubmission(submissionValue);
   submissionStore.setPermits(permitsValue);
@@ -150,7 +147,7 @@ onMounted(async () => {
       class="p-0"
       text
     >
-      <router-link :to="{ name: RouteName.HOUSING_PROJECTS }">
+      <router-link :to="{ name: RouteName.HOUSING_PROJECTS_LIST }">
         <span class="app-primary-color">Applications and Permits</span>
       </router-link>
     </Button>
@@ -238,7 +235,7 @@ onMounted(async () => {
             :key="permit.permitId"
             class="m-0"
           >
-            {{ permit.name }}
+            {{ permit.businessDomain }}: {{ permit.name }}
           </li>
         </ul>
       </AccordionTab>
@@ -251,7 +248,7 @@ onMounted(async () => {
       You will see your permit applications here once submitted.
     </div>
     <Card
-      v-for="permit in permitsNeeded"
+      v-for="permit in permitsSubmitted"
       :key="permit.permitId"
       class="pl-4 pr-4 pt-3 pb-3 mt-2 mb-2 permit-card"
     >

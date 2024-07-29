@@ -50,7 +50,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
           <router-link
             :to="{
               name: RouteName.HOUSING_PROJECT,
-              query: { activityId: data.activityId, submissionId: data.submissionId }
+              params: { submissionId: data.submissionId }
             }"
           >
             {{ data.projectName }}
@@ -64,7 +64,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
     />
     <Column
       field="applicationStatus"
-      header="Status"
+      header="Activity state"
       :sortable="true"
       style="min-width: 150px"
     />
