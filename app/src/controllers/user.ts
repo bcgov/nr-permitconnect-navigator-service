@@ -17,7 +17,8 @@ const controller = {
         firstName: req.query.firstName as string,
         fullName: req.query.fullName as string,
         lastName: req.query.lastName as string,
-        active: isTruthy(req.query.active as string)
+        active: isTruthy(req.query.active as string),
+        role: req.query.role as string
       });
       res.status(200).json(response);
     } catch (e: unknown) {

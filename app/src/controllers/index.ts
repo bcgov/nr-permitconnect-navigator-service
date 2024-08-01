@@ -1,3 +1,4 @@
+export { default as accessRequestController } from './accessRequest';
 export { default as documentController } from './document';
 export { default as enquiryController } from './enquiry';
 export { default as noteController } from './note';

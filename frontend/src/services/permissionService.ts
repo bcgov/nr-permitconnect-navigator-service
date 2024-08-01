@@ -1,6 +1,7 @@
+import type { CancelToken } from 'axios';
+
 import { AccessRole } from '@/utils/enums/application';
 import { appAxios } from './interceptors';
-
 import { useAuthStore } from '@/store';
 
 export enum Permissions {
@@ -168,8 +169,8 @@ export default class PermissionService {
     return appAxios().post('sso/requestBasicAccess');
   }
 
-  public async searchIdirUsers(params?: any) {
-    return appAxios().get('sso/idir/users', { params: params });
+  public async searchIdirUsers(params?: any, cancelToken?: CancelToken) {
+    return appAxios().get('sso/idir/users', { params: params, cancelToken: cancelToken });
   }
 
   public async searchBasicBceidUsers(params?: any) {
