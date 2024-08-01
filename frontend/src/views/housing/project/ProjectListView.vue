@@ -71,8 +71,8 @@ onMounted(async () => {
     <span class="font-bold">Applications and Permits</span>
   </div>
   <div class="app-primary-color">
-    <h1>Application and Permits</h1>
-    <div class="mt-1 mb-3 flex justify-content-between">
+    <h1 class="mt-7">Applications and Permits</h1>
+    <div class="mt-7 mb-5 flex justify-content-between">
       <h3 class="mb-0">My Projects</h3>
       <Button
         class="p-button-sm"

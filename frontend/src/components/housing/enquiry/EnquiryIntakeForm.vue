@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, onMounted, ref, toRaw } from 'vue';
+import { onBeforeMount, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
@@ -30,14 +30,14 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 // Props
 type Props = {
   activityId?: string;
-  confirmationId?: string;
   enquiryId?: string;
+  submissionId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  confirmationId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // Store
@@ -210,10 +210,18 @@ onBeforeMount(async () => {
   if (props.enquiryId) {
     response = (await enquiryService.getEnquiry(props.enquiryId)).data;
     editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-  } else if (props.confirmationId) {
+  } else if (props.submissionId) {
+    const submission = (await submissionService.getSubmission(props.submissionId)).data;
     response = {
+      contactFirstName: submission?.contactFirstName,
+      contactLastName: submission?.contactLastName,
+      contactPhoneNumber: submission?.contactPhoneNumber,
+      contactEmail: submission?.contactEmail,
+      contactApplicantRelationship: submission?.contactApplicantRelationship,
+      contactPreference: submission?.contactPreference,
+
       isRelated: BasicResponse.YES,
-      relatedActivityId: props.confirmationId
+      relatedActivityId: submission.activityId
     };
   }
 

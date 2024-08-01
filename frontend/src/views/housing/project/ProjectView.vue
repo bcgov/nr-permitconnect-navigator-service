@@ -7,6 +7,7 @@ import { Accordion, AccordionTab, Button, Card, Divider } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
+import { toKebabCase } from '@/utils/utils';
 
 import { permitService, submissionService, userService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -104,13 +105,27 @@ function permitFilter(config: PermitFilterConfig) {
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
 }
 
-function authStatusClass(authStat: string | undefined) {
-  if (!authStat) return '';
-  if (authStat === PermitAuthorizationStatus.IN_REVIEW) {
-    return 'in-review';
-  } else {
-    return authStat?.toLowerCase();
+function displayTrackerStatus(authStatus: string | undefined, permitState: string | undefined): string {
+  if (permitState === PermitStatus.APPLIED) {
+    switch (authStatus) {
+      case PermitAuthorizationStatus.IN_REVIEW:
+      case PermitAuthorizationStatus.PENDING:
+        return authStatus;
+      case PermitAuthorizationStatus.NONE:
+      default:
+        return 'Submitted';
+    }
   }
+  if (permitState === PermitStatus.COMPLETED) {
+    switch (authStatus) {
+      case PermitAuthorizationStatus.ISSUED:
+      case PermitAuthorizationStatus.DENIED:
+        return authStatus;
+      default:
+        return 'Completed';
+    }
+  }
+  return 'Submitted';
 }
 
 onMounted(async () => {
@@ -119,7 +134,6 @@ onMounted(async () => {
   ).map((r) => r.data);
 
   const permitsValue = (await permitService.listPermits(submissionValue.activityId)).data;
-
   submissionStore.setSubmission(submissionValue);
   submissionStore.setPermits(permitsValue);
   typeStore.setPermitTypes(permitTypesValue);
@@ -169,7 +183,7 @@ onMounted(async () => {
     v-if="!loading && getSubmission"
     class="app-primary-color"
   >
-    <div class="mt-3 flex justify-content-between align-items-center">
+    <div class="mt-7 mb-2 flex justify-content-between align-items-center">
       <h1
         class="m-0 cursor-pointer hover:underline"
         @click="
@@ -189,11 +203,14 @@ onMounted(async () => {
         class="p-button-sm header-btn"
         label="Ask a Navigator"
         @click="
-          router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE, query: { confirmationId: getSubmission.activityId } })
+          router.push({
+            name: RouteName.HOUSING_ENQUIRY_INTAKE,
+            query: { submissionId: getSubmission.submissionId }
+          })
         "
       />
     </div>
-    <div class="mb-6">
+    <div class="mb-8">
       <span class="mr-3">
         Confirmation ID:
         <span class="font-bold">{{ getSubmission.activityId }}</span>
@@ -204,9 +221,9 @@ onMounted(async () => {
       </span>
       <span v-else>Navigator: -</span>
     </div>
-    <div><h3 class="mb-3">Required permits</h3></div>
+    <div><h3 class="mb-5">Required permits</h3></div>
     <div
-      v-if="!permitsNeeded?.length"
+      v-if="!(permitsNeeded?.length || permitsNotNeeded?.length)"
       class="empty-block p-5"
     >
       We are investigating the permits required for this project.
@@ -215,10 +232,10 @@ onMounted(async () => {
     <Card
       v-for="permit in permitsNeeded"
       :key="permit.permitId"
-      class="app-primary-color mt-2 mb-2 hover-underline cursor-pointer"
+      class="app-primary-color permit-card hover-underline cursor-pointer"
     >
       <template #content>
-        <h5 class="mt-0 mb-0 mr-0 ml-2 p-3">{{ permit.businessDomain }}: {{ permit.name }}</h5>
+        <h5 class="m-0 p-0">{{ permit.businessDomain }}: {{ permit.name }}</h5>
       </template>
     </Card>
     <Accordion
@@ -229,7 +246,7 @@ onMounted(async () => {
         <div>
           We have also investigated the following permits as requested. These permits are not required for this project.
         </div>
-        <ul>
+        <ul class="mt-4 mb-0">
           <li
             v-for="permit in permitsNotNeeded"
             :key="permit.permitId"
@@ -240,7 +257,7 @@ onMounted(async () => {
         </ul>
       </AccordionTab>
     </Accordion>
-    <h3 class="mt-6 mb-3">Submitted applications</h3>
+    <h3 class="mt-8 mb-5">Submitted applications</h3>
     <div
       v-if="!(permitsSubmitted.length || permitsNotNeeded.length)"
       class="empty-block p-5"
@@ -250,7 +267,7 @@ onMounted(async () => {
     <Card
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
-      class="pl-4 pr-4 pt-3 pb-3 mt-2 mb-2 permit-card"
+      class="permit-card"
     >
       <template #title>
         <h5 class="m-0 app-primary-color">{{ permit.businessDomain }}: {{ permit.name }}</h5>
@@ -259,11 +276,8 @@ onMounted(async () => {
       <template #content>
         <div class="grid">
           <div class="col-2">
-            <div
-              v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-              :class="['authIndicator', authStatusClass(permit?.authStatus)]"
-            >
-              {{ permit.authStatus }}
+            <div :class="['authIndicator', toKebabCase(displayTrackerStatus(permit.authStatus, permit.status))]">
+              {{ displayTrackerStatus(permit.authStatus, permit.status) }}
             </div>
           </div>
           <div class="col-2">
@@ -282,7 +296,6 @@ onMounted(async () => {
       </template>
     </Card>
   </div>
-  <!-- <div>{{ getSubmission }}</div> -->
 </template>
 
 <style scoped lang="scss">
@@ -290,12 +303,20 @@ a {
   text-decoration: none;
 }
 
+h1 {
+  font-size: 2.125rem;
+}
+
+h3 {
+  font-size: 1.75rem;
+}
+
 .hover-underline:hover {
   text-decoration: underline;
 }
 
 .empty-block {
-  background-color: white;
+  background-color: $app-grey;
 }
 .header-btn {
   max-height: 2rem;
@@ -319,6 +340,7 @@ a {
   border-width: 1px;
 }
 
+.completed,
 .issued {
   background-color: $app-green;
   color: white;
@@ -347,28 +369,61 @@ a {
 }
 
 .permit-card {
-  box-shadow: 0px 4px 4px 0px #0000000a;
+  border-color: #efefef;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+  padding: 1.76rem 2rem 1.76rem 2rem;
+  margin-bottom: 1rem;
   &:hover {
-    background-color: rgb(233, 236, 239);
+    background-color: $app-grey;
   }
 }
 
 .sub-label {
-  color: $app-grey;
+  color: #868585;
   font-size: 0.8rem;
   margin-top: 1rem;
 }
 
-// Overriding default Accordion CSS to match h5
+:deep(.p-accordion-content) {
+  padding: 4rem 4rem 4rem 4rem;
+  border-style: none;
+}
+
 :deep(.p-accordion-header > a) {
   color: inherit;
   font-size: 1.1rem;
   text-decoration: none;
+  padding: 1.5rem 2rem 1.5rem 2rem;
+  border-top-style: none;
+  border-left-style: none;
+  border-right-style: none;
+}
+
+:deep(.p-accordion-tab) {
+  border-color: #efefef;
+  border-style: solid;
+  border-width: 1px;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+}
+
+:deep(.p-accordion-tab-active .p-accordion-header > a) {
+  background-color: $app-grey !important;
+}
+
+:deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {
+  background-color: inherit;
+  &:hover {
+    background-color: $app-grey;
+  }
 }
 
 :deep(.p-card-body) {
   padding-top: 0rem;
   padding-bottom: 0rem;
+  padding-left: 1.5rem;
+  padding-right: 1.5 rem;
 }
 
 :deep(.p-card-content) {

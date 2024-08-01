@@ -15,7 +15,8 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
   confirmationId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // State
@@ -31,7 +32,7 @@ onMounted(async () => {
   <EnquiryIntakeForm
     v-if="!loading"
     :activity-id="props.activityId"
-    :confirmation-id="props.confirmationId"
     :enquiry-id="props.enquiryId"
+    :submission-id="props.submissionId"
   />
 </template>
