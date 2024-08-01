@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, onMounted, ref, toRaw } from 'vue';
+import { onBeforeMount, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
@@ -31,14 +31,14 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 // Props
 type Props = {
   activityId?: string;
-  confirmationId?: string;
   enquiryId?: string;
+  submissionId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  confirmationId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // Store
