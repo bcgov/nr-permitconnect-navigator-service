@@ -8,4 +8,5 @@ export type UserSearchParameters = {
   fullName?: string;
   lastName?: string;
   active?: boolean;
+  role?: string;
 };

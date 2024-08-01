@@ -1,25 +1,78 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { Button, Column, DataTable, Dialog, FilterMatchMode, IconField, InputIcon, InputText } from '@/lib/primevue';
 
 import { Dropdown } from '@/components/form';
+import { Spinner } from '@/components/layout';
+import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
+import { PermissionService } from '@/services';
 import { ROLES } from '@/utils/constants/application';
 
+import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
-import type { User } from '@/types';
-
+import type { UserAccessRequest } from '@/types';
+import axios from 'axios';
 // Emits
 const emit = defineEmits(['userCreate:request']);
 
 // State
+let cancelTokenSource: any = null; // Initialize a variable to hold the cancel token source
+const loading: Ref<boolean> = ref(false);
 const visible = defineModel<boolean>('visible');
-const users: Ref<Array<User>> = ref([]);
-const selection: Ref<User | undefined> = ref(undefined);
+const users: Ref<Array<UserAccessRequest>> = ref([]);
+const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
+const selectedRole: Ref<string | undefined> = ref(undefined);
+const selectedParam: Ref<string | undefined> = ref(undefined);
+const searchTag: Ref<string> = ref('');
 
-// Datatable filter(s)
-const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
+const USER_SEARCH_PARAMS: { [key: string]: string } = {
+  firstName: 'First name',
+  lastName: 'Last name',
+  email: 'Email'
+};
+
+// Actions
+const permissionService = new PermissionService();
+const toast = useToast();
+
+async function searchIdirUsers() {
+  selection.value = undefined;
+  const searchParam =
+    Object.keys(USER_SEARCH_PARAMS).find((key) => USER_SEARCH_PARAMS[key] === selectedParam.value) ||
+    Object.keys(USER_SEARCH_PARAMS)[0];
+  searchTag.value = searchTag.value.trim();
+  if (searchTag.value.length > 2) {
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel('Cancelling the previous request'); // Cancel the previous request
+    }
+    cancelTokenSource = axios.CancelToken.source(); // Create a new cancel token source for the new request
+
+    try {
+      loading.value = true;
+      const response = await permissionService.searchIdirUsers(
+        {
+          [searchParam]: searchTag.value
+        },
+        cancelTokenSource.token // Attach the cancel token to the request
+      );
+      loading.value = false;
+      // Map the response data to the required format
+      // Spread the rest of the properties and filter out users without email
+      users.value = response.data
+        .map(({ attributes, ...rest }: any) => ({
+          ...rest,
+          fullName: attributes?.display_name?.[0] as string,
+          identityId: attributes?.idir_user_guid?.[0] as string
+        }))
+        .filter((user: any) => !!user.email);
+    } catch (error) {
+      if (!axios.isCancel(error)) toast.error('Error searching for users ' + error);
+    } finally {
+      cancelTokenSource = null; // Reset the cancel token source
+    }
+  } else {
+    users.value = [];
+  }
+}
 </script>
 
 <template>
@@ -27,41 +80,64 @@ const filters = ref({
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-5"
+    class="app-info-dialog w-6"
   >
     <template #header>
       <span class="p-dialog-title">Create new user</span>
     </template>
-    <IconField
-      icon-position="left"
-      class="mt-1"
-    >
-      <InputIcon class="pi pi-search" />
-      <InputText
-        v-model="filters['global'].value"
-        placeholder="Search by first name, last name, or email"
-        class="col-12 pl-5"
+    <div class="flex justify-content-between align-items-center">
+      <div class="col-9 mb-2">
+        <IconField icon-position="left">
+          <InputIcon class="pi pi-search" />
+          <InputText
+            v-model="searchTag"
+            placeholder="Search by first name, last name, or email"
+            class="col-12 pl-5"
+            @update:model-value="searchIdirUsers"
+          />
+        </IconField>
+      </div>
+      <Dropdown
+        class="col-3 m-0"
+        name="assignRole"
+        placeholder="First name"
+        :options="Object.values(USER_SEARCH_PARAMS)"
+        @on-change="
+          (param: DropdownChangeEvent) => {
+            selectedParam = param.value;
+            searchIdirUsers();
+          }
+        "
       />
-    </IconField>
+    </div>
     <DataTable
       v-model:selection="selection"
-      v-model:filters="filters"
       :row-hover="true"
-      class="datatable mt-3 mb-2"
+      :loading="loading"
+      class="datatable mt-3 mb-2 pl-2 pr-2"
       :value="users"
       selection-mode="single"
-      data-key="userId"
+      data-key="username"
+      :rows="5"
+      :paginator="true"
     >
       <template #empty>
         <div class="flex justify-content-center">
           <h5 class="m-0">No users found.</h5>
         </div>
       </template>
+      <template #loading>
+        <Spinner />
+      </template>
       <Column
         field="username"
         header="Username"
         sortable
-      />
+      >
+        <template #body="{ data }">
+          {{ data.fullName }}
+        </template>
+      </Column>
       <Column
         field="firstName"
         header="First Name"
@@ -72,23 +148,30 @@ const filters = ref({
         header="Last Name"
         sortable
       />
+      <Column
+        field="email"
+        header="Email"
+        sortable
+      />
     </DataTable>
     <Dropdown
       class="col-12"
       name="assignRole"
       label="Assign role"
       :options="ROLES"
+      :disabled="!selection"
+      @on-change="(e: DropdownChangeEvent) => (selectedRole = e.value)"
     />
-    <div class="flex-auto">
+    <div class="flex-auto pl-2">
       <Button
         class="mr-2"
         label="Request approval"
         type="submit"
         icon="pi pi-check"
+        :disabled="!selection || !selectedRole"
         @click="
           () => {
-            emit('userCreate:request', selection);
-            visible = false;
+            emit('userCreate:request', selection, selectedRole);
           }
         "
       />
