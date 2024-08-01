@@ -17,10 +17,6 @@ const { getConfig } = storeToRefs(useConfigStore());
 const permissionService = new PermissionService();
 const router = useRouter();
 
-async function ssoRequestBasicAccess() {
-  await permissionService.requestBasicAccess();
-}
-
 async function searchIdirUsers() {
   await permissionService.searchIdirUsers({ firstName: 'Kyle' });
 }

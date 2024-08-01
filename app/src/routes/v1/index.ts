@@ -2,6 +2,7 @@ import { currentUser } from '../../middleware/authentication';
 
 import express from 'express';
 
+import activity from './activity';
 import document from './document';
 import enquiry from './enquiry';
 import note from './note';
@@ -17,10 +18,11 @@ router.use(currentUser);
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/document', '/enquiry', '/note', '/permit', '/roadmap', '/sso', '/submission', '/user']
+    endpoints: ['/activity', '/document', '/enquiry', '/note', '/permit', '/roadmap', '/sso', '/submission', '/user']
   });
 });
 
+router.use('/activity', activity);
 router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/note', note);
