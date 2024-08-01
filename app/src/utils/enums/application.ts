@@ -30,6 +30,12 @@ export enum Initiative {
   HOUSING = 'HOUSING'
 }
 
+export enum AccessRequestStatus {
+  APPROVED = 'Approved',
+  PENDING = 'Pending',
+  REJECTED = 'Rejected'
+}
+
 export enum Regex {
   /**
    * Generic email regex modified to require domain of at least 2 characters

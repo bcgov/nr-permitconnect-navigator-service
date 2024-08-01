@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { Button, Dialog } from '@/lib/primevue';
+import { ref } from 'vue';
 
 import { RadioList } from '@/components/form';
+import { Button, Dialog } from '@/lib/primevue';
 import { ROLES } from '@/utils/constants/application';
+
+import type { Ref } from 'vue';
 
 // Emits
 const emit = defineEmits(['userManage:save']);
 
 // State
 const visible = defineModel<boolean>('visible');
+const role: Ref<string | undefined> = ref(undefined);
 </script>
 
 <template>
@@ -27,6 +31,7 @@ const visible = defineModel<boolean>('visible');
       :bold="false"
       :options="ROLES"
       class="mt-3 mb-4"
+      @on-change="(value) => (role = value)"
     />
     <div class="flex-auto">
       <Button
@@ -34,12 +39,7 @@ const visible = defineModel<boolean>('visible');
         label="Save"
         type="submit"
         icon="pi pi-check"
-        @click="
-          () => {
-            emit('userManage:save');
-            visible = false;
-          }
-        "
+        @click="emit('userManage:save', role)"
       />
       <Button
         class="p-button-outlined mr-2"
