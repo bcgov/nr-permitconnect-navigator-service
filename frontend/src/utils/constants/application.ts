@@ -14,6 +14,12 @@ export const PCNS_CONTACT = {
 
 export const ROLES = [Roles.NAVIGATOR, Roles.READ_ONLY];
 
+export const ACCESS_REQUEST_STATUS = [
+  AccessRequestStatus.APPROVED,
+  AccessRequestStatus.PENDING,
+  AccessRequestStatus.REJECTED
+];
+
 export const SPATIAL_FILE_FORMATS = [
   '.cpg',
   '.dbf',
@@ -33,6 +39,8 @@ export const SPATIAL_FILE_FORMATS = [
 ];
 
 export const SYSTEM_USER = NIL;
+
+export const USER_SEARCH_PARAMS = [UserSearchParams.FIRST_NAME, UserSearchParams.LAST_NAME, UserSearchParams.EMAIL];
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];

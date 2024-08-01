@@ -230,6 +230,7 @@ model user {
   created_at        DateTime?          @default(now()) @db.Timestamptz(6)
   updated_by        String?
   updated_at        DateTime?          @db.Timestamptz(6)
+  access_request    access_request[]
   enquiry           enquiry[]
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
@@ -438,4 +439,23 @@ view group_role_policy_vw {
   action_name     String?
 
   @@schema("yars")
+}
+
+model access_request {
+  access_request_id String                     @id @db.Uuid
+  user_id           String                     @db.Uuid
+  role              String?
+  status            access_request_status_enum @default(Pending)
+  grant             Boolean
+  created_by        String?                    @default("00000000-0000-0000-0000-000000000000")
+  created_at        DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_by        String?
+  updated_at        DateTime?                  @db.Timestamptz(6)
+  user              user                       @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "access_request_user_id_foreign")
+}
+
+enum access_request_status_enum {
+  Approved
+  Pending
+  Rejected
 }
