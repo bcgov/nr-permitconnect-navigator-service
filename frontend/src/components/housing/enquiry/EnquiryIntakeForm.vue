@@ -9,9 +9,9 @@ import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea 
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, submissionService } from '@/services';
+import { activityService, enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
-import { YES_NO_LIST } from '@/utils/constants/application';
+import { ACTIVITY_ID_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
@@ -234,6 +234,23 @@ async function emailConfirmation(activityId: string) {
   };
   await submissionService.emailConfirmation(emailData);
 }
+
+async function checkActivityIdValidity(event: Event) {
+  const target = event.target as HTMLInputElement;
+  const activityId = target.value;
+  const hexidecimal = parseInt(activityId, 16);
+
+  if (activityId) {
+    if (activityId.length === ACTIVITY_ID_LENGTH && hexidecimal) {
+      const valid = (await activityService.checkActivityIdValidity(activityId)).data.valid;
+      if (!valid) {
+        toast.warn(`Confirmation ID ${activityId} does not exist, please check again.`);
+      }
+    } else {
+      toast.warn('Confirmation ID is not the right format, please check again.');
+    }
+  }
+}
 </script>
 
 <template>
@@ -369,6 +386,7 @@ async function emailConfirmation(activityId: string) {
               name="basic.relatedActivityId"
               placeholder="Confirmation ID"
               :disabled="!editable"
+              @on-change="checkActivityIdValidity"
             />
           </div>
         </template>

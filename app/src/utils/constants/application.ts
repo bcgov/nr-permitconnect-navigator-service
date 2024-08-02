@@ -19,3 +19,5 @@ export const DEFAULTCORS = Object.freeze({
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];
+
+export const ACTIVITY_ID_LENGTH = 8;

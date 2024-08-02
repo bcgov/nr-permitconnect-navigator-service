@@ -1,3 +1,4 @@
+export { default as activityController } from './activity';
 export { default as documentController } from './document';
 export { default as enquiryController } from './enquiry';
 export { default as noteController } from './note';
