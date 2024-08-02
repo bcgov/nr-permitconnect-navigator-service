@@ -5,10 +5,11 @@ import { onBeforeMount, ref, toRaw } from 'vue';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
-import { Dropdown, InputMask, RadioList, InputText, StepperNavigation, TextArea } from '@/components/form';
+import { Dropdown, InputMask, InputText, RadioList, StepperNavigation, TextArea } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
+import { useAutoSave } from '@/composables/formAutoSave';
 import { activityService, enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { ACTIVITY_ID_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
@@ -18,6 +19,13 @@ import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
+
+const { formUpdated, stopAutoSave } = useAutoSave(async () => {
+  const values = formRef.value?.values;
+  if (values) {
+    await onSaveDraft(values, true);
+  }
+});
 
 // Props
 type Props = {
@@ -115,7 +123,7 @@ function onInvalidSubmit(e: any) {
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSaveDraft(data: any) {
+async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
   try {
@@ -133,7 +141,12 @@ async function onSaveDraft(data: any) {
       throw new Error('Failed to retrieve correct draft data');
     }
 
-    toast.success('Draft saved');
+    if (isAutoSave) {
+      toast.success('Draft autosaved');
+    } else {
+      toast.success('Draft saved');
+      formUpdated.value = false;
+    }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
@@ -169,6 +182,7 @@ async function onSubmit(data: any) {
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId);
+      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
     }
@@ -278,6 +292,7 @@ async function checkActivityIdValidity(event: Event) {
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
+      @change="formUpdated = true"
     >
       <input
         type="hidden"
