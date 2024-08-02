@@ -37,6 +37,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
+import { useAutoSave } from '@/composables/formAutoSave';
 import { externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -99,7 +100,12 @@ const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors: Ref<string[]> = ref([]);
-const formUpdated: Ref<boolean> = ref(false);
+const formModified: Ref<boolean> = ref(false);
+
+const { formUpdated, stopAutoSave } = useAutoSave(() => {
+  const values = formRef.value?.values;
+  if (values) onSaveDraft(values, true);
+});
 
 // Actions
 const confirm = useConfirm();
@@ -174,7 +180,7 @@ const onLatLongInputClick = async () => {
 function onInvalidSubmit(e: any) {
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
-  formUpdated.value = false;
+  formModified.value = false;
 }
 
 function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
@@ -191,7 +197,7 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(data: any) {
+async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
   const tempData = Object.assign({}, data);
@@ -212,7 +218,12 @@ async function onSaveDraft(data: any) {
       throw new Error('Failed to retrieve correct draft data');
     }
 
-    toast.success('Draft saved');
+    if (isAutoSave) {
+      toast.success('Draft autosaved');
+    } else {
+      toast.success('Draft saved');
+      formUpdated.value = false;
+    }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
@@ -235,6 +246,7 @@ async function onSubmit(data: any) {
       formRef.value?.setFieldValue('activityId', response.data.activityId);
       // Send confirmation email
       emailConfirmation(response.data.activityId);
+      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -370,7 +382,12 @@ onBeforeMount(async () => {
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
-      @change="formUpdated = true"
+      @change="
+        () => {
+          formUpdated = true;
+          formModified = true;
+        }
+      "
     >
       <SubmissionAssistance
         :form-errors="errors"
@@ -407,7 +424,7 @@ onBeforeMount(async () => {
                 'app-error-color':
                   (validationErrors.includes(IntakeFormCategory.APPLICANT) ||
                     validationErrors.includes(IntakeFormCategory.BASIC)) &&
-                  !formUpdated
+                  !formModified
               }"
             />
           </template>
@@ -415,7 +432,7 @@ onBeforeMount(async () => {
             <CollectionDisclaimer />
 
             <Message
-              v-if="validationErrors.length && !formUpdated"
+              v-if="validationErrors.length && !formModified"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -571,12 +588,14 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{ 'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formUpdated }"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formModified
+              }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formUpdated"
+              v-if="validationErrors.length && !formModified"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -918,13 +937,13 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formUpdated
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formModified
               }"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formUpdated"
+              v-if="validationErrors.length && !formModified"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1233,13 +1252,13 @@ onBeforeMount(async () => {
                 'app-error-color':
                   (validationErrors.includes(IntakeFormCategory.PERMITS) ||
                     validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)) &&
-                  !formUpdated
+                  !formModified
               }"
             />
           </template>
           <template #content="{ prevCallback }">
             <Message
-              v-if="validationErrors.length && !formUpdated"
+              v-if="validationErrors.length && !formModified"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
