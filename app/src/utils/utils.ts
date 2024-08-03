@@ -6,7 +6,7 @@ import { getLogger } from '../components/log';
 import { AuthType } from './enums/application';
 
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser, IdpAttributes } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -130,6 +130,25 @@ export function getCurrentTokenClaim(
 }
 
 /**
+ * @function getCurrentTokenUsername
+ * Parses currentUser object's identity provider to return their username
+ * @param {object} currentUser The express request currentUser object
+ * @returns {string | undefined} The username in currentUser or undefined
+ */
+export function getCurrentTokenUsername(currentUser: CurrentUser | undefined): string | undefined {
+  if (currentUser?.tokenPayload) {
+    const idpList = readIdpList();
+    const payload = currentUser.tokenPayload as JwtPayload;
+
+    const usernameKey = idpList.find((x) => x.idp === payload.identity_provider)?.username;
+
+    if (usernameKey && usernameKey in payload) return payload[usernameKey];
+  }
+
+  return undefined;
+}
+
+/**
  * @function isTruthy
  * Returns true if the element name in the object contains a truthy value
  * @param {object} value The object to evaluate
@@ -188,7 +207,7 @@ export function parseIdentityKeyClaims(): Array<string> {
  * Acquires the list of identity providers to be used
  * @returns {object[]} A promise resolving to an array of idp provider objects
  */
-export function readIdpList(): object[] {
+export function readIdpList(): Array<IdpAttributes> {
   const configDir = '../../config';
   const defaultFile = 'idplist-default.json';
   const overrideFile = 'idplist-local.json';
