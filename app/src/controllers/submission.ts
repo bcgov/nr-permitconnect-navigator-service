@@ -18,7 +18,14 @@ import {
   PermitStatus,
   SubmissionType
 } from '../utils/enums/housing';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
+import {
+  camelCaseToTitleCase,
+  deDupeUnsure,
+  getCurrentIdentity,
+  getCurrentTokenUsername,
+  isTruthy,
+  toTitleCase
+} from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
@@ -271,7 +278,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+        submittedBy: getCurrentTokenUsername(req.currentUser),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -376,7 +383,7 @@ const controller = {
 
       if (isTruthy(req.query.self)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
       }
 
       res.status(200).json(response);

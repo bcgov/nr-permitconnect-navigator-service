@@ -9,6 +9,7 @@ export type { Enquiry } from './Enquiry';
 export type { EnquirySearchParameters } from './EnquirySearchParameters';
 export type { EmailAttachment } from './EmailAttachment';
 export type { IdentityProvider } from './IdentityProvider';
+export type { IdpAttributes } from './IdpAttributes';
 export type { Middleware } from './Middleware';
 export type { Note } from './Note';
 export type { Permit } from './Permit';
