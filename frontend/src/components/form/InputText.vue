@@ -1,11 +1,8 @@
 <script setup lang="ts">
 import { ErrorMessage } from 'vee-validate';
-import { ref } from 'vue';
 
 import InputTextInternal from './internal/InputTextInternal.vue';
 import { FloatLabel } from '@/lib/primevue';
-
-import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -30,9 +27,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 // Emits
 const emit = defineEmits(['onChange']);
-
-// State
-const fieldActive: Ref<boolean> = ref(false);
 </script>
 
 <template>
@@ -45,15 +39,11 @@ const fieldActive: Ref<boolean> = ref(false);
     </FloatLabel>
     <InputTextInternal
       v-else
-      v-model:fieldActive="fieldActive"
       v-bind="props"
       @on-change="(e) => emit('onChange', e)"
     />
 
-    <small
-      v-if="fieldActive"
-      :id="`${name}-help`"
-    >
+    <small :id="`${name}-help`">
       {{ helpText }}
     </small>
     <div class="mt-2">

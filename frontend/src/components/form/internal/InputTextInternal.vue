@@ -22,7 +22,6 @@ const emit = defineEmits(['onChange']);
 
 // State
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
-const fieldActive = defineModel<boolean>('fieldActive');
 </script>
 
 <template>
@@ -40,8 +39,6 @@ const fieldActive = defineModel<boolean>('fieldActive');
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
-    @focus="fieldActive = true"
-    @blur="fieldActive = false"
     @change="(e) => emit('onChange', e)"
   />
 </template>

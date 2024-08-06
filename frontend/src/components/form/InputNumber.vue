@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { toRef, ref } from 'vue';
+import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { InputNumber } from '@/lib/primevue';
-
-import type { Ref } from 'vue';
 
 // Props
 type Props = {
@@ -27,10 +25,6 @@ const props = withDefaults(defineProps<Props>(), {
 
 // State
 const { errorMessage, value } = useField<number>(toRef(props, 'name'));
-const fieldActive: Ref<boolean> = ref(false);
-
-// Emits
-const emit = defineEmits(['onBlur', 'onFocus']);
 </script>
 
 <template>
@@ -51,23 +45,8 @@ const emit = defineEmits(['onBlur', 'onFocus']);
       :disabled="disabled"
       :min-fraction-digits="0"
       :max-fraction-digits="6"
-      @blur="
-        () => {
-          fieldActive = true;
-          emit('onBlur');
-        }
-      "
-      @focus="
-        () => {
-          fieldActive = true;
-          emit('onFocus');
-        }
-      "
     />
-    <small
-      v-if="fieldActive"
-      :id="`${name}-help`"
-    >
+    <small :id="`${name}-help`">
       {{ helpText }}
     </small>
     <div class="mt-2">
