@@ -3,6 +3,7 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { Accordion, AccordionTab, Button, Card, Divider } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
@@ -14,6 +15,7 @@ import { useSubmissionStore, useTypeStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Permit, PermitType, User } from '@/types';
+import type { MenuItem } from 'primevue/menuitem';
 
 const router = useRouter();
 
@@ -41,7 +43,13 @@ const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
 
 const assignee: Ref<User | undefined> = ref(undefined);
+const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
+const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
+  { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
+  { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
+]);
 const loading: Ref<boolean> = ref(true);
+
 const permitsNeeded = computed(() => {
   return permitFilter({
     permitNeeded: PermitNeeded.YES,
@@ -122,7 +130,7 @@ function displayTrackerStatus(authStatus: string | undefined, permitState: strin
       case PermitAuthorizationStatus.DENIED:
         return authStatus;
       default:
-        return 'Completed';
+        return PermitStatus.COMPLETED;
     }
   }
   return 'Submitted';
@@ -141,44 +149,15 @@ onMounted(async () => {
   if (submissionValue?.assignedUserId) {
     assignee.value = (await userService.searchUsers({ userId: [submissionValue.assignedUserId] })).data[0];
   }
-
   loading.value = false;
 });
 </script>
 
 <template>
-  <div>
-    <Button
-      class="p-0"
-      text
-    >
-      <router-link :to="{ name: RouteName.HOUSING }">
-        <span class="app-primary-color">Housing</span>
-      </router-link>
-    </Button>
-    /
-    <Button
-      class="p-0"
-      text
-    >
-      <router-link :to="{ name: RouteName.HOUSING_PROJECTS_LIST }">
-        <span class="app-primary-color">Applications and Permits</span>
-      </router-link>
-    </Button>
-    /
-    <span
-      v-if="!loading"
-      class="font-bold"
-    >
-      {{ getSubmission?.projectName }}
-    </span>
-    <span
-      v-else
-      class="font-bold"
-    >
-      ...loading
-    </span>
-  </div>
+  <Breadcrumb
+    :home="breadcrumbHome"
+    :model="breadcrumbItems"
+  />
   <div
     v-if="!loading && getSubmission"
     class="app-primary-color"

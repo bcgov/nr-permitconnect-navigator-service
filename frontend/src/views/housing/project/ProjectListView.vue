@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import ProjectsList from '@/components/housing/projects/ProjectsList.vue';
 import { Button } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
@@ -10,10 +11,13 @@ import { submissionService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
+import type { MenuItem } from 'primevue/menuitem';
 
 const router = useRouter();
 
-// Enums
+// Constants
+const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
+const breadcrumbItems: Array<MenuItem> = [{ label: 'Applications and Permits', class: 'font-bold' }];
 const IntakeSearchParams: String[] = [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 const SubmissionSearchParams: String[] = [SubmissionType.GUIDANCE];
 
@@ -58,18 +62,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
-    <Button
-      class="p-0"
-      text
-    >
-      <router-link :to="{ name: RouteName.HOUSING }">
-        <span class="app-primary-color">Housing</span>
-      </router-link>
-    </Button>
-    /
-    <span class="font-bold">Applications and Permits</span>
-  </div>
+  <Breadcrumb
+    :home="breadcrumbHome"
+    :model="breadcrumbItems"
+  />
   <div class="app-primary-color">
     <h1 class="mt-7">Applications and Permits</h1>
     <div class="mt-7 mb-5 flex justify-content-between">
