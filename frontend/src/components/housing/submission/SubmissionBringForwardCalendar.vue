@@ -20,10 +20,12 @@ const NOTES_TAB_INDEX = {
 // Props
 type Props = {
   bringForward?: Array<BringForward>;
+  myAssignedTo: Set<string>;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  bringForward: () => []
+  bringForward: () => [],
+  myAssignedTo: () => new Set<string>()
 });
 
 // Store
@@ -53,6 +55,10 @@ function getQueryObject(bf: BringForward) {
     enquiryId: bf.enquiryId
   };
 }
+
+function filterForMyBringForwards(bf: BringForward): boolean {
+  return bf.createdByFullName === getProfile.value?.name || props.myAssignedTo.has(bf.submissionId ?? '');
+}
 </script>
 
 <template>
@@ -69,7 +75,8 @@ function getQueryObject(bf: BringForward) {
         class="text-left w-full"
         :value="
           bringForwards.filter((x) => {
-            return filterToUser ? x.createdByFullName === getProfile?.name : x;
+            // return x.createdByFullName === getProfile?.name;
+            return filterToUser ? filterForMyBringForwards(x) : x;
           })
         "
         data-key="noteId"
@@ -108,7 +115,7 @@ function getQueryObject(bf: BringForward) {
         </Column>
         <Column
           field="createdByFullName"
-          header="Navigator"
+          header="Author"
           :sortable="true"
         />
         <Column

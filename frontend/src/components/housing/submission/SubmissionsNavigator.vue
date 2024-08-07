@@ -35,6 +35,7 @@ const accordionIndex: Ref<number | null> = ref(null);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
+const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
@@ -108,11 +109,20 @@ onMounted(async () => {
 
   assignEnquiries();
 
-  myBringForward.value = bringForward.value.filter(
-    (x) =>
-      x.createdByFullName === getProfile.value?.name &&
+  const profile = getProfile.value;
+
+  submissions.value.forEach((sub) => {
+    if (sub.user?.username === profile?.preferred_username) {
+      myAssignedTo.value.add(sub.submissionId);
+    }
+  });
+
+  myBringForward.value = bringForward.value.filter((x) => {
+    return (
+      (x.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(x.submissionId ?? '')) &&
       (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
-  );
+    );
+  });
 
   loading.value = false;
 
@@ -224,7 +234,10 @@ watch(accordionIndex, () => {
       v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
       header="Bring Forward Calendar"
     >
-      <SubmissionBringForwardCalendar :bring-forward="bringForward" />
+      <SubmissionBringForwardCalendar
+        :bring-forward="bringForward"
+        :my-assigned-to="myAssignedTo"
+      />
     </TabPanel>
   </TabView>
 </template>
