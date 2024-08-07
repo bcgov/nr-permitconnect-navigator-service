@@ -7,7 +7,7 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function setInitiative
- * Injects the given initiative into the currentUser
+ * Injects the given initiative into the currentContext
  * @param {string} initiative An initiative code
  * @returns {function} Express middleware function
  * @throws The error encountered upon failure
@@ -15,11 +15,11 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 export const setInitiative = (initiative: Initiative) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.currentUser) {
-        req.currentUser.initiative = initiative;
+      if (req.currentContext) {
+        req.currentContext.initiative = initiative;
       } else {
         throw new Problem(403, {
-          detail: 'Unable to determine initiative',
+          detail: 'Unable to set route initiative',
           instance: req.originalUrl
         });
       }

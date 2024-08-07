@@ -1,93 +1,86 @@
 /* eslint-disable no-useless-catch */
 
 import prisma from '../db/dataConnection';
-import { AccessRole, Initiative } from '../utils/enums/application';
+import { Initiative, GroupName } from '../utils/enums/application';
 
 const service = {
-  assignRole: async (identityId: string, role: AccessRole, initiative?: Initiative) => {
+  assignGroup: async (identityId: string, initiative: Initiative, group: GroupName) => {
     try {
-      let roleResult;
-
-      if (initiative) {
-        const i = await prisma.initiative.findFirstOrThrow({
-          where: {
-            code: initiative
-          }
-        });
-
-        roleResult = await prisma.role.findFirstOrThrow({
-          where: {
-            initiative_id: i.initiative_id,
-            user_type: role
-          }
-        });
-      } else {
-        roleResult = await prisma.role.findFirstOrThrow({
-          where: {
-            initiative_id: null,
-            user_type: role
-          }
-        });
-      }
-
-      const result = await prisma.identity_role.create({
-        data: {
-          identity_id: identityId,
-          role_id: roleResult.role_id
+      const i = await prisma.initiative.findFirstOrThrow({
+        where: {
+          code: initiative
         }
       });
 
-      return { identityId: result.identity_id, roleId: result.role_id };
+      const groupResult = await prisma.group.findFirstOrThrow({
+        where: {
+          initiative_id: i.initiative_id,
+          name: group
+        }
+      });
+
+      const result = await prisma.identity_group.create({
+        data: {
+          identity_id: identityId,
+          group_id: groupResult.group_id
+        }
+      });
+
+      return { identityId: result.identity_id, roleId: result.group_id };
     } catch (e: unknown) {
       throw e;
     }
   },
 
   /**
-   * @function getEnquiry
-   * Gets roles for the specified identity
+   * @function getIdentityGroups
+   * Gets groups for the specified identity
    * @param {string} identityId Identity ID to search
    * @returns {Promise<roleId: number>} The result of running the findMany operation
    */
-  getIdentityRoles: async (identityId: string) => {
+  getIdentityGroups: async (identityId: string) => {
     try {
-      const result = await prisma.identity_role.findMany({
+      const result = await prisma.identity_group.findMany({
         where: {
           identity_id: identityId
         },
         include: {
-          role: true
+          group: true
         }
       });
 
-      return result.map((x) => ({ roleId: x.role_id, userType: x.role.user_type }));
+      return result.map((x) => ({
+        initiativeId: x.group.initiative_id,
+        groupId: x.group_id,
+        groupName: x.group.name
+      }));
     } catch (e: unknown) {
       throw e;
     }
   },
 
-  getRolePermissionDetails: async (
-    roleId: number,
-    initiativeName: Initiative,
+  getGroupPolicyDetails: async (
+    groupId: number,
+    initiativeCode: Initiative,
     resourceName: string,
     actionName: string
   ) => {
     try {
-      const result = await prisma.role_permission_vw.findMany({
+      const result = await prisma.group_role_policy_vw.findMany({
         where: {
-          role_id: roleId,
-          initiative_name: initiativeName.toLowerCase(),
+          group_id: groupId,
+          initiative_code: initiativeCode,
           resource_name: resourceName,
           action_name: actionName
         }
       });
 
       return result.map((x) => ({
-        initiativeName: x.initiative_name,
-        userType: x.user_type,
-        policyName: x.policy_name,
-        scopeName: x.scope_name,
-        scopePriority: x.scope_priority,
+        groupId: x.group_id,
+        initiativeCode: x.initiative_code,
+        groupName: x.group_name,
+        roleName: x.role_name,
+        policyId: x.policy_id,
         resourceName: x.resource_name,
         actionName: x.action_name
       }));
@@ -96,18 +89,43 @@ const service = {
     }
   },
 
-  getRolePermissions: async (roleId: number) => {
+  getGroupPermissions: async (groupId: number) => {
     try {
-      const result = await prisma.role_permission_vw.findMany({
+      const result = await prisma.group_role_policy_vw.findMany({
         where: {
-          role_id: roleId
+          group_id: groupId
         }
       });
 
       return result.map((x) => ({
-        initiativeName: x.initiative_name,
-        resourceName: x.resource_name,
-        actionName: x.action_name
+        initiative: x.initiative_code,
+        resource: x.resource_name,
+        action: x.action_name
+      }));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  getPolicyAttributes: async (policyId: number) => {
+    try {
+      const result = await prisma.policy_attribute.findMany({
+        where: {
+          policy_id: policyId
+        },
+        include: {
+          attribute: {
+            include: {
+              attribute_group: true
+            }
+          }
+        }
+      });
+
+      return result.map((x) => ({
+        attributeId: x.attribute.attribute_id,
+        attributeName: x.attribute.name,
+        groupId: x.attribute.attribute_group.map((x) => x.group_id)
       }));
     } catch (e: unknown) {
       throw e;

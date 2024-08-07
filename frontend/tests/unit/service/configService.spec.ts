@@ -44,7 +44,7 @@ describe('Config Store', () => {
   beforeEach(() => {
     storageType.clear();
     vi.mocked(axios.get).mockImplementation(() =>
-      Promise.resolve({
+      Promise.resolve<any>({
         data: testData
       })
     );
@@ -88,7 +88,7 @@ describe('Config Store', () => {
     it('getConfig fails to reaquire missing config', async () => {
       vi.mocked(axios.get)
         .mockImplementationOnce(() =>
-          Promise.resolve({
+          Promise.resolve<any>({
             data: testData
           })
         )

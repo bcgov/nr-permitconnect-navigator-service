@@ -21,7 +21,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('searchUsers', () => {
   const next = jest.fn();
@@ -32,7 +32,7 @@ describe('searchUsers', () => {
   it('should return 200 if all good', async () => {
     const req = {
       query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const users = [
@@ -65,7 +65,7 @@ describe('searchUsers', () => {
   it('adds dashes to user IDs', async () => {
     const req = {
       query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const users = [
@@ -96,7 +96,7 @@ describe('searchUsers', () => {
   it('calls next if the user service fails to list users', async () => {
     const req = {
       query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     searchUsersSpy.mockImplementationOnce(() => {

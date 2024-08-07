@@ -1,19 +1,22 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, onErrorCaptured, ref } from 'vue';
+import { onBeforeMount, onErrorCaptured, ref, watch } from 'vue';
 import { RouterView, useRouter } from 'vue-router';
 
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
-import { useAppStore, useAuthStore, useConfigStore } from '@/store';
+import { yarsService } from '@/services';
+import { useAppStore, useAuthStore, useConfigStore, usePermissionStore } from '@/store';
 import { RouteName, ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
 // Store
 const appStore = useAppStore();
+const authStore = useAuthStore();
 const router = useRouter();
 const { getIsLoading } = storeToRefs(appStore);
+const { getIsAuthenticated } = storeToRefs(authStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -32,6 +35,16 @@ onBeforeMount(async () => {
 onErrorCaptured((e: Error) => {
   const toast = useToast();
   toast.error('Error', e.message, { life: ToastTimeout.STICKY });
+});
+
+watch(getIsAuthenticated, async () => {
+  // Get front end permissions upon authentication
+  if (getIsAuthenticated.value) {
+    ready.value = false;
+    const permissions = await yarsService.getPermissions();
+    usePermissionStore().setPermissions(permissions.data);
+    ready.value = true;
+  }
 });
 </script>
 

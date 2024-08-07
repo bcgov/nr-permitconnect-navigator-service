@@ -9,7 +9,7 @@ import {
   permitService,
   userService
 } from '../services';
-import { BasicResponse, Initiative, Scope } from '../utils/enums/application';
+import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
   IntakeStatus,
@@ -21,15 +21,7 @@ import {
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentIdentity, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type {
-  ChefsFormConfig,
-  ChefsFormConfigData,
-  Submission,
-  ChefsSubmissionExport,
-  Permit,
-  Email,
-  ApiScope
-} from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -279,7 +271,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+        submittedBy: (req.currentContext?.tokenPayload as any)?.idir_username,
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -376,17 +368,15 @@ const controller = {
 
   getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
     try {
-      const apiScope = req.currentUser?.apiScope as ApiScope;
-
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();
 
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
 
-      if (apiScope.name === Scope.SELF) {
+      if (req.currentContext?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+        response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
       }
 
       res.status(200).json(response);
@@ -409,16 +399,14 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const apiScope = req.currentUser?.apiScope as ApiScope;
-
       let response = await submissionService.searchSubmissions({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
       });
 
-      if (apiScope.name === Scope.SELF) {
+      if (req.currentContext?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+        response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
       }
 
       res.status(200).json(response);
@@ -437,7 +425,7 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
       // Update submission
       const result = await submissionService.updateSubmission({
@@ -472,7 +460,7 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
       const response = await submissionService.updateSubmission({
         ...(req.body as Submission),

@@ -5,7 +5,7 @@ import { useConfigStore } from '@/store';
 import { StorageKey } from '@/utils/enums/application';
 
 import type { StoreGeneric } from 'pinia';
-import type { SpyInstance } from 'vitest';
+import type { MockInstance } from 'vitest';
 
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -31,8 +31,8 @@ describe('Config Store', () => {
   let configService: ConfigService;
   let configStore: StoreGeneric;
 
-  let configServiceInitSpy: SpyInstance;
-  let configServiceGetConfigSpy: SpyInstance;
+  let configServiceInitSpy: MockInstance;
+  let configServiceGetConfigSpy: MockInstance;
 
   beforeEach(() => {
     configService = new ConfigService();

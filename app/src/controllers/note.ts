@@ -9,7 +9,7 @@ import type { BringForward } from '../types';
 const controller = {
   async createNote(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       // TODO: define body type in request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = req.body as any;
@@ -78,7 +78,7 @@ const controller = {
 
   async updateNote(req: Request, res: Response, next: NextFunction) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       // TODO: define body type in request
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const body = req.body as any;

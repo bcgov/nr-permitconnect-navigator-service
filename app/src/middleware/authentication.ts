@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import { userService } from '../services';
 import { AuthType } from '../utils/enums/application';
 
-import type { CurrentUser } from '../types';
+import type { CurrentContext } from '../types';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
@@ -18,26 +18,27 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 export const _spkiWrapper = (spki: string) => `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
 
 /**
- * @function currentUser
- * Injects a currentUser object to the request if there exists valid authentication artifacts.
- * Subsequent logic should check `req.currentUser.authType` for authentication method if needed.
+ * @function currentContext
+ * Injects a currentContext object to the request if there exists valid authentication artifacts.
+ * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
  * @param {Request} req Express request object
  * @param {Response} res Express response object
  * @param {NextFunction} next The next callback function
  * @returns {function} Express middleware function
  * @throws The error encountered upon failure
  */
-export const currentUser = async (req: Request, res: Response, next: NextFunction) => {
+export const currentContext = async (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.get('Authorization');
-  const currentUser: CurrentUser = {
+  const currentContext: CurrentContext = {
     authType: AuthType.NONE,
+    attributes: [],
     tokenPayload: null
   };
 
   if (authorization) {
     // OIDC JWT Authorization
     if (authorization.toLowerCase().startsWith('bearer ')) {
-      currentUser.authType = AuthType.BEARER;
+      currentContext.authType = AuthType.BEARER;
 
       try {
         const bearerToken = authorization.substring(7);
@@ -54,8 +55,8 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
         }
 
         if (isValid) {
-          currentUser.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
-          await userService.login(currentUser.tokenPayload as jwt.JwtPayload);
+          currentContext.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
+          await userService.login(currentContext.tokenPayload as jwt.JwtPayload);
         } else {
           throw new Error('Invalid authorization token');
         }
@@ -66,8 +67,8 @@ export const currentUser = async (req: Request, res: Response, next: NextFunctio
     }
   }
 
-  // Inject currentUser data into request
-  req.currentUser = currentUser;
+  // Inject currentContext data into request
+  req.currentContext = currentContext;
 
   // Continue middleware
   next();

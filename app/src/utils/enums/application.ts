@@ -1,16 +1,8 @@
-export enum AccessRole {
-  DEVELOPER = 'developer',
-  PROPONENT = 'proponent',
-  NAVIGATOR = 'navigator',
-  SUPERVISOR = 'supervisor',
-  ADMIN = 'admin'
-}
-
 export enum Action {
-  CREATE = 'create',
-  READ = 'read',
-  UPDATE = 'update',
-  DELETE = 'delete'
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE'
 }
 
 /** Current user authentication type */
@@ -34,6 +26,7 @@ export enum IdentityProvider {
 }
 
 export enum Initiative {
+  PCNS = 'PCNS',
   HOUSING = 'HOUSING'
 }
 
@@ -47,17 +40,20 @@ export enum Regex {
 }
 
 export enum Resource {
-  DOCUMENT = 'document',
-  ENQUIRY = 'enquiry',
-  NOTE = 'note',
-  PERMIT = 'permit',
-  ROADMAP = 'roadmap',
-  SSO = 'sso',
-  SUBMISSION = 'submission',
-  USER = 'user'
+  DOCUMENT = 'DOCUMENT',
+  ENQUIRY = 'ENQUIRY',
+  NOTE = 'NOTE',
+  PERMIT = 'PERMIT',
+  ROADMAP = 'ROADMAP',
+  SSO = 'SSO',
+  SUBMISSION = 'SUBMISSION',
+  USER = 'USER'
 }
 
-export enum Scope {
-  ALL = 'all',
-  SELF = 'self'
+export enum GroupName {
+  DEVELOPER = 'DEVELOPER',
+  PROPONENT = 'PROPONENT',
+  NAVIGATOR = 'NAVIGATOR',
+  SUPERVISOR = 'SUPERVISOR',
+  ADMIN = 'ADMIN'
 }

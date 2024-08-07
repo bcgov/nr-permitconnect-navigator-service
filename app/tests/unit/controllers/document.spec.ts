@@ -24,7 +24,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('createDocument', () => {
   const next = jest.fn();
@@ -37,7 +37,7 @@ describe('createDocument', () => {
   it('should return 201 if all good', async () => {
     const req = {
       body: { documentId: 'abc123', activityId: '1', filename: 'testfile', mimeType: 'imgjpg', length: 1234567 },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const created = {
@@ -60,7 +60,7 @@ describe('createDocument', () => {
     await documentController.createDocument(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
@@ -79,7 +79,7 @@ describe('createDocument', () => {
   it('calls next if the document service fails to create', async () => {
     const req = {
       body: { documentId: 'abc123', activityId: '1', filename: 'testfile', mimeType: 'imgjpg', length: 1234567 },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -95,7 +95,7 @@ describe('createDocument', () => {
     await documentController.createDocument(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
@@ -121,7 +121,7 @@ describe('deleteDocument', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { documentId: 'abc123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const deleted = {
@@ -147,7 +147,7 @@ describe('deleteDocument', () => {
   it('calls next if the document service fails to delete', async () => {
     const req = {
       params: { documentId: 'abc123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     deleteSpy.mockImplementationOnce(() => {
@@ -173,7 +173,7 @@ describe('listDocuments', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const documentList = [
@@ -201,7 +201,7 @@ describe('listDocuments', () => {
   it('calls next if the document service fails to list documents', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     listSpy.mockImplementationOnce(() => {

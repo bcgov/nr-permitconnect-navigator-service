@@ -13,12 +13,12 @@ const controller = {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);
       if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
         await noteService.createNote({
           activityId: data.relatedActivityId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${(req.currentUser?.tokenPayload as any)?.idir_username}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
+          note: `Added by ${(req.currentContext?.tokenPayload as any)?.idir_username}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
           noteType: NoteType.ENQUIRY,
           title: 'Enquiry',
           bringForwardDate: null,
@@ -69,7 +69,7 @@ const controller = {
       activityId: activityId,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      submittedBy: (req.currentUser?.tokenPayload as any)?.idir_username,
+      submittedBy: (req.currentContext?.tokenPayload as any)?.idir_username,
       intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
@@ -113,7 +113,7 @@ const controller = {
 
       if (isTruthy(req.query.self)) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === (req.currentUser?.tokenPayload as any)?.idir_username);
+        response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
       }
 
       res.status(200).json(response);
@@ -136,7 +136,7 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
         updatedBy: userId

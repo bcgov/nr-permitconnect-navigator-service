@@ -24,7 +24,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('createNote', () => {
   const next = jest.fn();
@@ -45,7 +45,7 @@ describe('createNote', () => {
         noteType: 'GENERAL',
         title: 'Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -70,7 +70,7 @@ describe('createNote', () => {
     await noteController.createNote(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
@@ -90,7 +90,7 @@ describe('createNote', () => {
         noteType: 'GENERAL',
         title: 'Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_ID = 'abc-123';
@@ -122,7 +122,7 @@ describe('listBringForward', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       query: {}
     };
 
@@ -191,7 +191,7 @@ describe('listBringForward', () => {
 
   it('calls next if the note service fails to list bring forward notes', async () => {
     const req = {
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       query: {}
     };
 
@@ -220,7 +220,7 @@ describe('listNotes', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const noteList = [
@@ -250,7 +250,7 @@ describe('listNotes', () => {
   it('calls next if the note service fails to list notes', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     listSpy.mockImplementationOnce(() => {
@@ -276,7 +276,7 @@ describe('deleteNote', () => {
   it('should return 200 if deletion is successful', async () => {
     const req = {
       params: { noteId: '123-123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const deletedNote = {
@@ -304,7 +304,7 @@ describe('deleteNote', () => {
   it('calls next if the note service fails to delete the note', async () => {
     const req = {
       params: { noteId: '123-123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     deleteNoteSpy.mockImplementationOnce(() => {
@@ -339,7 +339,7 @@ describe('updateNote', () => {
         noteType: 'GENERAL',
         title: 'Updated Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -364,7 +364,7 @@ describe('updateNote', () => {
     await noteController.updateNote(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateNoteSpy).toHaveBeenCalledTimes(1);
@@ -384,7 +384,7 @@ describe('updateNote', () => {
         noteType: 'GENERAL',
         title: 'Updated Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_ID = 'abc-123';

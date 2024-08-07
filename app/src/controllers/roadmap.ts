@@ -53,7 +53,7 @@ const controller = {
 
       // Add a new note on success
       if (status === 201) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
         let noteBody = req.body.emailData.body;
         if (req.body.emailData.attachments) {

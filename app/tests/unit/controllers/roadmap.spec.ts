@@ -26,7 +26,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('send', () => {
   const next = jest.fn();
@@ -51,7 +51,7 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const noteCreate: Note = {
@@ -102,7 +102,7 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const emailResponse = {
@@ -140,7 +140,7 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
@@ -178,7 +178,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -245,7 +245,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -302,7 +302,7 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
@@ -340,7 +340,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -394,7 +394,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
