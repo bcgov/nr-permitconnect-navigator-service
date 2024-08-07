@@ -5,6 +5,7 @@ import { onBeforeMount, ref, toRaw } from 'vue';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
+import BackButton from '@/components/common/BackButton.vue';
 import { Dropdown, InputMask, InputText, RadioList, StepperNavigation, TextArea } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
@@ -79,22 +80,6 @@ const formSchema = object({
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
-
-function confirmLeave() {
-  if (editable.value) {
-    confirm.require({
-      message:
-        'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
-      header: 'Leave this page?',
-      acceptLabel: 'Leave',
-      acceptClass: 'p-button-danger',
-      rejectLabel: 'Cancel',
-      accept: () => router.push({ name: RouteName.HOUSING })
-    });
-  } else {
-    router.push({ name: RouteName.HOUSING });
-  }
-}
 
 async function confirmNext(data: any) {
   const validateResult = await formRef?.value?.validate();
@@ -293,17 +278,15 @@ async function checkActivityIdValidity(event: Event) {
 
 <template>
   <div v-if="!assignedActivityId">
-    <Button
-      class="mb-3 p-0"
-      text
-      @click="confirmLeave"
-    >
-      <font-awesome-icon
-        icon="fa fa-arrow-circle-left"
-        class="mr-1"
+    <div class="mb-3 p-0">
+      <BackButton
+        :confirm-leave="editable"
+        confirm-message="Are you sure you want to leave this page?
+      Any unsaved changes will be lost. Please save as draft first."
+        :route-name="RouteName.HOUSING"
+        text="Back to Housing"
       />
-      <span>Back to Housing</span>
-    </Button>
+    </div>
 
     <CollectionDisclaimer />
 

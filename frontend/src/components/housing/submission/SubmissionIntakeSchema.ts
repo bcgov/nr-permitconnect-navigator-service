@@ -148,7 +148,7 @@ export const submissionIntakeSchema = object({
       then: () => number().required().min(-139).max(-114).label('Longitude'),
       otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
     }),
-    ltsaPIDLookup: string().max(255).label('Parcel ID'),
+    ltsaPIDLookup: string().max(255).nullable().label('Parcel ID'),
     geomarkUrl: string().max(255).label('Geomark web service url')
   }),
   [IntakeFormCategory.PERMITS]: object({
@@ -169,7 +169,7 @@ export const submissionIntakeSchema = object({
           (val) => val instanceof Date || val === undefined
         )
         .label('Last verified date'),
-      trackingId: string().max(255).label('Tracking ID')
+      trackingId: string().max(255).nullable().label('Tracking ID')
     })
   )
 });
