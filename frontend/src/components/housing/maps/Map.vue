@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import { onMounted, onUpdated } from 'vue';
+import { onMounted, onUpdated, watch } from 'vue';
 
 import {
   BC_BOUNDARIES_LOWER,
@@ -15,11 +15,13 @@ import {
 } from '@/utils/constants/mapping';
 
 type Props = {
+  disabled?: boolean;
   latitude?: number;
   longitude?: number;
 };
 
 const props = withDefaults(defineProps<Props>(), {
+  disabled: false,
   latitude: undefined,
   longitude: undefined
 });
@@ -42,6 +44,26 @@ async function initMap() {
   map.on('drag', function () {
     map.panInsideBounds(bcBounds, { animate: false });
   });
+}
+
+function disableInteraction() {
+  map.dragging.disable();
+  map.touchZoom.disable();
+  map.doubleClickZoom.disable();
+  map.scrollWheelZoom.disable();
+  map.boxZoom.disable();
+  map.keyboard.disable();
+  if (map.tap) map.tap.disable();
+}
+
+function enableInteraction() {
+  map.dragging.enable();
+  map.touchZoom.enable();
+  map.doubleClickZoom.enable();
+  map.scrollWheelZoom.enable();
+  map.boxZoom.enable();
+  map.keyboard.enable();
+  if (map.tap) map.tap.enable();
 }
 
 // Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
@@ -71,6 +93,14 @@ onUpdated(async () => {
     setAddressMarker(addressLocation);
   }
 });
+
+watch(
+  () => props.disabled,
+  (val) => {
+    if (val) disableInteraction();
+    else enableInteraction();
+  }
+);
 </script>
 
 <template>

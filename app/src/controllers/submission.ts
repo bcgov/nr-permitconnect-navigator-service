@@ -427,7 +427,6 @@ const controller = {
       );
 
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-
       // Update submission
       const result = await submissionService.updateSubmission({
         ...(submission as Submission),
