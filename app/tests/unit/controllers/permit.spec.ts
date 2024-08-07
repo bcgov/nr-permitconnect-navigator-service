@@ -24,7 +24,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('createPermit', () => {
   const next = jest.fn();
@@ -49,7 +49,7 @@ describe('createPermit', () => {
         submittedDate: now,
         adjudicationDate: now
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -77,7 +77,7 @@ describe('createPermit', () => {
     await permitController.createPermit(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
@@ -102,7 +102,7 @@ describe('createPermit', () => {
         submittedDate: now,
         adjudicationDate: now
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_ID = 'abc-123';
@@ -132,7 +132,7 @@ describe('deletePermit', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { permitId: 'abc123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const now = new Date();
@@ -164,7 +164,7 @@ describe('deletePermit', () => {
   it('calls next if the permit service fails to delete', async () => {
     const req = {
       params: { permitId: 'abc123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     deleteSpy.mockImplementationOnce(() => {
@@ -189,7 +189,7 @@ describe('getPermitTypes', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const permitTypesList = [
@@ -223,7 +223,7 @@ describe('getPermitTypes', () => {
 
   it('calls next if the permit service fails to get permit types', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     permitTypesSpy.mockImplementationOnce(() => {
@@ -250,7 +250,7 @@ describe('listPermits', () => {
     const now = new Date();
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const permitList = [
@@ -283,7 +283,7 @@ describe('listPermits', () => {
   it('calls next if the permit service fails to list permits', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     listSpy.mockImplementationOnce(() => {
@@ -323,7 +323,7 @@ describe('updatePermit', () => {
         submittedDate: now,
         adjudicationDate: now
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_IDENTITY = 'xxxy';
@@ -351,7 +351,7 @@ describe('updatePermit', () => {
     await permitController.updatePermit(req as any, res as any, next);
 
     expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
+    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
     expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
     expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateSpy).toHaveBeenCalledTimes(1);
@@ -375,7 +375,7 @@ describe('updatePermit', () => {
         submittedDate: now,
         adjudicationDate: now
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const USR_ID = 'abc-123';

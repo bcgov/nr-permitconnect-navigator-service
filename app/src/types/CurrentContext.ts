@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-import { ApiScope } from './ApiScope';
 import { AuthType, Initiative } from '../utils/enums/application';
 
-export type CurrentUser = {
+export type CurrentContext = {
   authType: AuthType;
-  apiScope?: ApiScope;
   initiative?: Initiative;
+  attributes: Array<string>;
   tokenPayload: string | jwt.JwtPayload | null;
 };

@@ -1,25 +1,18 @@
 // @ts-expect-error api-problem lacks a defined interface; code still works fine
 import Problem from 'api-problem';
-
-import { userService, yarsService } from '../services';
-
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import { AccessRole, Initiative, Scope } from '../utils/enums/application';
-import { getCurrentIdentity } from '../utils/utils';
 import { NIL } from 'uuid';
 
-// Converts a primitive string to a Scope enum type
-function convertStringToScope(value: string): Scope | undefined {
-  return (Object.values(Scope) as Array<string>).includes(value) ? (value as Scope) : undefined;
-}
+import { submissionService, userService, yarsService } from '../services';
+import { Initiative, GroupName } from '../utils/enums/application';
+import { getCurrentIdentity } from '../utils/utils';
+
+import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function hasPermission
- * Obtains the roles for the current users identity
- * Obtains the full permission mappings for the given resource/action pair for any of the users roles
+ * Obtains the groups for the current users identity
+ * Obtains the full permission mappings for the given resource/action pair for any of the users groups
  * 403 if none are found
- * Checks for highest priority scope and injects into the currentUser
- * Defaults scope to self if none were found
  * @param {string} resource a resource name
  * @param {string} action an action name
  * @returns {function} Express middleware function
@@ -28,59 +21,94 @@ function convertStringToScope(value: string): Scope | undefined {
 export const hasPermission = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.currentUser) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const identityId = (req.currentUser?.tokenPayload as any).preferred_username;
-
-        let roles = await yarsService.getIdentityRoles(identityId);
-
-        // Auto assign PROPONENT if user has no roles
-        if (roles && roles.length === 0) {
-          await yarsService.assignRole(identityId, AccessRole.PROPONENT);
-          roles = await yarsService.getIdentityRoles(identityId);
-        }
-
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      if (req.currentContext) {
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
         if (!userId) {
           throw new Error('Invalid user');
         }
 
-        // Permission/Scope checking for non developers
-        if (!roles.find((x) => x.userType === AccessRole.DEVELOPER)) {
-          const permissions = await Promise.all(
-            roles.map((x) =>
-              yarsService.getRolePermissionDetails(
-                x.roleId,
-                req.currentUser?.initiative as Initiative,
-                resource,
-                action
-              )
-            )
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const identityId = (req.currentContext?.tokenPayload as any).preferred_username;
+
+        let groups = await yarsService.getIdentityGroups(identityId);
+
+        // Auto assign all PROPONENT groups if user has none
+        if (groups && groups.length === 0) {
+          await yarsService.assignGroup(identityId, Initiative.HOUSING, GroupName.PROPONENT);
+          groups = await yarsService.getIdentityGroups(identityId);
+        }
+
+        if (groups.length === 0) {
+          throw new Error('Invalid group(s)');
+        }
+
+        // Permission checking for non developers
+        if (!groups.find((x) => x.groupName === GroupName.DEVELOPER)) {
+          const policyDetails = await Promise.all(
+            groups.map((x) => {
+              const initiative = req.currentContext?.initiative as Initiative;
+
+              return yarsService.getGroupPolicyDetails(x.groupId, initiative, resource, action);
+            })
           ).then((x) => x.flat());
 
-          if (!permissions || permissions.length === 0) {
-            throw new Error('Invalid role authorization');
+          if (!policyDetails || policyDetails.length === 0) {
+            throw new Error('Invalid policies(s)');
           }
 
-          const scopes = permissions
-            .filter((x) => !!x.scopeName)
-            .map((x) => ({ scopeName: x.scopeName as string, scopePriority: x.scopePriority as number }))
-            .sort((a, b) => (a.scopePriority > b.scopePriority ? 1 : -1));
+          // Inject policy attributes at global level and matching users groups
+          const policyAttributes = await Promise.all(
+            policyDetails.map((x) => {
+              return yarsService.getPolicyAttributes(x.policyId as number);
+            })
+          ).then((x) => x.flat());
 
-          req.currentUser.apiScope = {
-            name: scopes.length ? convertStringToScope(scopes[0].scopeName) ?? Scope.SELF : Scope.SELF,
-            userId: userId
-          };
+          const matchingAttributes: Array<string> = [];
+          for (const attribute of policyAttributes) {
+            if (attribute.groupId.length === 0) {
+              matchingAttributes.push(attribute.attributeName);
+            } else {
+              const filter = attribute.groupId.filter((x) => groups.some((y) => y.groupId === x));
+              if (filter.length > 0) matchingAttributes.push(attribute.attributeName);
+            }
+          }
+
+          req.currentContext.attributes.push(...matchingAttributes);
         } else {
-          // Allow all for developers
-          req.currentUser.apiScope = {
-            name: Scope.ALL,
-            userId: userId
-          };
+          // Developers automatically go through with all scope
+          req.currentContext.attributes.push('scope:all');
         }
       } else {
         throw new Error('No current user');
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    }
+
+    // Continue middleware
+    next();
+  };
+};
+
+// WIP
+// Takes the key to be read from params
+// Gets object in question (somehow from right table... idk yet)
+// Compares createdBy with current userId
+export const hasAccess = (param: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.currentContext?.attributes.includes('scope:self')) {
+        const id = req.params[param];
+
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+
+        const data = await submissionService.getSubmission(id);
+
+        if (data?.createdBy !== userId) {
+          throw new Error('No access');
+        }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {

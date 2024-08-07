@@ -6,7 +6,7 @@ import { getLogger } from '../components/log';
 import { AuthType } from './enums/application';
 
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser, IdpAttributes } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -100,13 +100,16 @@ export function getGitRevision(): string {
  * @function getCurrentIdentity
  * Attempts to acquire current identity value.
  * Always takes first non-default value available. Yields `defaultValue` otherwise.
- * @param {object} currentUser The express request currentUser object
+ * @param {object} currentContext The express request currentContext object
  * @param {string} [defaultValue=undefined] An optional default return value
  * @returns {string} The current user identifier if applicable, or `defaultValue`
  */
-export function getCurrentIdentity(currentUser: CurrentUser | undefined, defaultValue: string | undefined = undefined) {
+export function getCurrentIdentity(
+  currentContext: CurrentContext | undefined,
+  defaultValue: string | undefined = undefined
+) {
   return parseIdentityKeyClaims()
-    .map((claim) => getCurrentTokenClaim(currentUser, claim, undefined))
+    .map((claim) => getCurrentTokenClaim(currentContext, claim, undefined))
     .filter((value) => value) // Drop falsy values from array
     .concat(defaultValue)[0]; // Add defaultValue as last element of array
 }
@@ -114,18 +117,18 @@ export function getCurrentIdentity(currentUser: CurrentUser | undefined, default
 /**
  * @function getCurrentTokenClaim
  * Attempts to acquire a specific current token claim. Yields `defaultValue` otherwise
- * @param {object} currentUser The express request currentUser object
+ * @param {object} currentContext The express request currentContext object
  * @param {string} claim The requested token claim
  * @param {string} [defaultValue=undefined] An optional default return value
  * @returns {object} The requested current token claim if applicable, or `defaultValue`
  */
 export function getCurrentTokenClaim(
-  currentUser: CurrentUser | undefined,
+  currentContext: CurrentContext | undefined,
   claim: string,
   defaultValue: string | undefined = undefined
 ) {
-  return currentUser && currentUser.authType === AuthType.BEARER
-    ? (currentUser.tokenPayload as JwtPayload)[claim]
+  return currentContext && currentContext.authType === AuthType.BEARER
+    ? (currentContext.tokenPayload as JwtPayload)[claim]
     : defaultValue;
 }
 

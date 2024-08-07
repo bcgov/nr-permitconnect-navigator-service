@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { currentUser } from '../../middleware/authentication';
+import { currentContext } from '../../middleware/authentication';
 import { setInitiative } from '../../middleware/initiative';
 
 import activity from './activity';
@@ -17,7 +17,7 @@ import yars from './yars';
 import { Initiative } from '../../utils/enums/application';
 
 const router = express.Router();
-router.use(currentUser);
+router.use(currentContext);
 router.use(setInitiative(Initiative.HOUSING));
 
 // Base v1 Responder

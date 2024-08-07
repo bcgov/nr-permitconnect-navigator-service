@@ -134,6 +134,7 @@ export default {
       contactLastName: input.contact_last_name,
       submissionType: input.submission_type,
       relatedEnquiries: null,
+      createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };

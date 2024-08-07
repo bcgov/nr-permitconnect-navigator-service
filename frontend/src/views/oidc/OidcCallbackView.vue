@@ -3,8 +3,7 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { yarsService } from '@/services';
-import { useAuthStore, usePermissionStore } from '@/store';
+import { useAuthStore } from '@/store';
 import { StorageKey } from '@/utils/enums/application';
 
 const authStore = useAuthStore();
@@ -12,11 +11,6 @@ const router = useRouter();
 
 onMounted(async () => {
   await authStore.loginCallback();
-
-  // Get front end permissions
-  const permissions = await yarsService.getPermissions();
-  console.log(permissions);
-  usePermissionStore().setPermissions(permissions.data);
 
   // Return user back to original login entrypoint if specified
   const entrypoint = window.sessionStorage.getItem(StorageKey.AUTH);
