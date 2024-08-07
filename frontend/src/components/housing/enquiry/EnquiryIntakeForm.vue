@@ -278,7 +278,7 @@ async function checkActivityIdValidity(event: Event) {
   <div v-if="!assignedActivityId">
     <div class="mb-3 p-0">
       <BackButton
-        :confirm-leave="editable"
+        :confirm-leave="editable && !!formUpdated"
         confirm-message="Are you sure you want to leave this page?
       Any unsaved changes will be lost. Please save as draft first."
         :route-name="RouteName.HOUSING"
@@ -378,6 +378,12 @@ async function checkActivityIdValidity(event: Event) {
               :bold="false"
               :disabled="!editable"
               :options="YES_NO_LIST"
+              @on-click="
+                (e: string) => {
+                  if (e === BasicResponse.YES) formRef?.setFieldValue('basic.relatedActivityId', null);
+                  else if (e === BasicResponse.NO) formRef?.setFieldValue('basic.applyForPermitConnect', null);
+                }
+              "
             />
           </div>
         </template>

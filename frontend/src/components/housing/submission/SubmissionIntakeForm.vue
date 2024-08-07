@@ -140,6 +140,9 @@ function handleProjectLocationClick() {
   if (location?.latitude || location?.longitude) {
     formRef?.value?.setFieldValue('location.latitude', null);
     formRef?.value?.setFieldValue('location.longitude', null);
+    formRef.value?.setFieldValue('location.streetAddress', null);
+    formRef.value?.setFieldValue('location.locality', null);
+    formRef.value?.setFieldValue('location.province', null);
   }
 }
 
@@ -209,9 +212,12 @@ async function onSaveDraft(data: any, isAutoSave = false) {
   // Cleanup unneeded data to be saved to draft
   delete tempData['addressSearch'];
 
-  // Remove empty applied permits
-  if (tempData.appliedPermits && tempData.appliedPermits.length) {
+  // Remove empty permits
+  if (Array.isArray(tempData.appliedPermits)) {
     tempData.appliedPermits = tempData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
+  if (Array.isArray(tempData.investigatePermits)) {
+    tempData.investigatePermits = tempData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
 
   try {
@@ -367,11 +373,11 @@ async function loadSubmission(submissionId: string, activityId: string) {
       },
       investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
     });
+    // Move map pin
+    onLatLongInputClick();
   } catch {
     router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
-
-  typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
 }
 
 // Only triggers if the current URL updates
@@ -391,6 +397,8 @@ onBeforeRouteUpdate(async (to) => {
 });
 
 onBeforeMount(async () => {
+  typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
+
   if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
 });
 </script>
@@ -398,13 +406,13 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
-      :confirm-leave="editable"
+      :confirm-leave="editable && !!formUpdated"
       confirm-message="Are you sure you want to leave this page?
       Any unsaved changes will be lost. Please save as draft first."
       :route-name="RouteName.HOUSING"
       text="Back to Housing"
     />
-
+    <div @click="editable = !editable">{{ formUpdated }}</div>
     <Form
       v-if="!isFormReset"
       id="form"
@@ -543,6 +551,11 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_LIST"
+                    @on-change="
+                      (e: string) => {
+                        if (e === BasicResponse.NO) setFieldValue('basic.isDevelopedInBC', null);
+                      }
+                    "
                   />
 
                   <span
@@ -564,11 +577,7 @@ onBeforeMount(async () => {
                       :bold="false"
                       :disabled="!editable"
                       :options="YES_NO_LIST"
-                      @on-change="
-                        () => {
-                          if (values.basic.registeredName) setFieldValue('basic.registeredName', null);
-                        }
-                      "
+                      @on-change="() => setFieldValue('basic.registeredName', null)"
                     />
                     <AutoComplete
                       v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
@@ -1032,7 +1041,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="PROJECT_LOCATION_LIST"
-                    @on-change="handleProjectLocationClick"
+                    @on-click="handleProjectLocationClick"
                   />
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
@@ -1105,6 +1114,7 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
+                            @keyup.enter="onLatLongInputClick"
                           />
                           <InputNumber
                             class="col-4"
@@ -1112,10 +1122,12 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
+                            @keyup.enter="onLatLongInputClick"
                           />
                           <Button
                             class="lat-long-btn"
                             label="Show on map"
+                            :disabled="!editable"
                             @click="onLatLongInputClick"
                           />
                         </div>
@@ -1131,6 +1143,7 @@ onBeforeMount(async () => {
                 </div>
                 <Map
                   ref="mapRef"
+                  :disabled="!editable"
                   :latitude="mapLatitude"
                   :longitude="mapLongitude"
                 />
@@ -1361,6 +1374,7 @@ onBeforeMount(async () => {
                               />
                               <Dropdown
                                 class="col-4"
+                                :disabled="!editable"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
                                 :options="getPermitTypes"
@@ -1397,8 +1411,8 @@ onBeforeMount(async () => {
                             </div>
                             <div class="col-12">
                               <Button
+                                v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
-                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined,
@@ -1500,6 +1514,7 @@ onBeforeMount(async () => {
                                 <div class="flex justify-content-center">
                                   <Dropdown
                                     class="w-full"
+                                    :disabled="!editable"
                                     :name="`investigatePermits[${idx}].permitTypeId`"
                                     placeholder="Select Permit type"
                                     :options="getPermitTypes"
@@ -1509,6 +1524,7 @@ onBeforeMount(async () => {
                                   />
                                   <div class="flex align-items-center ml-2 mb-4">
                                     <Button
+                                      v-if="editable"
                                       class="p-button-lg p-button-text p-button-danger p-0"
                                       aria-label="Delete"
                                       @click="remove(idx)"
@@ -1523,8 +1539,8 @@ onBeforeMount(async () => {
                             </div>
                             <div class="col-12">
                               <Button
+                                v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
-                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined

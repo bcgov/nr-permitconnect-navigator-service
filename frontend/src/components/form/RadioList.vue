@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Emits
-const emit = defineEmits(['onChange']);
+const emit = defineEmits(['onChange', 'onClick']);
 
 // State
 const { errorMessage, value } = useField<string>(toRef(props, 'name'));
@@ -51,6 +51,7 @@ watch(value, () => {
             :value="option"
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
+            @click="emit('onClick', value)"
           />
           <span
             :for="option"

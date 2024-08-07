@@ -25,11 +25,13 @@ export const submissionIntakeSchema = object({
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
     isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
       is: (value: string) => value === BasicResponse.YES,
-      then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC')
+      then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
     }),
     registeredName: string().when('isDevelopedInBC', {
-      is: (value: string) => value,
-      then: (schema) => schema.required().max(255).label('Business name')
+      is: (value: string) => value === BasicResponse.YES || value === BasicResponse.NO,
+      then: (schema) => schema.required().max(255).label('Business name'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Business name')
     })
   }),
   [IntakeFormCategory.HOUSING]: object().shape(
