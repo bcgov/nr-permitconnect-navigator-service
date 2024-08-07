@@ -9,7 +9,7 @@ import type { Permit } from '../types';
 const controller = {
   createPermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
       res.status(201).json(response);
     } catch (e: unknown) {
@@ -46,7 +46,7 @@ const controller = {
 
   updatePermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const response = await permitService.updatePermit({ ...(req.body as Permit), updatedBy: userId });
       res.status(200).json(response);
     } catch (e: unknown) {

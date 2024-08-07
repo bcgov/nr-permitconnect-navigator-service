@@ -80,6 +80,7 @@ model initiative {
   updated_by    String?
   updated_at    DateTime?  @db.Timestamptz(6)
   activity      activity[]
+  group         group[]
 
   @@schema("public")
 }
@@ -271,102 +272,148 @@ model enquiry {
 }
 
 model action {
-  action_id  Int          @id @default(autoincrement())
-  name       String       @unique(map: "action_name_unique")
-  created_by String?      @default("00000000-0000-0000-0000-000000000000")
-  created_at DateTime?    @default(now()) @db.Timestamptz(6)
+  action_id  Int       @id @default(autoincrement())
+  name       String    @unique(map: "action_name_unique")
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
   updated_by String?
-  updated_at DateTime?    @db.Timestamptz(6)
-  permission permission[]
+  updated_at DateTime? @db.Timestamptz(6)
+  policy     policy[]
 
   @@schema("yars")
 }
 
-model identity_role {
-  identity_role_id Int       @id @default(autoincrement())
-  identity_id      String
-  role_id          Int
-  created_by       String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by       String?
-  updated_at       DateTime? @db.Timestamptz(6)
-  role             role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "identity_role_role_id_foreign")
+model group {
+  group_id        Int               @id @default(autoincrement())
+  initiative_id   String            @db.Uuid
+  name            String
+  created_by      String?           @default("00000000-0000-0000-0000-000000000000")
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_by      String?
+  updated_at      DateTime?         @db.Timestamptz(6)
+  attribute_group attribute_group[]
+  initiative      initiative        @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "group_initiative_id_foreign")
+  group_role      group_role[]
+  identity_group  identity_group[]
 
-  @@unique([identity_id, role_id], map: "identity_role_identity_id_role_id_unique")
+  @@unique([initiative_id, name], map: "group_initiative_id_name_unique")
   @@schema("yars")
 }
 
-model permission {
-  permission_id     Int                 @id @default(autoincrement())
-  resource_id       Int
-  action_id         Int
-  created_by        String?             @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
+model group_role {
+  group_role_id Int       @id @default(autoincrement())
+  group_id      Int
+  role_id       Int
+  created_by    String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by    String?
+  updated_at    DateTime? @db.Timestamptz(6)
+  group         group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "group_role_group_id_foreign")
+  role          role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "group_role_role_id_foreign")
+
+  @@unique([group_id, role_id], map: "group_role_group_id_role_id_unique")
+  @@schema("yars")
+}
+
+model identity_group {
+  identity_group_id Int       @id @default(autoincrement())
+  identity_id       String
+  group_id          Int
+  created_by        String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at        DateTime? @default(now()) @db.Timestamptz(6)
   updated_by        String?
-  updated_at        DateTime?           @db.Timestamptz(6)
-  action            action              @relation(fields: [action_id], references: [action_id], onDelete: Cascade, map: "permission_action_id_foreign")
-  resource          resource            @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, map: "permission_resource_id_foreign")
-  policy_permission policy_permission[]
+  updated_at        DateTime? @db.Timestamptz(6)
+  group             group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "identity_group_group_id_foreign")
 
-  @@unique([resource_id, action_id], map: "permission_resource_id_action_id_unique")
-  @@schema("yars")
-}
-
-model policy {
-  policy_id         Int                 @id @default(autoincrement())
-  scope_id          Int?
-  name              String              @unique(map: "policy_name_unique")
-  description       String
-  created_by        String?             @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?           @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime?           @db.Timestamptz(6)
-  scope             scope?              @relation(fields: [scope_id], references: [scope_id], onDelete: Cascade, map: "policy_scope_id_foreign")
-  policy_permission policy_permission[]
-  role_policy       role_policy[]
-
-  @@schema("yars")
-}
-
-model policy_permission {
-  policy_permission_id Int        @id @default(autoincrement())
-  policy_id            Int
-  permission_id        Int
-  created_by           String?    @default("00000000-0000-0000-0000-000000000000")
-  created_at           DateTime?  @default(now()) @db.Timestamptz(6)
-  updated_by           String?
-  updated_at           DateTime?  @db.Timestamptz(6)
-  permission           permission @relation(fields: [permission_id], references: [permission_id], onDelete: Cascade, map: "policy_permission_permission_id_foreign")
-  policy               policy     @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "policy_permission_policy_id_foreign")
-
-  @@unique([policy_id, permission_id], map: "policy_permission_policy_id_permission_id_unique")
+  @@unique([identity_id, group_id], map: "identity_group_identity_id_group_id_unique")
   @@schema("yars")
 }
 
 model resource {
-  resource_id Int          @id @default(autoincrement())
-  name        String       @unique(map: "resource_name_unique")
-  created_by  String?      @default("00000000-0000-0000-0000-000000000000")
-  created_at  DateTime?    @default(now()) @db.Timestamptz(6)
+  resource_id Int       @id @default(autoincrement())
+  name        String    @unique(map: "resource_name_unique")
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_by  String?
-  updated_at  DateTime?    @db.Timestamptz(6)
-  permission  permission[]
+  updated_at  DateTime? @db.Timestamptz(6)
+  policy      policy[]
 
   @@schema("yars")
 }
 
 model role {
-  role_id       Int             @id @default(autoincrement())
-  initiative_id String?         @db.Uuid
-  user_type     String
-  created_by    String?         @default("00000000-0000-0000-0000-000000000000")
-  created_at    DateTime?       @default(now()) @db.Timestamptz(6)
-  updated_by    String?
-  updated_at    DateTime?       @db.Timestamptz(6)
-  identity_role identity_role[]
-  role_policy   role_policy[]
+  role_id         Int           @id @default(autoincrement())
+  name            String        @unique(map: "role_name_unique")
+  description     String?
+  record_security Boolean       @default(false)
+  created_by      String?       @default("00000000-0000-0000-0000-000000000000")
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_by      String?
+  updated_at      DateTime?     @db.Timestamptz(6)
+  group_role      group_role[]
+  role_policy     role_policy[]
 
-  @@unique([initiative_id, user_type], map: "role_initiative_id_user_type_unique")
+  @@schema("yars")
+}
+
+model attribute {
+  attribute_id     Int                @id @default(autoincrement())
+  name             String             @unique(map: "attribute_name_unique")
+  description      String?
+  created_by       String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by       String?
+  updated_at       DateTime?          @db.Timestamptz(6)
+  attribute_group  attribute_group[]
+  policy_attribute policy_attribute[]
+
+  @@schema("yars")
+}
+
+model attribute_group {
+  attribute_group Int       @id @default(autoincrement())
+  attribute_id    Int
+  group_id        Int
+  created_by      String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by      String?
+  updated_at      DateTime? @db.Timestamptz(6)
+  attribute       attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "attribute_group_attribute_id_foreign")
+  group           group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "attribute_group_group_id_foreign")
+
+  @@unique([attribute_id, group_id], map: "attribute_group_attribute_id_group_id_unique")
+  @@schema("yars")
+}
+
+model policy {
+  policy_id        Int                @id @default(autoincrement())
+  resource_id      Int
+  action_id        Int
+  created_by       String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by       String?
+  updated_at       DateTime?          @db.Timestamptz(6)
+  action           action             @relation(fields: [action_id], references: [action_id], onDelete: Cascade, map: "policy_action_id_foreign")
+  resource         resource           @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, map: "policy_resource_id_foreign")
+  policy_attribute policy_attribute[]
+  role_policy      role_policy[]
+
+  @@unique([resource_id, action_id], map: "policy_resource_id_action_id_unique")
+  @@schema("yars")
+}
+
+model policy_attribute {
+  policy_attribute Int       @id @default(autoincrement())
+  policy_id        Int
+  attribute_id     Int
+  created_by       String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at       DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by       String?
+  updated_at       DateTime? @db.Timestamptz(6)
+  attribute        attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "policy_attribute_attribute_id_foreign")
+  policy           policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "policy_attribute_policy_id_foreign")
+
+  @@unique([policy_id, attribute_id], map: "policy_attribute_policy_id_attribute_id_unique")
   @@schema("yars")
 }
 
@@ -385,28 +432,13 @@ model role_policy {
   @@schema("yars")
 }
 
-model scope {
-  scope_id    Int       @id @default(autoincrement())
-  priority    Int
-  name        String    @unique(map: "scope_name_unique")
-  description String
-  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by  String?
-  updated_at  DateTime? @db.Timestamptz(6)
-  policy      policy[]
-
-  @@schema("yars")
-}
-
-view role_permission_vw {
-  pid             String  @unique
-  role_id         Int?
-  initiative_name String?
-  user_type       String?
-  policy_name     String?
-  scope_name      String?
-  scope_priority  Int?
+view group_role_policy_vw {
+  row_number      BigInt  @unique
+  group_id        Int?
+  initiative_code String?
+  group_name      String?
+  role_name       String?
+  policy_id       Int?
   resource_name   String?
   action_name     String?
 

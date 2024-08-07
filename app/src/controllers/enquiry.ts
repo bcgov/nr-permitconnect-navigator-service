@@ -9,6 +9,28 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
 
 const controller = {
+  createRelatedNote: async (req: Request, data: Enquiry) => {
+    if (data.relatedActivityId) {
+      const activity = await activityService.getActivity(data.relatedActivityId);
+      if (activity) {
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+
+        await noteService.createNote({
+          activityId: data.relatedActivityId,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
+          note: `Added by ${getCurrentTokenUsername(req.currentUser)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
+          noteType: NoteType.ENQUIRY,
+          title: 'Enquiry',
+          bringForwardDate: null,
+          bringForwardState: null,
+          createdAt: new Date().toISOString(),
+          createdBy: userId,
+          isDeleted: false
+        });
+      }
+    }
+  },
+
   generateEnquiryData: async (req: Request) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
@@ -122,7 +144,7 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
         updatedAt: new Date().toISOString(),

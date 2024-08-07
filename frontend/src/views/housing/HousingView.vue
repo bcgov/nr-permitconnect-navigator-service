@@ -2,10 +2,7 @@
 import { ref } from 'vue';
 
 import { Button } from '@/lib/primevue';
-import { Permissions, default as PermissionService } from '@/services/permissionService';
 import { RouteName } from '@/utils/enums/application';
-
-const permissionService = new PermissionService();
 
 const items = ref([
   {
@@ -28,8 +25,7 @@ const items = ref([
   {
     top: 'Check the status of your applications and/or permits',
     icon: 'fa-bars-progress',
-    route: RouteName.HOUSING_PROJECTS_LIST,
-    access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
+    route: RouteName.COMING_SOON
   }
 ]);
 </script>
@@ -53,7 +49,6 @@ const items = ref([
         class="flex justify-content-center mb-5"
       >
         <router-link
-          v-if="item.access ? permissionService.can(item.access) : true"
           v-slot="{ href, navigate }"
           :to="{ name: item.route }"
           custom

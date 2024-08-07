@@ -4,17 +4,17 @@ import { computed } from 'vue';
 import BackButton from '@/components/common/BackButton.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
 import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
+import { usePermissionStore } from '@/store';
+import { NavigationPermission } from '@/store/permissionStore';
 
-import { PermissionService } from '@/services';
-import { Permissions } from '@/services/permissionService';
 import { RouteName } from '@/utils/enums/application';
 
 // Store
-const permissionService = new PermissionService();
+const permissionStore = usePermissionStore();
 
 // Actions
 const getTitle = computed(() =>
-  permissionService.can(Permissions.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and previous entries'
+  permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS) ? 'Submissions' : 'My drafts and submissions'
 );
 </script>
 
@@ -28,8 +28,8 @@ const getTitle = computed(() =>
   <h1>{{ getTitle }}</h1>
 
   <!-- Navigator view -->
-  <SubmissionsNavigator v-if="permissionService.can(Permissions.HOUSING_SUBMISSION_READ)" />
+  <SubmissionsNavigator v-if="permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)" />
 
   <!-- Proponent view -->
-  <SubmissionsProponent v-else-if="permissionService.can(Permissions.HOUSING_SUBMISSION_READ_SELF)" />
+  <SubmissionsProponent v-else-if="permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
 </template>

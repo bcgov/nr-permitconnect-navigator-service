@@ -1,9 +1,8 @@
 export type { Activity } from './Activity';
-export type { ApiScope } from './ApiScope';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
-export type { CurrentUser } from './CurrentUser';
+export type { CurrentContext } from './CurrentContext';
 export type { Document } from './Document';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';

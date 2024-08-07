@@ -4,6 +4,7 @@ export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
 export type { IdentityProvider } from './IdentityProvider';
 export type { Note } from './Note';
+export type { Permission } from './Permission';
 export type { Permit } from './Permit';
 export type { PermitForm } from './PermitForm';
 export type { PermitType } from './PermitType';
