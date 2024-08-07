@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref, toRaw } from 'vue';
+import { nextTick, onBeforeMount, ref, toRaw } from 'vue';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
@@ -46,6 +46,7 @@ const { getConfig } = storeToRefs(useConfigStore());
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const isFormReset: Ref<boolean> = ref(false);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -220,18 +221,15 @@ async function loadEnquiry(enquiryId: string) {
   });
 }
 
-onBeforeRouteUpdate((to) => {
+onBeforeRouteUpdate(async (to) => {
   if (!formRef.value) return;
 
   if ('enquiryId' in to.query) {
     loadEnquiry(to.query.enquiryId as string);
   } else {
-    formRef.value.setValues({
-      activityId: undefined,
-      enquiryId: undefined,
-      applicant: undefined,
-      basic: undefined
-    });
+    isFormReset.value = true;
+    await nextTick();
+    isFormReset.value = false;
     editable.value = true;
   }
 });
@@ -291,6 +289,7 @@ async function checkActivityIdValidity(event: Event) {
     <CollectionDisclaimer />
 
     <Form
+      v-if="!isFormReset"
       v-slot="{ values }"
       ref="formRef"
       keep-values

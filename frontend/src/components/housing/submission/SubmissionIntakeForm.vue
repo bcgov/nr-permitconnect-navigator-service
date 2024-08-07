@@ -95,6 +95,7 @@ const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
+const isFormReset: Ref<boolean> = ref(false);
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
@@ -204,7 +205,14 @@ async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
   const tempData = Object.assign({}, data);
+
+  // Cleanup unneeded data to be saved to draft
   delete tempData['addressSearch'];
+
+  // Remove empty applied permits
+  if (tempData.appliedPermits && tempData.appliedPermits.length) {
+    tempData.appliedPermits = tempData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
 
   try {
     let response;
@@ -363,26 +371,22 @@ async function loadSubmission(submissionId: string, activityId: string) {
     router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
 
-  // Default form values
-
   typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
 }
 
-onBeforeRouteUpdate((to) => {
+// Only triggers if the current URL updates
+// Does not trigger going to another route
+onBeforeRouteUpdate(async (to) => {
   if (!formRef.value) return;
 
+  // Detects if query params exist
   if ('submissionId' in to.query && 'activityId' in to.query) {
     loadSubmission(to.query.submissionId as string, to.query.activityId as string);
   } else {
-    formRef.value.resetForm();
-
-    formRef.value.setFieldValue('activityId', undefined);
-    formRef.value.setFieldValue('submissionId', undefined);
-
-    formRef.value.setFieldValue('applicant', undefined);
-    formRef.value.setFieldValue('basic', undefined);
-    formRef.value.setFieldValue('location', undefined);
-    editable.value = true;
+    // Resets form without triggering validation
+    isFormReset.value = true;
+    await nextTick();
+    isFormReset.value = false;
   }
 });
 
@@ -402,6 +406,7 @@ onBeforeMount(async () => {
     />
 
     <Form
+      v-if="!isFormReset"
       id="form"
       v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
