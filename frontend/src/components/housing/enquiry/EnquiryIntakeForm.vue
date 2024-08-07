@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { onBeforeMount, ref, toRaw } from 'vue';
-import { useRouter } from 'vue-router';
+import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { Dropdown, InputMask, InputText, RadioList, StepperNavigation, TextArea } from '@/components/form';
@@ -45,7 +45,6 @@ const { getConfig } = storeToRefs(useConfigStore());
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -82,14 +81,19 @@ const router = useRouter();
 const toast = useToast();
 
 function confirmLeave() {
-  confirm.require({
-    message: 'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
-    header: 'Leave this page?',
-    acceptLabel: 'Leave',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    accept: () => router.push({ name: RouteName.HOUSING })
-  });
+  if (editable.value) {
+    confirm.require({
+      message:
+        'Are you sure you want to leave this page? Any unsaved changes will be lost. Please save as draft first.',
+      header: 'Leave this page?',
+      acceptLabel: 'Leave',
+      acceptClass: 'p-button-danger',
+      rejectLabel: 'Cancel',
+      accept: () => router.push({ name: RouteName.HOUSING })
+    });
+  } else {
+    router.push({ name: RouteName.HOUSING });
+  }
 }
 
 async function confirmNext(data: any) {
@@ -202,33 +206,53 @@ async function onSubmit(data: any) {
     }
   }
 }
-
-onBeforeMount(async () => {
-  let response;
-  if (props.enquiryId) {
-    response = (await enquiryService.getEnquiry(props.enquiryId)).data;
-    editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+async function loadEnquiry(enquiryId: string) {
+  let formVal;
+  try {
+    formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
+    editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+  } catch (e: any) {
+    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }
 
-  // Default form values
-  initialFormValues.value = {
-    activityId: response?.activityId,
-    enquiryId: response?.enquiryId,
+  formRef.value?.setValues({
+    activityId: formVal?.activityId,
+    enquiryId: formVal?.enquiryId,
     applicant: {
-      contactFirstName: response?.contactFirstName,
-      contactLastName: response?.contactLastName,
-      contactPhoneNumber: response?.contactPhoneNumber,
-      contactEmail: response?.contactEmail,
-      contactApplicantRelationship: response?.contactApplicantRelationship,
-      contactPreference: response?.contactPreference
+      contactFirstName: formVal?.contactFirstName,
+      contactLastName: formVal?.contactLastName,
+      contactPhoneNumber: formVal?.contactPhoneNumber,
+      contactEmail: formVal?.contactEmail,
+      contactApplicantRelationship: formVal?.contactApplicantRelationship,
+      contactPreference: formVal?.contactPreference
     },
     basic: {
-      isRelated: response?.isRelated,
-      relatedActivityId: response?.relatedActivityId,
-      enquiryDescription: response?.enquiryDescription,
-      applyForPermitConnect: response?.applyForPermitConnect
+      isRelated: formVal?.isRelated,
+      relatedActivityId: formVal?.relatedActivityId,
+      enquiryDescription: formVal?.enquiryDescription,
+      applyForPermitConnect: formVal?.applyForPermitConnect
     }
-  };
+  });
+}
+
+onBeforeRouteUpdate((to) => {
+  if (!formRef.value) return;
+
+  if ('enquiryId' in to.query) {
+    loadEnquiry(to.query.enquiryId as string);
+  } else {
+    formRef.value.setValues({
+      activityId: undefined,
+      enquiryId: undefined,
+      applicant: undefined,
+      basic: undefined
+    });
+    editable.value = true;
+  }
+});
+
+onBeforeMount(async () => {
+  if (props.enquiryId) loadEnquiry(props.enquiryId);
 });
 
 async function emailConfirmation(activityId: string) {
@@ -284,11 +308,9 @@ async function checkActivityIdValidity(event: Event) {
     <CollectionDisclaimer />
 
     <Form
-      v-if="initialFormValues"
       v-slot="{ values }"
       ref="formRef"
       keep-values
-      :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
@@ -442,7 +464,7 @@ async function checkActivityIdValidity(event: Event) {
               :options="YES_NO_LIST"
             />
             <div
-              v-if="values.basic?.applyForPermitConnect === BasicResponse.YES"
+              v-if="values.basic?.applyForPermitConnect === BasicResponse.YES && editable"
               class="col-12 text-blue-500"
             >
               Please proceed to the next page to register your project with a Navigator.
@@ -454,7 +476,7 @@ async function checkActivityIdValidity(event: Event) {
         :editable="editable"
         :next-callback="() => confirmNext(values)"
         :prev-disabled="true"
-        :next-disabled="values.basic?.applyForPermitConnect !== BasicResponse.YES"
+        :next-disabled="values.basic?.applyForPermitConnect !== BasicResponse.YES || !editable"
       >
         <template #content>
           <Button
