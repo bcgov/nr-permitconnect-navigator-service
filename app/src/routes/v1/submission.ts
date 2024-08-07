@@ -4,7 +4,7 @@ import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
-import { hasPermission } from '../../middleware/authorization';
+import { hasAccess, hasPermission } from '../../middleware/authorization';
 import { Action, Resource } from '../../utils/enums/application';
 
 const router = express.Router();
@@ -101,6 +101,7 @@ router.get(
 router.put(
   '/:submissionId',
   hasPermission(Resource.SUBMISSION, Action.UPDATE),
+  hasAccess('submissionId'),
   submissionValidator.updateSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.updateSubmission(req, res, next);

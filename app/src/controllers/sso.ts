@@ -6,7 +6,9 @@ const controller = {
   requestBasicAccess: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const response = await ssoService.requestBasicAccess((req.currentUser?.tokenPayload as any).preferred_username);
+      const response = await ssoService.requestBasicAccess(
+        (req.currentContext?.tokenPayload as any).preferred_username
+      );
       res.status(response.status).json(response.data);
     } catch (e: unknown) {
       next(e);

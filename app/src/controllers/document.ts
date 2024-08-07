@@ -16,7 +16,7 @@ const controller = {
     next: NextFunction
   ) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const response = await documentService.createDocument(
         req.body.documentId,
         req.body.activityId,

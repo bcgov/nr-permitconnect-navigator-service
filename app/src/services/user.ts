@@ -119,7 +119,7 @@ const service = {
 
   /**
    * @function getCurrentUserId
-   * Gets userId (primary identifier of a user in db) of currentUser.
+   * Gets userId (primary identifier of a user in db) of currentContext.
    * if request is basic auth returns `defaultValue`
    * @param {object} identityId the identity field of the current user
    * @param {string} [defaultValue=undefined] An optional default return value

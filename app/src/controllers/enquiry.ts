@@ -13,7 +13,7 @@ const controller = {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);
       if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
         await noteService.createNote({
           activityId: data.relatedActivityId,
@@ -136,7 +136,7 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
         updatedBy: userId
