@@ -18,7 +18,8 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn()
-  })
+  }),
+  onBeforeRouteUpdate: vi.fn()
 }));
 
 const usePermitService = vi.spyOn(permitService, 'getPermitTypes');
