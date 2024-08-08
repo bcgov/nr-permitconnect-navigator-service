@@ -31,11 +31,13 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 type Props = {
   activityId?: string;
   enquiryId?: string;
+  submissionId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // Store
@@ -208,6 +210,19 @@ onBeforeMount(async () => {
   if (props.enquiryId) {
     response = (await enquiryService.getEnquiry(props.enquiryId)).data;
     editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+  } else if (props.submissionId) {
+    const submission = (await submissionService.getSubmission(props.submissionId)).data;
+    response = {
+      contactFirstName: submission?.contactFirstName,
+      contactLastName: submission?.contactLastName,
+      contactPhoneNumber: submission?.contactPhoneNumber,
+      contactEmail: submission?.contactEmail,
+      contactApplicantRelationship: submission?.contactApplicantRelationship,
+      contactPreference: submission?.contactPreference,
+
+      isRelated: BasicResponse.YES,
+      relatedActivityId: submission.activityId
+    };
   }
 
   // Default form values

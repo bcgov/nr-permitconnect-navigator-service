@@ -8,12 +8,15 @@ import type { Ref } from 'vue';
 // Props
 type Props = {
   activityId?: string;
+  confirmationId?: string;
   enquiryId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined
+  confirmationId: undefined,
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // State
@@ -30,5 +33,6 @@ onMounted(async () => {
     v-if="!loading"
     :activity-id="props.activityId"
     :enquiry-id="props.enquiryId"
+    :submission-id="props.submissionId"
   />
 </template>

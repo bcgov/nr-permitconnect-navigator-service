@@ -99,6 +99,31 @@ const routes: Array<RouteRecordRaw> = [
         ]
       },
       {
+        path: 'project',
+        meta: {
+          access: [Permissions.NAVIGATION_HOUSING]
+        },
+        children: [
+          {
+            path: '',
+            component: () => import('@/views/housing/project/ProjectListView.vue'),
+            meta: {
+              access: [Permissions.NAVIGATION_HOUSING]
+            },
+            name: RouteName.HOUSING_PROJECTS_LIST
+          },
+          {
+            path: ':submissionId',
+            component: () => import('@/views/housing/project/ProjectView.vue'),
+            meta: {
+              access: [Permissions.NAVIGATION_HOUSING]
+            },
+            name: RouteName.HOUSING_PROJECT,
+            props: createProps
+          }
+        ]
+      },
+      {
         path: 'submissions',
         name: RouteName.HOUSING_SUBMISSIONS,
         component: () => import('@/views/housing/SubmissionsView.vue'),
