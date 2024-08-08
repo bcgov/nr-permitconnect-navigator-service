@@ -282,14 +282,6 @@ a {
   text-decoration: none;
 }
 
-h1 {
-  font-size: 2.125rem;
-}
-
-h3 {
-  font-size: 1.75rem;
-}
-
 .hover-underline:hover {
   text-decoration: underline;
 }
