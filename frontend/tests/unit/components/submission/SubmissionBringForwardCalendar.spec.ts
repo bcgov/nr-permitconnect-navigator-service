@@ -34,9 +34,12 @@ const bringForward: Array<BringForward> = [
   }
 ];
 
+const myAssignedTo: Set<string> = new Set([]);
+
 const wrapperSettings = () => ({
   props: {
-    bringForward: bringForward
+    bringForward: bringForward,
+    myAssignedTo: myAssignedTo
   },
   global: {
     plugins: [

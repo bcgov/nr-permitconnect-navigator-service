@@ -1,4 +1,5 @@
 import type { IStamps } from '@/interfaces';
+import type { User } from './User';
 
 export type Submission = {
   activityId: string;
@@ -50,4 +51,5 @@ export type Submission = {
   assignedUserId?: string;
   applicationStatus: string;
   waitingOn?: string;
+  user?: User;
 } & Partial<IStamps>;
