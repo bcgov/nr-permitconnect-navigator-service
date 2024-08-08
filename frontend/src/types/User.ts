@@ -13,4 +13,5 @@ export type User = {
   userId: string;
   username: string;
   elevatedRights: boolean;
+  attributes?: { idir_user_guid?: Array<string>; idir_username?: Array<string>; display_name?: Array<string> };
 } & IStamps;

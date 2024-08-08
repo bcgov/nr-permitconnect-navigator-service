@@ -37,6 +37,20 @@ const service = {
   },
 
   /**
+   * @function deleteAccessRequests
+   * Deletes the access request
+   * @returns {Promise<object>} The result of running the delete operation
+   */
+  deleteAccessRequests: async (accessRequestId: string) => {
+    const response = await prisma.access_request.delete({
+      where: {
+        access_request_id: accessRequestId
+      }
+    });
+    return access_request.fromPrismaModel(response);
+  },
+
+  /**
    * @function getAccessRequests
    * Get all access requests
    * @returns {Promise<object>} The result of running the find operation
