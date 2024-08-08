@@ -4,6 +4,7 @@ import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
+import { AccessRole } from '../utils/enums/application';
 import { parseIdentityKeyClaims } from '../utils/utils';
 
 import type { User, UserSearchParameters } from '../types';
@@ -117,6 +118,28 @@ const service = {
     return response;
   },
 
+  /**
+   * @function createUserIfNew
+   * Create a user DB record if it does not exist
+   * @param {object} data Incoming user data
+   * @returns {Promise<object>} The result of running the insert operation
+   * @throws The error encountered upon db transaction failure
+   */
+  createUserIfNew: async (data: User) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let response: any;
+    response = await prisma.user.findFirst({
+      where: {
+        identity_id: data.identityId,
+        idp: data.idp
+      }
+    });
+
+    if (!response) {
+      response = await service.createUser(data);
+      return user.fromPrismaModel(response);
+    } else return;
+  },
   /**
    * @function getCurrentUserId
    * Gets userId (primary identifier of a user in db) of currentUser.
@@ -261,6 +284,11 @@ const service = {
         ]
       }
     });
+
+    if ((params.role as string) === AccessRole.PCNS_NAVIGATOR) {
+      // eslint-disable-next-line max-len
+      // TODO filter out any use without a role of PCNS_NAVIGATOR|PCNS_READ_ONLY or a pending access request from the response
+    }
 
     return response.map((x) => user.fromPrismaModel(x));
   },

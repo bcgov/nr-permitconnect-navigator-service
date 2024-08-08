@@ -1,4 +1,5 @@
 export type { Activity } from './Activity';
+export type { AccessRequest } from './AccessRequest';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
@@ -16,4 +17,5 @@ export type { PermitType } from './PermitType';
 export type { Submission } from './Submission';
 export type { SubmissionSearchParameters } from './SubmissionSearchParameters';
 export type { User } from './User';
+export type { UserAccessRequest } from './UserAccessRequest';
 export type { UserSearchParameters } from './UserSearchParameters';

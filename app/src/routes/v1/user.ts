@@ -8,7 +8,7 @@ import type { NextFunction, Request, Response } from 'express';
 const router = express.Router();
 router.use(requireSomeAuth);
 
-// Submission endpoint
+// Search for users
 router.get('/', userValidator.searchUsers, (req: Request, res: Response, next: NextFunction): void => {
   userController.searchUsers(req, res, next);
 });

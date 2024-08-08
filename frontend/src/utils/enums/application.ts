@@ -57,9 +57,21 @@ export enum RouteName {
   USER_MANAGEMENT = 'user_management'
 }
 
+export enum IdentityProvider {
+  IDIR = 'idir',
+  BCEID = 'bceidbasic',
+  BCEIDBUSINESS = 'bceidbusiness'
+}
+
 export enum Roles {
   NAVIGATOR = 'Navigator',
   READ_ONLY = 'Read-only'
+}
+
+export enum AccessRequestStatus {
+  APPROVED = 'Approved',
+  PENDING = 'Pending',
+  REJECTED = 'Rejected'
 }
 
 export enum StorageKey {
@@ -74,4 +86,10 @@ export enum ToastTimeout {
   STICKY = 0,
   SUCCESS = 3000,
   WARNING = 5000
+}
+
+export enum UserSearchParams {
+  FIRST_NAME = 'First name',
+  LAST_NAME = 'Last name',
+  EMAIL = 'Email'
 }
