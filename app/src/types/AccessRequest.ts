@@ -6,5 +6,5 @@ export type AccessRequest = {
   grant: boolean;
   role: string | null;
   status: AccessRequestStatus;
-  userId: string;
+  userId: string | undefined;
 } & Partial<IStamps>;
