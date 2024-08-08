@@ -14,6 +14,14 @@ export default {
   },
 
   /**
+   * @function deleteUserAccessRequest
+   * @returns {Promise} An axios response
+   */
+  deleteAccessRequest(accessRequestId: string) {
+    return appAxios().delete(`${PATH}/${accessRequestId}`);
+  },
+
+  /**
    * @function getAccessRequests
    * @returns {Promise} An axios response
    */

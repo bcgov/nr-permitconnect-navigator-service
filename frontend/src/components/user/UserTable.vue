@@ -19,11 +19,21 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Emits
-const emit = defineEmits(['userTable:delete', 'userTable:approve', 'userTable:manage', 'userTable:revoke']);
+const emit = defineEmits([
+  'userTable:action',
+  'userTable:denyRevocation',
+  'userTable:delete',
+  'userTable:manage',
+  'userTable:revoke'
+]);
 
 // Constants
 const DEFAULT_SORT_ORDER = 1;
 const DEFAULT_SORT_FIELD = 'fullName';
+const PENDING_STATUSES = {
+  PENDING_APPROVAL: 'Pending Approval',
+  PENDING_REVOCATION: 'Pending Revocation'
+};
 
 // State
 const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
@@ -66,7 +76,17 @@ const permissionService = new PermissionService();
       field="status"
       header="Status"
       sortable
-    />
+    >
+      <template #body="{ data }">
+        {{
+          data.accessRequest?.status && data.accessRequest.status === AccessRequestStatus.PENDING
+            ? data.accessRequest.grant
+              ? PENDING_STATUSES.PENDING_APPROVAL
+              : PENDING_STATUSES.PENDING_REVOCATION
+            : AccessRequestStatus.APPROVED
+        }}
+      </template>
+    </Column>
     <Column
       field="role"
       header="Role"
@@ -102,8 +122,8 @@ const permissionService = new PermissionService();
     </Column>
     <Column
       v-if="!revocation && permissionService.can(Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN)"
-      field="approve"
-      header="Approve"
+      field="approve/deny"
+      header="Approve/Deny"
       header-class="header-right"
       class="text-right"
       style="min-width: 150px"
@@ -111,12 +131,12 @@ const permissionService = new PermissionService();
       <template #body="{ data }">
         <Button
           class="p-button-lg p-button-text p-0 mr-3"
-          aria-label="Approve user"
+          aria-label="Approve/Deny user"
           :disabled="revocation || data.status === AccessRequestStatus.APPROVED"
           @click="
             () => {
               selection = data;
-              emit('userTable:approve', data);
+              emit('userTable:action', data);
             }
           "
         >
@@ -125,8 +145,9 @@ const permissionService = new PermissionService();
       </template>
     </Column>
     <Column
-      field="action"
-      header="Action"
+      v-if="revocation"
+      field="deny"
+      header="Deny"
       header-class="header-right"
       class="text-right"
       style="min-width: 150px"
@@ -134,8 +155,30 @@ const permissionService = new PermissionService();
       <template #body="{ data }">
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 mr-3"
-          aria-label="Delete user"
-          :disabled="revocation || data.accessRequest?.status === AccessRequestStatus.PENDING"
+          aria-label="Deny revoke request"
+          @click="
+            () => {
+              selection = data;
+              emit('userTable:denyRevocation', data);
+            }
+          "
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-xmark" />
+        </Button>
+      </template>
+    </Column>
+    <Column
+      field="revoke"
+      header="Revoke"
+      header-class="header-right"
+      class="text-right"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          aria-label="Revoke user"
+          :disabled="!revocation && data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
             () => {
               selection = data;
@@ -145,7 +188,7 @@ const permissionService = new PermissionService();
             }
           "
         >
-          <font-awesome-icon icon="fa-solid fa-trash" />
+          <font-awesome-icon icon="fa-solid fa-user-xmark" />
         </Button>
       </template>
     </Column>

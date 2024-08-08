@@ -17,7 +17,7 @@ export default {
       grant: input.grant,
       role: input.role,
       status: input.status as AccessRequestStatus, // Cast the status property to AccessRequestStatus enum
-      user_id: input.userId
+      user_id: input.userId as string
     };
   },
 
