@@ -21,7 +21,18 @@ router.use(currentContext(Initiative.HOUSING));
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/activity', '/document', '/enquiry', '/note', '/permit', '/roadmap', '/sso', '/submission', '/user']
+    endpoints: [
+      '/activity',
+      '/document',
+      '/enquiry',
+      '/note',
+      '/permit',
+      '/roadmap',
+      '/sso',
+      '/submission',
+      '/user',
+      '/yars'
+    ]
   });
 });
 
