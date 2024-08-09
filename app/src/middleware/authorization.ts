@@ -118,9 +118,16 @@ const paramMap = new Map<string, (id: string) => any>([
   ['submissionId', submissionService.getSubmission]
 ]);
 
-// Takes the key to be read from request params
-// Obtains callback function from paramMap
-// Compares createdBy with current userId
+/**
+ * @function hasAccess
+ * If current scope of request is self ensure that the object being acted upon was created by the current user
+ * Takes the key to be read from request params
+ * Obtains callback function from paramMap
+ * Compares createdBy with current userId
+ * @param {string} param A route parameter string
+ * @returns {function} Express middleware function
+ * @throws The error encountered upon failure
+ */
 export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {

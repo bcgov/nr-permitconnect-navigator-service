@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { documentController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { documentValidator } from '../../validators';
@@ -23,6 +23,7 @@ router.put(
 router.delete(
   '/:documentId',
   hasAuthorization(Resource.DOCUMENT, Action.DELETE),
+  hasAccess('documentId'),
   documentValidator.deleteDocument,
   (req: Request, res: Response, next: NextFunction): void => {
     documentController.deleteDocument(req, res, next);

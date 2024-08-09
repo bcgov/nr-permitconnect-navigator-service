@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { enquiryController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
@@ -38,6 +38,7 @@ router.get(
 router.get(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.READ),
+  hasAccess('enquiryId'),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.getEnquiry(req, res, next);
   }
@@ -47,6 +48,7 @@ router.get(
 router.delete(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.DELETE),
+  hasAccess('enquiryId'),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.deleteEnquiry(req, res, next);
   }
@@ -66,6 +68,7 @@ router.put(
 router.put(
   '/draft/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
+  hasAccess('enquiryId'),
   decideValidation(enquiryValidator.updateDraft),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateDraft(req, res, next);
@@ -76,6 +79,7 @@ router.put(
 router.put(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
+  hasAccess('enquiryId'),
   enquiryValidator.updateEnquiry,
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateEnquiry(req, res, next);
@@ -86,6 +90,7 @@ router.put(
 router.patch(
   '/:enquiryId/delete',
   hasAuthorization(Resource.ENQUIRY, Action.DELETE),
+  hasAccess('enquiryId'),
   enquiryValidator.updateIsDeletedFlag,
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateIsDeletedFlag(req, res, next);
