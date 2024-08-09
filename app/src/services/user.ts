@@ -67,7 +67,7 @@ const service = {
    * @throws The error encountered upon db transaction failure
    */
   createUser: async (data: User, etrx: Prisma.TransactionClient | undefined = undefined) => {
-    let response;
+    let response: User | undefined;
 
     // Logical function
     const _createUser = async (data: User, trx: Prisma.TransactionClient) => {
@@ -79,7 +79,7 @@ const service = {
       });
 
       if (exists) {
-        response = exists;
+        response = user.fromPrismaModel(exists);
       } else {
         if (data.idp) {
           const identityProvider = await service.readIdp(data.idp, trx);
@@ -99,9 +99,13 @@ const service = {
           active: true
         };
 
-        response = await trx.user.create({
+        const createResponse = await trx.user.create({
           data: user.toPrismaModel(newUser)
         });
+
+        // TS hiccuping on the internal function
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        response = user.fromPrismaModel(createResponse);
       }
     };
 
@@ -159,7 +163,7 @@ const service = {
   login: async (token: jwt.JwtPayload) => {
     const newUser = service._tokenToUser(token);
 
-    let response;
+    let response: User | undefined | null;
     await prisma.$transaction(async (trx) => {
       const oldUser = await trx.user.findFirst({
         where: {
@@ -279,7 +283,7 @@ const service = {
     const oldUser = await service.readUser(userId);
     const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof User] !== value);
 
-    let response;
+    let response: User | undefined;
 
     if (diff) {
       const _updateUser = async (userId: string, data: User, trx: Prisma.TransactionClient | undefined = undefined) => {
@@ -302,12 +306,14 @@ const service = {
         };
 
         // TODO: Add support for updating userId primary key in the event it changes
-        response = await trx?.user.update({
+        const updateResponse = await trx?.user.update({
           data: { ...user.toPrismaModel(obj), updated_by: obj.updatedBy },
           where: {
             user_id: userId
           }
         });
+
+        if (updateResponse) response = user.fromPrismaModel(updateResponse);
       };
 
       // Call with proper transaction

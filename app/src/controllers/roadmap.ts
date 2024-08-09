@@ -5,6 +5,7 @@ import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';
+import { generateCreateStamps } from '../db/utils/utils';
 
 const controller = {
   /**
@@ -53,8 +54,6 @@ const controller = {
 
       // Add a new note on success
       if (status === 201) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-
         let noteBody = req.body.emailData.body;
         if (req.body.emailData.attachments) {
           noteBody += '\n\nAttachments:\n';
@@ -70,9 +69,8 @@ const controller = {
           title: 'Sent roadmap',
           bringForwardDate: null,
           bringForwardState: null,
-          createdAt: new Date().toISOString(),
-          createdBy: userId,
-          isDeleted: false
+          isDeleted: false,
+          ...generateCreateStamps(req.currentContext)
         });
       }
 

@@ -6,4 +6,5 @@ export type CurrentContext = {
   authType: AuthType;
   initiative?: Initiative;
   tokenPayload: string | jwt.JwtPayload | null;
+  userId: string | null;
 };
