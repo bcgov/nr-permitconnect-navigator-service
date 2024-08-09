@@ -43,7 +43,7 @@
     "rebuild": "npm run clean",
     "reinstall": "npm run purge",
     "seed:make": "knex seed:make",
-    "seed:dev": "knex seed:run --specific=dev_roles.ts",
+    "seed:dev": "knex seed:run --specific=dev_groups.ts",
     "seed": "knex seed:run",
     "serve": "ts-node-dev --respawn --transpile-only --rs --watch bin,config,dist ./bin/www",
     "start": "ts-node --transpile-only ./bin/www",
