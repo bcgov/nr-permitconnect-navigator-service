@@ -98,6 +98,7 @@ const service = {
       });
 
       return result.map((x) => ({
+        group: x.group_name,
         initiative: x.initiative_code,
         resource: x.resource_name,
         action: x.action_name

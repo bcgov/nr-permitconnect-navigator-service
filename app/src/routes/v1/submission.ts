@@ -4,7 +4,7 @@ import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
-import { hasAccess, hasPermission } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { Action, Resource } from '../../utils/enums/application';
 
 const router = express.Router();
@@ -13,7 +13,7 @@ router.use(requireSomeAuth);
 /** Gets a list of submissions */
 router.get(
   '/',
-  hasPermission(Resource.SUBMISSION, Action.READ),
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.getSubmissions(req, res, next);
   }
@@ -27,7 +27,7 @@ router.get('/activityIds', (req: Request, res: Response, next: NextFunction): vo
 /** Search submissions */
 router.get(
   '/search',
-  hasPermission(Resource.SUBMISSION, Action.READ),
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
   submissionValidator.searchSubmissions,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.searchSubmissions(req, res, next);
@@ -37,7 +37,7 @@ router.get(
 /** Gets submission statistics*/
 router.get(
   '/statistics',
-  hasPermission(Resource.SUBMISSION, Action.READ),
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
   submissionValidator.getStatistics,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.getStatistics(req, res, next);
@@ -47,7 +47,7 @@ router.get(
 /** Creates a submission with Draft status */
 router.put(
   '/draft',
-  hasPermission(Resource.SUBMISSION, Action.CREATE),
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.createDraft(req, res, next);
   }
@@ -56,7 +56,8 @@ router.put(
 /** Updates a submission with Draft status */
 router.put(
   '/draft/:submissionId',
-  hasPermission(Resource.SUBMISSION, Action.UPDATE),
+  hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
+  hasAccess('submissionId'),
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
   }
@@ -65,7 +66,7 @@ router.put(
 // Send an email with the confirmation of submission
 router.put(
   '/emailConfirmation',
-  hasPermission(Resource.SUBMISSION, Action.CREATE),
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.emailConfirmation,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.emailConfirmation(req, res, next);
@@ -75,17 +76,18 @@ router.put(
 /** Creates a submission */
 router.put(
   '/',
-  hasPermission(Resource.SUBMISSION, Action.CREATE),
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.createSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.createSubmission(req, res, next);
   }
 );
 
-/** Deletes a submission */
+/** Hard deletes a submission */
 router.delete(
   '/:submissionId',
-  hasPermission(Resource.SUBMISSION, Action.DELETE),
+  hasAuthorization(Resource.SUBMISSION, Action.DELETE),
+  hasAccess('submissionId'),
   submissionValidator.deleteSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.deleteSubmission(req, res, next);
@@ -98,7 +100,8 @@ router.get('/search', (req: Request, res: Response, next: NextFunction): void =>
 });
 router.get(
   '/:submissionId',
-  hasPermission(Resource.SUBMISSION, Action.READ),
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  hasAccess('submissionId'),
   submissionValidator.getSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.getSubmission(req, res, next);
@@ -108,7 +111,7 @@ router.get(
 /** Updates a submission*/
 router.put(
   '/:submissionId',
-  hasPermission(Resource.SUBMISSION, Action.UPDATE),
+  hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
   hasAccess('submissionId'),
   submissionValidator.updateSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
@@ -119,7 +122,8 @@ router.put(
 /** Updates is_deleted flag for a submission */
 router.patch(
   '/:submissionId/delete',
-  hasPermission(Resource.SUBMISSION, Action.DELETE),
+  hasAuthorization(Resource.SUBMISSION, Action.DELETE),
+  hasAccess('submissionId'),
   submissionValidator.updateIsDeletedFlag,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.updateIsDeletedFlag(req, res, next);

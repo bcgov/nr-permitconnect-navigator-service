@@ -301,31 +301,29 @@ model group {
 }
 
 model group_role {
-  group_role_id Int       @id @default(autoincrement())
-  group_id      Int
-  role_id       Int
-  created_by    String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at    DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by    String?
-  updated_at    DateTime? @db.Timestamptz(6)
-  group         group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "group_role_group_id_foreign")
-  role          role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "group_role_role_id_foreign")
+  group_id   Int
+  role_id    Int
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  group      group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "group_role_group_id_foreign")
+  role       role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "group_role_role_id_foreign")
 
-  @@unique([group_id, role_id], map: "group_role_group_id_role_id_unique")
+  @@id([group_id, role_id])
   @@schema("yars")
 }
 
 model identity_group {
-  identity_group_id Int       @id @default(autoincrement())
-  identity_id       String
-  group_id          Int
-  created_by        String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime? @db.Timestamptz(6)
-  group             group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "identity_group_group_id_foreign")
+  identity_id String
+  group_id    Int
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  group       group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "identity_group_group_id_foreign")
 
-  @@unique([identity_id, group_id], map: "identity_group_identity_id_group_id_unique")
+  @@id([identity_id, group_id])
   @@schema("yars")
 }
 
@@ -371,17 +369,16 @@ model attribute {
 }
 
 model attribute_group {
-  attribute_group Int       @id @default(autoincrement())
-  attribute_id    Int
-  group_id        Int
-  created_by      String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at      DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by      String?
-  updated_at      DateTime? @db.Timestamptz(6)
-  attribute       attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "attribute_group_attribute_id_foreign")
-  group           group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "attribute_group_group_id_foreign")
+  attribute_id Int
+  group_id     Int
+  created_by   String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime? @db.Timestamptz(6)
+  attribute    attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "attribute_group_attribute_id_foreign")
+  group        group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "attribute_group_group_id_foreign")
 
-  @@unique([attribute_id, group_id], map: "attribute_group_attribute_id_group_id_unique")
+  @@id([attribute_id, group_id])
   @@schema("yars")
 }
 
@@ -403,32 +400,30 @@ model policy {
 }
 
 model policy_attribute {
-  policy_attribute Int       @id @default(autoincrement())
-  policy_id        Int
-  attribute_id     Int
-  created_by       String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at       DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by       String?
-  updated_at       DateTime? @db.Timestamptz(6)
-  attribute        attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "policy_attribute_attribute_id_foreign")
-  policy           policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "policy_attribute_policy_id_foreign")
+  policy_id    Int
+  attribute_id Int
+  created_by   String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime? @db.Timestamptz(6)
+  attribute    attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "policy_attribute_attribute_id_foreign")
+  policy       policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "policy_attribute_policy_id_foreign")
 
-  @@unique([policy_id, attribute_id], map: "policy_attribute_policy_id_attribute_id_unique")
+  @@id([policy_id, attribute_id])
   @@schema("yars")
 }
 
 model role_policy {
-  role_policy_id Int       @id @default(autoincrement())
-  role_id        Int
-  policy_id      Int
-  created_by     String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by     String?
-  updated_at     DateTime? @db.Timestamptz(6)
-  policy         policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "role_policy_policy_id_foreign")
-  role           role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "role_policy_role_id_foreign")
+  role_id    Int
+  policy_id  Int
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  policy     policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "role_policy_policy_id_foreign")
+  role       role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "role_policy_role_id_foreign")
 
-  @@unique([role_id, policy_id], map: "role_policy_role_id_policy_id_unique")
+  @@id([role_id, policy_id])
   @@schema("yars")
 }
 
