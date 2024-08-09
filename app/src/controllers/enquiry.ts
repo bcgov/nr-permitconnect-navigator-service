@@ -110,7 +110,7 @@ const controller = {
       // Pull from PCNS database
       let response = await enquiryService.getEnquiries();
 
-      if (isTruthy(req.query.self)) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
       }
