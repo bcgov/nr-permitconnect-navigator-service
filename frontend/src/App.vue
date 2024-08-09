@@ -6,17 +6,17 @@ import { RouterView, useRouter } from 'vue-router';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { yarsService } from '@/services';
-import { useAppStore, useAuthStore, useConfigStore, usePermissionStore } from '@/store';
+import { useAppStore, useAuthNStore, useConfigStore, useAuthZStore } from '@/store';
 import { RouteName, ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
 // Store
 const appStore = useAppStore();
-const authStore = useAuthStore();
+const authnStore = useAuthNStore();
 const router = useRouter();
 const { getIsLoading } = storeToRefs(appStore);
-const { getIsAuthenticated } = storeToRefs(authStore);
+const { getIsAuthenticated } = storeToRefs(authnStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -26,7 +26,7 @@ const ready: Ref<boolean> = ref(false);
 onBeforeMount(async () => {
   appStore.beginDeterminateLoading();
   await useConfigStore().init();
-  await useAuthStore().init();
+  await useAuthNStore().init();
   appStore.endDeterminateLoading();
   ready.value = true;
 });
@@ -40,10 +40,8 @@ onErrorCaptured((e: Error) => {
 watch(getIsAuthenticated, async () => {
   // Get front end permissions upon authentication
   if (getIsAuthenticated.value) {
-    ready.value = false;
     const permissions = await yarsService.getPermissions();
-    usePermissionStore().setPermissions(permissions.data);
-    ready.value = true;
+    useAuthZStore().setPermissions(permissions.data);
   }
 });
 </script>

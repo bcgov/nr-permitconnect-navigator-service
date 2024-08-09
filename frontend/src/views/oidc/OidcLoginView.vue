@@ -2,12 +2,12 @@
 import { onMounted } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import { useAuthStore } from '@/store';
+import { useAuthNStore } from '@/store';
 
-const authStore = useAuthStore();
+const authnStore = useAuthNStore();
 
 onMounted(() => {
-  authStore.login();
+  authnStore.login();
 });
 </script>
 

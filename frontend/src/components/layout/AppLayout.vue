@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
-import { useAuthStore, usePermissionStore } from '@/store';
-import { NavigationPermission } from '@/store/permissionStore';
+import { useAuthNStore, useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 
 // Store
-const authStore = useAuthStore();
-const permissionStore = usePermissionStore();
+const authnStore = useAuthNStore();
+const authzStore = useAuthZStore();
 </script>
 
 <template>
@@ -14,9 +14,9 @@ const permissionStore = usePermissionStore();
     <div class="layout-head">
       <DevelopmentRoleOverride
         v-if="
-          authStore.getIsAuthenticated &&
-          permissionStore.canNavigate(NavigationPermission.DEVELOPER, false) &&
-          permissionStore.getGroupOverride
+          authnStore.getIsAuthenticated &&
+          authzStore.canNavigate(NavigationPermission.DEVELOPER, false) &&
+          authzStore.getGroupOverride
         "
       />
       <Header />
@@ -34,3 +34,4 @@ const permissionStore = usePermissionStore();
     </footer>
   </div>
 </template>
+@/store/authnStore

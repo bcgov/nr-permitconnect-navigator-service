@@ -3,15 +3,15 @@ import { storeToRefs } from 'pinia';
 
 import { CopyToClipboard } from '@/components/form';
 import { Dropdown } from '@/lib/primevue';
-import { useAuthStore, useConfigStore, usePermissionStore } from '@/store';
+import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
 import { ButtonMode } from '@/utils/enums/application';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 
 // Store
-const authStore = useAuthStore();
-const { getAccessToken, getProfile } = storeToRefs(authStore);
+const authnStore = useAuthNStore();
+const { getAccessToken, getProfile } = storeToRefs(authnStore);
 const { getConfig } = storeToRefs(useConfigStore());
-const permissionStore = usePermissionStore();
+const authzStore = useAuthZStore();
 </script>
 
 <template>
@@ -25,7 +25,7 @@ const permissionStore = usePermissionStore();
           :options="GROUP_NAME_LIST"
           @change="
             (e) => {
-              permissionStore.setGroupOverride(e.value);
+              authzStore.setGroupOverride(e.value);
             }
           "
         />

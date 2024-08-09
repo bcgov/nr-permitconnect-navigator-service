@@ -4,17 +4,17 @@ import { computed } from 'vue';
 import BackButton from '@/components/common/BackButton.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
 import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
-import { usePermissionStore } from '@/store';
-import { NavigationPermission } from '@/store/permissionStore';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 
 import { RouteName } from '@/utils/enums/application';
 
 // Store
-const permissionStore = usePermissionStore();
+const authzStore = useAuthZStore();
 
 // Actions
 const getTitle = computed(() =>
-  permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS) ? 'Submissions' : 'My drafts and submissions'
+  authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS) ? 'Submissions' : 'My drafts and submissions'
 );
 </script>
 
@@ -28,8 +28,9 @@ const getTitle = computed(() =>
   <h1>{{ getTitle }}</h1>
 
   <!-- Navigator view -->
-  <SubmissionsNavigator v-if="permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)" />
+  <SubmissionsNavigator v-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)" />
 
   <!-- Proponent view -->
-  <SubmissionsProponent v-else-if="permissionStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
+  <SubmissionsProponent v-else-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
 </template>
+@/store/authnStore

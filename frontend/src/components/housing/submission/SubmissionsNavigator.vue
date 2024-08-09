@@ -10,7 +10,7 @@ import SubmissionListNavigator from '@/components/housing/submission/SubmissionL
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
-import { useAuthStore, usePermissionStore } from '@/store';
+import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
@@ -26,10 +26,10 @@ const NOTES_TAB_INDEX = {
 };
 
 // Store
-const authStore = useAuthStore();
-const permissionStore = usePermissionStore();
+const authnStore = useAuthNStore();
+const authzStore = useAuthZStore();
 
-const { getProfile } = storeToRefs(authStore);
+const { getProfile } = storeToRefs(authnStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
@@ -183,7 +183,7 @@ watch(accordionIndex, () => {
   <TabView v-if="!loading">
     <TabPanel header="Projects">
       <Accordion
-        v-if="permissionStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
+        v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -240,7 +240,7 @@ watch(accordionIndex, () => {
       </div>
     </TabPanel>
     <TabPanel
-      v-if="permissionStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
+      v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
       header="Bring Forward Calendar"
     >
       <SubmissionBringForwardCalendar

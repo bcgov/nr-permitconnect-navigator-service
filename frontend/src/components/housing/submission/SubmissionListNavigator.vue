@@ -15,7 +15,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
-import { usePermissionStore } from '@/store';
+import { useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
@@ -34,7 +34,7 @@ type Props = {
 const props = withDefaults(defineProps<Props>(), {});
 
 // Store
-const permissionStore = usePermissionStore();
+const authzStore = useAuthZStore();
 
 // State
 const selection: Ref<Submission | undefined> = ref(undefined);
@@ -134,7 +134,7 @@ function isFinanciallySupported(data: Submission) {
     <template #header>
       <div class="flex justify-content-between">
         <Button
-          v-if="permissionStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
+          v-if="authzStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
