@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { permitController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
@@ -25,6 +25,7 @@ router.put(
 router.put(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.UPDATE),
+  hasAccess('permitId'),
   permitValidator.updatePermit,
   (req: Request, res: Response, next: NextFunction): void => {
     permitController.updatePermit(req, res, next);
@@ -35,6 +36,7 @@ router.put(
 router.delete(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.DELETE),
+  hasAccess('permitId'),
   permitValidator.deletePermit,
   (req: Request, res: Response, next: NextFunction): void => {
     permitController.deletePermit(req, res, next);

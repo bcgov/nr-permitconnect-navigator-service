@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { noteController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { noteValidator } from '../../validators';
@@ -24,6 +24,7 @@ router.put(
 router.put(
   '/:noteId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
+  hasAccess('noteId'),
   noteValidator.updateNote,
   (req: Request, res: Response, next: NextFunction): void => {
     noteController.updateNote(req, res, next);
@@ -34,6 +35,7 @@ router.put(
 router.delete(
   '/:noteId',
   hasAuthorization(Resource.NOTE, Action.DELETE),
+  hasAccess('noteId'),
   (req: Request, res: Response, next: NextFunction): void => {
     noteController.deleteNote(req, res, next);
   }
