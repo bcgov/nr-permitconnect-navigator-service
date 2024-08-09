@@ -6,7 +6,7 @@ import { getLogger } from '../components/log';
 import { AuthType } from './enums/application';
 
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -134,14 +134,14 @@ export function getCurrentTokenClaim(
 
 /**
  * @function getCurrentTokenUsername
- * Parses currentUser object's identity provider to return their username
- * @param {object} currentUser The express request currentUser object
+ * Parses currentContext object's identity provider to return their username
+ * @param {object} currentContext The express request CurrentContext object
  * @returns {string | undefined} The username in currentUser or undefined
  */
-export function getCurrentTokenUsername(currentUser: CurrentUser | undefined): string | undefined {
-  if (currentUser?.tokenPayload) {
+export function getCurrentTokenUsername(currentContext: CurrentContext | undefined): string | undefined {
+  if (currentContext?.tokenPayload) {
     const idpList = readIdpList();
-    const payload = currentUser.tokenPayload as JwtPayload;
+    const payload = currentContext.tokenPayload as JwtPayload;
 
     const usernameKey = idpList.find((x) => x.idp === payload.identity_provider)?.username;
 

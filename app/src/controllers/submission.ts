@@ -278,7 +278,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: getCurrentTokenUsername(req.currentUser),
+        submittedBy: getCurrentTokenUsername(req.currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -387,7 +387,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
+        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentContext));
       }
 
       res.status(200).json(response);

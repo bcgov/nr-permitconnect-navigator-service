@@ -3,7 +3,7 @@ import { NIL, v4 as uuidv4 } from 'uuid';
 import { activityService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
-import { getCurrentIdentity, getCurrentTokenUsername, isTruthy } from '../utils/utils';
+import { getCurrentIdentity, getCurrentTokenUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
@@ -18,7 +18,7 @@ const controller = {
         await noteService.createNote({
           activityId: data.relatedActivityId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${getCurrentTokenUsername(req.currentUser)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
+          note: `Added by ${getCurrentTokenUsername(req.currentContext)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
           noteType: NoteType.ENQUIRY,
           title: 'Enquiry',
           bringForwardDate: null,
@@ -69,7 +69,7 @@ const controller = {
       activityId: activityId,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      submittedBy: getCurrentTokenUsername(req.currentUser),
+      submittedBy: getCurrentTokenUsername(req.currentContext),
       intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
@@ -113,7 +113,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
+        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentContext));
       }
 
       res.status(200).json(response);
