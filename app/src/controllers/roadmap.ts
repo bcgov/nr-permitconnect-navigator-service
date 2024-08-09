@@ -1,11 +1,8 @@
-import { NIL } from 'uuid';
-
-import { comsService, emailService, noteService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
+import { generateCreateStamps } from '../db/utils/utils';
+import { comsService, emailService, noteService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';
-import { generateCreateStamps } from '../db/utils/utils';
 
 const controller = {
   /**

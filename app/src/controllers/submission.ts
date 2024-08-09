@@ -1,14 +1,8 @@
 import config from 'config';
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import {
-  activityService,
-  emailService,
-  enquiryService,
-  submissionService,
-  permitService,
-  userService
-} from '../services';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { activityService, emailService, enquiryService, submissionService, permitService } from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
@@ -18,18 +12,10 @@ import {
   PermitStatus,
   SubmissionType
 } from '../utils/enums/housing';
-import {
-  camelCaseToTitleCase,
-  deDupeUnsure,
-  getCurrentIdentity,
-  getCurrentTokenUsername,
-  isTruthy,
-  toTitleCase
-} from '../utils/utils';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentTokenUsername, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {

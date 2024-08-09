@@ -8,8 +8,6 @@ import { AuthType, Initiative } from '../utils/enums/application';
 
 import type { CurrentContext } from '../types';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import { getCurrentIdentity } from '../utils/utils';
-import { NIL } from 'uuid';
 
 /**
  * @function _spkiWrapper

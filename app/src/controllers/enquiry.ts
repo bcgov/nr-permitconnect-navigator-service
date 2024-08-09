@@ -1,5 +1,6 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
@@ -7,7 +8,6 @@ import { getCurrentIdentity, getCurrentTokenUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {

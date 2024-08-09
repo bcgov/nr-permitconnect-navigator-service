@@ -1,11 +1,8 @@
-import { NIL } from 'uuid';
-
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { enquiryService, noteService, submissionService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { BringForward } from '../types';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   async createNote(req: Request, res: Response, next: NextFunction) {
