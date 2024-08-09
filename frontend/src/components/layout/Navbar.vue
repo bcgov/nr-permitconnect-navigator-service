@@ -2,8 +2,8 @@
 import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { usePermissionStore } from '@/store';
-import { NavigationPermission } from '@/store/permissionStore';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_CONTACT } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
@@ -21,7 +21,7 @@ type NavItem = {
 };
 
 // Store
-const permissionStore = usePermissionStore();
+const authzStore = useAuthZStore();
 
 // State
 const items: Ref<Array<NavItem>> = ref([]);
@@ -102,7 +102,7 @@ onMounted(() => {
   <nav class="navigation-main pl-2 lg:pl-6">
     <Menubar :model="items">
       <template #item="{ item, props, hasSubmenu }">
-        <span v-if="item.public || permissionStore.canNavigate(item.access)">
+        <span v-if="item.public || authzStore.canNavigate(item.access)">
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"

@@ -3,12 +3,12 @@ import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 
 import { Button } from '@/lib/primevue';
-import { useAuthStore } from '@/store/authStore';
+import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 // Store
-const authStore = useAuthStore();
-const { getIsAuthenticated } = storeToRefs(authStore);
+const authnStore = useAuthNStore();
+const { getIsAuthenticated } = storeToRefs(authnStore);
 
 // Actions
 const router = useRouter();

@@ -19,7 +19,7 @@ export enum NavigationPermission {
   DEVELOPER = 'developer'
 }
 
-const NavigationPermissionMap = [
+const NavigationAuthorizationMap = [
   {
     group: GroupName.ADMIN,
     permissions: [
@@ -68,15 +68,15 @@ const NavigationPermissionMap = [
   }
 ];
 
-export type PermissionStoreState = {
+export type AuthZStoreState = {
   groups: Ref<Array<GroupName>>;
   permissions: Ref<Array<Permission>>;
   groupOverride: Ref<GroupName | undefined>;
 };
 
-export const usePermissionStore = defineStore('permission', () => {
+export const useAuthZStore = defineStore('authz', () => {
   // State
-  const state: PermissionStoreState = {
+  const state: AuthZStoreState = {
     groups: ref([]),
     permissions: ref([]),
     groupOverride: ref(undefined)
@@ -100,7 +100,9 @@ export const usePermissionStore = defineStore('permission', () => {
           const groups =
             allowGroupOverride && state.groupOverride.value ? state.groupOverride.value : state.groups.value;
           const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
-          const perms = NavigationPermissionMap.filter((p) => groups?.includes(p.group)).flatMap((p) => p.permissions);
+          const perms = NavigationAuthorizationMap.filter((p) => groups?.includes(p.group)).flatMap(
+            (p) => p.permissions
+          );
           return groups?.includes(GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
         }
     ),
@@ -132,4 +134,4 @@ export const usePermissionStore = defineStore('permission', () => {
   };
 });
 
-export default usePermissionStore;
+export default useAuthZStore;

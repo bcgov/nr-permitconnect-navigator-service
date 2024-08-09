@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, InputSwitch } from '@/lib/primevue';
-import { useAuthStore } from '@/store';
+import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -29,7 +29,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Store
-const { getProfile } = storeToRefs(useAuthStore());
+const { getProfile } = storeToRefs(useAuthNStore());
 
 // State
 const bringForwards: Ref<Array<BringForward>> = ref(props.bringForward);
