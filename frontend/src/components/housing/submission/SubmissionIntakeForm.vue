@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, nextTick, ref } from 'vue';
+import { onBeforeMount, nextTick, ref, onUpdated } from 'vue';
 import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 
 import BackButton from '@/components/common/BackButton.vue';
@@ -380,25 +380,7 @@ async function loadSubmission(submissionId: string, activityId: string) {
   }
 }
 
-// Only triggers if the current URL updates
-// Does not trigger going to another route
-onBeforeRouteUpdate(async (to) => {
-  if (!formRef.value) return;
-
-  // Detects if query params exist
-  if ('submissionId' in to.query && 'activityId' in to.query) {
-    loadSubmission(to.query.submissionId as string, to.query.activityId as string);
-  } else {
-    // Resets form without triggering validation
-    isFormReset.value = true;
-    await nextTick();
-    isFormReset.value = false;
-  }
-});
-
 onBeforeMount(async () => {
-  typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
-
   if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
 });
 </script>
@@ -412,7 +394,7 @@ onBeforeMount(async () => {
       :route-name="RouteName.HOUSING"
       text="Back to Housing"
     />
-    <div @click="editable = !editable">{{ formUpdated }}</div>
+
     <Form
       v-if="!isFormReset"
       id="form"
