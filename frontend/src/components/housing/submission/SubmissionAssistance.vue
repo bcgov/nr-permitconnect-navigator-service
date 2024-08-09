@@ -133,7 +133,7 @@ const onSubmit = async (values: any) => {
   position: fixed;
   right: 0%;
   bottom: 0%;
-  z-index: 5;
+  z-index: 1000;
   translate: 0rem;
   transition: all 0.75s ease-in;
 

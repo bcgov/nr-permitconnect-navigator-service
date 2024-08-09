@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, nextTick, ref } from 'vue';
+import { onBeforeMount, nextTick, ref, onUpdated } from 'vue';
+import { onBeforeRouteUpdate, useRouter } from 'vue-router';
 
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
@@ -73,7 +74,7 @@ const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
   submissionId: undefined
 });
-
+const router = useRouter();
 // Constants
 const VALIDATION_BANNER_TEXT =
   'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
@@ -94,8 +95,8 @@ const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
+const isFormReset: Ref<boolean> = ref(false);
 const isSubmittable: Ref<boolean> = ref(false);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
@@ -135,8 +136,14 @@ const getAddressSearchLabel = (e: GeocoderEntry) => {
 };
 
 function handleProjectLocationClick() {
-  formRef?.value?.setFieldValue('location.latitude', null);
-  formRef?.value?.setFieldValue('location.longitude', null);
+  let location = formRef?.value?.values?.location;
+  if (location?.latitude || location?.longitude) {
+    formRef?.value?.setFieldValue('location.latitude', null);
+    formRef?.value?.setFieldValue('location.longitude', null);
+    formRef.value?.setFieldValue('location.streetAddress', null);
+    formRef.value?.setFieldValue('location.locality', null);
+    formRef.value?.setFieldValue('location.province', null);
+  }
 }
 
 const onAddressSearchInput = async (e: IInputEvent) => {
@@ -201,7 +208,17 @@ async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
   const tempData = Object.assign({}, data);
+
+  // Cleanup unneeded data to be saved to draft
   delete tempData['addressSearch'];
+
+  // Remove empty permits
+  if (Array.isArray(tempData.appliedPermits)) {
+    tempData.appliedPermits = tempData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
+  if (Array.isArray(tempData.investigatePermits)) {
+    tempData.investigatePermits = tempData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
 
   try {
     let response;
@@ -288,85 +305,90 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-onBeforeMount(async () => {
+async function loadSubmission(submissionId: string, activityId: string) {
   let response,
     permits: Array<Permit> = [];
-  if (props.activityId && props.submissionId) {
-    response = (await submissionService.getSubmission(props.submissionId)).data;
-    permits = (await permitService.listPermits(props.activityId)).data;
+  try {
+    response = (await submissionService.getSubmission(submissionId)).data;
+    permits = (await permitService.listPermits(activityId)).data;
     editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+
+    formRef.value?.setValues({
+      activityId: response?.activityId,
+      submissionId: response?.submissionId,
+      applicant: {
+        contactFirstName: response?.contactFirstName,
+        contactLastName: response?.contactLastName,
+        contactPhoneNumber: response?.contactPhoneNumber,
+        contactEmail: response?.contactEmail,
+        contactApplicantRelationship: response?.contactApplicantRelationship,
+        contactPreference: response?.contactPreference
+      },
+      basic: {
+        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+        isDevelopedInBC: response?.isDevelopedInBC,
+        registeredName: response?.companyNameRegistered
+      },
+      housing: {
+        projectName: response?.projectName,
+        projectDescription: response?.projectDescription,
+        singleFamilySelected: !!response?.singleFamilyUnits,
+        multiFamilySelected: !!response?.multiFamilyUnits,
+        singleFamilyUnits: response?.singleFamilyUnits,
+        multiFamilyUnits: response?.multiFamilyUnits,
+        otherSelected: !!response?.otherUnits,
+        otherUnitsDescription: response?.otherUnitsDescription,
+        otherUnits: response?.otherUnits,
+        hasRentalUnits: response?.hasRentalUnits,
+        rentalUnits: response?.rentalUnits,
+        financiallySupportedBC: response?.financiallySupportedBC,
+        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+        indigenousDescription: response?.indigenousDescription,
+        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+        nonProfitDescription: response?.nonProfitDescription,
+        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+        housingCoopDescription: response?.housingCoopDescription
+      },
+      location: {
+        naturalDisaster: response?.naturalDisaster,
+        projectLocation: response?.projectLocation,
+        streetAddress: response?.streetAddress,
+        locality: response?.locality,
+        province: response?.province,
+        latitude: response?.latitude,
+        longitude: response?.longitude,
+        ltsaPIDLookup: response?.locationPIDs,
+        geomarkUrl: response?.geomarkUrl,
+        projectLocationDescription: response?.projectLocationDescription
+      },
+      appliedPermits: permits
+        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+        .map((x: Permit) => ({
+          ...x,
+          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+        })),
+      permits: {
+        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
+        checkProvincialPermits: response?.checkProvincialPermits
+      },
+      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+    });
+    // Move map pin
+    onLatLongInputClick();
+  } catch {
+    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
+}
 
-  // Default form values
-  initialFormValues.value = {
-    activityId: response?.activityId,
-    submissionId: response?.submissionId,
-    applicant: {
-      contactFirstName: response?.contactFirstName,
-      contactLastName: response?.contactLastName,
-      contactPhoneNumber: response?.contactPhoneNumber,
-      contactEmail: response?.contactEmail,
-      contactApplicantRelationship: response?.contactApplicantRelationship,
-      contactPreference: response?.contactPreference
-    },
-    basic: {
-      isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-      isDevelopedInBC: response?.isDevelopedInBC,
-      registeredName: response?.companyNameRegistered
-    },
-    housing: {
-      projectName: response?.projectName,
-      projectDescription: response?.projectDescription,
-      singleFamilySelected: !!response?.singleFamilyUnits,
-      multiFamilySelected: !!response?.multiFamilyUnits,
-      singleFamilyUnits: response?.singleFamilyUnits,
-      multiFamilyUnits: response?.multiFamilyUnits,
-      otherSelected: !!response?.otherUnits,
-      otherUnitsDescription: response?.otherUnitsDescription,
-      otherUnits: response?.otherUnits,
-      hasRentalUnits: response?.hasRentalUnits,
-      rentalUnits: response?.rentalUnits,
-      financiallySupportedBC: response?.financiallySupportedBC,
-      financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-      indigenousDescription: response?.indigenousDescription,
-      financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-      nonProfitDescription: response?.nonProfitDescription,
-      financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-      housingCoopDescription: response?.housingCoopDescription
-    },
-    location: {
-      naturalDisaster: response?.naturalDisaster,
-      projectLocation: response?.projectLocation,
-      streetAddress: response?.streetAddress,
-      locality: response?.locality,
-      province: response?.province,
-      latitude: response?.latitude,
-      longitude: response?.longitude,
-      ltsaPIDLookup: response?.locationPIDs,
-      geomarkUrl: response?.geomarkUrl,
-      projectLocationDescription: response?.projectLocationDescription
-    },
-    appliedPermits: permits
-      .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-      .map((x: Permit) => ({
-        ...x,
-        statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-      })),
-    permits: {
-      hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
-      checkProvincialPermits: response?.checkProvincialPermits
-    },
-    investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-  };
-
-  typeStore.setPermitTypes((await permitService.getPermitTypes()).data);
+onBeforeMount(async () => {
+  if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
 });
 </script>
 
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
-      :confirm-leave="true"
+      :confirm-leave="editable && !!formUpdated"
       confirm-message="Are you sure you want to leave this page?
       Any unsaved changes will be lost. Please save as draft first."
       :route-name="RouteName.HOUSING"
@@ -374,11 +396,10 @@ onBeforeMount(async () => {
     />
 
     <Form
-      v-if="initialFormValues"
+      v-if="!isFormReset"
       id="form"
       v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
-      :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
@@ -390,6 +411,7 @@ onBeforeMount(async () => {
       "
     >
       <SubmissionAssistance
+        v-if="!(props.activityId || props.submissionId) && values?.applicant"
         :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onSubmitAssistance"
@@ -511,6 +533,11 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_LIST"
+                    @on-change="
+                      (e: string) => {
+                        if (e === BasicResponse.NO) setFieldValue('basic.isDevelopedInBC', null);
+                      }
+                    "
                   />
 
                   <span
@@ -777,6 +804,7 @@ onBeforeMount(async () => {
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
                     outlined
+                    :disabled="!editable"
                     @click="
                       () => {
                         setFieldValue('housing.financiallySupportedBC', BasicResponse.NO);
@@ -995,7 +1023,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                     :options="PROJECT_LOCATION_LIST"
-                    @on-change="handleProjectLocationClick"
+                    @on-click="handleProjectLocationClick"
                   />
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
@@ -1068,6 +1096,7 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
                             placeholder="Latitude"
+                            @keyup.enter="onLatLongInputClick"
                           />
                           <InputNumber
                             class="col-4"
@@ -1075,10 +1104,12 @@ onBeforeMount(async () => {
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
+                            @keyup.enter="onLatLongInputClick"
                           />
                           <Button
                             class="lat-long-btn"
                             label="Show on map"
+                            :disabled="!editable"
                             @click="onLatLongInputClick"
                           />
                         </div>
@@ -1094,6 +1125,7 @@ onBeforeMount(async () => {
                 </div>
                 <Map
                   ref="mapRef"
+                  :disabled="!editable"
                   :latitude="mapLatitude"
                   :longitude="mapLongitude"
                 />
@@ -1324,6 +1356,7 @@ onBeforeMount(async () => {
                               />
                               <Dropdown
                                 class="col-4"
+                                :disabled="!editable"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
                                 :options="getPermitTypes"
@@ -1347,6 +1380,7 @@ onBeforeMount(async () => {
                                   />
                                   <div class="flex align-items-center ml-2 mb-3">
                                     <Button
+                                      v-if="editable"
                                       class="p-button-lg p-button-text p-button-danger p-0"
                                       aria-label="Delete"
                                       @click="remove(idx)"
@@ -1359,8 +1393,8 @@ onBeforeMount(async () => {
                             </div>
                             <div class="col-12">
                               <Button
+                                v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
-                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined,
@@ -1462,6 +1496,7 @@ onBeforeMount(async () => {
                                 <div class="flex justify-content-center">
                                   <Dropdown
                                     class="w-full"
+                                    :disabled="!editable"
                                     :name="`investigatePermits[${idx}].permitTypeId`"
                                     placeholder="Select Permit type"
                                     :options="getPermitTypes"
@@ -1471,6 +1506,7 @@ onBeforeMount(async () => {
                                   />
                                   <div class="flex align-items-center ml-2 mb-4">
                                     <Button
+                                      v-if="editable"
                                       class="p-button-lg p-button-text p-button-danger p-0"
                                       aria-label="Delete"
                                       @click="remove(idx)"
@@ -1485,8 +1521,8 @@ onBeforeMount(async () => {
                             </div>
                             <div class="col-12">
                               <Button
+                                v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
-                                :disabled="!editable"
                                 @click="
                                   push({
                                     permitTypeId: undefined
