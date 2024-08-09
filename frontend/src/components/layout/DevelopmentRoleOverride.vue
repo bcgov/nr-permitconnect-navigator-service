@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue';
 
 import { Button, Dropdown } from '@/lib/primevue';
-import { usePermissionStore } from '@/store';
+import { useAuthZStore } from '@/store';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
 
@@ -10,19 +10,19 @@ import type { Ref } from 'vue';
 import { storeToRefs } from 'pinia';
 
 // Store
-const permissionStore = usePermissionStore();
-const { getGroupOverride } = storeToRefs(permissionStore);
+const authzStore = useAuthZStore();
+const { getGroupOverride } = storeToRefs(authzStore);
 
 const group: Ref<GroupName | undefined> = ref(undefined);
 
 // Actions
 function clearGroup() {
-  permissionStore.setGroupOverride(undefined);
+  authzStore.setGroupOverride(undefined);
   group.value = undefined;
 }
 
 function setGroup(e: any) {
-  permissionStore.setGroupOverride(e.value);
+  authzStore.setGroupOverride(e.value);
   group.value = e.value;
 }
 

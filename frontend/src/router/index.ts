@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
 import { AuthService } from '@/services';
-import { useAppStore, usePermissionStore } from '@/store';
-import { NavigationPermission } from '@/store/permissionStore';
+import { useAppStore, useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
@@ -145,15 +145,15 @@ const routes: Array<RouteRecordRaw> = [
   }
 ];
 
-function waitForPermissions(): Promise<string[] | undefined> {
+function waitForUserGroups(): Promise<string[] | undefined> {
   let attempts = 0;
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   return new Promise(function (resolve, reject) {
-    (function _waitForRoles() {
-      const r = usePermissionStore().getGroups;
+    (function _waitForUserGroups() {
+      const r = useAuthZStore().getGroups;
       if (r.length > 0) return resolve(r);
       if (attempts > 10) resolve(undefined);
-      setTimeout(_waitForRoles, 100);
+      setTimeout(_waitForUserGroups, 100);
       attempts++;
     })();
   });
@@ -162,7 +162,7 @@ function waitForPermissions(): Promise<string[] | undefined> {
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
-  const permissionStore = usePermissionStore();
+  const authzStore = useAuthZStore();
   const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -205,7 +205,7 @@ export default function getRouter() {
 
     // Check for reroutes
     if (to.name === RouteName.HOUSING) {
-      if (!permissionStore.canNavigate(NavigationPermission.HOUSING)) {
+      if (!authzStore.canNavigate(NavigationPermission.HOUSING)) {
         router.replace({ name: RouteName.HOUSING_SUBMISSIONS });
         return;
       }
@@ -213,8 +213,10 @@ export default function getRouter() {
 
     // Check access
     if (to.meta.access) {
-      await waitForPermissions();
-      if (!permissionStore.canNavigate(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
+      // Race condition on initial load between routing and getting user groups
+      // So just hold a sec if we haven't gotten them yet
+      await waitForUserGroups();
+      if (!authzStore.canNavigate(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
         router.replace({ name: RouteName.NOT_FOUND });
         return;
       }
