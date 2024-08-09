@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { ssoController } from '../../controllers';
-import { hasPermission } from '../../middleware/authorization';
+import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 
@@ -16,7 +16,7 @@ router.post('/requestBasicAccess', (req: Request, res: Response, next: NextFunct
 
 router.get(
   '/idir/users',
-  hasPermission(Resource.SSO, Action.READ),
+  hasAuthorization(Resource.SSO, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     ssoController.searchIdirUsers(req, res, next);
   }
@@ -24,7 +24,7 @@ router.get(
 
 router.get(
   '/basic-bceid/users',
-  hasPermission(Resource.SSO, Action.READ),
+  hasAuthorization(Resource.SSO, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     ssoController.searchBasicBceidUsers(req, res, next);
   }

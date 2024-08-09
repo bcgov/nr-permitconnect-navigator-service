@@ -12,7 +12,7 @@ const controller = {
         x.flat()
       );
 
-      res.status(200).json(permissions);
+      res.status(200).json({ groups: groups.map((x) => x.groupName), permissions });
     } catch (e: unknown) {
       next(e);
     }

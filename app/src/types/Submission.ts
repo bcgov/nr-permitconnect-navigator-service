@@ -59,6 +59,5 @@ export type Submission = {
   contactLastName: string | null;
   submissionType: string | null;
   relatedEnquiries: string | null;
-
   user: User | null;
 } & Partial<IStamps>;

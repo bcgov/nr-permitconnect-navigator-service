@@ -12,7 +12,7 @@ export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];
 
-export const USER_TYPE_LIST = [
+export const GROUP_NAME_LIST = [
   GroupName.ADMIN,
   GroupName.DEVELOPER,
   GroupName.NAVIGATOR,

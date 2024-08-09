@@ -65,6 +65,25 @@ const service = {
   },
 
   /**
+   * @function getPermit
+   * Get a permit
+   * @param {string} permitId Permit ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getPermit: async (permitId: string) => {
+    const result = await prisma.permit.findFirst({
+      where: {
+        permit_id: permitId
+      },
+      include: {
+        permit_type: true
+      }
+    });
+
+    return result ? permit.fromPrismaModel(result) : null;
+  },
+
+  /**
    * @function getPermitTypes
    * Get all Permit types
    * @returns {Promise<PermitType[]>} The result of running the findMany operation

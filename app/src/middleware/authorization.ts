@@ -2,14 +2,23 @@
 import Problem from 'api-problem';
 import { NIL } from 'uuid';
 
-import { submissionService, userService, yarsService } from '../services';
+import {
+  documentService,
+  enquiryService,
+  noteService,
+  permitService,
+  submissionService,
+  userService,
+  yarsService
+} from '../services';
 import { Initiative, GroupName } from '../utils/enums/application';
 import { getCurrentIdentity } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import { CurrentAuthorization } from '../types';
 
 /**
- * @function hasPermission
+ * @function hasAuthorization
  * Obtains the groups for the current users identity
  * Obtains the full permission mappings for the given resource/action pair for any of the users groups
  * 403 if none are found
@@ -18,9 +27,13 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
  * @returns {function} Express middleware function
  * @throws The error encountered upon failure
  */
-export const hasPermission = (resource: string, action: string) => {
+export const hasAuthorization = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const currentAuthorization: CurrentAuthorization = {
+        attributes: []
+      };
+
       if (req.currentContext) {
         const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
@@ -74,11 +87,14 @@ export const hasPermission = (resource: string, action: string) => {
             }
           }
 
-          req.currentContext.attributes.push(...matchingAttributes);
+          currentAuthorization.attributes.push(...matchingAttributes);
         } else {
           // Developers automatically go through with all scope
-          req.currentContext.attributes.push('scope:all');
+          currentAuthorization.attributes.push('scope:all');
         }
+
+        // Update current authorization and freeze
+        req.currentAuthorization = Object.freeze(currentAuthorization);
       } else {
         throw new Error('No current user');
       }
@@ -92,21 +108,31 @@ export const hasPermission = (resource: string, action: string) => {
   };
 };
 
-// WIP
-// Takes the key to be read from params
-// Gets object in question (somehow from right table... idk yet)
+// Maps a param key to a callback function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const paramMap = new Map<string, (id: string) => any>([
+  ['documentId', documentService.getDocument],
+  ['enquiryId', enquiryService.getEnquiry],
+  ['noteId', noteService.getNote],
+  ['permitId', permitService.getPermit],
+  ['submissionId', submissionService.getSubmission]
+]);
+
+// Takes the key to be read from request params
+// Obtains callback function from paramMap
 // Compares createdBy with current userId
 export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      if (req.currentContext?.attributes.includes('scope:self')) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         const id = req.params[param];
-
         const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
-        const data = await submissionService.getSubmission(id);
+        let data;
+        const func = paramMap.get(param);
+        if (func) data = await func(id);
 
-        if (data?.createdBy !== userId) {
+        if (!data || data?.createdBy !== userId) {
           throw new Error('No access');
         }
       }

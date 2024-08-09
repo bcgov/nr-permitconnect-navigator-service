@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { userController } from '../../controllers';
-import { hasPermission } from '../../middleware/authorization';
+import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { userValidator } from '../../validators';
@@ -14,7 +14,7 @@ router.use(requireSomeAuth);
 // Search users endpoint
 router.get(
   '/',
-  hasPermission(Resource.USER, Action.READ),
+  hasAuthorization(Resource.USER, Action.READ),
   userValidator.searchUsers,
   (req: Request, res: Response, next: NextFunction): void => {
     userController.searchUsers(req, res, next);

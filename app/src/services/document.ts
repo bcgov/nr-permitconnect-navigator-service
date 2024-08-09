@@ -60,6 +60,22 @@ const service = {
   },
 
   /**
+   * @function getDocument
+   * Get a document
+   * @param {string} documentId Document ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getDocument: async (documentId: string) => {
+    const result = await prisma.document.findFirst({
+      where: {
+        document_id: documentId
+      }
+    });
+
+    return result ? document.fromPrismaModel(result) : null;
+  },
+
+  /**
    * @function listDocuments
    * Retrieve a list of documents associated with a given activity
    * @param {string} activityId PCNS Activity ID

@@ -5,8 +5,8 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 const controller = {
   requestBasicAccess: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await ssoService.requestBasicAccess(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (req.currentContext?.tokenPayload as any).preferred_username
       );
       res.status(response.status).json(response.data);

@@ -9,7 +9,7 @@ import { ApplicationStatus } from '../utils/enums/housing';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { ApiScope, Submission, SubmissionSearchParameters } from '../types';
+import type { Submission, SubmissionSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -34,7 +34,7 @@ const service = {
    */
   createSubmission: async (data: Partial<Submission>) => {
     const response = await prisma.submission.create({
-      data: submission.toPrismaModel(data as Submission)
+      data: { ...submission.toPrismaModel(data as Submission), created_by: data.createdBy }
     });
 
     return submission.fromPrismaModel(response);
