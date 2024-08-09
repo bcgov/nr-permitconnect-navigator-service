@@ -8,6 +8,8 @@ import { AuthType, Initiative } from '../utils/enums/application';
 
 import type { CurrentContext } from '../types';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import { getCurrentIdentity } from '../utils/utils';
+import { NIL } from 'uuid';
 
 /**
  * @function _spkiWrapper
@@ -33,7 +35,8 @@ export const currentContext = (initiative: Initiative) => {
     const currentContext: CurrentContext = {
       authType: AuthType.NONE,
       initiative: initiative,
-      tokenPayload: null
+      tokenPayload: null,
+      userId: null
     };
 
     if (authorization) {
@@ -57,7 +60,10 @@ export const currentContext = (initiative: Initiative) => {
 
           if (isValid) {
             currentContext.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
-            await userService.login(currentContext.tokenPayload as jwt.JwtPayload);
+            const user = await userService.login(currentContext.tokenPayload as jwt.JwtPayload);
+
+            if (user && user.userId) currentContext.userId = user.userId;
+            else throw new Error('Failed to log user in');
           } else {
             throw new Error('Invalid authorization token');
           }

@@ -10,7 +10,11 @@ const controller = {
   createPermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-      const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
+      const response = await permitService.createPermit({
+        ...(req.body as Permit),
+        createdBy: userId,
+        updatedBy: userId
+      });
       res.status(201).json(response);
     } catch (e: unknown) {
       next(e);

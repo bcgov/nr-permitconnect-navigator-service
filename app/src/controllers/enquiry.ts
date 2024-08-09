@@ -7,6 +7,7 @@ import { getCurrentIdentity, getCurrentTokenUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {
@@ -35,7 +36,9 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
+    const activityId =
+      data.activityId ??
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
     let applicant, basic;
 
@@ -86,8 +89,7 @@ const controller = {
       // Create new enquiry
       const result = await enquiryService.createEnquiry({
         ...enquiry,
-        createdAt: new Date().toISOString(),
-        createdBy: userId
+        ...generateCreateStamps(req.currentContext)
       });
 
       res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
@@ -144,11 +146,9 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       } as Enquiry);
 
       res.status(200).json(result);
@@ -165,10 +165,9 @@ const controller = {
 
       // Update enquiry
       const result = await enquiryService.updateEnquiry({
-        ...enquiry,
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
-      } as Enquiry);
+        ...(enquiry as Enquiry),
+        ...generateUpdateStamps(req.currentContext)
+      });
 
       res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {
@@ -180,7 +179,11 @@ const controller = {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
-      const response = await enquiryService.updateIsDeletedFlag(req.params.enquiryId, data.isDeleted);
+      const response = await enquiryService.updateIsDeletedFlag(
+        req.params.enquiryId,
+        data.isDeleted,
+        generateUpdateStamps(req.currentContext)
+      );
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
