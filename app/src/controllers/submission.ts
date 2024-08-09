@@ -30,6 +30,7 @@ import {
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -190,7 +191,9 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
+    const activityId =
+      data.activityId ??
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
     let applicant, basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
@@ -324,10 +327,11 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-
       // Create new submission
-      const result = await submissionService.createSubmission({ ...submission, createdBy: userId });
+      const result = await submissionService.createSubmission({
+        ...submission,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -345,10 +349,11 @@ const controller = {
         IntakeStatus.SUBMITTED
       );
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-
       // Create new submission
-      const result = await submissionService.createSubmission({ ...submission, createdBy: userId });
+      const result = await submissionService.createSubmission({
+        ...submission,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -457,13 +462,10 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-
       // Update submission
       const result = await submissionService.updateSubmission({
         ...(submission as Submission),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       });
 
       // Remove already existing permits for this activity
@@ -483,7 +485,11 @@ const controller = {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
-      const response = await submissionService.updateIsDeletedFlag(req.params.submissionId, data.isDeleted);
+      const response = await submissionService.updateIsDeletedFlag(
+        req.params.submissionId,
+        data.isDeleted,
+        generateUpdateStamps(req.currentContext)
+      );
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -492,12 +498,9 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
-
       const response = await submissionService.updateSubmission({
         ...(req.body as Submission),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       });
       res.status(200).json(response);
     } catch (e: unknown) {

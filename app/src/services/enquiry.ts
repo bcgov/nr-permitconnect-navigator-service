@@ -1,6 +1,7 @@
 /* eslint-disable no-useless-catch */
 import prisma from '../db/dataConnection';
 import { enquiry } from '../db/models';
+import { IStamps } from '../interfaces/IStamps';
 
 import type { Enquiry, EnquirySearchParameters } from '../types';
 
@@ -12,7 +13,7 @@ const service = {
    */
   createEnquiry: async (data: Partial<Enquiry>) => {
     const response = await prisma.enquiry.create({
-      data: enquiry.toPrismaModel(data as Enquiry)
+      data: { ...enquiry.toPrismaModel(data as Enquiry), created_at: data.createdAt, created_by: data.createdBy }
     });
 
     return enquiry.fromPrismaModel(response);
@@ -156,7 +157,7 @@ const service = {
   updateEnquiry: async (data: Enquiry) => {
     try {
       const result = await prisma.enquiry.update({
-        data: { ...enquiry.toPrismaModel(data), updated_by: data.updatedBy },
+        data: { ...enquiry.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
         where: {
           enquiry_id: data.enquiryId
         }
@@ -175,10 +176,12 @@ const service = {
    * @param {string} isDeleted flag
    * @returns {Promise<Enquiry>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (enquiryId: string, isDeleted: boolean) => {
+  updateIsDeletedFlag: async (enquiryId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteEnquiry = await prisma.enquiry.findUnique({
       where: {
-        enquiry_id: enquiryId
+        enquiry_id: enquiryId,
+        updated_at: updateStamp.updatedAt,
+        updated_by: updateStamp.updatedBy
       }
     });
     if (deleteEnquiry) {
