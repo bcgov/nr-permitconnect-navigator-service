@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { enquiryController } from '../../controllers';
-import { hasPermission } from '../../middleware/authorization';
+import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
@@ -28,7 +28,7 @@ const decideValidation = (validator: Middleware) => {
 /** Gets a list of enquiries */
 router.get(
   '/',
-  hasPermission(Resource.ENQUIRY, Action.READ),
+  hasAuthorization(Resource.ENQUIRY, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.getEnquiries(req, res, next);
   }
@@ -37,7 +37,7 @@ router.get(
 /** Gets a specific enquiry */
 router.get(
   '/:enquiryId',
-  hasPermission(Resource.ENQUIRY, Action.READ),
+  hasAuthorization(Resource.ENQUIRY, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.getEnquiry(req, res, next);
   }
@@ -51,7 +51,7 @@ router.get('/list/:activityId', (req: Request, res: Response, next: NextFunction
 /** Deletes an enquiry */
 router.delete(
   '/:enquiryId',
-  hasPermission(Resource.ENQUIRY, Action.DELETE),
+  hasAuthorization(Resource.ENQUIRY, Action.DELETE),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.deleteEnquiry(req, res, next);
   }
@@ -60,7 +60,7 @@ router.delete(
 /** Creates an enquiry with Draft status */
 router.put(
   '/draft',
-  hasPermission(Resource.ENQUIRY, Action.CREATE),
+  hasAuthorization(Resource.ENQUIRY, Action.CREATE),
   decideValidation(enquiryValidator.createDraft),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.createDraft(req, res, next);
@@ -70,7 +70,7 @@ router.put(
 /** Updates an enquiry with Draft status */
 router.put(
   '/draft/:enquiryId',
-  hasPermission(Resource.ENQUIRY, Action.UPDATE),
+  hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
   decideValidation(enquiryValidator.updateDraft),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateDraft(req, res, next);
@@ -80,7 +80,7 @@ router.put(
 /** Updates an enquiry */
 router.put(
   '/:enquiryId',
-  hasPermission(Resource.ENQUIRY, Action.UPDATE),
+  hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
   enquiryValidator.updateEnquiry,
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateEnquiry(req, res, next);
@@ -90,7 +90,7 @@ router.put(
 /** Updates is_deleted flag for an enquiry */
 router.patch(
   '/:enquiryId/delete',
-  hasPermission(Resource.ENQUIRY, Action.DELETE),
+  hasAuthorization(Resource.ENQUIRY, Action.DELETE),
   enquiryValidator.updateIsDeletedFlag,
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.updateIsDeletedFlag(req, res, next);

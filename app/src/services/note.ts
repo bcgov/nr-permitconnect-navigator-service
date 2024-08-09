@@ -44,6 +44,22 @@ const service = {
   },
 
   /**
+   * @function getNote
+   * Get a note
+   * @param {string} noteId Note ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getNote: async (noteId: string) => {
+    const result = await prisma.note.findFirst({
+      where: {
+        note_id: noteId
+      }
+    });
+
+    return result ? note.fromPrismaModel(result) : null;
+  },
+
+  /**
    * @function listBringForward
    * Retrieve a list of notes with the Bring forward type
    * @param {string} bringForwardState Optional state to filter on

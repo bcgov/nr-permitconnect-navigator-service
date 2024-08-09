@@ -314,8 +314,10 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+
       // Create new submission
-      const result = await submissionService.createSubmission(submission);
+      const result = await submissionService.createSubmission({ ...submission, createdBy: userId });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -333,8 +335,10 @@ const controller = {
         IntakeStatus.SUBMITTED
       );
 
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+
       // Create new submission
-      const result = await submissionService.createSubmission(submission);
+      const result = await submissionService.createSubmission({ ...submission, createdBy: userId });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -391,7 +395,7 @@ const controller = {
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
 
-      if (req.currentContext?.attributes.includes('scope:self')) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
       }
@@ -422,7 +426,7 @@ const controller = {
         includeUser: isTruthy(req.query.includeUser)
       });
 
-      if (req.currentContext?.attributes.includes('scope:self')) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
       }
