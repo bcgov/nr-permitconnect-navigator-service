@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { nextTick, onBeforeMount, ref, toRaw } from 'vue';
-import { onBeforeRouteUpdate, useRouter } from 'vue-router';
+import { onBeforeMount, ref, toRaw } from 'vue';
+import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
@@ -220,19 +220,6 @@ async function loadEnquiry(enquiryId: string) {
     }
   });
 }
-
-onBeforeRouteUpdate(async (to) => {
-  if (!formRef.value) return;
-
-  if ('enquiryId' in to.query) {
-    loadEnquiry(to.query.enquiryId as string);
-  } else {
-    isFormReset.value = true;
-    await nextTick();
-    isFormReset.value = false;
-    editable.value = true;
-  }
-});
 
 onBeforeMount(async () => {
   if (props.enquiryId) loadEnquiry(props.enquiryId);
