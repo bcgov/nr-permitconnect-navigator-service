@@ -1,7 +1,7 @@
 import express from 'express';
 
 import { roadmapController } from '../../controllers';
-import { hasPermission } from '../../middleware/authorization';
+import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { Action, Resource } from '../../utils/enums/application';
 import { roadmapValidator } from '../../validators';
@@ -14,7 +14,7 @@ router.use(requireSomeAuth);
 // Send an email with the roadmap data
 router.put(
   '/',
-  hasPermission(Resource.ROADMAP, Action.CREATE),
+  hasAuthorization(Resource.ROADMAP, Action.CREATE),
   roadmapValidator.send,
   (req: Request, res: Response, next: NextFunction): void => {
     roadmapController.send(req, res, next);

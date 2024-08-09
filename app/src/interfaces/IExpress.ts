@@ -1,5 +1,6 @@
 import * as core from 'express-serve-static-core';
 
+import type { CurrentAuthorization } from '../types/CurrentAuthorization';
 import type { CurrentContext } from '../types/CurrentContext';
 
 interface Query extends core.Query {}
@@ -7,6 +8,7 @@ interface Query extends core.Query {}
 interface Params extends core.ParamsDictionary {}
 
 export interface Request<P extends Params = never, Q extends Query = never, B = never> extends core.Request {
+  currentAuthorization?: CurrentAuthorization;
   currentContext?: CurrentContext;
   params: P;
   query: Q;

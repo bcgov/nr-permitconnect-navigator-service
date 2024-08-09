@@ -2,6 +2,7 @@ export type { Activity } from './Activity';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
+export type { CurrentAuthorization } from './CurrentAuthorization';
 export type { CurrentContext } from './CurrentContext';
 export type { Document } from './Document';
 export type { Email } from './Email';
