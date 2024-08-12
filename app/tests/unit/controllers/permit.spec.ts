@@ -1,8 +1,5 @@
-import { NIL } from 'uuid';
-
 import { permitController } from '../../../src/controllers';
-import { permitService, userService } from '../../../src/services';
-import * as utils from '../../../src/utils/utils';
+import { permitService } from '../../../src/services';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -24,15 +21,15 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+
+const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 describe('createPermit', () => {
   const next = jest.fn();
 
   // Mock service calls
   const createSpy = jest.spyOn(permitService, 'createPermit');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 201 if all good', async () => {
     const now = new Date();
@@ -52,9 +49,6 @@ describe('createPermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     const created = {
       permitId: '12345',
       permitTypeId: 123,
@@ -70,18 +64,18 @@ describe('createPermit', () => {
     };
 
     createSpy.mockResolvedValue(created);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await permitController.createPermit(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({ ...req.body, updatedBy: USR_ID });
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123',
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
   });
@@ -100,14 +94,14 @@ describe('createPermit', () => {
         needed: 'true',
         status: 'FOO',
         submittedDate: now,
-        adjudicationDate: now
+        adjudicationDate: now,
+        createdAt: new Date().toISOString(),
+        createdBy: 'abc-123',
+        updatedAt: new Date().toISOString(),
+        updatedBy: 'abc-123'
       },
       currentContext: CURRENT_CONTEXT
     };
-
-    const USR_ID = 'abc-123';
-
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     createSpy.mockImplementationOnce(() => {
       throw new Error();
@@ -117,7 +111,13 @@ describe('createPermit', () => {
     await permitController.createPermit(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({ ...req.body, updatedBy: USR_ID });
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123',
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -305,8 +305,6 @@ describe('updatePermit', () => {
 
   // Mock service calls
   const updateSpy = jest.spyOn(permitService, 'updatePermit');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 200 if all good', async () => {
     const now = new Date();
@@ -326,9 +324,6 @@ describe('updatePermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     const updated = {
       permitId: '12345',
       permitTypeId: 123,
@@ -344,18 +339,16 @@ describe('updatePermit', () => {
     };
 
     updateSpy.mockResolvedValue(updated);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await permitController.updatePermit(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({ ...req.body, updatedBy: USR_ID });
+    expect(updateSpy).toHaveBeenCalledWith({
+      ...req.body,
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
   });
@@ -378,10 +371,6 @@ describe('updatePermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const USR_ID = 'abc-123';
-
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
-
     updateSpy.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -390,7 +379,11 @@ describe('updatePermit', () => {
     await permitController.updatePermit(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({ ...req.body, updatedBy: USR_ID });
+    expect(updateSpy).toHaveBeenCalledWith({
+      ...req.body,
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
