@@ -25,11 +25,13 @@ export const submissionIntakeSchema = object({
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
     isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
       is: (value: string) => value === BasicResponse.YES,
-      then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC')
+      then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
     }),
     registeredName: string().when('isDevelopedInBC', {
-      is: (value: string) => value,
-      then: (schema) => schema.required().max(255).label('Business name')
+      is: (value: string) => value === BasicResponse.YES || value === BasicResponse.NO,
+      then: (schema) => schema.required().max(255).label('Business name'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Business name')
     })
   }),
   [IntakeFormCategory.HOUSING]: object().shape(
@@ -148,7 +150,7 @@ export const submissionIntakeSchema = object({
       then: () => number().required().min(-139).max(-114).label('Longitude'),
       otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
     }),
-    ltsaPIDLookup: string().max(255).label('Parcel ID'),
+    ltsaPIDLookup: string().max(255).nullable().label('Parcel ID'),
     geomarkUrl: string().max(255).label('Geomark web service url')
   }),
   [IntakeFormCategory.PERMITS]: object({
@@ -169,7 +171,7 @@ export const submissionIntakeSchema = object({
           (val) => val instanceof Date || val === undefined
         )
         .label('Last verified date'),
-      trackingId: string().max(255).label('Tracking ID')
+      trackingId: string().max(255).nullable().label('Tracking ID')
     })
   )
 });
