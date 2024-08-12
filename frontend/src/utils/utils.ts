@@ -251,7 +251,7 @@ export function setEmptyStringsToNull(data: any) {
  * @param  {string} input The object to change
  * @returns {string} The object with the remapped values
  */
-export function toKebabCase(input: string | undefined | '') {
+export function toKebabCase(input: string | undefined) {
   if (!input) return input;
 
   return input

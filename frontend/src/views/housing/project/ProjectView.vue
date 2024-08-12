@@ -4,7 +4,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
-import { Accordion, AccordionTab, Button, Card, Divider } from '@/lib/primevue';
+import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -86,6 +86,8 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 });
 
 // Actions
+const toast = useToast();
+
 function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
   return a.businessDomain > b.businessDomain ? 1 : -1;
 }
@@ -137,13 +139,24 @@ function displayTrackerStatus(authStatus: string | undefined, permitState: strin
 }
 
 onMounted(async () => {
-  const [submissionValue, permitTypesValue] = (
-    await Promise.all([submissionService.getSubmission(props.submissionId), permitService.getPermitTypes()])
-  ).map((r) => r.data);
+  let submissionValue;
+  let permitTypesValue;
+  try {
+    [submissionValue, permitTypesValue] = (
+      await Promise.all([submissionService.getSubmission(props.submissionId), permitService.getPermitTypes()])
+    ).map((r) => r.data);
+  } catch {
+    toast.error('Unable to load project, please try again later');
+    router.replace({ name: RouteName.HOUSING_PROJECTS_LIST });
+  }
 
-  const permitsValue = (await permitService.listPermits(submissionValue.activityId)).data;
+  try {
+    const permitsValue = (await permitService.listPermits(submissionValue.activityId)).data;
+    submissionStore.setPermits(permitsValue);
+  } catch {
+    toast.error('Unable to load permits for this project, please try again later');
+  }
   submissionStore.setSubmission(submissionValue);
-  submissionStore.setPermits(permitsValue);
   typeStore.setPermitTypes(permitTypesValue);
 
   if (submissionValue?.assignedUserId) {
