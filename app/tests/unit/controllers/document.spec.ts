@@ -1,8 +1,5 @@
-import { NIL } from 'uuid';
-
 import { documentController } from '../../../src/controllers';
-import { documentService, userService } from '../../../src/services';
-import * as utils from '../../../src/utils/utils';
+import { documentService } from '../../../src/services';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -24,15 +21,15 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+
+const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 describe('createDocument', () => {
   const next = jest.fn();
 
   // Mock service calls
   const createSpy = jest.spyOn(documentService, 'createDocument');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 201 if all good', async () => {
     const req = {
@@ -49,20 +46,11 @@ describe('createDocument', () => {
       createdByFullName: 'testuser'
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     createSpy.mockResolvedValue(created);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await documentController.createDocument(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
       req.body.documentId,
@@ -70,7 +58,7 @@ describe('createDocument', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.length,
-      USR_ID
+      { createdAt: expect.stringMatching(isoPattern), createdBy: 'abc-123' }
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
@@ -82,22 +70,13 @@ describe('createDocument', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     createSpy.mockImplementationOnce(() => {
       throw new Error();
     });
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await documentController.createDocument(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_CONTEXT, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
       req.body.documentId,
@@ -105,7 +84,7 @@ describe('createDocument', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.length,
-      USR_ID
+      { createdAt: expect.stringMatching(isoPattern), createdBy: expect.any(String) }
     );
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
