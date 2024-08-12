@@ -51,13 +51,20 @@ import {
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus, PermitNeeded, PermitStatus, ProjectLocation } from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
+import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { Permit } from '@/types';
+import type { Permit, Submission } from '@/types';
 
+// Interfaces
+interface SubmissionForm extends Submission {
+  addressSearch?: string;
+  appliedPermits?: Array<Permit>;
+  investigatePermits?: Array<Permit>;
+}
 // Types
 type GeocoderEntry = {
   geometry: { coordinates: Array<number>; [key: string]: any };
@@ -95,7 +102,6 @@ const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
-const isFormReset: Ref<boolean> = ref(false);
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
@@ -119,15 +125,14 @@ const checkSubmittable = (stepNumber: number) => {
 };
 
 function confirmSubmit(data: any) {
-  const tempData = Object.assign({}, data);
-  delete tempData['addressSearch'];
+  const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
     message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
-    accept: () => onSubmit(tempData)
+    accept: () => onSubmit(submitData)
   });
 }
 
@@ -207,25 +212,23 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
 async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
-  const tempData = Object.assign({}, data);
-
   // Cleanup unneeded data to be saved to draft
-  delete tempData['addressSearch'];
+  const draftData = omit(data as SubmissionForm, ['addressSearch']);
 
   // Remove empty permits
-  if (Array.isArray(tempData.appliedPermits)) {
-    tempData.appliedPermits = tempData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  if (Array.isArray(draftData.appliedPermits)) {
+    draftData.appliedPermits = draftData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
-  if (Array.isArray(tempData.investigatePermits)) {
-    tempData.investigatePermits = tempData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  if (Array.isArray(draftData.investigatePermits)) {
+    draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
 
   try {
     let response;
     if (data.submissionId) {
-      response = await submissionService.updateDraft(tempData.submissionId, tempData);
+      response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
-      response = await submissionService.createDraft(tempData);
+      response = await submissionService.createDraft(draftData);
     }
 
     if (response.data.submissionId && response.data.activityId) {
@@ -396,7 +399,6 @@ onBeforeMount(async () => {
     />
 
     <Form
-      v-if="!isFormReset"
       id="form"
       v-slot="{ setFieldValue, errors, values }"
       ref="formRef"

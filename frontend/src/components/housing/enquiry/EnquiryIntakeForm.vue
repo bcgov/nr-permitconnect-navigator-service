@@ -46,7 +46,6 @@ const { getConfig } = storeToRefs(useConfigStore());
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const isFormReset: Ref<boolean> = ref(false);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -221,7 +220,7 @@ async function loadEnquiry(enquiryId: string) {
   });
 }
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   if (props.enquiryId) loadEnquiry(props.enquiryId);
 });
 
@@ -276,7 +275,6 @@ async function checkActivityIdValidity(event: Event) {
     <CollectionDisclaimer />
 
     <Form
-      v-if="!isFormReset"
       v-slot="{ values }"
       ref="formRef"
       keep-values
