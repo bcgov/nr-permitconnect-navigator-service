@@ -3,6 +3,7 @@ import express from 'express';
 import { enquiryController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
 
@@ -11,6 +12,7 @@ import type { Middleware } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(requireSomeGroup);
 
 const decideValidation = (validator: Middleware) => {
   return (req: Request, _res: Response, next: NextFunction) => {
