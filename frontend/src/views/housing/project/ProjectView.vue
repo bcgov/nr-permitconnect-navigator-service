@@ -35,15 +35,18 @@ type Props = {
 
 const props = withDefaults(defineProps<Props>(), {});
 
-// State
+// Constants
+const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
+
+// Store
 const submissionStore = useSubmissionStore();
 const { getPermits, getSubmission } = storeToRefs(submissionStore);
 
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
 
+// State
 const assignee: Ref<User | undefined> = ref(undefined);
-const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
 const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
   { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
@@ -91,9 +94,11 @@ const toast = useToast();
 function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
   return a.businessDomain > b.businessDomain ? 1 : -1;
 }
+
 function permitNameSortFcn(a: CombinedPermit, b: CombinedPermit) {
   return a.name > b.name ? 1 : -1;
 }
+
 function permitFilter(config: PermitFilterConfig) {
   const { permitNeeded, permits, permitStatus, permitTypes } = config;
   let returnArray: Array<any> = permits;
@@ -115,27 +120,10 @@ function permitFilter(config: PermitFilterConfig) {
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
 }
 
-function displayTrackerStatus(authStatus: string | undefined, permitState: string | undefined): string {
-  if (permitState === PermitStatus.APPLIED) {
-    switch (authStatus) {
-      case PermitAuthorizationStatus.IN_REVIEW:
-      case PermitAuthorizationStatus.PENDING:
-        return authStatus;
-      case PermitAuthorizationStatus.NONE:
-      default:
-        return 'Submitted';
-    }
-  }
-  if (permitState === PermitStatus.COMPLETED) {
-    switch (authStatus) {
-      case PermitAuthorizationStatus.ISSUED:
-      case PermitAuthorizationStatus.DENIED:
-        return authStatus;
-      default:
-        return PermitStatus.COMPLETED;
-    }
-  }
-  return 'Submitted';
+function displayTrackerStatus(authStatus: string | undefined, permitState: string | undefined): string | undefined {
+  if (permitState === PermitStatus.APPLIED && authStatus === PermitAuthorizationStatus.NONE) return 'Submitted';
+
+  return authStatus;
 }
 
 onMounted(async () => {
@@ -272,16 +260,31 @@ onMounted(async () => {
               {{ displayTrackerStatus(permit.authStatus, permit.status) }}
             </div>
           </div>
-          <div class="col-2">
-            <div>{{ permit?.statusLastVerified ? formatDate(permit.statusLastVerified) : '' }}</div>
+          <div
+            v-tooltip="{ value: permit?.statusLastVerified ? formatDate(permit.statusLastVerified) : '' }"
+            class="col-2"
+          >
+            <div class="permit-data">
+              {{ permit?.statusLastVerified ? formatDate(permit.statusLastVerified) : '' }}
+            </div>
             <div :class="['sub-label', { 'm-0': permit?.statusLastVerified }]">Last verified date</div>
           </div>
-          <div class="col-2">
-            <div>{{ permit?.trackingId ? permit.trackingId : '' }}</div>
+          <div
+            v-tooltip="{ value: permit?.trackingId ? permit.trackingId : '' }"
+            class="col-2"
+          >
+            <div class="permit-data">
+              {{ permit?.trackingId ? permit.trackingId : '' }}
+            </div>
             <div :class="['sub-label', { 'm-0': permit?.trackingId }]">Tracking ID</div>
           </div>
-          <div class="col-2">
-            <div>{{ permit?.issuedPermitId ? permit.issuedPermitId : '' }}</div>
+          <div
+            v-tooltip="{ value: permit?.issuedPermitId ? permit.issuedPermitId : '' }"
+            class="col-2"
+          >
+            <div class="permit-data">
+              {{ permit?.issuedPermitId ? permit.issuedPermitId : '' }}
+            </div>
             <div :class="['sub-label', { 'm-0': permit?.issuedPermitId }]">Permit ID</div>
           </div>
         </div>
@@ -362,6 +365,11 @@ a {
   &:hover {
     background-color: $app-grey;
   }
+}
+
+.permit-data {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .sub-label {

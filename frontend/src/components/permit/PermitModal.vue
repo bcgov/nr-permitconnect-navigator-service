@@ -9,10 +9,11 @@ import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
-import { PermitStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
+import type { Schema } from 'yup';
 import type { Permit, PermitForm, PermitType } from '@/types';
 
 // Props
@@ -59,7 +60,27 @@ const formSchema = object({
   needed: string().required().label('Needed'),
   status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
-  businessDomain: string().required().label('Business domain'),
+  businessDomain: string().label('Business domain'),
+  authStatus: string()
+    .notRequired()
+    .label('For the currently selected Permit state, Authorization status')
+    .when('status', {
+      is: (value: string) => (PermitStatus.APPLIED as string) === value,
+      then: (schema: Schema) =>
+        schema
+          .oneOf([
+            PermitAuthorizationStatus.NONE,
+            PermitAuthorizationStatus.IN_REVIEW,
+            PermitAuthorizationStatus.PENDING
+          ])
+          .required()
+    })
+    .when('status', {
+      is: (value: string) => (PermitStatus.COMPLETED as string) === value,
+      then: (schema: Schema) =>
+        schema.oneOf([PermitAuthorizationStatus.ISSUED, PermitAuthorizationStatus.DENIED]).required(),
+      otherwise: (schema: Schema) => schema
+    }),
   statusLastVerified: date()
     .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()
