@@ -62,6 +62,13 @@
     "env": "SERVER_ENV",
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
+    "objectStorage": {
+      "accessKeyId": "OBJECTSTORAGE_ACCESSKEYID",
+      "bucket": "OBJECTSTORAGE_BUCKET",
+      "endpoint": "OBJECTSTORAGE_ENDPOINT",
+      "key": "OBJECTSTORAGE_KEY",
+      "secretAccessKey": "OBJECTSTORAGE_SECRETACCESSKEY"
+    },
     "oidc": {
       "authority": "SERVER_OIDC_AUTHORITY",
       "clientId": "SERVER_OIDC_CLIENTID",
