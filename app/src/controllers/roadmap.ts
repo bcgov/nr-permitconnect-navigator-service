@@ -18,12 +18,12 @@ const controller = {
       if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
         const attachments: Array<EmailAttachment> = [];
 
-        const comsObjects = await comsService.getObjects(req.headers, req.body.selectedFileIds);
+        const comsObjects = await comsService.getObjects(req.currentContext?.bearerToken, req.body.selectedFileIds);
 
         // Attempt to get the requested documents from COMS
         // If succesful it is converted to base64 encoding and added to the attachment list
         const objectPromises = req.body.selectedFileIds.map(async (id) => {
-          const { status, headers, data } = await comsService.getObject(req.headers, id);
+          const { status, headers, data } = await comsService.getObject(req.currentContext?.bearerToken, id);
 
           if (status === 200) {
             const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;

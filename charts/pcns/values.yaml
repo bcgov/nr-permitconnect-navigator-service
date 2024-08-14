@@ -160,6 +160,10 @@ config:
     # SERVER_LOGFILE: ~
     SERVER_LOGLEVEL: http
 
+    OBJECTSTORAGE_BUCKET: ~
+    OBJECTSTORAGE_ENDPOINT: ~
+    OBJECTSTORAGE_KEY: ~
+
     SERVER_OIDC_AUTHORITY: ~
     SERVER_OIDC_IDENTITYKEY: ~
     SERVER_OIDC_PUBLICKEY: ~
@@ -181,6 +185,9 @@ form2SecretOverride:
   username: ~
   password: ~
 chesSecretOverride:
+  username: ~
+  password: ~
+objectStorageSecretOverride:
   username: ~
   password: ~
 oidcSecretOverride:
