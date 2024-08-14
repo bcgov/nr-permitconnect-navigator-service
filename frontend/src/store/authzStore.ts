@@ -15,6 +15,7 @@ export enum NavigationPermission {
   HOUSING_SUBMISSIONS = 'housing.submissions',
   HOUSING_SUBMISSIONS_SUB = 'housing.submissions.sub',
   HOUSING_STATUS_TRACKER = 'housing.statustracker',
+  HOUSING_USER_GUIDE = 'housing.userguide',
   HOUSING_USER_MANAGEMENT = 'housing.usermanagement',
   DEVELOPER = 'developer'
 }

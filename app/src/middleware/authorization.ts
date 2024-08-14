@@ -44,13 +44,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const identityId = (req.currentContext?.tokenPayload as any).preferred_username;
 
-        let groups = await yarsService.getIdentityGroups(identityId);
-
-        // Auto assign all PROPONENT groups if user has none
-        if (groups && groups.length === 0) {
-          await yarsService.assignGroup(identityId, Initiative.HOUSING, GroupName.PROPONENT);
-          groups = await yarsService.getIdentityGroups(identityId);
-        }
+        const groups = await yarsService.getIdentityGroups(identityId);
 
         if (groups.length === 0) {
           throw new Error('Invalid group(s)');

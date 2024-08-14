@@ -1,14 +1,17 @@
 import express from 'express';
+
 import { submissionController } from '../../controllers';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+import { Action, Resource } from '../../utils/enums/application';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { Action, Resource } from '../../utils/enums/application';
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(requireSomeGroup);
 
 /** Gets a list of submissions */
 router.get(
