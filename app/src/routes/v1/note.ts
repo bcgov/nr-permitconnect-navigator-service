@@ -3,6 +3,7 @@ import express from 'express';
 import { noteController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { noteValidator } from '../../validators';
 
@@ -10,6 +11,7 @@ import type { NextFunction, Request, Response } from '../../interfaces/IExpress'
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(requireSomeGroup);
 
 // Note create endpoint
 router.put(

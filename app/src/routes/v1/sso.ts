@@ -3,16 +3,14 @@ import express from 'express';
 import { ssoController } from '../../controllers';
 import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 
 import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
 
 const router = express.Router();
 router.use(requireSomeAuth);
-
-router.post('/requestBasicAccess', (req: Request, res: Response, next: NextFunction): void => {
-  ssoController.requestBasicAccess(req, res, next);
-});
+router.use(requireSomeGroup);
 
 router.get(
   '/idir/users',

@@ -89,7 +89,7 @@ onMounted(() => {
         {
           label: 'User Guide',
           route: RouteName.HOUSING_GUIDE,
-          access: NavigationPermission.HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_USER_GUIDE
         }
       ],
       public: true

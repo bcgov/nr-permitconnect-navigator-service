@@ -3,6 +3,8 @@ import express from 'express';
 import { permitController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+
 import { Action, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
 
@@ -10,6 +12,7 @@ import type { NextFunction, Request, Response } from '../../interfaces/IExpress'
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(requireSomeGroup);
 
 // Permit create endpoint
 router.put(

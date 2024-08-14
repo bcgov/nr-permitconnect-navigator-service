@@ -1,12 +1,9 @@
 import axios from 'axios';
 import config from 'config';
 
-import { GroupName } from '../utils/enums/application';
-
 import type { AxiosInstance } from 'axios';
 
 // Types
-
 type IdirSearchParams = {
   firstName: string;
   lastName: string;
@@ -62,31 +59,6 @@ function ssoAxios(): AxiosInstance {
 }
 
 const service = {
-  requestBasicAccess: async (username: string) => {
-    try {
-      const env = config.get('server.env');
-      const integration = config.get('server.sso.integration');
-      const { data, status } = await ssoAxios().post(`/integrations/${integration}/${env}/users/${username}/roles`, [
-        {
-          name: GroupName.PROPONENT
-        }
-      ]);
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
   searchIdirUsers: async (params?: IdirSearchParams) => {
     try {
       const env = config.get('server.env');
@@ -111,27 +83,6 @@ const service = {
     try {
       const env = config.get('server.env');
       const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  getRoles: async () => {
-    try {
-      const env = config.get('server.env');
-      const integration = config.get('server.sso.integration');
-      const { data, status } = await ssoAxios().get(`/integrations/${integration}/${env}/roles`);
       return { data: data.data, status };
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {

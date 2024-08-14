@@ -203,6 +203,10 @@ export default function getRouter() {
       }
     }
 
+    // Race condition on initial load between routing and getting user groups
+    // So just hold a sec if we haven't gotten them yet
+    await waitForUserGroups();
+
     // Check for reroutes
     if (to.name === RouteName.HOUSING) {
       if (!authzStore.canNavigate(NavigationPermission.HOUSING)) {
@@ -213,9 +217,6 @@ export default function getRouter() {
 
     // Check access
     if (to.meta.access) {
-      // Race condition on initial load between routing and getting user groups
-      // So just hold a sec if we haven't gotten them yet
-      await waitForUserGroups();
       if (!authzStore.canNavigate(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
         router.replace({ name: RouteName.NOT_FOUND });
         return;
