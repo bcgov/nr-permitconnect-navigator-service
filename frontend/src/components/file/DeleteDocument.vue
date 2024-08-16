@@ -8,8 +8,9 @@ import type { Document } from '@/types';
 // Props
 type Props = {
   document: Document;
+  disabled?: boolean;
 };
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), { disabled: false });
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -43,6 +44,7 @@ const confirmDelete = (document: Document) => {
 <template>
   <Button
     v-tooltip.bottom="'Delete document'"
+    :disabled="props.disabled"
     class="p-button-lg p-button-text p-button-danger p-0 align-self-center"
     aria-label="Delete object"
     style="position: relative; top: 5; right: 0"

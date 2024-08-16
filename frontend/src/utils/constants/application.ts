@@ -20,6 +20,24 @@ export const PCNS_CONTACT = {
   subject: 'Reporting an Issue with PCNS'
 };
 
+export const SPATIAL_FILE_FORMATS = [
+  '.cpg',
+  '.dbf',
+  '.geojson',
+  '.gml',
+  '.gpx',
+  '.kml',
+  '.kmz',
+  '.pdf',
+  '.prj',
+  '.sbn',
+  '.sbx',
+  '.shp',
+  '.shx',
+  '.wkt',
+  '.xml'
+];
+
 export const SYSTEM_USER = NIL;
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
