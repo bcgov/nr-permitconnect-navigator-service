@@ -1,9 +1,8 @@
-export enum AccessRole {
-  PCNS_ADMIN = 'PCNS_ADMIN',
-  PCNS_DEVELOPER = 'PCNS_DEVELOPER',
-  PCNS_NAVIGATOR = 'PCNS_NAVIGATOR',
-  PCNS_PROPONENT = 'PCNS_PROPONENT',
-  PCNS_SUPERVISOR = 'PCNS_SUPERVISOR'
+export enum Action {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE'
 }
 
 /** Current user authentication type */
@@ -27,6 +26,7 @@ export enum IdentityProvider {
 }
 
 export enum Initiative {
+  PCNS = 'PCNS',
   HOUSING = 'HOUSING'
 }
 
@@ -37,4 +37,23 @@ export enum Regex {
    */
   EMAIL = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$',
   PHONE_NUMBER = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$'
+}
+
+export enum Resource {
+  DOCUMENT = 'DOCUMENT',
+  ENQUIRY = 'ENQUIRY',
+  NOTE = 'NOTE',
+  PERMIT = 'PERMIT',
+  ROADMAP = 'ROADMAP',
+  SSO = 'SSO',
+  SUBMISSION = 'SUBMISSION',
+  USER = 'USER'
+}
+
+export enum GroupName {
+  DEVELOPER = 'DEVELOPER',
+  PROPONENT = 'PROPONENT',
+  NAVIGATOR = 'NAVIGATOR',
+  SUPERVISOR = 'SUPERVISOR',
+  ADMIN = 'ADMIN'
 }

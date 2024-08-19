@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { Permissions, default as PermissionService } from '@/services/permissionService';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_CONTACT } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
@@ -19,10 +20,11 @@ type NavItem = {
   mailTo?: string;
 };
 
+// Store
+const authzStore = useAuthZStore();
+
 // State
 const items: Ref<Array<NavItem>> = ref([]);
-
-const permissionService = new PermissionService();
 
 onMounted(() => {
   items.value = [
@@ -37,39 +39,39 @@ onMounted(() => {
         {
           label: 'Work with a Housing Navigator',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
           route: RouteName.HOUSING_ENQUIRY_INTAKE,
-          access: Permissions.NAVIGATION_HOUSING_ENQUIRY
+          access: NavigationPermission.HOUSING_ENQUIRY
         },
         {
           label: 'Drafts and submissions',
           route: RouteName.HOUSING_SUBMISSIONS,
-          access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB
+          access: NavigationPermission.HOUSING_SUBMISSIONS_SUB
         },
         {
           label: 'Status of application/permit',
           route: RouteName.COMING_SOON,
-          access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
+          access: NavigationPermission.HOUSING_STATUS_TRACKER
         }
       ],
-      access: Permissions.NAVIGATION_HOUSING_DROPDOWN
+      access: NavigationPermission.HOUSING_DROPDOWN
     },
     {
       label: 'Submissions',
       route: RouteName.HOUSING_SUBMISSIONS,
-      access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS
+      access: NavigationPermission.HOUSING_SUBMISSIONS
     },
     {
       label: 'User Management',
-      access: Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
+      access: NavigationPermission.HOUSING_USER_MANAGEMENT
     },
     {
       label: 'Developer',
       route: RouteName.DEVELOPER,
-      access: Permissions.NAVIGATION_DEVELOPER
+      access: NavigationPermission.DEVELOPER
     },
     {
       label: 'Help',
@@ -77,7 +79,7 @@ onMounted(() => {
         {
           label: 'Contact a Navigator',
           mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_INTAKE
         },
         {
           label: 'Report a problem',
@@ -87,7 +89,7 @@ onMounted(() => {
         {
           label: 'User Guide',
           route: RouteName.HOUSING_GUIDE,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_USER_GUIDE
         }
       ],
       public: true
@@ -100,7 +102,7 @@ onMounted(() => {
   <nav class="navigation-main pl-2 lg:pl-6">
     <Menubar :model="items">
       <template #item="{ item, props, hasSubmenu }">
-        <span v-if="item.public || permissionService.can(item.access)">
+        <span v-if="item.public || authzStore.canNavigate(item.access)">
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"

@@ -3,13 +3,13 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { useAuthStore } from '@/store';
+import { useAuthNStore } from '@/store';
 
-const authStore = useAuthStore();
+const authnStore = useAuthNStore();
 const router = useRouter();
 
 onMounted(async () => {
-  if (authStore.getIsAuthenticated) await authStore.logout();
+  if (authnStore.getIsAuthenticated) await authnStore.logout();
 
   // Return user back to home page
   router.replace('/');

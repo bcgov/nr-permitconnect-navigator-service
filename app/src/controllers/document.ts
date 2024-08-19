@@ -1,7 +1,5 @@
-import { documentService, userService } from '../services';
-import { NIL } from 'uuid';
-
-import { getCurrentIdentity } from '../utils/utils';
+import { generateCreateStamps } from '../db/utils/utils';
+import { documentService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
@@ -16,14 +14,13 @@ const controller = {
     next: NextFunction
   ) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const response = await documentService.createDocument(
         req.body.documentId,
         req.body.activityId,
         req.body.filename,
         req.body.mimeType,
         req.body.length,
-        userId as string
+        generateCreateStamps(req.currentContext)
       );
       res.status(201).json(response);
     } catch (e: unknown) {

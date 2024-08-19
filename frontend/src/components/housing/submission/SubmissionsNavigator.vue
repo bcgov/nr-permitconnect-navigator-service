@@ -10,9 +10,8 @@ import SubmissionListNavigator from '@/components/housing/submission/SubmissionL
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
-import PermissionService, { Permissions } from '@/services/permissionService';
-import { useAuthStore } from '@/store';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { useAuthNStore, useAuthZStore } from '@/store';
+import { Action, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -27,8 +26,10 @@ const NOTES_TAB_INDEX = {
 };
 
 // Store
-const authStore = useAuthStore();
-const { getProfile } = storeToRefs(authStore);
+const authnStore = useAuthNStore();
+const authzStore = useAuthZStore();
+
+const { getProfile } = storeToRefs(authnStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
@@ -41,7 +42,6 @@ const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
-const permissionService = new PermissionService();
 const toast = useToast();
 
 function getBringForwardDate(bf: BringForward) {
@@ -174,7 +174,7 @@ watch(accordionIndex, () => {
   <TabView v-if="!loading">
     <TabPanel header="Projects">
       <Accordion
-        v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
+        v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -231,7 +231,7 @@ watch(accordionIndex, () => {
       </div>
     </TabPanel>
     <TabPanel
-      v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
+      v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
       header="Bring Forward Calendar"
     >
       <SubmissionBringForwardCalendar

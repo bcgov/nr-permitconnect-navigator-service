@@ -1,7 +1,5 @@
-import { NIL } from 'uuid';
-
-import { comsService, emailService, noteService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
+import { generateCreateStamps } from '../db/utils/utils';
+import { comsService, emailService, noteService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';
@@ -53,8 +51,6 @@ const controller = {
 
       // Add a new note on success
       if (status === 201) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-
         let noteBody = req.body.emailData.body;
         if (req.body.emailData.attachments) {
           noteBody += '\n\nAttachments:\n';
@@ -70,9 +66,8 @@ const controller = {
           title: 'Sent roadmap',
           bringForwardDate: null,
           bringForwardState: null,
-          createdAt: new Date().toISOString(),
-          createdBy: userId,
-          isDeleted: false
+          isDeleted: false,
+          ...generateCreateStamps(req.currentContext)
         });
       }
 

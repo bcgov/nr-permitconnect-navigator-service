@@ -1,9 +1,10 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
-import { getCurrentIdentity, getCurrentTokenUsername, isTruthy } from '../utils/utils';
+import { getCurrentIdentity, getCurrentTokenUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
@@ -13,12 +14,12 @@ const controller = {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);
       if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
 
         await noteService.createNote({
           activityId: data.relatedActivityId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${getCurrentTokenUsername(req.currentUser)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
+          note: `Added by ${getCurrentTokenUsername(req.currentContext)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
           noteType: NoteType.ENQUIRY,
           title: 'Enquiry',
           bringForwardDate: null,
@@ -35,7 +36,9 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
+    const activityId =
+      data.activityId ??
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
     let applicant, basic;
 
@@ -69,7 +72,7 @@ const controller = {
       activityId: activityId,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      submittedBy: getCurrentTokenUsername(req.currentUser),
+      submittedBy: getCurrentTokenUsername(req.currentContext),
       intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
@@ -84,7 +87,10 @@ const controller = {
       const enquiry = await controller.generateEnquiryData(req);
 
       // Create new enquiry
-      const result = await enquiryService.createEnquiry(enquiry);
+      const result = await enquiryService.createEnquiry({
+        ...enquiry,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // On submit attempt to create note if enquiry is associated with an existing activity
       if (data.submit) {
@@ -111,9 +117,9 @@ const controller = {
       // Pull from PCNS database
       let response = await enquiryService.getEnquiries();
 
-      if (isTruthy(req.query.self)) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
+        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentContext));
       }
 
       res.status(200).json(response);
@@ -136,10 +142,9 @@ const controller = {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       } as Enquiry);
 
       res.status(200).json(result);
@@ -156,7 +161,10 @@ const controller = {
       const enquiry = await controller.generateEnquiryData(req);
 
       // Update enquiry
-      const result = await enquiryService.updateEnquiry(enquiry as Enquiry);
+      const result = await enquiryService.updateEnquiry({
+        ...(enquiry as Enquiry),
+        ...generateUpdateStamps(req.currentContext)
+      });
 
       // On submit, attempt to create note if enquiry is associated with an existing activity
       if (data.submit) {
@@ -173,7 +181,11 @@ const controller = {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
-      const response = await enquiryService.updateIsDeletedFlag(req.params.enquiryId, data.isDeleted);
+      const response = await enquiryService.updateIsDeletedFlag(
+        req.params.enquiryId,
+        data.isDeleted,
+        generateUpdateStamps(req.currentContext)
+      );
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

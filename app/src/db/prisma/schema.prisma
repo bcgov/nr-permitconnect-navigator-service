@@ -1,10 +1,12 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema", "views"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  schemas  = ["public", "yars"]
 }
 
 model knex_migrations {
@@ -12,11 +14,15 @@ model knex_migrations {
   name           String?   @db.VarChar(255)
   batch          Int?
   migration_time DateTime? @db.Timestamptz(6)
+
+  @@schema("public")
 }
 
 model knex_migrations_lock {
   index     Int  @id @default(autoincrement())
   is_locked Int?
+
+  @@schema("public")
 }
 
 model activity {
@@ -33,6 +39,8 @@ model activity {
   note          note[]
   permit        permit[]
   submission    submission[]
+
+  @@schema("public")
 }
 
 model document {
@@ -48,6 +56,7 @@ model document {
   activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "document_activity_id_foreign")
 
   @@unique([document_id, activity_id], map: "document_document_id_activity_id_unique")
+  @@schema("public")
 }
 
 model identity_provider {
@@ -58,6 +67,8 @@ model identity_provider {
   updated_by String?
   updated_at DateTime? @db.Timestamptz(6)
   user       user[]
+
+  @@schema("public")
 }
 
 model initiative {
@@ -69,6 +80,9 @@ model initiative {
   updated_by    String?
   updated_at    DateTime?  @db.Timestamptz(6)
   activity      activity[]
+  group         group[]
+
+  @@schema("public")
 }
 
 model note {
@@ -85,6 +99,8 @@ model note {
   bring_forward_state String?
   is_deleted          Boolean   @default(false)
   activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
+
+  @@schema("public")
 }
 
 model permit {
@@ -107,6 +123,7 @@ model permit {
   permit_type          permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
 
   @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
+  @@schema("public")
 }
 
 model permit_type {
@@ -128,6 +145,8 @@ model permit_type {
   updated_by            String?
   updated_at            DateTime? @db.Timestamptz(6)
   permit                permit[]
+
+  @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
@@ -193,6 +212,8 @@ model submission {
   contact_last_name                  String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
+
+  @@schema("public")
 }
 
 model user {
@@ -216,6 +237,7 @@ model user {
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
+  @@schema("public")
 }
 
 model enquiry {
@@ -244,4 +266,175 @@ model enquiry {
   updated_at                     DateTime? @db.Timestamptz(6)
   activity                       activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
   user                           user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
+
+  @@schema("public")
+}
+
+model action {
+  action_id  Int       @id @default(autoincrement())
+  name       String    @unique(map: "action_name_unique")
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  policy     policy[]
+
+  @@schema("yars")
+}
+
+model group {
+  group_id        Int               @id @default(autoincrement())
+  initiative_id   String            @db.Uuid
+  name            String
+  created_by      String?           @default("00000000-0000-0000-0000-000000000000")
+  created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_by      String?
+  updated_at      DateTime?         @db.Timestamptz(6)
+  attribute_group attribute_group[]
+  initiative      initiative        @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "group_initiative_id_foreign")
+  group_role      group_role[]
+  identity_group  identity_group[]
+
+  @@unique([initiative_id, name], map: "group_initiative_id_name_unique")
+  @@schema("yars")
+}
+
+model group_role {
+  group_id   Int
+  role_id    Int
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  group      group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "group_role_group_id_foreign")
+  role       role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "group_role_role_id_foreign")
+
+  @@id([group_id, role_id])
+  @@schema("yars")
+}
+
+model identity_group {
+  identity_id String
+  group_id    Int
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  group       group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "identity_group_group_id_foreign")
+
+  @@id([identity_id, group_id])
+  @@schema("yars")
+}
+
+model resource {
+  resource_id Int       @id @default(autoincrement())
+  name        String    @unique(map: "resource_name_unique")
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  policy      policy[]
+
+  @@schema("yars")
+}
+
+model role {
+  role_id         Int           @id @default(autoincrement())
+  name            String        @unique(map: "role_name_unique")
+  description     String?
+  record_security Boolean       @default(false)
+  created_by      String?       @default("00000000-0000-0000-0000-000000000000")
+  created_at      DateTime?     @default(now()) @db.Timestamptz(6)
+  updated_by      String?
+  updated_at      DateTime?     @db.Timestamptz(6)
+  group_role      group_role[]
+  role_policy     role_policy[]
+
+  @@schema("yars")
+}
+
+model attribute {
+  attribute_id     Int                @id @default(autoincrement())
+  name             String             @unique(map: "attribute_name_unique")
+  description      String?
+  created_by       String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by       String?
+  updated_at       DateTime?          @db.Timestamptz(6)
+  attribute_group  attribute_group[]
+  policy_attribute policy_attribute[]
+
+  @@schema("yars")
+}
+
+model attribute_group {
+  attribute_id Int
+  group_id     Int
+  created_by   String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime? @db.Timestamptz(6)
+  attribute    attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "attribute_group_attribute_id_foreign")
+  group        group     @relation(fields: [group_id], references: [group_id], onDelete: Cascade, map: "attribute_group_group_id_foreign")
+
+  @@id([attribute_id, group_id])
+  @@schema("yars")
+}
+
+model policy {
+  policy_id        Int                @id @default(autoincrement())
+  resource_id      Int
+  action_id        Int
+  created_by       String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by       String?
+  updated_at       DateTime?          @db.Timestamptz(6)
+  action           action             @relation(fields: [action_id], references: [action_id], onDelete: Cascade, map: "policy_action_id_foreign")
+  resource         resource           @relation(fields: [resource_id], references: [resource_id], onDelete: Cascade, map: "policy_resource_id_foreign")
+  policy_attribute policy_attribute[]
+  role_policy      role_policy[]
+
+  @@unique([resource_id, action_id], map: "policy_resource_id_action_id_unique")
+  @@schema("yars")
+}
+
+model policy_attribute {
+  policy_id    Int
+  attribute_id Int
+  created_by   String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime? @db.Timestamptz(6)
+  attribute    attribute @relation(fields: [attribute_id], references: [attribute_id], onDelete: Cascade, map: "policy_attribute_attribute_id_foreign")
+  policy       policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "policy_attribute_policy_id_foreign")
+
+  @@id([policy_id, attribute_id])
+  @@schema("yars")
+}
+
+model role_policy {
+  role_id    Int
+  policy_id  Int
+  created_by String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by String?
+  updated_at DateTime? @db.Timestamptz(6)
+  policy     policy    @relation(fields: [policy_id], references: [policy_id], onDelete: Cascade, map: "role_policy_policy_id_foreign")
+  role       role      @relation(fields: [role_id], references: [role_id], onDelete: Cascade, map: "role_policy_role_id_foreign")
+
+  @@id([role_id, policy_id])
+  @@schema("yars")
+}
+
+view group_role_policy_vw {
+  row_number      BigInt  @unique
+  group_id        Int?
+  initiative_code String?
+  group_name      String?
+  role_name       String?
+  policy_id       Int?
+  resource_name   String?
+  action_name     String?
+
+  @@schema("yars")
 }

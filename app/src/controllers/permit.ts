@@ -1,16 +1,17 @@
-import { NIL } from 'uuid';
-
-import { permitService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
+import { permitService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Permit } from '../types';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
   createPermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
+      const response = await permitService.createPermit({
+        ...(req.body as Permit),
+        ...generateCreateStamps(req.currentContext),
+        ...generateUpdateStamps(req.currentContext)
+      });
       res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
@@ -46,8 +47,10 @@ const controller = {
 
   updatePermit: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      const response = await permitService.updatePermit({ ...(req.body as Permit), updatedBy: userId });
+      const response = await permitService.updatePermit({
+        ...(req.body as Permit),
+        ...generateUpdateStamps(req.currentContext)
+      });
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

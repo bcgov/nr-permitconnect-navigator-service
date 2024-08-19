@@ -1,10 +1,7 @@
 import config from 'config';
-import { NIL } from 'uuid';
 
 import submissionController from '../../../src/controllers/submission';
-import { activityService, enquiryService, permitService, submissionService, userService } from '../../../src/services';
-import * as utils from '../../../src/utils/utils';
-
+import { activityService, enquiryService, permitService, submissionService } from '../../../src/services';
 import type { Permit, Submission } from '../../../src/types';
 import {
   ApplicationStatus,
@@ -42,7 +39,7 @@ afterEach(() => {
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
 const FORM_EXPORT_1 = {
   form: {
@@ -264,7 +261,10 @@ const SUBMISSION_1 = {
   submissions: null,
   intakeStatus: null,
   applicationStatus: null,
+  createdAt: new Date().toISOString(),
+  createdBy: 'abc-123',
   updatedAt: new Date().toISOString(),
+  updatedBy: 'abc-123',
   user: null
 };
 
@@ -386,7 +386,7 @@ describe('createDraft', () => {
   it('creates submission with unique activity ID', async () => {
     const req = {
       body: { ...SUBMISSION_1, activityId: undefined, submissionId: undefined },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -446,7 +446,7 @@ describe('createDraft', () => {
           checkProvincialPermits: true
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -482,7 +482,7 @@ describe('createDraft', () => {
         submissionId: '11111111',
         submit: true
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -526,7 +526,7 @@ describe('createDraft', () => {
           }
         ]
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -582,7 +582,7 @@ describe('createSubmission', () => {
   it('creates submission with unique activity ID', async () => {
     const req = {
       body: { ...SUBMISSION_1, activityId: undefined, submissionId: undefined },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -620,7 +620,7 @@ describe('createSubmission', () => {
           hasAppliedProvincialPermits: true
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -676,7 +676,7 @@ describe('createSubmission', () => {
           }
         ]
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
@@ -737,7 +737,7 @@ describe('getStatistics', () => {
         monthYear: '',
         userId: ''
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const statistics = [
@@ -768,7 +768,7 @@ describe('getStatistics', () => {
         monthYear: '',
         userId: ''
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     statisticsSpy.mockImplementationOnce(() => {
@@ -795,7 +795,7 @@ describe('getSubmission', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { submissionId: 'SOMEID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -814,7 +814,7 @@ describe('getSubmission', () => {
   it('calls next if the submission service fails to get submission', async () => {
     const req = {
       params: { submissionId: 'SOMEID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     submissionSpy.mockImplementationOnce(() => {
@@ -842,7 +842,7 @@ describe('getSubmissions', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       query: {}
     };
 
@@ -862,7 +862,7 @@ describe('getSubmissions', () => {
 
   it('calls checkAndStoreNewSubmissions', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     checkAndStoreSpy.mockResolvedValue();
@@ -878,7 +878,7 @@ describe('getSubmissions', () => {
 
   it('calls next if the submission controller fails to check/create submissions', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     checkAndStoreSpy.mockImplementationOnce(() => {
@@ -896,7 +896,7 @@ describe('getSubmissions', () => {
 
   it('calls next if the submission service fails to get submissions', async () => {
     const req = {
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     submissionsSpy.mockImplementationOnce(() => {
@@ -920,29 +920,20 @@ describe('updateDraft', () => {
   const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('updates submission with the given activity ID', async () => {
     const req = {
       body: { activityId: '000000000', submissionId: '11111111' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -972,23 +963,16 @@ describe('updateDraft', () => {
           hasAppliedProvincialPermits: true
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
@@ -1016,23 +1000,15 @@ describe('updateDraft', () => {
         submissionId: '11111111',
         submit: true
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
@@ -1059,27 +1035,19 @@ describe('updateDraft', () => {
           }
         ]
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
-
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
     const deleteOrder = deletePermitsByActivitySpy.mock.invocationCallOrder[0];
     const createOrder = createPermitSpy.mock.invocationCallOrder[0];
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -1125,24 +1093,16 @@ describe('updateDraft', () => {
           }
         ]
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
-
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
@@ -1184,37 +1144,26 @@ describe('updateSubmission', () => {
 
   // Mock service calls
   const updateSpy = jest.spyOn(submissionService, 'updateSubmission');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 200 if all good', async () => {
     const req = {
       body: SUBMISSION_1,
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updated: any = SUBMISSION_1;
 
     updateSpy.mockResolvedValue(updated);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateSubmission(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
       updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: USR_ID
+      updatedBy: 'abc-123'
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
@@ -1223,12 +1172,8 @@ describe('updateSubmission', () => {
   it('calls next if the submission service fails to update', async () => {
     const req = {
       body: SUBMISSION_1,
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_ID = 'abc-123';
-
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     updateSpy.mockImplementationOnce(() => {
       throw new Error();
@@ -1240,9 +1185,9 @@ describe('updateSubmission', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
 
     expect(updateSpy).toHaveBeenCalledWith({
-      ...(req.body as any), // eslint-disable-line @typescript-eslint/no-explicit-any
+      ...req.body,
       updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: USR_ID
+      updatedBy: 'abc-123'
     });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
