@@ -22,7 +22,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+const CURRENT_CONTEXT = { authType: 'BEARER', bearerToken: 'sometoken', tokenPayload: null, userId: 'abc-123' };
 
 describe('send', () => {
   const next = jest.fn();
@@ -188,10 +188,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
@@ -270,10 +270,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
@@ -329,10 +329,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
@@ -389,10 +389,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
