@@ -32,11 +32,13 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 type Props = {
   activityId?: string;
   enquiryId?: string;
+  submissionId?: string;
 };
 
 const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
-  enquiryId: undefined
+  enquiryId: undefined,
+  submissionId: undefined
 });
 
 // Store

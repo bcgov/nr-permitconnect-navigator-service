@@ -9,11 +9,10 @@ import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
-import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
+import { PermitStatus } from '@/utils/enums/housing';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
-import type { Schema } from 'yup';
 import type { Permit, PermitForm, PermitType } from '@/types';
 
 // Props
@@ -60,27 +59,7 @@ const formSchema = object({
   needed: string().required().label('Needed'),
   status: string().required().label('Permit state'),
   agency: string().required().label('Agency'),
-  businessDomain: string().label('Business domain'),
-  authStatus: string()
-    .notRequired()
-    .label('For the currently selected Permit state, Authorization status')
-    .when('status', {
-      is: (value: string) => (PermitStatus.APPLIED as string) === value,
-      then: (schema: Schema) =>
-        schema
-          .oneOf([
-            PermitAuthorizationStatus.NONE,
-            PermitAuthorizationStatus.IN_REVIEW,
-            PermitAuthorizationStatus.PENDING
-          ])
-          .required()
-    })
-    .when('status', {
-      is: (value: string) => (PermitStatus.COMPLETED as string) === value,
-      then: (schema: Schema) =>
-        schema.oneOf([PermitAuthorizationStatus.ISSUED, PermitAuthorizationStatus.DENIED]).required(),
-      otherwise: (schema: Schema) => schema
-    }),
+  businessDomain: string().required().label('Business domain'),
   statusLastVerified: date()
     .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()
@@ -127,41 +106,6 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
     sourceSystem: e.value.sourceSystem ?? e.value.sourceSystemAcronym
   });
 }
-
-// @ts-expect-error TS7031
-// resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
-async function onSubmit(data: PermitForm, { resetForm }) {
-  if (props.permit) initialFormValues = { ...data };
-  else resetForm();
-
-  // Remove extra fields in permit that belongs to permitType
-  delete data.agency;
-  delete data.businessDomain;
-  delete data.sourceSystem;
-
-  // Convert form back to a proper Permit type
-  const permitData = {
-    ...data,
-    permitTypeId: data.permitType?.permitTypeId,
-    submittedDate: data.submittedDate?.toISOString(),
-    adjudicationDate: data.adjudicationDate?.toISOString()
-  } as Permit;
-
-  try {
-    if (!props.permit) {
-      const result = (await permitService.createPermit({ ...permitData, activityId: props.activityId })).data;
-      submissionStore.addPermit(result);
-    } else {
-      const result = (await permitService.updatePermit({ ...permitData, activityId: props.permit.activityId })).data;
-      submissionStore.updatePermit(result);
-    }
-    toast.success('Permit saved');
-  } catch (e: any) {
-    toast.error('Failed to save permit', e.message);
-  } finally {
-    visible.value = false;
-  }
-}
 </script>
 
 <template>
@@ -191,7 +135,6 @@ async function onSubmit(data: PermitForm, { resetForm }) {
       v-slot="{ setValues }"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
-      @submit="onSubmit"
     >
       <div class="formgrid grid">
         <Dropdown

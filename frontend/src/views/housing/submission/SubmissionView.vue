@@ -205,7 +205,7 @@ const onDeleteNote = (note: Note) => {
           :sort-order="SORT_ORDER.DESCENDING"
           @update:sort-order="
             (order: number | undefined) => {
-              sortOrder = order ?? SORT_ORDER.ASCENDING;
+              sortOrder = order ?? SORT_ORDER.DESCENDING;
             }
           "
           @update:sort-field="

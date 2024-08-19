@@ -244,3 +244,18 @@ export function setEmptyStringsToNull(data: any) {
 
   return data;
 }
+
+/**
+ * @function toKebabCase
+ * Converts string values to kebab case
+ * @param  {string} input The object to change
+ * @returns {string} The object with the remapped values
+ */
+export function toKebabCase(input: string | undefined) {
+  if (!input) return input;
+
+  return input
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase();
+}

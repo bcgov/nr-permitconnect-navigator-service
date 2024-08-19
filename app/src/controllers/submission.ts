@@ -397,15 +397,17 @@ const controller = {
       never,
       {
         activityId?: Array<string>;
-        submissionId?: Array<string>;
         intakeStatus?: Array<string>;
         includeUser?: string;
+        submissionId?: Array<string>;
+        submissionType?: Array<string>;
       }
     >,
     res: Response,
     next: NextFunction
   ) => {
     try {
+      // TBD: Implement filtering so proponents can only search for their own submissions
       const response = await submissionService.searchSubmissions({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
