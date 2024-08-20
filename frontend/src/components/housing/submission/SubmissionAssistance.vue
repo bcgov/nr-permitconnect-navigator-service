@@ -9,6 +9,7 @@ import type { Ref } from 'vue';
 // Props
 type Prop = {
   formErrors: Record<string, string | undefined>;
+  formValues: { [key: string]: string };
 };
 
 const props = withDefaults(defineProps<Prop>(), {});
@@ -19,7 +20,16 @@ const showTab: Ref<boolean> = ref(true);
 // Actions
 const confirm = useConfirm();
 
-const checkApplicantValuesValid = (errors: Record<string, string | undefined>): boolean => {
+const checkApplicantValuesValid = (
+  values: { [key: string]: string },
+  errors: Record<string, string | undefined>
+): boolean => {
+  // Check applicant section is filled
+  let applicant = values?.[IntakeFormCategory.APPLICANT];
+  if (Object.values(applicant).some((x) => !x)) {
+    return false;
+  }
+
   // Check applicant section is valid
   let isValid = true;
   const errorList = Object.keys(errors);
@@ -35,7 +45,7 @@ const checkApplicantValuesValid = (errors: Record<string, string | undefined>): 
 
 const confirmSubmit = () => {
   confirm.require({
-    message: 'Are you sure you wish for assistance with this form? Please review the form before submitting.',
+    message: 'Are you sure you want to request assistance for this form? Please review this form before submitting.',
     header: 'Please confirm assistance',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
@@ -81,7 +91,7 @@ const emit = defineEmits(['onSubmitAssistance']);
         <div class="flex justify-content-center">
           <Button
             label="Get assistance"
-            :disabled="!checkApplicantValuesValid(props.formErrors)"
+            :disabled="!checkApplicantValuesValid(props.formValues, props.formErrors)"
             @click="() => confirmSubmit()"
           />
         </div>

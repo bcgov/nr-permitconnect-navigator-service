@@ -42,6 +42,7 @@ export async function up(knex: Knex): Promise<void> {
         queue_1 bigint,
         queue_2 bigint,
         queue_3 bigint,
+        assistance bigint,
         escalation bigint,
         general_enquiry bigint,
         guidance bigint,

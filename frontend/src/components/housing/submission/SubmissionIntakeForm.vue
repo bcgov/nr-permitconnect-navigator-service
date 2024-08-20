@@ -463,6 +463,7 @@ onBeforeMount(async () => {
       <SubmissionAssistance
         v-if="!(props.activityId || props.submissionId) && values?.applicant"
         :form-errors="errors"
+        :form-values="values"
         @on-submit-assistance="onSaveDraft(values, true, false, true)"
       />
 
