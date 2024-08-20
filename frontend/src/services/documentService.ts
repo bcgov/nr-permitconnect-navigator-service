@@ -39,11 +39,12 @@ export default {
         mimeType: comsResponse.data.mimeType,
         length: comsResponse.data.length
       });
-    } catch (e) {
+    } catch (e: any) {
       // In event of any error try to Delete COMS object if it was created
       if (comsResponse) {
-        await comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId);
+        comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
       }
+      throw new Error(e);
     }
   },
 

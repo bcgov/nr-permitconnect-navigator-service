@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, nextTick, ref, onUpdated } from 'vue';
-import { onBeforeRouteUpdate, useRouter } from 'vue-router';
+import { onBeforeMount, nextTick, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
+import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
-import FileUpload from '@/components/file/FileUpload.vue';
 import { EditableDropdown } from '@/components/form';
 import {
   AutoComplete,
@@ -39,9 +39,9 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAutoSave } from '@/composables/formAutoSave';
-import { externalApiService, permitService, submissionService } from '@/services';
-import { useConfigStore, useTypeStore } from '@/store';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { documentService, externalApiService, permitService, submissionService } from '@/services';
+import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
+import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
@@ -57,7 +57,7 @@ import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { Permit, Submission } from '@/types';
+import type { Document, Permit, Submission } from '@/types';
 
 // Interfaces
 interface SubmissionForm extends Submission {
@@ -87,6 +87,7 @@ const VALIDATION_BANNER_TEXT =
   'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
 
 // Store
+const submissionStore = useSubmissionStore();
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
 const { getConfig } = storeToRefs(useConfigStore());
@@ -209,7 +210,7 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(data: any, isAutoSave = false) {
+async function onSaveDraft(data: any, isAutoSave = false, showToast = true) {
   editable.value = false;
 
   // Cleanup unneeded data to be saved to draft
@@ -239,9 +240,9 @@ async function onSaveDraft(data: any, isAutoSave = false) {
     }
 
     if (isAutoSave) {
-      toast.success('Draft autosaved');
+      if (showToast) toast.success('Draft autosaved');
     } else {
-      toast.success('Draft saved');
+      if (showToast) toast.success('Draft saved');
       formUpdated.value = false;
     }
   } catch (e: any) {
@@ -310,10 +311,13 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
 
 async function loadSubmission(submissionId: string, activityId: string) {
   let response,
-    permits: Array<Permit> = [];
+    permits: Array<Permit> = [],
+    documents: Array<Document> = [];
   try {
     response = (await submissionService.getSubmission(submissionId)).data;
     permits = (await permitService.listPermits(activityId)).data;
+    documents = (await documentService.listDocuments(activityId)).data;
+    submissionStore.setDocuments(documents);
     editable.value = response.intakeStatus === IntakeStatus.DRAFT;
 
     formRef.value?.setValues({
@@ -385,6 +389,8 @@ async function loadSubmission(submissionId: string, activityId: string) {
 
 onBeforeMount(async () => {
   if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
+  // clearing the document store on page load
+  submissionStore.setDocuments([]);
 });
 </script>
 
@@ -592,6 +598,7 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-callback="nextCallback"
               :prev-disabled="true"
+              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button
@@ -620,6 +627,11 @@ onBeforeMount(async () => {
               :class="{
                 'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formModified
               }"
+              @click="
+                () => {
+                  if (!values.activityId) onSaveDraft(values, true, false);
+                }
+              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -671,10 +683,10 @@ onBeforeMount(async () => {
                   />
                   <!-- eslint-enable max-len -->
                   <label class="col-12">Upload documents about your housing project (optional)</label>
-                  <FileUpload
-                    class="col-12"
-                    activity-id="TODO_HOW_TO_CREATE_DOCUMENTS_WITHOUT_ACTIVITY_ID"
-                    :disabled="true"
+                  <AdvancedFileUpload
+                    :activity-id="values.activityId"
+                    :disabled="!editable"
+                    :reject="SPATIAL_FILE_FORMATS"
                   />
                 </div>
               </template>
@@ -969,6 +981,11 @@ onBeforeMount(async () => {
               :class="{
                 'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formModified
               }"
+              @click="
+                () => {
+                  if (!values.activityId) onSaveDraft(values, true, false);
+                }
+              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1183,7 +1200,7 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
-                          <div class="col-12 text-blue-500">
+                          <div class="col-12 text-blue-500 mb-2">
                             <a
                               href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
                               target="_blank"
@@ -1191,10 +1208,10 @@ onBeforeMount(async () => {
                               See acceptable file formats
                             </a>
                           </div>
-                          <FileUpload
-                            class="col-12"
-                            activity-id="TODO_HOW_TO_CREATE_DOCUMENTS_WITHOUT_ACTIVITY_ID"
-                            :disabled="true"
+                          <AdvancedFileUpload
+                            :activity-id="values.activityId"
+                            :accept="SPATIAL_FILE_FORMATS"
+                            :disabled="!editable"
                           />
                         </div>
                       </template>
@@ -1551,6 +1568,7 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-disabled="true"
               :prev-callback="prevCallback"
+              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button
