@@ -46,7 +46,9 @@ const service = {
       ]);
 
       const comsPerms = comsPermsMap.get(group);
-      if (comsPerms) await comsService.createBucket(bearerToken, comsPerms);
+      if (comsPerms && bearerToken) {
+        await comsService.createBucket(bearerToken, comsPerms);
+      }
 
       return { identityId: result.sub, roleId: result.group_id };
     } catch (e: unknown) {

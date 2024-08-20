@@ -198,6 +198,55 @@ describe('send', () => {
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
   });
 
+  it('should not call COMS without a bearer token', async () => {
+    const req = {
+      body: {
+        activityId: '123-123',
+        selectedFileIds: ['123', '456'],
+        emailData: {
+          body: 'Some message text',
+          bodyType: 'text',
+          from: 'test@gov.bc.ca',
+          to: 'hello@gov.bc.ca',
+          subject: 'Unit tests',
+          attachments: [
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'foo'
+            },
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'bar'
+            }
+          ]
+        }
+      },
+      currentContext: { ...CURRENT_CONTEXT, bearerToken: null },
+      headers: {}
+    };
+
+    const emailResponse = {
+      data: 'foo',
+      status: 201
+    };
+
+    emailSpy.mockResolvedValue(emailResponse);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await roadmapController.send(req as any, res as any, next);
+
+    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
+    expect(getObjectSpy).toHaveBeenCalledTimes(0);
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+  });
+
   it('should append attachments to note', async () => {
     const req = {
       body: {
