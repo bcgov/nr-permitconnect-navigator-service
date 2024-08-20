@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 import { YES_NO_LIST } from '../utils/constants/application';
+import { ENQUIRY_TYPE_LIST } from '../utils/constants/housing';
 import { BasicResponse } from '../utils/enums/application';
 
 export const basicIntake = Joi.object({
@@ -23,5 +24,8 @@ export const basicEnquiry = Joi.object({
     .required(),
   applyForPermitConnect: Joi.string().valid(...YES_NO_LIST),
   enquiryDescription: Joi.string().required(),
-  relatedActivityId: Joi.string().max(255).allow(null)
+  relatedActivityId: Joi.string().max(255).allow(null),
+  enquiryType: Joi.string()
+    .valid(...ENQUIRY_TYPE_LIST)
+    .allow(null)
 });

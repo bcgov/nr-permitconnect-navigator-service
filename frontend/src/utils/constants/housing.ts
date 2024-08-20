@@ -44,6 +44,7 @@ export const CONTACT_PREFERENCE_LIST = [
 ];
 
 export const ENQUIRY_TYPE_LIST = [
+  SubmissionType.ASSISTANCE,
   SubmissionType.GENERAL_ENQUIRY,
   SubmissionType.STATUS_REQUEST,
   SubmissionType.ESCALATION,
