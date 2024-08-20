@@ -29,10 +29,10 @@ const service = {
    * an existing record, the user will be added to that existing bucket with the provided permissions
    * instead of generating a new bucket record.
    * This endpoint can be used to grant the current user permission to upload to a new or existing bucket.
-   * @param {string | null | undefined} bearerToken The bearer token of the authorized user
+   * @param {string} bearerToken The bearer token of the authorized user
    * @param {Action[]} permissions An array of permissions to grant the user
    */
-  async createBucket(bearerToken: string | null | undefined, permissions: Array<Action>) {
+  async createBucket(bearerToken: string, permissions: Array<Action>) {
     const { data } = await comsAxios({
       headers: { Authorization: `Bearer ${bearerToken}` }
     }).put('/bucket', {
@@ -50,10 +50,10 @@ const service = {
   /**
    * @function getObject
    * Get an object
-   * @param {string | null | undefined} bearerToken The bearer token of the authorized user
+   * @param {string} bearerToken The bearer token of the authorized user
    * @param {string} objectId The id for the object to get
    */
-  async getObject(bearerToken: string | null | undefined, objectId: string) {
+  async getObject(bearerToken: string, objectId: string) {
     const { status, headers, data } = await comsAxios({
       responseType: 'arraybuffer',
       headers: { Authorization: `Bearer ${bearerToken}` }
@@ -64,10 +64,10 @@ const service = {
   /**
    * @function getObjects
    * Gets a list of objects
-   * @param {string | null | undefined} bearerToken The bearer token of the authorized user
+   * @param {string} bearerToken The bearer token of the authorized user
    * @param {string[]} objectIds Array of object ids to get
    */
-  async getObjects(bearerToken: string | null | undefined, objectIds: Array<string>) {
+  async getObjects(bearerToken: string, objectIds: Array<string>) {
     const { data } = await comsAxios({ headers: { Authorization: `Bearer ${bearerToken}` } }).get('/object', {
       params: { objectId: objectIds }
     });
