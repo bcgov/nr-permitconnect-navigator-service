@@ -3,7 +3,16 @@
  */
 
 import { NIL } from 'uuid';
-import { BasicResponse, GroupName } from '../enums/application';
+
+import { AccessRequestStatus, BasicResponse, GroupName, UserSearchParams } from '../enums/application';
+
+export const ACCESS_REQUEST_STATUS = [
+  AccessRequestStatus.APPROVED,
+  AccessRequestStatus.PENDING,
+  AccessRequestStatus.REJECTED
+];
+
+export const ACTIVITY_ID_LENGTH = 8;
 
 export const DELIMITER = '/';
 
@@ -12,12 +21,13 @@ export const PCNS_CONTACT = {
   subject: 'Reporting an Issue with PCNS'
 };
 
-export const ROLES = [Roles.NAVIGATOR, Roles.READ_ONLY];
-
-export const ACCESS_REQUEST_STATUS = [
-  AccessRequestStatus.APPROVED,
-  AccessRequestStatus.PENDING,
-  AccessRequestStatus.REJECTED
+export const GROUP_NAME_LIST = [
+  GroupName.ADMIN,
+  GroupName.DEVELOPER,
+  GroupName.NAVIGATOR,
+  GroupName.NAVIGATOR_READ_ONLY,
+  GroupName.PROPONENT,
+  GroupName.SUPERVISOR
 ];
 
 export const SPATIAL_FILE_FORMATS = [
@@ -44,13 +54,3 @@ export const USER_SEARCH_PARAMS = [UserSearchParams.FIRST_NAME, UserSearchParams
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];
-
-export const ACTIVITY_ID_LENGTH = 8;
-
-export const GROUP_NAME_LIST = [
-  GroupName.ADMIN,
-  GroupName.DEVELOPER,
-  GroupName.NAVIGATOR,
-  GroupName.PROPONENT,
-  GroupName.SUPERVISOR
-];

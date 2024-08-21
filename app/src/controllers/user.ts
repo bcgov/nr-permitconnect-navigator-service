@@ -1,4 +1,5 @@
 import { userService } from '../services';
+import { GroupName } from '../utils/enums/application';
 import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -20,6 +21,14 @@ const controller = {
         active: isTruthy(req.query.active as string),
         role: req.query.role as string
       });
+
+      if (
+        req.query.role &&
+        [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY].includes(req.query.role as GroupName)
+      ) {
+        // TODO: filter out uses without a role of NAVIGATOR|NAVIGATOR_READ_ONLY or a pending access request from the response
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

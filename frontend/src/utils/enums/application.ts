@@ -1,3 +1,9 @@
+export enum AccessRequestStatus {
+  APPROVED = 'Approved',
+  PENDING = 'Pending',
+  REJECTED = 'Rejected'
+}
+
 export enum Action {
   CREATE = 'CREATE',
   READ = 'READ',
@@ -26,6 +32,15 @@ export enum FileCategory {
   PDF = 'pdf',
   SHAPE = 'shape',
   SPREADSHEET = 'spreadsheet'
+}
+
+export enum GroupName {
+  DEVELOPER = 'DEVELOPER',
+  PROPONENT = 'PROPONENT',
+  NAVIGATOR = 'NAVIGATOR',
+  NAVIGATOR_READ_ONLY = 'NAVIGATOR_READ_ONLY',
+  SUPERVISOR = 'SUPERVISOR',
+  ADMIN = 'ADMIN'
 }
 
 export enum Initiative {
@@ -68,17 +83,6 @@ export enum IdentityProvider {
   IDIR = 'idir',
   BCEID = 'bceidbasic',
   BCEIDBUSINESS = 'bceidbusiness'
-}
-
-export enum Roles {
-  NAVIGATOR = 'Navigator',
-  READ_ONLY = 'Read-only'
-}
-
-export enum AccessRequestStatus {
-  APPROVED = 'Approved',
-  PENDING = 'Pending',
-  REJECTED = 'Rejected'
 }
 
 export enum Resource {

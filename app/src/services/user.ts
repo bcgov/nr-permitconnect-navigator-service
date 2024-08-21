@@ -4,7 +4,6 @@ import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
-import { AccessRole } from '../utils/enums/application';
 import { parseIdentityKeyClaims } from '../utils/utils';
 
 import type { User, UserSearchParameters } from '../types';
@@ -288,11 +287,6 @@ const service = {
         ]
       }
     });
-
-    if ((params.role as string) === AccessRole.PCNS_NAVIGATOR) {
-      // eslint-disable-next-line max-len
-      // TODO filter out any use without a role of PCNS_NAVIGATOR|PCNS_READ_ONLY or a pending access request from the response
-    }
 
     return response.map((x) => user.fromPrismaModel(x));
   },
