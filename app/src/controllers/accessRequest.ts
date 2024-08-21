@@ -1,4 +1,4 @@
-import { AccessRole } from '../utils/enums/application';
+import { GroupName } from '../utils/enums/application';
 import { userService, accessRequestService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
@@ -14,8 +14,8 @@ const controller = {
   ) => {
     // Check if the requestee is an admin
     const admin =
-      (req.currentUser?.tokenPayload as JwtPayload)?.client_roles?.some(
-        (role: string) => role === AccessRole.PCNS_DEVELOPER || role === AccessRole.PCNS_ADMIN
+      (req.currentContext?.tokenPayload as JwtPayload)?.client_roles?.some(
+        (role: string) => role === GroupName.DEVELOPER || role === GroupName.ADMIN
       ) ?? false;
 
     try {

@@ -2,11 +2,20 @@
 import { ref } from 'vue';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import PermissionService, { Permissions } from '@/services/permissionService';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { AccessRequestStatus } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { UserAccessRequest } from '@/types';
+
+// Constants
+const DEFAULT_SORT_ORDER = 1;
+const DEFAULT_SORT_FIELD = 'fullName';
+const PENDING_STATUSES = {
+  PENDING_APPROVAL: 'Pending Approval',
+  PENDING_REVOCATION: 'Pending Revocation'
+};
 
 // Props
 type Props = {
@@ -27,19 +36,11 @@ const emit = defineEmits([
   'userTable:revoke'
 ]);
 
-// Constants
-const DEFAULT_SORT_ORDER = 1;
-const DEFAULT_SORT_FIELD = 'fullName';
-const PENDING_STATUSES = {
-  PENDING_APPROVAL: 'Pending Approval',
-  PENDING_REVOCATION: 'Pending Revocation'
-};
+// Store
+const authzStore = useAuthZStore();
 
 // State
 const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
-
-// Actions
-const permissionService = new PermissionService();
 </script>
 
 <template>
@@ -121,7 +122,7 @@ const permissionService = new PermissionService();
       </template>
     </Column>
     <Column
-      v-if="!revocation && permissionService.can(Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN)"
+      v-if="!revocation && authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
       field="approve/deny"
       header="Approve/Deny"
       header-class="header-right"
@@ -182,7 +183,7 @@ const permissionService = new PermissionService();
           @click="
             () => {
               selection = data;
-              permissionService.can(Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN)
+              authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)
                 ? emit('userTable:delete', data)
                 : emit('userTable:revoke', data);
             }

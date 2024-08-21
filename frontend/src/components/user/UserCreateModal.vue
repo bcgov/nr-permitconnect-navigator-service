@@ -1,37 +1,39 @@
 <script setup lang="ts">
+import axios from 'axios';
 import { ref } from 'vue';
 
 import { Dropdown } from '@/components/form';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
-import { PermissionService } from '@/services';
-import { ROLES } from '@/utils/constants/application';
+import { ssoService } from '@/services';
+import { GroupName } from '@/utils/enums/application';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
 import type { UserAccessRequest } from '@/types';
-import axios from 'axios';
-// Emits
-const emit = defineEmits(['userCreate:request']);
 
-// State
-let cancelTokenSource: any = null; // Initialize a variable to hold the cancel token source
-const loading: Ref<boolean> = ref(false);
-const visible = defineModel<boolean>('visible');
-const users: Ref<Array<UserAccessRequest>> = ref([]);
-const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
-const selectedRole: Ref<string | undefined> = ref(undefined);
-const selectedParam: Ref<string | undefined> = ref(undefined);
-const searchTag: Ref<string> = ref('');
-
+// Constants
 const USER_SEARCH_PARAMS: { [key: string]: string } = {
   firstName: 'First name',
   lastName: 'Last name',
   email: 'Email'
 };
 
+// Emits
+const emit = defineEmits(['userCreate:request']);
+
+// State
+const loading: Ref<boolean> = ref(false);
+const searchTag: Ref<string> = ref('');
+const selectedRole: Ref<string | undefined> = ref(undefined);
+const selectedParam: Ref<string | undefined> = ref(undefined);
+const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
+const users: Ref<Array<UserAccessRequest>> = ref([]);
+const visible = defineModel<boolean>('visible');
+
 // Actions
-const permissionService = new PermissionService();
+let cancelTokenSource: any = null;
+
 const toast = useToast();
 
 async function searchIdirUsers() {
@@ -40,21 +42,23 @@ async function searchIdirUsers() {
     Object.keys(USER_SEARCH_PARAMS).find((key) => USER_SEARCH_PARAMS[key] === selectedParam.value) ||
     Object.keys(USER_SEARCH_PARAMS)[0];
   searchTag.value = searchTag.value.trim();
+
   if (searchTag.value.length > 2) {
     if (cancelTokenSource) {
-      cancelTokenSource.cancel('Cancelling the previous request'); // Cancel the previous request
+      cancelTokenSource.cancel('Cancelling the previous request');
     }
-    cancelTokenSource = axios.CancelToken.source(); // Create a new cancel token source for the new request
+    cancelTokenSource = axios.CancelToken.source();
 
     try {
       loading.value = true;
-      const response = await permissionService.searchIdirUsers(
+
+      const response = await ssoService.searchIdirUsers(
         {
           [searchParam]: searchTag.value
         },
-        cancelTokenSource.token // Attach the cancel token to the request
+        cancelTokenSource.token
       );
-      loading.value = false;
+
       // Map the response data to the required format
       // Spread the rest of the properties and filter out users without email
       users.value = response.data
@@ -67,7 +71,8 @@ async function searchIdirUsers() {
     } catch (error) {
       if (!axios.isCancel(error)) toast.error('Error searching for users ' + error);
     } finally {
-      cancelTokenSource = null; // Reset the cancel token source
+      cancelTokenSource = null;
+      loading.value = false;
     }
   } else {
     users.value = [];
@@ -158,7 +163,7 @@ async function searchIdirUsers() {
       class="col-12"
       name="assignRole"
       label="Assign role"
-      :options="ROLES"
+      :options="[GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
       :disabled="!selection"
       @on-change="(e: DropdownChangeEvent) => (selectedRole = e.value)"
     />
