@@ -18,14 +18,24 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import PermissionService, { Permissions } from '@/services/permissionService';
 import { accessRequestService, userService } from '@/services';
-import { IdentityProvider, AccessRequestStatus, AccessRole } from '@/utils/enums/application';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
+import { IdentityProvider, AccessRequestStatus, GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { AccessRequest, User, UserAccessRequest } from '@/types';
 
-//State
+// Constants
+const PENDING_STATUSES = {
+  PENDING_APPROVAL: 'Pending Approval',
+  PENDING_REVOCATION: 'Pending Revocation'
+};
+
+// Store
+const authzStore = useAuthZStore();
+
+// State
 const actionUserAccessRequest: Ref<UserAccessRequest | undefined> = ref(undefined);
 const activeTab: Ref<number> = ref(Number(0));
 const createUserModalVisible: Ref<boolean> = ref(false);
@@ -33,23 +43,12 @@ const getIsLoading: Ref<boolean> = ref(false);
 const managedUser: Ref<UserAccessRequest | undefined> = ref(undefined);
 const manageUserModalVisible: Ref<boolean> = ref(false);
 const userActionModalVisible: Ref<boolean> = ref(false);
-
-// Store users and their access/revoke request
-const usersRequest: Ref<Array<UserAccessRequest>> = ref([]);
-
-// Constants
-const PENDING_STATUSES = {
-  PENDING_APPROVAL: 'Pending Approval',
-  PENDING_REVOCATION: 'Pending Revocation'
-};
-// Store users and their revoke request
-const usersRevocationRequest: Ref<Array<UserAccessRequest>> = ref([]);
-// Store users and their access request
 const usersAccessRequest: Ref<Array<UserAccessRequest>> = ref([]);
+const usersRequest: Ref<Array<UserAccessRequest>> = ref([]);
+const usersRevocationRequest: Ref<Array<UserAccessRequest>> = ref([]);
 
-//Actions
+// Actions
 const confirm = useConfirm();
-const permissionService = new PermissionService();
 const toast = useToast();
 
 function onDelete(user: UserAccessRequest) {
@@ -149,7 +148,7 @@ async function onApproveAccess() {
 function onRevoke(user: UserAccessRequest) {
   let message = '';
   let header = '';
-  if (!permissionService.can(Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN)) {
+  if (!authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)) {
     message = 'The user will be revoked from the system upon the approval of an admin.';
     header = 'Revoke user';
   } else {
@@ -224,26 +223,29 @@ const filters = ref({
 });
 
 onMounted(async () => {
-  const response = await userService.searchUsers({
-    active: true,
-    role: AccessRole.PCNS_NAVIGATOR
-  });
-  let users: Array<UserAccessRequest> = response.data;
-  // filtering out system user
-  users = users.filter((user) => user.userId !== NIL);
-  let accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
-  // combining user and access request data
+  const users: Array<UserAccessRequest> = (
+    await userService.searchUsers({
+      active: true,
+      role: GroupName.NAVIGATOR
+    })
+  ).data.filter((user: UserAccessRequest) => user.userId !== NIL);
+
+  const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
+
+  // Combine user and access request data
   usersRequest.value = users.map((user) => {
     const accessRequest = accessRequests.find((accessRequest) => accessRequest.userId === user.userId);
     user.accessRequest = accessRequest ?? user.accessRequest;
     user = assignUserStatus(user);
     return user;
   });
-  // filtering for users with pending revocation request
+
+  // Filter pending revocation request
   usersRevocationRequest.value = usersRequest.value.filter(
     (user) => user.accessRequest?.status === AccessRequestStatus.PENDING && user.accessRequest?.grant === false
   );
-  // filtering out users with pending access request
+
+  // Filter pending access request
   usersAccessRequest.value = usersRequest.value.filter((user) => user.accessRequest?.grant !== false);
 });
 
@@ -282,7 +284,7 @@ function assignUserStatus(user: UserAccessRequest) {
     @user-action:deny-access="onDenyAccess"
   />
   <TabView
-    v-if="permissionService.can(Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT_ADMIN)"
+    v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
     v-model:activeIndex="activeTab"
   >
     <TabPanel header="Manage users">

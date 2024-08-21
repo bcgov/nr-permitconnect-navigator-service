@@ -3,7 +3,7 @@ import { ref } from 'vue';
 
 import { RadioList } from '@/components/form';
 import { Button, Dialog } from '@/lib/primevue';
-import { ROLES } from '@/utils/constants/application';
+import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -29,7 +29,7 @@ const role: Ref<string | undefined> = ref(undefined);
     <RadioList
       name="role"
       :bold="false"
-      :options="ROLES"
+      :options="[GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
       class="mt-3 mb-4"
       @on-change="(value) => (role = value)"
     />
