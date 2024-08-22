@@ -4,7 +4,7 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
-import { getCurrentIdentity, getCurrentTokenUsername } from '../utils/utils';
+import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
@@ -14,12 +14,12 @@ const controller = {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);
       if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         await noteService.createNote({
           activityId: data.relatedActivityId,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${getCurrentTokenUsername(req.currentContext)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
+          note: `Added by ${getCurrentUsername(req.currentContext)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
           noteType: NoteType.ENQUIRY,
           title: 'Enquiry',
           bringForwardDate: null,
@@ -72,7 +72,7 @@ const controller = {
       activityId: activityId,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      submittedBy: getCurrentTokenUsername(req.currentContext),
+      submittedBy: getCurrentUsername(req.currentContext),
       intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
@@ -114,7 +114,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentContext));
+        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
 
       res.status(200).json(response);

@@ -15,7 +15,7 @@ export default {
     return {
       access_request_id: input.accessRequestId,
       grant: input.grant,
-      role: input.role,
+      group: input.role,
       status: input.status as AccessRequestStatus, // Cast the status property to AccessRequestStatus enum
       user_id: input.userId as string
     };
@@ -25,7 +25,7 @@ export default {
     return {
       accessRequestId: input.access_request_id,
       grant: input.grant,
-      role: input.role,
+      role: input.group,
       userId: input.user_id as string,
       status: input.status as AccessRequestStatus // Cast the status property to AccessRequestStatus enum
     };

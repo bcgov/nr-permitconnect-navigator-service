@@ -51,12 +51,18 @@ const actions = [
 export async function up(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
+      .then(() =>
+        knex.schema.alterTable('user', (table) => {
+          table.renameColumn('username', 'sub');
+        })
+      )
+
       // Create the access_request table
       .then(() =>
         knex.schema.createTable('access_request', (table) => {
           table.uuid('access_request_id').primary();
           table.uuid('user_id').notNullable().references('user_id').inTable('user');
-          table.text('role');
+          table.text('group');
           table
             .enu('status', ['Approved', 'Pending', 'Rejected'], {
               useNative: true,
@@ -247,9 +253,9 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
-        knex.schema.withSchema('yars').createTable('identity_group', (table) => {
-          table.primary(['identity_id', 'group_id']);
-          table.text('identity_id').notNullable();
+        knex.schema.withSchema('yars').createTable('subject_group', (table) => {
+          table.primary(['sub', 'group_id']);
+          table.text('sub').notNullable();
           table
             .integer('group_id')
             .notNullable()
@@ -323,8 +329,8 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
-        knex.schema.raw(`CREATE TRIGGER before_update_identity_group_trigger
-          BEFORE UPDATE ON yars."identity_group"
+        knex.schema.raw(`CREATE TRIGGER before_update_subject_group_trigger
+          BEFORE UPDATE ON yars."subject_group"
           FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`)
       )
 
@@ -390,8 +396,8 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       .then(() =>
-        knex.schema.raw(`CREATE TRIGGER audit_identity_group_trigger
-          AFTER UPDATE OR DELETE ON yars."identity_group"
+        knex.schema.raw(`CREATE TRIGGER audit_subject_group_trigger
+          AFTER UPDATE OR DELETE ON yars."subject_group"
           FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
 
@@ -707,7 +713,7 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.withSchema('yars').dropViewIfExists('group_role_policy_vw'))
 
       // Drop yars audit triggers
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_identity_group_trigger ON yars."identity_group"'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_subject_group_trigger ON yars."subject_group"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_attribute_group_trigger ON yars."attribute_group"'))
       .then(() =>
         knex.schema.raw('DROP TRIGGER IF EXISTS audit_role_policy_attribute_trigger ON yars."policy_attribute"')
@@ -722,9 +728,7 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_group_trigger ON yars."group"'))
 
       // Drop yars table triggers
-      .then(() =>
-        knex.schema.raw('DROP TRIGGER IF EXISTS before_update_identity_group_trigger ON yars."identity_group"')
-      )
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_subject_group_trigger ON yars."subject_group"'))
       .then(() =>
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_attribute_group_trigger ON yars."attribute_group"')
       )
@@ -733,18 +737,20 @@ export async function down(knex: Knex): Promise<void> {
       )
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_role_policy_trigger ON yars."role_policy"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_group_role_trigger ON yars."group_role"'))
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permission_trigger ON yars."policy"'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_attribute_trigger ON yars."attribute"'))
+      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_policy_trigger ON yars."policy"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_resource_trigger ON yars."resource"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_action_trigger ON yars."action"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_role_trigger ON yars."role"'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_group_trigger ON yars."group"'))
 
       // Drop yars tables
-      .then(() => knex.schema.withSchema('yars').dropTableIfExists('identity_group'))
+      .then(() => knex.schema.withSchema('yars').dropTableIfExists('subject_group'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('attribute_group'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('policy_attribute'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('role_policy'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('group_role'))
+      .then(() => knex.schema.withSchema('yars').dropTableIfExists('attribute'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('policy'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('resource'))
       .then(() => knex.schema.withSchema('yars').dropTableIfExists('action'))
@@ -761,5 +767,11 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('access_request'))
       // Drop the access_request_status_enum type
       .then(() => knex.schema.raw('DROP TYPE IF EXISTS access_request_status_enum'))
+
+      .then(() =>
+        knex.schema.alterTable('user', (table) => {
+          table.renameColumn('sub', 'username');
+        })
+      )
   );
 }

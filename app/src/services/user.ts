@@ -28,7 +28,7 @@ const service = {
 
     return {
       identityId: identityId,
-      username: token.identity_provider_identity ? token.identity_provider_identity : token.preferred_username,
+      sub: token.sub ? token.sub : token.preferred_username,
       firstName: token.given_name,
       fullName: token.name,
       lastName: token.family_name,
@@ -89,7 +89,7 @@ const service = {
         const newUser = {
           userId: uuidv4(),
           identityId: data.identityId,
-          username: data.username,
+          sub: data.sub,
           fullName: data.fullName,
           email: data.email,
           firstName: data.firstName,
@@ -130,32 +130,31 @@ const service = {
    */
   createUserIfNew: async (data: User) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let response: any;
-    response = await prisma.user.findFirst({
+    const existingUser = await prisma.user.findFirst({
       where: {
-        identity_id: data.identityId,
+        sub: data.sub,
         idp: data.idp
       }
     });
 
-    if (!response) {
-      response = await service.createUser(data);
-      return user.fromPrismaModel(response);
-    } else return;
+    if (!existingUser) {
+      return await service.createUser(data);
+    } else {
+      return user.fromPrismaModel(existingUser);
+    }
   },
   /**
    * @function getCurrentUserId
    * Gets userId (primary identifier of a user in db) of currentContext.
-   * if request is basic auth returns `defaultValue`
-   * @param {object} identityId the identity field of the current user
+   * @param {object} sub The subject of the current user
    * @param {string} [defaultValue=undefined] An optional default return value
    * @returns {string} The current userId if applicable, or `defaultValue`
    */
-  getCurrentUserId: async (identityId: string, defaultValue: string | undefined = undefined) => {
+  getCurrentUserId: async (sub: string, defaultValue: string | undefined = undefined) => {
     // TODO: Consider conditionally skipping when identityId is undefined?
     const user = await prisma.user.findFirst({
       where: {
-        identity_id: identityId
+        sub: sub
       }
     });
 
@@ -245,7 +244,7 @@ const service = {
    * @param {string[]} [params.userId] Optional array of uuids representing the user subject
    * @param {string[]} [params.identityId] Optionalarray of uuids representing the user identity
    * @param {string[]} [params.idp] Optional array of identity providers
-   * @param {string} [params.username] Optional username string to match on
+   * @param {string} [params.sub] Optional sub string to match on
    * @param {string} [params.email] Optional email string to match on
    * @param {string} [params.firstName] Optional firstName string to match on
    * @param {string} [params.fullName] Optional fullName string to match on
@@ -267,7 +266,7 @@ const service = {
             idp: { in: params.idp, mode: 'insensitive' }
           },
           {
-            username: { contains: params.username, mode: 'insensitive' }
+            sub: { contains: params.sub, mode: 'insensitive' }
           },
           {
             email: { contains: params.email, mode: 'insensitive' }
@@ -317,7 +316,7 @@ const service = {
 
         const obj = {
           identityId: data.identityId,
-          username: data.username,
+          sub: data.sub,
           fullName: data.fullName,
           email: data.email,
           firstName: data.firstName,
