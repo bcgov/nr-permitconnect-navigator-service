@@ -1,36 +1,14 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { activityService, enquiryService, noteService, userService } from '../services';
+import { activityService, enquiryService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
+import { ApplicationStatus, IntakeStatus, SubmissionType } from '../utils/enums/housing';
 import { getCurrentIdentity, getCurrentTokenUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Enquiry } from '../types';
 
 const controller = {
-  createRelatedNote: async (req: Request, data: Enquiry) => {
-    if (data.relatedActivityId) {
-      const activity = await activityService.getActivity(data.relatedActivityId);
-      if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-
-        await noteService.createNote({
-          activityId: data.relatedActivityId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${getCurrentTokenUsername(req.currentUser)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
-          noteType: NoteType.ENQUIRY,
-          title: 'Enquiry',
-          bringForwardDate: null,
-          bringForwardState: null,
-          createdAt: new Date().toISOString(),
-          createdBy: userId,
-          isDeleted: false
-        });
-      }
-    }
-  },
-
   generateEnquiryData: async (req: Request) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
@@ -78,18 +56,17 @@ const controller = {
 
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
 
       const enquiry = await controller.generateEnquiryData(req);
 
       // Create new enquiry
-      const result = await enquiryService.createEnquiry(enquiry);
-
-      // On submit attempt to create note if enquiry is associated with an existing activity
-      if (data.submit) {
-        await controller.createRelatedNote(req, result);
-      }
+      const result = await enquiryService.createEnquiry({
+        ...enquiry,
+        createdAt: new Date().toISOString(),
+        createdBy: userId
+      });
 
       res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {
@@ -131,6 +108,15 @@ const controller = {
     }
   },
 
+  listRelatedEnquiries: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await enquiryService.getRelatedEnquiries(req.params.activityId);
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   updateEnquiry: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -139,6 +125,7 @@ const controller = {
       const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const result = await enquiryService.updateEnquiry({
         ...data,
+        updatedAt: new Date().toISOString(),
         updatedBy: userId
       } as Enquiry);
 
@@ -151,17 +138,15 @@ const controller = {
   updateDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
-
+      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const enquiry = await controller.generateEnquiryData(req);
 
       // Update enquiry
-      const result = await enquiryService.updateEnquiry(enquiry as Enquiry);
-
-      // On submit, attempt to create note if enquiry is associated with an existing activity
-      if (data.submit) {
-        await controller.createRelatedNote(req, result);
-      }
+      const result = await enquiryService.updateEnquiry({
+        ...enquiry,
+        updatedAt: new Date().toISOString(),
+        updatedBy: userId
+      } as Enquiry);
 
       res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {

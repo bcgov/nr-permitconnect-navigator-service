@@ -2,10 +2,11 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Document, Note, Permit, Submission } from '@/types';
+import type { Document, Enquiry, Note, Permit, Submission } from '@/types';
 
 export type SubmissionStoreState = {
   documents: Ref<Array<Document>>;
+  relatedEnquiries: Ref<Array<Enquiry>>;
   notes: Ref<Array<Note>>;
   permits: Ref<Array<Permit>>;
   submission: Ref<Submission | undefined>;
@@ -15,6 +16,7 @@ export const useSubmissionStore = defineStore('submission', () => {
   // State
   const state: SubmissionStoreState = {
     documents: ref([]),
+    relatedEnquiries: ref([]),
     notes: ref([]),
     permits: ref([]),
     submission: ref(undefined)
@@ -25,6 +27,7 @@ export const useSubmissionStore = defineStore('submission', () => {
     getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
+    getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
     getSubmission: computed(() => state.submission.value)
   };
 
@@ -71,6 +74,18 @@ export const useSubmissionStore = defineStore('submission', () => {
     state.permits.value = data;
   }
 
+  function addRelatedEnquiry(data: Enquiry) {
+    state.relatedEnquiries.value.push(data);
+  }
+
+  function removeRelatedEnquiry(data: Enquiry) {
+    state.relatedEnquiries.value = state.relatedEnquiries.value.filter((x) => x.enquiryId !== data.enquiryId);
+  }
+
+  function setRelatedEnquiries(data: Array<Enquiry>) {
+    state.relatedEnquiries.value = data;
+  }
+
   function updatePermit(data: Permit) {
     const idx = state.permits.value.findIndex((x: Permit) => x.permitId === data.permitId);
     if (idx >= 0) state.permits.value[idx] = data;
@@ -99,6 +114,9 @@ export const useSubmissionStore = defineStore('submission', () => {
     removePermit,
     setPermits,
     updatePermit,
+    addRelatedEnquiry,
+    removeRelatedEnquiry,
+    setRelatedEnquiries,
     setSubmission
   };
 });

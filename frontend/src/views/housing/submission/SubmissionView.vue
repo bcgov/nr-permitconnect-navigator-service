@@ -7,6 +7,7 @@ import BackButton from '@/components/common/BackButton.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
+import EnquiryCard from '@/components/housing/enquiry/EnquiryCard.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
@@ -14,7 +15,7 @@ import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
-import { submissionService, documentService, noteService, permitService } from '@/services';
+import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { formatDateLong } from '@/utils/formatters';
@@ -49,7 +50,7 @@ const SORT_TYPES = {
 // Store
 const submissionStore = useSubmissionStore();
 const typeStore = useTypeStore();
-const { getDocuments, getNotes, getPermits, getSubmission } = storeToRefs(submissionStore);
+const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
@@ -64,13 +65,14 @@ const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Actions
 onMounted(async () => {
-  const [submission, documents, notes, permits, permitTypes] = (
+  const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
     await Promise.all([
       submissionService.getSubmission(props.submissionId),
       documentService.listDocuments(props.activityId),
       noteService.listNotes(props.activityId),
       permitService.listPermits(props.activityId),
-      permitService.getPermitTypes()
+      permitService.getPermitTypes(),
+      enquiryService.listRelatedEnquiries(props.activityId)
     ])
   ).map((r) => r.data);
 
@@ -79,6 +81,7 @@ onMounted(async () => {
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
   typeStore.setPermitTypes(permitTypes);
+  submissionStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
 });
@@ -397,6 +400,21 @@ const onDeleteNote = (note: Note) => {
         v-if="!loading"
         :activity-id="props.activityId"
       />
+    </TabPanel>
+    <TabPanel header="Related enquiries">
+      <div class="flex align-items-center pb-2">
+        <div class="flex-grow-1">
+          <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
+        </div>
+      </div>
+      <div
+        v-for="(enquiry, index) in getRelatedEnquiries"
+        :key="enquiry.enquiryId"
+        :index="index"
+        class="col-12"
+      >
+        <EnquiryCard :enquiry="enquiry" />
+      </div>
     </TabPanel>
   </TabView>
 </template>

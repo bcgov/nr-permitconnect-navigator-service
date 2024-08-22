@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 
 import user from './user';
 
-import type { Stamps } from '../stamps';
 import type { Enquiry } from '../../types';
 
 // Define types
@@ -10,7 +9,7 @@ const _enquiry = Prisma.validator<Prisma.enquiryDefaultArgs>()({});
 const _enquiryWithGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({});
 const _enquiryWithUserGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({ include: { user: true } });
 
-type PrismaRelationEnquiry = Omit<Prisma.enquiryGetPayload<typeof _enquiry>, keyof Stamps>;
+type PrismaRelationEnquiry = Prisma.enquiryGetPayload<typeof _enquiry>;
 type PrismaGraphEnquiry = Prisma.enquiryGetPayload<typeof _enquiryWithGraph>;
 type PrismaGraphEnquiryUser = Prisma.enquiryGetPayload<typeof _enquiryWithUserGraph>;
 
@@ -35,7 +34,11 @@ export default {
       apply_for_permit_connect: input.applyForPermitConnect,
       intake_status: input.intakeStatus,
       waiting_on: input.waitingOn,
-      enquiry_status: input.enquiryStatus
+      enquiry_status: input.enquiryStatus,
+      created_at: input.createdAt ? new Date(input.createdAt) : null,
+      created_by: input.createdBy as string,
+      updated_at: input.updatedAt ? new Date(input.updatedAt) : null,
+      updated_by: input.updatedBy as string
     };
   },
 
@@ -60,8 +63,11 @@ export default {
       intakeStatus: input.intake_status,
       enquiryStatus: input.enquiry_status,
       waitingOn: input.waiting_on,
-      updatedAt: input.updated_at?.toISOString() as string,
-      user: null
+      user: null,
+      createdAt: input.created_at?.toISOString() ?? null,
+      createdBy: input.created_by,
+      updatedAt: input.updated_at?.toISOString() ?? null,
+      updatedBy: input.updated_by
     };
   },
 

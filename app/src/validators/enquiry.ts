@@ -64,7 +64,10 @@ const schema = {
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       waitingOn: Joi.string().allow(null).max(255),
-      updatedAt: Joi.date()
+      createdAt: Joi.date().allow(null),
+      createdBy: Joi.string().allow(null),
+      updatedAt: Joi.date().allow(null),
+      updatedBy: Joi.string().allow(null)
     })
   }
 };

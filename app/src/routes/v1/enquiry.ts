@@ -32,6 +32,11 @@ router.get('/:enquiryId', (req: Request, res: Response, next: NextFunction): voi
   enquiryController.getEnquiry(req, res, next);
 });
 
+/** Gets enquiries related to an activityId */
+router.get('/list/:activityId', (req: Request, res: Response, next: NextFunction): void => {
+  enquiryController.listRelatedEnquiries(req, res, next);
+});
+
 /** Deletes an enquiry */
 router.delete('/:enquiryId', (req: Request, res: Response, next: NextFunction): void => {
   enquiryController.deleteEnquiry(req, res, next);
