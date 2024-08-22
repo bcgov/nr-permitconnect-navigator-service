@@ -112,7 +112,7 @@ onMounted(async () => {
   const profile = getProfile.value;
 
   submissions.value.forEach((sub) => {
-    if (sub.user?.username === profile?.preferred_username) {
+    if (sub.user?.sub === profile?.sub) {
       myAssignedTo.value.add(sub.submissionId);
     }
   });

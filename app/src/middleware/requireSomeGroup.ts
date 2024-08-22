@@ -18,14 +18,14 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const identityId = (req.currentContext?.tokenPayload as any).preferred_username;
+  const sub = (req.currentContext?.tokenPayload as any).sub;
 
-  let groups = await yarsService.getIdentityGroups(identityId);
+  let groups = await yarsService.getSubjectGroups(sub);
 
   // Auto assign all PROPONENT groups if user has none
   if (groups && groups.length === 0) {
-    await yarsService.assignGroup(identityId, Initiative.HOUSING, GroupName.PROPONENT);
-    groups = await yarsService.getIdentityGroups(identityId);
+    await yarsService.assignGroup(sub, Initiative.HOUSING, GroupName.PROPONENT);
+    groups = await yarsService.getSubjectGroups(sub);
   }
 
   if (groups.length === 0) {
