@@ -32,9 +32,7 @@ export const currentContext = (initiative: Initiative) => {
     const authorization = req.get('Authorization');
     const currentContext: CurrentContext = {
       authType: AuthType.NONE,
-      initiative: initiative,
-      tokenPayload: null,
-      userId: null
+      initiative: initiative
     };
 
     if (authorization) {
@@ -57,8 +55,8 @@ export const currentContext = (initiative: Initiative) => {
           }
 
           if (isValid) {
-            currentContext.tokenPayload = typeof isValid === 'object' ? isValid : jwt.decode(bearerToken);
-            const user = await userService.login(currentContext.tokenPayload as jwt.JwtPayload);
+            currentContext.tokenPayload = isValid as jwt.JwtPayload;
+            const user = await userService.login(currentContext.tokenPayload);
 
             if (user && user.userId) currentContext.userId = user.userId;
             else throw new Error('Failed to log user in');

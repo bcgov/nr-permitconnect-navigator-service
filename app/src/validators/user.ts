@@ -15,7 +15,8 @@ const schema = {
       fullName: Joi.string().max(255),
       lastName: Joi.string().max(255),
       active: Joi.string().max(255),
-      role: Joi.string().max(255)
+      group: Joi.array().items(Joi.string().max(255)),
+      includeUserGroups: Joi.boolean()
     })
   }
 };

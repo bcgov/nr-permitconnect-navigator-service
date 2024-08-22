@@ -12,7 +12,7 @@ import {
   PermitStatus,
   SubmissionType
 } from '../utils/enums/housing';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentTokenUsername, isTruthy, toTitleCase } from '../utils/utils';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentUsername, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
@@ -267,7 +267,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: getCurrentTokenUsername(req.currentContext),
+        submittedBy: getCurrentUsername(req.currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -388,7 +388,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentContext));
+        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
 
       res.status(200).json(response);

@@ -6,7 +6,7 @@ const controller = {
   getPermissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const groups = await yarsService.getIdentityGroups((req.currentContext?.tokenPayload as any).preferred_username);
+      const groups = await yarsService.getSubjectGroups((req.currentContext?.tokenPayload as any).sub);
 
       const permissions = await Promise.all(groups.map((x) => yarsService.getGroupPermissions(x.groupId))).then((x) =>
         x.flat()

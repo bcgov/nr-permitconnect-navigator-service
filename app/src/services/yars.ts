@@ -4,7 +4,7 @@ import prisma from '../db/dataConnection';
 import { Initiative, GroupName } from '../utils/enums/application';
 
 const service = {
-  assignGroup: async (identityId: string, initiative: Initiative, group: GroupName) => {
+  assignGroup: async (sub: string, initiative: Initiative, group: GroupName) => {
     try {
       const i = await prisma.initiative.findFirstOrThrow({
         where: {
@@ -19,30 +19,30 @@ const service = {
         }
       });
 
-      const result = await prisma.identity_group.create({
+      const result = await prisma.subject_group.create({
         data: {
-          identity_id: identityId,
+          sub: sub,
           group_id: groupResult.group_id
         }
       });
 
-      return { identityId: result.identity_id, roleId: result.group_id };
+      return { identityId: result.sub, roleId: result.group_id };
     } catch (e: unknown) {
       throw e;
     }
   },
 
   /**
-   * @function getIdentityGroups
+   * @function getSubjectGroups
    * Gets groups for the specified identity
-   * @param {string} identityId Identity ID to search
+   * @param {string} sub Subject to search
    * @returns {Promise<roleId: number>} The result of running the findMany operation
    */
-  getIdentityGroups: async (identityId: string) => {
+  getSubjectGroups: async (sub: string) => {
     try {
-      const result = await prisma.identity_group.findMany({
+      const result = await prisma.subject_group.findMany({
         where: {
-          identity_id: identityId
+          sub: sub
         },
         include: {
           group: true
@@ -52,7 +52,7 @@ const service = {
       return result.map((x) => ({
         initiativeId: x.group.initiative_id,
         groupId: x.group_id,
-        groupName: x.group.name
+        groupName: x.group.name as GroupName
       }));
     } catch (e: unknown) {
       throw e;
@@ -128,6 +128,36 @@ const service = {
         attributeName: x.attribute.name,
         groupId: x.attribute.attribute_group.map((x) => x.group_id)
       }));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  removeGroup: async (sub: string, initiative: Initiative, group: GroupName) => {
+    try {
+      const i = await prisma.initiative.findFirstOrThrow({
+        where: {
+          code: initiative
+        }
+      });
+
+      const groupResult = await prisma.group.findFirstOrThrow({
+        where: {
+          initiative_id: i.initiative_id,
+          name: group
+        }
+      });
+
+      const result = await prisma.subject_group.delete({
+        where: {
+          sub_group_id: {
+            sub: sub,
+            group_id: groupResult.group_id
+          }
+        }
+      });
+
+      return { sub: result.sub, roleId: result.group_id };
     } catch (e: unknown) {
       throw e;
     }

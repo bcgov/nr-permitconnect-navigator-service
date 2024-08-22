@@ -13,13 +13,12 @@ const controller = {
         userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
         identityId: mixedQueryToArray(req.query.identityId as string),
         idp: mixedQueryToArray(req.query.idp as string),
-        username: req.query.username as string,
+        sub: req.query.username as string,
         email: req.query.email as string,
         firstName: req.query.firstName as string,
         fullName: req.query.fullName as string,
         lastName: req.query.lastName as string,
-        active: isTruthy(req.query.active as string),
-        role: req.query.role as string
+        active: isTruthy(req.query.active as string)
       });
 
       if (
