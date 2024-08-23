@@ -5,6 +5,14 @@ import type { Email } from '@/types';
 
 export default {
   /**
+   * @function getActivityIds
+   * @returns {Promise} An axios response
+   */
+  getActivityIds() {
+    return appAxios().get('submission/activityIds');
+  },
+
+  /**
    * @function createDraft
    * @returns {Promise} An axios response
    */

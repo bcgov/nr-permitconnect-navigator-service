@@ -294,6 +294,16 @@ const controller = {
     return submissionData;
   },
 
+  getActivityIds: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionService.getActivityIds();
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

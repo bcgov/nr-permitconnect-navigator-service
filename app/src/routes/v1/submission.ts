@@ -13,6 +13,11 @@ router.get('/', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.getSubmissions(req, res, next);
 });
 
+/** Get a list of all the activityIds */
+router.get('/activityIds', (req: Request, res: Response, next: NextFunction): void => {
+  submissionController.getActivityIds(req, res, next);
+});
+
 /** Search submissions */
 router.get(
   '/search',
