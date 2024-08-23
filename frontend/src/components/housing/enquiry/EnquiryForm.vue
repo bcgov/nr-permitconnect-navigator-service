@@ -15,9 +15,9 @@ import {
   TextArea
 } from '@/components/form';
 import { Button, Message, useToast } from '@/lib/primevue';
-import { enquiryService, userService } from '@/services';
+import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { Regex } from '@/utils/enums/application';
+import { BasicResponse, Regex } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
@@ -47,10 +47,15 @@ const props = withDefaults(defineProps<Props>(), {
   editable: true
 });
 
+// Emit
+const emit = defineEmits(['enquiryForm:saved']);
+
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const editable: Ref<boolean> = ref(props.editable);
+const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const projectActivityIds: Ref<Array<string>> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 
@@ -140,12 +145,19 @@ function onInvalidSubmit(e: any) {
   first?.scrollIntoView({ behavior: 'smooth' });
 }
 
+function onRelatedActivityInput(e: IInputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
+}
+
 const onSubmit = async (values: any) => {
   try {
     editable.value = false;
 
     const submitData: Enquiry = omit(setEmptyStringsToNull(values) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
+    submitData.isRelated = submitData.relatedActivityId ? BasicResponse.YES : BasicResponse.NO;
 
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);
@@ -156,6 +168,7 @@ const onSubmit = async (values: any) => {
         user: values.user
       }
     });
+    emit('enquiryForm:saved');
 
     toast.success('Form saved');
   } catch (e: any) {
@@ -174,6 +187,7 @@ onMounted(async () => {
     submittedAt: new Date(props.enquiry?.submittedAt),
     user: assigneeOptions.value[0] ?? null
   };
+  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
 });
 </script>
 
@@ -211,11 +225,14 @@ onMounted(async () => {
         label="Submission date"
         :disabled="!editable"
       />
-      <InputText
+      <EditableDropdown
         class="col-3"
         name="relatedActivityId"
         label="Related submission"
         :disabled="!editable"
+        :options="filteredProjectActivityIds"
+        :get-option-label="(e: string) => e"
+        @on-input="onRelatedActivityInput"
       />
       <div class="col-3" />
 

@@ -42,13 +42,7 @@ onMounted(async () => {
     enquiryStore.setEnquiry(enquiry);
     enquiryStore.setNotes(notes);
 
-    if (enquiry?.relatedActivityId) {
-      relatedSubmission.value = (
-        await submissionService.searchSubmissions({
-          activityId: [enquiry.relatedActivityId]
-        })
-      ).data[0];
-    }
+    updateRelatedEnquiry();
   }
 
   loading.value = false;
@@ -63,6 +57,20 @@ const onUpdateNote = (oldNote: Note, newNote: Note) => {
 const onDeleteNote = (note: Note) => {
   enquiryStore.removeNote(note);
 };
+
+async function updateRelatedEnquiry() {
+  if (getEnquiry?.value?.relatedActivityId) {
+    relatedSubmission.value = (
+      await submissionService.searchSubmissions({
+        activityId: [getEnquiry?.value?.relatedActivityId]
+      })
+    ).data[0];
+  } else relatedSubmission.value = undefined;
+}
+
+function onEnquiryFormSaved() {
+  updateRelatedEnquiry();
+}
 </script>
 
 <template>
@@ -98,8 +106,20 @@ const onDeleteNote = (note: Note) => {
           {{ getEnquiry?.relatedActivityId }}
         </router-link>
       </Message>
+
+      <Message
+        v-if="getEnquiry?.relatedActivityId && !relatedSubmission"
+        severity="error"
+        class="text-center"
+        :closable="false"
+      >
+        This activity is linked to an invalid Activity
+      </Message>
       <span v-if="!loading && getEnquiry">
-        <EnquiryForm :enquiry="getEnquiry" />
+        <EnquiryForm
+          :enquiry="getEnquiry"
+          @enquiry-form:saved="onEnquiryFormSaved"
+        />
       </span>
     </TabPanel>
     <TabPanel header="Notes">
