@@ -71,6 +71,15 @@ export enum PermitStatus {
   COMPLETED = 'Completed'
 }
 
+export enum PermitTrackerStatus {
+  COMPLETED = 'Completed',
+  DENIED = 'Denied',
+  IN_REVIEW = 'In review',
+  ISSUED = 'Issued',
+  PENDING = 'Pending',
+  SUBMITTED = 'Submitted'
+}
+
 export enum ProjectRelationship {
   OWNER = 'Owner',
   EMPLOYEE = 'Employee',

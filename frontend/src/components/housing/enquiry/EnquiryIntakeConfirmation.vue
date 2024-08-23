@@ -6,14 +6,19 @@ import { RouteName } from '@/utils/enums/application';
 // Props
 type Props = {
   assignedActivityId: string;
+  showHeader?: boolean;
+  showHomeLink?: boolean;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  showHeader: true,
+  showHomeLink: true
+});
 </script>
 
 <template>
   <div>
-    <h2>Confirmation of Submission</h2>
+    <h2 v-if="showHeader">Confirmation of Submission</h2>
     <Message
       class="border-none"
       severity="success"
@@ -26,6 +31,11 @@ const props = withDefaults(defineProps<Props>(), {});
       A Housing Navigator will review your submission and contact you. Please check your email for the confirmation
       email and keep the confirmation ID for future reference.
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
+    <div
+      v-if="showHomeLink"
+      class="mt-4"
+    >
+      <router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link>
+    </div>
   </div>
 </template>
