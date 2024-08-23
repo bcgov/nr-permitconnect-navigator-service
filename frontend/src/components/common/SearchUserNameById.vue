@@ -15,7 +15,6 @@ const username = ref('');
 
 onBeforeMount(() => {
   if (props.userId) {
-    console.log('search comp');
     userService
       .searchUsers({ userId: [props.userId] })
       .then((res) => {

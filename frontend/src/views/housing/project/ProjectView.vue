@@ -284,7 +284,6 @@ onMounted(async () => {
       class="permit-card"
       @click="
         () => {
-          console.log(permit);
           permitModalVisible = true;
           selectedPermit = permit;
         }

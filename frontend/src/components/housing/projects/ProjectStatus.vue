@@ -1,134 +1,80 @@
 <script setup lang="ts">
 import { PermitAuthorizationStatus, PermitTrackerStatus } from '@/utils/enums/housing';
-
-import StatusMarks from '@/components/housing/projects/StatusMarks.vue';
+import { Timeline } from '@/lib/primevue';
 
 // Props
 type Props = {
-  authStatus: string | undefined;
+  authStatus?: string;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+const props = withDefaults(defineProps<Props>(), {
+  authStatus: PermitAuthorizationStatus.NONE
+});
+
+// Constants
+const checkmark = (trackerStatus: string) => ({
+  class: 'checkmark',
+  iconString: 'fas fa-circle-check',
+  text: trackerStatus
+});
+const exclamation = (trackerStatus: string) => ({
+  class: 'exclamation',
+  iconString: 'fa fa-exclamation-circle',
+  text: trackerStatus
+});
+const empty = (trackerStatus: string) => ({ class: 'empty', iconString: 'fa fa-circle', text: trackerStatus });
+const end = () => ({ class: '', iconString: '', text: '' });
+
+const iconStates = {
+  [PermitAuthorizationStatus.DENIED]: [
+    checkmark(PermitTrackerStatus.SUBMITTED),
+    checkmark(PermitTrackerStatus.IN_REVIEW),
+    exclamation(PermitAuthorizationStatus.DENIED),
+    end()
+  ],
+  [PermitAuthorizationStatus.IN_REVIEW]: [
+    checkmark(PermitTrackerStatus.SUBMITTED),
+    checkmark(PermitTrackerStatus.IN_REVIEW),
+    empty(PermitTrackerStatus.COMPLETED),
+    end()
+  ],
+  [PermitAuthorizationStatus.ISSUED]: [
+    checkmark(PermitTrackerStatus.SUBMITTED),
+    checkmark(PermitTrackerStatus.IN_REVIEW),
+    checkmark(PermitAuthorizationStatus.ISSUED),
+    end()
+  ],
+  [PermitAuthorizationStatus.NONE]: [
+    checkmark(PermitTrackerStatus.SUBMITTED),
+    empty(PermitTrackerStatus.IN_REVIEW),
+    empty(PermitTrackerStatus.COMPLETED),
+    end()
+  ],
+  [PermitAuthorizationStatus.PENDING]: [
+    checkmark(PermitTrackerStatus.SUBMITTED),
+    exclamation(PermitTrackerStatus.PENDING),
+    empty(PermitTrackerStatus.COMPLETED),
+    end()
+  ]
+};
 </script>
 
 <template>
-  <div>
-    <div
-      v-if="!props.authStatus || props.authStatus === PermitAuthorizationStatus.NONE"
-      class="grid m-0"
+  <div class="grid m-0 flex flex-column gap-3">
+    <Timeline
+      :value="iconStates[props.authStatus as keyof typeof iconStates]"
+      layout="horizontal"
     >
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.SUBMITTED"
+      <template #marker="slotProps">
+        <font-awesome-icon
+          :class="slotProps.item.class"
+          :icon="slotProps.item.iconString"
         />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          empty
-          :label="PermitTrackerStatus.PENDING"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          empty
-          :label="PermitTrackerStatus.COMPLETED"
-        />
-      </div>
-    </div>
-    <div
-      v-else-if="props.authStatus === PermitAuthorizationStatus.IN_REVIEW"
-      class="grid m-0"
-    >
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.SUBMITTED"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.IN_REVIEW"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          empty
-          :label="PermitTrackerStatus.COMPLETED"
-        />
-      </div>
-    </div>
-    <div
-      v-else-if="props.authStatus === PermitAuthorizationStatus.PENDING"
-      class="grid m-0"
-    >
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.SUBMITTED"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          exclamation
-          :label="PermitTrackerStatus.PENDING"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          empty
-          :label="PermitTrackerStatus.COMPLETED"
-        />
-      </div>
-    </div>
-    <div
-      v-else-if="props.authStatus === PermitAuthorizationStatus.ISSUED"
-      class="grid m-0"
-    >
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.SUBMITTED"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.IN_REVIEW"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.COMPLETED"
-        />
-      </div>
-    </div>
-
-    <div
-      v-else-if="props.authStatus === PermitAuthorizationStatus.DENIED"
-      class="grid m-0"
-    >
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          label="Issued"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          checkmark
-          :label="PermitTrackerStatus.IN_REVIEW"
-        />
-      </div>
-      <div class="col-4 p-0">
-        <StatusMarks
-          exclamation
-          :label="PermitTrackerStatus.DENIED"
-        />
-      </div>
-    </div>
+      </template>
+      <template #content="slotProps">
+        {{ slotProps.item.text }}
+      </template>
+    </Timeline>
   </div>
 </template>
 
@@ -137,28 +83,22 @@ font-awesome-icon {
   height: 1rem;
   width: 1rem;
 }
+
+.checkmark {
+  color: $app-green;
+}
+
 .empty {
   color: transparent;
   border: 1px dotted grey;
   border-radius: 50%;
 }
 
-.check {
-  color: $app-green;
-}
-
-.exclaim {
+.exclamation {
   color: $app-error;
 }
 
-.solid {
-  stroke-dasharray: none;
-}
-.dashed {
-  stroke-dasharray: 8, 8.5;
-}
-.dotted {
-  stroke-dasharray: 0.1, 12.5;
-  stroke-linecap: round;
+:deep(.p-timeline-event-opposite) {
+  display: none;
 }
 </style>

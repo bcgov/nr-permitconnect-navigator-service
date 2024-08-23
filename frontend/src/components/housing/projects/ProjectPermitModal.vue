@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
-import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import SearchUserNameById from '@/components/common/SearchUserNameById.vue';
+import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import ProjectStatus from '@/components/housing/projects/ProjectStatus.vue';
 import { Button, Dialog, Textarea } from '@/lib/primevue';
 import { PermitAuthorizationStatus } from '@/utils/enums/housing';
@@ -32,6 +32,12 @@ const visible = defineModel<boolean | undefined>('visible');
 // Actions
 const emits = defineEmits(['onHide', 'onSumbitEnquiry']);
 
+const handleCloseDialog = () => {
+  emits('onHide');
+  enquiryDescription.value = '';
+  showEnquiryTextarea.value = false;
+};
+
 const handleShowEnquiry = () => {
   if (!enquiryDescription.value) {
     enquiryDescription.value = `Re: ${props.permit?.name}\nTracking ID: ${props.permit?.trackingId}\n`;
@@ -50,8 +56,8 @@ const onSubmitEnquiry = () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
-    @hide="emits('onHide')"
+    class="app-info-dialog w-6 dialog-container"
+    @hide="handleCloseDialog"
   >
     <template #header>
       <span class="p-dialog-title">{{ permit?.businessDomain }}: {{ permit?.name }}</span>
@@ -122,7 +128,12 @@ const onSubmitEnquiry = () => {
           </div>
           <div class="col-6 flex">
             <div class="mr-1 permit-label">Status verified date:</div>
-            <div class="font-bold permit-data">{{ formatDate(permit?.statusLastVerified) }}</div>
+            <div
+              v-tooltip="{ value: formatDate(permit?.adjudicationDate) }"
+              class="font-bold permit-data"
+            >
+              {{ formatDate(permit?.statusLastVerified) }}
+            </div>
           </div>
           <div class="col-12 flex">
             <div class="mr-1 permit-label">Agency:</div>
@@ -186,9 +197,10 @@ const onSubmitEnquiry = () => {
 </template>
 
 <style scoped lang="scss">
-.status-card {
-  background-color: $app-grey;
-  padding: 2rem;
+.dialog-container {
+  width: 50%;
+  max-height: 90%;
+  box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.2);
 }
 
 .permit-data {
@@ -198,5 +210,10 @@ const onSubmitEnquiry = () => {
 
 .permit-label {
   white-space: pre;
+}
+
+.status-card {
+  background-color: $app-grey;
+  padding: 2rem;
 }
 </style>

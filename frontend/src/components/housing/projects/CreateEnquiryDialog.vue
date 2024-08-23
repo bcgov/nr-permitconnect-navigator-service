@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Dialog, Textarea } from '@/lib/primevue';
-import { formatDate } from '@/utils/formatters';
 import { useSubmissionStore } from '@/store';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 
@@ -19,8 +18,7 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 // Store
-const submissionStore = useSubmissionStore();
-const { getSubmission } = storeToRefs(submissionStore);
+const { getSubmission } = useSubmissionStore();
 
 // State
 const enquiryDescription: Ref<string> = ref('');
@@ -32,6 +30,11 @@ const emits = defineEmits(['onHide', 'onSumbitEnquiry']);
 const onSubmitEnquiry = () => {
   if (enquiryDescription.value) emits('onSumbitEnquiry', enquiryDescription.value);
 };
+
+const handleCloseDialog = () => {
+  emits('onHide');
+  enquiryDescription.value = '';
+};
 </script>
 
 <template>
@@ -40,7 +43,7 @@ const onSubmitEnquiry = () => {
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6"
-    @hide="emits('onHide')"
+    @hide="handleCloseDialog"
   >
     <template #header>
       <span class="p-dialog-title">New enquiry for: {{ getSubmission?.projectName }}</span>
