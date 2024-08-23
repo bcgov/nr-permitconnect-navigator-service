@@ -57,6 +57,13 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      // Alter public schema tables
+      .then(() =>
+        knex.schema.alterTable('submission', (table) => {
+          // Add new columns
+          table.boolean('consent_to_feedback').notNullable().defaultTo(false);
+        })
+      )
       // Create the access_request table
       .then(() =>
         knex.schema.createTable('access_request', (table) => {
@@ -767,6 +774,12 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('access_request'))
       // Drop the access_request_status_enum type
       .then(() => knex.schema.raw('DROP TYPE IF EXISTS access_request_status_enum'))
+      // Drop consent_to_feedback column from submission table
+      .then(() =>
+        knex.schema.alterTable('submission', (table) => {
+          table.dropColumn('consent_to_feedback');
+        })
+      )
 
       .then(() =>
         knex.schema.alterTable('user', (table) => {

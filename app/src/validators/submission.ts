@@ -87,6 +87,7 @@ const schema = {
     body: Joi.object({
       submissionId: uuidv4.required(),
       activityId: activityId,
+      consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
       submissionType: Joi.string()
         .required()

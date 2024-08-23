@@ -4,6 +4,7 @@ import { YES_NO_LIST } from '../utils/constants/application';
 import { BasicResponse } from '../utils/enums/application';
 
 export const basicIntake = Joi.object({
+  consentToFeedback: Joi.boolean(),
   isDevelopedByCompanyOrOrg: Joi.string()
     .required()
     .valid(...YES_NO_LIST),

@@ -12,6 +12,7 @@ export type Submission = {
   contactFirstName: string;
   contactLastName: string;
   companyNameRegistered: string;
+  consentToFeedback?: boolean;
   isDevelopedInBC: string;
   contactApplicantRelationship: string;
   contactPreference: string;
