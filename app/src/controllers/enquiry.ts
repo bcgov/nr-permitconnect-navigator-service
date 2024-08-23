@@ -72,7 +72,7 @@ const controller = {
       submittedBy: getCurrentTokenUsername(req.currentUser),
       intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
-      enquiryType: data?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
+      enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
     };
   },
 

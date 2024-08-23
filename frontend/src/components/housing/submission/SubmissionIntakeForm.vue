@@ -22,7 +22,7 @@ import {
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
+import IntakeAssistanceConfirmation from './IntakeAssistanceConfirmation.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
 import SubmissionIntakeConfirmation from '@/components/housing/submission/SubmissionIntakeConfirmation.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
@@ -39,7 +39,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAutoSave } from '@/composables/formAutoSave';
-import { documentService, externalApiService, permitService, submissionService } from '@/services';
+import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
 import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
@@ -49,7 +49,14 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { IntakeFormCategory, IntakeStatus, PermitNeeded, PermitStatus, ProjectLocation } from '@/utils/enums/housing';
+import {
+  IntakeFormCategory,
+  IntakeStatus,
+  PermitNeeded,
+  PermitStatus,
+  ProjectLocation,
+  SubmissionType
+} from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
 import { omit } from '@/utils/utils';
 
@@ -179,6 +186,37 @@ const onAddressSelect = async (e: DropdownChangeEvent) => {
   }
 };
 
+async function handleEnquirySubmit(values: any, relatedActivityId: string) {
+  try {
+    const formattedData = Object.assign(
+      {
+        basic: {
+          applyForPermitConnect: BasicResponse.NO,
+          enquiryDescription: 'Assistance requested',
+          isRelated: BasicResponse.YES,
+          relatedActivityId: relatedActivityId,
+          enquiryType: SubmissionType.ASSISTANCE
+        },
+        submit: true
+      },
+      { applicant: values?.[IntakeFormCategory.APPLICANT] }
+    );
+
+    const enquiryResponse = await enquiryService.createDraft(formattedData);
+
+    if (enquiryResponse.data.activityId) {
+      toast.success('Form saved');
+      assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+    } else {
+      toast.error('Failed to submit enquiry');
+    }
+  } catch (e: any) {
+    toast.error('Failed to save enquiry', e);
+  } finally {
+    editable.value = true;
+  }
+}
+
 const onLatLongInputClick = async () => {
   const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
   const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
@@ -210,9 +248,13 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(data: any, isAutoSave = false, showToast = true) {
+async function onSaveDraft(
+  data: any,
+  isAutoSave: boolean = false,
+  showToast: boolean = true,
+  assistanceRequired: boolean = false
+) {
   editable.value = false;
-
   // Cleanup unneeded data to be saved to draft
   const draftData = omit(data as SubmissionForm, ['addressSearch']);
 
@@ -224,8 +266,8 @@ async function onSaveDraft(data: any, isAutoSave = false, showToast = true) {
     draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
 
+  let response;
   try {
-    let response;
     if (data.submissionId) {
       response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
@@ -238,7 +280,6 @@ async function onSaveDraft(data: any, isAutoSave = false, showToast = true) {
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
-
     if (isAutoSave) {
       if (showToast) toast.success('Draft autosaved');
     } else {
@@ -249,6 +290,11 @@ async function onSaveDraft(data: any, isAutoSave = false, showToast = true) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
+  }
+
+  if (assistanceRequired && response?.data?.activityId) {
+    formUpdated.value = false;
+    handleEnquirySubmit(draftData, response.data.activityId);
   }
 }
 
@@ -276,10 +322,6 @@ async function onSubmit(data: any) {
   } finally {
     editable.value = true;
   }
-}
-
-async function onSubmitAssistance(activityId: string) {
-  assistanceAssignedActivityId.value = activityId;
 }
 
 async function emailConfirmation(activityId: string) {
@@ -422,7 +464,7 @@ onBeforeMount(async () => {
         v-if="!(props.activityId || props.submissionId) && values?.applicant"
         :form-errors="errors"
         :form-values="values"
-        @on-submit-assistance="onSubmitAssistance"
+        @on-submit-assistance="onSaveDraft(values, true, false, true)"
       />
 
       <input
@@ -598,7 +640,11 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-callback="nextCallback"
               :prev-disabled="true"
-              @click="() => onSaveDraft(values, true, false)"
+              @click="
+                () => {
+                  if (!values.activityId) onSaveDraft(values, true, false);
+                }
+              "
             >
               <template #content>
                 <Button
@@ -1597,7 +1643,7 @@ onBeforeMount(async () => {
     v-else-if="assignedActivityId"
     :assigned-activity-id="assignedActivityId"
   />
-  <EnquiryIntakeConfirmation
+  <IntakeAssistanceConfirmation
     v-else-if="assistanceAssignedActivityId"
     :assigned-activity-id="assistanceAssignedActivityId"
   />

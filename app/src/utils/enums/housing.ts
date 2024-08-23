@@ -85,6 +85,7 @@ export enum ProjectLocation {
 }
 
 export enum SubmissionType {
+  ASSISTANCE = 'Assistance',
   ESCALATION = 'Escalation',
   GENERAL_ENQUIRY = 'General enquiry',
   GUIDANCE = 'Guidance',

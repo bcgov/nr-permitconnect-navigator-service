@@ -1,9 +1,7 @@
 <script setup lang="ts">
-import { Button, useConfirm, useToast } from '@/lib/primevue';
+import { Button, useConfirm } from '@/lib/primevue';
 import { ref } from 'vue';
 
-import { enquiryService } from '@/services';
-import { BasicResponse } from '@/utils/enums/application';
 import { IntakeFormCategory } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
@@ -21,7 +19,6 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
-const toast = useToast();
 
 const checkApplicantValuesValid = (
   values: { [key: string]: string },
@@ -46,44 +43,19 @@ const checkApplicantValuesValid = (
   return isValid;
 };
 
-const confirmSubmit = (data: any) => {
+const confirmSubmit = () => {
   confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
-    header: 'Please confirm submission',
+    message: 'Are you sure you want to request assistance for this form? Please review this form before submitting.',
+    header: 'Please confirm assistance',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
-    accept: () => onSubmit(data)
+    accept: () => {
+      emit('onSubmitAssistance');
+    }
   });
 };
 
 const emit = defineEmits(['onSubmitAssistance']);
-
-const onSubmit = async (values: any) => {
-  try {
-    const formattedData = Object.assign(
-      {
-        basic: {
-          applyForPermitConnect: BasicResponse.NO,
-          enquiryDescription: 'Assistance requested',
-          isRelated: BasicResponse.NO
-        },
-        submit: true
-      },
-      { applicant: values?.[IntakeFormCategory.APPLICANT] }
-    );
-
-    const enquiryResponse = await enquiryService.createDraft(formattedData);
-
-    if (enquiryResponse.data.activityId) {
-      toast.success('Form saved');
-      emit('onSubmitAssistance', enquiryResponse.data.activityId);
-    } else {
-      toast.error('Failed to submit enquiry');
-    }
-  } catch (e: any) {
-    toast.error('Failed to save enquiry', e);
-  }
-};
 </script>
 
 <template>
@@ -120,7 +92,7 @@ const onSubmit = async (values: any) => {
           <Button
             label="Get assistance"
             :disabled="!checkApplicantValuesValid(props.formValues, props.formErrors)"
-            @click="() => confirmSubmit(props.formValues)"
+            @click="() => confirmSubmit()"
           />
         </div>
       </div>
