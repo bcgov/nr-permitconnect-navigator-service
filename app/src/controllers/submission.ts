@@ -187,6 +187,7 @@ const controller = {
 
     if (data.basic) {
       basic = {
+        consentToFeedback: data.basic.consentToFeedback ?? false,
         isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
         isDevelopedInBC: data.basic.isDevelopedInBC,
         companyNameRegistered: data.basic.registeredName

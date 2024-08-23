@@ -78,6 +78,7 @@ const formSchema = object({
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...applicantValidator,
   companyNameRegistered: string().notRequired().max(255).label('Company'),
+  consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
   isDevelopedInBC: string().when('companyNameRegistered', {
     is: (val: string) => val,
     then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Company registered in B.C'),
@@ -199,14 +200,15 @@ const onSubmit = async (values: any) => {
 
     const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
-
+    submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
     submissionStore.setSubmission(result.data);
     formRef.value?.resetForm({
       values: {
         ...submitData,
         locationAddress: values.locationAddress,
-        user: values.user
+        user: values.user,
+        consentToFeedback: values.consentToFeedback
       }
     });
 
@@ -249,6 +251,7 @@ onMounted(async () => {
     contactPreference: props.submission.contactPreference,
     contactPhoneNumber: props.submission.contactPhoneNumber,
     contactEmail: props.submission.contactEmail,
+    consentToFeedback: props.submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     projectName: props.submission.projectName,
     projectDescription: props.submission.projectDescription,
     projectLocationDescription: props.submission.projectLocationDescription,
@@ -398,6 +401,13 @@ onMounted(async () => {
         name="contactEmail"
         label="Contact email"
         :disabled="!props.editable"
+      />
+      <Dropdown
+        class="col-3"
+        name="consentToFeedback"
+        label="Research opt-in"
+        :disabled="!props.editable"
+        :options="YES_NO_LIST"
       />
 
       <SectionHeader title="Housing" />

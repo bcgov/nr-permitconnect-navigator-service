@@ -81,9 +81,6 @@ const controller = {
 
   createDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
       const enquiry = await controller.generateEnquiryData(req);
 
       // Create new enquiry
@@ -159,8 +156,6 @@ const controller = {
 
   updateDraft: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       const enquiry = await controller.generateEnquiryData(req);
 
       // Update enquiry

@@ -101,14 +101,14 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'project',
         meta: {
-          access: [Permissions.NAVIGATION_HOUSING_STATUS_TRACKER]
+          access: [NavigationPermission.HOUSING_STATUS_TRACKER]
         },
         children: [
           {
             path: '',
             component: () => import('@/views/housing/project/ProjectListView.vue'),
             meta: {
-              access: [Permissions.NAVIGATION_HOUSING_STATUS_TRACKER]
+              access: [NavigationPermission.HOUSING_STATUS_TRACKER]
             },
             name: RouteName.HOUSING_PROJECTS_LIST
           },
@@ -116,7 +116,7 @@ const routes: Array<RouteRecordRaw> = [
             path: ':submissionId',
             component: () => import('@/views/housing/project/ProjectView.vue'),
             meta: {
-              access: [Permissions.NAVIGATION_HOUSING_STATUS_TRACKER]
+              access: [NavigationPermission.HOUSING_STATUS_TRACKER]
             },
             name: RouteName.HOUSING_PROJECT,
             props: createProps
