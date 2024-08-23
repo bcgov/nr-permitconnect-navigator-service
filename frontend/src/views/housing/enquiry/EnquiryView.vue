@@ -95,7 +95,7 @@ const onDeleteNote = (note: Note) => {
             query: { activityId: getEnquiry?.relatedActivityId, submissionId: relatedSubmission.submissionId }
           }"
         >
-          {{ relatedSubmission.activityId }}
+          {{ getEnquiry?.relatedActivityId }}
         </router-link>
       </Message>
       <span v-if="!loading && getEnquiry">

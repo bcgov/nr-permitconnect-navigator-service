@@ -34,6 +34,16 @@ export default {
   },
 
   /**
+   * @function listRelatedEnquiries
+   * @param {string} activityId
+   * @description List all enquiries related to an activity
+   * @returns {Promise} An axios response
+   */
+  async listRelatedEnquiries(activityId: string) {
+    return appAxios().get(`enquiry/list/${activityId}`);
+  },
+
+  /**
    * @function updateDraft
    * @returns {Promise} An axios response
    */
