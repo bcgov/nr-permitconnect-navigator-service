@@ -107,7 +107,7 @@ onMounted(async () => {
     ])
   ).map((r) => r.data);
 
-  assignEnquiries();
+  assignEnquiriesAndFullName();
 
   const profile = getProfile.value;
 
@@ -147,7 +147,7 @@ function refreshStatistics() {
     });
 }
 
-function assignEnquiries() {
+function assignEnquiriesAndFullName() {
   const relatedActivityIds = new Set();
 
   enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
@@ -157,6 +157,15 @@ function assignEnquiries() {
       sub.hasRelatedEnquiry = true;
     } else {
       sub.hasRelatedEnquiry = false;
+    }
+  });
+
+  submissions.value.forEach((sub) => {
+    if (sub.user) {
+      sub.user.fullName =
+        sub.user.firstName && sub.user.lastName
+          ? `${sub.user.lastName}, ${sub.user.firstName}`
+          : sub.user.firstName || sub.user.lastName || '';
     }
   });
 }
