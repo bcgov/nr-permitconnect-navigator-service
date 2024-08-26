@@ -1,10 +1,21 @@
 /* eslint-disable no-useless-catch */
 
+import { comsService } from '.';
 import prisma from '../db/dataConnection';
-import { Initiative, GroupName } from '../utils/enums/application';
+import { Initiative, GroupName, Action } from '../utils/enums/application';
 
 const service = {
-  assignGroup: async (sub: string, initiative: Initiative, group: GroupName) => {
+  /**
+   * @function assignGroup
+   * Assigns an identity to the given group
+   * Assigns permissions to COMS based on the given group
+   * @param {string | undefined} bearerToken The bearer token of the authorized user
+   * @param {string} identityId Identity ID of the authorized user
+   * @param {Initiative} initiative The initiative to associate with the group
+   * @param {GroupName} group The group to add the user to
+   * @returns {Promise<{identityId: string;roleId: number;}>} The result of running the create operation
+   */
+  assignGroup: async (bearerToken: string | undefined, sub: string, initiative: Initiative, group: GroupName) => {
     try {
       const i = await prisma.initiative.findFirstOrThrow({
         where: {
@@ -25,6 +36,19 @@ const service = {
           group_id: groupResult.group_id
         }
       });
+
+      const comsPermsMap = new Map<GroupName, Array<Action>>([
+        [GroupName.PROPONENT, [Action.CREATE]],
+        [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+        [GroupName.SUPERVISOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+        [GroupName.ADMIN, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+        [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]
+      ]);
+
+      const comsPerms = comsPermsMap.get(group);
+      if (comsPerms && bearerToken) {
+        await comsService.createBucket(bearerToken, comsPerms);
+      }
 
       return { identityId: result.sub, roleId: result.group_id };
     } catch (e: unknown) {
@@ -59,6 +83,15 @@ const service = {
     }
   },
 
+  /**
+   * @function getGroupPolicyDetails
+   * Gets a list of group/role/policy/resource/action matching the given parameters
+   * @param {string} groupId Group ID to match on
+   * @param {Initiative} initiativeCode Initiative code to match on
+   * @param {string} resourceName Resource name to match on
+   * @param {string} actionName Action name to match on
+   * @returns The result of running the findMany operation
+   */
   getGroupPolicyDetails: async (
     groupId: number,
     initiativeCode: Initiative,
@@ -89,6 +122,12 @@ const service = {
     }
   },
 
+  /**
+   * @function getGroupPermissions
+   * Gets a list of resource/actions associated with the given groupId
+   * @param {number} groupId Group ID to search
+   * @returns The result of running the findMany operation
+   */
   getGroupPermissions: async (groupId: number) => {
     try {
       const result = await prisma.group_role_policy_vw.findMany({
@@ -108,6 +147,12 @@ const service = {
     }
   },
 
+  /**
+   * @function getPolicyAttributes
+   * Gets a list of attributes associated with the given policyId
+   * @param {number} policyId Policy ID to search
+   * @returns The result of running the findMany operation
+   */
   getPolicyAttributes: async (policyId: number) => {
     try {
       const result = await prisma.policy_attribute.findMany({

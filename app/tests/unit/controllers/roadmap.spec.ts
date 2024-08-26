@@ -22,7 +22,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+const CURRENT_CONTEXT = { authType: 'BEARER', bearerToken: 'sometoken', tokenPayload: null, userId: 'abc-123' };
 
 describe('send', () => {
   const next = jest.fn();
@@ -188,10 +188,59 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+  });
+
+  it('should not call COMS without a bearer token', async () => {
+    const req = {
+      body: {
+        activityId: '123-123',
+        selectedFileIds: ['123', '456'],
+        emailData: {
+          body: 'Some message text',
+          bodyType: 'text',
+          from: 'test@gov.bc.ca',
+          to: 'hello@gov.bc.ca',
+          subject: 'Unit tests',
+          attachments: [
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'foo'
+            },
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'bar'
+            }
+          ]
+        }
+      },
+      currentContext: { ...CURRENT_CONTEXT, bearerToken: null },
+      headers: {}
+    };
+
+    const emailResponse = {
+      data: 'foo',
+      status: 201
+    };
+
+    emailSpy.mockResolvedValue(emailResponse);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await roadmapController.send(req as any, res as any, next);
+
+    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
+    expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
@@ -270,10 +319,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
@@ -329,10 +378,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
@@ -389,10 +438,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
