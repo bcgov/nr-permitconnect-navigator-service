@@ -9,13 +9,13 @@ const service = {
    * @function assignGroup
    * Assigns an identity to the given group
    * Assigns permissions to COMS based on the given group
-   * @param {string | null | undefined} bearerToken The bearer token of the authorized user
+   * @param {string | undefined} bearerToken The bearer token of the authorized user
    * @param {string} identityId Identity ID of the authorized user
    * @param {Initiative} initiative The initiative to associate with the group
    * @param {GroupName} group The group to add the user to
    * @returns {Promise<{identityId: string;roleId: number;}>} The result of running the create operation
    */
-  assignGroup: async (sub: string, initiative: Initiative, group: GroupName) => {
+  assignGroup: async (bearerToken: string | undefined, sub: string, initiative: Initiative, group: GroupName) => {
     try {
       const i = await prisma.initiative.findFirstOrThrow({
         where: {
