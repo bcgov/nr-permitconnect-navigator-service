@@ -55,6 +55,7 @@ export const currentContext = (initiative: Initiative) => {
           }
 
           if (isValid) {
+            currentContext.bearerToken = bearerToken;
             currentContext.tokenPayload = isValid as jwt.JwtPayload;
             const user = await userService.login(currentContext.tokenPayload);
 
