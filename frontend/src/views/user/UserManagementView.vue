@@ -226,7 +226,7 @@ onMounted(async () => {
   const users: Array<UserAccessRequest> = (
     await userService.searchUsers({
       active: true,
-      role: GroupName.NAVIGATOR
+      group: [GroupName.NAVIGATOR]
     })
   ).data.filter((user: UserAccessRequest) => user.userId !== NIL);
 

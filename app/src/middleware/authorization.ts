@@ -12,7 +12,7 @@ import {
   yarsService
 } from '../services';
 import { Initiative, GroupName } from '../utils/enums/application';
-import { getCurrentIdentity } from '../utils/utils';
+import { getCurrentSubject } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import { CurrentAuthorization } from '../types';
@@ -31,20 +31,21 @@ export const hasAuthorization = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const currentAuthorization: CurrentAuthorization = {
-        attributes: []
+        attributes: [],
+        groups: []
       };
 
       if (req.currentContext) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         if (!userId) {
           throw new Error('Invalid user');
         }
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const identityId = (req.currentContext?.tokenPayload as any).preferred_username;
+        const sub = (req.currentContext?.tokenPayload as any).sub;
 
-        const groups = await yarsService.getIdentityGroups(identityId);
+        const groups = await yarsService.getSubjectGroups(sub);
 
         if (groups.length === 0) {
           throw new Error('Invalid group(s)');
@@ -88,6 +89,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         }
 
         // Update current authorization and freeze
+        currentAuthorization.groups = groups.map((x) => x.groupName);
         req.currentAuthorization = Object.freeze(currentAuthorization);
       } else {
         throw new Error('No current user');
@@ -127,7 +129,7 @@ export const hasAccess = (param: string) => {
     try {
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         const id = req.params[param];
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentContext, NIL), NIL);
+        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         let data;
         const func = paramMap.get(param);

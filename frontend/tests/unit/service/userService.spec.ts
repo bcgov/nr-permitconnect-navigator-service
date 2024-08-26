@@ -28,7 +28,7 @@ describe('userService test', () => {
       userId: ['testUserId1', 'testUserId2'],
       identityId: ['testIdentityId1'],
       idp: ['idp1', 'idp2'],
-      username: 'testUserName',
+      sub: 'testSub',
       email: 'testEmail@test.com',
       firstName: 'testFirst',
       fullName: 'testFull',

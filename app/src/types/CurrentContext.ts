@@ -3,8 +3,8 @@ import jwt from 'jsonwebtoken';
 import { AuthType, Initiative } from '../utils/enums/application';
 
 export type CurrentContext = {
-  authType: AuthType;
+  authType?: AuthType;
   initiative?: Initiative;
-  tokenPayload: string | jwt.JwtPayload | null;
-  userId: string | null;
+  tokenPayload?: jwt.JwtPayload;
+  userId?: string;
 };
