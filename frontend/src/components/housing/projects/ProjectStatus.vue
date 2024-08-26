@@ -79,23 +79,27 @@ const iconStates = {
 </template>
 
 <style scoped lang="scss">
-font-awesome-icon {
-  height: 1rem;
-  width: 1rem;
-}
-
 .checkmark {
   color: $app-green;
+  & + :deep(.p-timeline-event-connector) {
+    background-color: $app-green;
+  }
 }
 
 .empty {
   color: transparent;
-  border: 1px dotted grey;
+  border: 1px dashed $app-proj-grey-two;
   border-radius: 50%;
+  & + :deep(.p-timeline-event-connector) {
+    background-color: $app-proj-grey-two;
+  }
 }
 
 .exclamation {
   color: $app-error;
+  & + :deep(.p-timeline-event-connector) {
+    background-color: $app-error;
+  }
 }
 
 :deep(.p-timeline-event-opposite) {

@@ -80,7 +80,7 @@ const onSubmitEnquiry = () => {
             </div>
           </div>
         </div>
-        <div class="grid mt-3">
+        <div class="grid mt-4">
           <div class="col-6 flex">
             <div class="mr-1 permit-label">Tracking ID:</div>
             <div
@@ -213,7 +213,10 @@ const onSubmitEnquiry = () => {
 }
 
 .status-card {
-  background-color: $app-grey;
   padding: 2rem;
+  border-radius: 8px;
+  border: 1px solid $app-proj-white-one;
+  background: $app-proj-white-two;
+  box-shadow: 0px 4px 4px 0px $app-proj-black;
 }
 </style>

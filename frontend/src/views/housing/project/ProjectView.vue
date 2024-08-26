@@ -290,7 +290,7 @@ onMounted(async () => {
       "
     >
       <template #title>
-        <h5 class="m-0 app-primary-color">{{ permit.businessDomain }}: {{ permit.name }}</h5>
+        <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.businessDomain }}: {{ permit.name }}</h5>
         <Divider />
       </template>
       <template #content>
@@ -340,6 +340,7 @@ onMounted(async () => {
     />
     <CreateEnquiryDialog
       v-model:visible="enquiryModalVisible"
+      dismissable-mask
       :confirmation-id="enquiryConfirmationId"
       @on-hide="handleDialogClose"
       @on-sumbit-enquiry="handleEnquirySubmit"
@@ -410,10 +411,10 @@ a {
 }
 
 .permit-card {
-  border-color: #efefef;
+  border-color: $app-proj-white-one;
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+  box-shadow: 4px 4px 4px 0px $app-proj-black;
   padding: 1.76rem 2rem 1.76rem 2rem;
   margin-bottom: 1rem;
   &:hover {
@@ -427,7 +428,7 @@ a {
 }
 
 .sub-label {
-  color: #868585;
+  color: $app-proj-grey-one;
   font-size: 0.8rem;
   margin-top: 1rem;
 }
@@ -448,10 +449,10 @@ a {
 }
 
 :deep(.p-accordion-tab) {
-  border-color: #efefef;
+  border-color: $app-proj-white-one;
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+  box-shadow: 4px 4px 4px 0px $app-proj-black;
 }
 
 :deep(.p-accordion-tab-active .p-accordion-header > a) {

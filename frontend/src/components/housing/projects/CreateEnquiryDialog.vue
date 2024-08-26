@@ -51,9 +51,9 @@ const handleCloseDialog = () => {
     <template #default>
       <div v-if="!props.confirmationId">
         <div class="flex flex-column">
-          <div class="status-card">
+          <div>
             <div>
-              Confirmation ID:
+              Project ID:
               <span class="font-bold">{{ getSubmission?.activityId }}</span>
             </div>
             <div
@@ -121,11 +121,6 @@ const handleCloseDialog = () => {
 </template>
 
 <style scoped lang="scss">
-.status-card {
-  background-color: $app-grey;
-  padding: 2rem;
-}
-
 .permit-data {
   overflow: hidden;
   text-overflow: ellipsis;

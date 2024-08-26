@@ -54,33 +54,39 @@ let initialFormValues: PermitForm = {
   adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
 };
 
+const PERMIT_STATE_VALIDATION_MESSAGE = 'For the currently selected Authorization status, Permit state';
 // Form validation schema
 const formSchema = object({
   permitType: object().required().label('Permit'),
   needed: string().required().label('Needed'),
-  status: string().required().label('Permit state'),
+  status: string()
+    .required()
+    .label(PERMIT_STATE_VALIDATION_MESSAGE)
+    .when('authStatus', {
+      is: (value: string) => !value || (PermitAuthorizationStatus.NONE as string) === value,
+      then: (schema: Schema) => schema.oneOf([PermitStatus.NEW, PermitStatus.APPLIED]).required()
+    })
+    .when('authStatus', {
+      is: (value: string) =>
+        [PermitAuthorizationStatus.IN_REVIEW as string, PermitAuthorizationStatus.PENDING as string].includes(value),
+      then: () =>
+        string().matches(
+          RegExp(`${PermitStatus.APPLIED}`),
+          `${PERMIT_STATE_VALIDATION_MESSAGE} must be ${PermitStatus.APPLIED}`
+        )
+    })
+    .when('authStatus', {
+      is: (value: string) =>
+        [PermitAuthorizationStatus.ISSUED as string, PermitAuthorizationStatus.DENIED as string].includes(value),
+      then: () =>
+        string().matches(
+          RegExp(`${PermitStatus.COMPLETED}`),
+          `${PERMIT_STATE_VALIDATION_MESSAGE} must be ${PermitStatus.COMPLETED}`
+        )
+    }),
   agency: string().required().label('Agency'),
   businessDomain: string().label('Business domain'),
-  authStatus: string()
-    .notRequired()
-    .label('For the currently selected Permit state, Authorization status')
-    .when('status', {
-      is: (value: string) => (PermitStatus.APPLIED as string) === value,
-      then: (schema: Schema) =>
-        schema
-          .oneOf([
-            PermitAuthorizationStatus.NONE,
-            PermitAuthorizationStatus.IN_REVIEW,
-            PermitAuthorizationStatus.PENDING
-          ])
-          .required()
-    })
-    .when('status', {
-      is: (value: string) => (PermitStatus.COMPLETED as string) === value,
-      then: (schema: Schema) =>
-        schema.oneOf([PermitAuthorizationStatus.ISSUED, PermitAuthorizationStatus.DENIED]).required(),
-      otherwise: (schema: Schema) => schema
-    }),
+  authStatus: string().required().oneOf(PERMIT_AUTHORIZATION_STATUS_LIST),
   statusLastVerified: date()
     .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()
