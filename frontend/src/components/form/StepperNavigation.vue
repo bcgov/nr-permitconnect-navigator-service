@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { nextTick } from 'vue';
 import { Button } from '@/lib/primevue';
 
 // Props
@@ -16,6 +17,23 @@ const props = withDefaults(defineProps<Props>(), {
   prevCallback: () => {},
   prevDisabled: false
 });
+
+function scrollToTop() {
+  const stepperPanel = document.querySelector('.p-stepper');
+  if (stepperPanel) {
+    window.scroll(0, 0);
+  }
+}
+
+function handleNextClick() {
+  props.nextCallback?.();
+  nextTick(() => scrollToTop());
+}
+
+function handlePrevClick() {
+  props.prevCallback?.();
+  nextTick(() => scrollToTop());
+}
 </script>
 
 <template>
@@ -26,7 +44,7 @@ const props = withDefaults(defineProps<Props>(), {
       icon="pi pi-arrow-left"
       icon-class="text-xl"
       :disabled="props.prevDisabled"
-      @click="props.prevCallback()"
+      @click="handlePrevClick"
     />
     <slot name="content" />
     <Button
@@ -35,7 +53,7 @@ const props = withDefaults(defineProps<Props>(), {
       icon="pi pi-arrow-right"
       icon-class="text-xl"
       :disabled="props.nextDisabled"
-      @click="props.nextCallback()"
+      @click="handleNextClick"
     />
   </div>
 </template>
