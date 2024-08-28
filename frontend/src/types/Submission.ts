@@ -23,6 +23,7 @@ export type Submission = {
   projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
+  multiPermitsNeeded: string;
   otherUnitsDescription: string;
   otherUnits: string;
   hasRentalUnits: string;

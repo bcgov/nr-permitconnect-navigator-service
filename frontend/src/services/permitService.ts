@@ -31,8 +31,8 @@ export default {
    * @function listPermits
    * @returns {Promise} An axios response
    */
-  async listPermits(activityId: string) {
-    return appAxios().get(`permit/list/${activityId}`);
+  async listPermits(activityId?: string) {
+    return appAxios().get('permit', { params: { activityId } });
   },
 
   /**

@@ -36,9 +36,9 @@ const controller = {
     }
   },
 
-  async listPermits(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
+  async listPermits(req: Request<never, { activityId?: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await permitService.listPermits(req.params.activityId);
+      const response = await permitService.listPermits(req.query?.activityId);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

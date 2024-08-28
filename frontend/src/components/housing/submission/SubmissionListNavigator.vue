@@ -239,7 +239,13 @@ function isFinanciallySupported(data: Submission) {
       style="min-width: 125px"
     />
     <Column
-      field="user.fullName"
+      field="multiPermitsNeeded"
+      header="Multi-authorization project"
+      :sortable="true"
+      style="min-width: 125px"
+    />
+    <Column
+      field="assignedTo"
       header="Assigned to"
       :sortable="true"
       style="min-width: 200px"
