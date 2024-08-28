@@ -6,6 +6,7 @@ export type Statistics = {
   intake_submitted: number;
   intake_assigned: number;
   intake_completed: number;
+  multi_permits_needed: number;
   state_new: number;
   state_inprogress: number;
   state_delayed: number;

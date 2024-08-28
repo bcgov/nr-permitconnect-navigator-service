@@ -249,7 +249,7 @@ describe('listPermits', () => {
   it('should return 200 if all good', async () => {
     const now = new Date();
     const req = {
-      params: { activityId: 'ACT_ID' },
+      query: { activityId: 'ACT_ID' },
       currentContext: CURRENT_CONTEXT
     };
 
@@ -275,14 +275,14 @@ describe('listPermits', () => {
     await permitController.listPermits(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(listSpy).toHaveBeenCalledWith(req.query.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(permitList);
   });
 
   it('calls next if the permit service fails to list permits', async () => {
     const req = {
-      params: { activityId: 'ACT_ID' },
+      query: { activityId: 'ACT_ID' },
       currentContext: CURRENT_CONTEXT
     };
 
@@ -294,7 +294,7 @@ describe('listPermits', () => {
     await permitController.listPermits(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(listSpy).toHaveBeenCalledWith(req.query.activityId);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
