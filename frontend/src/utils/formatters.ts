@@ -2,7 +2,7 @@ import { format, parseJSON } from 'date-fns';
 
 import { useConfigStore } from '@/store';
 
-function _dateFnsFormat(value: string, formatter: string) {
+function _dateFnsFormat(value: string | undefined | null, formatter: string) {
   const formatted = '';
   try {
     if (value) {
@@ -21,8 +21,8 @@ function _dateFnsFormat(value: string, formatter: string) {
  * @param {String} value A string representation of a date
  * @returns {String} A string representation of `value`
  */
-export function formatDate(value: string) {
-  return _dateFnsFormat(value, 'MMMM d yyyy');
+export function formatDate(value: string | undefined | null) {
+  return value ? _dateFnsFormat(value, 'MMMM d yyyy') : '';
 }
 
 /**
@@ -31,7 +31,7 @@ export function formatDate(value: string) {
  * @param {String} value A string representation of a date
  * @returns {String} A string representation of `value`
  */
-export function formatDateShort(value: string) {
+export function formatDateShort(value: string | undefined | null) {
   return _dateFnsFormat(value, 'yyyy MMM dd, HH:mm');
 }
 
@@ -41,7 +41,7 @@ export function formatDateShort(value: string) {
  * @param {String} value A string representation of a date
  * @returns {String} A string representation of `value`
  */
-export function formatDateLong(value: string) {
+export function formatDateLong(value: string | undefined | null) {
   return _dateFnsFormat(value, 'MMMM d yyyy, h:mm:ss a');
 }
 
@@ -51,7 +51,7 @@ export function formatDateLong(value: string) {
  * @param {String} value A string representation of a date
  * @returns {String} A string representation of `value`
  */
-export function formatDateTime(value: string) {
+export function formatDateTime(value: string | undefined | null) {
   return _dateFnsFormat(value, 'MMMM d yyyy, h:mm a');
 }
 
@@ -61,7 +61,7 @@ export function formatDateTime(value: string) {
  * @param {String} value A string representation of a JWT username
  * @returns {String} A formatted representation of `value`
  */
-export function formatJwtUsername(value: string) {
+export function formatJwtUsername(value: string | undefined | null) {
   if (!value) return undefined;
 
   const idps = useConfigStore().getConfig.idpList;
@@ -78,7 +78,7 @@ export function formatJwtUsername(value: string) {
   return value.substring(0, substr);
 }
 
-export function toKebabCase(str: string | null) {
+export function toKebabCase(str: string | undefined | null) {
   const strs = str && str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
   return strs ? strs.join('-').toLocaleLowerCase() : '';
 }

@@ -4,13 +4,15 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
+import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
+import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
 import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
-import { RouteName } from '@/utils/enums/application';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toKebabCase } from '@/utils/utils';
 
-import { permitService, submissionService, userService } from '@/services';
+import { enquiryService, permitService, submissionService, userService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
@@ -51,7 +53,11 @@ const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
   { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
+const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
+const enquiryModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
+const permitModalVisible: Ref<boolean> = ref(false);
+const selectedPermit: Ref<CombinedPermit | undefined> = ref(undefined);
 
 const permitsNeeded = computed(() => {
   return permitFilter({
@@ -126,6 +132,39 @@ function displayTrackerStatus(authStatus: string | undefined, permitState: strin
   return authStatus;
 }
 
+function handleDialogClose() {
+  enquiryConfirmationId.value = undefined;
+}
+
+async function handleEnquirySubmit(enquiryDescription: string = '') {
+  if (!getSubmission.value) return;
+
+  const enquiryData = {
+    applicant: {
+      contactPreference: getSubmission.value.contactPreference,
+      contactEmail: getSubmission.value.contactEmail,
+      contactFirstName: getSubmission.value.contactFirstName,
+      contactLastName: getSubmission.value.contactLastName,
+      contactPhoneNumber: getSubmission.value.contactPhoneNumber,
+      contactApplicantRelationship: getSubmission.value.contactApplicantRelationship
+    },
+    basic: {
+      isRelated: BasicResponse.YES,
+      applyForPermitConnect: BasicResponse.NO,
+      enquiryDescription: enquiryDescription?.trim(),
+      relatedActivityId: getSubmission.value.activityId
+    },
+    submit: true
+  };
+
+  try {
+    const response = await enquiryService.createDraft(enquiryData);
+    enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
+  } catch (e: any) {
+    toast.error('Failed to submit enquiry', e);
+  }
+}
+
 onMounted(async () => {
   let submissionValue;
   let permitTypesValue;
@@ -182,12 +221,7 @@ onMounted(async () => {
       <Button
         class="p-button-sm header-btn"
         label="Ask a Navigator"
-        @click="
-          router.push({
-            name: RouteName.HOUSING_ENQUIRY_INTAKE,
-            query: { submissionId: getSubmission.submissionId }
-          })
-        "
+        @click="enquiryModalVisible = !enquiryModalVisible"
       />
     </div>
     <div class="mb-8">
@@ -248,9 +282,15 @@ onMounted(async () => {
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
       class="permit-card"
+      @click="
+        () => {
+          permitModalVisible = true;
+          selectedPermit = permit;
+        }
+      "
     >
       <template #title>
-        <h5 class="m-0 app-primary-color">{{ permit.businessDomain }}: {{ permit.name }}</h5>
+        <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.businessDomain }}: {{ permit.name }}</h5>
         <Divider />
       </template>
       <template #content>
@@ -290,6 +330,21 @@ onMounted(async () => {
         </div>
       </template>
     </Card>
+    <ProjectPermitModal
+      v-model:visible="permitModalVisible"
+      dismissable-mask
+      :confirmation-id="enquiryConfirmationId"
+      :permit="selectedPermit"
+      @on-hide="handleDialogClose"
+      @on-sumbit-enquiry="handleEnquirySubmit"
+    />
+    <CreateEnquiryDialog
+      v-model:visible="enquiryModalVisible"
+      dismissable-mask
+      :confirmation-id="enquiryConfirmationId"
+      @on-hide="handleDialogClose"
+      @on-sumbit-enquiry="handleEnquirySubmit"
+    />
   </div>
 </template>
 
@@ -356,10 +411,10 @@ a {
 }
 
 .permit-card {
-  border-color: #efefef;
+  border-color: $app-proj-white-one;
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+  box-shadow: 4px 4px 4px 0px $app-proj-black;
   padding: 1.76rem 2rem 1.76rem 2rem;
   margin-bottom: 1rem;
   &:hover {
@@ -373,7 +428,7 @@ a {
 }
 
 .sub-label {
-  color: #868585;
+  color: $app-proj-grey-one;
   font-size: 0.8rem;
   margin-top: 1rem;
 }
@@ -394,10 +449,10 @@ a {
 }
 
 :deep(.p-accordion-tab) {
-  border-color: #efefef;
+  border-color: $app-proj-white-one;
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
+  box-shadow: 4px 4px 4px 0px $app-proj-black;
 }
 
 :deep(.p-accordion-tab-active .p-accordion-header > a) {
