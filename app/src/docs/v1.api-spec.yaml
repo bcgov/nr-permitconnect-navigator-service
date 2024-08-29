@@ -1,8 +1,11 @@
+---
 openapi: 3.0.2
 info:
   version: 1.0.0
   title: NR PermitConnect Navigator Service (PCNS)
-  description: A case management application meant to serve the needs of the NRM Permitting Solutions Branch.
+  description: >-
+    A case management application meant to serve the needs of the NRM Permitting
+    Solutions Branch.
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -36,9 +39,9 @@ paths:
       tags:
         - Activity
       parameters:
-        - $ref: "#/components/parameters/Path-ActivityId"
+        - $ref: '#/components/parameters/Path-ActivityId'
       responses:
-        "200":
+        '200':
           description: The validation result
           content:
             application/json:
@@ -49,7 +52,7 @@ paths:
                     type: boolean
                     description: Whether the Activity ID is valid and exists
                     example: true
-        "400":
+        '400':
           description: Invalid Activity ID format
           content:
             application/json:
@@ -58,17 +61,19 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: "Invalid activity Id format"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                    example: Invalid activity Id format
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /document/:
     put:
       summary: Create or update a document
-      description: Creates a link between an activity and a previously existing object in COMS.
+      description: >-
+        Creates a link between an activity and a previously existing object in
+        COMS.
       operationId: createDocument
       tags:
         - Document
@@ -77,20 +82,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-Document"
+              $ref: '#/components/schemas/Request-Document'
       responses:
-        "201":
+        '201':
           description: Document created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Document"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+                $ref: '#/components/schemas/DB-Document'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /document/{documentId}:
     delete:
       summary: Delete a document by ID
@@ -99,22 +104,22 @@ paths:
       tags:
         - Document
       parameters:
-        - $ref: "#/components/parameters/Path-DocumentId"
+        - $ref: '#/components/parameters/Path-DocumentId'
       responses:
-        "200":
+        '200':
           description: Document deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Document"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Document'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /document/list/{activityId}:
     get:
       summary: List documents by Activity ID
@@ -123,25 +128,25 @@ paths:
       tags:
         - Document
       parameters:
-        - $ref: "#/components/parameters/Path-ActivityId"
+        - $ref: '#/components/parameters/Path-ActivityId'
       responses:
-        "200":
+        '200':
           description: A list of documents for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Document"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                  $ref: '#/components/schemas/DB-Document'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /enquiry/:
     get:
-      summary: Gets a list of 
+      summary: Gets a list of
       description: >-
         Gets a list of enquiries, if the query self is passed and true the list
         returned will contain just the enquiries made by the user, as per RBAC.
@@ -149,20 +154,20 @@ paths:
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Query-Self"
+        - $ref: '#/components/parameters/Query-Self'
       responses:
-        "200":
+        '200':
           description: A list of enquiries
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Enquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                  $ref: '#/components/schemas/DB-Enquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /enquiry/{enquiryId}:
     get:
       summary: Get a specific enquiry
@@ -170,71 +175,71 @@ paths:
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Path-EnquiryId"
+        - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        "200":
+        '200':
           description: Details of the specific enquiry
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Enquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Enquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     put:
       summary: Update an enquiry
       operationId: updateEnquiry
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Path-EnquiryId"
+        - $ref: '#/components/parameters/Path-EnquiryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DB-Enquiry"
+              $ref: '#/components/schemas/DB-Enquiry'
       responses:
-        "200":
+        '200':
           description: Enquiry updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Enquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Enquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete an enquiry
       description: >-
-        Deletes the enquiry, followed by the associated activity
-        This action will cascade delete across all linked items
+        Deletes the enquiry, followed by the associated activity This action
+        will cascade delete across all linked items
       operationId: deleteEnquiry
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Path-EnquiryId"
+        - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        "200":
+        '200':
           description: Enquiry deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Enquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Enquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /enquiry/{enquiryId}/delete:
     patch:
       summary: Soft delete
@@ -243,7 +248,7 @@ paths:
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Path-EnquiryId"
+        - $ref: '#/components/parameters/Path-EnquiryId'
       requestBody:
         required: true
         content:
@@ -255,7 +260,7 @@ paths:
                   type: boolean
                   example: true
       responses:
-        "200":
+        '200':
           description: The is_deleted flag updated successfully
           content:
             application/json:
@@ -268,18 +273,19 @@ paths:
                       is_deleted:
                         type: boolean
                         example: true
-                  - $ref: "#/components/schemas/DB-Enquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                  - $ref: '#/components/schemas/DB-Enquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /enquiry/draft:
     put:
       summary: Create a draft enquiry
       description: >-
-        Creates a draft for an enquiry so unfinished/unvalidatd enquiries can be saved
+        Creates a draft for an enquiry so unfinished/unvalidatd enquiries can be
+        saved
       operationId: enquiry-createDraft
       tags:
         - Enquiry
@@ -288,45 +294,46 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-CreateDraftEnquiry"
+              $ref: '#/components/schemas/Request-CreateDraftEnquiry'
       responses:
-        "201":
+        '201':
           description: Draft enquiry created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-DraftEnquiry"
-        "500":
+                $ref: '#/components/schemas/Response-DraftEnquiry'
+        '500':
           description: Server error
   /enquiry/draft/{enquiryId}:
     put:
       summary: Update a draft enquiry
       description: >-
-        Updates a draft for an enquiry so unfinished/unvalidatd enquiries can be saved
+        Updates a draft for an enquiry so unfinished/unvalidatd enquiries can be
+        saved
       operationId: enquiry-updateDraft
       tags:
         - Enquiry
       parameters:
-        - $ref: "#/components/parameters/Path-EnquiryId"
+        - $ref: '#/components/parameters/Path-EnquiryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-UpdateDraftEnquiry"
+              $ref: '#/components/schemas/Request-UpdateDraftEnquiry'
       responses:
-        "200":
+        '200':
           description: Draft enquiry updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-DraftEnquiry"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/Response-DraftEnquiry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /note/:
     put:
       summary: Create a note
@@ -338,18 +345,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-Notes"
+              $ref: '#/components/schemas/Request-Notes'
       responses:
-        "201":
+        '201':
           description: Note created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Note"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/DB-Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /note/{noteId}:
     put:
       summary: Update a note
@@ -357,26 +364,26 @@ paths:
       tags:
         - Note
       parameters:
-        - $ref: "#/components/parameters/Path-NoteId"
+        - $ref: '#/components/parameters/Path-NoteId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DB-Note"
+              $ref: '#/components/schemas/DB-Note'
       responses:
-        "200":
+        '200':
           description: Note updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Note"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete a note
       description: Soft deletes a note by marking isDeleted true
@@ -384,22 +391,22 @@ paths:
       tags:
         - Note
       parameters:
-        - $ref: "#/components/parameters/Path-NoteId"
+        - $ref: '#/components/parameters/Path-NoteId'
       responses:
-        "200":
+        '200':
           description: Note deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Note"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /note/bringForward:
     get:
       summary: List notes with bring forward type
@@ -408,20 +415,20 @@ paths:
       tags:
         - Note
       parameters:
-        - $ref: "#/components/parameters/Query-BringForwardState"
+        - $ref: '#/components/parameters/Query-BringForwardState'
       responses:
-        "200":
+        '200':
           description: A list of bring forward notes
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Response-BringForwardNotes"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                  $ref: '#/components/schemas/Response-BringForwardNotes'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /note/list/{activityId}:
     get:
       summary: List notes by Activity ID
@@ -430,22 +437,22 @@ paths:
       tags:
         - Note
       parameters:
-        - $ref: "#/components/parameters/Path-ActivityId"
+        - $ref: '#/components/parameters/Path-ActivityId'
       responses:
-        "200":
+        '200':
           description: A list of notes for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Note"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                  $ref: '#/components/schemas/DB-Note'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /permit/:
     put:
       summary: Create a permit
@@ -457,20 +464,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-Permit"
+              $ref: '#/components/schemas/Request-Permit'
       responses:
-        "201":
+        '201':
           description: Permit created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Permit"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+                $ref: '#/components/schemas/DB-Permit'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /permit/{permitId}:
     put:
       summary: Update a permit
@@ -489,71 +496,70 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-Permit"
+              $ref: '#/components/schemas/Request-Permit'
       responses:
-        "200":
+        '200':
           description: Permit updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Permit"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Permit'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete a permit
       operationId: deletePermit
       tags:
         - Permit
       parameters:
-        - $ref: "#/components/parameters/Path-PermitId"
+        - $ref: '#/components/parameters/Path-PermitId'
       responses:
-        "200":
+        '200':
           description: Permit deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Permit"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Permit'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /permit/list/{activityId}:
     get:
       summary: List permits by Activity ID
-      description: >- 
-        Gets a list of permits that are associated to a specific activity
+      description: Gets a list of permits that are associated to a specific activity
       operationId: listPermits
       tags:
         - Permit
       parameters:
-        - $ref: "#/components/parameters/Path-ActivityId"
+        - $ref: '#/components/parameters/Path-ActivityId'
       responses:
-        "200":
+        '200':
           description: A list of permits for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Permit"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                  $ref: '#/components/schemas/DB-Permit'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /permit/types:
     get:
       summary: Get all permit types
@@ -561,37 +567,37 @@ paths:
       tags:
         - Permit
       responses:
-        "200":
+        '200':
           description: A list of all permit types
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-PermitType"
+                  $ref: '#/components/schemas/DB-PermitType'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /roadmap/:
     put:
       summary: Send an email with the roadmap data
       operationId: send
       tags:
-        - Permit
+        - Roadmap
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-Roadmap"
+              $ref: '#/components/schemas/Request-Roadmap'
       responses:
-        "201":
+        '201':
           description: Permit created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-Email"
+                $ref: '#/components/schemas/Response-Email'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/:
     get:
       summary: Get a list of submissions
@@ -599,34 +605,34 @@ paths:
       tags:
         - Submission
       responses:
-        "200":
+        '200':
           description: A list of submissions
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                  $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     put:
       summary: Create a submission
       operationId: createSubmission
       tags:
         - Submission
       responses:
-        "201":
+        '201':
           description: Submission created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-SubmissionCreate"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/Response-SubmissionCreate'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/{submissionId}:
     get:
       summary: Get a specific submission
@@ -634,68 +640,68 @@ paths:
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Path-SubmissionId"
+        - $ref: '#/components/parameters/Path-SubmissionId'
       responses:
-        "200":
+        '200':
           description: Details of the specific submission
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a submission
       operationId: updateSubmission
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Path-SubmissionId"
+        - $ref: '#/components/parameters/Path-SubmissionId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-SubmissionUpdate"
+              $ref: '#/components/schemas/Request-SubmissionUpdate'
       responses:
-        "200":
+        '200':
           description: Submission updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
     delete:
       summary: Delete a submission
       operationId: deleteSubmission
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Path-SubmissionId"
+        - $ref: '#/components/parameters/Path-SubmissionId'
       responses:
-        "200":
+        '200':
           description: Submission deleted successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/{submissionId}/delete:
     patch:
       summary: Soft delete
@@ -704,7 +710,7 @@ paths:
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Path-SubmissionId"
+        - $ref: '#/components/parameters/Path-SubmissionId'
       requestBody:
         required: true
         content:
@@ -719,20 +725,20 @@ paths:
                   description: set to true to change is deleted tag
                   example: true
       responses:
-        "200":
+        '200':
           description: The is_deleted flag updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/draft:
     put:
       summary: Create a draft submission
@@ -744,18 +750,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-SaveSubmissionDraft"
+              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
       responses:
-        "201":
+        '201':
           description: Draft submission created successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-DraftSubmission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/Response-DraftSubmission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/draft/{submissionId}:
     put:
       summary: Update a draft submission
@@ -763,26 +769,26 @@ paths:
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Path-SubmissionId"
+        - $ref: '#/components/parameters/Path-SubmissionId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/Request-SaveSubmissionDraft"
+              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
       responses:
-        "200":
+        '200':
           description: Draft submission updated successfully
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/emailConfirmation:
     put:
       summary: Send confirmation Email
@@ -794,26 +800,25 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/EmailData"
+              $ref: '#/components/schemas/EmailData'
       responses:
-        "201":
+        '201':
           description: Email Confirmation was set
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-Email"
+                $ref: '#/components/schemas/Response-Email'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/search:
     get:
       summary: Search submissions
-      description: >-
-        Returns a list of submissions based on the given queries
+      description: Returns a list of submissions based on the given queries
       operationId: searchSubmissions
       tags:
         - Submission
       parameters:
-        - $ref: "#/components/parameters/Query-IncludeUser"
+        - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
           required: false
@@ -821,7 +826,7 @@ paths:
             type: array
             description: the activity ids to filter on
             items:
-              $ref: "#/components/parameters/Path-ActivityId"
+              $ref: '#/components/parameters/Path-ActivityId'
         - in: query
           name: submissionId
           required: false
@@ -829,7 +834,7 @@ paths:
             type: array
             description: The submissions to filter on
             items:
-              $ref: "#/components/parameters/Path-SubmissionId"
+              $ref: '#/components/parameters/Path-SubmissionId'
         - in: query
           name: intakeStatus
           required: false
@@ -837,7 +842,7 @@ paths:
             type: array
             description: The intake statuses to filter on
             items:
-              $ref: "#/components/parameters/IntakeStatus"
+              $ref: '#/components/parameters/IntakeStatus'
         - in: query
           name: submissionType
           required: false
@@ -845,20 +850,20 @@ paths:
             type: array
             description: The submission types to filter on
       responses:
-        "200":
+        '200':
           description: A list of submissions matching the search criteria
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/DB-Submission"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+                  $ref: '#/components/schemas/DB-Submission'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
   /submission/statistics:
     get:
       summary: Get submission statistics
@@ -894,24 +899,24 @@ paths:
             type: string
             description: User ID to filter statistics
       responses:
-        "200":
+        '200':
           description: Submission statistics
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Response-SubmissionStatistics"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
+                $ref: '#/components/schemas/Response-SubmissionStatistics'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
-          $ref: "#/components/responses/Error"
+          $ref: '#/components/responses/Error'
 components:
   parameters:
     IntakeStatus:
       in: path
       name: intakeStatus
-      description: The intake status type of a submission 
+      description: The intake status type of a submission
       required: true
       schema:
         type: string
@@ -1056,14 +1061,14 @@ components:
           type: string
           format: date-time
           description: date time enquiry was submitted
-          example: 2024-08-27T02:11:45.986Z
+          example: '2024-08-27T02:11:45.986Z'
         submittedBy:
           type: string
           description: user who submitted enquiry
           example: JSMITH
         contactFirstName:
           type: string
-          description:  first name of contact
+          description: first name of contact
           example: John
         contactLastName:
           type: string
@@ -1088,7 +1093,7 @@ components:
         isRelated:
           type: string
           description: is this related to a project
-          example: "yes"
+          example: 'yes'
         relatedActivityId:
           type: string
           description: activity id of related project
@@ -1100,9 +1105,9 @@ components:
         applyForPermitConnect:
           type: string
           description: If applied to Permit Connect
-          example: yes
+          example: 'yes'
         user:
-          $ref: "#/components/schemas/DB-User"
+          $ref: '#/components/schemas/DB-User'
     DB-Note:
       title: DB Note
       type: object
@@ -1134,7 +1139,7 @@ components:
         noteType:
           type: string
           description: type of note
-          example: "Bring forward"
+          example: Bring forward
         title:
           type: string
           description: Title of the note
@@ -1143,7 +1148,7 @@ components:
           type: string
           format: date-time
           description: date time for when note is to be brought forward
-          example: "2029-08-14T07:00:00.000Z"
+          example: '2029-08-14T07:00:00.000Z'
         bringForwardState:
           type: string
           description: state of a bring forward tyoe note
@@ -1156,7 +1161,7 @@ components:
           type: string
           format: date-time
           description: date time for when note is to be brought forward
-          example: "2024-08-14T07:00:00.000Z"
+          example: '2024-08-14T07:00:00.000Z'
         createdBy:
           type: string
           description: Uuid for user that created note
@@ -1166,7 +1171,7 @@ components:
           type: string
           format: date-time
           description: date time for when note was updated
-          example: "2024-08-14T07:00:00.000Z"
+          example: '2024-08-14T07:00:00.000Z'
         updatedBy:
           type: string
           description: Uuid for user that updated note
@@ -1195,12 +1200,12 @@ components:
           example: 2DE67F13
         permitTypeId:
           type: number
-          description: Id for the associated permit type 
+          description: Id for the associated permit type
           example: 1
         issuedPermitId:
           type: string
           description: Id of the issued permit
-          example: "123"
+          example: '123'
         trackingId:
           type: string
           description: Id for tracking permit
@@ -1212,7 +1217,7 @@ components:
         needed:
           type: string
           description: whether permit is needed, or still uner investigation
-          example: "Under Investigation"
+          example: Under Investigation
         status:
           type: string
           description: status of the permit
@@ -1220,23 +1225,23 @@ components:
         submittedDate:
           type: string
           description: date the permit was submitted
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         adjudicationDate:
           type: string
           description: date of the permit's adjudication
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         statusLastVerified:
           type: string
           description: Date of the last verified status of permit
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         updatedAt:
           type: string
           format: date-time
           description: date time for when permit was updated
-          example: "2024-08-14T07:00:00.000Z"
+          example: '2024-08-14T07:00:00.000Z'
         updatedBy:
           type: string
           description: Uuid for user that updated permit
@@ -1256,7 +1261,7 @@ components:
       properties:
         permitTypeId:
           type: number
-          description: Id for the permit type 
+          description: Id for the permit type
           example: 1
         acronym:
           type: string
@@ -1292,7 +1297,7 @@ components:
           example: some name subtype
         sourceSystem:
           type: string
-          description: source of the system used for this permit type 
+          description: source of the system used for this permit type
           example: Archaeology Permit Tracking System
         sourceSystemAcronym:
           type: string
@@ -1319,12 +1324,12 @@ components:
         - naturalDisaster
         - aaiUpdated
       properties:
-        submissionId: 
+        submissionId:
           type: string
           description: Uuid for the submission
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId: 
+        activityId:
           type: string
           description: Activity Id
           example: D95F1DE6
@@ -1332,68 +1337,68 @@ components:
           type: string
           description: User assigned to the submission
           example: Smith, John
-        submittedAt: 
+        submittedAt:
           type: string
           description: date it was submitted
           format: date-time
-          example: "2024-04-03T00:57:09.070Z"
-        submittedBy: 
+          example: '2024-04-03T00:57:09.070Z'
+        submittedBy:
           type: string
           description: Who made the submission
           example: JSMITH
-        locationPIDs: 
+        locationPIDs:
           type: string
-          description: Location PIDs 
+          description: Location PIDs
           example: 006-209-521, 007-209-522
-        contactApplicantRelationship: 
+        contactApplicantRelationship:
           type: string
           description: Relationship of contact information to the project
           example: Agent
-        contactPhoneNumber: 
+        contactPhoneNumber:
           type: string
           description: Phone number for contact
           example: (123)-456-7890
-        contactEmail: 
+        contactEmail:
           type: string
           description: Email for contact
           example: preferredContactTest@test.com
-        contactPreference: 
+        contactPreference:
           type: string
           description: Preferred contact method
           example: Phone Call
-        projectName: 
+        projectName:
           type: string
           description: Name of the Project
           example: New Project
-        projectDescription: 
+        projectDescription:
           type: string
           description: A description of the project
           example: Project description example.
-        companyNameRegistered: 
+        companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
-        singleFamilyUnits: 
+        singleFamilyUnits:
           type: string
           description: range of units to be for single family
           example: 10-49
-        hasRentalUnits: 
+        hasRentalUnits:
           type: string
           description: Whether or not the project will have rental units
-          example: "Yes"
-        streetAddress: 
+          example: 'Yes'
+        streetAddress:
           type: string
           description: Street address of project
           example: 2975 Jutland Rd
-        latitude: 
+        latitude:
           type: number
           description: Latitude Cordinate for project
           example: 48.440531
-        longitude: 
+        longitude:
           type: number
           description: Longitude Cordinate for project
           example: -123.377677
-        queuePriority: 
+        queuePriority:
           type: number
           description: Navigator assigned priority rank
           example: 3
@@ -1403,54 +1408,54 @@ components:
         astNotes:
           type: string
           description: Notes from AST
-        astUpdated: 
+        astUpdated:
           type: boolean
           description: Whether updated by AST
           example: false
-        addedToATS: 
+        addedToATS:
           type: boolean
           description: Whether added to AST
           example: false
         atsClientNumber:
           type: string
           description: Client number from ATS
-        ltsaCompleted: 
+        ltsaCompleted:
           type: boolean
           description: ltsa completed
           example: false
-        bcOnlineCompleted: 
+        bcOnlineCompleted:
           type: boolean
-          description: Comlpeted 
+          description: Comlpeted
           example: false
-        naturalDisaster: 
+        naturalDisaster:
           type: string
           description: Is it affected by Natural disaster?
-          example: "No"
-        financiallySupported: 
+          example: 'No'
+        financiallySupported:
           type: boolean
           description: Is it financially supported?
           example: false
-        financiallySupportedBC: 
+        financiallySupportedBC:
           type: string
           description: Is is financially supported by BC Housing?
-          example: "No"
-        financiallySupportedIndigenous: 
+          example: 'No'
+        financiallySupportedIndigenous:
           type: string
           description: Is it an Indigenous led project?
-          example: "No"
-        financiallySupportedNonProfit: 
+          example: 'No'
+        financiallySupportedNonProfit:
           type: string
           description: Is is financially supported by a Non-Profit
-          example: "No"
-        financiallySupportedHousingCoop: 
+          example: 'No'
+        financiallySupportedHousingCoop:
           type: string
           description: Is is financially supported by a House Cooperative
-          example: "No"
-        aaiUpdated: 
+          example: 'No'
+        aaiUpdated:
           type: boolean
           description: Updated by aai
           example: false
-        intakeStatus: 
+        intakeStatus:
           type: string
           description: Intake status type
           example: Submitted
@@ -1460,13 +1465,12 @@ components:
           example: New
         isDevelopedByCompanyOrOrg:
           type: string
-          description: >-
-            Is the project being developed by a company or organization 
-          example: "Yes"
+          description: 'Is the project being developed by a company or organization '
+          example: 'Yes'
         isDevelopedInBC:
           type: string
           description: Is the project developed in BC?
-          example: "Yes"
+          example: 'Yes'
         multiFamilyUnits:
           type: string
           description: Range of multi-family units in the project
@@ -1490,7 +1494,7 @@ components:
         projectLocationDescription:
           type: string
           description: Description of the location of the project
-          example: "no"
+          example: 'no'
         locality:
           type: string
           description: City, town, etc. (Location) of project
@@ -1502,11 +1506,11 @@ components:
         hasAppliedProvincialPermits:
           type: string
           description: Has applied for provincial permits
-          example: "Yes"
+          example: 'Yes'
         checkProvincialPermits:
           type: string
           description: Needs to check for provincial permits
-          example: "Yes"
+          example: 'Yes'
         indigenousDescription:
           type: string
           description: Description for the Indigenous Led
@@ -1522,7 +1526,7 @@ components:
           example: John
         contactLastName:
           type: string
-          description: Last name for contact 
+          description: Last name for contact
           example: Smith
     DB-User:
       type: object
@@ -1550,7 +1554,7 @@ components:
       properties:
         contactFirstName:
           type: string
-          description:  first name of contact
+          description: first name of contact
           example: John
         contactLastName:
           type: string
@@ -1582,7 +1586,7 @@ components:
         isRelated:
           type: string
           description: is this related to a project
-          example: "yes"
+          example: 'yes'
         relatedActivityId:
           type: string
           description: activity id of related project
@@ -1594,7 +1598,7 @@ components:
         applyForPermitConnect:
           type: string
           description: If applied to Permit Connect
-          example: yes
+          example: 'yes'
     EmailData:
       type: object
       required:
@@ -1655,9 +1659,9 @@ components:
           description: Id for the activity
           example: 2DE67F13
         applicant:
-          $ref: "#/components/schemas/DraftEnquiry-Applicant"
+          $ref: '#/components/schemas/DraftEnquiry-Applicant'
         basic:
-          $ref: "#/components/schemas/DraftEnquiry-Basic"
+          $ref: '#/components/schemas/DraftEnquiry-Basic'
     Request-Document:
       type: object
       properties:
@@ -1704,7 +1708,7 @@ components:
         noteType:
           type: string
           description: type of note
-          example: "Bring forward"
+          example: Bring forward
         title:
           type: string
           description: Title of the note
@@ -1713,7 +1717,7 @@ components:
           type: string
           format: date-time
           description: date time for when note is to be brought forward
-          example: "2029-08-14T07:00:00.000Z"
+          example: '2029-08-14T07:00:00.000Z'
         bringForwardState:
           type: string
           description: state of a bring forward tyoe note
@@ -1722,7 +1726,7 @@ components:
           type: string
           format: date-time
           description: date time for when note is to be brought forward
-          example: "2024-08-14T07:00:00.000Z"
+          example: '2024-08-14T07:00:00.000Z'
     Request-Permit:
       title: Request Permit
       type: object
@@ -1740,12 +1744,12 @@ components:
         needed:
           type: string
           description: whether permit is needed, or still uner investigation
-          example: "Under Investigation"
+          example: Under Investigation
         permitType:
-          $ref: "#/components/schemas/DB-PermitType"
+          $ref: '#/components/schemas/DB-PermitType'
         permitTypeId:
           type: number
-          description: Id for the associated permit type 
+          description: Id for the associated permit type
           example: 1
         status:
           type: string
@@ -1754,8 +1758,8 @@ components:
         adjudicationDate:
           type: string
           description: date of the permit's adjudication
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         authStatus:
           type: string
           description: status of authentication for the permit
@@ -1763,17 +1767,17 @@ components:
         issuedPermitId:
           type: string
           description: Id of the issued permit
-          example: "123"
+          example: '123'
         statusLastVerified:
           type: string
           description: Date of the last verified status of permit
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         submittedDate:
           type: string
           description: date the permit was submitted
-          format: date-time 
-          example: "2024-08-14T07:00:00.000Z"
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         trackingId:
           type: string
           description: Id for tracking permit
@@ -1789,7 +1793,7 @@ components:
         activityId:
           type: string
           description: Id of the activity
-          example: 
+          example: null
         selectedFileIds:
           type: array
           items:
@@ -1797,7 +1801,7 @@ components:
             format: uuid
           description: Array of selected file IDs
         emailData:
-          $ref: "#/components/schemas/EmailData"
+          $ref: '#/components/schemas/EmailData'
     Request-SaveSubmissionDraft:
       title: Save draft of Submission
       type: object
@@ -1841,12 +1845,14 @@ components:
             isDevelopedByCompanyOrOrg:
               type: boolean
               description: >-
-                Indicates if the project is being developed by a company or organization
+                Indicates if the project is being developed by a company or
+                organization
               example: true
             isDevelopedInBC:
               type: boolean
               description: >-
-                Indicates if the project is being developed in British Columbia (BC)
+                Indicates if the project is being developed in British Columbia
+                (BC)
               example: true
             companyNameRegistered:
               type: string
@@ -1883,23 +1889,23 @@ components:
             hasRentalUnits:
               type: string
               description: Whether or not the project will have rental units
-              example: "Yes"
+              example: 'Yes'
             financiallySupportedBC:
               type: string
               description: Is it financially supported by BC Housing?
-              example: "No"
+              example: 'No'
             financiallySupportedIndigenous:
               type: string
               description: Is it an Indigenous-led project?
-              example: "No"
+              example: 'No'
             financiallySupportedNonProfit:
               type: string
               description: Is it financially supported by a Non-Profit?
-              example: "No"
+              example: 'No'
             financiallySupportedHousingCoop:
               type: string
               description: Is it financially supported by a Housing Cooperative?
-              example: "No"
+              example: 'No'
             rentalUnits:
               type: string
               description: Range of rental units
@@ -1925,7 +1931,7 @@ components:
             naturalDisaster:
               type: string
               description: Indicates if the project is affected by a natural disaster
-              example: "No"
+              example: 'No'
             projectLocation:
               type: string
               description: Location of the project
@@ -1967,16 +1973,18 @@ components:
               example: true
             checkProvincialPermits:
               type: boolean
-              description: Indicates whether the project needs to check for provincial permits
+              description: >-
+                Indicates whether the project needs to check for provincial
+                permits
               example: true
         appliedPermits:
           type: array
           items:
-            $ref: "#/components/schemas/DB-Permit"
+            $ref: '#/components/schemas/DB-Permit'
         investigatePermits:
           type: array
           items:
-            $ref: "#/components/schemas/DB-Permit"
+            $ref: '#/components/schemas/DB-Permit'
         submissionId:
           type: string
           description: Uuid for the submission
@@ -1990,7 +1998,7 @@ components:
           type: string
           format: date-time
           description: Date it was submitted
-          example: "2024-04-03T00:57:09.070Z"
+          example: '2024-04-03T00:57:09.070Z'
         submittedBy:
           type: string
           description: Who made the submission
@@ -2082,7 +2090,7 @@ components:
           type: string
           description: Date it was submitted
           format: date-time
-          example: "2024-04-03T00:57:09.070Z"
+          example: '2024-04-03T00:57:09.070Z'
         relatedEnquiries:
           type: string
           description: Related enquiries
@@ -2094,7 +2102,7 @@ components:
         isDevelopedInBC:
           type: string
           description: Is the project developed in BC?
-          example: "Yes"
+          example: 'Yes'
         projectName:
           type: string
           description: Name of the Project
@@ -2124,7 +2132,7 @@ components:
         hasRentalUnits:
           type: string
           description: Whether or not the project will have rental units
-          example: "Yes"
+          example: 'Yes'
         rentalUnits:
           type: string
           description: Range of rental units
@@ -2133,11 +2141,11 @@ components:
         financiallySupportedBC:
           type: string
           description: Is it financially supported by BC Housing?
-          example: "No"
+          example: 'No'
         financiallySupportedIndigenous:
           type: string
           description: Is it an Indigenous-led project?
-          example: "No"
+          example: 'No'
         indigenousDescription:
           type: string
           description: Description for the Indigenous-led project
@@ -2146,7 +2154,7 @@ components:
         financiallySupportedNonProfit:
           type: string
           description: Is it financially supported by a Non-Profit?
-          example: "No"
+          example: 'No'
         nonProfitDescription:
           type: string
           description: Description for Non-Profit supported project
@@ -2155,7 +2163,7 @@ components:
         financiallySupportedHousingCoop:
           type: string
           description: Is it financially supported by a Housing Cooperative?
-          example: "No"
+          example: 'No'
         housingCoopDescription:
           type: string
           description: Description for Housing Cooperative supported project
@@ -2192,16 +2200,16 @@ components:
         geomarkUrl:
           type: string
           description: URL for geomark
-          example: "http://geomark.com"
+          example: http://geomark.com
           maxLength: 255
         naturalDisaster:
           type: string
           description: Is it affected by a natural disaster?
-          example: "No"
+          example: 'No'
         projectLocationDescription:
           type: string
           description: Description of the location of the project
-          example: "Near the river"
+          example: Near the river
           maxLength: 4000
         addedToATS:
           type: boolean
@@ -2227,7 +2235,7 @@ components:
         astNotes:
           type: string
           description: Notes from AST
-          example: "AST notes here"
+          example: AST notes here
           maxLength: 4000
         intakeStatus:
           type: string
@@ -2245,13 +2253,13 @@ components:
         waitingOn:
           type: string
           description: Any dependencies or things waiting on
-          example: "Waiting on review"
+          example: Waiting on review
           maxLength: 255
     Request-UpdateDraftEnquiry:
       type: object
       allOf:
         - type: object
-          required: 
+          required:
             - enquiryId
           properties:
             enquiryId:
@@ -2259,12 +2267,12 @@ components:
               description: Uuid for an enquiry
               format: uuid
               example: b76469a3-896c-4435-aa83-b8b87db6f401
-        - $ref: "#/components/schemas/Request-CreateDraftEnquiry"
+        - $ref: '#/components/schemas/Request-CreateDraftEnquiry'
     Response-BadRequest:
       title: Response Bad Request
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             status:
@@ -2314,7 +2322,7 @@ components:
           type: string
           format: date-time
           description: date time for when note is to be brought forward
-          example: "2029-08-14T07:00:00.000Z"
+          example: '2029-08-14T07:00:00.000Z'
         projectName:
           type: string
           description: name of the project the note is attached to
@@ -2329,7 +2337,7 @@ components:
             is_deleted:
               type: boolean
               example: true
-        - $ref: "#/components/schemas/DB-Enquiry"
+        - $ref: '#/components/schemas/DB-Enquiry'
     Response-DraftEnquiry:
       type: object
       required:
@@ -2347,12 +2355,12 @@ components:
         - activityId
         - submissionId
       properties:
-        submissionId: 
+        submissionId:
           type: string
           description: Uuid for the submission
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId: 
+        activityId:
           type: string
           description: Activity Id
           example: D95F1DE6
@@ -2364,7 +2372,7 @@ components:
           items:
             type: object
             properties:
-              msgId: 
+              msgId:
                 type: string
                 description: Uuid for email message
                 format: uuid
@@ -2382,7 +2390,7 @@ components:
       title: Response Error
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             status:
@@ -2395,7 +2403,7 @@ components:
       title: Response Forbidden
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             type:
@@ -2410,7 +2418,7 @@ components:
       title: Response Not Found
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             status:
@@ -2453,7 +2461,7 @@ components:
         - activityId
         - submissionId
       properties:
-        activityId: 
+        activityId:
           type: string
           description: Activity Id
           example: D95F1DE6
@@ -2465,71 +2473,71 @@ components:
     Response-SubmissionStatistics:
       type: object
       properties:
-        total_submissions: 
+        total_submissions:
           type: number
           example: 112
-        total_submissions_between: 
+        total_submissions_between:
           type: number
           example: 0
-        total_submissions_monthyear: 
+        total_submissions_monthyear:
           type: number
           example: 0
-        total_submissions_assignedto: 
+        total_submissions_assignedto:
           type: number
           example: 0
-        intake_submitted: 
+        intake_submitted:
           type: number
           example: 80
-        intake_assigned: 
+        intake_assigned:
           type: number
           example: 6
-        intake_completed: 
+        intake_completed:
           type: number
           example: 1
-        state_new: 
+        state_new:
           type: number
           example: 112
-        state_inprogress: 
+        state_inprogress:
           type: number
           example: 0
-        state_delayed: 
+        state_delayed:
           type: number
           example: 0
-        state_completed: 
+        state_completed:
           type: number
           example: 0
-        waiting_on: 
+        waiting_on:
           type: number
           example: 0
-        queue_1: 
+        queue_1:
           type: number
           example: 7
-        queue_2: 
+        queue_2:
           type: number
           example: 4
-        queue_3: 
+        queue_3:
           type: number
           example: 50
-        escalation: 
+        escalation:
           type: number
           example: 0
-        general_enquiry: 
+        general_enquiry:
           type: number
           example: 0
-        guidance: 
+        guidance:
           type: number
           example: 50
-        inapplicable: 
+        inapplicable:
           type: number
           example: 0
-        status_request: 
+        status_request:
           type: number
           example: 0
     Response-Unauthorized:
       title: Response Unauthorized
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             type:
@@ -2546,32 +2554,32 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-BadRequest"
+            $ref: '#/components/schemas/Response-BadRequest'
     Error:
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-Error"
+            $ref: '#/components/schemas/Response-Error'
     Forbidden:
       description: Forbidden
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-Forbidden"
+            $ref: '#/components/schemas/Response-Forbidden'
     NotFound:
       description: Not Found
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-NotFound"
+            $ref: '#/components/schemas/Response-NotFound'
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-Unauthorized"
-  securitySchemes: 
+            $ref: '#/components/schemas/Response-Unauthorized'
+  securitySchemes:
     BearerAuth:
       type: http
       description: Bearer token auth using an OIDC issued JWT token
