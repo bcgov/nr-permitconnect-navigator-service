@@ -1,8 +1,10 @@
 import { currentUser } from '../../middleware/authentication';
+import { expressListRoutes } from '../utils';
 
 import express from 'express';
 
 import activity from './activity';
+import docs from './docs';
 import document from './document';
 import enquiry from './enquiry';
 import note from './note';
@@ -23,6 +25,7 @@ router.get('/', (_req, res) => {
 });
 
 router.use('/activity', activity);
+router.use('/docs', docs);
 router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/note', note);
@@ -31,5 +34,7 @@ router.use('/roadmap', roadmap);
 router.use('/sso', sso);
 router.use('/submission', submission);
 router.use('/user', user);
+
+expressListRoutes(router, { prefix: 'api/v1' });
 
 export default router;

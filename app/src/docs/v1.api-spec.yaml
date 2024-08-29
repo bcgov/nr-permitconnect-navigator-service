@@ -1,0 +1,2584 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: NR PermitConnect Navigator Service (PCNS)
+  description: A case management application meant to serve the needs of the NRM Permitting Solutions Branch.
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: /api/v1
+    description: This server
+security:
+  - BearerAuth: []
+    OpenID: []
+tags:
+  - name: Activity
+    description: Operations for managing Activities
+  - name: Document
+    description: Operations for managing Documents
+  - name: Enquiry
+    description: Operations for managing Enquiries
+  - name: Note
+    description: Operations for managing Notes
+  - name: Permit
+    description: Operations for managing Permits
+  - name: Roadmap
+    description: Operations for validating Roadmaps
+  - name: Submission
+    description: Operations for managing Submissions, Drafts, and Statistics
+paths:
+  /activity/validate/{activityId}:
+    get:
+      summary: Validates an Activity ID
+      description: Validates the format and existence of an Activity ID.
+      operationId: validateActivityId
+      tags:
+        - Activity
+      parameters:
+        - $ref: "#/components/parameters/Path-ActivityId"
+      responses:
+        "200":
+          description: The validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                    description: Whether the Activity ID is valid and exists
+                    example: true
+        "400":
+          description: Invalid Activity ID format
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Invalid activity Id format"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /document/:
+    put:
+      summary: Create or update a document
+      description: Creates a link between an activity and a previously existing object in COMS.
+      operationId: createDocument
+      tags:
+        - Document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-Document"
+      responses:
+        "201":
+          description: Document created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Document"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/Error"
+  /document/{documentId}:
+    delete:
+      summary: Delete a document by ID
+      description: Deletes the document associated with the provided document ID.
+      operationId: deleteDocument
+      tags:
+        - Document
+      parameters:
+        - $ref: "#/components/parameters/Path-DocumentId"
+      responses:
+        "200":
+          description: Document deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Document"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /document/list/{activityId}:
+    get:
+      summary: List documents by Activity ID
+      description: Retrieves a list of documents associated with a given activity.
+      operationId: listDocuments
+      tags:
+        - Document
+      parameters:
+        - $ref: "#/components/parameters/Path-ActivityId"
+      responses:
+        "200":
+          description: A list of documents for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Document"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /enquiry/:
+    get:
+      summary: Gets a list of 
+      description: >-
+        Gets a list of enquiries, if the query self is passed and true the list
+        returned will contain just the enquiries made by the user, as per RBAC.
+      operationId: getEnquiries
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Query-Self"
+      responses:
+        "200":
+          description: A list of enquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Enquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+  /enquiry/{enquiryId}:
+    get:
+      summary: Get a specific enquiry
+      operationId: getEnquiry
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Path-EnquiryId"
+      responses:
+        "200":
+          description: Details of the specific enquiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Enquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      summary: Update an enquiry
+      operationId: updateEnquiry
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Path-EnquiryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DB-Enquiry"
+      responses:
+        "200":
+          description: Enquiry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Enquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete an enquiry
+      description: >-
+        Deletes the enquiry, followed by the associated activity
+        This action will cascade delete across all linked items
+      operationId: deleteEnquiry
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Path-EnquiryId"
+      responses:
+        "200":
+          description: Enquiry deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Enquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /enquiry/{enquiryId}/delete:
+    patch:
+      summary: Soft delete
+      description: A soft delete of an enquiry using a is_deleted flag
+      operationId: enquiry-updateIsDeletedFlag
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Path-EnquiryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isDeleted:
+                  type: boolean
+                  example: true
+      responses:
+        "200":
+          description: The is_deleted flag updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    required:
+                      - is_deleted
+                    properties:
+                      is_deleted:
+                        type: boolean
+                        example: true
+                  - $ref: "#/components/schemas/DB-Enquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /enquiry/draft:
+    put:
+      summary: Create a draft enquiry
+      description: >-
+        Creates a draft for an enquiry so unfinished/unvalidatd enquiries can be saved
+      operationId: enquiry-createDraft
+      tags:
+        - Enquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-CreateDraftEnquiry"
+      responses:
+        "201":
+          description: Draft enquiry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-DraftEnquiry"
+        "500":
+          description: Server error
+  /enquiry/draft/{enquiryId}:
+    put:
+      summary: Update a draft enquiry
+      description: >-
+        Updates a draft for an enquiry so unfinished/unvalidatd enquiries can be saved
+      operationId: enquiry-updateDraft
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: "#/components/parameters/Path-EnquiryId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-UpdateDraftEnquiry"
+      responses:
+        "200":
+          description: Draft enquiry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-DraftEnquiry"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /note/:
+    put:
+      summary: Create a note
+      operationId: createNote
+      tags:
+        - Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-Notes"
+      responses:
+        "201":
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Note"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+  /note/{noteId}:
+    put:
+      summary: Update a note
+      operationId: updateNote
+      tags:
+        - Note
+      parameters:
+        - $ref: "#/components/parameters/Path-NoteId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DB-Note"
+      responses:
+        "200":
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Note"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete a note
+      description: Soft deletes a note by marking isDeleted true
+      operationId: deleteNote
+      tags:
+        - Note
+      parameters:
+        - $ref: "#/components/parameters/Path-NoteId"
+      responses:
+        "200":
+          description: Note deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Note"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /note/bringForward:
+    get:
+      summary: List notes with bring forward type
+      description: Retrieve a list of notes with the Bring forward type given
+      operationId: listBringForward
+      tags:
+        - Note
+      parameters:
+        - $ref: "#/components/parameters/Query-BringForwardState"
+      responses:
+        "200":
+          description: A list of bring forward notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Response-BringForwardNotes"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+  /note/list/{activityId}:
+    get:
+      summary: List notes by Activity ID
+      description: Return a list of notes that have the given activityId
+      operationId: listNotes
+      tags:
+        - Note
+      parameters:
+        - $ref: "#/components/parameters/Path-ActivityId"
+      responses:
+        "200":
+          description: A list of notes for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Note"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /permit/:
+    put:
+      summary: Create a permit
+      operationId: createPermit
+      tags:
+        - Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-Permit"
+      responses:
+        "201":
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Permit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/Error"
+  /permit/{permitId}:
+    put:
+      summary: Update a permit
+      operationId: updatePermit
+      tags:
+        - Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-Permit"
+      responses:
+        "200":
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Permit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete a permit
+      operationId: deletePermit
+      tags:
+        - Permit
+      parameters:
+        - $ref: "#/components/parameters/Path-PermitId"
+      responses:
+        "200":
+          description: Permit deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Permit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /permit/list/{activityId}:
+    get:
+      summary: List permits by Activity ID
+      description: >- 
+        Gets a list of permits that are associated to a specific activity
+      operationId: listPermits
+      tags:
+        - Permit
+      parameters:
+        - $ref: "#/components/parameters/Path-ActivityId"
+      responses:
+        "200":
+          description: A list of permits for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Permit"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /permit/types:
+    get:
+      summary: Get all permit types
+      operationId: getPermitTypes
+      tags:
+        - Permit
+      responses:
+        "200":
+          description: A list of all permit types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-PermitType"
+        default:
+          $ref: "#/components/responses/Error"
+  /roadmap/:
+    put:
+      summary: Send an email with the roadmap data
+      operationId: send
+      tags:
+        - Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-Roadmap"
+      responses:
+        "201":
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-Email"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/:
+    get:
+      summary: Get a list of submissions
+      operationId: getSubmissions
+      tags:
+        - Submission
+      responses:
+        "200":
+          description: A list of submissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      summary: Create a submission
+      operationId: createSubmission
+      tags:
+        - Submission
+      responses:
+        "201":
+          description: Submission created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-SubmissionCreate"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/{submissionId}:
+    get:
+      summary: Get a specific submission
+      operationId: getSubmission
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Path-SubmissionId"
+      responses:
+        "200":
+          description: Details of the specific submission
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    put:
+      summary: Update a submission
+      operationId: updateSubmission
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Path-SubmissionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-SubmissionUpdate"
+      responses:
+        "200":
+          description: Submission updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+    delete:
+      summary: Delete a submission
+      operationId: deleteSubmission
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Path-SubmissionId"
+      responses:
+        "200":
+          description: Submission deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/{submissionId}/delete:
+    patch:
+      summary: Soft delete
+      description: A soft delete of a submission using a is_deleted flag
+      operationId: submission-updateIsDeletedFlag
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Path-SubmissionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isDeleted
+              properties:
+                isDeleted:
+                  type: boolean
+                  description: set to true to change is deleted tag
+                  example: true
+      responses:
+        "200":
+          description: The is_deleted flag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/draft:
+    put:
+      summary: Create a draft submission
+      operationId: submission-createDraft
+      tags:
+        - Submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-SaveSubmissionDraft"
+      responses:
+        "201":
+          description: Draft submission created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-DraftSubmission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/draft/{submissionId}:
+    put:
+      summary: Update a draft submission
+      operationId: submission-updateDraft
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Path-SubmissionId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Request-SaveSubmissionDraft"
+      responses:
+        "200":
+          description: Draft submission updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/emailConfirmation:
+    put:
+      summary: Send confirmation Email
+      operationId: emailConfirmation
+      tags:
+        - Submission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmailData"
+      responses:
+        "201":
+          description: Email Confirmation was set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-Email"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/search:
+    get:
+      summary: Search submissions
+      description: >-
+        Returns a list of submissions based on the given queries
+      operationId: searchSubmissions
+      tags:
+        - Submission
+      parameters:
+        - $ref: "#/components/parameters/Query-IncludeUser"
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: the activity ids to filter on
+            items:
+              $ref: "#/components/parameters/Path-ActivityId"
+        - in: query
+          name: submissionId
+          required: false
+          schema:
+            type: array
+            description: The submissions to filter on
+            items:
+              $ref: "#/components/parameters/Path-SubmissionId"
+        - in: query
+          name: intakeStatus
+          required: false
+          schema:
+            type: array
+            description: The intake statuses to filter on
+            items:
+              $ref: "#/components/parameters/IntakeStatus"
+        - in: query
+          name: submissionType
+          required: false
+          schema:
+            type: array
+            description: The submission types to filter on
+      responses:
+        "200":
+          description: A list of submissions matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DB-Submission"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/Error"
+  /submission/statistics:
+    get:
+      summary: Get submission statistics
+      description: Gets a set of submission related statistics
+      operationId: getStatistics
+      tags:
+        - Submission
+      parameters:
+        - in: query
+          name: dateFrom
+          required: false
+          schema:
+            type: string
+            format: date
+            description: Start date for the statistics
+        - in: query
+          name: dateTo
+          required: false
+          schema:
+            type: string
+            format: date
+            description: End date for the statistics
+        - in: query
+          name: monthYear
+          required: false
+          schema:
+            type: string
+            description: Month and year for the statistics
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+            description: User ID to filter statistics
+      responses:
+        "200":
+          description: Submission statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response-SubmissionStatistics"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        default:
+          $ref: "#/components/responses/Error"
+components:
+  parameters:
+    IntakeStatus:
+      in: path
+      name: intakeStatus
+      description: The intake status type of a submission 
+      required: true
+      schema:
+        type: string
+        example: Assigned
+    Path-ActivityId:
+      in: path
+      name: activityId
+      description: Id of an Activity
+      required: true
+      schema:
+        type: string
+        example: 2DE67F13
+    Path-DocumentId:
+      in: path
+      name: documentId
+      description: Uuid of a document
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db6f401
+    Path-EnquiryId:
+      in: path
+      name: enquiryId
+      description: Uuid of an enquiry
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db60921
+    Path-NoteId:
+      in: path
+      name: noteId
+      description: Uuid of a note
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db6f555
+    Path-PermitId:
+      in: path
+      name: permitId
+      required: true
+      schema:
+        type: string
+        description: Uuid of the permit
+        format: uuid
+        example: da5c5031-0e84-4234-8559-1ba846997482
+    Path-SubmissionId:
+      in: path
+      name: submissionId
+      required: true
+      schema:
+        type: string
+        description: Uuid of the submission
+        format: uuid
+        example: da5c5031-0e84-4234-7766-1ba846997482
+    Query-BringForwardState:
+      in: query
+      name: bringForwardState
+      description: The state to filter on for bring forward notes
+      required: true
+      schema:
+        type: string
+        example: true
+    Query-IncludeUser:
+      in: query
+      name: includeUser
+      description: used to retrieve submissions connected to a specific user
+      required: false
+      schema:
+        type: boolean
+        example: true
+    Query-Self:
+      in: query
+      name: self
+      description: If true, only returns enquiries submitted by the current user
+      required: false
+      schema:
+        type: boolean
+        example: true
+  schemas:
+    DB-Document:
+      title: DB Document
+      type: object
+      required:
+        - activityId
+        - documentId
+        - filename
+        - mimeType
+        - length
+      properties:
+        activityId:
+          type: string
+          description: The ID of the activity associated with the document
+          example: 2DE67F13
+        documentId:
+          type: string
+          description: The unique identifier of the document
+          example: b76469a3-896c-4435-aa83-b8b87db6f401
+        filename:
+          type: string
+          description: The original filename of the document
+          example: example.jpeg
+        mimeType:
+          type: string
+          description: The MIME type of the document
+          example: image/jpeg
+        length:
+          type: number
+          description: The size of the document in bytes
+          example: 7414
+        createdByFullName:
+          type: string
+          description: The full name of the user who created the document
+          example: Smith, John
+    DB-Enquiry:
+      title: DB Enquiry
+      type: object
+      required:
+        - enquiryId
+        - submittedBy
+      properties:
+        enquiryId:
+          type: string
+          description: Uuid for an enquiry
+          format: uuid
+          example: b76469a3-896c-4435-aa83-b8b87db6f401
+        activityId:
+          type: string
+          description: Id for the activity
+          example: 2DE67F13
+        enquiryType:
+          type: string
+          description: the type of enquiry
+          example: General enquiry
+        assignedUserId:
+          type: string
+          description: user assigned to enquiry
+          example: Smith, John
+        submittedAt:
+          type: string
+          format: date-time
+          description: date time enquiry was submitted
+          example: 2024-08-27T02:11:45.986Z
+        submittedBy:
+          type: string
+          description: user who submitted enquiry
+          example: JSMITH
+        contactFirstName:
+          type: string
+          description:  first name of contact
+          example: John
+        contactLastName:
+          type: string
+          description: last name of contact
+          example: Smith
+        contactPhoneNumber:
+          type: string
+          description: phone number of contact
+          example: 123-456-7890
+        contactEmail:
+          type: string
+          description: email of contact
+          example: j.smith@email.com
+        contactApplicantRelationship:
+          type: string
+          description: relationship of the contact
+          example: Employee
+        contactPreference:
+          type: string
+          description: preferred contact method for the contact
+          example: email
+        isRelated:
+          type: string
+          description: is this related to a project
+          example: "yes"
+        relatedActivityId:
+          type: string
+          description: activity id of related project
+          example: 699BFA81
+        enquiryDescription:
+          type: string
+          description: user description for enquiry
+          example: This is a description for some enquiry
+        applyForPermitConnect:
+          type: string
+          description: If applied to Permit Connect
+          example: yes
+        user:
+          $ref: "#/components/schemas/DB-User"
+    DB-Note:
+      title: DB Note
+      type: object
+      required:
+        - noteId
+        - activityId
+        - isDeleted
+        - note
+        - noteType
+        - title
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+      properties:
+        noteId:
+          type: string
+          description: Uuid of a note
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
+        note:
+          type: string
+          description: the note text
+          example: this is a note about something in the project
+        activityId:
+          type: string
+          description: the ID of the activity the note is associated with
+          example: 2DE67F13
+        noteType:
+          type: string
+          description: type of note
+          example: "Bring forward"
+        title:
+          type: string
+          description: Title of the note
+          example: Some Title
+        bringForwardDate:
+          type: string
+          format: date-time
+          description: date time for when note is to be brought forward
+          example: "2029-08-14T07:00:00.000Z"
+        bringForwardState:
+          type: string
+          description: state of a bring forward tyoe note
+          example: Unresolved
+        isDeleted:
+          type: boolean
+          description: deletion flag
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          description: date time for when note is to be brought forward
+          example: "2024-08-14T07:00:00.000Z"
+        createdBy:
+          type: string
+          description: Uuid for user that created note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        updatedAt:
+          type: string
+          format: date-time
+          description: date time for when note was updated
+          example: "2024-08-14T07:00:00.000Z"
+        updatedBy:
+          type: string
+          description: Uuid for user that updated note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+    DB-Permit:
+      title: DB Permit
+      type: object
+      required:
+        - permitId
+        - activityId
+        - permitTypeId
+        - status
+        - needed
+        - updatedAt
+        - updatedBy
+      properties:
+        permitId:
+          type: string
+          description: Uuid for permit
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b57174354231
+        activityId:
+          type: string
+          description: The Id of the activity associated with the permit
+          example: 2DE67F13
+        permitTypeId:
+          type: number
+          description: Id for the associated permit type 
+          example: 1
+        issuedPermitId:
+          type: string
+          description: Id of the issued permit
+          example: "123"
+        trackingId:
+          type: string
+          description: Id for tracking permit
+          example: H7kidnhd948594
+        authStatus:
+          type: string
+          description: status of authentication for the permit
+          example: Pending
+        needed:
+          type: string
+          description: whether permit is needed, or still uner investigation
+          example: "Under Investigation"
+        status:
+          type: string
+          description: status of the permit
+          example: New
+        submittedDate:
+          type: string
+          description: date the permit was submitted
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        adjudicationDate:
+          type: string
+          description: date of the permit's adjudication
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: date time for when permit was updated
+          example: "2024-08-14T07:00:00.000Z"
+        updatedBy:
+          type: string
+          description: Uuid for user that updated permit
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+    DB-PermitType:
+      title: DB Permit Type
+      type: object
+      required:
+        - agency
+        - businessDomain
+        - name
+        - permitTypeId
+        - sourceSystemAcronym
+        - trackedInATS
+        - type
+      properties:
+        permitTypeId:
+          type: number
+          description: Id for the permit type 
+          example: 1
+        acronym:
+          type: string
+          description: acronym for permit type name
+          example: SAP
+        agency:
+          type: string
+          description: government agency
+          example: Water, Land and Resource Stewardship
+        branch:
+          type: string
+          description: government branch
+          example: Archaeology
+        businessDomain:
+          type: string
+          description: government business domain
+          example: Archaeology
+        division:
+          type: string
+          description: government division
+          example: Forest Resiliency and Archaeology
+        family:
+          type: string
+          description: family associated with permit type
+          example: Crown Land Tenure
+        name:
+          type: string
+          description: name of permit type
+          example: Site Alteration Permit
+        nameSubtype:
+          type: string
+          description: subtype of a permit type
+          example: some name subtype
+        sourceSystem:
+          type: string
+          description: source of the system used for this permit type 
+          example: Archaeology Permit Tracking System
+        sourceSystemAcronym:
+          type: string
+          description: acronym for source system
+          example: APTS
+        trackedInATS:
+          type: boolean
+          description: whether this permit type is tracked in ATS or not
+          example: false
+        type:
+          type: string
+          description: type of permit type
+          example: Alteration
+    DB-Submission:
+      type: object
+      required:
+        - submissionId
+        - activityId
+        - submittedAt
+        - submittedBy
+        - addedToATS
+        - ltsaCompleted
+        - bcOnlineCompleted
+        - naturalDisaster
+        - aaiUpdated
+      properties:
+        submissionId: 
+          type: string
+          description: Uuid for the submission
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId: 
+          type: string
+          description: Activity Id
+          example: D95F1DE6
+        assignedUserId:
+          type: string
+          description: User assigned to the submission
+          example: Smith, John
+        submittedAt: 
+          type: string
+          description: date it was submitted
+          format: date-time
+          example: "2024-04-03T00:57:09.070Z"
+        submittedBy: 
+          type: string
+          description: Who made the submission
+          example: JSMITH
+        locationPIDs: 
+          type: string
+          description: Location PIDs 
+          example: 006-209-521, 007-209-522
+        contactApplicantRelationship: 
+          type: string
+          description: Relationship of contact information to the project
+          example: Agent
+        contactPhoneNumber: 
+          type: string
+          description: Phone number for contact
+          example: (123)-456-7890
+        contactEmail: 
+          type: string
+          description: Email for contact
+          example: preferredContactTest@test.com
+        contactPreference: 
+          type: string
+          description: Preferred contact method
+          example: Phone Call
+        projectName: 
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription: 
+          type: string
+          description: A description of the project
+          example: Project description example.
+        companyNameRegistered: 
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        singleFamilyUnits: 
+          type: string
+          description: range of units to be for single family
+          example: 10-49
+        hasRentalUnits: 
+          type: string
+          description: Whether or not the project will have rental units
+          example: "Yes"
+        streetAddress: 
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+        latitude: 
+          type: number
+          description: Latitude Cordinate for project
+          example: 48.440531
+        longitude: 
+          type: number
+          description: Longitude Cordinate for project
+          example: -123.377677
+        queuePriority: 
+          type: number
+          description: Navigator assigned priority rank
+          example: 3
+        relatedPermits:
+          type: string
+          description: Permits related to the project
+        astNotes:
+          type: string
+          description: Notes from AST
+        astUpdated: 
+          type: boolean
+          description: Whether updated by AST
+          example: false
+        addedToATS: 
+          type: boolean
+          description: Whether added to AST
+          example: false
+        atsClientNumber:
+          type: string
+          description: Client number from ATS
+        ltsaCompleted: 
+          type: boolean
+          description: ltsa completed
+          example: false
+        bcOnlineCompleted: 
+          type: boolean
+          description: Comlpeted 
+          example: false
+        naturalDisaster: 
+          type: string
+          description: Is it affected by Natural disaster?
+          example: "No"
+        financiallySupported: 
+          type: boolean
+          description: Is it financially supported?
+          example: false
+        financiallySupportedBC: 
+          type: string
+          description: Is is financially supported by BC Housing?
+          example: "No"
+        financiallySupportedIndigenous: 
+          type: string
+          description: Is it an Indigenous led project?
+          example: "No"
+        financiallySupportedNonProfit: 
+          type: string
+          description: Is is financially supported by a Non-Profit
+          example: "No"
+        financiallySupportedHousingCoop: 
+          type: string
+          description: Is is financially supported by a House Cooperative
+          example: "No"
+        aaiUpdated: 
+          type: boolean
+          description: Updated by aai
+          example: false
+        intakeStatus: 
+          type: string
+          description: Intake status type
+          example: Submitted
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        isDevelopedByCompanyOrOrg:
+          type: string
+          description: >-
+            Is the project being developed by a company or organization 
+          example: "Yes"
+        isDevelopedInBC:
+          type: string
+          description: Is the project developed in BC?
+          example: "Yes"
+        multiFamilyUnits:
+          type: string
+          description: Range of multi-family units in the project
+          example: 10-49
+        otherUnits:
+          type: string
+          description: Range of "other" units in the project
+          example: 10-49
+        otherUnitsDescription:
+          type: string
+          description: Description of the "other" units
+          example: detached garages
+        rentalUnits:
+          type: string
+          description: Range of rental units
+          example: 1-9
+        projectLocation:
+          type: string
+          description: Project's location
+          example: Street address
+        projectLocationDescription:
+          type: string
+          description: Description of the location of the project
+          example: "no"
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Maple Ridge
+        province:
+          type: string
+          description: Province (Location) of project
+          example: BC
+        hasAppliedProvincialPermits:
+          type: string
+          description: Has applied for provincial permits
+          example: "Yes"
+        checkProvincialPermits:
+          type: string
+          description: Needs to check for provincial permits
+          example: "Yes"
+        indigenousDescription:
+          type: string
+          description: Description for the Indigenous Led
+        nonProfitDescription:
+          type: string
+          description: Description for  Non-Profit
+        housingCoopDescription:
+          type: string
+          description: Description for COOP Housing
+        contactFirstName:
+          type: string
+          description: First name for contact
+          example: John
+        contactLastName:
+          type: string
+          description: Last name for contact 
+          example: Smith
+    DB-User:
+      type: object
+      properties:
+        userId:
+          type: string
+        identityId:
+          type: string
+        username:
+          type: string
+        firstName:
+          type: string
+        fullName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        idp:
+          type: string
+        active:
+          type: boolean
+    DraftEnquiry-Applicant:
+      type: object
+      properties:
+        contactFirstName:
+          type: string
+          description:  first name of contact
+          example: John
+        contactLastName:
+          type: string
+          description: last name of contact
+          example: Smith
+        contactPhoneNumber:
+          type: string
+          description: phone number of contact
+          example: 123-456-7890
+        contactEmail:
+          type: string
+          description: email of contact
+          example: j.smith@email.com
+        contactApplicantRelationship:
+          type: string
+          description: relationship of the contact
+          example: Employee
+        contactPreference:
+          type: string
+          description: preferred contact method for the contact
+          example: email
+    DraftEnquiry-Basic:
+      type: object
+      properties:
+        enquiryType:
+          type: string
+          description: the type of enquiry
+          example: General enquiry
+        isRelated:
+          type: string
+          description: is this related to a project
+          example: "yes"
+        relatedActivityId:
+          type: string
+          description: activity id of related project
+          example: 699BFA81
+        enquiryDescription:
+          type: string
+          description: user description for enquiry
+          example: This is a description for some enquiry
+        applyForPermitConnect:
+          type: string
+          description: If applied to Permit Connect
+          example: yes
+    EmailData:
+      type: object
+      required:
+        - bodyType
+        - body
+        - from
+        - subject
+        - to
+      properties:
+        bcc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Array of BCC email addresses
+        bodyType:
+          type: string
+          description: Type of the email body
+        body:
+          type: string
+          description: Content of the email body
+        cc:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Array of CC email addresses
+        delayTS:
+          type: number
+          description: Timestamp for delayed sending
+        from:
+          type: string
+          format: email
+          description: Sender's email address
+        priority:
+          type: string
+          description: Priority of the email
+        subject:
+          type: string
+          description: Subject of the email
+        tag:
+          type: string
+          description: Tag associated with the email
+        to:
+          type: array
+          items:
+            type: string
+            format: email
+          description: Array of recipient email addresses
+    Request-CreateDraftEnquiry:
+      type: object
+      required:
+        - applicant
+        - basic
+      properties:
+        activityId:
+          type: string
+          description: Id for the activity
+          example: 2DE67F13
+        applicant:
+          $ref: "#/components/schemas/DraftEnquiry-Applicant"
+        basic:
+          $ref: "#/components/schemas/DraftEnquiry-Basic"
+    Request-Document:
+      type: object
+      properties:
+        activityId:
+          type: string
+          description: The ID of the activity associated with the document
+          example: 2DE67F13
+        documentId:
+          type: string
+          description: The unique identifier of the document
+          example: b76469a3-896c-4435-aa83-b8b87db6f401
+        filename:
+          type: string
+          description: The original filename of the document
+          example: example.jpeg
+        mimeType:
+          type: string
+          description: The MIME type of the document
+          example: image/jpeg
+        length:
+          type: number
+          description: The size of the document in bytes
+          example: 7414
+    Request-Notes:
+      title: Request Notes
+      type: object
+      required:
+        - note
+        - activityId
+        - noteType
+        - title
+        - bringForwardDate
+        - bringForwardState
+        - createdAt
+      properties:
+        note:
+          type: string
+          description: the note text
+          example: this is a note about something in the project
+        activityId:
+          type: string
+          description: the ID of the activity the note is associated with
+          example: 2DE67F13
+        noteType:
+          type: string
+          description: type of note
+          example: "Bring forward"
+        title:
+          type: string
+          description: Title of the note
+          example: Some Title
+        bringForwardDate:
+          type: string
+          format: date-time
+          description: date time for when note is to be brought forward
+          example: "2029-08-14T07:00:00.000Z"
+        bringForwardState:
+          type: string
+          description: state of a bring forward tyoe note
+          example: Unresolved
+        createdAt:
+          type: string
+          format: date-time
+          description: date time for when note is to be brought forward
+          example: "2024-08-14T07:00:00.000Z"
+    Request-Permit:
+      title: Request Permit
+      type: object
+      required:
+        - activityId
+        - needed
+        - permitType
+        - permitTypeId
+        - status
+      properties:
+        activityId:
+          type: string
+          description: The Id of the activity associated with the permit
+          example: 2DE67F13
+        needed:
+          type: string
+          description: whether permit is needed, or still uner investigation
+          example: "Under Investigation"
+        permitType:
+          $ref: "#/components/schemas/DB-PermitType"
+        permitTypeId:
+          type: number
+          description: Id for the associated permit type 
+          example: 1
+        status:
+          type: string
+          description: status of the permit
+          example: New
+        adjudicationDate:
+          type: string
+          description: date of the permit's adjudication
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        authStatus:
+          type: string
+          description: status of authentication for the permit
+          example: Pending
+        issuedPermitId:
+          type: string
+          description: Id of the issued permit
+          example: "123"
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        submittedDate:
+          type: string
+          description: date the permit was submitted
+          format: date-time 
+          example: "2024-08-14T07:00:00.000Z"
+        trackingId:
+          type: string
+          description: Id for tracking permit
+          example: H7kidnhd948594
+    Request-Roadmap:
+      title: Request Roadmap
+      type: object
+      required:
+        - activityId
+        - selectedFileIds
+        - emailData
+      properties:
+        activityId:
+          type: string
+          description: Id of the activity
+          example: 
+        selectedFileIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          description: Array of selected file IDs
+        emailData:
+          $ref: "#/components/schemas/EmailData"
+    Request-SaveSubmissionDraft:
+      title: Save draft of Submission
+      type: object
+      required:
+        - applicant
+        - basic
+        - housing
+        - location
+        - permits
+      properties:
+        applicant:
+          type: object
+          properties:
+            contactFirstName:
+              type: string
+              description: First name of the contact person
+              example: John
+            contactLastName:
+              type: string
+              description: Last name of the contact person
+              example: Smith
+            contactPhoneNumber:
+              type: string
+              description: Phone number for contact
+              example: (123) 456-7890
+            contactEmail:
+              type: string
+              description: Email address for contact
+              example: john.smith@example.com
+            contactApplicantRelationship:
+              type: string
+              description: Relationship of the contact person to the project
+              example: Agent
+            contactPreference:
+              type: string
+              description: Preferred method of contact
+              example: Email
+        basic:
+          type: object
+          properties:
+            isDevelopedByCompanyOrOrg:
+              type: boolean
+              description: >-
+                Indicates if the project is being developed by a company or organization
+              example: true
+            isDevelopedInBC:
+              type: boolean
+              description: >-
+                Indicates if the project is being developed in British Columbia (BC)
+              example: true
+            companyNameRegistered:
+              type: string
+              description: Name of the company associated with the project
+              example: QW URBAN FOOD LTD.
+        housing:
+          type: object
+          properties:
+            projectName:
+              type: string
+              description: Name of the Project
+              example: New Project
+            projectDescription:
+              type: string
+              description: A description of the project
+              example: Project description example.
+            singleFamilyUnits:
+              type: string
+              description: Range of single-family units in the project
+              example: 10-49
+            multiFamilyUnits:
+              type: string
+              description: Range of multi-family units in the project
+              example: 10-49
+            otherUnitsDescription:
+              type: string
+              description: Description of the "other" units
+              example: detached garages
+              maxLength: 255
+            otherUnits:
+              type: string
+              description: Range of "other" units in the project
+              example: 10-49
+            hasRentalUnits:
+              type: string
+              description: Whether or not the project will have rental units
+              example: "Yes"
+            financiallySupportedBC:
+              type: string
+              description: Is it financially supported by BC Housing?
+              example: "No"
+            financiallySupportedIndigenous:
+              type: string
+              description: Is it an Indigenous-led project?
+              example: "No"
+            financiallySupportedNonProfit:
+              type: string
+              description: Is it financially supported by a Non-Profit?
+              example: "No"
+            financiallySupportedHousingCoop:
+              type: string
+              description: Is it financially supported by a Housing Cooperative?
+              example: "No"
+            rentalUnits:
+              type: string
+              description: Range of rental units
+              example: 1-9
+            indigenousDescription:
+              type: string
+              description: Description for the Indigenous-led project
+              example: Indigenous project details
+              maxLength: 255
+            nonProfitDescription:
+              type: string
+              description: Description for Non-Profit supported project
+              example: Non-Profit project details
+              maxLength: 255
+            housingCoopDescription:
+              type: string
+              description: Description for Housing Cooperative supported project
+              example: Housing Cooperative project details
+              maxLength: 255
+        location:
+          type: object
+          properties:
+            naturalDisaster:
+              type: string
+              description: Indicates if the project is affected by a natural disaster
+              example: "No"
+            projectLocation:
+              type: string
+              description: Location of the project
+              example: Street address
+            projectLocationDescription:
+              type: string
+              description: Description of the project’s location
+              example: Near the downtown area
+            locationPIDs:
+              type: string
+              description: Location PIDs for the project
+              example: 006-209-521, 007-209-522
+            latitude:
+              type: number
+              description: Latitude coordinate for the project
+              example: 48.440531
+            longitude:
+              type: number
+              description: Longitude coordinate for the project
+              example: -123.377677
+            streetAddress:
+              type: string
+              description: Street address of the project
+              example: 2975 Jutland Rd
+            locality:
+              type: string
+              description: City, town, etc. (location) of the project
+              example: Maple Ridge
+            province:
+              type: string
+              description: Province (location) of the project
+              example: BC
+        permits:
+          type: object
+          properties:
+            hasAppliedProvincialPermits:
+              type: boolean
+              description: Indicates whether the project has applied for provincial permits
+              example: true
+            checkProvincialPermits:
+              type: boolean
+              description: Indicates whether the project needs to check for provincial permits
+              example: true
+        appliedPermits:
+          type: array
+          items:
+            $ref: "#/components/schemas/DB-Permit"
+        investigatePermits:
+          type: array
+          items:
+            $ref: "#/components/schemas/DB-Permit"
+        submissionId:
+          type: string
+          description: Uuid for the submission
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity Id
+          example: D95F1DE6
+        submittedAt:
+          type: string
+          format: date-time
+          description: Date it was submitted
+          example: "2024-04-03T00:57:09.070Z"
+        submittedBy:
+          type: string
+          description: Who made the submission
+          example: JSMITH
+        intakeStatus:
+          type: string
+          description: Intake status type
+          example: Submitted
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        submissionType:
+          type: string
+          description: The type of submission
+          example: Guidance
+    Request-SubmissionSearch:
+      title: Request Submission Search
+      type: object
+      required:
+        - activityId
+        - intakeStatus
+        - includeUser
+        - submissionId
+        - submissionType
+      properties:
+        activityId:
+          type: string
+          description: Id of the activity
+          example: 2DE67F13
+        intakeStatus:
+          type: string
+          description: Intake status type
+          example: Assigned
+        includeUser:
+          type: string
+          description: if set it retrieves only this user's submissions
+          example: Smith, John
+        submissionId:
+          type: string
+          description: Uuid of submission
+          format: Uuid
+          example: ac246e31-c807-496c-bc93-cd8bc2f1b2b4
+        submissionType:
+          type: string
+          description: type of the submission
+          example: Guidance
+    Request-SubmissionUpdate:
+      title: Request to Update Submission
+      type: object
+      required:
+        - submissionId
+        - activityId
+        - queuePriority
+        - submissionType
+        - submittedAt
+        - projectName
+        - hasRentalUnits
+        - financiallySupportedBC
+        - financiallySupportedIndigenous
+        - financiallySupportedNonProfit
+        - financiallySupportedHousingCoop
+        - naturalDisaster
+        - addedToATS
+        - ltsaCompleted
+        - bcOnlineCompleted
+        - aaiUpdated
+      properties:
+        submissionId:
+          type: string
+          description: Uuid for the submission
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity Id
+          example: D95F1DE6
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          format: integer
+          example: 2
+          default: 3
+        submissionType:
+          type: string
+          description: The type of submission
+          example: Guidance
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: "2024-04-03T00:57:09.070Z"
+        relatedEnquiries:
+          type: string
+          description: Related enquiries
+          example: Some enquiry
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        isDevelopedInBC:
+          type: string
+          description: Is the project developed in BC?
+          example: "Yes"
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription:
+          type: string
+          description: A description of the project
+          example: Project description example.
+          nullable: true
+        singleFamilyUnits:
+          type: string
+          description: Range of single-family units in the project
+          example: 10-49
+        multiFamilyUnits:
+          type: string
+          description: Range of multi-family units in the project
+          example: 10-49
+        otherUnitsDescription:
+          type: string
+          description: Description of the "other" units
+          example: detached garages
+          maxLength: 255
+        otherUnits:
+          type: string
+          description: Range of "other" units in the project
+          example: 10-49
+        hasRentalUnits:
+          type: string
+          description: Whether or not the project will have rental units
+          example: "Yes"
+        rentalUnits:
+          type: string
+          description: Range of rental units
+          example: 1-9
+          nullable: true
+        financiallySupportedBC:
+          type: string
+          description: Is it financially supported by BC Housing?
+          example: "No"
+        financiallySupportedIndigenous:
+          type: string
+          description: Is it an Indigenous-led project?
+          example: "No"
+        indigenousDescription:
+          type: string
+          description: Description for the Indigenous-led project
+          example: Indigenous project details
+          maxLength: 255
+        financiallySupportedNonProfit:
+          type: string
+          description: Is it financially supported by a Non-Profit?
+          example: "No"
+        nonProfitDescription:
+          type: string
+          description: Description for Non-Profit supported project
+          example: Non-Profit project details
+          maxLength: 255
+        financiallySupportedHousingCoop:
+          type: string
+          description: Is it financially supported by a Housing Cooperative?
+          example: "No"
+        housingCoopDescription:
+          type: string
+          description: Description for Housing Cooperative supported project
+          example: Housing Cooperative project details
+          maxLength: 255
+        streetAddress:
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+          maxLength: 255
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Victoria
+          maxLength: 255
+        province:
+          type: string
+          description: Province (Location) of project
+          example: BC
+          maxLength: 255
+        locationPIDs:
+          type: string
+          description: Location PIDs
+          example: 006-209-521, 007-209-522
+          maxLength: 255
+        latitude:
+          type: number
+          description: Latitude coordinate for the project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude coordinate for the project
+          example: -123.377677
+        geomarkUrl:
+          type: string
+          description: URL for geomark
+          example: "http://geomark.com"
+          maxLength: 255
+        naturalDisaster:
+          type: string
+          description: Is it affected by a natural disaster?
+          example: "No"
+        projectLocationDescription:
+          type: string
+          description: Description of the location of the project
+          example: "Near the river"
+          maxLength: 4000
+        addedToATS:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientNumber:
+          type: string
+          description: Client number from ATS
+          example: ATS-001
+          maxLength: 255
+        ltsaCompleted:
+          type: boolean
+          description: LTSA completed
+          example: false
+        bcOnlineCompleted:
+          type: boolean
+          description: BC Online completed
+          example: false
+        aaiUpdated:
+          type: boolean
+          description: Updated by AAI
+          example: false
+        astNotes:
+          type: string
+          description: Notes from AST
+          example: "AST notes here"
+          maxLength: 4000
+        intakeStatus:
+          type: string
+          description: Intake status type
+          example: Submitted
+        assignedUserId:
+          type: string
+          description: User assigned to the submission
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        waitingOn:
+          type: string
+          description: Any dependencies or things waiting on
+          example: "Waiting on review"
+          maxLength: 255
+    Request-UpdateDraftEnquiry:
+      type: object
+      allOf:
+        - type: object
+          required: 
+            - enquiryId
+          properties:
+            enquiryId:
+              type: string
+              description: Uuid for an enquiry
+              format: uuid
+              example: b76469a3-896c-4435-aa83-b8b87db6f401
+        - $ref: "#/components/schemas/Request-CreateDraftEnquiry"
+    Response-BadRequest:
+      title: Response Bad Request
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            status:
+              example: 400
+            title:
+              example: Bad Request
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/400
+    Response-BringForwardNotes:
+      type: object
+      required:
+        - activityId
+        - noteId
+        - title
+        - projectName
+        - createdByFullName
+        - bringForwardDate
+      properties:
+        activityId:
+          type: string
+          description: the ID of the activity the note is associated with
+          example: 2DE67F13
+        noteId:
+          type: string
+          description: Uuid of a note
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
+        submissionId:
+          type: string
+          description: Uuid of a submission
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b2865635421
+        enquiryId:
+          type: string
+          description: Uuid for an enquiry
+          format: uuid
+          example: b76469a3-896c-4435-aa83-b8b87db6f401
+        title:
+          type: string
+          description: Title of the note
+          example: Some Title
+        createdByFullName:
+          type: string
+          description: The full name of the user who created the note
+          example: Smith, John
+        bringForwardDate:
+          type: string
+          format: date-time
+          description: date time for when note is to be brought forward
+          example: "2029-08-14T07:00:00.000Z"
+        projectName:
+          type: string
+          description: name of the project the note is attached to
+          example: The Project
+    Response-DeletedEnquiry:
+      type: object
+      allOf:
+        - type: object
+          required:
+            - is_deleted
+          properties:
+            is_deleted:
+              type: boolean
+              example: true
+        - $ref: "#/components/schemas/DB-Enquiry"
+    Response-DraftEnquiry:
+      type: object
+      required:
+        - activityId
+        - enquiryId
+      properties:
+        activityId:
+          type: string
+        enquiryId:
+          type: string
+    Response-DraftSubmission:
+      title: Response Draft Submission
+      type: object
+      required:
+        - activityId
+        - submissionId
+      properties:
+        submissionId: 
+          type: string
+          description: Uuid for the submission
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId: 
+          type: string
+          description: Activity Id
+          example: D95F1DE6
+    Response-Email:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: object
+            properties:
+              msgId: 
+                type: string
+                description: Uuid for email message
+                format: uuid
+                example: b76469a3-896c-4435-aa83-b8b87db6f401
+              to:
+                type: array
+                items:
+                  type: string
+                  description: The To email addresses
+        txId:
+          type: string
+          format: uuid
+          example: b76469a3-896c-4435-aa83-b8b87db6f401
+    Response-Error:
+      title: Response Error
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            status:
+              example: 500
+            title:
+              example: Internal Server Error
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/500
+    Response-Forbidden:
+      title: Response Forbidden
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+            title:
+              example: Forbidden
+            status:
+              example: 403
+            detail:
+              example: User lacks permission to complete this action
+    Response-NotFound:
+      title: Response Not Found
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            status:
+              example: 404
+            title:
+              example: Not Found
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+    Response-Problem:
+      title: Response Problem
+      type: object
+      required:
+        - type
+        - title
+        - status
+      properties:
+        type:
+          type: string
+          description: What type of problem, link to explanation of problem
+        title:
+          type: string
+          description: Title of problem, generally the HTTP Status Code description
+        status:
+          type: string
+          description: The HTTP Status code
+        detail:
+          type: string
+          description: >-
+            A short, human-readable explanation specific to this occurrence of
+            the problem
+        instance:
+          type: string
+          description: >-
+            A URI reference that identifies the specific occurrence of the
+            problem
+    Response-SubmissionCreate:
+      title: Response for Create Submission
+      type: object
+      required:
+        - activityId
+        - submissionId
+      properties:
+        activityId: 
+          type: string
+          description: Activity Id
+          example: D95F1DE6
+        submissionId:
+          type: string
+          description: Uuid for the submission
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+    Response-SubmissionStatistics:
+      type: object
+      properties:
+        total_submissions: 
+          type: number
+          example: 112
+        total_submissions_between: 
+          type: number
+          example: 0
+        total_submissions_monthyear: 
+          type: number
+          example: 0
+        total_submissions_assignedto: 
+          type: number
+          example: 0
+        intake_submitted: 
+          type: number
+          example: 80
+        intake_assigned: 
+          type: number
+          example: 6
+        intake_completed: 
+          type: number
+          example: 1
+        state_new: 
+          type: number
+          example: 112
+        state_inprogress: 
+          type: number
+          example: 0
+        state_delayed: 
+          type: number
+          example: 0
+        state_completed: 
+          type: number
+          example: 0
+        waiting_on: 
+          type: number
+          example: 0
+        queue_1: 
+          type: number
+          example: 7
+        queue_2: 
+          type: number
+          example: 4
+        queue_3: 
+          type: number
+          example: 50
+        escalation: 
+          type: number
+          example: 0
+        general_enquiry: 
+          type: number
+          example: 0
+        guidance: 
+          type: number
+          example: 50
+        inapplicable: 
+          type: number
+          example: 0
+        status_request: 
+          type: number
+          example: 0
+    Response-Unauthorized:
+      title: Response Unauthorized
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/401
+            title:
+              example: Unauthorized
+            status:
+              example: 401
+            detail:
+              example: Invalid authorization credentials
+  responses:
+    BadRequest:
+      description: Bad Request (Request is missing content or malformed)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response-BadRequest"
+    Error:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response-Error"
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response-Forbidden"
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response-NotFound"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Response-Unauthorized"
+  securitySchemes: 
+    BearerAuth:
+      type: http
+      description: Bearer token auth using an OIDC issued JWT token
+      scheme: bearer
+      bearerFormat: JWT
+    OpenID:
+      type: openIdConnect
+      description: OpenID Connect endpoint for acquiring JWT tokens
+      openIdConnectUrl: >-
+        https://logonproxy.gov.bc.ca/auth/realms/your-realm-name/.well-known/openid-configuration
