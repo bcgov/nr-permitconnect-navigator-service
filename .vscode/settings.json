@@ -22,5 +22,8 @@
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnSave": true,
   "eslint.format.enable": true,
-  "files.insertFinalNewline": true
+  "files.insertFinalNewline": true,
+  "yaml.schemas": {
+    "openapi:v3": "file:///Users/qhanson/dev/nr-permitconnect-navigator-service/app/src/docs/v1.api-spec.yaml"
+  }
 }

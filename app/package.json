@@ -21,6 +21,7 @@
     "migrate:up": "knex migrate:up",
     "migrate": "knex migrate:latest --knexfile ./sbin/knexfile.js",
     "postbuild:all": "npm run build",
+    "postbuild": "ts-node ./deploy-utils.ts docs",
     "postclean:all": "npm run clean",
     "postprisma:migrate:down": "npm run prisma:sync",
     "postprisma:migrate:up": "npm run prisma:sync",

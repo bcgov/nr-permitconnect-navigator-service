@@ -20,9 +20,15 @@ interface OpenAPISpec {
 
 /** Gets the OpenAPI specification */
 function getSpec(): OpenAPISpec | undefined {
+  // if local path = '../../docs/v1.api-spec.yaml'
+  // else path = ../../../docs/v1.api-spec.yaml
   const rawSpec = readFileSync(join(__dirname, '../../docs/v1.api-spec.yaml'), 'utf8');
   const spec = yaml.load(rawSpec) as OpenAPISpec;
   spec.servers[0].url = '/api/v1';
+  // if (getConfigBoolean('keycloak.enabled')) {
+  //   // eslint-disable-next-line max-len
+  //   spec.components.securitySchemes.OpenID.openIdConnectUrl = `${config.get('keycloak.serverUrl')}/realms/${config.get('keycloak.realm')}/.well-known/openid-configuration`;
+  // }
   return spec;
 }
 
