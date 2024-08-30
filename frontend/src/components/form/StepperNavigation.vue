@@ -39,6 +39,7 @@ function handlePrevClick() {
 <template>
   <div class="flex pt-4 justify-content-between">
     <Button
+      :class="props.prevDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined
       icon="pi pi-arrow-left"
@@ -48,6 +49,7 @@ function handlePrevClick() {
     />
     <slot name="content" />
     <Button
+      :class="props.nextDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined
       icon="pi pi-arrow-right"
@@ -57,3 +59,12 @@ function handlePrevClick() {
     />
   </div>
 </template>
+
+<style scoped lang="scss">
+.button-visible {
+  visibility: visible;
+}
+.button-hidden {
+  visibility: hidden;
+}
+</style>
