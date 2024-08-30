@@ -35,7 +35,7 @@ const props = withDefaults(defineProps<Props>(), {
       v-if="showHomeLink"
       class="mt-4"
     >
-      <router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link>
+      <router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link>
     </div>
   </div>
 </template>

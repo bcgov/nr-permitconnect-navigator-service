@@ -76,7 +76,7 @@ function onDelete(enquiryId: string) {
     </template>
     <Column
       field="activity.activityId"
-      header="Activity"
+      header="Confirmation ID"
       :sortable="true"
       frozen
     >

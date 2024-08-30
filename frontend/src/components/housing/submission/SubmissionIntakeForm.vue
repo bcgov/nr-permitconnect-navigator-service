@@ -91,7 +91,8 @@ const props = withDefaults(defineProps<Props>(), {
 const router = useRouter();
 // Constants
 const VALIDATION_BANNER_TEXT =
-  'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
+  // eslint-disable-next-line max-len
+  'One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red.';
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -445,6 +446,9 @@ onBeforeMount(async () => {
       :route-name="RouteName.HOUSING"
       text="Back to Housing"
     />
+    <div class="flex justify-content-center app-primary-color mt-3">
+      <h3>Project Investigation Form</h3>
+    </div>
 
     <Form
       id="form"
@@ -701,7 +705,7 @@ onBeforeMount(async () => {
                   <InputText
                     class="col-6"
                     name="housing.projectName"
-                    label="Project name - well known title like Capital Park"
+                    label="Project name - your preferred name for your project"
                     :bold="false"
                     :disabled="!editable"
                   />
@@ -857,9 +861,7 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      Is this project being financially supported by any of the following?
-                    </span>
+                    <span class="section-header">Is this project associated with any of the following?</span>
                   </div>
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
@@ -1210,7 +1212,7 @@ onBeforeMount(async () => {
                   v-model:active-index="parcelAccordionIndex"
                   class="mb-3"
                 >
-                  <AccordionTab header="Parcel ID">
+                  <AccordionTab header="Parcel ID (PID Number)">
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
@@ -1301,7 +1303,7 @@ onBeforeMount(async () => {
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
                     <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location?
+                      Is there anything else you would like to tell us about this project's location? (optional)
                     </span>
                   </div>
                 </div>
@@ -1401,7 +1403,7 @@ onBeforeMount(async () => {
                       class="col-12"
                     >
                       <div class="mb-2">
-                        <span class="text-red-500">
+                        <span class="app-primary-color">
                           * Sharing this information will authorize the navigators to seek additional information about
                           this permit.
                         </span>

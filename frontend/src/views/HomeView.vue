@@ -16,7 +16,7 @@ const toHousing = (): void => {
   <div class="flex align-items-center justify-content-start h-full">
     <div class="text-left text-white-alpha-90">
       <h1 class="font-bold mb-0">Welcome to the</h1>
-      <h1 class="font-bold underline mt-0">Permit Connect Services</h1>
+      <h1 class="font-bold mt-0">Permit Connect Services</h1>
       <h2 class="mb-3">Choose your project type</h2>
       <Button @click="toHousing">
         <font-awesome-icon

@@ -28,6 +28,6 @@ const props = withDefaults(defineProps<Props>(), {});
       <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">View my drafts and submissions page.</router-link>
       Please check your email for the confirmation email and keep the confirmation ID for future reference
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
   </div>
 </template>
