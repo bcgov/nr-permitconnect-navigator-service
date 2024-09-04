@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Dropdown } from '@/components/form';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
 import { ssoService } from '@/services';
+import { useAuthZStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
@@ -22,9 +23,13 @@ const USER_SEARCH_PARAMS: { [key: string]: string } = {
 // Emits
 const emit = defineEmits(['userCreate:request']);
 
+// Store
+const authzStore = useAuthZStore();
+
 // State
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
+const selectableGroups: Ref<Array<GroupName>> = ref([]);
 const selectedGroup: Ref<GroupName | undefined> = ref(undefined);
 const selectedParam: Ref<string | undefined> = ref(undefined);
 const selectedUser: Ref<User | undefined> = ref(undefined);
@@ -80,6 +85,13 @@ async function searchIdirUsers() {
     users.value = [];
   }
 }
+
+onMounted(() => {
+  selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+  if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
+    selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
+  }
+});
 </script>
 
 <template>
@@ -162,7 +174,7 @@ async function searchIdirUsers() {
       class="col-12"
       name="assignRole"
       label="Assign role"
-      :options="[GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
+      :options="selectableGroups"
       :disabled="!selectedUser"
       @on-change="(e: DropdownChangeEvent) => (selectedGroup = e.value)"
     />

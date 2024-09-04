@@ -36,13 +36,13 @@ const controller = {
 
         // Filters users based on searched groups
         if (reqGroup?.length) {
-          userWithGroups = userWithGroups.filter((user) => reqGroup.some((g) => user.group?.some((ug) => ug === g)));
+          userWithGroups = userWithGroups.filter((user) => reqGroup.some((g) => user.groups?.some((ug) => ug === g)));
         }
 
         // Remove groups if not requested
         if (!isTruthy(req.query.includeUserGroups)) {
           for (const user of userWithGroups) {
-            delete user.group;
+            delete user.groups;
           }
         }
       }

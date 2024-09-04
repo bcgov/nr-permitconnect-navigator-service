@@ -21,7 +21,11 @@ const schema = {
         accessRequestId: uuidv4.allow(null),
         userId: uuidv4.allow(null),
         grant: Joi.boolean().required(),
-        group: Joi.string().max(255).allow(null),
+        group: Joi.when('grant', {
+          is: true,
+          then: Joi.string().max(255).required(),
+          otherwise: Joi.string().max(255).allow(null)
+        }),
         status: Joi.string().max(255).allow(null)
       })
     })

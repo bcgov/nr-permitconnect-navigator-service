@@ -128,7 +128,7 @@ async function onProcessUserAccessRequest(approve: boolean) {
 }
 
 function onRevoke(userAccessRequest: UserAccessRequest) {
-  const admin = authzStore.isInGroup(GroupName.ADMIN);
+  const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
   let message, successMessage;
 
   if (admin) {
@@ -176,8 +176,25 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
 async function onUserGroupChange(group: GroupName) {
   try {
-    // TODO: Implement
-    toast.success('User role updated');
+    const user = selectedUserAccessRequest.value?.user;
+    if (user) {
+      const omittedUser = omit(user, ['groups', 'status']);
+      const response = await accessRequestService.createUserAccessRequest({
+        user: omittedUser,
+        accessRequest: {
+          userId: user.userId,
+          group: group,
+          grant: true
+        }
+      });
+
+      if (response) {
+        const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === user.userId);
+        usersAndAccessRequests.value[idx].user.groups = [group];
+
+        toast.success('User role updated');
+      }
+    }
   } catch (error) {
     toast.error('Error updating user role ');
   } finally {

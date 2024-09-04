@@ -106,7 +106,7 @@ export const useAuthZStore = defineStore('authz', () => {
             x.resource === resource &&
             x.action === action &&
             (group ? x.group === group : true)
-        ) || getters.isInGroup.value(GroupName.DEVELOPER)
+        ) || getters.isInGroup.value([GroupName.DEVELOPER])
     ),
     canNavigate: computed(
       () =>
@@ -122,7 +122,7 @@ export const useAuthZStore = defineStore('authz', () => {
     ),
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
-    isInGroup: computed(() => (group: GroupName) => state.groups.value.some((x) => x === group))
+    isInGroup: computed(() => (group: Array<GroupName>) => state.groups.value.some((x) => group.includes(x)))
   };
 
   // Actions

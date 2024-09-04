@@ -122,28 +122,6 @@ const service = {
   },
 
   /**
-   * @function createUserIfNew
-   * Create a user DB record if it does not exist
-   * @param {object} data Incoming user data
-   * @returns {Promise<object>} The result of running the insert operation
-   * @throws The error encountered upon db transaction failure
-   */
-  createUserIfNew: async (data: User) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const existingUser = await prisma.user.findFirst({
-      where: {
-        sub: data.sub,
-        idp: data.idp
-      }
-    });
-
-    if (!existingUser) {
-      return await service.createUser(data);
-    } else {
-      return user.fromPrismaModel(existingUser);
-    }
-  },
-  /**
    * @function getCurrentUserId
    * Gets userId (primary identifier of a user in db) of currentContext.
    * @param {object} sub The subject of the current user
