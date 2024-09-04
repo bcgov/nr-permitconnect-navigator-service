@@ -47,6 +47,17 @@ const NavigationAuthorizationMap = [
     ]
   },
   {
+    group: GroupName.NAVIGATOR_READ_ONLY,
+    permissions: [
+      NavigationPermission.HOUSING_DROPDOWN,
+      NavigationPermission.HOUSING_ENQUIRY,
+      NavigationPermission.HOUSING_INTAKE,
+      NavigationPermission.HOUSING_STATUS_TRACKER,
+      NavigationPermission.HOUSING_SUBMISSION,
+      NavigationPermission.HOUSING_SUBMISSIONS
+    ]
+  },
+  {
     group: GroupName.PROPONENT,
     permissions: [
       NavigationPermission.HOUSING,

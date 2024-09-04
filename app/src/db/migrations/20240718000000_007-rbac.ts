@@ -460,6 +460,10 @@ export async function up(knex: Knex): Promise<void> {
           },
           {
             initiative_id: housing_id,
+            name: GroupName.NAVIGATOR_READ_ONLY
+          },
+          {
+            initiative_id: housing_id,
             name: GroupName.SUPERVISOR
           },
           {
@@ -624,6 +628,10 @@ export async function up(knex: Knex): Promise<void> {
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
+        const navigator_read_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR_READ_ONLY })
+          .select('group_id');
+
         const superviser_group_id = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
           .select('group_id');
@@ -674,10 +682,9 @@ export async function up(knex: Knex): Promise<void> {
         };
 
         // Note: Only UPDATE or DELETE is required to be given EDITOR role, don't include both
-
-        // Add all navigator role mappings
         // prettier-ignore
         {
+          // Add all navigator role mappings
           await addResourceRoles(navigator_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
@@ -686,6 +693,16 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(navigator_group_id[0].group_id, Resource.SSO, [Action.READ]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.USER, [Action.READ]);
+
+          // Add all navigator read only role mappings
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.DOCUMENT, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.ENQUIRY, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.NOTE, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.SSO, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.SUBMISSION, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.USER, [Action.READ]);
 
           // Add all supervisor role mappings
           await addResourceRoles(superviser_group_id[0].group_id, Resource.ACCESS_REQUEST, [Action.CREATE, Action.READ]);
@@ -758,6 +775,10 @@ export async function up(knex: Knex): Promise<void> {
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
+        const navigator_read_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR_READ_ONLY })
+          .select('group_id');
+
         const superviser_group_id = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
           .select('group_id');
@@ -775,6 +796,11 @@ export async function up(knex: Knex): Promise<void> {
             attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
               .attribute_id,
             group_id: navigator_group_id[0].group_id
+          },
+          {
+            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
+              .attribute_id,
+            group_id: navigator_read_group_id[0].group_id
           },
           {
             attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
