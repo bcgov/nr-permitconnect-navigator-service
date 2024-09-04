@@ -445,7 +445,7 @@ model subject_group {
 }
 
 view group_role_policy_vw {
-  row_number      BigInt  @unique
+  row_number      BigInt @unique
   group_id        Int?
   initiative_code String?
   group_name      String?
