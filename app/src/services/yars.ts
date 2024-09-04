@@ -148,6 +148,37 @@ const service = {
   },
 
   /**
+   * @function getGroups
+   * Gets a list of groups for the given initiativeId
+   * @param {number} initiativeId Initiative ID to search
+   * @returns The result of running the findMany operation
+   */
+  getGroups: async (initiative: Initiative | undefined) => {
+    try {
+      const i = await prisma.initiative.findFirstOrThrow({
+        where: {
+          code: initiative
+        }
+      });
+
+      const result = await prisma.group.findMany({
+        where: {
+          initiative_id: i.initiative_id
+        }
+      });
+
+      return result.map((x) => ({
+        groupId: x.group_id,
+        initiativeId: x.initiative_id,
+        name: x.name,
+        label: x.label
+      }));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
    * @function getPolicyAttributes
    * Gets a list of attributes associated with the given policyId
    * @param {number} policyId Policy ID to search

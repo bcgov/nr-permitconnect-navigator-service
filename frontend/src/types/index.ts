@@ -5,6 +5,7 @@ export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';
 export type { Document } from './Document';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
+export type { Group } from './Group';
 export type { IdentityProvider } from './IdentityProvider';
 export type { IDIRAttribute } from './IDIRAttribute';
 export type { Note } from './Note';
