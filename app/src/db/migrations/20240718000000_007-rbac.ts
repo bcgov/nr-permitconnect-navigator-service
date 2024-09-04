@@ -8,6 +8,9 @@ import { Action, GroupName, Initiative, Resource } from '../../utils/enums/appli
 
 const resources = [
   {
+    name: Resource.ACCESS_REQUEST
+  },
+  {
     name: Resource.DOCUMENT
   },
   {
@@ -426,6 +429,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Add groups
+         */
+
         const pcns_id = knex('initiative')
           .where({
             code: Initiative.PCNS
@@ -464,14 +471,26 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(() => {
+        /*
+         * Add resources
+         */
+
         return knex('yars.resource').insert(resources);
       })
 
       .then(() => {
+        /*
+         * Add actions
+         */
+
         return knex('yars.action').insert(actions);
       })
 
       .then(() => {
+        /*
+         * Add policies
+         */
+
         const items = [];
         for (const resource of resources) {
           for (const action of actions) {
@@ -486,6 +505,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Add roles
+         */
+
         const items: Array<{ name: string; description: string }> = [];
 
         const addRolesForResource = (resourceName: string) => {
@@ -513,6 +536,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Add attributes
+         */
+
         return knex('yars.attribute').insert([
           {
             name: 'scope:all'
@@ -524,6 +551,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Add role to policy mappings
+         */
+
         const policies = await knex
           .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
           .from({ p: 'yars.policy' })
@@ -565,6 +596,7 @@ export async function up(knex: Knex): Promise<void> {
           );
         };
 
+        await addRolePolicies(Resource.ACCESS_REQUEST);
         await addRolePolicies(Resource.DOCUMENT);
         await addRolePolicies(Resource.ENQUIRY);
         await addRolePolicies(Resource.NOTE);
@@ -578,6 +610,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Add group to role mappings
+         */
+
         const housing_id = knex('initiative')
           .where({
             code: Initiative.HOUSING
@@ -588,61 +624,106 @@ export async function up(knex: Knex): Promise<void> {
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
+        const superviser_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
+          .select('group_id');
+
+        const admin_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.ADMIN })
+          .select('group_id');
+
         const proponent_group_id = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.PROPONENT })
           .select('group_id');
 
         const items: Array<{ group_id: number; role_id: number }> = [];
 
-        const addResourceRoles = async (group_id: number, resourceName: string) => {
-          items.push(
-            {
+        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Array<Action>) => {
+          if (actionNames.includes(Action.CREATE)) {
+            items.push({
               group_id: group_id,
               role_id: (
                 await knex('yars.role')
                   .where({ name: `${resourceName}_CREATOR` })
                   .select('role_id')
               )[0].role_id
-            },
-            {
+            });
+          }
+
+          if (actionNames.includes(Action.READ)) {
+            items.push({
               group_id: group_id,
               role_id: (
                 await knex('yars.role')
                   .where({ name: `${resourceName}_VIEWER` })
                   .select('role_id')
               )[0].role_id
-            },
-            {
+            });
+          }
+
+          if (actionNames.includes(Action.UPDATE) || actionNames.includes(Action.DELETE)) {
+            items.push({
               group_id: group_id,
               role_id: (
                 await knex('yars.role')
                   .where({ name: `${resourceName}_EDITOR` })
                   .select('role_id')
               )[0].role_id
-            }
-          );
+            });
+          }
         };
 
-        /*
-         * Add all navigator role mappings
-         */
-        for (const resource of resources) {
-          await addResourceRoles(navigator_group_id[0].group_id, resource.name);
+        // Note: Only UPDATE or DELETE is required to be given EDITOR role, don't include both
+
+        // Add all navigator role mappings
+        // prettier-ignore
+        {
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.SSO, [Action.READ]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.USER, [Action.READ]);
+
+          // Add all supervisor role mappings
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.ACCESS_REQUEST, [Action.CREATE, Action.READ]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.SSO, [Action.READ]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.USER, [Action.READ]);
+
+          // Add all admin role mappings
+          await addResourceRoles(admin_group_id[0].group_id, Resource.ACCESS_REQUEST, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.DOCUMENT, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.ENQUIRY, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.NOTE, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.SSO, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.SUBMISSION, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.USER, [Action.CREATE, Action.READ, Action.UPDATE]);
+
+          // Add all proponent role mappings
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
         }
-
-        /*
-         * Add all proponent role mappings
-         */
-        await addResourceRoles(proponent_group_id[0].group_id, Resource.DOCUMENT);
-        await addResourceRoles(proponent_group_id[0].group_id, Resource.ENQUIRY);
-        await addResourceRoles(proponent_group_id[0].group_id, Resource.NOTE);
-        await addResourceRoles(proponent_group_id[0].group_id, Resource.PERMIT);
-        await addResourceRoles(proponent_group_id[0].group_id, Resource.SUBMISSION);
-
         return knex('yars.group_role').insert(items);
       })
 
       .then(async () => {
+        /*
+         * Attach attributes to all non CREATE policies
+         */
+
         const action_create_id = await knex('yars.action').where({ name: Action.CREATE }).select('action_id');
 
         const scopeAllId = await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id');
@@ -663,6 +744,10 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
+        /*
+         * Attach scopes to the proper groups
+         */
+
         const housing_id = knex('initiative')
           .where({
             code: Initiative.HOUSING
@@ -671,6 +756,14 @@ export async function up(knex: Knex): Promise<void> {
 
         const navigator_group_id = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
+          .select('group_id');
+
+        const superviser_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
+          .select('group_id');
+
+        const admin_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id, name: GroupName.ADMIN })
           .select('group_id');
 
         const proponent_group_id = await knex('yars.group')
@@ -682,6 +775,16 @@ export async function up(knex: Knex): Promise<void> {
             attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
               .attribute_id,
             group_id: navigator_group_id[0].group_id
+          },
+          {
+            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
+              .attribute_id,
+            group_id: superviser_group_id[0].group_id
+          },
+          {
+            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
+              .attribute_id,
+            group_id: admin_group_id[0].group_id
           },
           {
             attribute_id: (await knex('yars.attribute').where({ name: 'scope:self' }).select('attribute_id'))[0]

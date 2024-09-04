@@ -10,7 +10,7 @@ import { GroupName } from '@/utils/enums/application';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
-import type { UserAccessRequest } from '@/types';
+import type { User } from '@/types';
 
 // Constants
 const USER_SEARCH_PARAMS: { [key: string]: string } = {
@@ -25,10 +25,10 @@ const emit = defineEmits(['userCreate:request']);
 // State
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const selectedRole: Ref<string | undefined> = ref(undefined);
+const selectedGroup: Ref<GroupName | undefined> = ref(undefined);
 const selectedParam: Ref<string | undefined> = ref(undefined);
-const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
-const users: Ref<Array<UserAccessRequest>> = ref([]);
+const selectedUser: Ref<User | undefined> = ref(undefined);
+const users: Ref<Array<User>> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -37,7 +37,8 @@ let cancelTokenSource: any = null;
 const toast = useToast();
 
 async function searchIdirUsers() {
-  selection.value = undefined;
+  selectedUser.value = undefined;
+
   const searchParam =
     Object.keys(USER_SEARCH_PARAMS).find((key) => USER_SEARCH_PARAMS[key] === selectedParam.value) ||
     Object.keys(USER_SEARCH_PARAMS)[0];
@@ -62,8 +63,9 @@ async function searchIdirUsers() {
       // Map the response data to the required format
       // Spread the rest of the properties and filter out users without email
       users.value = response.data
-        .map(({ attributes, ...rest }: any) => ({
+        .map(({ attributes, username, ...rest }: any) => ({
           ...rest,
+          sub: username,
           fullName: attributes?.display_name?.[0] as string,
           identityId: attributes?.idir_user_guid?.[0] as string
         }))
@@ -116,13 +118,13 @@ async function searchIdirUsers() {
       />
     </div>
     <DataTable
-      v-model:selection="selection"
+      v-model:selection="selectedUser"
       :row-hover="true"
       :loading="loading"
       class="datatable mt-3 mb-2 pl-2 pr-2"
       :value="users"
       selection-mode="single"
-      data-key="username"
+      data-key="sub"
       :rows="5"
       :paginator="true"
     >
@@ -134,15 +136,12 @@ async function searchIdirUsers() {
       <template #loading>
         <Spinner />
       </template>
+
       <Column
-        field="username"
+        field="fullName"
         header="Username"
         sortable
-      >
-        <template #body="{ data }">
-          {{ data.fullName }}
-        </template>
-      </Column>
+      />
       <Column
         field="firstName"
         header="First Name"
@@ -164,8 +163,8 @@ async function searchIdirUsers() {
       name="assignRole"
       label="Assign role"
       :options="[GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
-      :disabled="!selection"
-      @on-change="(e: DropdownChangeEvent) => (selectedRole = e.value)"
+      :disabled="!selectedUser"
+      @on-change="(e: DropdownChangeEvent) => (selectedGroup = e.value)"
     />
     <div class="flex-auto pl-2">
       <Button
@@ -173,10 +172,10 @@ async function searchIdirUsers() {
         label="Request approval"
         type="submit"
         icon="pi pi-check"
-        :disabled="!selection || !selectedRole"
+        :disabled="!selectedUser || !selectedGroup"
         @click="
           () => {
-            emit('userCreate:request', selection, selectedRole);
+            emit('userCreate:request', { ...selectedUser }, selectedGroup);
           }
         "
       />

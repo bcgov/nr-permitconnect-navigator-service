@@ -1,4 +1,5 @@
 import type { IStamps } from '@/interfaces';
+import type { BasicBCeIDAttribute, BusinessBCeIDAttribute, IDIRAttribute } from '@/types';
 import type { GroupName } from '@/utils/enums/application';
 
 export type User = {
@@ -14,5 +15,7 @@ export type User = {
   userId: string;
   sub: string;
   elevatedRights: boolean;
-  attributes?: { idir_user_guid?: Array<string>; idir_username?: Array<string>; display_name?: Array<string> };
+  idirAttributes: IDIRAttribute;
+  bceidAttributes: BasicBCeIDAttribute;
+  businessBceidAttribute: BusinessBCeIDAttribute;
 } & IStamps;

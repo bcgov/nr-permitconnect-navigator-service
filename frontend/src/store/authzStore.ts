@@ -31,7 +31,8 @@ const NavigationAuthorizationMap = [
       NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS,
-      NavigationPermission.HOUSING_USER_MANAGEMENT
+      NavigationPermission.HOUSING_USER_MANAGEMENT,
+      NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN
     ]
   },
   {

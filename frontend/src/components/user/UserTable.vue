@@ -19,17 +19,17 @@ const PENDING_STATUSES = {
 
 // Props
 type Props = {
-  usersRequest: Array<UserAccessRequest>;
+  usersAndAccessRequest: Array<UserAccessRequest>;
   revocation?: boolean;
 };
 
 const props = withDefaults(defineProps<Props>(), {
-  usersRequest: undefined
+  revocation: false
 });
 
 // Emits
 const emit = defineEmits([
-  'userTable:action',
+  'userTable:processRequest',
   'userTable:denyRevocation',
   'userTable:delete',
   'userTable:manage',
@@ -48,7 +48,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
     v-model:selection="selection"
     :row-hover="true"
     class="datatable"
-    :value="props.usersRequest"
+    :value="props.usersAndAccessRequest"
     selection-mode="single"
     :sort-field="DEFAULT_SORT_FIELD"
     :sort-order="DEFAULT_SORT_ORDER"
@@ -59,42 +59,32 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
       </div>
     </template>
     <Column
-      field="fullName"
+      field="user.fullName"
       header="Username"
       sortable
     />
     <Column
-      field="firstName"
+      field="user.firstName"
       header="First Name"
       sortable
     />
     <Column
-      field="lastName"
+      field="user.lastName"
       header="Last Name"
       sortable
     />
     <Column
-      field="status"
+      field="user.status"
       header="Status"
       sortable
-    >
-      <template #body="{ data }">
-        {{
-          data.accessRequest?.status && data.accessRequest.status === AccessRequestStatus.PENDING
-            ? data.accessRequest.grant
-              ? PENDING_STATUSES.PENDING_APPROVAL
-              : PENDING_STATUSES.PENDING_REVOCATION
-            : AccessRequestStatus.APPROVED
-        }}
-      </template>
-    </Column>
+    />
     <Column
       field="role"
       header="Role"
       sortable
     >
       <template #body="{ data }">
-        {{ data.role ?? data.accessRequest?.role }}
+        {{ data.user.groups?.length ? data.user.groups.join(', ') : data.accessRequest?.group }}
       </template>
     </Column>
     <Column
@@ -133,11 +123,10 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
         <Button
           class="p-button-lg p-button-text p-0 mr-3"
           aria-label="Approve/Deny user"
-          :disabled="revocation || data.status === AccessRequestStatus.APPROVED"
+          :disabled="revocation || data.user.status === AccessRequestStatus.APPROVED"
           @click="
             () => {
-              selection = data;
-              emit('userTable:action', data);
+              emit('userTable:processRequest', data);
             }
           "
         >
@@ -183,9 +172,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
           @click="
             () => {
               selection = data;
-              authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)
-                ? emit('userTable:delete', data)
-                : emit('userTable:revoke', data);
+              emit('userTable:revoke', data);
             }
           "
         >

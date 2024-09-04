@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
 
-import { AccessRequestStatus } from '../../utils/enums/application';
+import { AccessRequestStatus, GroupName } from '../../utils/enums/application';
 
 import type { Stamps } from '../stamps';
-import type { AccessRequest } from '../../types/AccessRequest'; // Import the access_request_status_enum type
+import type { AccessRequest } from '../../types/AccessRequest';
 
 // Define types
 const _accessRequest = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
@@ -15,8 +15,8 @@ export default {
     return {
       access_request_id: input.accessRequestId,
       grant: input.grant,
-      group: input.role,
-      status: input.status as AccessRequestStatus, // Cast the status property to AccessRequestStatus enum
+      group: input.group,
+      status: input.status as AccessRequestStatus,
       user_id: input.userId as string
     };
   },
@@ -25,9 +25,9 @@ export default {
     return {
       accessRequestId: input.access_request_id,
       grant: input.grant,
-      role: input.group,
+      group: input.group as GroupName | null,
       userId: input.user_id as string,
-      status: input.status as AccessRequestStatus // Cast the status property to AccessRequestStatus enum
+      status: input.status as AccessRequestStatus
     };
   }
 };
