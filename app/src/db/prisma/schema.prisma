@@ -213,6 +213,7 @@ model user {
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
+  @@unique([identity_id, idp], map: "user_identity_id_idp_unique")
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([username], map: "user_username_index")
