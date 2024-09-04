@@ -28,7 +28,7 @@ const NavigationAuthorizationMap = [
       NavigationPermission.HOUSING_DROPDOWN,
       NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_STATUS_TRACKER,
+      //NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
       //NavigationPermission.HOUSING_USER_MANAGEMENT,
@@ -41,7 +41,7 @@ const NavigationAuthorizationMap = [
       NavigationPermission.HOUSING_DROPDOWN,
       NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_STATUS_TRACKER,
+      //NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
     ]
@@ -52,7 +52,7 @@ const NavigationAuthorizationMap = [
       NavigationPermission.HOUSING_DROPDOWN,
       NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_STATUS_TRACKER,
+      //NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
     ]
@@ -74,7 +74,7 @@ const NavigationAuthorizationMap = [
       NavigationPermission.HOUSING_DROPDOWN,
       NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_STATUS_TRACKER,
+      //NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
       //NavigationPermission.HOUSING_USER_MANAGEMENT

@@ -21,12 +21,12 @@ const items = ref([
     top: 'View my drafts and submissions',
     icon: 'fa-pen-to-square',
     route: RouteName.HOUSING_SUBMISSIONS
-  },
-  {
-    top: 'Check the status of your applications and/or permits',
-    icon: 'fa-bars-progress',
-    route: RouteName.COMING_SOON
   }
+  // {
+  //   top: 'Check the status of your applications and/or permits',
+  //   icon: 'fa-bars-progress',
+  //   route: RouteName.HOUSING_PROJECTS_LIST
+  // }
 ]);
 </script>
 
