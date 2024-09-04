@@ -255,7 +255,7 @@ const service = {
   searchUsers: async (params: UserSearchParameters) => {
     const response = await prisma.user.findMany({
       where: {
-        OR: [
+        AND: [
           {
             user_id: { in: params.userId }
           },
@@ -287,7 +287,7 @@ const service = {
       }
     });
 
-    return response.map((x) => user.fromPrismaModel(x));
+    return response.map((x) => user.fromPrismaModel(x)).filter((x) => x.userId !== NIL);
   },
 
   /**

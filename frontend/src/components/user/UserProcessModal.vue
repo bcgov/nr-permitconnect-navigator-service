@@ -2,7 +2,7 @@
 import { Button, Dialog } from '@/lib/primevue';
 
 // Emits
-const emit = defineEmits(['userAction:approveAccess', 'userAction:denyAccess']);
+const emit = defineEmits(['userAction:process']);
 
 // State
 const visible = defineModel<boolean>('visible');
@@ -27,7 +27,7 @@ const visible = defineModel<boolean>('visible');
           icon="pi pi-check"
           @click="
             () => {
-              emit('userAction:approveAccess');
+              emit('userAction:process', true);
               visible = false;
             }
           "
@@ -38,7 +38,7 @@ const visible = defineModel<boolean>('visible');
           icon="pi pi-times"
           @click="
             () => {
-              emit('userAction:denyAccess');
+              emit('userAction:process', false);
               visible = false;
             }
           "

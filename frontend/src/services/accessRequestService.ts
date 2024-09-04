@@ -4,6 +4,22 @@ import type { AxiosResponse } from 'axios';
 
 const PATH = 'accessRequest';
 
+/*
+Supervisor
+ - create access request
+ - create revoke request
+ - change role
+
+Admin
+ - create access request (auto approved)
+ - create revoke request (auto approved)
+ - approve access request
+ - approve revoke request
+ - deny access request
+ - deny revoke request
+ - change role
+*/
+
 export default {
   /**
    * @function createUserAccessRequest
@@ -14,11 +30,11 @@ export default {
   },
 
   /**
-   * @function deleteUserAccessRequest
+   * @function processUserAccessRequest
    * @returns {Promise} An axios response
    */
-  deleteAccessRequest(accessRequestId: string) {
-    return appAxios().delete(`${PATH}/${accessRequestId}`);
+  processUserAccessRequest(accessRequestId: string, data: any) {
+    return appAxios().post(`${PATH}/${accessRequestId}`, data);
   },
 
   /**
@@ -27,13 +43,5 @@ export default {
    */
   getAccessRequests(): Promise<AxiosResponse> {
     return appAxios().get(`${PATH}`);
-  },
-
-  /**
-   * @function revokeUserAccessRequest
-   * @returns {Promise} An axios response
-   */
-  revokeUserAccessRequest(data: any) {
-    return appAxios().post(`${PATH}/`, data);
   }
 };

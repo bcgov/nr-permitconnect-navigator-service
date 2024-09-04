@@ -29,7 +29,7 @@ const role: Ref<string | undefined> = ref(undefined);
     <RadioList
       name="role"
       :bold="false"
-      :options="[GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
+      :options="[GroupName.ADMIN, GroupName.SUPERVISOR, GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
       class="mt-3 mb-4"
       @on-change="(value) => (role = value)"
     />

@@ -14,21 +14,20 @@ import type { AccessRequest } from '../types';
 const service = {
   /**
    * @function createUserAccessRequest
-   * Create an access_request record
-   * @param {object} data Incoming accessRequest data
+   * Create an access request record
+   * @param {object} accessRequest Incoming access request data
    * @returns {Promise<object>} The result of running the insert operation
    * @throws The error encountered upon db transaction failure
    */
-  createUserAccessRevokeRequest: async (accessRequest: AccessRequest) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
+  createUserAccessRequest: async (accessRequest: AccessRequest) => {
     const newAccessRequest = {
       accessRequestId: uuidv4(),
       userId: accessRequest.userId,
-      grant: accessRequest.grant as boolean,
-      role: accessRequest.role as string,
+      grant: accessRequest.grant,
+      group: accessRequest.group,
       status: AccessRequestStatus.PENDING
     };
+
     const accessRequestResponse = await prisma.access_request.create({
       data: access_request.toPrismaModel(newAccessRequest)
     });
@@ -41,13 +40,28 @@ const service = {
    * Deletes the access request
    * @returns {Promise<object>} The result of running the delete operation
    */
-  deleteAccessRequests: async (accessRequestId: string) => {
+  deleteAccessRequest: async (accessRequestId: string) => {
     const response = await prisma.access_request.delete({
       where: {
         access_request_id: accessRequestId
       }
     });
     return access_request.fromPrismaModel(response);
+  },
+
+  /**
+   * @function getAccessRequest
+   * Get an access request
+   * @param {string} accessRequestId The access request data to retrieve
+   * @returns {Promise<object>} The result of running the find operation
+   */
+  getAccessRequest: async (accessRequestId: string) => {
+    const response = await prisma.access_request.findUnique({
+      where: {
+        access_request_id: accessRequestId
+      }
+    });
+    return response ? access_request.fromPrismaModel(response) : null;
   },
 
   /**
@@ -58,15 +72,6 @@ const service = {
   getAccessRequests: async () => {
     const response = await prisma.access_request.findMany();
     return response.map((x) => access_request.fromPrismaModel(x));
-  },
-
-  /**
-   * @function updateUserRole
-   * Updates user role
-   * @returns {Promise<object>} The result of running the put operation
-   */
-  updateUserRole: async () => {
-    // TODO: Implement updateUserRole
   }
 };
 

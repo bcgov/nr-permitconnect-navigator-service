@@ -23,7 +23,6 @@ export const PCNS_CONTACT = {
 
 export const GROUP_NAME_LIST = [
   GroupName.ADMIN,
-  GroupName.DEVELOPER,
   GroupName.NAVIGATOR,
   GroupName.NAVIGATOR_READ_ONLY,
   GroupName.PROPONENT,
