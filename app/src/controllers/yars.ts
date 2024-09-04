@@ -3,6 +3,16 @@ import { yarsService } from '../services';
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 const controller = {
+  getGroups: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await yarsService.getGroups(req.currentContext.initiative);
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getPermissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any

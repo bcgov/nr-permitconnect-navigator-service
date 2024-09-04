@@ -87,6 +87,7 @@ async function searchIdirUsers() {
 }
 
 onMounted(() => {
+  // TODO: Map rbac groups to radio list to get cleaner labels
   selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
     selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);

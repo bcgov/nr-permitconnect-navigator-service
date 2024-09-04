@@ -112,6 +112,7 @@ export async function up(knex: Knex): Promise<void> {
             .onDelete('CASCADE')
             .notNullable();
           table.text('name').notNullable();
+          table.text('label').notNullable();
           stamps(knex, table);
           table.unique(['initiative_id', 'name']);
         })
@@ -448,27 +449,33 @@ export async function up(knex: Knex): Promise<void> {
         const items = [
           {
             initiative_id: pcns_id,
-            name: GroupName.DEVELOPER
+            name: GroupName.DEVELOPER,
+            label: 'Developer'
           },
           {
             initiative_id: housing_id,
-            name: GroupName.PROPONENT
+            name: GroupName.PROPONENT,
+            label: 'Proponent'
           },
           {
             initiative_id: housing_id,
-            name: GroupName.NAVIGATOR
+            name: GroupName.NAVIGATOR,
+            label: 'Navigator'
           },
           {
             initiative_id: housing_id,
-            name: GroupName.NAVIGATOR_READ_ONLY
+            name: GroupName.NAVIGATOR_READ_ONLY,
+            label: 'Navigator (Read-only)'
           },
           {
             initiative_id: housing_id,
-            name: GroupName.SUPERVISOR
+            name: GroupName.SUPERVISOR,
+            label: 'Supervisor'
           },
           {
             initiative_id: housing_id,
-            name: GroupName.ADMIN
+            name: GroupName.ADMIN,
+            label: 'Admin'
           }
         ];
         return knex('yars.group').insert(items);

@@ -2,11 +2,13 @@
 import { onMounted, ref } from 'vue';
 
 import { RadioList } from '@/components/form';
+import { yarsService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { Button, Dialog } from '@/lib/primevue';
 import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
+import type { Group } from '@/types';
 
 // Emits
 const emit = defineEmits(['userManage:save']);
@@ -18,9 +20,13 @@ const authzStore = useAuthZStore();
 const visible = defineModel<boolean>('visible');
 const selectableGroups: Ref<Array<GroupName>> = ref([]);
 const group: Ref<GroupName | undefined> = ref(undefined);
+const yarsGroups: Ref<Array<Group>> = ref([]);
 
 // Actions
-onMounted(() => {
+onMounted(async () => {
+  yarsGroups.value = (await yarsService.getGroups()).data;
+
+  // TODO: Map rbac groups to radio list to get cleaner labels
   selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
     selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);

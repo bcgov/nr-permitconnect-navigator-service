@@ -10,6 +10,10 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+router.get('/groups', (req: Request, res: Response, next: NextFunction): void => {
+  yarsController.getGroups(req, res, next);
+});
+
 router.get('/permissions', (req: Request, res: Response, next: NextFunction): void => {
   yarsController.getPermissions(req, res, next);
 });
