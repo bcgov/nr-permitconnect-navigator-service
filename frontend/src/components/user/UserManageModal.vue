@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { RadioList } from '@/components/form';
+import { useAuthZStore } from '@/store';
 import { Button, Dialog } from '@/lib/primevue';
 import { GroupName } from '@/utils/enums/application';
 
@@ -10,9 +11,21 @@ import type { Ref } from 'vue';
 // Emits
 const emit = defineEmits(['userManage:save']);
 
+// Store
+const authzStore = useAuthZStore();
+
 // State
 const visible = defineModel<boolean>('visible');
-const role: Ref<string | undefined> = ref(undefined);
+const selectableGroups: Ref<Array<GroupName>> = ref([]);
+const group: Ref<GroupName | undefined> = ref(undefined);
+
+// Actions
+onMounted(() => {
+  selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+  if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
+    selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
+  }
+});
 </script>
 
 <template>
@@ -29,9 +42,9 @@ const role: Ref<string | undefined> = ref(undefined);
     <RadioList
       name="role"
       :bold="false"
-      :options="[GroupName.ADMIN, GroupName.SUPERVISOR, GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY]"
+      :options="selectableGroups"
       class="mt-3 mb-4"
-      @on-change="(value) => (role = value)"
+      @on-change="(value) => (group = value)"
     />
     <div class="flex-auto">
       <Button
@@ -39,7 +52,7 @@ const role: Ref<string | undefined> = ref(undefined);
         label="Save"
         type="submit"
         icon="pi pi-check"
-        @click="emit('userManage:save', role)"
+        @click="emit('userManage:save', group)"
       />
       <Button
         class="p-button-outlined mr-2"

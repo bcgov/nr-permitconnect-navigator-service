@@ -14,42 +14,80 @@ const controller = {
     try {
       const { accessRequest, user } = req.body;
 
-      let userResponse;
-
-      if (user) userResponse = await userService.createUserIfNew(user);
-      else userResponse = await userService.readUser(accessRequest.userId as string);
-
-      let groups: Array<{
-        initiativeId?: string;
-        groupId?: number;
-        groupName: GroupName;
-      }> = [];
-
-      if (!userResponse) {
-        res.status(404).json({ message: 'User does not exist' });
-      } else {
-        groups = await yarsService.getSubjectGroups(userResponse.sub);
-
-        if (accessRequest.grant && (!accessRequest.group || !accessRequest.group.length)) {
-          res.status(422).json({ message: 'Must provided a role to grant' });
-        }
-        if (accessRequest.group && groups.map((x) => x.groupName).includes(accessRequest.group)) {
-          res.status(409).json({ message: 'User is already assigned this role' });
-        }
-        if (userResponse.idp !== IdentityProvider.IDIR) {
-          res.status(409).json({ message: 'User must be an IDIR user to be assigned this role' });
-        }
-      }
-
       // Check if the requestee is an admin
       const admin =
         req.currentAuthorization?.groups.some(
           (group: GroupName) => group === GroupName.DEVELOPER || group === GroupName.ADMIN
         ) ?? false;
 
+      const existingUser = !!user.userId;
+
+      // Groups the current user can modify
+      const modifyableGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+      if (admin) {
+        modifyableGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
+      }
+
+      let userResponse;
+
+      if (!user.userId) userResponse = await userService.createUser(user);
+      else userResponse = await userService.readUser(user.userId);
+
+      let userGroups: Array<{
+        initiativeId?: string;
+        groupId?: number;
+        groupName: GroupName;
+      }> = [];
+
+      if (!userResponse) {
+        res.status(404).json({ message: 'User not found' });
+      } else {
+        userGroups = await yarsService.getSubjectGroups(userResponse.sub);
+        if (accessRequest.grant && !modifyableGroups.includes(accessRequest.group as GroupName)) {
+          res.status(403).json({ message: 'Cannot modify requested group' });
+        }
+        if (accessRequest.group && userGroups.map((x) => x.groupName).includes(accessRequest.group)) {
+          res.status(409).json({ message: 'User is already assigned this group' });
+        }
+        if (userResponse.idp !== IdentityProvider.IDIR) {
+          res.status(409).json({ message: 'User must be an IDIR user to be assigned this group' });
+        }
+        if (accessRequest.grant && (!accessRequest.group || !accessRequest.group.length)) {
+          res.status(422).json({ message: 'Must provided a group to grant' });
+        }
+      }
+
+      const isGroupUpdate = existingUser && accessRequest.grant;
+
       let response;
 
-      if (admin) {
+      if (isGroupUpdate) {
+        // Remove all user groups
+        for (const g of userGroups) {
+          let initiative = req.currentContext?.initiative as Initiative;
+          if (g.groupName === GroupName.DEVELOPER) {
+            initiative = Initiative.PCNS;
+          }
+
+          response = await yarsService.removeGroup(userResponse?.sub as string, initiative, g.groupName);
+        }
+
+        // Assign new group
+        await yarsService.assignGroup(
+          req.currentContext.bearerToken,
+          user.sub,
+          req.currentContext?.initiative as Initiative,
+          accessRequest.group as GroupName
+        );
+
+        // Mock an access request for the response
+        response = {
+          userId: userResponse?.userId,
+          grant: accessRequest.grant,
+          group: accessRequest.group,
+          status: AccessRequestStatus.APPROVED
+        };
+      } else if (admin) {
         if (accessRequest.grant) {
           await yarsService.assignGroup(
             req.currentContext.bearerToken,
@@ -59,14 +97,14 @@ const controller = {
           );
           // Mock an access request for the response
           response = {
-            userId: accessRequest.userId,
+            userId: userResponse?.userId,
             grant: accessRequest.grant,
             group: accessRequest.group,
             status: AccessRequestStatus.APPROVED
           };
         } else {
           // Remove requested group if provided - otherwise remove all user groups
-          const groupsToRemove = accessRequest.group ? [{ groupName: accessRequest.group }] : groups;
+          const groupsToRemove = accessRequest.group ? [{ groupName: accessRequest.group }] : userGroups;
           for (const g of groupsToRemove) {
             let initiative = req.currentContext?.initiative as Initiative;
             if (g.groupName === GroupName.DEVELOPER) {
