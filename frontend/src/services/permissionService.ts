@@ -84,7 +84,6 @@ const PermissionMap = [
       Permissions.NAVIGATION_HOUSING_DROPDOWN,
       Permissions.NAVIGATION_HOUSING_ENQUIRY,
       Permissions.NAVIGATION_HOUSING_INTAKE,
-      Permissions.NAVIGATION_HOUSING_STATUS_TRACKER,
       Permissions.NAVIGATION_HOUSING_SUBMISSION,
       Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB
     ]

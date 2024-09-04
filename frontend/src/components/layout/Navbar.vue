@@ -35,7 +35,7 @@ onMounted(() => {
       label: 'Housing',
       items: [
         {
-          label: 'Work with a Housing Navigator',
+          label: 'Start a new project investigation',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
           access: Permissions.NAVIGATION_HOUSING_INTAKE
         },
@@ -45,12 +45,12 @@ onMounted(() => {
           access: Permissions.NAVIGATION_HOUSING_ENQUIRY
         },
         {
-          label: 'Drafts and submissions',
+          label: 'View my drafts and previous entries',
           route: RouteName.HOUSING_SUBMISSIONS,
           access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB
         },
         {
-          label: 'Status of application/permit',
+          label: 'Check the status of your applications/permits',
           route: RouteName.HOUSING_PROJECTS_LIST,
           access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
         }

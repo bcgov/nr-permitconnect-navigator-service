@@ -264,7 +264,7 @@ async function checkActivityIdValidity(event: Event) {
 
 <template>
   <div v-if="!assignedActivityId">
-    <div class="mb-3 p-0">
+    <div class="mb-2 p-0">
       <BackButton
         :confirm-leave="editable && !!formUpdated"
         confirm-message="Are you sure you want to leave this page?
@@ -272,6 +272,9 @@ async function checkActivityIdValidity(event: Event) {
         :route-name="RouteName.HOUSING"
         text="Back to Housing"
       />
+    </div>
+    <div class="flex justify-content-center align-items-center app-primary-color mb-2 mt-3">
+      <h3>Enquiry Form</h3>
     </div>
 
     <CollectionDisclaimer />

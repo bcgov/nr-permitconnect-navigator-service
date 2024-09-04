@@ -21,7 +21,7 @@ const items = ref([
     route: RouteName.HOUSING_ENQUIRY_INTAKE
   },
   {
-    top: 'View my drafts and submissions',
+    top: 'View my drafts and previous entries',
     icon: 'fa-pen-to-square',
     route: RouteName.HOUSING_SUBMISSIONS
   },

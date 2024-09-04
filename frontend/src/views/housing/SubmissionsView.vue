@@ -12,7 +12,7 @@ const permissionService = new PermissionService();
 
 // Actions
 const getTitle = computed(() =>
-  permissionService.can(Permissions.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and submissions'
+  permissionService.can(Permissions.HOUSING_SUBMISSION_READ) ? 'Submissions' : 'My drafts and previous entries'
 );
 </script>
 
