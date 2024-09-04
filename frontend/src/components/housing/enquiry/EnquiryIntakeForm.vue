@@ -6,20 +6,29 @@ import { useRoute, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
-import { Dropdown, InputMask, InputText, RadioList, StepperNavigation, TextArea } from '@/components/form';
+import {
+  EditableDropdown,
+  Dropdown,
+  InputMask,
+  InputText,
+  RadioList,
+  StepperNavigation,
+  TextArea
+} from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { useAutoSave } from '@/composables/formAutoSave';
-import { activityService, enquiryService, submissionService } from '@/services';
+import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
-import { ACTIVITY_ID_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
+import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
+import type { IInputEvent } from '@/interfaces';
 
 const { formUpdated, stopAutoSave } = useAutoSave(async () => {
   const values = formRef.value?.values;
@@ -47,7 +56,9 @@ const { getConfig } = storeToRefs(useConfigStore());
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
+const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const projectActivityIds: Ref<Array<string>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -237,8 +248,15 @@ async function loadEnquiry(enquiryId: string) {
   });
 }
 
-onBeforeMount(() => {
+function onRelatedActivityInput(e: IInputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
+}
+
+onBeforeMount(async () => {
   if (props.enquiryId) loadEnquiry(props.enquiryId);
+  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
 });
 
 async function emailConfirmation(activityId: string) {
@@ -257,23 +275,6 @@ async function emailConfirmation(activityId: string) {
     body: body
   };
   await submissionService.emailConfirmation(emailData);
-}
-
-async function checkActivityIdValidity(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const activityId = target.value;
-  const hexidecimal = parseInt(activityId, 16);
-
-  if (activityId) {
-    if (activityId.length === ACTIVITY_ID_LENGTH && hexidecimal) {
-      const valid = (await activityService.checkActivityIdValidity(activityId)).data.valid;
-      if (!valid) {
-        toast.warn(`Confirmation ID ${activityId} does not exist, please check again.`);
-      }
-    } else {
-      toast.warn('Confirmation ID is not the right format, please check again.');
-    }
-  }
 }
 </script>
 
@@ -411,12 +412,14 @@ async function checkActivityIdValidity(event: Event) {
         </template>
         <template #content>
           <div class="formgrid grid">
-            <InputText
-              class="col-6"
+            <EditableDropdown
+              class="col-3"
               name="basic.relatedActivityId"
-              placeholder="Confirmation ID"
+              label="Confirmation ID"
               :disabled="!editable"
-              @on-change="checkActivityIdValidity"
+              :options="filteredProjectActivityIds"
+              :get-option-label="(e: string) => e"
+              @on-input="onRelatedActivityInput"
             />
           </div>
         </template>
