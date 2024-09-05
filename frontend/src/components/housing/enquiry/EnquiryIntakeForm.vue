@@ -29,6 +29,7 @@ import { confirmationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
+import type { Submission } from '@/types';
 
 const { formUpdated, stopAutoSave } = useAutoSave(async () => {
   const values = formRef.value?.values;
@@ -59,6 +60,7 @@ const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
+const submissions: Ref<Array<Submission>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -257,6 +259,7 @@ function onRelatedActivityInput(e: IInputEvent) {
 onBeforeMount(async () => {
   if (props.enquiryId) loadEnquiry(props.enquiryId);
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
+  submissions.value = (await submissionService.getSubmissions()).data;
 });
 
 async function emailConfirmation(activityId: string) {
@@ -418,7 +421,13 @@ async function emailConfirmation(activityId: string) {
               label="Confirmation ID"
               :disabled="!editable"
               :options="filteredProjectActivityIds"
-              :get-option-label="(e: string) => e"
+              :get-option-label="
+                (e: string) => {
+                  const name = submissions.find((x) => x.activityId === e)?.projectName;
+                  if (name) return `${e} - ${name}`;
+                  else return e;
+                }
+              "
               @on-input="onRelatedActivityInput"
             />
           </div>

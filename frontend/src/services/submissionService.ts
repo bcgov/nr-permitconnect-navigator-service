@@ -40,8 +40,8 @@ export default {
    * @function getSubmissions
    * @returns {Promise} An axios response
    */
-  getSubmissions(self?: boolean) {
-    return appAxios().get('submission', { params: { self } });
+  getSubmissions() {
+    return appAxios().get('submission');
   },
 
   /**
