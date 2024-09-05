@@ -71,7 +71,7 @@ describe('permitService test', () => {
   it('calls get permit list', async () => {
     await permitService.listPermits(TEST_ID);
     expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
+    expect(getSpy).toHaveBeenCalledWith(`${PATH}`, { params: { activityId: TEST_ID } });
   });
 
   it('calls get permit list with wrong ID', async () => {

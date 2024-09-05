@@ -9,15 +9,15 @@ import SubmissionBringForwardCalendar from '@/components/housing/submission/Subm
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
-import { enquiryService, noteService, submissionService } from '@/services';
+import { enquiryService, noteService, permitService, submissionService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
-import { Action, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
+import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
+import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/types';
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -37,6 +37,7 @@ const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
+const permits: Ref<Array<Permit>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
@@ -95,9 +96,10 @@ onMounted(async () => {
   // To pull data from CHEFS
   await submissionService.getSubmissions();
 
-  [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
+  [enquiries.value, permits.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
+      permitService.listPermits(),
       submissionService.searchSubmissions({
         includeUser: true,
         intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
@@ -108,6 +110,7 @@ onMounted(async () => {
   ).map((r) => r.data);
 
   assignEnquiriesAndFullName();
+  assignMultiPermitsNeeded();
 
   const profile = getProfile.value;
 
@@ -167,6 +170,19 @@ function assignEnquiriesAndFullName() {
           ? `${sub.user.lastName}, ${sub.user.firstName}`
           : sub.user.firstName || sub.user.lastName || '';
     }
+  });
+}
+
+// Set multiPermitsNeeded property of each submission to Yes/No (count)
+// if the submission have more than one permit with needed Yes
+function assignMultiPermitsNeeded() {
+  submissions.value.forEach((sub) => {
+    const multiPermitsNeededCount = permits.value.filter(
+      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
+    ).length;
+
+    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
+    else sub.multiPermitsNeeded = BasicResponse.NO;
   });
 }
 

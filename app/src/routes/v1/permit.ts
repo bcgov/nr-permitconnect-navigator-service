@@ -14,6 +14,16 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+// Permit list endpoint
+router.get(
+  '/',
+  hasAuthorization(Resource.PERMIT, Action.READ),
+  permitValidator.listPermits,
+  (req: Request, res: Response, next: NextFunction): void => {
+    permitController.listPermits(req, res, next);
+  }
+);
+
 // Permit create endpoint
 router.put(
   '/',
@@ -43,16 +53,6 @@ router.delete(
   permitValidator.deletePermit,
   (req: Request, res: Response, next: NextFunction): void => {
     permitController.deletePermit(req, res, next);
-  }
-);
-
-// Permit list by activity endpoint
-router.get(
-  '/list/:activityId',
-  hasAuthorization(Resource.PERMIT, Action.READ),
-  permitValidator.listPermits,
-  (req: Request, res: Response, next: NextFunction): void => {
-    permitController.listPermits(req, res, next);
   }
 );
 

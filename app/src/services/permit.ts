@@ -99,17 +99,17 @@ const service = {
 
   /**
    * @function listPermits
-   * Retrieve a list of permits associated with a given activity
+   * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<Permit[]>} The result of running the findMany operation
    */
-  listPermits: async (activityId: string) => {
+  listPermits: async (activityId?: string) => {
     const response = await prisma.permit.findMany({
       include: {
         permit_type: true
       },
       where: {
-        activity_id: activityId
+        activity_id: activityId ? activityId : undefined
       },
       orderBy: {
         permit_type: {

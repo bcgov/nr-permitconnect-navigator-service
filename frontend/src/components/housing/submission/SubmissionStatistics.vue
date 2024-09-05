@@ -79,6 +79,11 @@ watch(
         <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions) }}%</td>
       </tr>
       <tr>
+        <td class="col-9">Multi-authorization projects</td>
+        <td class="col-1 text-right">{{ statistics.multi_permits_needed }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.multi_permits_needed) }}%</td>
+      </tr>
+      <tr>
         <td class="col-9">
           Submissions by range
           <Calendar
