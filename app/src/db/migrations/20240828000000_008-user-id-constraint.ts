@@ -7,16 +7,11 @@ export async function up(knex: Knex): Promise<void> {
       // Find all duplicated user entries in "user" table (by querying by "identity_id")
       // Then delete the most recent duplicated entry
       .then(() =>
-        knex.raw(`DELETE FROM "public"."user" AS u
-        WHERE u."user_id" IN (
-          SELECT DISTINCT ON ("public"."user"."identity_id") "public"."user"."user_id"
-          FROM "public"."user"
-          WHERE (
-            SELECT count(*)
-            FROM "public"."user" AS user2
-            WHERE user2."identity_id" = "public"."user"."identity_id") > 1
-          ORDER BY "public"."user"."identity_id", "public"."user"."created_at" DESC
-        )`)
+        knex.raw(`DELETE FROM "public"."user" AS u WHERE u."user_id" in
+          (SELECT "user_id" from
+          (SELECT "user_id", row_number() over(partition by "identity_id" order by "created_at" asc) AS row_num FROM "public"."user")s
+          WHERE s.row_num>1);
+        `)
       )
 
       // prevent further duplicate users - add unique index over columns identityId and idp in user table
