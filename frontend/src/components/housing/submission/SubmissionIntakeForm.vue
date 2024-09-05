@@ -245,9 +245,31 @@ const onLatLongInputClick = async () => {
   }
 };
 
-function onInvalidSubmit(e: any) {
+async function onInvalidSubmit(e: any) {
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+
+  switch (validationErrors.value[0]) {
+    case IntakeFormCategory.APPLICANT as string:
+    case IntakeFormCategory.BASIC as string:
+      activeStep.value = 0;
+      break;
+    case IntakeFormCategory.HOUSING as string:
+      activeStep.value = 1;
+      break;
+
+    case IntakeFormCategory.LOCATION as string:
+      activeStep.value = 2;
+      break;
+
+    case IntakeFormCategory.PERMITS as string:
+    case IntakeFormCategory.APPLIED_PERMITS as string:
+      activeStep.value = 3;
+      break;
+  }
+
+  await nextTick();
+  document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
+
   formModified.value = false;
 }
 
