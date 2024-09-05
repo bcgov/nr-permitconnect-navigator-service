@@ -746,16 +746,14 @@ onBeforeMount(async () => {
                     placeholder="Provide us with additional information - short description about the project and/or project website link"
                     :disabled="!editable"
                   />
+                  <!-- prettier-ignore -->
                   <label class="col-12">
                     Upload documents about your housing project (pdfs, maps,
                     <a
                       href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
                       target="_blank"
                       class="text-blue-500 underline"
-                    >
-                      {{ 'shape files' }}
-                    </a>
-                    {{ 'etc)' }}
+                    >shape files</a>, etc)
                   </label>
                   <AdvancedFileUpload
                     :activity-id="values.activityId"
