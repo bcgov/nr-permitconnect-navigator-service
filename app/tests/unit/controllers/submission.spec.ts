@@ -442,8 +442,7 @@ describe('createDraft', () => {
           province: 'BC'
         },
         permits: {
-          hasAppliedProvincialPermits: true,
-          checkProvincialPermits: true
+          hasAppliedProvincialPermits: true
         }
       },
       currentUser: CURRENT_USER

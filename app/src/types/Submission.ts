@@ -51,7 +51,6 @@ export type Submission = {
   locality: string | null;
   province: string | null;
   hasAppliedProvincialPermits: string | null;
-  checkProvincialPermits: string | null;
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;

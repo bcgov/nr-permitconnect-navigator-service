@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref, toRaw } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, ref, toRaw } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
@@ -81,7 +81,22 @@ const formSchema = object({
 // Actions
 const confirm = useConfirm();
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
+
+const getBackButtonConfig = computed(() => {
+  if (route.query.activityId) {
+    return {
+      text: 'Back to my drafts and previous entries',
+      routeName: RouteName.HOUSING_SUBMISSIONS
+    };
+  } else {
+    return {
+      text: 'Back to Housing',
+      routeName: RouteName.HOUSING
+    };
+  }
+});
 
 async function confirmNext(data: any) {
   const validateResult = await formRef?.value?.validate();
@@ -269,8 +284,8 @@ async function checkActivityIdValidity(event: Event) {
         :confirm-leave="editable && !!formUpdated"
         confirm-message="Are you sure you want to leave this page?
       Any unsaved changes will be lost. Please save as draft first."
-        :route-name="RouteName.HOUSING"
-        text="Back to Housing"
+        :route-name="getBackButtonConfig.routeName"
+        :text="getBackButtonConfig.text"
       />
     </div>
     <div class="flex justify-content-center align-items-center app-primary-color mb-2 mt-3">

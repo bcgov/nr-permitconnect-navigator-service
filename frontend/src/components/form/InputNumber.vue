@@ -46,7 +46,10 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
       :min-fraction-digits="0"
       :max-fraction-digits="6"
     />
-    <small :id="`${name}-help`">
+    <small
+      v-if="helpText"
+      :id="`${name}-help`"
+    >
       {{ helpText }}
     </small>
     <div class="mt-2">

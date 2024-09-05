@@ -2,33 +2,30 @@ import { BasicResponse } from '../../../src/utils/enums/application';
 import { permits } from '../../../src/validators/permits';
 
 describe('permitsSchema', () => {
-  it('should validate checkProvincialPermits when hasAppliedProvincialPermits is YES', () => {
+  it('should validate when hasAppliedProvincialPermits is YES', () => {
     const data = {
-      hasAppliedProvincialPermits: BasicResponse.YES,
-      checkProvincialPermits: BasicResponse.YES
+      hasAppliedProvincialPermits: BasicResponse.YES
     };
 
     const result = permits.validate(data);
     expect(result.error).toBeUndefined();
   });
 
-  it('should validate checkProvincialPermits when hasAppliedProvincialPermits is UNSURE', () => {
+  it('should validate when hasAppliedProvincialPermits is UNSURE', () => {
     const data = {
-      hasAppliedProvincialPermits: BasicResponse.UNSURE,
-      checkProvincialPermits: BasicResponse.YES
+      hasAppliedProvincialPermits: BasicResponse.UNSURE
     };
 
     const result = permits.validate(data);
     expect(result.error).toBeUndefined();
   });
 
-  it('should not validate checkProvincialPermits when hasAppliedProvincialPermits is NO', () => {
+  it('should not validate when hasAppliedProvincialPermits is NO', () => {
     const data = {
-      hasAppliedProvincialPermits: BasicResponse.NO,
-      checkProvincialPermits: BasicResponse.YES
+      hasAppliedProvincialPermits: BasicResponse.NO
     };
 
     const result = permits.validate(data);
-    expect(result.error).toBeDefined();
+    expect(result.error).toBeUndefined();
   });
 });
