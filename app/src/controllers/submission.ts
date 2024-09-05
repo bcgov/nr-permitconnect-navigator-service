@@ -284,11 +284,14 @@ const controller = {
     return submissionData;
   },
 
-  getActivityIds: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getActivityIds();
-
-      res.status(200).json(response);
+      let response = await submissionService.getSubmissions();
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+      }
+      res.status(200).json(response.map((x) => x.activityId));
     } catch (e: unknown) {
       next(e);
     }
@@ -379,7 +382,7 @@ const controller = {
     }
   },
 
-  getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();

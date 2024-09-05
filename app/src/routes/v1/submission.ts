@@ -23,9 +23,13 @@ router.get(
 );
 
 /** Get a list of all the activityIds */
-router.get('/activityIds', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.getActivityIds(req, res, next);
-});
+router.get(
+  '/activityIds',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getActivityIds(req, res, next);
+  }
+);
 
 /** Search submissions */
 router.get(

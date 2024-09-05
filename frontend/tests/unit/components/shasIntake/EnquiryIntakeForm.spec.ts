@@ -3,9 +3,10 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { submissionService } from '@/services';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
-
+import type { AxiosResponse } from 'axios';
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
@@ -17,6 +18,10 @@ vi.mock('vue-router', () => ({
   }),
   onBeforeRouteUpdate: vi.fn()
 }));
+
+const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');
+
+getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
 
 interface FormValues {
   applicant: {

@@ -59,26 +59,6 @@ describe('enquiryService', () => {
     expect(deleteSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
   });
 
-  it('calls getEnquiries w/ undefined param', async () => {
-    await enquiryService.getEnquiries();
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('enquiry', { params: { self: undefined } });
-  });
-
-  it('calls getEnquiries w/ correct param', async () => {
-    const testBoolean = true;
-    await enquiryService.getEnquiries(testBoolean);
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('enquiry', { params: { self: testBoolean } });
-
-    await enquiryService.getEnquiries(!testBoolean);
-
-    expect(getSpy).toHaveBeenCalledTimes(2);
-    expect(getSpy).toHaveBeenCalledWith('enquiry', { params: { self: !testBoolean } });
-  });
-
   it('calls getEnquiry with correct data', async () => {
     await enquiryService.getEnquiry(testEnquiry.enquiryId);
 

@@ -29,20 +29,6 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 
 const service = {
   /**
-   * @function getActivityIds
-   * Gets a list of activity IDs
-   * @returns {Promise<string[]>} The result of running the findMany operation
-   */
-  getActivityIds: async () => {
-    try {
-      const result = await prisma.submission.findMany({ select: { activity_id: true } });
-      return result.map((x) => x.activity_id);
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
-  /**
    * @function createSubmission
    * Creates a new submission
    * @returns {Promise<Partial<Submission>>} The result of running the transaction

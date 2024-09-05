@@ -104,7 +104,7 @@ const controller = {
     }
   },
 
-  getEnquiries: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getEnquiries: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Pull from PCNS database
       let response = await enquiryService.getEnquiries();
