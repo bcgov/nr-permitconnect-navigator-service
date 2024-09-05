@@ -1,11 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { AuthService } from '@/services';
-import { useAppStore, useAuthZStore } from '@/store';
+import { AuthService, yarsService } from '@/services';
+import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
+import { storeToRefs } from 'pinia';
 
 /**
  * @function createProps
@@ -175,24 +176,12 @@ const routes: Array<RouteRecordRaw> = [
   }
 ];
 
-function waitForUserGroups(): Promise<string[] | undefined> {
-  let attempts = 0;
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  return new Promise(function (resolve, reject) {
-    (function _waitForUserGroups() {
-      const r = useAuthZStore().getGroups;
-      if (r.length > 0) return resolve(r);
-      if (attempts > 10) resolve(undefined);
-      setTimeout(_waitForUserGroups, 100);
-      attempts++;
-    })();
-  });
-}
-
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
+  const authnStore = useAuthNStore();
   const authzStore = useAuthZStore();
+  const { getIsAuthenticated } = storeToRefs(authnStore);
   const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -233,9 +222,11 @@ export default function getRouter() {
       }
     }
 
-    // Race condition on initial load between routing and getting user groups
-    // So just hold a sec if we haven't gotten them yet
-    await waitForUserGroups();
+    // Get user groups if we haven't before any routing
+    if (getIsAuthenticated.value && !authzStore.getGroups.length) {
+      const permissions = await yarsService.getPermissions();
+      authzStore.setPermissions(permissions.data);
+    }
 
     // Check for reroutes
     if (to.name === RouteName.HOUSING) {
