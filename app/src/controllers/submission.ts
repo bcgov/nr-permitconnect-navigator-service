@@ -284,7 +284,7 @@ const controller = {
     return submissionData;
   },
 
-  getActivityIds: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
       let response = await submissionService.getSubmissions();
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -382,7 +382,7 @@ const controller = {
     }
   },
 
-  getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();

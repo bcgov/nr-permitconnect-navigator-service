@@ -24,7 +24,7 @@ function onSubmissionDelete(submissionId: string) {
 
 onMounted(async () => {
   [enquiries.value, submissions.value] = (
-    await Promise.all([enquiryService.getEnquiries(true), submissionService.getSubmissions(true)])
+    await Promise.all([enquiryService.getEnquiries(), submissionService.getSubmissions()])
   ).map((r) => r.data);
 
   loading.value = false;
