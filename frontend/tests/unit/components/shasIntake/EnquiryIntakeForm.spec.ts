@@ -24,8 +24,10 @@ vi.mock('vue-router', () => ({
 }));
 
 const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');
+const getSubmissions = vi.spyOn(submissionService, 'getSubmissions');
 
 getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
+getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 
 interface FormValues {
   applicant: {
@@ -208,7 +210,7 @@ describe('EnquiryIntakeForm', () => {
     });
   });
 
-  describe('validation', () => {
+  describe('validation', async () => {
     it('accepts valid values (isRelated: Yes)', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 
