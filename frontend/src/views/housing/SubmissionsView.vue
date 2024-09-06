@@ -6,7 +6,6 @@ import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNav
 import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-
 import { RouteName } from '@/utils/enums/application';
 
 // Store
@@ -20,7 +19,7 @@ const getTitle = computed(() =>
 
 <template>
   <BackButton
-    v-if="!permissionService.can(Permissions.HOUSING_SUBMISSION_READ)"
+    v-if="!authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
     :route-name="RouteName.HOUSING"
     text="Back to Housing"
   />
