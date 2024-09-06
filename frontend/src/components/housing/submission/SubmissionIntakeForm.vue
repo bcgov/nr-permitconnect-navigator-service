@@ -249,20 +249,21 @@ async function onInvalidSubmit(e: any) {
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
 
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.APPLICANT as string:
-    case IntakeFormCategory.BASIC as string:
+    case IntakeFormCategory.APPLICANT:
+    case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
-    case IntakeFormCategory.HOUSING as string:
+
+    case IntakeFormCategory.HOUSING:
       activeStep.value = 1;
       break;
 
-    case IntakeFormCategory.LOCATION as string:
+    case IntakeFormCategory.LOCATION:
       activeStep.value = 2;
       break;
 
-    case IntakeFormCategory.PERMITS as string:
-    case IntakeFormCategory.APPLIED_PERMITS as string:
+    case IntakeFormCategory.PERMITS:
+    case IntakeFormCategory.APPLIED_PERMITS:
       activeStep.value = 3;
       break;
   }
