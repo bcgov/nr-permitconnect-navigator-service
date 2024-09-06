@@ -381,6 +381,12 @@ const controller = {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
 
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (response?.submittedBy !== getCurrentUsername(req.currentContext)) {
+          res.status(403).send();
+        }
+      }
+
       if (response?.activityId) {
         const relatedEnquiries = await enquiryService.getRelatedEnquiries(response.activityId);
         if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');

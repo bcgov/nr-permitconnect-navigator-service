@@ -101,14 +101,16 @@ router.delete(
   }
 );
 
-/** Gets a specific submission */
+/** Search all submissions */
 router.get('/search', (req: Request, res: Response, next: NextFunction): void => {
   submissionController.searchSubmissions(req, res, next);
 });
+
+/** Gets a specific submission */
 router.get(
   '/:submissionId',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
-  hasAccess('submissionId'),
+  //hasAccess('submissionId'), // TODO: Temp fix to check submittedBy in controller until we're off chefs
   submissionValidator.getSubmission,
   (req: Request, res: Response, next: NextFunction): void => {
     submissionController.getSubmission(req, res, next);
