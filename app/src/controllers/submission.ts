@@ -16,6 +16,7 @@ import {
   NumResidentialUnits,
   PermitNeeded,
   PermitStatus,
+  ProjectLocation,
   SubmissionType
 } from '../utils/enums/housing';
 import {
@@ -98,12 +99,16 @@ const controller = {
                     previousPermitType: string;
                     previousTrackingNumber2: string;
                     previousTrackingNumber: string;
+                    status: string;
+                    statusLastVerified: string;
                   }) => {
                     const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
                     if (permit) {
                       return {
                         permitId: uuidv4(),
                         permitTypeId: permit.permitTypeId,
+                        status: x.status,
+                        statusLastVerified: x.statusLastVerified,
                         activityId: data.form.confirmationId,
                         trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
                       };
@@ -118,7 +123,7 @@ const controller = {
               submissionId: data.form.submissionId,
               activityId: data.form.confirmationId,
               applicationStatus: ApplicationStatus.NEW,
-              companyNameRegistered: data.companyNameRegistered,
+              companyNameRegistered: data.companyNameRegistered ?? data.companyName,
               contactEmail: data.contactEmail,
               contactPreference: camelCaseToTitleCase(data.contactPreference),
               projectName: data.projectName,
@@ -132,6 +137,7 @@ const controller = {
               housingCoopDescription: data.housingCoopName,
               intakeStatus: toTitleCase(data.form.status),
               indigenousDescription: data.IndigenousHousingProviderName,
+              isDevelopedByCompanyOrOrg: toTitleCase(data.isCompany),
               isDevelopedInBC: toTitleCase(data.isCompanyRegistered),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
@@ -149,9 +155,14 @@ const controller = {
                 ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
                 : BasicResponse.UNSURE,
               rentalUnits: parsedUnitData[3],
+              projectLocation:
+                data.addressType === 'civicAddress'
+                  ? ProjectLocation.STREET_ADDRESS
+                  : ProjectLocation.LOCATION_COORDINATES,
               streetAddress: data.streetAddress,
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
+              hasAppliedProvincialPermits: toTitleCase(data.previousPermits),
               permits: permits
             };
           });
