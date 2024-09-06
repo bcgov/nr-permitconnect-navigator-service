@@ -240,8 +240,7 @@ const controller = {
 
     if (data.permits) {
       permits = {
-        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
-        checkProvincialPermits: data.permits.checkProvincialPermits
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
       };
     }
 

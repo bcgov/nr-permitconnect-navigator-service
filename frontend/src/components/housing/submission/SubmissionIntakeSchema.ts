@@ -154,12 +154,7 @@ export const submissionIntakeSchema = object({
     geomarkUrl: string().max(255).label('Geomark web service url')
   }),
   [IntakeFormCategory.PERMITS]: object({
-    hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits'),
-    checkProvincialPermits: string().when('hasAppliedProvincialPermits', {
-      is: (value: string) => value === BasicResponse.YES || value === BasicResponse.UNSURE,
-      then: (schema) => schema.oneOf(YES_NO_LIST).required().label('Check permits'),
-      otherwise: (schema) => schema.nullable()
-    })
+    hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits')
   }),
   [IntakeFormCategory.APPLIED_PERMITS]: array().of(
     object({

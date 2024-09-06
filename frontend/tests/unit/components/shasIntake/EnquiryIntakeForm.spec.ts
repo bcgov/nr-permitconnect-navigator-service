@@ -15,6 +15,10 @@ vi.mock('vue-router', () => ({
     push: vi.fn(),
     replace: vi.fn()
   }),
+  useRoute: () => ({
+    params: {},
+    query: {}
+  }),
   onBeforeRouteUpdate: vi.fn()
 }));
 

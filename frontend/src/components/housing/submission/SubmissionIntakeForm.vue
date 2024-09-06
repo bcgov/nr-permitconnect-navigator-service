@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, nextTick, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
@@ -88,7 +88,10 @@ const props = withDefaults(defineProps<Props>(), {
   activityId: undefined,
   submissionId: undefined
 });
+
 const router = useRouter();
+const route = useRoute();
+
 // Constants
 const VALIDATION_BANNER_TEXT =
   // eslint-disable-next-line max-len
@@ -114,7 +117,6 @@ const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
-const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors: Ref<string[]> = ref([]);
 const formModified: Ref<boolean> = ref(false);
 
@@ -126,6 +128,20 @@ const { formUpdated, stopAutoSave } = useAutoSave(() => {
 // Actions
 const confirm = useConfirm();
 const toast = useToast();
+
+const getBackButtonConfig = computed(() => {
+  if (route.query.activityId) {
+    return {
+      text: 'Back to my drafts and previous entries',
+      routeName: RouteName.HOUSING_SUBMISSIONS
+    };
+  } else {
+    return {
+      text: 'Back to Housing',
+      routeName: RouteName.HOUSING
+    };
+  }
+});
 
 const checkSubmittable = (stepNumber: number) => {
   // Map component misaligned if mounted while not visible. Trigger resize to fix on show
@@ -418,8 +434,7 @@ async function loadSubmission(submissionId: string, activityId: string) {
           statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
         })),
       permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
-        checkProvincialPermits: response?.checkProvincialPermits
+        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
       },
       investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
     });
@@ -443,8 +458,8 @@ onBeforeMount(async () => {
       :confirm-leave="editable && !!formUpdated"
       confirm-message="Are you sure you want to leave this page?
       Any unsaved changes will be lost. Please save as draft first."
-      :route-name="RouteName.HOUSING"
-      text="Back to Housing"
+      :route-name="getBackButtonConfig.routeName"
+      :text="getBackButtonConfig.text"
     />
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Project Investigation Form</h3>
@@ -646,7 +661,7 @@ onBeforeMount(async () => {
               :prev-disabled="true"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             >
@@ -679,7 +694,7 @@ onBeforeMount(async () => {
               }"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -731,8 +746,15 @@ onBeforeMount(async () => {
                     placeholder="Provide us with additional information - short description about the project and/or project website link"
                     :disabled="!editable"
                   />
-                  <!-- eslint-enable max-len -->
-                  <label class="col-12">Upload documents about your housing project (optional)</label>
+                  <!-- prettier-ignore -->
+                  <label class="col-12">
+                    Upload documents about your housing project (pdfs, maps,
+                    <a
+                      href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                      target="_blank"
+                      class="text-blue-500 underline"
+                    >shape files</a>, etc)
+                  </label>
                   <AdvancedFileUpload
                     :activity-id="values.activityId"
                     :disabled="!editable"
@@ -1031,7 +1053,7 @@ onBeforeMount(async () => {
               }"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -1132,17 +1154,28 @@ onBeforeMount(async () => {
                             class="col-4"
                             name="location.latitude"
                             disabled
-                            help-text="Provide a coordinate between 48 and 60"
+                            :help-text="
+                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                                ? 'Provide a coordinate between 48 and 60'
+                                : ''
+                            "
                             placeholder="Latitude"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.longitude"
                             disabled
-                            help-text="Provide a coordinate between -114 and -139"
+                            :help-text="
+                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                                ? 'Provide a coordinate between -114 and -139'
+                                : ''
+                            "
                             placeholder="Longitude"
                           />
-                          <div class="col-12 text-blue-500">
+                          <div
+                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
+                            class="col-12 text-blue-500"
+                          >
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
                           </div>
@@ -1235,32 +1268,6 @@ onBeforeMount(async () => {
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
                           />
                           <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="spacialAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Spatial file or PDF upload">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12 text-blue-500 mb-2">
-                            <a
-                              href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                              target="_blank"
-                            >
-                              See acceptable file formats
-                            </a>
-                          </div>
-                          <AdvancedFileUpload
-                            :activity-id="values.activityId"
-                            :accept="SPATIAL_FILE_FORMATS"
-                            :disabled="!editable"
-                          />
                         </div>
                       </template>
                     </Card>
@@ -1482,30 +1489,6 @@ onBeforeMount(async () => {
                       </Card>
                     </div>
                   </FieldArray>
-                </div>
-              </template>
-            </Card>
-            <Card
-              v-if="
-                values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
-                values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
-              "
-            >
-              <template #title>
-                <div class="flex">
-                  <span class="section-header">Would you like to have the status of the above permit(s) checked?</span>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="permits.checkProvincialPermits"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
                 </div>
               </template>
             </Card>
