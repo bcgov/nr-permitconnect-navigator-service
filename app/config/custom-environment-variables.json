@@ -63,11 +63,11 @@
     "logFile": "SERVER_LOGFILE",
     "logLevel": "SERVER_LOGLEVEL",
     "objectStorage": {
-      "accessKeyId": "OBJECTSTORAGE_ACCESSKEYID",
-      "bucket": "OBJECTSTORAGE_BUCKET",
-      "endpoint": "OBJECTSTORAGE_ENDPOINT",
-      "key": "OBJECTSTORAGE_KEY",
-      "secretAccessKey": "OBJECTSTORAGE_SECRETACCESSKEY"
+      "accessKeyId": "SERVER_OBJECTSTORAGE_ACCESSKEYID",
+      "bucket": "SERVER_OBJECTSTORAGE_BUCKET",
+      "endpoint": "SERVER_OBJECTSTORAGE_ENDPOINT",
+      "key": "SERVER_OBJECTSTORAGE_KEY",
+      "secretAccessKey": "SERVER_OBJECTSTORAGE_SECRETACCESSKEY"
     },
     "oidc": {
       "authority": "SERVER_OIDC_AUTHORITY",
