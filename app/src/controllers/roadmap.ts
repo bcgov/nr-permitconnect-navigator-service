@@ -1,7 +1,5 @@
-import { NIL } from 'uuid';
-
-import { comsService, emailService, noteService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
+import { generateCreateStamps } from '../db/utils/utils';
+import { comsService, emailService, noteService } from '../services';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { Email, EmailAttachment } from '../types';
@@ -20,29 +18,34 @@ const controller = {
       if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
         const attachments: Array<EmailAttachment> = [];
 
-        const comsObjects = await comsService.getObjects(req.headers, req.body.selectedFileIds);
+        if (req.currentContext?.bearerToken) {
+          const comsObjects = await comsService.getObjects(req.currentContext?.bearerToken, req.body.selectedFileIds);
 
-        // Attempt to get the requested documents from COMS
-        // If succesful it is converted to base64 encoding and added to the attachment list
-        const objectPromises = req.body.selectedFileIds.map(async (id) => {
-          const { status, headers, data } = await comsService.getObject(req.headers, id);
+          // Attempt to get the requested documents from COMS
+          // If succesful it is converted to base64 encoding and added to the attachment list
+          const objectPromises = req.body.selectedFileIds.map(async (id) => {
+            const { status, headers, data } = await comsService.getObject(
+              req.currentContext?.bearerToken as string,
+              id
+            );
 
-          if (status === 200) {
-            const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;
-            if (filename) {
-              attachments.push({
-                content: Buffer.from(data).toString('base64'),
-                contentType: headers['content-type'],
-                encoding: 'base64',
-                filename: filename
-              });
-            } else {
-              throw new Error(`Unable to obtain filename for file ${id}`);
+            if (status === 200) {
+              const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;
+              if (filename) {
+                attachments.push({
+                  content: Buffer.from(data).toString('base64'),
+                  contentType: headers['content-type'],
+                  encoding: 'base64',
+                  filename: filename
+                });
+              } else {
+                throw new Error(`Unable to obtain filename for file ${id}`);
+              }
             }
-          }
-        });
+          });
 
-        await Promise.all(objectPromises);
+          await Promise.all(objectPromises);
+        }
 
         // All succesful so attachment list is added to payload
         req.body.emailData.attachments = attachments;
@@ -53,8 +56,6 @@ const controller = {
 
       // Add a new note on success
       if (status === 201) {
-        const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-
         let noteBody = req.body.emailData.body;
         if (req.body.emailData.attachments) {
           noteBody += '\n\nAttachments:\n';
@@ -70,9 +71,8 @@ const controller = {
           title: 'Sent roadmap',
           bringForwardDate: null,
           bringForwardState: null,
-          createdAt: new Date().toISOString(),
-          createdBy: userId,
-          isDeleted: false
+          isDeleted: false,
+          ...generateCreateStamps(req.currentContext)
         });
       }
 

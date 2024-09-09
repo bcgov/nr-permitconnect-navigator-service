@@ -3,9 +3,10 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { submissionService } from '@/services';
 import { mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
-
+import type { AxiosResponse } from 'axios';
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
@@ -21,6 +22,12 @@ vi.mock('vue-router', () => ({
   }),
   onBeforeRouteUpdate: vi.fn()
 }));
+
+const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');
+const getSubmissions = vi.spyOn(submissionService, 'getSubmissions');
+
+getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
+getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 
 interface FormValues {
   applicant: {
@@ -203,7 +210,7 @@ describe('EnquiryIntakeForm', () => {
     });
   });
 
-  describe('validation', () => {
+  describe('validation', async () => {
     it('accepts valid values (isRelated: Yes)', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
 

@@ -10,6 +10,7 @@ import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { Submission, SubmissionSearchParameters } from '../types';
+import { IStamps } from '../interfaces/IStamps';
 
 /**
  * @function chefsAxios
@@ -28,27 +29,13 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 
 const service = {
   /**
-   * @function getActivityIds
-   * Gets a list of activity IDs
-   * @returns {Promise<string[]>} The result of running the findMany operation
-   */
-  getActivityIds: async () => {
-    try {
-      const result = await prisma.submission.findMany({ select: { activity_id: true } });
-      return result.map((x) => x.activity_id);
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
-  /**
    * @function createSubmission
    * Creates a new submission
    * @returns {Promise<Partial<Submission>>} The result of running the transaction
    */
   createSubmission: async (data: Partial<Submission>) => {
     const response = await prisma.submission.create({
-      data: submission.toPrismaModel(data as Submission)
+      data: { ...submission.toPrismaModel(data as Submission), created_at: data.createdAt, created_by: data.createdBy }
     });
 
     return submission.fromPrismaModel(response);
@@ -213,7 +200,7 @@ const service = {
     }
   },
 
-  /**
+  /*
    * @function getSubmissions
    * Gets a list of submissions
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
@@ -276,10 +263,12 @@ const service = {
    * @param {string} isDeleted flag
    * @returns {Promise<Submission>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean) => {
+  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteSubmission = await prisma.submission.findUnique({
       where: {
-        submission_id: submissionId
+        submission_id: submissionId,
+        updated_at: updateStamp.updatedAt,
+        updated_by: updateStamp.updatedBy
       }
     });
     if (deleteSubmission) {
@@ -302,7 +291,7 @@ const service = {
   updateSubmission: async (data: Submission) => {
     try {
       const result = await prisma.submission.update({
-        data: { ...submission.toPrismaModel(data), updated_by: data.updatedBy },
+        data: { ...submission.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
         where: {
           submission_id: data.submissionId
         }

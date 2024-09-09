@@ -1,9 +1,5 @@
-import { NIL } from 'uuid';
-
 import { roadmapController } from '../../../src/controllers';
-import { comsService, emailService, noteService, userService } from '../../../src/services';
-import * as utils from '../../../src/utils/utils';
-
+import { comsService, emailService, noteService } from '../../../src/services';
 import type { Note } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -26,15 +22,13 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', bearerToken: 'sometoken', tokenPayload: null, userId: 'abc-123' };
 
 describe('send', () => {
   const next = jest.fn();
 
   // Mock service calls
   const emailSpy = jest.spyOn(emailService, 'email');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
   const getObjectSpy = jest.spyOn(comsService, 'getObject');
   const getObjectsSpy = jest.spyOn(comsService, 'getObjects');
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
@@ -51,7 +45,7 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const noteCreate: Note = {
@@ -71,13 +65,8 @@ describe('send', () => {
       status: 201
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
@@ -102,7 +91,7 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const emailResponse = {
@@ -122,15 +111,10 @@ describe('send', () => {
       isDeleted: false
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
     createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
@@ -139,10 +123,6 @@ describe('send', () => {
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(
       expect.objectContaining({ ...noteCreate, createdAt: expect.stringMatching(isoPattern) })
@@ -178,7 +158,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -208,10 +188,59 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+  });
+
+  it('should not call COMS without a bearer token', async () => {
+    const req = {
+      body: {
+        activityId: '123-123',
+        selectedFileIds: ['123', '456'],
+        emailData: {
+          body: 'Some message text',
+          bodyType: 'text',
+          from: 'test@gov.bc.ca',
+          to: 'hello@gov.bc.ca',
+          subject: 'Unit tests',
+          attachments: [
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'foo'
+            },
+            {
+              content: Buffer.from('foo').toString('base64'),
+              contentType: 'filetype',
+              encoding: 'base64',
+              filename: 'bar'
+            }
+          ]
+        }
+      },
+      currentContext: { ...CURRENT_CONTEXT, bearerToken: null },
+      headers: {}
+    };
+
+    const emailResponse = {
+      data: 'foo',
+      status: 201
+    };
+
+    emailSpy.mockResolvedValue(emailResponse);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await roadmapController.send(req as any, res as any, next);
+
+    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
+    expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
@@ -245,7 +274,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -279,15 +308,10 @@ describe('send', () => {
       isDeleted: false
     };
 
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
-
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
     createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
     getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockResolvedValue(getObjectResponse);
 
@@ -295,16 +319,12 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(
       expect.objectContaining({ ...noteCreate, createdAt: expect.stringMatching(isoPattern) })
@@ -340,7 +360,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -358,10 +378,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
@@ -394,7 +414,7 @@ describe('send', () => {
           ]
         }
       },
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       headers: {}
     };
 
@@ -418,10 +438,10 @@ describe('send', () => {
     await roadmapController.send(req as any, res as any, next);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds);
+    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.headers, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.headers, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);

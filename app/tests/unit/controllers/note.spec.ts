@@ -1,8 +1,5 @@
-import { NIL } from 'uuid';
-
 import { noteController } from '../../../src/controllers';
 import { enquiryService, noteService, submissionService, userService } from '../../../src/services';
-import * as utils from '../../../src/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -24,15 +21,15 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_USER = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+
+const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 describe('createNote', () => {
   const next = jest.fn();
 
   // Mock service calls
   const createSpy = jest.spyOn(noteService, 'createNote');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
 
   it('should return 201 if all good', async () => {
     const req = {
@@ -45,11 +42,8 @@ describe('createNote', () => {
         noteType: 'GENERAL',
         title: 'Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
 
     const created = {
       noteId: '123-123',
@@ -59,22 +53,22 @@ describe('createNote', () => {
       note: 'Some not text',
       noteType: 'GENERAL',
       title: 'Note title',
-      isDeleted: false
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      createdBy: 'abc-123'
     };
 
     createSpy.mockResolvedValue(created);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await noteController.createNote(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID });
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(created);
   });
@@ -90,12 +84,8 @@ describe('createNote', () => {
         noteType: 'GENERAL',
         title: 'Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_ID = 'abc-123';
-
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     createSpy.mockImplementationOnce(() => {
       throw new Error();
@@ -105,7 +95,11 @@ describe('createNote', () => {
     await noteController.createNote(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID });
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -122,7 +116,7 @@ describe('listBringForward', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       query: {}
     };
 
@@ -191,7 +185,7 @@ describe('listBringForward', () => {
 
   it('calls next if the note service fails to list bring forward notes', async () => {
     const req = {
-      currentUser: CURRENT_USER,
+      currentContext: CURRENT_CONTEXT,
       query: {}
     };
 
@@ -220,7 +214,7 @@ describe('listNotes', () => {
   it('should return 200 if all good', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const noteList = [
@@ -250,7 +244,7 @@ describe('listNotes', () => {
   it('calls next if the note service fails to list notes', async () => {
     const req = {
       params: { activityId: 'ACT_ID' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     listSpy.mockImplementationOnce(() => {
@@ -276,7 +270,7 @@ describe('deleteNote', () => {
   it('should return 200 if deletion is successful', async () => {
     const req = {
       params: { noteId: '123-123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     const deletedNote = {
@@ -296,7 +290,10 @@ describe('deleteNote', () => {
     await noteController.deleteNote(req as any, res as any, next);
 
     expect(deleteNoteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId);
+    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId, {
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(deletedNote);
   });
@@ -304,7 +301,7 @@ describe('deleteNote', () => {
   it('calls next if the note service fails to delete the note', async () => {
     const req = {
       params: { noteId: '123-123' },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
 
     deleteNoteSpy.mockImplementationOnce(() => {
@@ -315,7 +312,10 @@ describe('deleteNote', () => {
     await noteController.deleteNote(req as any, res as any, next);
 
     expect(deleteNoteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId);
+    expect(deleteNoteSpy).toHaveBeenCalledWith(req.params.noteId, {
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -325,8 +325,6 @@ describe('updateNote', () => {
 
   // Mock service calls
   const updateNoteSpy = jest.spyOn(noteService, 'updateNote');
-  const getCurrentUserIdSpy = jest.spyOn(userService, 'getCurrentUserId');
-  const getCurrentIdentitySpy = jest.spyOn(utils, 'getCurrentIdentity');
 
   it('should return 200 if update is successful', async () => {
     const req = {
@@ -339,11 +337,8 @@ describe('updateNote', () => {
         noteType: 'GENERAL',
         title: 'Updated Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_IDENTITY = 'xxxy';
-    const USR_ID = 'abc-123';
 
     const updated = {
       noteId: '123-123',
@@ -357,18 +352,18 @@ describe('updateNote', () => {
     };
 
     updateNoteSpy.mockResolvedValue(updated);
-    getCurrentIdentitySpy.mockReturnValue(USR_IDENTITY);
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await noteController.updateNote(req as any, res as any, next);
 
-    expect(getCurrentIdentitySpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentIdentitySpy).toHaveBeenCalledWith(CURRENT_USER, NIL);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledTimes(1);
-    expect(getCurrentUserIdSpy).toHaveBeenCalledWith(USR_IDENTITY, NIL);
     expect(updateNoteSpy).toHaveBeenCalledTimes(1);
-    expect(updateNoteSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID, updatedAt: expect.any(String) });
+    expect(updateNoteSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123',
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
   });
@@ -384,12 +379,8 @@ describe('updateNote', () => {
         noteType: 'GENERAL',
         title: 'Updated Note title'
       },
-      currentUser: CURRENT_USER
+      currentContext: CURRENT_CONTEXT
     };
-
-    const USR_ID = 'abc-123';
-
-    getCurrentUserIdSpy.mockResolvedValue(USR_ID);
 
     updateNoteSpy.mockImplementationOnce(() => {
       throw new Error();
@@ -399,7 +390,13 @@ describe('updateNote', () => {
     await noteController.updateNote(req as any, res as any, next);
 
     expect(updateNoteSpy).toHaveBeenCalledTimes(1);
-    expect(updateNoteSpy).toHaveBeenCalledWith({ ...req.body, createdBy: USR_ID, updatedAt: expect.any(String) });
+    expect(updateNoteSpy).toHaveBeenCalledWith({
+      ...req.body,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123',
+      updatedAt: expect.stringMatching(isoPattern),
+      updatedBy: 'abc-123'
+    });
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });

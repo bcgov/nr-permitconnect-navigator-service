@@ -1,14 +1,8 @@
 import config from 'config';
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
-import {
-  activityService,
-  emailService,
-  enquiryService,
-  submissionService,
-  permitService,
-  userService
-} from '../services';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { activityService, emailService, enquiryService, submissionService, permitService } from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
@@ -19,14 +13,7 @@ import {
   ProjectLocation,
   SubmissionType
 } from '../utils/enums/housing';
-import {
-  camelCaseToTitleCase,
-  deDupeUnsure,
-  getCurrentIdentity,
-  getCurrentTokenUsername,
-  isTruthy,
-  toTitleCase
-} from '../utils/utils';
+import { camelCaseToTitleCase, deDupeUnsure, getCurrentUsername, isTruthy, toTitleCase } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
@@ -190,7 +177,9 @@ const controller = {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = req.body;
 
-    const activityId = data.activityId ?? (await activityService.createActivity(Initiative.HOUSING))?.activityId;
+    const activityId =
+      data.activityId ??
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
     let applicant, basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
@@ -209,6 +198,7 @@ const controller = {
 
     if (data.basic) {
       basic = {
+        consentToFeedback: data.basic.consentToFeedback ?? false,
         isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
         isDevelopedInBC: data.basic.isDevelopedInBC,
         companyNameRegistered: data.basic.registeredName
@@ -288,7 +278,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: getCurrentTokenUsername(req.currentUser),
+        submittedBy: getCurrentUsername(req.currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -304,11 +294,14 @@ const controller = {
     return submissionData;
   },
 
-  getActivityIds: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getActivityIds();
-
-      res.status(200).json(response);
+      let response = await submissionService.getSubmissions();
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+      }
+      res.status(200).json(response.map((x) => x.activityId));
     } catch (e: unknown) {
       next(e);
     }
@@ -325,7 +318,10 @@ const controller = {
       );
 
       // Create new submission
-      const result = await submissionService.createSubmission(submission);
+      const result = await submissionService.createSubmission({
+        ...submission,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -344,7 +340,10 @@ const controller = {
       );
 
       // Create new submission
-      const result = await submissionService.createSubmission(submission);
+      const result = await submissionService.createSubmission({
+        ...submission,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // Create each permit
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
@@ -382,6 +381,12 @@ const controller = {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
 
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (response?.submittedBy !== getCurrentUsername(req.currentContext)) {
+          res.status(403).send();
+        }
+      }
+
       if (response?.activityId) {
         const relatedEnquiries = await enquiryService.getRelatedEnquiries(response.activityId);
         if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');
@@ -393,7 +398,7 @@ const controller = {
     }
   },
 
-  getSubmissions: async (req: Request<never, { self?: string }>, res: Response, next: NextFunction) => {
+  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
       await controller.checkAndStoreNewSubmissions();
@@ -401,9 +406,9 @@ const controller = {
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
 
-      if (isTruthy(req.query.self)) {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentTokenUsername(req.currentUser));
+        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
 
       res.status(200).json(response);
@@ -427,11 +432,16 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      // TBD: Implement filtering so proponents can only search for their own submissions
-      const response = await submissionService.searchSubmissions({
+      let response = await submissionService.searchSubmissions({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
       });
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -448,12 +458,10 @@ const controller = {
         data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
       // Update submission
       const result = await submissionService.updateSubmission({
         ...(submission as Submission),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       });
 
       // Remove already existing permits for this activity
@@ -473,7 +481,11 @@ const controller = {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const data: any = req.body;
-      const response = await submissionService.updateIsDeletedFlag(req.params.submissionId, data.isDeleted);
+      const response = await submissionService.updateIsDeletedFlag(
+        req.params.submissionId,
+        data.isDeleted,
+        generateUpdateStamps(req.currentContext)
+      );
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -482,12 +494,9 @@ const controller = {
 
   updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-
       const response = await submissionService.updateSubmission({
         ...(req.body as Submission),
-        updatedAt: new Date().toISOString(),
-        updatedBy: userId
+        ...generateUpdateStamps(req.currentContext)
       });
       res.status(200).json(response);
     } catch (e: unknown) {

@@ -60,7 +60,7 @@ const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const sortOrder: Ref<number> = ref(Number(SORT_ORDER.DESCENDING));
+const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Actions
@@ -88,7 +88,7 @@ onMounted(async () => {
 
 // Actions
 
-function sortComparator(sortValue: number, a: any, b: any) {
+function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 

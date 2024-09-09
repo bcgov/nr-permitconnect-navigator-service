@@ -21,7 +21,7 @@ const service = {
         include: {
           permit_type: true
         },
-        data: { ...permit.toPrismaModel(newPermit), updated_by: data.updatedBy }
+        data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
       });
       return permit.fromPrismaModel(create);
     } catch (e: unknown) {
@@ -65,6 +65,25 @@ const service = {
   },
 
   /**
+   * @function getPermit
+   * Get a permit
+   * @param {string} permitId Permit ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getPermit: async (permitId: string) => {
+    const result = await prisma.permit.findFirst({
+      where: {
+        permit_id: permitId
+      },
+      include: {
+        permit_type: true
+      }
+    });
+
+    return result ? permit.fromPrismaModel(result) : null;
+  },
+
+  /**
    * @function getPermitTypes
    * Get all Permit types
    * @returns {Promise<PermitType[]>} The result of running the findMany operation
@@ -80,17 +99,17 @@ const service = {
 
   /**
    * @function listPermits
-   * Retrieve a list of permits associated with a given activity
+   * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<Permit[]>} The result of running the findMany operation
    */
-  listPermits: async (activityId: string) => {
+  listPermits: async (activityId?: string) => {
     const response = await prisma.permit.findMany({
       include: {
         permit_type: true
       },
       where: {
-        activity_id: activityId
+        activity_id: activityId ? activityId : undefined
       },
       orderBy: {
         permit_type: {

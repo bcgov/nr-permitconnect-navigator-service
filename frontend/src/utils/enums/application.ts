@@ -1,9 +1,15 @@
-export enum AccessRole {
-  PCNS_ADMIN = 'PCNS_ADMIN',
-  PCNS_DEVELOPER = 'PCNS_DEVELOPER',
-  PCNS_NAVIGATOR = 'PCNS_NAVIGATOR',
-  PCNS_PROPONENT = 'PCNS_PROPONENT',
-  PCNS_SUPERVISOR = 'PCNS_SUPERVISOR'
+export enum AccessRequestStatus {
+  APPROVED = 'Approved',
+  PENDING = 'Pending',
+  REJECTED = 'Rejected'
+}
+
+export enum Action {
+  CREATE = 'CREATE',
+  READ = 'READ',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  ROLEOVERRIDE = 'ROLEOVERRIDE'
 }
 
 export enum BasicResponse {
@@ -26,6 +32,20 @@ export enum FileCategory {
   PDF = 'pdf',
   SHAPE = 'shape',
   SPREADSHEET = 'spreadsheet'
+}
+
+export enum GroupName {
+  DEVELOPER = 'DEVELOPER',
+  PROPONENT = 'PROPONENT',
+  NAVIGATOR = 'NAVIGATOR',
+  NAVIGATOR_READ_ONLY = 'NAVIGATOR_READ_ONLY',
+  SUPERVISOR = 'SUPERVISOR',
+  ADMIN = 'ADMIN'
+}
+
+export enum Initiative {
+  PCNS = 'PCNS',
+  HOUSING = 'HOUSING'
 }
 
 export enum Regex {
@@ -54,7 +74,28 @@ export enum RouteName {
 
   OIDC_CALLBACK = 'oidc_callback',
   OIDC_LOGIN = 'oidc_login',
-  OIDC_LOGOUT = 'oidc_logout'
+  OIDC_LOGOUT = 'oidc_logout',
+
+  USER_MANAGEMENT = 'user_management'
+}
+
+export enum IdentityProvider {
+  IDIR = 'idir',
+  BCEID = 'bceidbasic',
+  BCEIDBUSINESS = 'bceidbusiness'
+}
+
+export enum Resource {
+  DOCUMENT = 'DOCUMENT',
+  ENQUIRY = 'ENQUIRY',
+  NAVIGATION = 'NAVIGATION',
+  NOTE = 'NOTE',
+  PERMIT = 'PERMIT',
+  ROADMAP = 'ROADMAP',
+  SSO = 'SSO',
+  SUBMISSION = 'SUBMISSION',
+  TESTING = 'TESTING',
+  USER = 'USER'
 }
 
 export enum StorageKey {
@@ -69,4 +110,10 @@ export enum ToastTimeout {
   STICKY = 0,
   SUCCESS = 3000,
   WARNING = 5000
+}
+
+export enum UserSearchParams {
+  FIRST_NAME = 'First name',
+  LAST_NAME = 'Last name',
+  EMAIL = 'Email'
 }

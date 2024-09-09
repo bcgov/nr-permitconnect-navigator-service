@@ -9,16 +9,15 @@ import SubmissionBringForwardCalendar from '@/components/housing/submission/Subm
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
 import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
-import { enquiryService, noteService, submissionService } from '@/services';
-import PermissionService, { Permissions } from '@/services/permissionService';
-import { useAuthStore } from '@/store';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { enquiryService, noteService, permitService, submissionService } from '@/services';
+import { useAuthNStore, useAuthZStore } from '@/store';
+import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Statistics, Submission } from '@/types';
+import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/types';
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -27,8 +26,10 @@ const NOTES_TAB_INDEX = {
 };
 
 // Store
-const authStore = useAuthStore();
-const { getProfile } = storeToRefs(authStore);
+const authnStore = useAuthNStore();
+const authzStore = useAuthZStore();
+
+const { getProfile } = storeToRefs(authnStore);
 
 // State
 const accordionIndex: Ref<number | null> = ref(null);
@@ -36,12 +37,12 @@ const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
+const permits: Ref<Array<Permit>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
-const permissionService = new PermissionService();
 const toast = useToast();
 
 function getBringForwardDate(bf: BringForward) {
@@ -95,9 +96,10 @@ onMounted(async () => {
   // To pull data from CHEFS
   await submissionService.getSubmissions();
 
-  [enquiries.value, submissions.value, statistics.value, bringForward.value] = (
+  [enquiries.value, permits.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
+      permitService.listPermits(),
       submissionService.searchSubmissions({
         includeUser: true,
         intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
@@ -108,11 +110,12 @@ onMounted(async () => {
   ).map((r) => r.data);
 
   assignEnquiriesAndFullName();
+  assignMultiPermitsNeeded();
 
   const profile = getProfile.value;
 
   submissions.value.forEach((sub) => {
-    if (sub.user?.username === profile?.preferred_username) {
+    if (sub.user?.sub === profile?.sub) {
       myAssignedTo.value.add(sub.submissionId);
     }
   });
@@ -170,6 +173,19 @@ function assignEnquiriesAndFullName() {
   });
 }
 
+// Set multiPermitsNeeded property of each submission to Yes/No (count)
+// if the submission have more than one permit with needed Yes
+function assignMultiPermitsNeeded() {
+  submissions.value.forEach((sub) => {
+    const multiPermitsNeededCount = permits.value.filter(
+      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
+    ).length;
+
+    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
+    else sub.multiPermitsNeeded = BasicResponse.NO;
+  });
+}
+
 watch(accordionIndex, () => {
   if (accordionIndex.value !== null) {
     window.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value.toString());
@@ -183,7 +199,7 @@ watch(accordionIndex, () => {
   <TabView v-if="!loading">
     <TabPanel header="Projects">
       <Accordion
-        v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
+        v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
@@ -240,7 +256,7 @@ watch(accordionIndex, () => {
       </div>
     </TabPanel>
     <TabPanel
-      v-if="permissionService.can(Permissions.HOUSING_BRINGFORWARD_READ)"
+      v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
       header="Bring Forward Calendar"
     >
       <SubmissionBringForwardCalendar

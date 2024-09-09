@@ -15,7 +15,7 @@ import type { NextFunction, Request, Response } from '../interfaces/IExpress';
  * @throws The error encountered upon failure
  */
 export const requireSomeAuth = (req: Request, _res: Response, next: NextFunction) => {
-  const authType: string | undefined = req.currentUser ? req.currentUser.authType : undefined;
+  const authType: string | undefined = req.currentContext ? req.currentContext.authType : undefined;
 
   if (!authType || authType === AuthType.NONE) {
     throw new Problem(403, {

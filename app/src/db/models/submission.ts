@@ -26,6 +26,7 @@ export default {
       project_description: input.projectDescription,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
+      consent_to_feedback: input.consentToFeedback,
       location_pids: input.locationPIDs,
       contact_name: `${input.contactFirstName} ${input.contactLastName}`,
       contact_first_name: input.contactFirstName,
@@ -89,6 +90,7 @@ export default {
       contactPhoneNumber: input.contact_phone_number,
       contactEmail: input.contact_email,
       contactPreference: input.contact_preference,
+      consentToFeedback: input.consent_to_feedback,
       projectName: input.project_name,
       projectDescription: input.project_description,
       companyNameRegistered: input.company_name_registered,
@@ -133,6 +135,7 @@ export default {
       contactLastName: input.contact_last_name,
       submissionType: input.submission_type,
       relatedEnquiries: null,
+      createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,
       user: null
     };

@@ -14,6 +14,7 @@ export type Submission = {
   contactPhoneNumber: string | null;
   contactEmail: string | null;
   contactPreference: string | null;
+  consentToFeedback: boolean;
   projectName: string | null;
   projectDescription: string | null;
   singleFamilyUnits: string | null;
@@ -58,6 +59,5 @@ export type Submission = {
   contactLastName: string | null;
   submissionType: string | null;
   relatedEnquiries: string | null;
-
   user: User | null;
 } & Partial<IStamps>;

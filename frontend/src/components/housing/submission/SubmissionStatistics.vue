@@ -38,7 +38,7 @@ async function onAssigneeInput(e: IInputEvent) {
   const input = e.target.value;
 
   if (input.length >= 3) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input, username: input })).data;
+    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input, sub: input })).data;
   } else if (input.match(Regex.EMAIL)) {
     assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
   } else {
@@ -77,6 +77,11 @@ watch(
         <td class="col-9">Total submissions</td>
         <td class="col-1 text-right">{{ statistics.total_submissions }}</td>
         <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions) }}%</td>
+      </tr>
+      <tr>
+        <td class="col-9">Multi-authorization projects</td>
+        <td class="col-1 text-right">{{ statistics.multi_permits_needed }}</td>
+        <td class="col-2 text-right">{{ getPercentage(statistics.multi_permits_needed) }}%</td>
       </tr>
       <tr>
         <td class="col-9">

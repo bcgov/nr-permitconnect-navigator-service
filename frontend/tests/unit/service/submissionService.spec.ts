@@ -43,12 +43,7 @@ describe('submissionService', () => {
       await submissionService.getSubmissions();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(
-        PATH,
-        expect.objectContaining({
-          params: expect.anything()
-        })
-      );
+      expect(getSpy).toHaveBeenCalledWith(PATH);
     });
   });
 

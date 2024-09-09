@@ -150,6 +150,16 @@ spec:
                 secretKeyRef:
                   key: app-db-password
                   name: {{ $dbSecretName }}
+            - name: OBJECTSTORAGE_ACCESSKEYID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-objectstorage
+            - name: OBJECTSTORAGE_SECRETACCESSKEY
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-objectstorage
             - name: SERVER_OIDC_CLIENTID
               valueFrom:
                 secretKeyRef:

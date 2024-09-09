@@ -3,10 +3,8 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
 import { getLogger } from '../components/log';
-import { AuthType } from './enums/application';
-
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentUser, IdpAttributes } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -97,48 +95,26 @@ export function getGitRevision(): string {
 }
 
 /**
- * @function getCurrentIdentity
- * Attempts to acquire current identity value.
- * Always takes first non-default value available. Yields `defaultValue` otherwise.
- * @param {object} currentUser The express request currentUser object
- * @param {string} [defaultValue=undefined] An optional default return value
- * @returns {string} The current user identifier if applicable, or `defaultValue`
+ * @function getCurrentSubject
+ * Attempts to acquire a specific current token sub. Yields `defaultValue` otherwise
+ * @param {object} currentContext The express request currentContext object
+ * @param {string} [defaultValue=''] An optional default return value
+ * @returns {object} The requested current token sub if applicable, or `defaultValue`
  */
-export function getCurrentIdentity(currentUser: CurrentUser | undefined, defaultValue: string | undefined = undefined) {
-  return parseIdentityKeyClaims()
-    .map((claim) => getCurrentTokenClaim(currentUser, claim, undefined))
-    .filter((value) => value) // Drop falsy values from array
-    .concat(defaultValue)[0]; // Add defaultValue as last element of array
+export function getCurrentSubject(currentContext: CurrentContext | undefined, defaultValue: string = '') {
+  return currentContext?.tokenPayload?.sub ?? defaultValue;
 }
 
 /**
- * @function getCurrentTokenClaim
- * Attempts to acquire a specific current token claim. Yields `defaultValue` otherwise
- * @param {object} currentUser The express request currentUser object
- * @param {string} claim The requested token claim
- * @param {string} [defaultValue=undefined] An optional default return value
- * @returns {object} The requested current token claim if applicable, or `defaultValue`
- */
-export function getCurrentTokenClaim(
-  currentUser: CurrentUser | undefined,
-  claim: string,
-  defaultValue: string | undefined = undefined
-) {
-  return currentUser && currentUser.authType === AuthType.BEARER
-    ? (currentUser.tokenPayload as JwtPayload)[claim]
-    : defaultValue;
-}
-
-/**
- * @function getCurrentTokenUsername
- * Parses currentUser object's identity provider to return their username
- * @param {object} currentUser The express request currentUser object
+ * @function getCurrentUsername
+ * Parses currentContext object's identity provider to return their username
+ * @param {object} currentContext The express request CurrentContext object
  * @returns {string | undefined} The username in currentUser or undefined
  */
-export function getCurrentTokenUsername(currentUser: CurrentUser | undefined): string | undefined {
-  if (currentUser?.tokenPayload) {
+export function getCurrentUsername(currentContext: CurrentContext | undefined): string | undefined {
+  if (currentContext?.tokenPayload) {
     const idpList = readIdpList();
-    const payload = currentUser.tokenPayload as JwtPayload;
+    const payload = currentContext.tokenPayload as JwtPayload;
 
     const usernameKey = idpList.find((x) => x.idp === payload.identity_provider)?.username;
 

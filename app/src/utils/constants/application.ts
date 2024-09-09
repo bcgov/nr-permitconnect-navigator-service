@@ -1,12 +1,6 @@
-import { AccessRole, BasicResponse } from '../enums/application';
+import { BasicResponse, GroupName } from '../enums/application';
 
-export const ACCESS_ROLES_LIST = [
-  AccessRole.PCNS_ADMIN,
-  AccessRole.PCNS_DEVELOPER,
-  AccessRole.PCNS_NAVIGATOR,
-  AccessRole.PCNS_PROPONENT,
-  AccessRole.PCNS_SUPERVISOR
-];
+export const ACTIVITY_ID_LENGTH = 8;
 
 /** Default CORS settings used across the entire application */
 export const DEFAULTCORS = Object.freeze({
@@ -16,8 +10,14 @@ export const DEFAULTCORS = Object.freeze({
   origin: true
 });
 
+export const GROUP_NAME_LIST = [
+  GroupName.ADMIN,
+  GroupName.DEVELOPER,
+  GroupName.NAVIGATOR,
+  GroupName.PROPONENT,
+  GroupName.SUPERVISOR
+];
+
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];
-
-export const ACTIVITY_ID_LENGTH = 8;

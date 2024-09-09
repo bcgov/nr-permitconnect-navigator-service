@@ -5,7 +5,7 @@ import { RouterView, useRouter } from 'vue-router';
 
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
-import { useAppStore, useAuthStore, useConfigStore } from '@/store';
+import { useAppStore, useAuthNStore, useConfigStore } from '@/store';
 import { RouteName, ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -23,7 +23,7 @@ const ready: Ref<boolean> = ref(false);
 onBeforeMount(async () => {
   appStore.beginDeterminateLoading();
   await useConfigStore().init();
-  await useAuthStore().init();
+  await useAuthNStore().init();
   appStore.endDeterminateLoading();
   ready.value = true;
 });

@@ -22,6 +22,7 @@ export const submissionIntakeSchema = object({
     contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
   }),
   [IntakeFormCategory.BASIC]: object({
+    consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
     isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
       is: (value: string) => value === BasicResponse.YES,
