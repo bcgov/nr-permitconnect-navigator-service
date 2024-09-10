@@ -30,6 +30,7 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -38,6 +39,7 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
     <InputNumber
       v-model="value"
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       :name="name"
       :placeholder="placeholder"
       class="w-full"

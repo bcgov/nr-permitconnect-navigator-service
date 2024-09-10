@@ -45,6 +45,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -53,6 +54,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     <AutoComplete
       v-model="value"
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :delay="delay"

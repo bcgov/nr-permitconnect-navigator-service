@@ -37,6 +37,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -46,6 +47,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       v-model="value"
       editable
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       :name="name"
       :placeholder="placeholder"
       class="w-full"

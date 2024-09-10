@@ -23,6 +23,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 
 <template>
   <label
+    :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
   >
@@ -31,6 +32,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <InputMask
     v-model="value"
     :aria-describedby="`${name}-help`"
+    :aria-labelledby="`${name}-label`"
     :name="name"
     :mask="mask"
     :placeholder="placeholder"
