@@ -25,7 +25,7 @@ import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
-import { confirmationTemplate } from '@/utils/templates';
+import { confirmationTemplateEnquiry } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -200,7 +200,7 @@ async function onSubmit(data: any) {
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
       // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId);
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
       stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
@@ -262,11 +262,21 @@ onBeforeMount(async () => {
   submissions.value = (await submissionService.getSubmissions()).data;
 });
 
-async function emailConfirmation(activityId: string) {
+async function emailConfirmation(activityId: string, enquiryId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
-  const body = confirmationTemplate({
+
+  // Get the first two sentences of the enquiry description
+  // If there are more than two sentences in enquiryDescription, add '..' to the end
+  const enquiryDescription = formRef.value?.values.basic.enquiryDescription || '';
+  let firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
+  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
+  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
+
+  const body = confirmationTemplateEnquiry({
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
-    '{{ activityId }}': activityId
+    '{{ activityId }}': activityId,
+    '{{ enquiryDescription }}': firstTwoSentences.trim(),
+    '{{ enquiryId }}': enquiryId
   });
   let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
@@ -274,7 +284,7 @@ async function emailConfirmation(activityId: string) {
     to: [applicantEmail],
     cc: configCC,
     subject: 'Confirmation of Submission', // eslint-disable-line quotes
-    bodyType: 'text',
+    bodyType: 'html',
     body: body
   };
   await submissionService.emailConfirmation(emailData);
