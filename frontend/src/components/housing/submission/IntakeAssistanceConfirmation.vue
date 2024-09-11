@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<Props>(), {});
     <div>
       A Housing Navigator will review your submission and contact you. Your form has also been saved as draft, you can
       find it in
-      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">View my drafts and submissions page.</router-link>
+      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">My drafts and previous entries.</router-link>
       Please check your email for the confirmation email and keep the confirmation ID for future reference
     </div>
     <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>

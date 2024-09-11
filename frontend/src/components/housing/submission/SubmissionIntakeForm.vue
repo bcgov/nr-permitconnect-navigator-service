@@ -57,7 +57,7 @@ import {
   ProjectLocation,
   SubmissionType
 } from '@/utils/enums/housing';
-import { confirmationTemplate } from '@/utils/templates';
+import { confirmationTemplateSubmission } from '@/utils/templates';
 import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -224,6 +224,8 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
       assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
     } else {
       toast.error('Failed to submit enquiry');
     }
@@ -335,6 +337,7 @@ async function onSaveDraft(
   if (assistanceRequired && response?.data?.activityId) {
     formUpdated.value = false;
     handleEnquirySubmit(draftData, response.data.activityId);
+    stopAutoSave();
   }
 }
 
@@ -352,7 +355,7 @@ async function onSubmit(data: any) {
       assignedActivityId.value = response.data.activityId;
       formRef.value?.setFieldValue('activityId', response.data.activityId);
       // Send confirmation email
-      emailConfirmation(response.data.activityId);
+      emailConfirmation(response.data.activityId, response.data.submissionId);
       stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
@@ -364,11 +367,12 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailConfirmation(activityId: string) {
+async function emailConfirmation(activityId: string, submissionId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
-  const body = confirmationTemplate({
+  const body = confirmationTemplateSubmission({
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
-    '{{ activityId }}': activityId
+    '{{ activityId }}': activityId,
+    '{{ submissionId }}': submissionId
   });
   let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
@@ -376,7 +380,7 @@ async function emailConfirmation(activityId: string) {
     to: [applicantEmail],
     cc: configCC,
     subject: 'Confirmation of Submission', // eslint-disable-line quotes
-    bodyType: 'text',
+    bodyType: 'html',
     body: body
   };
   await submissionService.emailConfirmation(emailData);
