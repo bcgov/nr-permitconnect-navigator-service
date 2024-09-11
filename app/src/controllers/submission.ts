@@ -156,17 +156,11 @@ const controller = {
         })
       ).then((x) => x.filter((y) => y.length).flat());
 
-    // Get a list of all activity IDs currently in our DB including deleted
-    // This is to prevent duplicate submissions
-    const stored = (
-      await submissionService.searchSubmissions({
-        activityId: exportData.map((x) => x.activityId as string),
-        includeDeleted: true
-      })
-    ).map((x) => x?.activityId);
+    // Get a list of all activity IDs currently in our DB
+    const stored: Array<string> = (await submissionService.getSubmissions()).map((x: Submission) => x.activityId);
 
-    // Create new activities
-    const notStored = exportData.filter((x) => !stored.some((activityId) => activityId === x.activityId));
+    // Filter to entries not in our DB and create
+    const notStored = exportData.filter((x) => !stored.some((activityId: string) => activityId === x.activityId));
     await submissionService.createSubmissionsFromExport(notStored);
 
     // Create each permit
