@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { Dropdown } from '@/lib/primevue';
@@ -8,7 +7,16 @@ import type { IInputEvent } from '@/interfaces';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  options,
+  getOptionLabel = (e: string) => e,
+  bold = true
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -17,21 +25,12 @@ type Props = {
   options: Array<unknown>;
   getOptionLabel: Function;
   bold?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  bold: true
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onInput', 'onChange']);
 
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
@@ -53,8 +52,8 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
-      :options="props.options"
-      :option-label="(option) => props.getOptionLabel(option)"
+      :options="options"
+      :option-label="(option) => getOptionLabel(option)"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: DropdownChangeEvent) => emit('onChange', e)"
     />

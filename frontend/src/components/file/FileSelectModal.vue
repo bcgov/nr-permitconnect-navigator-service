@@ -8,21 +8,17 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-type Props = {
+const { documents, selectedDocuments = [] } = defineProps<{
   documents: Array<Document>;
   selectedDocuments?: Array<Document>;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  selectedDocuments: () => []
-});
+}>();
 
 // Emits
 const emit = defineEmits(['fileSelect:submit']);
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectedFiles: Ref<Array<Document>> = ref(props.selectedDocuments);
+const selectedFiles: Ref<Array<Document>> = ref(selectedDocuments);
 
 // Actions
 function onDocumentClicked(data: { document: Document; selected: boolean }) {
@@ -41,7 +37,7 @@ function onSave() {
 }
 
 watchEffect(() => {
-  selectedFiles.value = props.selectedDocuments;
+  selectedFiles.value = selectedDocuments;
 });
 </script>
 
@@ -58,7 +54,7 @@ watchEffect(() => {
     <div class="col-12">
       <div class="grid">
         <div
-          v-for="(document, index) in props.documents"
+          v-for="(document, index) in documents"
           :key="document.documentId"
           :index="index"
           class="col-12 md:col-6 lg:col-4 xl:col-3"

@@ -1,30 +1,28 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { InputNumber } from '@/lib/primevue';
 
 // Props
-type Props = {
+
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  bold = true
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  bold: true
-});
+}>();
 
 // State
-const { errorMessage, value } = useField<number>(toRef(props, 'name'));
+const { errorMessage, value } = useField<number>(name);
 </script>
 
 <template>

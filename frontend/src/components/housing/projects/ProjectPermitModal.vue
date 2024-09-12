@@ -15,14 +15,10 @@ import type { Ref } from 'vue';
 type CombinedPermit = Permit & PermitType;
 
 // Props
-type Props = {
+const { permit, confirmationId = '' } = defineProps<{
   permit: CombinedPermit | undefined;
   confirmationId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  confirmationId: ''
-});
+}>();
 
 // State
 const enquiryDescription: Ref<string> = ref('');
@@ -40,7 +36,7 @@ const handleCloseDialog = () => {
 
 const handleShowEnquiry = () => {
   if (!enquiryDescription.value) {
-    enquiryDescription.value = `Re: ${props.permit?.name}\nTracking ID: ${props.permit?.trackingId}\n`;
+    enquiryDescription.value = `Re: ${permit?.name}\nTracking ID: ${permit?.trackingId}\n`;
   }
 
   showEnquiryTextarea.value = true;
@@ -63,7 +59,7 @@ const onSubmitEnquiry = () => {
       <span class="p-dialog-title">{{ permit?.businessDomain }}: {{ permit?.name }}</span>
     </template>
     <template #default>
-      <div v-if="!props.confirmationId">
+      <div v-if="!confirmationId">
         <div class="status-card">
           <ProjectStatus :auth-status="permit?.authStatus" />
           <div class="mt-3">

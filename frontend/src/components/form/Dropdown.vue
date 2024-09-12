@@ -7,7 +7,19 @@ import { FloatLabel } from '@/lib/primevue';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  options,
+  optionLabel = undefined,
+  optionValue = undefined,
+  bold = true,
+  loading = undefined,
+  floatLabel = false
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -19,20 +31,7 @@ type Props = {
   bold?: boolean;
   loading?: boolean;
   floatLabel?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  optionLabel: undefined,
-  optionValue: undefined,
-  bold: true,
-  loading: undefined,
-  floatLabel: false
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onChange']);
@@ -40,15 +39,15 @@ const emit = defineEmits(['onChange']);
 
 <template>
   <div class="field">
-    <FloatLabel v-if="props.floatLabel">
+    <FloatLabel v-if="floatLabel">
       <DropdownInternal
-        v-bind="props"
+        v-bind="{ label, name, placeholder, disabled, options, optionLabel, optionValue, bold, loading, floatLabel }"
         @on-change="(e: DropdownChangeEvent) => emit('onChange', e)"
       />
     </FloatLabel>
     <DropdownInternal
       v-else
-      v-bind="props"
+      v-bind="{ label, name, placeholder, disabled, optionLabel, options, optionValue, bold, loading, floatLabel }"
       @on-change="(e: DropdownChangeEvent) => emit('onChange', e)"
     />
 

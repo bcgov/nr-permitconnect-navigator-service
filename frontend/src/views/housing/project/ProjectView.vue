@@ -19,8 +19,7 @@ import type { ComputedRef, Ref } from 'vue';
 import type { Permit, PermitType, User } from '@/types';
 import type { MenuItem } from 'primevue/menuitem';
 
-const router = useRouter();
-
+// Types
 type PermitFilterConfig = {
   permitNeeded?: string;
   permits: Array<Permit>;
@@ -31,11 +30,9 @@ type PermitFilterConfig = {
 type CombinedPermit = Permit & PermitType;
 
 // Props
-type Props = {
+const { submissionId } = defineProps<{
   submissionId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Constants
 const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
@@ -95,6 +92,7 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 });
 
 // Actions
+const router = useRouter();
 const toast = useToast();
 
 function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
@@ -170,7 +168,7 @@ onMounted(async () => {
   let permitTypesValue;
   try {
     [submissionValue, permitTypesValue] = (
-      await Promise.all([submissionService.getSubmission(props.submissionId), permitService.getPermitTypes()])
+      await Promise.all([submissionService.getSubmission(submissionId), permitService.getPermitTypes()])
     ).map((r) => r.data);
   } catch {
     toast.error('Unable to load project, please try again later');

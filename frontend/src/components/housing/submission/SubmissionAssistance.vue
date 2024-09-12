@@ -7,12 +7,10 @@ import { IntakeFormCategory } from '@/utils/enums/housing';
 import type { Ref } from 'vue';
 
 // Props
-type Prop = {
+const { formErrors, formValues } = defineProps<{
   formErrors: Record<string, string | undefined>;
   formValues: { [key: string]: string };
-};
-
-const props = withDefaults(defineProps<Prop>(), {});
+}>();
 
 // State
 const showTab: Ref<boolean> = ref(true);
@@ -91,7 +89,7 @@ const emit = defineEmits(['onSubmitAssistance']);
         <div class="flex justify-content-center">
           <Button
             label="Get assistance"
-            :disabled="!checkApplicantValuesValid(props.formValues, props.formErrors)"
+            :disabled="!checkApplicantValuesValid(formValues, formErrors)"
             @click="() => confirmSubmit()"
           />
         </div>

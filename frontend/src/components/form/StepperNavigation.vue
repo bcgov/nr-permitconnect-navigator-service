@@ -3,21 +3,19 @@ import { nextTick } from 'vue';
 import { Button } from '@/lib/primevue';
 
 // Props
-type Props = {
-  editable: boolean;
+const {
+  nextCallback = () => {},
+  nextDisabled = false,
+  prevCallback = () => {},
+  prevDisabled = false
+} = defineProps<{
   nextCallback?: Function;
   nextDisabled?: boolean;
   prevCallback?: Function;
   prevDisabled?: boolean;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  nextCallback: () => {},
-  nextDisabled: false,
-  prevCallback: () => {},
-  prevDisabled: false
-});
-
+// Actions
 function scrollToTop() {
   const stepperPanel = document.querySelector('.p-stepper');
   if (stepperPanel) {
@@ -26,12 +24,12 @@ function scrollToTop() {
 }
 
 function handleNextClick() {
-  props.nextCallback?.();
+  nextCallback?.();
   nextTick(() => scrollToTop());
 }
 
 function handlePrevClick() {
-  props.prevCallback?.();
+  prevCallback?.();
   nextTick(() => scrollToTop());
 }
 </script>
@@ -40,23 +38,23 @@ function handlePrevClick() {
   <div class="flex pt-4 justify-content-between">
     <Button
       aria-label="Go to previous page"
-      :class="props.prevDisabled ? 'button-hidden' : 'button-visible'"
+      :class="prevDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined
       icon="pi pi-arrow-left"
       icon-class="text-xl"
-      :disabled="props.prevDisabled"
+      :disabled="prevDisabled"
       @click="handlePrevClick"
     />
     <slot name="content" />
     <Button
       aria-label="Go to next page"
-      :class="props.nextDisabled ? 'button-hidden' : 'button-visible'"
+      :class="nextDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined
       icon="pi pi-arrow-right"
       icon-class="text-xl"
-      :disabled="props.nextDisabled"
+      :disabled="nextDisabled"
       @click="handleNextClick"
     />
   </div>

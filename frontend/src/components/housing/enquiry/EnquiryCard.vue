@@ -10,19 +10,17 @@ import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
 
 // Props
-type Props = {
+const { enquiry } = defineProps<{
   enquiry: Enquiry;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // State
 const userName: Ref<string> = ref('');
 
 // Actions
 onMounted(() => {
-  if (props.enquiry.createdBy) {
-    userService.searchUsers({ userId: [props.enquiry.createdBy] }).then((res) => {
+  if (enquiry.createdBy) {
+    userService.searchUsers({ userId: [enquiry.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';
     });
   }
@@ -30,7 +28,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card :id="props.enquiry.enquiryId">
+  <Card :id="enquiry.enquiryId">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex-grow-1">
@@ -39,10 +37,10 @@ onMounted(() => {
             <router-link
               :to="{
                 name: RouteName.HOUSING_ENQUIRY,
-                query: { activityId: props.enquiry.activityId, enquiryId: props.enquiry.enquiryId }
+                query: { activityId: enquiry.activityId, enquiryId: enquiry.enquiryId }
               }"
             >
-              {{ props.enquiry.activityId }}
+              {{ enquiry.activityId }}
             </router-link>
           </h3>
         </div>
@@ -56,7 +54,7 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
-              {{ props.enquiry.submittedAt ? formatDateShort(props.enquiry.submittedAt) : undefined }}
+              {{ enquiry.submittedAt ? formatDateShort(enquiry.submittedAt) : undefined }}
             </p>
           </div>
         </div>
@@ -74,11 +72,11 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Submission type:</span>
-              {{ props.enquiry.enquiryType }}
+              {{ enquiry.enquiryType }}
             </p>
           </div>
         </div>
-        <p class="col-12 mt-0 mb-0 enquiry-content">{{ props.enquiry.enquiryDescription }}</p>
+        <p class="col-12 mt-0 mb-0 enquiry-content">{{ enquiry.enquiryDescription }}</p>
       </div>
     </template>
   </Card>

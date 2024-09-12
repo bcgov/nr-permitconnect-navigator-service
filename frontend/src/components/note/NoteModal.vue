@@ -13,33 +13,29 @@ import type { Ref } from 'vue';
 import type { Note } from '@/types';
 
 // Props
-type Props = {
+const { activityId, note = undefined } = defineProps<{
   activityId: string;
   note?: Note;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  note: undefined
-});
+}>();
 
 // Emits
 const emit = defineEmits(['addNote', 'updateNote', 'deleteNote']);
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const showBringForward: Ref<boolean> = ref(props.note?.noteType === NoteType.BRING_FORWARD);
+const showBringForward: Ref<boolean> = ref(note?.noteType === NoteType.BRING_FORWARD);
 const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: any = {
-  activityId: props.note?.activityId,
-  bringForwardDate: props.note?.bringForwardDate ? new Date(props.note.bringForwardDate) : null,
-  bringForwardState: props.note?.bringForwardState ?? null,
-  createdAt: props.note?.createdAt ? new Date(props.note.createdAt) : new Date(),
-  note: props.note?.note,
-  noteId: props.note?.noteId,
-  noteType: props.note?.noteType ?? NoteType.GENERAL,
-  title: props.note?.title
+  activityId: note?.activityId,
+  bringForwardDate: note?.bringForwardDate ? new Date(note.bringForwardDate) : null,
+  bringForwardState: note?.bringForwardState ?? null,
+  createdAt: note?.createdAt ? new Date(note.createdAt) : new Date(),
+  note: note?.note,
+  noteId: note?.noteId,
+  noteType: note?.noteType ?? NoteType.GENERAL,
+  title: note?.title
 };
 
 // Form validation schema
@@ -74,7 +70,7 @@ const confirm = useConfirm();
 const toast = useToast();
 
 function onDelete() {
-  if (props.note) {
+  if (note) {
     confirm.require({
       message: 'Please confirm that you want to delete the selected note.',
       header: 'Confirm delete',
@@ -83,9 +79,9 @@ function onDelete() {
       rejectLabel: 'Cancel',
       accept: () => {
         noteService
-          .deleteNote(props.note?.noteId as string)
+          .deleteNote(note?.noteId as string)
           .then(() => {
-            emit('deleteNote', props.note as Note);
+            emit('deleteNote', note as Note);
             toast.success('Note deleted');
           })
           .catch((e: any) => toast.error('Failed to delete note', e.message))
@@ -113,13 +109,13 @@ const onNoteTypeChange = (e: { OriginalEvent: Event; value: string }) => {
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
   try {
-    if (!props.note) {
-      const result = (await noteService.createNote({ ...data, activityId: props.activityId })).data;
+    if (!note) {
+      const result = (await noteService.createNote({ ...data, activityId: activityId })).data;
       emit('addNote', result);
       resetForm();
     } else {
-      const result = (await noteService.updateNote({ ...data, activityId: props.activityId })).data;
-      emit('updateNote', props.note, result);
+      const result = (await noteService.updateNote({ ...data, activityId: activityId })).data;
+      emit('updateNote', note, result);
       initialFormValues = data;
     }
     toast.success('Note saved');
@@ -159,7 +155,7 @@ async function onSubmit(data: any, { resetForm }) {
           class="col-6"
           name="createdAt"
           label="Date"
-          :disabled="!props.note"
+          :disabled="!note"
           :show-time="true"
         />
         <div class="col-6" />
@@ -216,14 +212,14 @@ async function onSubmit(data: any, { resetForm }) {
               @click="
                 () => {
                   handleReset();
-                  showBringForward = props.note?.noteType === NoteType.BRING_FORWARD;
+                  showBringForward = note?.noteType === NoteType.BRING_FORWARD;
                   visible = false;
                 }
               "
             />
           </div>
           <div
-            v-if="props.note"
+            v-if="note"
             class="flex justify-content-right"
           >
             <Button

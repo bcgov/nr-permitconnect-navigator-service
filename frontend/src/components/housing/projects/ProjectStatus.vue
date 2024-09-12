@@ -3,13 +3,9 @@ import { PermitAuthorizationStatus, PermitTrackerStatus } from '@/utils/enums/ho
 import { Timeline } from '@/lib/primevue';
 
 // Props
-type Props = {
+const { authStatus = PermitAuthorizationStatus.NONE } = defineProps<{
   authStatus?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  authStatus: PermitAuthorizationStatus.NONE
-});
+}>();
 
 // Constants
 const checkmark = (trackerStatus: string) => ({
@@ -62,7 +58,7 @@ const iconStates = {
 <template>
   <div class="grid m-0 flex flex-column gap-3">
     <Timeline
-      :value="iconStates[props.authStatus as keyof typeof iconStates]"
+      :value="iconStates[authStatus as keyof typeof iconStates]"
       layout="horizontal"
     >
       <template #marker="slotProps">

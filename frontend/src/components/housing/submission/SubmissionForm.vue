@@ -45,21 +45,16 @@ interface SubmissionForm extends Submission {
 }
 
 // Props
-type Props = {
+const { editable = true, submission } = defineProps<{
   editable?: boolean;
   submission: Submission;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  editable: true
-});
+}>();
 
 // Store
 const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-const editable: Ref<boolean> = ref(props.editable);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -196,8 +191,6 @@ function onInvalidSubmit(e: any) {
 
 const onSubmit = async (values: any) => {
   try {
-    editable.value = false;
-
     const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
@@ -215,8 +208,6 @@ const onSubmit = async (values: any) => {
     toast.success('Form saved');
   } catch (e: any) {
     toast.error('Failed to save submission', e.message);
-  } finally {
-    editable.value = true;
   }
 };
 
@@ -231,62 +222,62 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
 }
 
 onMounted(async () => {
-  if (props.submission.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [props.submission.assignedUserId] })).data;
+  if (submission.assignedUserId) {
+    assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
   }
 
   // Default form values
   initialFormValues.value = {
-    activityId: props.submission.activityId,
-    submissionId: props.submission.submissionId,
-    queuePriority: props.submission.queuePriority,
-    submissionType: props.submission.submissionType,
-    submittedAt: new Date(props.submission.submittedAt),
-    relatedEnquiries: props.submission.relatedEnquiries,
-    contactFirstName: props.submission.contactFirstName,
-    contactLastName: props.submission.contactLastName,
-    companyNameRegistered: props.submission.companyNameRegistered,
-    isDevelopedInBC: props.submission.isDevelopedInBC,
-    contactApplicantRelationship: props.submission.contactApplicantRelationship,
-    contactPreference: props.submission.contactPreference,
-    contactPhoneNumber: props.submission.contactPhoneNumber,
-    contactEmail: props.submission.contactEmail,
-    consentToFeedback: props.submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
-    projectName: props.submission.projectName,
-    projectDescription: props.submission.projectDescription,
-    projectLocationDescription: props.submission.projectLocationDescription,
-    singleFamilyUnits: props.submission.singleFamilyUnits,
-    multiFamilyUnits: props.submission.multiFamilyUnits,
-    otherUnitsDescription: props.submission.otherUnitsDescription,
-    otherUnits: props.submission.otherUnits,
-    hasRentalUnits: props.submission.hasRentalUnits,
-    rentalUnits: props.submission.rentalUnits,
-    financiallySupportedBC: props.submission.financiallySupportedBC,
-    financiallySupportedIndigenous: props.submission.financiallySupportedIndigenous,
-    indigenousDescription: props.submission.indigenousDescription,
-    financiallySupportedNonProfit: props.submission.financiallySupportedNonProfit,
-    nonProfitDescription: props.submission.nonProfitDescription,
-    financiallySupportedHousingCoop: props.submission.financiallySupportedHousingCoop,
-    housingCoopDescription: props.submission.housingCoopDescription,
-    locationAddress: updateLocationAddress(props.submission),
-    streetAddress: props.submission.streetAddress,
-    locality: props.submission.locality,
-    province: props.submission.province,
-    locationPIDs: props.submission.locationPIDs,
-    latitude: props.submission.latitude,
-    longitude: props.submission.longitude,
-    geomarkUrl: props.submission.geomarkUrl,
-    naturalDisaster: props.submission.naturalDisaster,
-    addedToATS: props.submission.addedToATS,
-    atsClientNumber: props.submission.atsClientNumber,
-    ltsaCompleted: props.submission.ltsaCompleted,
-    bcOnlineCompleted: props.submission.bcOnlineCompleted,
-    aaiUpdated: props.submission.aaiUpdated,
-    astNotes: props.submission.astNotes,
-    intakeStatus: props.submission.intakeStatus,
+    activityId: submission.activityId,
+    submissionId: submission.submissionId,
+    queuePriority: submission.queuePriority,
+    submissionType: submission.submissionType,
+    submittedAt: new Date(submission.submittedAt),
+    relatedEnquiries: submission.relatedEnquiries,
+    contactFirstName: submission.contactFirstName,
+    contactLastName: submission.contactLastName,
+    companyNameRegistered: submission.companyNameRegistered,
+    isDevelopedInBC: submission.isDevelopedInBC,
+    contactApplicantRelationship: submission.contactApplicantRelationship,
+    contactPreference: submission.contactPreference,
+    contactPhoneNumber: submission.contactPhoneNumber,
+    contactEmail: submission.contactEmail,
+    consentToFeedback: submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
+    projectName: submission.projectName,
+    projectDescription: submission.projectDescription,
+    projectLocationDescription: submission.projectLocationDescription,
+    singleFamilyUnits: submission.singleFamilyUnits,
+    multiFamilyUnits: submission.multiFamilyUnits,
+    otherUnitsDescription: submission.otherUnitsDescription,
+    otherUnits: submission.otherUnits,
+    hasRentalUnits: submission.hasRentalUnits,
+    rentalUnits: submission.rentalUnits,
+    financiallySupportedBC: submission.financiallySupportedBC,
+    financiallySupportedIndigenous: submission.financiallySupportedIndigenous,
+    indigenousDescription: submission.indigenousDescription,
+    financiallySupportedNonProfit: submission.financiallySupportedNonProfit,
+    nonProfitDescription: submission.nonProfitDescription,
+    financiallySupportedHousingCoop: submission.financiallySupportedHousingCoop,
+    housingCoopDescription: submission.housingCoopDescription,
+    locationAddress: updateLocationAddress(submission),
+    streetAddress: submission.streetAddress,
+    locality: submission.locality,
+    province: submission.province,
+    locationPIDs: submission.locationPIDs,
+    latitude: submission.latitude,
+    longitude: submission.longitude,
+    geomarkUrl: submission.geomarkUrl,
+    naturalDisaster: submission.naturalDisaster,
+    addedToATS: submission.addedToATS,
+    atsClientNumber: submission.atsClientNumber,
+    ltsaCompleted: submission.ltsaCompleted,
+    bcOnlineCompleted: submission.bcOnlineCompleted,
+    aaiUpdated: submission.aaiUpdated,
+    astNotes: submission.astNotes,
+    intakeStatus: submission.intakeStatus,
     user: assigneeOptions.value[0] ?? null,
-    applicationStatus: props.submission.applicationStatus,
-    waitingOn: props.submission.waitingOn
+    applicationStatus: submission.applicationStatus,
+    waitingOn: submission.waitingOn
   };
 });
 </script>
@@ -317,14 +308,14 @@ onMounted(async () => {
         class="col-3"
         name="queuePriority"
         label="Priority"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="QUEUE_PRIORITY"
       />
       <Dropdown
         class="col-3"
         name="submissionType"
         label="Submission type"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="SUBMISSION_TYPE_LIST"
       />
       <Calendar
@@ -346,19 +337,19 @@ onMounted(async () => {
         class="col-3"
         name="contactFirstName"
         label="First name"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="contactLastName"
         label="Last name"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="companyNameRegistered"
         label="Company"
-        :disabled="!props.editable"
+        :disabled="!editable"
         @on-change="
           (e) => {
             if (!e.target.value) {
@@ -372,21 +363,21 @@ onMounted(async () => {
         class="col-3"
         name="isDevelopedInBC"
         label="Company registered in B.C?"
-        :disabled="!props.editable || !values.companyNameRegistered"
+        :disabled="!editable || !values.companyNameRegistered"
         :options="YES_NO_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to project"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
@@ -394,19 +385,19 @@ onMounted(async () => {
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="contactEmail"
         label="Contact email"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Dropdown
         class="col-3"
         name="consentToFeedback"
         label="Research opt-in"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_LIST"
       />
 
@@ -416,34 +407,34 @@ onMounted(async () => {
         class="col-3"
         name="projectName"
         label="Project name"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <div class="col-9" />
       <TextArea
         class="col-12"
         name="projectDescription"
         label="Additional information about project"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Dropdown
         class="col-3"
         name="singleFamilyUnits"
         label="Single family units"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="multiFamilyUnits"
         label="Multi-family units"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <InputText
         class="col-3"
         name="otherUnitsDescription"
         label="Other type"
-        :disabled="!props.editable"
+        :disabled="!editable"
         @on-change="
           (e) => {
             if (!e.target.value) {
@@ -457,14 +448,14 @@ onMounted(async () => {
         class="col-3"
         name="otherUnits"
         label="Other type units"
-        :disabled="!props.editable || !values.otherUnitsDescription"
+        :disabled="!editable || !values.otherUnitsDescription"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Dropdown
         class="col-3"
         name="hasRentalUnits"
         label="Rental included?"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -476,7 +467,7 @@ onMounted(async () => {
         class="col-3"
         name="rentalUnits"
         label="Rental units"
-        :disabled="!props.editable || values.hasRentalUnits !== BasicResponse.YES"
+        :disabled="!editable || values.hasRentalUnits !== BasicResponse.YES"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
 
@@ -486,7 +477,7 @@ onMounted(async () => {
         class="col-3"
         name="financiallySupportedBC"
         label="BC Housing"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
       />
       <div class="col-9" />
@@ -494,7 +485,7 @@ onMounted(async () => {
         class="col-3"
         name="financiallySupportedIndigenous"
         label="Indigenous Housing Provider"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -506,14 +497,14 @@ onMounted(async () => {
         class="col-3"
         name="indigenousDescription"
         label="Name of Indigenous Housing Provider"
-        :disabled="!props.editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
+        :disabled="!editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
         class="col-3"
         name="financiallySupportedNonProfit"
         label="Non-profit housing society"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -525,14 +516,14 @@ onMounted(async () => {
         class="col-3"
         name="nonProfitDescription"
         label="Name of Non-profit housing society"
-        :disabled="!props.editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
+        :disabled="!editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
       />
       <div class="col-6" />
       <Dropdown
         class="col-3"
         name="financiallySupportedHousingCoop"
         label="Housing co-operative"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e) => {
@@ -544,7 +535,7 @@ onMounted(async () => {
         class="col-3"
         name="housingCoopDescription"
         label="Name of Housing co-operative"
-        :disabled="!props.editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
+        :disabled="!editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
       />
       <div class="col-6" />
 
@@ -560,61 +551,61 @@ onMounted(async () => {
         class="col-3"
         name="streetAddress"
         label="Street address"
-        :disabled="!props.editable"
+        :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
         class="col-3"
         name="locality"
         label="Locality"
-        :disabled="!props.editable"
+        :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
         class="col-3"
         name="province"
         label="Province"
-        :disabled="!props.editable"
+        :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
         class="col-3"
         name="locationPIDs"
         label="Location PID(s)"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputNumber
         class="col-3"
         name="latitude"
         label="Location latitude"
         help-text="Optionally provide a number between 48 and 60"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputNumber
         class="col-3"
         name="longitude"
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <InputText
         class="col-3"
         name="geomarkUrl"
         label="Geomark URL"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Dropdown
         class="col-3"
         name="naturalDisaster"
         label="Affected by natural disaster?"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="YES_NO_LIST"
       />
       <TextArea
         class="col-12"
         name="projectLocationDescription"
         label="Additional information about location"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <div class="col-6" />
 
@@ -624,7 +615,7 @@ onMounted(async () => {
         class="col-12"
         name="addedToATS"
         label="Authorized Tracking System (ATS) updated"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :bold="true"
       />
 
@@ -636,7 +627,7 @@ onMounted(async () => {
           class="col-3"
           name="atsClientNumber"
           label="ATS Client #"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <div class="col-9" />
       </div>
@@ -644,25 +635,25 @@ onMounted(async () => {
         class="col-12"
         name="ltsaCompleted"
         label="Land Title Survey Authority (LTSA) completed"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Checkbox
         class="col-12"
         name="bcOnlineCompleted"
         label="BC Online completed"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <Checkbox
         class="col-12"
         name="aaiUpdated"
         label="Authorization and Approvals Insight (AAI) updated"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
       <TextArea
         class="col-12"
         name="astNotes"
         label="Automated Status Tool (AST) Notes"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
 
       <SectionHeader title="Submission state" />
@@ -671,14 +662,14 @@ onMounted(async () => {
         class="col-3"
         name="intakeStatus"
         label="Intake state"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
       <EditableDropdown
         class="col-3"
         name="user"
         label="Assigned to"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
@@ -687,28 +678,28 @@ onMounted(async () => {
         class="col-3"
         name="applicationStatus"
         label="Activity state"
-        :disabled="!props.editable"
+        :disabled="!editable"
         :options="APPLICATION_STATUS_LIST"
       />
       <InputText
         class="col-3"
         name="waitingOn"
         label="Waiting on"
-        :disabled="!props.editable"
+        :disabled="!editable"
       />
 
       <div
-        v-if="props.editable"
+        v-if="editable"
         class="field col-12 mt-5"
       >
         <Button
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <CancelButton
-          :editable="props.editable"
+          :editable="editable"
           @clicked="onCancel"
         />
       </div>
