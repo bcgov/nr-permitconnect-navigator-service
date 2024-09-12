@@ -1,7 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import PrimeVue from 'primevue/config';
+import PrimeVue from '@primevue/core/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
@@ -15,11 +15,22 @@ import getRouter from '@/router';
 import { AuthService, ConfigService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
-import 'primevue/resources/themes/saga-blue/theme.css';
-import 'primevue/resources/primevue.min.css';
+// import 'primevue/resources/themes/saga-blue/theme.css';
+// import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import '@/assets/main.scss';
+
+import Aura from '@primevue/themes/aura';
+import { definePreset } from '@primevue/themes';
+
+const MyPreset = definePreset(Aura, {
+  semantic: {
+    content: {
+      background: '{border.radius.md}'
+    }
+  }
+});
 
 /**
  * @function initializeApp
@@ -39,7 +50,16 @@ function initializeApp(): void {
   app.use(pinia);
   app.use(getRouter());
   app.use(i18n);
-  app.use(PrimeVue);
+  app.use(PrimeVue, {
+    theme: {
+      preset: Aura,
+      options: {
+        prefix: 'p',
+        darkModeSelector: '.p-app-dark',
+        cssLayer: false
+      }
+    }
+  });
   app.use(ToastService);
   app.use(ConfirmationService);
   app.component('FontAwesomeIcon', FontAwesomeIcon);

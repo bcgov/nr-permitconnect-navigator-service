@@ -164,8 +164,6 @@ onMounted(() => {
   display: flex;
   width: 100%;
   box-shadow: 0 6px 8px -4px #b3b1b3;
-  -webkit-box-shadow: 0 6px 8px -4px #b3b1b3;
-  -moz-box-shadow: 0 6px 8px -4px #b3b1b3;
 
   .p-menubar {
     border: none;
