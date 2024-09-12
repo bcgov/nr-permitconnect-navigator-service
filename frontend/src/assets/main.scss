@@ -148,6 +148,10 @@ label {
   .p-paginator {
     justify-content: right;
   }
+
+  .p-datatable-frozen-column {
+    background: inherit !important;
+  }
 }
 
 .header-right .p-datatable-column-header-content {
