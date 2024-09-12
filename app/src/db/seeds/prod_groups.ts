@@ -32,7 +32,6 @@ export async function seed(knex: Knex): Promise<void> {
     { sub: '8895e3992ee9455b8eef3ab435dd5486@idir', group_id: developer_group_id[0].group_id },
     { sub: 'e7d30762682b437cb8d60502c956a516@idir', group_id: developer_group_id[0].group_id },
 
-    { sub: '05f0df2af37e4f53afb484e3f1219326@idir', group_id: navigator_group_id[0].group_id },
     { sub: '067f5f2385cd43fda8c3cb55b04e992e@idir', group_id: navigator_group_id[0].group_id },
     { sub: '8bca8dc363494d8383ca5091e6712fdb@idir', group_id: navigator_group_id[0].group_id },
     { sub: '9ab23d31af1440a0920e69aabba45e22@idir', group_id: navigator_group_id[0].group_id },

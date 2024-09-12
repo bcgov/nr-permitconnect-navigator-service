@@ -38,11 +38,11 @@ export async function seed(knex: Knex): Promise<void> {
     { sub: 'ff3ce3f9a6664dfd82a303a189411446@idir', group_id: developer_group_id[0].group_id },
     { sub: '4a07a001034549d79f525715378e617a@idir', group_id: developer_group_id[0].group_id },
 
-    { sub: '05f0df2af37e4f53afb484e3f1219326@idir', group_id: navigator_group_id[0].group_id },
     { sub: '067f5f2385cd43fda8c3cb55b04e992e@idir', group_id: navigator_group_id[0].group_id },
     { sub: '8bca8dc363494d8383ca5091e6712fdb@idir', group_id: navigator_group_id[0].group_id },
     { sub: '9ab23d31af1440a0920e69aabba45e22@idir', group_id: navigator_group_id[0].group_id },
-    { sub: 'b50e45b3a01e4a7983ca7da70eae74e2@idir', group_id: navigator_group_id[0].group_id }
+    { sub: 'b50e45b3a01e4a7983ca7da70eae74e2@idir', group_id: navigator_group_id[0].group_id },
+    { sub: 'f3237101e6034ac1bd247342f6d4eb86@idir', group_id: navigator_group_id[0].group_id }
   ];
 
   const exists = await knex('yars.subject_group').whereIn(
