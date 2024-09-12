@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 
 import { SUPPORT_LOCALES } from '@/i18n';
-import { Dropdown } from '@/lib/primevue';
+import { Select } from '@/lib/primevue';
 
 const { locale } = useI18n();
 </script>
@@ -10,7 +10,7 @@ const { locale } = useI18n();
 <template>
   <div>
     <div>
-      <Dropdown
+      <Select
         v-model="locale"
         class="w-full"
         name="localeChanger"

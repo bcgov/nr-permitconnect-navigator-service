@@ -36,8 +36,8 @@ const { t } = useI18n();
         <Select
           class="w-full"
           :options="GROUP_NAME_LIST"
-          :option-label="(e) => t(`${e.text}`)"
-          :option-value="(e) => e.id"
+          :option-label="(e: any) => t(`${e.text}`)"
+          :option-value="(e: any) => e.id"
           @change="
             (e) => {
               authzStore.setGroupOverride(e.value);
