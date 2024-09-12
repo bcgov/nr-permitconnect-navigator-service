@@ -2,7 +2,7 @@
 export { default as Accordion } from 'primevue/accordion';
 export { default as AccordionTab } from 'primevue/accordiontab';
 export { default as AutoComplete } from 'primevue/autocomplete';
-export { FilterMatchMode } from 'primevue/api';
+export { FilterMatchMode } from '@primevue/core/api';
 export { default as Breadcrumb } from 'primevue/breadcrumb';
 export { default as Button } from 'primevue/button';
 export { default as Calendar } from 'primevue/calendar';
@@ -40,7 +40,7 @@ export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
 export { default as Sidebar } from 'primevue/sidebar';
 export { default as Stepper } from 'primevue/stepper';
-export { default as StepperPanel } from 'primevue/stepperpanel';
+export { default as Steps } from 'primevue/steps';
 
 export { useConfirm } from 'primevue/useconfirm';
 
