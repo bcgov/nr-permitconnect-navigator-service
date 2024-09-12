@@ -9,23 +9,15 @@ import { AccessRequestStatus } from '@/utils/enums/application';
 import type { Ref } from 'vue';
 import type { UserAccessRequest } from '@/types';
 
+// Props
+const { usersAndAccessRequest, revocation = false } = defineProps<{
+  usersAndAccessRequest: Array<UserAccessRequest>;
+  revocation?: boolean;
+}>();
+
 // Constants
 const DEFAULT_SORT_ORDER = 1;
 const DEFAULT_SORT_FIELD = 'fullName';
-const PENDING_STATUSES = {
-  PENDING_APPROVAL: 'Pending Approval',
-  PENDING_REVOCATION: 'Pending Revocation'
-};
-
-// Props
-type Props = {
-  usersAndAccessRequest: Array<UserAccessRequest>;
-  revocation?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  revocation: false
-});
 
 // Emits
 const emit = defineEmits([
@@ -48,7 +40,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
     v-model:selection="selection"
     :row-hover="true"
     class="datatable"
-    :value="props.usersAndAccessRequest"
+    :value="usersAndAccessRequest"
     selection-mode="single"
     :sort-field="DEFAULT_SORT_FIELD"
     :sort-order="DEFAULT_SORT_ORDER"

@@ -6,21 +6,19 @@ import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vu
 import type { ComputedRef, Ref } from 'vue';
 
 // Props
-type Props = {
+const {
+  activityId = undefined,
+  enquiryId = undefined,
+  submissionId = undefined
+} = defineProps<{
   activityId?: string;
   confirmationId?: string;
   enquiryId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  confirmationId: undefined,
-  enquiryId: undefined,
-  submissionId: undefined
-});
+  submissionId?: string;
+}>();
 
 // State
-const key: ComputedRef<string> = computed(() => JSON.stringify(props));
+const key: ComputedRef<string> = computed(() => JSON.stringify({ activityId, enquiryId, submissionId }));
 const loading: Ref<boolean> = ref(true);
 
 // Actions
@@ -34,8 +32,8 @@ onMounted(async () => {
   <EnquiryIntakeForm
     v-if="!loading"
     :key="key"
-    :activity-id="props.activityId"
-    :enquiry-id="props.enquiryId"
-    :submission-id="props.submissionId"
+    :activity-id="activityId"
+    :enquiry-id="enquiryId"
+    :submission-id="submissionId"
   />
 </template>

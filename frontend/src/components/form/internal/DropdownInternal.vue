@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField } from 'vee-validate';
 
 import { Dropdown } from '@/lib/primevue';
@@ -7,8 +6,18 @@ import { Dropdown } from '@/lib/primevue';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 
 // Props
-type Props = {
-  helpText?: string;
+const {
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  options,
+  optionLabel = undefined,
+  optionValue = undefined,
+  bold = true,
+  loading = undefined,
+  floatLabel = false
+} = defineProps<{
   label?: string;
   name: string;
   placeholder?: string;
@@ -19,31 +28,18 @@ type Props = {
   bold?: boolean;
   loading?: boolean;
   floatLabel?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  optionLabel: undefined,
-  optionValue: undefined,
-  bold: true,
-  loading: undefined,
-  floatLabel: false
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onChange']);
 
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <!-- Label needs to be set differently depending if it's floating or not -->
   <label
-    v-if="!props.floatLabel"
+    v-if="!floatLabel"
     :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
@@ -59,14 +55,14 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
-    :options="props.options"
-    :option-label="props.optionLabel"
-    :option-value="props.optionValue"
-    :loading="props.loading"
+    :options="options"
+    :option-label="optionLabel"
+    :option-value="optionValue"
+    :loading="loading"
     @change="(e: DropdownChangeEvent) => emit('onChange', e)"
   />
   <label
-    v-if="props.floatLabel"
+    v-if="floatLabel"
     :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"

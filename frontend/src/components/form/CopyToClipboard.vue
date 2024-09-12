@@ -5,22 +5,17 @@ import { Button, useToast } from '@/lib/primevue';
 import { ButtonMode } from '@/utils/enums/application';
 
 // Props
-type Props = {
+const { mode = ButtonMode.BUTTON, toCopy = undefined } = defineProps<{
   mode?: ButtonMode;
   toCopy?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  mode: ButtonMode.BUTTON,
-  toCopy: undefined
-});
+}>();
 
 // Actions
 const toast = useToast();
 
 const copyToClipboard = () => {
-  if (props.toCopy) {
-    navigator.clipboard.writeText(props.toCopy);
+  if (toCopy) {
+    navigator.clipboard.writeText(toCopy);
     toast.info('Copied to clipboard');
   }
 };

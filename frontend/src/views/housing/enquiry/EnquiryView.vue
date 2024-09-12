@@ -15,16 +15,18 @@ import { useEnquiryStore } from '@/store';
 import { storeToRefs } from 'pinia';
 
 // Props
-type Props = {
+const {
+  activityId,
+  initialTab = '0',
+  enquiryId
+} = defineProps<{
   activityId: string;
   initialTab?: string;
   enquiryId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), { initialTab: '0' });
+}>();
 
 // State
-const activeTab: Ref<number> = ref(Number(props.initialTab));
+const activeTab: Ref<number> = ref(Number(initialTab));
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
@@ -35,9 +37,9 @@ const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // Actions
 onMounted(async () => {
-  if (props.enquiryId && props.activityId) {
+  if (enquiryId && activityId) {
     const [enquiry, notes] = (
-      await Promise.all([enquiryService.getEnquiry(props?.enquiryId), noteService.listNotes(props?.activityId)])
+      await Promise.all([enquiryService.getEnquiry(enquiryId), noteService.listNotes(activityId)])
     ).map((r) => r.data);
     enquiryStore.setEnquiry(enquiry);
     enquiryStore.setNotes(notes);
@@ -153,7 +155,7 @@ function onEnquiryFormSaved() {
       <NoteModal
         v-if="noteModalVisible"
         v-model:visible="noteModalVisible"
-        :activity-id="props.activityId"
+        :activity-id="activityId"
         @add-note="onAddNote"
       />
     </TabPanel>

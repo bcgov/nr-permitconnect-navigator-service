@@ -5,7 +5,15 @@ import InputTextInternal from './internal/InputTextInternal.vue';
 import { FloatLabel } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  floatLabel = false,
+  bold = true
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -13,17 +21,7 @@ type Props = {
   disabled?: boolean;
   bold?: boolean;
   floatLabel?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  floatLabel: false,
-  bold: true
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onChange']);
@@ -31,15 +29,15 @@ const emit = defineEmits(['onChange']);
 
 <template>
   <div class="field">
-    <FloatLabel v-if="props.floatLabel">
+    <FloatLabel v-if="floatLabel">
       <InputTextInternal
-        v-bind="props"
+        v-bind="{ label, name, placeholder, disabled, bold }"
         @on-change="(e) => emit('onChange', e)"
       />
     </FloatLabel>
     <InputTextInternal
       v-else
-      v-bind="props"
+      v-bind="{ label, name, placeholder, disabled, bold }"
       @on-change="(e) => emit('onChange', e)"
     />
 

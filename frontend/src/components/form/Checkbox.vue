@@ -1,29 +1,26 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { Checkbox } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  disabled = false,
+  bold = true,
+  invalid = false
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
   disabled?: boolean;
   bold?: boolean;
   invalid?: boolean;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  disabled: false,
-  bold: true,
-  invalid: false
-});
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>

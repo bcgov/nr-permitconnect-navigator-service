@@ -3,18 +3,17 @@ import { Breadcrumb } from '@/lib/primevue';
 
 import type { MenuItem } from 'primevue/menuitem';
 
-type Props = {
+// Props
+const { home, model } = defineProps<{
   home: MenuItem;
   model: Array<MenuItem>;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 </script>
 
 <template>
   <Breadcrumb
-    :home="props.home"
-    :model="props.model"
+    :home="home"
+    :model="model"
   >
     <template #separator>/</template>
     <template #item="{ item }">

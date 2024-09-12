@@ -1,11 +1,18 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { Textarea } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  bold = true,
+  rows = 5
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -13,19 +20,9 @@ type Props = {
   disabled?: boolean;
   bold?: boolean;
   rows?: number;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  bold: true,
-  rows: 5
-});
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>

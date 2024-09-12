@@ -39,17 +39,9 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 });
 
 // Props
-type Props = {
-  activityId?: string;
+const { enquiryId = undefined } = defineProps<{
   enquiryId?: string;
-  submissionId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  enquiryId: undefined,
-  submissionId: undefined
-});
+}>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -223,11 +215,13 @@ async function onSubmit(data: any) {
     }
   }
 }
-async function loadEnquiry(enquiryId: string) {
+async function loadEnquiry() {
   let formVal;
   try {
-    formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
-    editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+    if (enquiryId) {
+      formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+    }
   } catch (e: any) {
     router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }
@@ -259,7 +253,7 @@ function onRelatedActivityInput(e: IInputEvent) {
 }
 
 onBeforeMount(async () => {
-  if (props.enquiryId) loadEnquiry(props.enquiryId);
+  if (enquiryId) loadEnquiry();
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
   submissions.value = (await submissionService.getSubmissions()).data;
 
