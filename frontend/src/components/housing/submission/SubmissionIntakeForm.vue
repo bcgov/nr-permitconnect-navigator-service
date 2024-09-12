@@ -36,7 +36,7 @@ import {
   Divider,
   Message,
   Stepper,
-  StepperPanel,
+  Steps,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -534,7 +534,7 @@ onBeforeMount(async () => {
         <!--
       Contact Information
       -->
-        <StepperPanel>
+        <Steps>
           <template #header="{ index, clickCallback }">
             <StepperHeader
               :index="index"
@@ -701,12 +701,12 @@ onBeforeMount(async () => {
               </template>
             </StepperNavigation>
           </template>
-        </StepperPanel>
+        </Steps>
 
         <!--
       Housing
       -->
-        <StepperPanel>
+        <Steps>
           <template #header="{ index, clickCallback }">
             <StepperHeader
               :index="index"
@@ -1054,12 +1054,12 @@ onBeforeMount(async () => {
               </template>
             </StepperNavigation>
           </template>
-        </StepperPanel>
+        </Steps>
 
         <!--
       Location
       -->
-        <StepperPanel>
+        <Steps>
           <template #header="{ index, clickCallback }">
             <StepperHeader
               :index="index"
@@ -1355,12 +1355,12 @@ onBeforeMount(async () => {
               </template>
             </StepperNavigation>
           </template>
-        </StepperPanel>
+        </Steps>
 
         <!--
       Permits & Reports
       -->
-        <StepperPanel>
+        <Steps>
           <template #header="{ index, clickCallback }">
             <StepperHeader
               :index="index"
@@ -1640,7 +1640,7 @@ onBeforeMount(async () => {
               </template>
             </StepperNavigation>
           </template>
-        </StepperPanel>
+        </Steps>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
