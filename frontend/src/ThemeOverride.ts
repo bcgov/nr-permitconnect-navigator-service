@@ -13,22 +13,11 @@ import { definePreset } from '@primevue/themes';
 // Otherwise, ask them to use https://primevue.org/theming/styled/#colors in the table
 
 // Bring up slate hue range, replace hard set variables.scss
+
+// Some values override base color values.
+// Base values here: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
 export const ThemeOverride = definePreset(Material, {
   primitive: {
-    // bcblue: {
-    //   50: '#F1F8FE',
-    //   100: '#D8EAFD',
-    //   200: '#A8D0FB',
-    //   300: '#1E5189',
-    //   400: '#3470B1',
-    //   500: '#013366',
-    //   600: '#3470B1',
-    //   700: '#1E5189',
-    //   800: '#A8D0FB',
-    //   900: '#D8EAFD',
-    //   950: '#F1F8FE'
-    // },
-    bcactiveblue: '#2E5DD7',
     bcblue: {
       50: '#F1F8FE',
       100: '#F1F8FE',
@@ -42,20 +31,32 @@ export const ThemeOverride = definePreset(Material, {
       900: '#1E5189',
       950: '#013366'
     },
-    // Override base red theme
-    // For base values see: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
-    red: {
-      50: '#CE3E39',
-      100: '#CE3E39',
-      200: '#CE3E39',
-      300: '#CE3E39',
-      400: '#CE3E39',
-      500: '#CE3E39',
-      600: '#CE3E39',
-      700: '#CE3E39',
-      800: '#CE3E39',
-      900: '#CE3E39',
-      950: '#CE3E39'
+    green: {
+      // Override base green hues, for base values see link at top
+      50: '#ffffff',
+      100: '#d9e6db',
+      200: '#b3cdb7',
+      300: '#8eb392',
+      400: '#689a6e',
+      500: '#42814A',
+      600: '#42814A',
+      700: '#35673b',
+      800: '#284d2c',
+      900: '#1a341e',
+      950: '#0d1a0f'
+    },
+    gold: {
+      50: '#FAF9F8',
+      100: '#FEF8E8',
+      200: '#FEF0D8',
+      300: '#FDE9C4',
+      400: '#FCE2B0',
+      500: '#FBDA9D',
+      600: '#FBD389',
+      700: '#FACC75',
+      800: '#F9C462',
+      900: '#F8BA47',
+      950: '#FCBA19'
     },
     greyscale: {
       50: '#FAF9F8',
@@ -70,17 +71,23 @@ export const ThemeOverride = definePreset(Material, {
       900: '#353433',
       950: '#252423'
     },
-    linktext: '#1a5a96',
-    linktexthover: '#0000ff',
-    hover: '#4696EC',
-    outlineonprimary: '#fff',
-    outoffocus: '#ccc',
-    green: '#2e8540',
-    grey: '#e9ecef',
-    highlightbackground: '#d9e1e8',
-    tablestripebackground: '#f2f2f2'
+    red: {
+      // Override base red hues, for base values see link at top
+      50: '#F4E1E2',
+      100: '#F4E1E2',
+      200: '#F4E1E2',
+      300: '#F4E1E2',
+      400: '#CE3E39',
+      500: '#CE3E39',
+      600: '#CE3E39',
+      700: '#CE3E39',
+      800: '#A2312D',
+      900: '#A2312D',
+      950: '#A2312D'
+    },
+    disabledcolor: '#EDEBE9',
+    white: '#FFFFFF'
   },
-
   semantic: {
     primary: {
       50: '{bcblue.50}',
@@ -95,13 +102,21 @@ export const ThemeOverride = definePreset(Material, {
       900: '{bcblue.900}',
       950: '{bcblue.950}'
     },
-
+    disabledOpacity: '0.6',
+    content: {
+      fontSize: '2rem'
+    },
+    formField: {
+      focusRing: {
+        color: '{primary.400}',
+        width: '2px'
+      }
+    },
+    errorColor: '{red.500}',
     colorScheme: {
       light: {
-        // For demo
-
         surface: {
-          0: '#ffffff',
+          0: '{white}',
           50: '{greyscale.50}',
           100: '{greyscale.100}',
           200: '{greyscale.200}',
@@ -116,17 +131,128 @@ export const ThemeOverride = definePreset(Material, {
         },
         primary: {
           color: '{primary.950}',
-          contrastColor: '#ffffff',
+          contrastColor: '{white}',
           hoverColor: '{primary.900}',
-          activeColor: '{primary.900}'
+          activeColor: '{primary.800}'
+        },
+        content: {
+          hover: {
+            background: '{greyscale.200}'
+          }
+        },
+        formField: {
+          hoverBorderColor: '{primary.700}',
+          focusBorderColor: '{primary.300}',
+          invalidBorderColor: '{red.500}',
+          floatLabelInvalidColor: '{red.500}',
+          disabledBackground: '{disabledcolor}',
+          disabledColor: '{primary.color}',
+          paddingX: '0.5rem',
+          paddingY: '0.5rem'
+        },
+        highlight: {
+          background: '{surface.0}'
+        },
+        navigation: {
+          item: {
+            color: '{greyscale.50}'
+          }
         }
       }
     }
   },
-
-  button: {
-    primary: {
-      background: '{red.500}'
+  components: {
+    accordion: {
+      header: {
+        padding: '1rem'
+      }
+    },
+    button: {
+      root: {
+        sm: {
+          fontSize: '0.875rem',
+          paddingX: '0.875rem',
+          paddingY: '0.5rem'
+        },
+        lg: {
+          fontSize: '1.125rem',
+          paddingX: '1.125rem',
+          paddingY: '0.7rem'
+        }
+      },
+      colorScheme: {
+        light: {
+          root: {
+            danger: {}
+          }
+        }
+      }
+    },
+    menubar: {
+      baseItem: {
+        borderRadius: 'none'
+      },
+      item: {
+        focusBackground: '{primary.activeColor}',
+        focusColor: '{surface.0}',
+        activeBackground: '{primary.activeColor}',
+        activeColor: '{surface.0}',
+        borderRadius: 'none',
+        padding: '0.45rem 0.45rem'
+      },
+      submenu: {
+        padding: 'none'
+      },
+      colorScheme: {
+        light: {
+          root: {
+            background: '{primary.900}',
+            borderColor: '{primary.900}',
+            borderRadius: 'none',
+            padding: 'none'
+          },
+          submenu: {
+            background: '{primary.900}'
+          }
+        }
+      }
+    },
+    radiobutton: {
+      root: {},
+      icon: {
+        size: '10px',
+        checkedColor: '{disabledcolor}',
+        checkedHoverColor: '{disabledcolor}',
+        disabledColor: '{form.field.disabled.color}'
+      },
+      css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick }'
+    },
+    tabs: {
+      tab: {
+        color: '{primary.color}'
+      },
+      tabPanel: {
+        padding: '1.2rem 1.2rem 1.2rem 1.2rem'
+      }
+    },
+    toast: {
+      colorScheme: {
+        light: {
+          success: {
+            background: '{green.100}',
+            borderColor: '{green.500}',
+            color: '{green.500}',
+            detailColor: '{surface.300}',
+            closeButton: {
+              hoverBackground: '{green.200}',
+              focusRing: {
+                color: '{green.600}',
+                shadow: 'none'
+              }
+            }
+          }
+        }
+      }
     }
   }
 });

@@ -40,7 +40,8 @@ import {
   Step,
   StepList,
   Stepper,
-  Steps,
+  StepPanel,
+  StepPanels,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -766,7 +767,7 @@ watchEffect(() => {
               :prev-disabled="true"
               @click="
                 () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                  if (!values.activityId) onSaveDraft(values, true, false);
                 }
               "
             >
@@ -780,8 +781,7 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </Steps>
+          </StepPanel>
 
             <StepperNavigation
               :editable="editable"
@@ -1923,8 +1923,8 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </Steps>
+          </StepPanel>
+        </StepPanels>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
