@@ -16,8 +16,6 @@ import { ThemeOverride } from '@/ThemeOverride';
 import { AuthService, ConfigService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
-// import 'primevue/resources/themes/saga-blue/theme.css';
-// import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import '@/assets/main.scss';
@@ -50,16 +48,18 @@ function initializeApp(): void {
 
   app.use(pinia);
   app.use(getRouter());
+  app.use(i18n);
   app.use(PrimeVue, {
     theme: {
-      preset: Aura,
+      preset: ThemeOverride,
       options: {
         prefix: 'p',
-        darkModeSelector: '.p-app-dark',
+        darkModeSelector: 'dark',
         cssLayer: false
       }
     }
   });
+  // app.use(PrimeVue, { unstyled: true });
   app.use(ToastService);
   app.use(ConfirmationService);
   app.component('FontAwesomeIcon', FontAwesomeIcon);

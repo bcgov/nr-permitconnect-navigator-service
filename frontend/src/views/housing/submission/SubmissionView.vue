@@ -194,12 +194,18 @@ onMounted(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getSubmission">
-          <SubmissionForm :submission="getSubmission" />
+          <SubmissionForm
+            :editable="useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
+            :submission="getSubmission"
+          />
         </span>
       </TabPanel>
       <TabPanel :value="1">
         <div class="mb-3 border-dashed file-upload border-round-md">
-          <FileUpload :activity-id="activityId" />
+          <FileUpload
+            :activity-id="activityId"
+            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+          />
         </div>
         <div class="flex flex-row justify-content-between pb-3">
           <div class="flex align-items-center">
@@ -318,7 +324,12 @@ onMounted(async () => {
             <template #body="{ data }">
               <a
                 href="#"
-                @click="documentService.downloadDocument(data.documentId, data.filename)"
+                @click="
+                  () => {
+                    if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
+                      documentService.downloadDocument(data.documentId, data.filename);
+                  }
+                "
               >
                 {{ data.filename }}
               </a>
@@ -360,7 +371,10 @@ onMounted(async () => {
             </template>
             <template #body="{ data }">
               <div class="flex justify-content-center">
-                <DeleteDocument :document="data" />
+                <DeleteDocument
+                  :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                  :document="data"
+                />
               </div>
             </template>
           </Column>
@@ -374,6 +388,7 @@ onMounted(async () => {
             </div>
             <Button
               aria-label="Add permit"
+              :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
               @click="permitModalVisible = true"
             >
               <font-awesome-icon
@@ -405,6 +420,7 @@ onMounted(async () => {
           </div>
           <Button
             aria-label="Add note"
+            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
             @click="noteModalVisible = true"
           >
             <font-awesome-icon
@@ -438,6 +454,7 @@ onMounted(async () => {
         <Roadmap
           v-if="!loading"
           :activity-id="activityId"
+          :editable="useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
         />
       </TabPanel>
       <TabPanel :value="5">
