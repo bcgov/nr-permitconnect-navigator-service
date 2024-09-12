@@ -59,6 +59,8 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const loadForm: Ref<boolean> = ref(false);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const submissions: Ref<Array<Submission>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
@@ -230,7 +232,7 @@ async function loadEnquiry(enquiryId: string) {
     router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }
 
-  formRef.value?.setValues({
+  initialFormValues.value = {
     activityId: formVal?.activityId,
     enquiryId: formVal?.enquiryId,
     applicant: {
@@ -247,7 +249,7 @@ async function loadEnquiry(enquiryId: string) {
       enquiryDescription: formVal?.enquiryDescription,
       applyForPermitConnect: formVal?.applyForPermitConnect
     }
-  });
+  };
 }
 
 function onRelatedActivityInput(e: IInputEvent) {
@@ -260,6 +262,8 @@ onBeforeMount(async () => {
   if (props.enquiryId) loadEnquiry(props.enquiryId);
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
   submissions.value = (await submissionService.getSubmissions()).data;
+
+  loadForm.value = true;
 });
 
 async function emailConfirmation(activityId: string, enquiryId: string) {
@@ -309,9 +313,11 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     <CollectionDisclaimer />
 
     <Form
+      v-if="loadForm"
       v-slot="{ values }"
       ref="formRef"
       keep-values
+      :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
