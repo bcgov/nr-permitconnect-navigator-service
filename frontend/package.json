@@ -31,7 +31,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.7.1",
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@geoman-io/leaflet-geoman-free": "^2.17.0",
-    "@primevue/themes": "^4.1.0",
+    "@primevue/themes": "^4.0.7",
     "@types/geojson": "^7946.0.14",
     "@types/leaflet": "^1.9.14",
     "@types/proj4": "^2.5.5",

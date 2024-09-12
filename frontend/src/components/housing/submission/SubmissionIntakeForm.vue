@@ -40,8 +40,7 @@ import {
   Step,
   StepList,
   Stepper,
-  StepPanel,
-  StepPanels,
+  Steps,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -781,7 +780,8 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
+          </template>
+        </Steps>
 
             <StepperNavigation
               :editable="editable"
@@ -1923,8 +1923,8 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-        </StepPanels>
+          </template>
+        </Steps>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
