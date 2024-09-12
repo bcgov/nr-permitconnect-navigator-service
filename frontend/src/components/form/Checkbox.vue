@@ -33,11 +33,13 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
         v-model="value"
         binary
         :aria-describedby="`${name}-help`"
+        :aria-labelledby="`${name}-label`"
         :name="name"
         :class="{ 'p-invalid': errorMessage || invalid }"
         :disabled="disabled"
       />
       <label
+        :id="`${name}-label`"
         class="pl-2 mb-0"
         :class="{ 'font-bold': bold }"
         :for="name"

@@ -33,6 +33,7 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -41,6 +42,7 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
     <Calendar
       v-model="value"
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       :name="name"
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"

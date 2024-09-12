@@ -39,6 +39,7 @@ function handlePrevClick() {
 <template>
   <div class="flex pt-4 justify-content-between">
     <Button
+      aria-label="Go to previous page"
       :class="props.prevDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined
@@ -49,6 +50,7 @@ function handlePrevClick() {
     />
     <slot name="content" />
     <Button
+      aria-label="Go to next page"
       :class="props.nextDisabled ? 'button-hidden' : 'button-visible'"
       class="px-4 py-1"
       outlined

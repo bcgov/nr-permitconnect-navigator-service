@@ -27,6 +27,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="props.name"
     >
@@ -35,6 +36,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     <Password
       v-model="value"
       :aria-describedby="`${props.name}-help`"
+      :aria-labelledby="`${name}-label`"
       :name="props.name"
       :type="props.type"
       :placeholder="props.placeholder"

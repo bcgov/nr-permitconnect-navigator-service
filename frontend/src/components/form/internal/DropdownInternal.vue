@@ -44,6 +44,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <!-- Label needs to be set differently depending if it's floating or not -->
   <label
     v-if="!props.floatLabel"
+    :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
   >
@@ -52,6 +53,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <Dropdown
     v-model="value"
     :aria-describedby="`${name}-help`"
+    :aria-labelledby="`${name}-label`"
     :name="name"
     :placeholder="placeholder"
     class="w-full"
@@ -65,6 +67,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   />
   <label
     v-if="props.floatLabel"
+    :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
   >

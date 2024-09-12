@@ -111,22 +111,35 @@ onMounted(() => {
             custom
           >
             <a
+              :aria-labelledby="item.label as string"
               :href="href"
               v-bind="props.action"
               @click="navigate"
             >
-              <span class="flex">{{ item.label }}</span>
+              <span
+                :id="item.label as string"
+                class="flex"
+              >
+                {{ item.label }}
+              </span>
             </a>
           </router-link>
           <a
             v-else-if="item.mailTo"
+            :aria-labelledby="item.label as string"
             :href="item.mailTo"
             class="mail-link"
           >
-            <span class="flex">{{ item.label }}</span>
+            <span
+              :id="item.label as string"
+              class="flex"
+            >
+              {{ item.label }}
+            </span>
           </a>
           <a
             v-else
+            :aria-labelledby="item.label as string"
             :href="item.url"
             :target="item.target"
             v-bind="props.action"
@@ -134,6 +147,7 @@ onMounted(() => {
             <span class="flex">{{ item.label }}</span>
             <span
               v-if="hasSubmenu"
+              :id="item.label as string"
               class="pi pi-angle-down mt-1 ml-1"
             />
           </a>
@@ -156,6 +170,14 @@ onMounted(() => {
   .p-menubar {
     border: none;
     padding: 0;
+
+    :deep(.p-menuitem) {
+      &.p-focus {
+        > .p-menuitem-content {
+          background-color: #5a7da9;
+        }
+      }
+    }
 
     :deep(.p-menuitem-content) {
       background-color: #38598a;

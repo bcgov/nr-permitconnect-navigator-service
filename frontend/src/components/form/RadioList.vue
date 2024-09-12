@@ -46,6 +46,8 @@ watch(value, () => {
         <div>
           <RadioButton
             v-model="value"
+            :aria-describedby="`${name}-help`"
+            :aria-labelledby="`${name}-option-${option}`"
             :input-id="option"
             :name="name"
             :value="option"
@@ -54,6 +56,7 @@ watch(value, () => {
             @click="emit('onClick', value)"
           />
           <span
+            :id="`${name}-option-${option}`"
             :for="option"
             class="ml-2 mb-0"
           >
