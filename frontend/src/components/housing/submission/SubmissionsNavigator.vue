@@ -330,14 +330,14 @@ watch(showCompleted, () => {
         </Accordion>
         <SubmissionListNavigator
           :loading="loading"
-          :submissions="submissions"
+          :submissions="getSubmissions"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>
       <TabPanel value="1">
         <EnquiryListNavigator
           :loading="loading"
-          :enquiries="enquiries"
+          :enquiries="getEnquiries"
           @enquiry:delete="onEnquiryDelete"
         />
       </TabPanel>

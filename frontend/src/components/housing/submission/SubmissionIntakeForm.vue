@@ -1692,10 +1692,6 @@ watchEffect(() => {
   box-shadow: none;
 }
 
-.test {
-  background-color: green !important;
-}
-
 :deep(.p-step) {
   button {
     padding: 0;
