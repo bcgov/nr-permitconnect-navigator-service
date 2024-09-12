@@ -44,10 +44,7 @@ export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
 export { default as Drawer } from 'primevue/drawer';
 export { default as Stepper } from 'primevue/stepper';
-export { default as StepList } from 'primevue/steplist';
-export { default as StepPanel } from 'primevue/steppanel';
-export { default as StepPanels } from 'primevue/steppanels';
-export { default as Step } from 'primevue/step';
+export { default as Steps } from 'primevue/steps';
 
 export { useConfirm } from 'primevue/useconfirm';
 

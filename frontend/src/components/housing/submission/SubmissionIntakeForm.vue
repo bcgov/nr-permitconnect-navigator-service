@@ -40,8 +40,7 @@ import {
   Step,
   StepList,
   Stepper,
-  StepPanel,
-  StepPanels,
+  Steps,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -547,9 +546,15 @@ watchEffect(() => {
         name="activityId"
       />
 
-      <Stepper :value="activeStep">
-        <StepList>
-          <Step :value="0">
+      <Stepper
+        v-model:activeStep="activeStep"
+        @update:active-step="onStepChange"
+      >
+        <!--
+      Contact Information
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
             <StepperHeader
               :index="0"
               :active-step="activeStep"
@@ -767,9 +772,26 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
+          </template>
+        </Steps>
 
-          <StepPanel :value="1">
+        <!--
+      Housing
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Housing"
+              icon="fa-house"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
+              }"
+            />
+          </template>
+          <template #content="{ prevCallback, nextCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1102,8 +1124,26 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-          <StepPanel :value="2">
+          </template>
+        </Steps>
+
+        <!--
+      Location
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Location"
+              icon="fa-location-dot"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
+              }"
+            />
+          </template>
+          <template #content="{ prevCallback, nextCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1384,8 +1424,28 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-          <StepPanel :value="3">
+          </template>
+        </Steps>
+
+        <!--
+      Permits & Reports
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Permits & Reports"
+              icon="fa-file"
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              }"
+            />
+          </template>
+          <template #content="{ prevCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1650,8 +1710,8 @@ watchEffect(() => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-        </StepPanels>
+          </template>
+        </Steps>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
