@@ -13,7 +13,7 @@ const authzStore = useAuthZStore();
 
 // Actions
 const getTitle = computed(() =>
-  authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS) ? 'Submissions' : 'My drafts and submissions'
+  authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS) ? 'Submissions' : 'My drafts and previous entries'
 );
 </script>
 
@@ -32,4 +32,3 @@ const getTitle = computed(() =>
   <!-- Proponent view -->
   <SubmissionsProponent v-else-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
 </template>
-@/store/authnStore

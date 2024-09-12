@@ -40,7 +40,7 @@ const items = ref([
         height="64"
         alt="Housing image"
       />
-      <h1 class="app-primary-color">Housing</h1>
+      <h1>Housing</h1>
     </div>
     <div class="flex flex-column align-items-center justify-content-start mt-8">
       <div
