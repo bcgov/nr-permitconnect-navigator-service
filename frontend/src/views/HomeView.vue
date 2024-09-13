@@ -65,3 +65,10 @@ const toHousing = (): void => {
   }
 }
 </style>
+
+<style scoped lang="scss">
+h1,
+h2 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+</style>

@@ -28,6 +28,10 @@ import { LoginButton } from '@/components/layout';
 </template>
 
 <style lang="scss" scoped>
+h2 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 #header-branding {
   background-color: #003366;
   color: white;
