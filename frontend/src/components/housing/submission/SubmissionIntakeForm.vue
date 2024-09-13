@@ -789,7 +789,6 @@ onBeforeMount(async () => {
                   <AdvancedFileUpload
                     :activity-id="values.activityId"
                     :disabled="!editable"
-                    :reject="SPATIAL_FILE_FORMATS"
                   />
                 </div>
               </template>
