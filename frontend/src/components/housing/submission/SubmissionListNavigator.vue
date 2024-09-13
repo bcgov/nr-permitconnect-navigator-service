@@ -249,7 +249,9 @@ function isFinanciallySupported(data: Submission) {
       header="Assigned to"
       :sortable="true"
       style="min-width: 200px"
-    />
+    >
+      <template #body="{ data }">{{ data?.user?.fullName }}</template>
+    </Column>
     <Column
       field="hasRelatedEnquiry"
       header="Related enquiry"

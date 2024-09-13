@@ -9,7 +9,7 @@ const schema = {
       userId: Joi.array().items(uuidv4),
       identityId: Joi.array().items(uuidv4),
       idp: Joi.array().items(Joi.string().max(255)),
-      username: Joi.string().max(255),
+      sub: Joi.string().max(255),
       email: Joi.string().max(255),
       firstName: Joi.string().max(255),
       fullName: Joi.string().max(255),

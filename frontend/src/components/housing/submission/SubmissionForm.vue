@@ -155,7 +155,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
 
   if (input.length >= 3) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input, sub: input })).data;
+    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input })).data;
   } else if (input.match(Regex.EMAIL)) {
     assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
   } else {
