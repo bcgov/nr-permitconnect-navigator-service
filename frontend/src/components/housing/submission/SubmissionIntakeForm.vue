@@ -111,14 +111,19 @@ const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
+const loadForm: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
-const validationErrors: Ref<string[]> = ref([]);
-const formModified: Ref<boolean> = ref(false);
+const validationErrors = computed(() => {
+  // Parse errors from vee-validate into a string[] of category headings
+  if (!formRef?.value?.errors) return [];
+  else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
+});
 
 const { formUpdated, stopAutoSave } = useAutoSave(() => {
   const values = formRef.value?.values;
@@ -247,9 +252,7 @@ const onLatLongInputClick = async () => {
   }
 };
 
-async function onInvalidSubmit(e: any) {
-  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
-
+async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
     case IntakeFormCategory.APPLICANT:
     case IntakeFormCategory.BASIC:
@@ -272,8 +275,6 @@ async function onInvalidSubmit(e: any) {
 
   await nextTick();
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
-
-  formModified.value = false;
 }
 
 function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
@@ -395,85 +396,92 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-async function loadSubmission(submissionId: string, activityId: string) {
-  let response,
-    permits: Array<Permit> = [],
-    documents: Array<Document> = [];
-  try {
-    response = (await submissionService.getSubmission(submissionId)).data;
-    permits = (await permitService.listPermits(activityId)).data;
-    documents = (await documentService.listDocuments(activityId)).data;
-    submissionStore.setDocuments(documents);
-    editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-
-    formRef.value?.setValues({
-      activityId: response?.activityId,
-      submissionId: response?.submissionId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
-      basic: {
-        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-        isDevelopedInBC: response?.isDevelopedInBC,
-        registeredName: response?.companyNameRegistered
-      },
-      housing: {
-        projectName: response?.projectName,
-        projectDescription: response?.projectDescription,
-        singleFamilySelected: !!response?.singleFamilyUnits,
-        multiFamilySelected: !!response?.multiFamilyUnits,
-        singleFamilyUnits: response?.singleFamilyUnits,
-        multiFamilyUnits: response?.multiFamilyUnits,
-        otherSelected: !!response?.otherUnits,
-        otherUnitsDescription: response?.otherUnitsDescription,
-        otherUnits: response?.otherUnits,
-        hasRentalUnits: response?.hasRentalUnits,
-        rentalUnits: response?.rentalUnits,
-        financiallySupportedBC: response?.financiallySupportedBC,
-        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-        indigenousDescription: response?.indigenousDescription,
-        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-        nonProfitDescription: response?.nonProfitDescription,
-        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-        housingCoopDescription: response?.housingCoopDescription
-      },
-      location: {
-        naturalDisaster: response?.naturalDisaster,
-        projectLocation: response?.projectLocation,
-        streetAddress: response?.streetAddress,
-        locality: response?.locality,
-        province: response?.province,
-        latitude: response?.latitude,
-        longitude: response?.longitude,
-        ltsaPIDLookup: response?.locationPIDs,
-        geomarkUrl: response?.geomarkUrl,
-        projectLocationDescription: response?.projectLocationDescription
-      },
-      appliedPermits: permits
-        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-        .map((x: Permit) => ({
-          ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-        })),
-      permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
-      },
-      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-    });
-    // Move map pin
-    onLatLongInputClick();
-  } catch {
-    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
-  }
-}
-
 onBeforeMount(async () => {
-  if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
+  if (props.submissionId && props.activityId) {
+    let response,
+      permits: Array<Permit> = [],
+      documents: Array<Document> = [],
+      submissionId = props.submissionId,
+      activityId = props.activityId;
+
+    try {
+      response = (await submissionService.getSubmission(submissionId)).data;
+      permits = (await permitService.listPermits(activityId)).data;
+      documents = (await documentService.listDocuments(activityId)).data;
+      submissionStore.setDocuments(documents);
+      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+
+      initialFormValues.value = {
+        activityId: response?.activityId,
+        submissionId: response?.submissionId,
+        applicant: {
+          contactFirstName: response?.contactFirstName,
+          contactLastName: response?.contactLastName,
+          contactPhoneNumber: response?.contactPhoneNumber,
+          contactEmail: response?.contactEmail,
+          contactApplicantRelationship: response?.contactApplicantRelationship,
+          contactPreference: response?.contactPreference
+        },
+        basic: {
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: response?.isDevelopedInBC,
+          registeredName: response?.companyNameRegistered
+        },
+        housing: {
+          projectName: response?.projectName,
+          projectDescription: response?.projectDescription,
+          singleFamilySelected: !!response?.singleFamilyUnits,
+          multiFamilySelected: !!response?.multiFamilyUnits,
+          singleFamilyUnits: response?.singleFamilyUnits,
+          multiFamilyUnits: response?.multiFamilyUnits,
+          otherSelected: !!response?.otherUnits,
+          otherUnitsDescription: response?.otherUnitsDescription,
+          otherUnits: response?.otherUnits,
+          hasRentalUnits: response?.hasRentalUnits,
+          rentalUnits: response?.rentalUnits,
+          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+          indigenousDescription: response?.indigenousDescription,
+          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+          nonProfitDescription: response?.nonProfitDescription,
+          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+          housingCoopDescription: response?.housingCoopDescription
+        },
+        location: {
+          naturalDisaster: response?.naturalDisaster,
+          projectLocation: response?.projectLocation,
+          streetAddress: response?.streetAddress,
+          locality: response?.locality,
+          province: response?.province,
+          latitude: response?.latitude,
+          longitude: response?.longitude,
+          ltsaPIDLookup: response?.locationPIDs,
+          geomarkUrl: response?.geomarkUrl,
+          projectLocationDescription: response?.projectLocationDescription
+        },
+        appliedPermits: permits
+          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .map((x: Permit) => ({
+            ...x,
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          })),
+        permits: {
+          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+        },
+        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+      };
+
+      await nextTick();
+      // Move map pin
+      onLatLongInputClick();
+      loadForm.value = true;
+    } catch {
+      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+    }
+  } else {
+    initialFormValues.value = {};
+    loadForm.value = true;
+  }
   // clearing the document store on page load
   submissionStore.setDocuments([]);
 });
@@ -493,18 +501,15 @@ onBeforeMount(async () => {
     </div>
 
     <Form
+      v-if="loadForm"
       id="form"
       v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
+      :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
-      @invalid-submit="(e) => onInvalidSubmit(e)"
+      @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
-      @change="
-        () => {
-          formUpdated = true;
-          formModified = true;
-        }
-      "
+      @change="() => (formUpdated = true)"
     >
       <SubmissionAssistance
         v-if="editable && values?.applicant"
@@ -540,9 +545,8 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(IntakeFormCategory.APPLICANT) ||
-                    validationErrors.includes(IntakeFormCategory.BASIC)) &&
-                  !formModified
+                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.BASIC)
               }"
             />
           </template>
@@ -550,7 +554,7 @@ onBeforeMount(async () => {
             <CollectionDisclaimer />
 
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -717,7 +721,7 @@ onBeforeMount(async () => {
               title="Housing"
               icon="fa-house"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formModified
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
               }"
               @click="
                 () => {
@@ -728,7 +732,7 @@ onBeforeMount(async () => {
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1076,7 +1080,7 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formModified
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
               }"
               @click="
                 () => {
@@ -1087,7 +1091,7 @@ onBeforeMount(async () => {
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1383,15 +1387,14 @@ onBeforeMount(async () => {
               icon="fa-file"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                    validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)) &&
-                  !formModified
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
               }"
             />
           </template>
           <template #content="{ prevCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"

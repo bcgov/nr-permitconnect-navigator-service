@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { submissionService } from '@/services';
-import { mount, RouterLinkStub } from '@vue/test-utils';
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
 import type { AxiosResponse } from 'axios';
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
@@ -111,11 +111,14 @@ describe('EnquiryIntakeForm', () => {
   describe('component', async () => {
     it('renders component', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
+
       expect(wrapper.isVisible()).toBeTruthy();
     });
 
     it('renders initial form fields', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const firstNameInput = wrapper.get('[name="applicant.contactFirstName"]');
       const lastNameInput = wrapper.get('[name="applicant.contactLastName"]');
@@ -140,6 +143,8 @@ describe('EnquiryIntakeForm', () => {
 
     it('renders the right input fields when isRelated is set to Yes', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
+
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[0].setValue('Yes');
       await nextTick();
@@ -153,6 +158,8 @@ describe('EnquiryIntakeForm', () => {
 
     it('renders the right input fields when isRelated is set to No', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
+
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -166,6 +173,8 @@ describe('EnquiryIntakeForm', () => {
 
     it('disables submit when isRelated to existing application is No and applying to PCNS is Yes', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
+
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -180,6 +189,8 @@ describe('EnquiryIntakeForm', () => {
 
     test('submit is enabled when isRelated to existing application is No applying to PCNS is No', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
+
       const relatedRadio = wrapper.findAll('[name="basic.isRelated"]');
       relatedRadio[1].setValue('No');
       await nextTick();
@@ -194,6 +205,7 @@ describe('EnquiryIntakeForm', () => {
 
     test('submit is enabled when Yes, No, or not selected for isRelated', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const submitBtn = wrapper.get('[type="submit"]');
       await nextTick();
@@ -213,6 +225,7 @@ describe('EnquiryIntakeForm', () => {
   describe('validation', async () => {
     it('accepts valid values (isRelated: Yes)', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
       formRef.setValues(basicValidFormValues());
@@ -223,6 +236,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -240,6 +254,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('accepts valid values (isRelated: No, applyForPermitConnect: No)', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -257,6 +272,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('generates email error', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -274,6 +290,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('generates missing first and last name missing error', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -294,6 +311,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('generates errors for isRelated', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
@@ -312,6 +330,7 @@ describe('EnquiryIntakeForm', () => {
 
     it('generates errors for applyForPermitConnect', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      await flushPromises();
 
       const formRef = (wrapper.vm as any)?.formRef;
 
