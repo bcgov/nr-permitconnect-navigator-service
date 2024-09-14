@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { mixed, object, string } from 'yup';
 
-import { DatePicker, Dropdown, InputText, TextArea } from '@/components/form';
+import { DatePicker, Select, InputText, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
@@ -11,6 +11,7 @@ import { BringForwardType, NoteType } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Props
 const { activityId, note = undefined } = defineProps<{
@@ -94,7 +95,7 @@ function onDelete() {
   }
 }
 
-const onNoteTypeChange = (e: { OriginalEvent: Event; value: string }) => {
+const onNoteTypeChange = (e: SelectChangeEvent) => {
   if (e.value === NoteType.BRING_FORWARD) {
     formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
     showBringForward.value = true;
@@ -159,12 +160,16 @@ async function onSubmit(data: any, { resetForm }) {
           :show-time="true"
         />
         <div class="col-6" />
-        <Dropdown
+        <Select
           class="col-6"
           name="noteType"
           label="Note type"
           :options="NOTE_TYPE_LIST"
-          @on-change="(e) => onNoteTypeChange(e)"
+          @on-change="
+            (e: SelectChangeEvent) => {
+              onNoteTypeChange(e);
+            }
+          "
         />
         <DatePicker
           v-if="showBringForward"
@@ -181,7 +186,7 @@ async function onSubmit(data: any, { resetForm }) {
           name="title"
           label="Title"
         />
-        <Dropdown
+        <Select
           v-if="showBringForward"
           class="col-6"
           name="bringForwardState"

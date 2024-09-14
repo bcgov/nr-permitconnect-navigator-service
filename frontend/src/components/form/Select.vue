@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ErrorMessage } from 'vee-validate';
 
-import DropdownInternal from './internal/DropdownInternal.vue';
+import SelectInternal from './internal/SelectInternal.vue';
 import { FloatLabel } from '@/lib/primevue';
 
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Props
 const {
@@ -40,15 +40,15 @@ const emit = defineEmits(['onChange']);
 <template>
   <div class="field">
     <FloatLabel v-if="floatLabel">
-      <DropdownInternal
+      <SelectInternal
         v-bind="{ label, name, placeholder, disabled, options, optionLabel, optionValue, bold, loading, floatLabel }"
-        @on-change="(e: DropdownChangeEvent) => emit('onChange', e)"
+        @on-change="(e: SelectChangeEvent) => emit('onChange', e)"
       />
     </FloatLabel>
-    <DropdownInternal
+    <SelectInternal
       v-else
       v-bind="{ label, name, placeholder, disabled, optionLabel, options, optionValue, bold, loading, floatLabel }"
-      @on-change="(e: DropdownChangeEvent) => emit('onChange', e)"
+      @on-change="(e: SelectChangeEvent) => emit('onChange', e)"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>

@@ -7,8 +7,8 @@ import {
   DatePicker,
   CancelButton,
   Checkbox,
-  Dropdown,
-  EditableDropdown,
+  Select,
+  EditableSelect,
   FormNavigationGuard,
   InputMask,
   InputNumber,
@@ -40,6 +40,7 @@ import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
 interface SubmissionForm extends Submission {
@@ -363,14 +364,14 @@ onMounted(async () => {
     <FormNavigationGuard v-if="!isCompleted" />
 
     <div class="formgrid grid">
-      <Dropdown
+      <Select
         class="col-3"
         name="queuePriority"
         label="Priority"
         :disabled="!editable"
         :options="QUEUE_PRIORITY"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="submissionType"
         label="Submission type"
@@ -418,21 +419,21 @@ onMounted(async () => {
           }
         "
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="isDevelopedInBC"
         label="Company registered in B.C?"
         :disabled="!editable || !values.companyNameRegistered"
         :options="YES_NO_LIST"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
@@ -452,7 +453,7 @@ onMounted(async () => {
         label="Contact email"
         :disabled="!editable"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="consentToFeedback"
         label="Research opt-in"
@@ -475,14 +476,14 @@ onMounted(async () => {
         label="Additional information about project"
         :disabled="!editable"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="singleFamilyUnits"
         label="Single family units"
         :disabled="!editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="multiFamilyUnits"
         label="Multi-family units"
@@ -503,26 +504,27 @@ onMounted(async () => {
           }
         "
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="otherUnits"
         label="Other type units"
         :disabled="!editable || !values.otherUnitsDescription"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="hasRentalUnits"
         label="Rental included?"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
-          (e) => {
+          (e: SelectChangeEvent) => {
+            console.log('subForm', e);
             if (e.value !== BasicResponse.YES) setFieldValue('rentalUnits', null);
           }
         "
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="rentalUnits"
         label="Rental units"
@@ -532,7 +534,7 @@ onMounted(async () => {
 
       <SectionHeader title="Financially supported" />
 
-      <Dropdown
+      <Select
         class="col-3"
         name="financiallySupportedBC"
         label="BC Housing"
@@ -540,14 +542,14 @@ onMounted(async () => {
         :options="YES_NO_UNSURE_LIST"
       />
       <div class="col-9" />
-      <Dropdown
+      <Select
         class="col-3"
         name="financiallySupportedIndigenous"
         label="Indigenous Housing Provider"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
-          (e) => {
+          (e: SelectChangeEvent) => {
             if (e.value !== BasicResponse.YES) setFieldValue('indigenousDescription', null);
           }
         "
@@ -559,14 +561,14 @@ onMounted(async () => {
         :disabled="!editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
       />
       <div class="col-6" />
-      <Dropdown
+      <Select
         class="col-3"
         name="financiallySupportedNonProfit"
         label="Non-profit housing society"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
-          (e) => {
+          (e: SelectChangeEvent) => {
             if (e.value !== BasicResponse.YES) setFieldValue('nonProfitDescription', null);
           }
         "
@@ -578,14 +580,14 @@ onMounted(async () => {
         :disabled="!editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
       />
       <div class="col-6" />
-      <Dropdown
+      <Select
         class="col-3"
         name="financiallySupportedHousingCoop"
         label="Housing co-operative"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
-          (e) => {
+          (e: SelectChangeEvent) => {
             if (e.value !== BasicResponse.YES) setFieldValue('housingCoopDescription', null);
           }
         "
@@ -653,7 +655,7 @@ onMounted(async () => {
         label="Geomark URL"
         :disabled="!editable"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="naturalDisaster"
         label="Affected by natural disaster?"
@@ -745,14 +747,14 @@ onMounted(async () => {
 
       <SectionHeader title="Submission state" />
 
-      <Dropdown
+      <Select
         class="col-3"
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
-      <EditableDropdown
+      <EditableSelect
         class="col-3"
         name="user"
         label="Assigned to"
@@ -761,7 +763,7 @@ onMounted(async () => {
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="applicationStatus"
         label="Project state"
