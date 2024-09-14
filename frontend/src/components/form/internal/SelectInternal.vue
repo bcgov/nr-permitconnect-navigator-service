@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useField } from 'vee-validate';
 
-import { Dropdown } from '@/lib/primevue';
+import { Select } from '@/lib/primevue';
 
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Props
 const {
@@ -46,7 +46,7 @@ const { errorMessage, value } = useField<string>(name);
   >
     {{ label }}
   </label>
-  <Dropdown
+  <Select
     v-model="value"
     :aria-describedby="`${name}-help`"
     :aria-labelledby="`${name}-label`"
@@ -59,7 +59,7 @@ const { errorMessage, value } = useField<string>(name);
     :option-label="optionLabel"
     :option-value="optionValue"
     :loading="loading"
-    @change="(e: DropdownChangeEvent) => emit('onChange', e)"
+    @change="(e: SelectChangeEvent) => emit('onChange', e)"
   />
   <label
     v-if="floatLabel"

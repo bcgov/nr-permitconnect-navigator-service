@@ -6,8 +6,8 @@ import { date, mixed, object, string } from 'yup';
 import {
   DatePicker,
   CancelButton,
-  Dropdown,
-  EditableDropdown,
+  Select,
+  EditableSelect,
   FormNavigationGuard,
   InputMask,
   InputText,
@@ -203,7 +203,7 @@ onMounted(async () => {
     <FormNavigationGuard />
 
     <div class="formgrid grid">
-      <Dropdown
+      <Select
         class="col-3"
         name="enquiryType"
         label="Submission type"
@@ -216,7 +216,7 @@ onMounted(async () => {
         label="Submission date"
         :disabled="!editable"
       />
-      <EditableDropdown
+      <EditableSelect
         class="col-3"
         name="relatedActivityId"
         label="Related submission"
@@ -241,14 +241,14 @@ onMounted(async () => {
         label="Last name"
         :disabled="!editable"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="contactApplicantRelationship"
         label="Relationship to activity"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="contactPreference"
         label="Preferred contact method"
@@ -280,14 +280,14 @@ onMounted(async () => {
 
       <SectionHeader title="Submission state" />
 
-      <Dropdown
+      <Select
         class="col-3"
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
-      <EditableDropdown
+      <EditableSelect
         class="col-3"
         name="user"
         label="Assigned to"
@@ -296,7 +296,7 @@ onMounted(async () => {
         :get-option-label="getAssigneeOptionLabel"
         @on-input="onAssigneeInput"
       />
-      <Dropdown
+      <Select
         class="col-3"
         name="enquiryStatus"
         label="Activity state"

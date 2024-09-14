@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import { Button, Dropdown } from '@/lib/primevue';
+import { Button, Select } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
@@ -38,7 +38,7 @@ onMounted(() => {
   >
     <p class="m-0 mr-2">Viewing site as:</p>
     <div class="w-2 mr-2">
-      <Dropdown
+      <Select
         v-model="group"
         class="w-full"
         :options="GROUP_NAME_LIST"

@@ -4,14 +4,14 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { date, object, string } from 'yup';
 
-import { DatePicker, Dropdown, InputText } from '@/components/form';
+import { DatePicker, Select, InputText } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
 import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { Schema } from 'yup';
 import type { Permit, PermitForm, PermitType } from '@/types';
@@ -121,7 +121,7 @@ function onDelete() {
   }
 }
 
-function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
+function onPermitTypeChanged(e: SelectChangeEvent, setValues: Function) {
   permitType.value = e.value;
   setValues({
     agency: e.value.agency,
@@ -196,7 +196,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
       @submit="onSubmit"
     >
       <div class="formgrid grid">
-        <Dropdown
+        <Select
           class="col-12"
           name="permitType"
           label="Permit"
@@ -204,7 +204,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           :option-label="(e) => `${e.businessDomain}: ${e.name}`"
           :loading="getPermitTypes === undefined"
           autofocus
-          @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
+          @on-change="(e: SelectChangeEvent) => onPermitTypeChanged(e, setValues)"
         />
         <InputText
           class="col-12 lg:col-6"
@@ -224,7 +224,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Source system"
           :disabled="true"
         />
-        <Dropdown
+        <Select
           class="col-12 lg:col-6"
           name="status"
           label="Permit state"
@@ -236,13 +236,13 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Submitted date"
           :max-date="new Date()"
         />
-        <Dropdown
+        <Select
           class="col-12 lg:col-6"
           name="needed"
           label="Needed"
           :options="PERMIT_NEEDED_LIST"
         />
-        <Dropdown
+        <Select
           class="col-12 lg:col-6"
           name="authStatus"
           label="Authorization status"
