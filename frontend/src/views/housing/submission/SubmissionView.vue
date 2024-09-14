@@ -194,18 +194,12 @@ onMounted(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getSubmission">
-          <SubmissionForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
-            :submission="getSubmission"
-          />
+          <SubmissionForm :submission="getSubmission" />
         </span>
       </TabPanel>
       <TabPanel :value="1">
         <div class="mb-3 border-dashed file-upload border-round-md">
-          <FileUpload
-            :activity-id="activityId"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
-          />
+          <FileUpload :activity-id="activityId" />
         </div>
         <div class="flex flex-row justify-content-between pb-3">
           <div class="flex align-items-center">
@@ -302,7 +296,6 @@ onMounted(async () => {
               >
                 <DocumentCard
                   :document="document"
-                  :editable="!isCompleted"
                   class="hover-hand hover-shadow"
                   @click="documentService.downloadDocument(document.documentId, document.filename)"
                 />
@@ -325,12 +318,7 @@ onMounted(async () => {
             <template #body="{ data }">
               <a
                 href="#"
-                @click="
-                  () => {
-                    if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
-                      documentService.downloadDocument(data.documentId, data.filename);
-                  }
-                "
+                @click="documentService.downloadDocument(data.documentId, data.filename)"
               >
                 {{ data.filename }}
               </a>
@@ -355,7 +343,7 @@ onMounted(async () => {
             </template>
           </Column>
           <Column
-            field="extension"
+            field="mimeType"
             header="Type"
             sortable
           />
@@ -372,10 +360,7 @@ onMounted(async () => {
             </template>
             <template #body="{ data }">
               <div class="flex justify-content-center">
-                <DeleteDocument
-                  :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
-                  :document="data"
-                />
+                <DeleteDocument :document="data" />
               </div>
             </template>
           </Column>
@@ -389,7 +374,6 @@ onMounted(async () => {
             </div>
             <Button
               aria-label="Add permit"
-              :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
               @click="permitModalVisible = true"
             >
               <font-awesome-icon
@@ -405,10 +389,7 @@ onMounted(async () => {
             :index="index"
             class="col-12"
           >
-            <PermitCard
-              :editable="!isCompleted"
-              :permit="permit"
-            />
+            <PermitCard :permit="permit" />
           </div>
 
           <PermitModal
@@ -424,7 +405,6 @@ onMounted(async () => {
           </div>
           <Button
             aria-label="Add note"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
             @click="noteModalVisible = true"
           >
             <font-awesome-icon

@@ -154,19 +154,19 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-a:hover {
-  text-decoration: none;
+.navigation-main {
+  background-color: $app-primary;
 }
+// .navigation-main {
+//   background-color: #38598a;
+//   color: #fcba19;
+//   display: flex;
+//   width: 100%;
+//   box-shadow: 0 6px 8px -4px #b3b1b3;
 
 :deep(.p-menubar-submenu) {
   li:first-child {
     border-top: 2px solid #fcba19;
   }
 }
-.navigation-main {
-  background-color: #38598a;
-  color: #fcba19;
-  display: flex;
-  width: 100%;
-// }
 </style>
