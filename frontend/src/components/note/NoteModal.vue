@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { mixed, object, string } from 'yup';
 
-import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
+import { DatePicker, Dropdown, InputText, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
@@ -151,7 +151,7 @@ async function onSubmit(data: any, { resetForm }) {
       @submit="onSubmit"
     >
       <div class="formgrid grid">
-        <Calendar
+        <DatePicker
           class="col-6"
           name="createdAt"
           label="Date"
@@ -166,7 +166,7 @@ async function onSubmit(data: any, { resetForm }) {
           :options="NOTE_TYPE_LIST"
           @on-change="(e) => onNoteTypeChange(e)"
         />
-        <Calendar
+        <DatePicker
           v-if="showBringForward"
           class="col-6"
           name="bringForwardDate"

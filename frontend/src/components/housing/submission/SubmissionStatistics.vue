@@ -2,7 +2,7 @@
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
 import { ref, watch } from 'vue';
 
-import { Calendar, Dropdown } from '@/lib/primevue';
+import { DatePicker, Select } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { Regex } from '@/utils/enums/application';
 
@@ -89,13 +89,13 @@ watch(
         <tr>
           <td class="col-9">
             Submissions by range
-            <Calendar
+            <DatePicker
               v-model="statisticFilters.dateFrom"
               show-icon
               icon-display="input"
             />
             to
-            <Calendar
+            <DatePicker
               v-model="statisticFilters.dateTo"
               show-icon
               icon-display="input"
@@ -107,7 +107,7 @@ watch(
         <tr>
           <td class="col-9">
             Submissions by month
-            <Calendar
+            <DatePicker
               v-model="statisticFilters.monthYear"
               view="month"
               show-icon
@@ -120,7 +120,7 @@ watch(
         <tr>
           <td class="col-9">
             Submissions by assigned navigator
-            <Dropdown
+            <Select
               v-model="statisticFilters.userId"
               class="w-7"
               editable

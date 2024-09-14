@@ -4,7 +4,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { date, object, string } from 'yup';
 
-import { Calendar, Dropdown, InputText } from '@/components/form';
+import { DatePicker, Dropdown, InputText } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -218,7 +218,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Application stage"
           :options="PERMIT_STATUS_LIST"
         />
-        <Calendar
+        <DatePicker
           class="col-12 lg:col-6"
           name="submittedDate"
           label="Submitted date"
@@ -236,7 +236,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           label="Authorization status"
           :options="PERMIT_AUTHORIZATION_STATUS_LIST"
         />
-        <Calendar
+        <DatePicker
           class="col-12 lg:col-6"
           name="statusLastVerified"
           label="Status verified date"
@@ -248,7 +248,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
           name="trackingId"
           label="Tracking ID"
         />
-        <Calendar
+        <DatePicker
           class="col-12 lg:col-6"
           name="adjudicationDate"
           label="Adjudication date"
