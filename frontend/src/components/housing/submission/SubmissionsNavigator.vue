@@ -262,16 +262,6 @@ watch(showCompleted, () => {
 </script>
 
 <template>
-  <div
-    v-if="showToggle"
-    class="flex justify-content-end mr-3 align-items-center"
-  >
-    <span class="app-primary-color mt-0 mb-0">Show completed submissions</span>
-    <InputSwitch
-      v-model="showCompleted"
-      class="ml-2 mt-0 mb-0 mr-2"
-    />
-  </div>
   <Tabs
     v-if="!loading"
     value="0"
@@ -325,14 +315,14 @@ watch(showCompleted, () => {
         </Accordion>
         <SubmissionListNavigator
           :loading="loading"
-          :submissions="getSubmissions"
+          :submissions="submissions"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>
       <TabPanel value="1">
         <EnquiryListNavigator
           :loading="loading"
-          :enquiries="getEnquiries"
+          :enquiries="enquiries"
           @enquiry:delete="onEnquiryDelete"
         />
       </TabPanel>

@@ -119,7 +119,7 @@ function onEnquiryFormSaved() {
       <TabPanel :value="0">
         <Message
           v-if="relatedSubmission"
-          severity="error"
+          severity="info"
           class="text-center"
           :closable="false"
         >
@@ -144,7 +144,6 @@ function onEnquiryFormSaved() {
         </Message>
         <span v-if="!loading && getEnquiry">
           <EnquiryForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
@@ -157,7 +156,6 @@ function onEnquiryFormSaved() {
           </div>
           <Button
             aria-label="Add note"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
             @click="noteModalVisible = true"
           >
             <font-awesome-icon
@@ -174,7 +172,6 @@ function onEnquiryFormSaved() {
           class="col-12"
         >
           <NoteCard
-            :editable="!isCompleted"
             :note="note"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"

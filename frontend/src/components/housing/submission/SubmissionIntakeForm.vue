@@ -561,7 +561,7 @@ watchEffect(() => {
               }"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -604,7 +604,7 @@ watchEffect(() => {
               }"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -753,7 +753,7 @@ watchEffect(() => {
               :prev-disabled="true"
               @click="
                 () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
                 }
               "
             >
