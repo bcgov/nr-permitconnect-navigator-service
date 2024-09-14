@@ -2,14 +2,14 @@
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
 
-import { Dropdown } from '@/components/form';
+import { Select } from '@/components/form';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
 import { ssoService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { User } from '@/types';
 
@@ -117,13 +117,13 @@ onMounted(() => {
           />
         </IconField>
       </div>
-      <Dropdown
+      <Select
         class="col-3 m-0"
         name="assignRole"
         placeholder="First name"
         :options="Object.values(USER_SEARCH_PARAMS)"
         @on-change="
-          (param: DropdownChangeEvent) => {
+          (param: SelectChangeEvent) => {
             selectedParam = param.value;
             searchIdirUsers();
           }
@@ -171,13 +171,13 @@ onMounted(() => {
         sortable
       />
     </DataTable>
-    <Dropdown
+    <Select
       class="col-12"
       name="assignRole"
       label="Assign role"
       :options="selectableGroups"
       :disabled="!selectedUser"
-      @on-change="(e: DropdownChangeEvent) => (selectedGroup = e.value)"
+      @on-change="(e: SelectChangeEvent) => (selectedGroup = e.value)"
     />
     <div class="flex-auto pl-2">
       <Button

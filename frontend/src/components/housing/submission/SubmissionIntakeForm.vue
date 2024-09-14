@@ -7,18 +7,18 @@ import { useRoute, useRouter } from 'vue-router';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
-import { EditableDropdown } from '@/components/form';
+import { EditableSelect } from '@/components/form';
 import {
   AutoComplete,
   DatePicker,
   Checkbox,
-  Dropdown,
   FormAutosave,
   FormNavigationGuard,
   InputMask,
   InputNumber,
   RadioList,
   InputText,
+  Select,
   StepperHeader,
   StepperNavigation,
   TextArea
@@ -63,9 +63,9 @@ import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, Submission } from '@/types';
+import type { Document, Permit, PermitType, Submission } from '@/types';
 
 // Interfaces
 interface SubmissionForm extends Submission {
@@ -205,7 +205,7 @@ async function onAddressSearchInput(e: IInputEvent) {
     ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
 }
 
-async function onAddressSelect(e: DropdownChangeEvent) {
+async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
 
   if (e.value as GeocoderEntry) {
@@ -607,7 +607,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="applicant.contactApplicantRelationship"
                     label="Relationship to project"
@@ -615,7 +615,7 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="applicant.contactPreference"
                     label="Preferred contact method"
@@ -827,14 +827,14 @@ onBeforeMount(async () => {
                       </div>
                     </div>
                   </div>
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.singleFamilyUnits"
                     :disabled="!editable || !values.housing.singleFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
@@ -856,7 +856,7 @@ onBeforeMount(async () => {
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
@@ -896,7 +896,7 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <Dropdown
+                  <Select
                     v-if="values.housing.hasRentalUnits === BasicResponse.YES"
                     class="col-6"
                     name="housing.rentalUnits"
@@ -1144,7 +1144,7 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="grid nested-grid">
-                          <EditableDropdown
+                          <EditableSelect
                             class="col-12"
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
@@ -1450,13 +1450,13 @@ onBeforeMount(async () => {
                                 type="hidden"
                                 :name="`appliedPermits[${idx}].permitId`"
                               />
-                              <Dropdown
+                              <Select
                                 class="col-4"
                                 :disabled="!editable"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
                                 :options="getPermitTypes"
-                                :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                                 option-value="permitTypeId"
                                 :loading="getPermitTypes === undefined"
                               />
@@ -1566,13 +1566,13 @@ onBeforeMount(async () => {
                             >
                               <div class="col-4">
                                 <div class="flex justify-content-center">
-                                  <Dropdown
+                                  <Select
                                     class="w-full"
                                     :disabled="!editable"
                                     :name="`investigatePermits[${idx}].permitTypeId`"
                                     placeholder="Select Permit type"
                                     :options="getPermitTypes"
-                                    :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                    :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                                     option-value="permitTypeId"
                                     :loading="getPermitTypes === undefined"
                                   />
