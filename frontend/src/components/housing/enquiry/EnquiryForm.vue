@@ -4,7 +4,7 @@ import { onMounted, ref } from 'vue';
 import { date, mixed, object, string } from 'yup';
 
 import {
-  Calendar,
+  DatePicker,
   CancelButton,
   Dropdown,
   EditableDropdown,
@@ -210,7 +210,7 @@ onMounted(async () => {
         :disabled="!editable"
         :options="ENQUIRY_TYPE_LIST"
       />
-      <Calendar
+      <DatePicker
         class="col-3"
         name="submittedAt"
         label="Submission date"
