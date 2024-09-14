@@ -10,7 +10,7 @@ import Map from '@/components/housing/maps/Map.vue';
 import { EditableDropdown } from '@/components/form';
 import {
   AutoComplete,
-  Calendar,
+  DatePicker,
   Checkbox,
   Dropdown,
   FormAutosave,
@@ -1468,7 +1468,7 @@ onBeforeMount(async () => {
                               />
                               <div class="col-4">
                                 <div class="flex justify-content-center">
-                                  <Calendar
+                                  <DatePicker
                                     class="w-full"
                                     :name="`appliedPermits[${idx}].statusLastVerified`"
                                     :disabled="!editable"

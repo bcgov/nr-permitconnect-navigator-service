@@ -5,7 +5,7 @@ export { default as AutoComplete } from 'primevue/autocomplete';
 export { FilterMatchMode } from '@primevue/core/api';
 export { default as Breadcrumb } from 'primevue/breadcrumb';
 export { default as Button } from 'primevue/button';
-export { default as Calendar } from 'primevue/calendar';
+export { default as DatePicker } from 'primevue/datepicker';
 export { default as Card } from 'primevue/card';
 export { default as Checkbox } from 'primevue/checkbox';
 export { default as Column } from 'primevue/column';

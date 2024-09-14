@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useField, ErrorMessage } from 'vee-validate';
 
-import { Calendar } from '@/lib/primevue';
+import { DatePicker } from '@/lib/primevue';
 
 // Props
 const {
@@ -36,7 +36,7 @@ const { errorMessage, value } = useField<Date>(name);
     >
       {{ label }}
     </label>
-    <Calendar
+    <DatePicker
       v-model="value"
       :aria-describedby="`${name}-help`"
       :aria-labelledby="`${name}-label`"

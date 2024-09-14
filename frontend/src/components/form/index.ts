@@ -1,5 +1,5 @@
 export { default as AutoComplete } from './AutoComplete.vue';
-export { default as Calendar } from './Calendar.vue';
+export { default as DatePicker } from './DatePicker.vue';
 export { default as CancelButton } from './CancelButton.vue';
 export { default as Checkbox } from './Checkbox.vue';
 export { default as CopyToClipboard } from './CopyToClipboard.vue';
