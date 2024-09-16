@@ -26,36 +26,23 @@ const NavigationAuthorizationMap = [
     group: GroupName.ADMIN,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
-      NavigationPermission.HOUSING_ENQUIRY,
-      NavigationPermission.HOUSING_INTAKE,
-      //NavigationPermission.HOUSING_STATUS_TRACKER,
+      NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
-      //NavigationPermission.HOUSING_USER_MANAGEMENT,
-      //NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN
     ]
   },
   {
     group: GroupName.NAVIGATOR,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
-      NavigationPermission.HOUSING_ENQUIRY,
-      NavigationPermission.HOUSING_INTAKE,
-      //NavigationPermission.HOUSING_STATUS_TRACKER,
+      NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
     ]
   },
   {
     group: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [
-      NavigationPermission.HOUSING_DROPDOWN,
-      NavigationPermission.HOUSING_ENQUIRY,
-      NavigationPermission.HOUSING_INTAKE,
-      //NavigationPermission.HOUSING_STATUS_TRACKER,
-      NavigationPermission.HOUSING_SUBMISSION,
-      NavigationPermission.HOUSING_SUBMISSIONS
-    ]
+    permissions: [NavigationPermission.HOUSING_SUBMISSION, NavigationPermission.HOUSING_SUBMISSIONS]
   },
   {
     group: GroupName.PROPONENT,
@@ -72,12 +59,9 @@ const NavigationAuthorizationMap = [
     group: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
-      NavigationPermission.HOUSING_ENQUIRY,
-      NavigationPermission.HOUSING_INTAKE,
-      //NavigationPermission.HOUSING_STATUS_TRACKER,
+      NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
-      //NavigationPermission.HOUSING_USER_MANAGEMENT
     ]
   }
 ];
