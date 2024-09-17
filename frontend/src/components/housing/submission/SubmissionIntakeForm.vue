@@ -307,6 +307,7 @@ async function onSaveDraft(
   let response;
   try {
     if (data.submissionId) {
+      console.log('save draft');
       response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
       response = await submissionService.createDraft(draftData);
@@ -416,6 +417,7 @@ onBeforeMount(async () => {
           contactPreference: response?.contactPreference
         },
         basic: {
+          consentToFeedback: response?.consentToFeedback,
           isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
           isDevelopedInBC: response?.isDevelopedInBC,
           registeredName: response?.companyNameRegistered
@@ -1637,7 +1639,6 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-disabled="true"
               :prev-callback="prevCallback"
-              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button

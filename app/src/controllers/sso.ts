@@ -1,9 +1,14 @@
 import { ssoService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { BceidSearchParameters, IdirSearchParameters } from '../types';
 
 const controller = {
-  searchIdirUsers: async (req: Request, res: Response, next: NextFunction) => {
+  searchIdirUsers: async (
+    req: Request<never, never, never, IdirSearchParameters>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const response = await ssoService.searchIdirUsers(req.query);
       res.status(response.status).json(response.data);
@@ -12,7 +17,11 @@ const controller = {
     }
   },
 
-  searchBasicBceidUsers: async (req: Request, res: Response, next: NextFunction) => {
+  searchBasicBceidUsers: async (
+    req: Request<never, never, never, BceidSearchParameters>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       const response = await ssoService.searchBasicBceidUsers(req.query);
       res.status(response.status).json(response.data);

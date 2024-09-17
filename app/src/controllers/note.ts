@@ -1,17 +1,14 @@
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { enquiryService, noteService, submissionService, userService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { BringForward } from '../types';
+import type { NextFunction, Request, Response } from 'express';
+import type { BringForward, Note } from '../types';
 
 const controller = {
-  async createNote(req: Request, res: Response, next: NextFunction) {
+  async createNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
     try {
-      // TODO: define body type in request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const body = req.body as any;
       const response = await noteService.createNote({
-        ...body,
+        ...req.body,
         ...generateCreateStamps(req.currentContext)
       });
       res.status(201).json(response);
@@ -30,7 +27,11 @@ const controller = {
     }
   },
 
-  async listBringForward(req: Request<never, { bringForwardState?: string }>, res: Response, next: NextFunction) {
+  async listBringForward(
+    req: Request<never, never, never, { bringForwardState?: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       let response = new Array<BringForward>();
       const notes = await noteService.listBringForward(req.query.bringForwardState);
@@ -73,13 +74,10 @@ const controller = {
     }
   },
 
-  async updateNote(req: Request, res: Response, next: NextFunction) {
+  async updateNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
     try {
-      // TODO: define body type in request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const body = req.body as any;
       const response = await noteService.updateNote({
-        ...body,
+        ...req.body,
         ...generateCreateStamps(req.currentContext),
         ...generateUpdateStamps(req.currentContext)
       });

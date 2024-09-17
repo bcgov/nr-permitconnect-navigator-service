@@ -2,17 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-
-// Types
-type IdirSearchParams = {
-  firstName: string;
-  lastName: string;
-  email: string;
-};
-
-type BCeIdSearchParams = {
-  guid: string;
-};
+import type { BceidSearchParameters, IdirSearchParameters } from '../types';
 
 /**
  * @function getToken
@@ -59,7 +49,7 @@ function ssoAxios(): AxiosInstance {
 }
 
 const service = {
-  searchIdirUsers: async (params?: IdirSearchParams) => {
+  searchIdirUsers: async (params?: IdirSearchParameters) => {
     try {
       const env = config.get('server.env');
       const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
@@ -79,7 +69,7 @@ const service = {
     }
   },
 
-  searchBasicBceidUsers: async (params?: BCeIdSearchParams) => {
+  searchBasicBceidUsers: async (params?: BceidSearchParameters) => {
     try {
       const env = config.get('server.env');
       const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });

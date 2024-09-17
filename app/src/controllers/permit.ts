@@ -1,14 +1,14 @@
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { permitService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 import type { Permit } from '../types';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 const controller = {
-  createPermit: async (req: Request, res: Response, next: NextFunction) => {
+  createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.createPermit({
-        ...(req.body as Permit),
+        ...req.body,
         ...generateCreateStamps(req.currentContext),
         ...generateUpdateStamps(req.currentContext)
       });
@@ -36,7 +36,7 @@ const controller = {
     }
   },
 
-  async listPermits(req: Request<never, { activityId?: string }>, res: Response, next: NextFunction) {
+  async listPermits(req: Request<never, never, never, { activityId?: string }>, res: Response, next: NextFunction) {
     try {
       const response = await permitService.listPermits(req.query?.activityId);
       res.status(200).json(response);
@@ -45,10 +45,10 @@ const controller = {
     }
   },
 
-  updatePermit: async (req: Request, res: Response, next: NextFunction) => {
+  updatePermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.updatePermit({
-        ...(req.body as Permit),
+        ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
       res.status(200).json(response);

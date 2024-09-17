@@ -4,7 +4,7 @@ import { yarsController } from '../../controllers';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
 const router = express.Router();
 router.use(requireSomeAuth);

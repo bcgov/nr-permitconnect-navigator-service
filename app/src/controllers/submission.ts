@@ -15,8 +15,18 @@ import {
 } from '../utils/enums/housing';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentUsername, isTruthy, toTitleCase } from '../utils/utils';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { ChefsFormConfig, ChefsFormConfigData, Submission, ChefsSubmissionExport, Permit, Email } from '../types';
+import type { NextFunction, Request, Response } from 'express';
+import type {
+  ChefsFormConfig,
+  ChefsFormConfigData,
+  Submission,
+  ChefsSubmissionExport,
+  Permit,
+  Email,
+  StatisticsFilters,
+  SubmissionIntake,
+  SubmissionSearchParameters
+} from '../types';
 
 const controller = {
   checkAndStoreNewSubmissions: async () => {
@@ -167,9 +177,8 @@ const controller = {
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  generateSubmissionData: async (req: Request, intakeStatus: string) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = req.body;
+  generateSubmissionData: async (req: Request<never, never, SubmissionIntake>, intakeStatus: string) => {
+    const data = req.body;
 
     const activityId =
       data.activityId ??
@@ -243,20 +252,31 @@ const controller = {
       appliedPermits = data.appliedPermits.map((x: Permit) => ({
         permitId: x.permitId,
         permitTypeId: x.permitTypeId,
-        activityId: activityId,
+        activityId: activityId as string,
         trackingId: x.trackingId,
         status: PermitStatus.APPLIED,
-        statusLastVerified: x.statusLastVerified
+        needed: null,
+        statusLastVerified: x.statusLastVerified,
+        issuedPermitId: null,
+        authStatus: null,
+        submittedDate: null,
+        adjudicationDate: null
       }));
     }
 
     if (data.investigatePermits && data.investigatePermits.length) {
-      investigatePermits = data.investigatePermits.flatMap((x: Permit) => ({
-        permitId: x.permitId,
-        permitTypeId: x.permitTypeId,
-        activityId: activityId,
+      investigatePermits = data.investigatePermits.map((x: Permit) => ({
+        permitId: x.permitId as string,
+        permitTypeId: x.permitTypeId as number,
+        activityId: activityId as string,
+        trackingId: null,
+        status: null,
         needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastVerified: x.statusLastVerified
+        statusLastVerified: x.statusLastVerified,
+        issuedPermitId: null,
+        authStatus: null,
+        submittedDate: null,
+        adjudicationDate: null
       }));
     }
 
@@ -276,7 +296,7 @@ const controller = {
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
-      },
+      } as Submission,
       appliedPermits,
       investigatePermits
     };
@@ -292,8 +312,7 @@ const controller = {
     try {
       let response = await submissionService.getSubmissions();
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
       res.status(200).json(response.map((x) => x.activityId));
     } catch (e: unknown) {
@@ -301,14 +320,11 @@ const controller = {
     }
   },
 
-  createDraft: async (req: Request, res: Response, next: NextFunction) => {
+  createDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
-
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Create new submission
@@ -326,7 +342,7 @@ const controller = {
     }
   },
 
-  createSubmission: async (req: Request, res: Response, next: NextFunction) => {
+  createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
@@ -358,11 +374,7 @@ const controller = {
     }
   },
 
-  getStatistics: async (
-    req: Request<never, { dateFrom: string; dateTo: string; monthYear: string; userId: string }>,
-    res: Response,
-    next: NextFunction
-  ) => {
+  getStatistics: async (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getStatistics(req.query);
       res.status(200).json(response[0]);
@@ -401,8 +413,7 @@ const controller = {
       let response = await submissionService.getSubmissions();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
 
       res.status(200).json(response);
@@ -412,16 +423,7 @@ const controller = {
   },
 
   searchSubmissions: async (
-    req: Request<
-      never,
-      {
-        activityId?: Array<string>;
-        intakeStatus?: Array<string>;
-        includeUser?: string;
-        submissionId?: Array<string>;
-        submissionType?: Array<string>;
-      }
-    >,
+    req: Request<never, never, never, SubmissionSearchParameters>,
     res: Response,
     next: NextFunction
   ) => {
@@ -432,8 +434,7 @@ const controller = {
       });
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === (req.currentContext?.tokenPayload as any)?.idir_username);
+        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
 
       res.status(200).json(response);
@@ -442,19 +443,16 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request, res: Response, next: NextFunction) => {
+  updateDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
-
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
       );
 
       // Update submission
       const result = await submissionService.updateSubmission({
-        ...(submission as Submission),
+        ...submission,
         ...generateUpdateStamps(req.currentContext)
       });
 
@@ -471,13 +469,15 @@ const controller = {
     }
   },
 
-  updateIsDeletedFlag: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  updateIsDeletedFlag: async (
+    req: Request<{ submissionId: string }, never, { isDeleted: boolean }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
       const response = await submissionService.updateIsDeletedFlag(
         req.params.submissionId,
-        data.isDeleted,
+        req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
       res.status(200).json(response);
@@ -486,10 +486,10 @@ const controller = {
     }
   },
 
-  updateSubmission: async (req: Request, res: Response, next: NextFunction) => {
+  updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.updateSubmission({
-        ...(req.body as Submission),
+        ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
       res.status(200).json(response);
@@ -502,9 +502,9 @@ const controller = {
    * @function emailConfirmation
    * Send an email with the confirmation of submission
    */
-  emailConfirmation: async (req: Request<never, never, { emailData: Email }>, res: Response, next: NextFunction) => {
+  emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
     try {
-      const { data, status } = await emailService.email(req.body.emailData);
+      const { data, status } = await emailService.email(req.body);
       res.status(status).json(data);
     } catch (e: unknown) {
       next(e);
@@ -513,8 +513,8 @@ const controller = {
 
   /**
    * @function assignPriority
-   * assigns a priority level to a submission based on given criteria
-   * criteria defined below
+   * Assigns a priority level to a submission based on given criteria
+   * Criteria defined below
    */
   assignPriority: (submission: Partial<Submission>) => {
     const matchesPriorityOneCriteria = // Priority 1 Criteria:

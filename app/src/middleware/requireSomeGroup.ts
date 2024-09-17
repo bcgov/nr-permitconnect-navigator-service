@@ -4,7 +4,7 @@ import Problem from 'api-problem';
 import { yarsService } from '../services';
 import { GroupName, Initiative } from '../utils/enums/application';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * @function requireSomeGroup

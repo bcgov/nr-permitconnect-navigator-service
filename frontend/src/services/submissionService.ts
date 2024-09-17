@@ -104,6 +104,6 @@ export default {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('submission/emailConfirmation', { emailData });
+    return appAxios().put('submission/emailConfirmation', emailData);
   }
 };
