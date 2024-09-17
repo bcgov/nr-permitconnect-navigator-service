@@ -38,15 +38,13 @@ const schema = {
   },
   emailConfirmation: {
     body: Joi.object({
-      emailData: Joi.object().keys({
-        bcc: Joi.array().items(email).allow(null),
-        bodyType: Joi.string().required().allow(null),
-        body: Joi.string().required(),
-        cc: Joi.array().items(email),
-        from: email.required(),
-        subject: Joi.string().required(),
-        to: Joi.array().items(email).required()
-      })
+      bcc: Joi.array().items(email).allow(null),
+      bodyType: Joi.string().required().allow(null),
+      body: Joi.string().required(),
+      cc: Joi.array().items(email),
+      from: email.required(),
+      subject: Joi.string().required(),
+      to: Joi.array().items(email).required()
     })
   },
   deleteSubmission: {

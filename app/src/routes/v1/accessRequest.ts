@@ -6,7 +6,8 @@ import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { accessRequestValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { AccessRequest, User } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -17,7 +18,11 @@ router.post(
   '/',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.CREATE),
   accessRequestValidator.createUserAccessRequest,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (
+    req: Request<never, never, { accessRequest: AccessRequest; user: User }>,
+    res: Response,
+    next: NextFunction
+  ): void => {
     accessRequestController.createUserAccessRequest(req, res, next);
   }
 );
@@ -26,7 +31,7 @@ router.post(
   '/:accessRequestId',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.UPDATE),
   accessRequestValidator.processUserAccessRequest,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ accessRequestId: string }, never, { approve: boolean }>, res: Response, next: NextFunction): void => {
     accessRequestController.processUserAccessRequest(req, res, next);
   }
 );

@@ -1,26 +1,26 @@
 import { userService, yarsService } from '../services';
-import { User } from '../types';
+import { User, UserSearchParameters } from '../types';
 import { GroupName } from '../utils/enums/application';
 import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 
 const controller = {
-  searchUsers: async (req: Request, res: Response, next: NextFunction) => {
+  searchUsers: async (req: Request<never, never, never, UserSearchParameters>, res: Response, next: NextFunction) => {
     try {
-      const reqGroup = mixedQueryToArray(req.query.group as string) as GroupName[];
-      const userIds = mixedQueryToArray(req.query.userId as string);
+      const reqGroup = mixedQueryToArray(req.query.group) as GroupName[];
+      const userIds = mixedQueryToArray(req.query.userId);
 
       const response = await userService.searchUsers({
         userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
-        identityId: mixedQueryToArray(req.query.identityId as string),
-        idp: mixedQueryToArray(req.query.idp as string),
-        sub: req.query.sub as string,
-        email: req.query.email as string,
-        firstName: req.query.firstName as string,
-        fullName: req.query.fullName as string,
-        lastName: req.query.lastName as string,
-        active: isTruthy(req.query.active as string)
+        identityId: mixedQueryToArray(req.query.identityId),
+        idp: mixedQueryToArray(req.query.idp),
+        sub: req.query.sub,
+        email: req.query.email,
+        firstName: req.query.firstName,
+        fullName: req.query.fullName,
+        lastName: req.query.lastName,
+        active: isTruthy(req.query.active)
       });
 
       type UserWithGroup = User & { groups?: GroupName[] };

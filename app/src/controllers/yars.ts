@@ -1,6 +1,6 @@
 import { yarsService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
 const controller = {
   getGroups: async (req: Request, res: Response, next: NextFunction) => {
@@ -15,8 +15,7 @@ const controller = {
 
   getPermissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const groups = await yarsService.getSubjectGroups((req.currentContext.tokenPayload as any).sub);
+      const groups = await yarsService.getSubjectGroups(req.currentContext.tokenPayload?.sub as string);
 
       const permissions = await Promise.all(groups.map((x) => yarsService.getGroupPermissions(x.groupId))).then((x) =>
         x.flat()

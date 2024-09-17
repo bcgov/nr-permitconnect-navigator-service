@@ -14,7 +14,7 @@ import {
 import { Initiative, GroupName } from '../utils/enums/application';
 import { getCurrentSubject } from '../utils/utils';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 import { CurrentAuthorization } from '../types';
 
 /**

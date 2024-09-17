@@ -6,8 +6,8 @@ import jwt from 'jsonwebtoken';
 import { userService } from '../services';
 import { AuthType, Initiative } from '../utils/enums/application';
 
+import type { NextFunction, Request, Response } from 'express';
 import type { CurrentContext } from '../types';
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
 
 /**
  * @function _spkiWrapper

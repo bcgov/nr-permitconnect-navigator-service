@@ -1,8 +1,7 @@
 import { activityService } from '../services';
-
 import { ACTIVITY_ID_LENGTH } from '../utils/constants/application';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
 const controller = {
   validateActivityId: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {

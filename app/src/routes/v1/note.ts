@@ -7,7 +7,8 @@ import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { noteValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { Note } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -18,7 +19,7 @@ router.put(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
   noteValidator.createNote,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Note>, res: Response, next: NextFunction): void => {
     noteController.createNote(req, res, next);
   }
 );
@@ -28,7 +29,7 @@ router.put(
   hasAuthorization(Resource.NOTE, Action.UPDATE),
   hasAccess('noteId'),
   noteValidator.updateNote,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Note>, res: Response, next: NextFunction): void => {
     noteController.updateNote(req, res, next);
   }
 );
@@ -38,7 +39,7 @@ router.delete(
   '/:noteId',
   hasAuthorization(Resource.NOTE, Action.DELETE),
   hasAccess('noteId'),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ noteId: string }>, res: Response, next: NextFunction): void => {
     noteController.deleteNote(req, res, next);
   }
 );
@@ -46,7 +47,7 @@ router.delete(
 router.get(
   '/bringForward',
   hasAuthorization(Resource.NOTE, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, { bringForwardState?: string }>, res: Response, next: NextFunction): void => {
     noteController.listBringForward(req, res, next);
   }
 );
@@ -56,7 +57,7 @@ router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),
   noteValidator.listNotes,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ activityId: string }>, res: Response, next: NextFunction): void => {
     noteController.listNotes(req, res, next);
   }
 );
