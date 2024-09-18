@@ -55,7 +55,6 @@ export enum Regex {
 }
 
 export enum RouteName {
-  COMING_SOON = 'coming_soon',
   DEVELOPER = 'developer',
   FORBIDDEN = 'forbidden',
   HOME = 'home',
