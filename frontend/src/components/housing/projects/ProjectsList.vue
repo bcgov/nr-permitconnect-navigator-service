@@ -9,12 +9,10 @@ import type { Submission } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
-type Props = {
+const { loading, submissions } = defineProps<{
   loading: boolean;
   submissions: Array<Submission> | undefined;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // State
 const selection: Ref<Submission | undefined> = ref(undefined);
@@ -26,7 +24,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
   <DataTable
     v-model:selection="selection"
     :loading="loading"
-    :value="props.submissions"
+    :value="submissions"
     data-key="submissionId"
     scrollable
     responsive-layout="scroll"

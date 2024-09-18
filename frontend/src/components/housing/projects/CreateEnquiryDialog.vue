@@ -9,13 +9,9 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 
 // Props
-type Props = {
+const { confirmationId = '' } = defineProps<{
   confirmationId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  confirmationId: ''
-});
+}>();
 
 // Store
 const { getSubmission } = useSubmissionStore();
@@ -49,7 +45,7 @@ const handleCloseDialog = () => {
       <span class="p-dialog-title">New enquiry for: {{ getSubmission?.projectName }}</span>
     </template>
     <template #default>
-      <div v-if="!props.confirmationId">
+      <div v-if="!confirmationId">
         <div class="flex flex-column">
           <div>
             <div>

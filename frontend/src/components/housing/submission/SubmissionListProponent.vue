@@ -12,12 +12,10 @@ import type { Ref } from 'vue';
 import type { Submission } from '@/types';
 
 // Props
-type Props = {
+const { loading, submissions } = defineProps<{
   loading: boolean;
   submissions: Array<Submission> | undefined;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Emit
 const emit = defineEmits(['submission:delete']);
@@ -53,7 +51,7 @@ function onDelete(submissionId: string) {
   <DataTable
     v-model:selection="selection"
     :loading="loading"
-    :value="props.submissions"
+    :value="submissions"
     data-key="submissionId"
     scrollable
     responsive-layout="scroll"

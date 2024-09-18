@@ -2,33 +2,35 @@
 import { Button } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  index,
+  activeStep,
+  clickCallback = () => {},
+  title,
+  icon
+} = defineProps<{
   index: number;
   activeStep: number;
   clickCallback?: Function;
   title: string;
   icon: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  clickCallback: () => {}
-});
+}>();
 </script>
 
 <template>
   <Button
     class="p-button-text"
-    @click="props.clickCallback()"
+    @click="clickCallback()"
   >
     <font-awesome-icon
       class="pr-2"
-      :icon="`fa-solid ${props.icon}`"
+      :icon="`fa-solid ${icon}`"
     />
     <span
       class="text-xl"
-      :class="{ 'font-bold': props.index === props.activeStep }"
+      :class="{ 'font-bold': index === activeStep }"
     >
-      {{ props.title }}
+      {{ title }}
     </span>
   </Button>
 </template>

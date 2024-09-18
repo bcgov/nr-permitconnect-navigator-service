@@ -1,33 +1,27 @@
 <script setup lang="ts">
 import { ErrorMessage, useField } from 'vee-validate';
-import { toRef, watch } from 'vue';
+import { watch } from 'vue';
 
 import { RadioButton } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  name,
+  disabled = false,
+  options
+} = defineProps<{
   helpText?: string;
   name: string;
-  placeholder?: string;
   disabled?: boolean;
   options: Array<string> | undefined;
-  bold?: boolean;
-  floatLabel?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  placeholder: '',
-  disabled: false,
-  floatLabel: false,
-  bold: true
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 
 // Actions
 watch(value, () => {

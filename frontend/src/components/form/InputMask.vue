@@ -5,7 +5,16 @@ import InputMaskInternal from './internal/InputMaskInternal.vue';
 import { FloatLabel } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  mask,
+  placeholder = '',
+  disabled = false,
+  bold = true,
+  floatLabel = false
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -14,27 +23,17 @@ type Props = {
   disabled?: boolean;
   bold?: boolean;
   floatLabel?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  bold: true,
-  floatLabel: false
-});
+}>();
 </script>
 
 <template>
   <div class="field">
-    <FloatLabel v-if="props.floatLabel">
-      <InputMaskInternal v-bind="props" />
+    <FloatLabel v-if="floatLabel">
+      <InputMaskInternal v-bind="{ label, name, mask, placeholder, disabled, bold }" />
     </FloatLabel>
     <InputMaskInternal
       v-else
-      v-bind="props"
+      v-bind="{ label, name, mask, placeholder, disabled, bold }"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>

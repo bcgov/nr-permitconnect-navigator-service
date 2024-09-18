@@ -17,14 +17,10 @@ import type { Schema } from 'yup';
 import type { Permit, PermitForm, PermitType } from '@/types';
 
 // Props
-type Props = {
+const { activityId, permit = undefined } = defineProps<{
   activityId: string;
   permit?: Permit;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  permit: undefined
-});
+}>();
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -33,25 +29,25 @@ const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const permitType: Ref<PermitType | undefined> = ref(
-  getPermitTypes.value.find((x) => x.permitTypeId === props.permit?.permitTypeId)
+  getPermitTypes.value.find((x) => x.permitTypeId === permit?.permitTypeId)
 );
 const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: PermitForm = {
-  permitId: props.permit?.permitId,
+  permitId: permit?.permitId,
   permitType: permitType.value,
-  needed: props.permit?.needed,
-  status: props.permit?.status ?? PermitStatus.NEW,
+  needed: permit?.needed,
+  status: permit?.status ?? PermitStatus.NEW,
   agency: permitType.value?.agency,
-  trackingId: props.permit?.trackingId,
+  trackingId: permit?.trackingId,
   businessDomain: permitType.value?.businessDomain,
-  authStatus: props.permit?.authStatus,
-  statusLastVerified: props.permit?.statusLastVerified ? new Date(props.permit.statusLastVerified) : undefined,
+  authStatus: permit?.authStatus,
+  statusLastVerified: permit?.statusLastVerified ? new Date(permit.statusLastVerified) : undefined,
   sourceSystem: permitType.value?.sourceSystem ?? permitType.value?.sourceSystemAcronym,
-  submittedDate: props.permit?.submittedDate ? new Date(props.permit.submittedDate) : undefined,
-  issuedPermitId: props.permit?.issuedPermitId,
-  adjudicationDate: props.permit?.adjudicationDate ? new Date(props.permit.adjudicationDate) : undefined
+  submittedDate: permit?.submittedDate ? new Date(permit.submittedDate) : undefined,
+  issuedPermitId: permit?.issuedPermitId,
+  adjudicationDate: permit?.adjudicationDate ? new Date(permit.adjudicationDate) : undefined
 };
 
 const PERMIT_STATE_VALIDATION_MESSAGE = 'For the currently selected Authorization status, Permit state';
@@ -104,7 +100,7 @@ const confirm = useConfirm();
 const toast = useToast();
 
 function onDelete() {
-  if (props.permit) {
+  if (permit) {
     confirm.require({
       message: 'Please confirm that you want to delete the selected permit. This cannot be undone.',
       header: 'Confirm delete',
@@ -113,9 +109,9 @@ function onDelete() {
       rejectLabel: 'Cancel',
       accept: () => {
         permitService
-          .deletePermit(props.permit?.permitId as string)
+          .deletePermit(permit?.permitId as string)
           .then(() => {
-            submissionStore.removePermit(props.permit as Permit);
+            submissionStore.removePermit(permit as Permit);
             toast.success('Permit deleted');
           })
           .catch((e: any) => toast.error('Failed to delete permit', e.message))
@@ -137,7 +133,7 @@ function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: PermitForm, { resetForm }) {
-  if (props.permit) initialFormValues = { ...data };
+  if (permit) initialFormValues = { ...data };
   else resetForm();
 
   // Remove extra fields in permit that belongs to permitType
@@ -154,11 +150,11 @@ async function onSubmit(data: PermitForm, { resetForm }) {
   } as Permit;
 
   try {
-    if (!props.permit) {
-      const result = (await permitService.createPermit({ ...permitData, activityId: props.activityId })).data;
+    if (!permit) {
+      const result = (await permitService.createPermit({ ...permitData, activityId: activityId })).data;
       submissionStore.addPermit(result);
     } else {
-      const result = (await permitService.updatePermit({ ...permitData, activityId: props.permit.activityId })).data;
+      const result = (await permitService.updatePermit({ ...permitData, activityId: permit.activityId })).data;
       submissionStore.updatePermit(result);
     }
     toast.success('Permit saved');
@@ -179,7 +175,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
   >
     <template #header>
       <font-awesome-icon
-        v-if="props.permit"
+        v-if="permit"
         icon="fa-solid fa-edit"
         fixed-width
         class="mr-2"
@@ -190,7 +186,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         fixed-width
         class="mr-2"
       />
-      <span class="p-dialog-title">{{ props.permit ? 'Edit' : 'Add' }} permit</span>
+      <span class="p-dialog-title">{{ permit ? 'Edit' : 'Add' }} permit</span>
     </template>
 
     <Form
