@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { ref, watchEffect } from 'vue';
 
-import { Column, DataTable, InputSwitch } from '@/lib/primevue';
+import { Column, DataTable, ToggleSwitch } from '@/lib/primevue';
 import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
@@ -60,7 +60,7 @@ function filterForMyBringForwards(bf: BringForward): boolean {
   <div class="grid">
     <div class="col-7">
       <div class="flex align-items-center justify-content-end pb-1">
-        <InputSwitch
+        <ToggleSwitch
           v-model="filterToUser"
           class="mr-1"
         />

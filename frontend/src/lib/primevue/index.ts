@@ -21,7 +21,7 @@ export { default as IconField } from 'primevue/iconfield';
 export { default as InputIcon } from 'primevue/inputicon';
 export { default as InputMask } from 'primevue/inputmask';
 export { default as InputNumber } from 'primevue/inputnumber';
-export { default as InputSwitch } from 'primevue/inputswitch';
+export { default as ToggleSwitch } from 'primevue/toggleswitch';
 export { default as InputText } from 'primevue/inputtext';
 export { default as Menubar } from 'primevue/menubar';
 export { default as Message } from 'primevue/message';
@@ -36,7 +36,7 @@ export { default as Textarea } from 'primevue/textarea';
 export { default as Timeline } from 'primevue/timeline';
 export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
-export { default as Sidebar } from 'primevue/sidebar';
+export { default as Drawer } from 'primevue/drawer';
 export { default as Stepper } from 'primevue/stepper';
 export { default as Steps } from 'primevue/steps';
 
