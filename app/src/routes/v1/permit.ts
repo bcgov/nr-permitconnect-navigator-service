@@ -4,11 +4,11 @@ import { permitController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-
 import { Action, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { Permit } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -19,7 +19,7 @@ router.get(
   '/',
   hasAuthorization(Resource.PERMIT, Action.READ),
   permitValidator.listPermits,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, { activityId?: string }>, res: Response, next: NextFunction): void => {
     permitController.listPermits(req, res, next);
   }
 );
@@ -29,7 +29,7 @@ router.put(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
   permitValidator.createPermit,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Permit>, res: Response, next: NextFunction): void => {
     permitController.createPermit(req, res, next);
   }
 );
@@ -40,7 +40,7 @@ router.put(
   hasAuthorization(Resource.PERMIT, Action.UPDATE),
   hasAccess('permitId'),
   permitValidator.updatePermit,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Permit>, res: Response, next: NextFunction): void => {
     permitController.updatePermit(req, res, next);
   }
 );
@@ -51,7 +51,7 @@ router.delete(
   hasAuthorization(Resource.PERMIT, Action.DELETE),
   hasAccess('permitId'),
   permitValidator.deletePermit,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ permitId: string }>, res: Response, next: NextFunction): void => {
     permitController.deletePermit(req, res, next);
   }
 );

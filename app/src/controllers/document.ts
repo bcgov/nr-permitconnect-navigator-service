@@ -1,7 +1,7 @@
 import { generateCreateStamps } from '../db/utils/utils';
 import { documentService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
 const controller = {
   async createDocument(

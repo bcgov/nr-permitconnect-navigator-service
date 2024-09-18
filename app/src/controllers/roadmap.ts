@@ -1,7 +1,7 @@
 import { generateCreateStamps } from '../db/utils/utils';
 import { comsService, emailService, noteService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 import type { Email, EmailAttachment } from '../types';
 
 const controller = {

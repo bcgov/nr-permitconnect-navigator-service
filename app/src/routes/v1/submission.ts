@@ -7,7 +7,8 @@ import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { submissionValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { Email, StatisticsFilters, Submission, SubmissionIntake, SubmissionSearchParameters } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -36,7 +37,7 @@ router.get(
   '/search',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
   submissionValidator.searchSubmissions,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, SubmissionSearchParameters>, res: Response, next: NextFunction): void => {
     submissionController.searchSubmissions(req, res, next);
   }
 );
@@ -46,7 +47,7 @@ router.get(
   '/statistics',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
   submissionValidator.getStatistics,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction): void => {
     submissionController.getStatistics(req, res, next);
   }
 );
@@ -55,7 +56,7 @@ router.get(
 router.put(
   '/draft',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
     submissionController.createDraft(req, res, next);
   }
 );
@@ -65,7 +66,7 @@ router.put(
   '/draft/:submissionId',
   hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
   hasAccess('submissionId'),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
   }
 );
@@ -75,7 +76,7 @@ router.put(
   '/emailConfirmation',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.emailConfirmation,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Email>, res: Response, next: NextFunction): void => {
     submissionController.emailConfirmation(req, res, next);
   }
 );
@@ -85,7 +86,7 @@ router.put(
   '/',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.createSubmission,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
     submissionController.createSubmission(req, res, next);
   }
 );
@@ -96,15 +97,18 @@ router.delete(
   hasAuthorization(Resource.SUBMISSION, Action.DELETE),
   hasAccess('submissionId'),
   submissionValidator.deleteSubmission,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
     submissionController.deleteSubmission(req, res, next);
   }
 );
 
 /** Search all submissions */
-router.get('/search', (req: Request, res: Response, next: NextFunction): void => {
-  submissionController.searchSubmissions(req, res, next);
-});
+router.get(
+  '/search',
+  (req: Request<never, never, never, SubmissionSearchParameters>, res: Response, next: NextFunction): void => {
+    submissionController.searchSubmissions(req, res, next);
+  }
+);
 
 /** Gets a specific submission */
 router.get(
@@ -112,7 +116,7 @@ router.get(
   hasAuthorization(Resource.SUBMISSION, Action.READ),
   //hasAccess('submissionId'), // TODO: Temp fix to check submittedBy in controller until we're off chefs
   submissionValidator.getSubmission,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
     submissionController.getSubmission(req, res, next);
   }
 );
@@ -123,7 +127,7 @@ router.put(
   hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
   hasAccess('submissionId'),
   submissionValidator.updateSubmission,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Submission>, res: Response, next: NextFunction): void => {
     submissionController.updateSubmission(req, res, next);
   }
 );
@@ -134,7 +138,7 @@ router.patch(
   hasAuthorization(Resource.SUBMISSION, Action.DELETE),
   hasAccess('submissionId'),
   submissionValidator.updateIsDeletedFlag,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ submissionId: string }, never, { isDeleted: boolean }>, res: Response, next: NextFunction): void => {
     submissionController.updateIsDeletedFlag(req, res, next);
   }
 );

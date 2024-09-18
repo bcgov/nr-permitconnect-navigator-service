@@ -8,6 +8,7 @@ import { Action, Resource } from '../../utils/enums/application';
 import { userValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { UserSearchParameters } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -18,7 +19,7 @@ router.get(
   '/',
   hasAuthorization(Resource.USER, Action.READ),
   userValidator.searchUsers,
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, UserSearchParameters>, res: Response, next: NextFunction): void => {
     userController.searchUsers(req, res, next);
   }
 );

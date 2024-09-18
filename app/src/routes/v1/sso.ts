@@ -6,7 +6,8 @@ import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 
-import type { NextFunction, Request, Response } from '../../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
+import type { BceidSearchParameters, IdirSearchParameters } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -15,7 +16,7 @@ router.use(requireSomeGroup);
 router.get(
   '/idir/users',
   hasAuthorization(Resource.SSO, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, IdirSearchParameters>, res: Response, next: NextFunction): void => {
     ssoController.searchIdirUsers(req, res, next);
   }
 );
@@ -23,7 +24,7 @@ router.get(
 router.get(
   '/basic-bceid/users',
   hasAuthorization(Resource.SSO, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, BceidSearchParameters>, res: Response, next: NextFunction): void => {
     ssoController.searchBasicBceidUsers(req, res, next);
   }
 );

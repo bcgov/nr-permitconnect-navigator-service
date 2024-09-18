@@ -144,7 +144,7 @@ export function isTruthy(value: unknown) {
  * @param {string|string[]} param The query param to process
  * @returns {string[]} A unique, non-empty array of string values, or undefined if empty
  */
-export function mixedQueryToArray(param: string | Array<string>): Array<string> | undefined {
+export function mixedQueryToArray(param: string | Array<string> | undefined): Array<string> | undefined {
   // Short circuit undefined if param is falsy
   if (!param) return undefined;
 
