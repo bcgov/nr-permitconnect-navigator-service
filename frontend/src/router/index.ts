@@ -6,11 +6,45 @@ import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
+
+/**
+ * @function accessHandler
+ * Checks for user access to the requested route and redirect if necessary
+ * @param {object} to The route to navigate to
+ * @returns {object} a Vue route
+ */
+function accessHandler(to: RouteLocationNormalizedGeneric) {
+  const access = to.meta.access as NavigationPermission[];
+
+  if (access && access.length) {
+    const authzStore = useAuthZStore();
+    if (!authzStore.canNavigate(access)) {
+      return { name: RouteName.NOT_FOUND };
+    }
+  }
+}
+
+/**
+ * @function bootstrap
+ * Obtains user permissions if authenticated before hard navigation
+ * @returns {object} a Vue route
+ */
+async function bootstrap() {
+  const authnStore = useAuthNStore();
+  const authzStore = useAuthZStore();
+
+  const { getIsAuthenticated } = storeToRefs(authnStore);
+
+  if (getIsAuthenticated.value && !authzStore.getGroups.length) {
+    const permissions = await yarsService.getPermissions();
+    authzStore.setPermissions(permissions.data);
+  }
+}
 
 /**
  * @function createProps
- * Parses the route query and params to generate vue props
+ * Parses the route query and params to generate Vue props
  * @param {object} route The route object
  * @returns {object} a Vue props object
  */
@@ -22,24 +56,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: async (to) => {
-      // Get user groups if we haven't before any routing
-      const authnStore = useAuthNStore();
-      const { getIsAuthenticated } = storeToRefs(authnStore);
-      const authzStore = useAuthZStore();
-      if (getIsAuthenticated.value && !authzStore.getGroups.length) {
-        const permissions = await yarsService.getPermissions();
-        authzStore.setPermissions(permissions.data);
-      }
-
-      // Check access
-      if (to.meta.access) {
-        if (!authzStore.canNavigate(Array.isArray(to.meta.access) ? to.meta.access : [to.meta.access])) {
-          useRouter().replace({ name: RouteName.NOT_FOUND });
-          return;
-        }
-      }
-    },
+    beforeEnter: [bootstrap, accessHandler],
     children: [
       {
         path: '/',
@@ -47,15 +64,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/HomeView.vue')
       },
       {
-        path: '/soon',
-        name: RouteName.COMING_SOON,
-        component: () => import('@/views/ComingSoon.vue')
-      },
-      {
         path: '/developer',
         name: RouteName.DEVELOPER,
         component: () => import('@/views/DeveloperView.vue'),
-        meta: { requiresAuth: true, access: NavigationPermission.DEVELOPER }
+        beforeEnter: accessHandler,
+        meta: { requiresAuth: true, access: [NavigationPermission.DEVELOPER] }
       },
       {
         path: '/forbidden',
@@ -64,16 +77,20 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: '/housing',
-        component: () => import('@/views/GenericView.vue'),
-
         meta: { requiresAuth: true },
         children: [
           {
             path: '',
             name: RouteName.HOUSING,
             component: () => import('../views/housing/HousingView.vue'),
+            beforeEnter: () => {
+              const authzStore = useAuthZStore();
+              if (!authzStore.canNavigate(NavigationPermission.HOUSING)) {
+                useRouter().replace({ name: RouteName.HOUSING_SUBMISSIONS });
+              }
+            },
             meta: {
-              access: NavigationPermission.HOUSING
+              access: [NavigationPermission.HOUSING]
             }
           },
           {
@@ -83,18 +100,20 @@ const routes: Array<RouteRecordRaw> = [
                 path: '',
                 name: RouteName.HOUSING_ENQUIRY,
                 component: () => import('../views/housing/enquiry/EnquiryView.vue'),
+                beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: NavigationPermission.HOUSING_ENQUIRY
+                  access: [NavigationPermission.HOUSING_ENQUIRY]
                 }
               },
               {
                 path: 'intake',
                 name: RouteName.HOUSING_ENQUIRY_INTAKE,
                 component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+                beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: NavigationPermission.HOUSING_INTAKE
+                  access: [NavigationPermission.HOUSING_INTAKE]
                 }
               }
             ]
@@ -106,18 +125,20 @@ const routes: Array<RouteRecordRaw> = [
                 path: '',
                 name: RouteName.HOUSING_SUBMISSION,
                 component: () => import('@/views/housing/submission/SubmissionView.vue'),
+                beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: NavigationPermission.HOUSING_SUBMISSION
+                  access: [NavigationPermission.HOUSING_SUBMISSION]
                 }
               },
               {
                 path: 'intake',
                 name: RouteName.HOUSING_SUBMISSION_INTAKE,
                 component: () => import('@/views/housing/submission/SubmissionIntakeView.vue'),
+                beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: NavigationPermission.HOUSING_INTAKE
+                  access: [NavigationPermission.HOUSING_INTAKE]
                 }
               }
             ]
@@ -131,6 +152,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: '',
                 component: () => import('@/views/housing/project/ProjectListView.vue'),
+                beforeEnter: accessHandler,
                 meta: {
                   access: [NavigationPermission.HOUSING_STATUS_TRACKER]
                 },
@@ -139,6 +161,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: ':submissionId',
                 component: () => import('@/views/housing/project/ProjectView.vue'),
+                beforeEnter: accessHandler,
                 meta: {
                   access: [NavigationPermission.HOUSING_STATUS_TRACKER]
                 },
@@ -151,6 +174,7 @@ const routes: Array<RouteRecordRaw> = [
             path: 'submissions',
             name: RouteName.HOUSING_SUBMISSIONS,
             component: () => import('@/views/housing/SubmissionsView.vue'),
+            beforeEnter: accessHandler,
             meta: {
               access: [NavigationPermission.HOUSING_SUBMISSIONS, NavigationPermission.HOUSING_SUBMISSIONS_SUB]
             }
@@ -159,13 +183,12 @@ const routes: Array<RouteRecordRaw> = [
             path: '/guide',
             name: RouteName.HOUSING_GUIDE,
             component: () => import('@/views/ComingSoon.vue'),
-            meta: { access: NavigationPermission.HOUSING }
+            meta: { access: [NavigationPermission.HOUSING] }
           }
         ]
       },
       {
         path: '/oidc',
-        component: () => import('@/views/GenericView.vue'),
         children: [
           {
             path: 'callback',
@@ -190,7 +213,9 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/user',
         name: RouteName.USER_MANAGEMENT,
-        component: () => import('@/views/user/UserManagementView.vue')
+        component: () => import('@/views/user/UserManagementView.vue'),
+        beforeEnter: accessHandler,
+        meta: { requiresAuth: true, access: [NavigationPermission.HOUSING_USER_MANAGEMENT] }
       },
       {
         path: '/:pathMatch(.*)*',
@@ -204,7 +229,6 @@ const routes: Array<RouteRecordRaw> = [
 export default function getRouter() {
   const appStore = useAppStore();
   const authService = new AuthService();
-  const authzStore = useAuthZStore();
 
   const router = createRouter({
     history: createWebHistory(),
@@ -242,14 +266,6 @@ export default function getRouter() {
       if (!user || user.expired) {
         window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
         router.replace({ name: RouteName.OIDC_LOGIN });
-        return;
-      }
-    }
-
-    // Check for reroutes
-    if (to.name === RouteName.HOUSING) {
-      if (!authzStore.canNavigate(NavigationPermission.HOUSING)) {
-        router.replace({ name: RouteName.HOUSING_SUBMISSIONS });
         return;
       }
     }
