@@ -2,6 +2,7 @@
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
@@ -32,7 +33,9 @@ const authzStore = useAuthZStore();
 const { getProfile } = storeToRefs(authnStore);
 
 // State
+const route = useRoute();
 const accordionIndex: Ref<number | null> = ref(null);
+const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
@@ -44,6 +47,7 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
 const toast = useToast();
+const router = useRouter();
 
 function assignEnquiriesAndFullName() {
   const relatedActivityIds = new Set();
@@ -194,10 +198,34 @@ watch(accordionIndex, () => {
     window.sessionStorage.removeItem(StorageKey.BF_ACCORDION_IDX);
   }
 });
+
+// Watch for changes in the active tab index
+watch(activeTabIndex, (newIndex) => {
+  // wipe out the query when switching tabs otherwise append the tab index to the query
+  if (route.query.tab != newIndex.toString()) {
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSIONS,
+      query: {
+        tab: newIndex.toString()
+      }
+    });
+  } else {
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSIONS,
+      query: {
+        ...route.query,
+        tab: newIndex.toString()
+      }
+    });
+  }
+});
 </script>
 
 <template>
-  <TabView v-if="!loading">
+  <TabView
+    v-if="!loading"
+    v-model:activeIndex="activeTabIndex"
+  >
     <TabPanel header="Projects">
       <Accordion
         v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"

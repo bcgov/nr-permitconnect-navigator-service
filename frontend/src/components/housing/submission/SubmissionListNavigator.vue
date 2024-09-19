@@ -25,10 +25,10 @@ import type { Submission } from '@/types';
 
 // Types
 type Pagination = {
-  rows: number;
-  order: number;
-  field: string;
-  page: number;
+  rows?: number;
+  order?: number;
+  field?: string;
+  page?: number;
 };
 
 // Props
@@ -48,11 +48,19 @@ const route = useRoute();
 const selection: Ref<Submission | undefined> = ref(undefined);
 const dataTable = ref(null);
 const pagination: Ref<Pagination> = ref({
-  rows: toNumber(route.query.rows as string) ?? 10,
-  order: toNumber(route.query.order as string) ?? -1,
-  field: (route.query.field as string) ?? 'submittedAt',
-  page: toNumber(route.query.page as string) ?? 0
+  rows: 10,
+  order: -1,
+  field: 'submittedAt',
+  page: 0
 });
+
+// read from query params if tab is set to enquiry otherwise use default values
+if (!route.query.tab || route.query.tab === '0') {
+  pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
+  pagination.value.order = toNumber(route.query.order as string) ?? -1;
+  pagination.value.field = (route.query.field as string) ?? 'submittedAt';
+  pagination.value.page = toNumber(route.query.page as string) ?? 0;
+}
 
 // Actions
 const confirmDialog = useConfirm();
@@ -127,7 +135,8 @@ function updateQueryParams() {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
       field: pagination.value.field ?? undefined,
-      page: pagination.value.page ?? undefined
+      page: pagination.value.page ?? undefined,
+      tab: route.query.tab ?? 0
     }
   });
 }
@@ -155,12 +164,14 @@ function updateQueryParams() {
     @update:sort-field="
       (e) => {
         pagination.field = e;
+        pagination.page = 0;
         updateQueryParams();
       }
     "
     @update:sort-order="
       (e) => {
         pagination.order = e ?? -1;
+        pagination.page = 0;
         updateQueryParams();
       }
     "
