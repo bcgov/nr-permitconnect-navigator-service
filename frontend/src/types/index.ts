@@ -2,6 +2,7 @@ export type { AccessRequest } from './AccessRequest';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';
 export type { BringForward } from './BringForward';
 export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';
+export type { Context } from './Context';
 export type { Document } from './Document';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
