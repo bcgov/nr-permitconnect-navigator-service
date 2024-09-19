@@ -2,8 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { computed, onBeforeMount, nextTick, ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
@@ -13,13 +12,11 @@ import {
   AutoComplete,
   DatePicker,
   Checkbox,
-  FormAutosave,
-  FormNavigationGuard,
+  Select,
   InputMask,
   InputNumber,
   RadioList,
   InputText,
-  Select,
   StepperHeader,
   StepperNavigation,
   TextArea
@@ -27,6 +24,7 @@ import {
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import IntakeAssistanceConfirmation from './IntakeAssistanceConfirmation.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
+import SubmissionIntakeConfirmation from '@/components/housing/submission/SubmissionIntakeConfirmation.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
@@ -36,62 +34,63 @@ import {
   Divider,
   Message,
   Stepper,
-  Step,
-  StepList,
-  StepPanel,
-  StepPanels,
+  Steps,
   useConfirm,
   useToast
 } from '@/lib/primevue';
+import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_APPLICANT_LIST,
   PROJECT_LOCATION_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import {
   IntakeFormCategory,
+  IntakeStatus,
   PermitNeeded,
   PermitStatus,
-  ProjectApplicant,
   ProjectLocation,
   SubmissionType
 } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
-import { getHTMLElement, omit } from '@/utils/utils';
+import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, SubmissionIntake } from '@/types';
-import type { GenericObject } from 'vee-validate';
+import type { Document, Permit, PermitType, Submission } from '@/types';
 
+// Interfaces
+interface SubmissionForm extends Submission {
+  addressSearch?: string;
+  appliedPermits?: Array<Permit>;
+  investigatePermits?: Array<Permit>;
+}
 // Types
 type GeocoderEntry = {
   geometry: { coordinates: Array<number>; [key: string]: any };
   properties: { [key: string]: string };
 };
 
-type SubmissionForm = {
-  addressSearch?: string;
-} & SubmissionIntake;
-
 // Props
-const {
-  activityId = undefined,
-  submissionId = undefined,
-  draftId = undefined
-} = defineProps<{
+type Props = {
   activityId?: string;
   submissionId?: string;
-  draftId?: string;
-}>();
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  activityId: undefined,
+  submissionId: undefined
+});
+
+const router = useRouter();
+const route = useRoute();
 
 // Constants
 const VALIDATION_BANNER_TEXT =
@@ -109,16 +108,15 @@ const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
-const assistanceAssignedEnquiryId: Ref<string | undefined> = ref(undefined);
-const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const isSubmittable: Ref<boolean> = ref(false);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
+const loadForm: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
+const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
@@ -127,48 +125,45 @@ const validationErrors = computed(() => {
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
 });
 
+const { formUpdated, stopAutoSave } = useAutoSave(() => {
+  const values = formRef.value?.values;
+  if (values) onSaveDraft(values, true);
+});
+
 // Actions
-const { t } = useI18n();
 const confirm = useConfirm();
-const router = useRouter();
 const toast = useToast();
 
 const getBackButtonConfig = computed(() => {
-  return {
-    text: 'Back to Housing',
-    routeName: RouteName.HOUSING
-  };
+  if (route.query.activityId) {
+    return {
+      text: 'Back to my drafts and previous entries',
+      routeName: RouteName.HOUSING_SUBMISSIONS
+    };
+  } else {
+    return {
+      text: 'Back to Housing',
+      routeName: RouteName.HOUSING
+    };
+  }
 });
 
-function confirmSubmit(data: GenericObject) {
-  const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
+const checkSubmittable = (stepNumber: number) => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (stepNumber === 3) isSubmittable.value = true;
+};
+
+function confirmSubmit(data: any) {
+  const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
-    message: 'Are you sure you wish to submit this form?',
+    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
     accept: () => onSubmit(submitData)
   });
-}
-
-async function generateActivityId() {
-  try {
-    const response = await submissionService.updateDraft({
-      draftId: undefined,
-      activityId: undefined,
-      data: {}
-    });
-    if (response.data?.activityId && response.data?.draftId) {
-      syncFormAndRoute(response.data.activityId, response.data.draftId);
-      return response.data.activityId;
-    } else {
-      return undefined;
-    }
-  } catch (error) {
-    toast.error('Failed to generate activity ID');
-    return undefined;
-  }
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
@@ -178,60 +173,21 @@ const getAddressSearchLabel = (e: GeocoderEntry) => {
 function handleProjectLocationClick() {
   let location = formRef?.value?.values?.location;
   if (location?.latitude || location?.longitude) {
-    const resetFields = [
-      'location.latitude',
-      'location.longitude',
-      'location.streetAddress',
-      'location.locality',
-      'location.province'
-    ];
-    resetFields.forEach((x) => formRef?.value?.setFieldValue(x, null));
+    formRef?.value?.setFieldValue('location.latitude', null);
+    formRef?.value?.setFieldValue('location.longitude', null);
+    formRef.value?.setFieldValue('location.streetAddress', null);
+    formRef.value?.setFieldValue('location.locality', null);
+    formRef.value?.setFieldValue('location.province', null);
   }
 }
 
-async function onAssistanceRequest(values: GenericObject) {
-  try {
-    const draft = await onSaveDraft(values, false, false);
-
-    const formattedData = Object.assign(
-      {
-        basic: {
-          applyForPermitConnect: BasicResponse.NO,
-          enquiryDescription: 'Assistance requested',
-          isRelated: BasicResponse.YES,
-          relatedActivityId: draft.activityId,
-          enquiryType: SubmissionType.ASSISTANCE
-        }
-      },
-      { contacts: values?.[IntakeFormCategory.CONTACTS] }
-    );
-
-    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
-
-    if (enquiryResponse.data.activityId) {
-      toast.success('Form saved');
-      assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
-      assistanceAssignedEnquiryId.value = enquiryResponse.data.enquiryId;
-
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
-    } else {
-      toast.error('Failed to submit enquiry');
-    }
-  } catch (e: any) {
-    toast.error('Failed to save enquiry', e);
-  } finally {
-    editable.value = true;
-  }
-}
-
-async function onAddressSearchInput(e: IInputEvent) {
+const onAddressSearchInput = async (e: IInputEvent) => {
   const input = e.target.value;
   addressGeocoderOptions.value =
     ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
-}
+};
 
-async function onAddressSelect(e: SelectChangeEvent) {
+const onAddressSelect = async (e: SelectChangeEvent) => {
   if (e.originalEvent instanceof InputEvent) return;
 
   if (e.value as GeocoderEntry) {
@@ -250,9 +206,42 @@ async function onAddressSelect(e: SelectChangeEvent) {
     formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
     formRef.value?.setFieldValue('location.province', properties?.provinceCode);
   }
+};
+
+async function handleEnquirySubmit(values: any, relatedActivityId: string) {
+  try {
+    const formattedData = Object.assign(
+      {
+        basic: {
+          applyForPermitConnect: BasicResponse.NO,
+          enquiryDescription: 'Assistance requested',
+          isRelated: BasicResponse.YES,
+          relatedActivityId: relatedActivityId,
+          enquiryType: SubmissionType.ASSISTANCE
+        },
+        submit: true
+      },
+      { applicant: values?.[IntakeFormCategory.APPLICANT] }
+    );
+
+    const enquiryResponse = await enquiryService.createDraft(formattedData);
+
+    if (enquiryResponse.data.activityId) {
+      toast.success('Form saved');
+      assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
+    } else {
+      toast.error('Failed to submit enquiry');
+    }
+  } catch (e: any) {
+    toast.error('Failed to save enquiry', e);
+  } finally {
+    editable.value = true;
+  }
 }
 
-async function onLatLongInputClick() {
+const onLatLongInputClick = async () => {
   const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
   const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
 
@@ -261,11 +250,11 @@ async function onLatLongInputClick() {
     mapLatitude.value = location.latitude;
     mapLongitude.value = location.longitude;
   }
-}
+};
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.CONTACTS:
+    case IntakeFormCategory.APPLICANT:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -280,7 +269,6 @@ async function onInvalidSubmit() {
 
     case IntakeFormCategory.PERMITS:
     case IntakeFormCategory.APPLIED_PERMITS:
-    case IntakeFormCategory.INVESTIGATE_PERMIS:
       activeStep.value = 3;
       break;
   }
@@ -303,106 +291,100 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
-  autoSaveRef.value?.stopAutoSave();
+async function onSaveDraft(
+  data: any,
+  isAutoSave: boolean = false,
+  showToast: boolean = true,
+  assistanceRequired: boolean = false
+) {
+  editable.value = false;
+  // Cleanup unneeded data to be saved to draft
+  const draftData = omit(data as SubmissionForm, ['addressSearch']);
+
+  // Remove empty permits
+  if (Array.isArray(draftData.appliedPermits)) {
+    draftData.appliedPermits = draftData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
+  if (Array.isArray(draftData.investigatePermits)) {
+    draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  }
 
   let response;
   try {
-    response = await submissionService.updateDraft({
-      draftId: draftId,
-      activityId: data.activityId,
-      data: data
-    });
+    if (data.submissionId) {
+      response = await submissionService.updateDraft(draftData.submissionId, draftData);
+    } else {
+      response = await submissionService.createDraft(draftData);
+    }
 
-    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
-
-    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
+    if (response.data.submissionId && response.data.activityId) {
+      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
+      formRef.value?.setFieldValue('activityId', response.data.activityId);
+    } else {
+      throw new Error('Failed to retrieve correct draft data');
+    }
+    if (isAutoSave) {
+      if (showToast) toast.success('Draft autosaved');
+    } else {
+      if (showToast) toast.success('Draft saved');
+      formUpdated.value = false;
+    }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
+  } finally {
+    editable.value = true;
   }
 
-  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
-}
-
-function onStepChange(stepNumber: number) {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
+  if (assistanceRequired && response?.data?.activityId) {
+    formUpdated.value = false;
+    handleEnquirySubmit(draftData, response.data.activityId);
+    stopAutoSave();
+  }
 }
 
 async function onSubmit(data: any) {
   editable.value = false;
 
   try {
-    autoSaveRef.value?.stopAutoSave();
-
-    // Convert contact fields into contacts array object
-    const submissionData = {
-      ...data,
-      contacts: [
-        {
-          firstName: data.contacts.contactFirstName,
-          lastName: data.contacts.contactLastName,
-          phoneNumber: data.contacts.contactPhoneNumber,
-          email: data.contacts.contactEmail,
-          contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-          contactPreference: data.contacts.contactPreference
-        }
-      ]
-    };
-
-    // Remove empty investigate permit objects
-    const filteredInvestigatePermits = submissionData.investigatePermits.filter(
-      (x: object) => JSON.stringify(x) !== '{}'
-    );
-
-    submissionData.investigatePermits = filteredInvestigatePermits;
-
-    const response = await submissionService.submitDraft({ ...submissionData, draftId });
-
-    if (response.data.activityId && response.data.submissionId) {
+    let response;
+    if (data.submissionId) {
+      response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
+    } else {
+      response = await submissionService.createDraft({ ...data, submit: true });
+    }
+    if (response.data.activityId) {
       assignedActivityId.value = response.data.activityId;
-
+      formRef.value?.setFieldValue('activityId', response.data.activityId);
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
-
-      router.push({
-        name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
-        query: {
-          activityId: response.data.activityId,
-          submissionId: response.data.submissionId
-        }
-      });
+      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
   } catch (e: any) {
     toast.error('Failed to save intake', e);
+  } finally {
     editable.value = true;
   }
 }
 
-async function emailConfirmation(actId: string, subId: string) {
-  try {
-    const configCC = getConfig.value.ches?.submission?.cc;
-    const body = confirmationTemplateSubmission({
-      '{{ contactName }}': formRef.value?.values.contacts.contactFirstName,
-      '{{ activityId }}': actId,
-      '{{ submissionId }}': subId
-    });
-    let applicantEmail = formRef.value?.values.contacts.contactEmail;
-    let emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: configCC,
-      subject: 'Confirmation of Submission',
-      bodyType: 'html',
-      body: body
-    };
-    await submissionService.emailConfirmation(emailData);
-  } catch (e: any) {
-    toast.error('Failed to send confirmation email. ', e);
-  }
+async function emailConfirmation(activityId: string, submissionId: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const body = confirmationTemplateSubmission({
+    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
+    '{{ activityId }}': activityId,
+    '{{ submissionId }}': submissionId
+  });
+  let applicantEmail = formRef.value?.values.applicant.contactEmail;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    bodyType: 'html',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
 }
 
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
@@ -414,78 +396,34 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function syncFormAndRoute(actId: string, drftId: string) {
-  if (drftId) {
-    // Update route query for refreshing
-    router.replace({
-      name: RouteName.HOUSING_SUBMISSION_INTAKE,
-      query: {
-        draftId: drftId
-      }
-    });
-  }
-
-  if (actId) {
-    formRef.value?.resetForm({
-      values: {
-        ...formRef.value?.values,
-        activityId: actId
-      }
-    });
-  }
-}
-
 onBeforeMount(async () => {
-  try {
-    // Clearing the document store on page load
-    submissionStore.setDocuments([]);
-
+  if (props.submissionId && props.activityId) {
     let response,
       permits: Array<Permit> = [],
-      documents: Array<Document> = [];
+      documents: Array<Document> = [],
+      submissionId = props.submissionId,
+      activityId = props.activityId;
 
-    if (draftId) {
-      response = (await submissionService.getDraft(draftId)).data;
-
-      initialFormValues.value = {
-        ...response.data,
-        activityId: response.activityId,
-        appliedPermits:
-          response.data.appliedPermits?.map((x: Partial<Permit>) => ({
-            ...x,
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-          })) ?? []
-      };
-
-      if (response.activityId) {
-        documents = (await documentService.listDocuments(response.activityId)).data;
-        submissionStore.setDocuments(documents);
-      }
-    } else {
-      if (submissionId && activityId) {
-        response = (await submissionService.getSubmission(submissionId)).data;
-        permits = (await permitService.listPermits({ activityId: activityId })).data;
-        documents = (await documentService.listDocuments(activityId)).data;
-        submissionStore.setDocuments(documents);
-
-        // Set form to read-only on non draft form reopening
-        editable.value = false;
-      }
+    try {
+      response = (await submissionService.getSubmission(submissionId)).data;
+      permits = (await permitService.listPermits(activityId)).data;
+      documents = (await documentService.listDocuments(activityId)).data;
+      submissionStore.setDocuments(documents);
+      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
 
       initialFormValues.value = {
         activityId: response?.activityId,
         submissionId: response?.submissionId,
-        contacts: {
-          contactFirstName: response?.contacts[0].firstName,
-          contactLastName: response?.contacts[0].lastName,
-          contactPhoneNumber: response?.contacts[0].phoneNumber,
-          contactEmail: response?.contacts[0].email,
-          contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
-          contactPreference: response?.contacts[0].contactPreference
+        applicant: {
+          contactFirstName: response?.contactFirstName,
+          contactLastName: response?.contactLastName,
+          contactPhoneNumber: response?.contactPhoneNumber,
+          contactEmail: response?.contactEmail,
+          contactApplicantRelationship: response?.contactApplicantRelationship,
+          contactPreference: response?.contactPreference
         },
         basic: {
-          consentToFeedback: response?.consentToFeedback,
-          projectApplicantType: response?.projectApplicantType,
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
           isDevelopedInBC: response?.isDevelopedInBC,
           registeredName: response?.companyNameRegistered
         },
@@ -525,63 +463,64 @@ onBeforeMount(async () => {
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)
           .map((x: Permit) => ({
             ...x,
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
           })),
         permits: {
           hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
         },
         investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
       };
+
+      await nextTick();
+      // Move map pin
+      onLatLongInputClick();
+      loadForm.value = true;
+    } catch {
+      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
     }
-
-    await nextTick();
-
-    // Move map pin
-    onLatLongInputClick();
-  } catch (e) {
-    router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+  } else {
+    initialFormValues.value = {};
+    loadForm.value = true;
   }
+  // clearing the document store on page load
+  submissionStore.setDocuments([]);
 });
 </script>
 
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
+      :confirm-leave="editable && !!formUpdated"
+      confirm-message="Are you sure you want to leave this page?
+      Any unsaved changes will be lost. Please save as draft first."
       :route-name="getBackButtonConfig.routeName"
       :text="getBackButtonConfig.text"
     />
-
     <div class="flex justify-content-center app-primary-color mt-3">
-      <h3>Housing Project Intake Form</h3>
+      <h3>Project Investigation Form</h3>
     </div>
-    <div>{{ activeStep }}</div>
+
     <Form
-      v-if="initialFormValues"
+      v-if="loadForm"
       id="form"
-      v-slot="{ setFieldValue, errors, meta, values }"
+      v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
+      @change="() => (formUpdated = true)"
     >
-      <FormNavigationGuard v-if="editable" />
-      <FormAutosave
-        v-if="editable"
-        ref="autoSaveRef"
-        :callback="() => onSaveDraft(values, true)"
-      />
-
       <SubmissionAssistance
-        v-if="editable && values?.contacts"
+        v-if="editable && values?.applicant"
         :form-errors="errors"
         :form-values="values"
-        @on-submit-assistance="onAssistanceRequest(values)"
+        @on-submit-assistance="onSaveDraft(values, true, false, true)"
       />
 
       <input
         type="hidden"
-        name="draftId"
+        name="submissionId"
       />
 
       <input
@@ -589,35 +528,29 @@ onBeforeMount(async () => {
         name="activityId"
       />
 
-      <Stepper :value="activeStep">
-        <StepList>
-          <Step :value="0">
       <Stepper
-        v-model:active-step="activeStep"
-        @update:active-step="onStepChange"
+        v-model:activeStep="activeStep"
+        @update:active-step="checkSubmittable"
       >
         <!--
-      Basic info
+      Contact Information
       -->
         <Steps>
           <template #header="{ index, clickCallback }">
             <StepperHeader
-              :index="0"
+              :index="index"
               :active-step="activeStep"
-              :click-callback="() => (activeStep = 0)"
               :click-callback="clickCallback"
-              title="Basic info"
+              title="Contact Information"
               icon="fa-user"
-          </Step>
-              :errors="
-                validationErrors.includes(IntakeFormCategory.CONTACTS) ||
-                validationErrors.includes(IntakeFormCategory.BASIC)
-              "
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.BASIC)
+              }"
             />
-          </Step>
-        </StepList>
-        <StepPanels>
-          <StepPanel :value="0">
+          </template>
+          <template #content="{ nextCallback }">
             <CollectionDisclaimer />
 
             <Message
@@ -632,28 +565,28 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
+                <span class="section-header">Who is the primary contact regarding this project?</span>
                 <Divider type="solid" />
               </template>
               <template #content>
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    :name="`contacts.contactFirstName`"
+                    name="applicant.contactFirstName"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.contactLastName`"
+                    name="applicant.contactLastName"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    :name="`contacts.contactPhoneNumber`"
+                    name="applicant.contactPhoneNumber"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -661,14 +594,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.contactEmail`"
+                    name="applicant.contactEmail"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Select
                     class="col-6"
-                    :name="`contacts.contactApplicantRelationship`"
+                    name="applicant.contactApplicantRelationship"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -676,7 +609,7 @@ onBeforeMount(async () => {
                   />
                   <Select
                     class="col-6"
-                    :name="`contacts.contactPreference`"
+                    name="applicant.contactPreference"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
@@ -685,38 +618,37 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.projectApplicantTypeCard') }}</span>
+                <span class="section-header">
+                  Is this project being developed by a business, company, or organization?
+                </span>
                 <Divider type="solid" />
               </template>
               <template #content>
                 <div class="formgrid grid">
                   <RadioList
                     class="col-12"
-                    name="basic.projectApplicantType"
+                    name="basic.isDevelopedByCompanyOrOrg"
                     :bold="false"
                     :disabled="!editable"
-                    :options="PROJECT_APPLICANT_LIST"
+                    :options="YES_NO_LIST"
                     @on-change="
                       (e: string) => {
-                        if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBC', null);
+                        if (e === BasicResponse.NO) setFieldValue('basic.isDevelopedInBC', null);
                       }
                     "
                   />
 
                   <span
-                    v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
+                    v-if="values.basic?.isDevelopedByCompanyOrOrg === BasicResponse.YES"
                     class="col-12"
                   >
                     <div class="flex align-items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
                       <div
-                        v-tooltip.right="t('submissionIntakeForm.isRegisteredTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.isRegisteredTooltip')"
+                        v-tooltip.right="'Are you registered with OrgBook BC?'"
                         class="pl-2"
-                        tabindex="0"
                       >
                         <font-awesome-icon icon="fa-solid fa-circle-question" />
                       </div>
@@ -753,12 +685,16 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-          </StepPanel>
 
             <StepperNavigation
               :editable="editable"
               :next-callback="nextCallback"
               :prev-disabled="true"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
             >
               <template #content>
                 <Button
@@ -784,7 +720,14 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -800,7 +743,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.projectNameCard') }}</span>
+                <span class="section-header">Help us learn more about your housing project</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -813,82 +756,109 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                   />
                   <div class="col-6" />
+                  <div class="col-12">
+                    <div class="flex align-items-center">
+                      <label>Provide additional information</label>
+                      <div
+                        v-tooltip.right="
+                          `Provide us with additional information -
+                         short description about the project, project website link, or upload a document.`
+                        "
+                        class="pl-2 mb-2"
+                      >
+                        <font-awesome-icon icon="fa-solid fa-circle-question" />
+                      </div>
+                    </div>
+                  </div>
+                  <!-- eslint-disable max-len -->
+                  <TextArea
+                    class="col-12"
+                    name="housing.projectDescription"
+                    placeholder="Provide us with additional information - short description about the project and/or project website link"
+                    :disabled="!editable"
+                  />
+                  <!-- prettier-ignore -->
+                  <label class="col-12">
+                    Upload documents about your housing project (pdfs, maps,
+                    <a
+                      href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                      target="_blank"
+                      class="text-blue-500 underline"
+                    >shape files</a>, etc)
+                  </label>
+                  <AdvancedFileUpload
+                    :activity-id="values.activityId"
+                    :disabled="!editable"
+                  />
                 </div>
               </template>
             </Card>
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.singleFamilySelectedCard') }}</span>
+                <span class="section-header">Select the types of residential units being developed</span>
                 <Divider type="solid" />
               </template>
               <template #content>
                 <div class="formgrid grid">
-                  <div class="col-12">
-                    <Checkbox
-                      name="housing.singleFamilySelected"
-                      label="Single-family"
-                      :bold="false"
-                      :disabled="!editable"
-                      :invalid="!!errors.housing && meta.touched"
-                    />
-                  </div>
-                  <Dropdown
-                    v-if="values.housing.singleFamilySelected"
+                  <Checkbox
                     class="col-6"
-                    name="housing.singleFamilyUnits"
-                    :disabled="!editable || !values.housing.singleFamilySelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
+                    name="housing.singleFamilySelected"
+                    label="Single-family"
+                    :bold="false"
+                    :disabled="!editable"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                   />
-                  <div class="col-12">
+                  <div class="col-6">
                     <div class="flex">
                       <Checkbox
-                        class="align-content-center"
                         name="housing.multiFamilySelected"
                         label="Multi-family"
                         :bold="false"
                         :disabled="!editable"
-                        :invalid="!!errors.housing && meta.touched"
+                        :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                       />
                       <div
-                        v-tooltip.right="t('submissionIntakeForm.multiFamilyTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.multiFamilyTooltip')"
+                        v-tooltip.right="
+                          `Multi-family dwelling: a residential building that contains two or more attached dwellings,
+                    including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.`
+                        "
                         class="pl-2"
-                        tabindex="0"
                       >
                         <font-awesome-icon icon="fa-solid fa-circle-question" />
                       </div>
                     </div>
                   </div>
                   <Select
-                    v-if="values.housing.multiFamilySelected"
-                    class="col-6 align-content-center"
+                    class="col-6"
+                    name="housing.singleFamilyUnits"
+                    :disabled="!editable || !values.housing.singleFamilySelected"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
+                    placeholder="How many expected units?"
+                  />
+                  <Select
+                    class="col-6"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
-                    <Checkbox
-                      name="housing.otherSelected"
-                      label="Other"
-                      :bold="false"
-                      :disabled="!editable"
-                      :invalid="!!errors?.housing && meta.touched"
-                    />
-                  </div>
+                  <Checkbox
+                    class="col-6"
+                    name="housing.otherSelected"
+                    label="Other"
+                    :bold="false"
+                    :disabled="!editable"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                  />
+                  <div class="col-6" />
                   <InputText
-                    v-if="values.housing.otherSelected"
-                    class="col-6 mb-2"
+                    class="col-6"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
-                  <div class="col-6" />
-
                   <Select
-                    v-if="values.housing.otherSelected"
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
@@ -897,7 +867,7 @@ onBeforeMount(async () => {
                   />
                   <div class="col-12">
                     <ErrorMessage
-                      v-show="meta.touched"
+                      v-show="formRef?.meta?.touched"
                       name="housing"
                     />
                   </div>
@@ -907,11 +877,12 @@ onBeforeMount(async () => {
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">{{ t('submissionIntakeForm.hasRentalUnitsCard') }}</span>
+                  <span class="section-header">Will this project include rental units?</span>
                   <div
-                    v-tooltip.right="t('submissionIntakeForm.rentalUnitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.rentalUnitsTooltip')"
-                    tabindex="0"
+                    v-tooltip.right="
+                      `Rental refers to a purpose built residentual unit, property,
+                  or dwelling that is available for long term rent by tenants.`
+                    "
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -942,9 +913,7 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      {{ t('submissionIntakeForm.financiallySupportedCard') }}
-                    </span>
+                    <span class="section-header">Is this project associated with any of the following?</span>
                   </div>
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
@@ -978,10 +947,10 @@ onBeforeMount(async () => {
                       </label>
                       <!-- eslint-disable max-len -->
                       <div
-                        v-tooltip.right="t('submissionIntakeForm.bcHousingTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.bcHousingTooltip')"
+                        v-tooltip.right="
+                          `BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.`
+                        "
                         class="mb-2"
-                        tabindex="0"
                       >
                         <font-awesome-icon
                           class="pl-2"
@@ -1079,59 +1048,66 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-            <Card>
-              <template #title>
-                <span class="section-header">
-                  {{ t('submissionIntakeForm.projectDescriptionCard') }}
-                </span>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="col-12 my-0 py-0">
-                  <div class="flex align-items-center">
-                    <label>Provide additional information</label>
-                    <div
-                      v-tooltip.right="t('submissionIntakeForm.additionalInfoTooltip')"
-                      v-tooltip.focus.right="t('submissionIntakeForm.additionalInfoTooltip')"
-                      class="pl-2 mb-2"
-                      tabindex="0"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
-                  </div>
-                </div>
-
-                <!-- eslint-disable max-len -->
-                <TextArea
-                  class="col-12 mb-0 pb-0"
-                  name="housing.projectDescription"
-                  placeholder="Provide us with additional information - short description about the project and/or project website link"
-                  :disabled="!editable"
-                />
-                <label class="col-12 mt-0 pt-0">
-                  Upload documents about your housing project (pdfs, maps,
-                  <a
-                    href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                    target="_blank"
-                    class="text-blue-500 underline"
-                  >
-                    shape files
-                  </a>
-                  , etc)
-                </label>
-                <AdvancedFileUpload
-                  :activity-id="values.activityId"
-                  :disabled="!editable"
-                  :generate-activity-id="generateActivityId"
-                />
-              </template>
-            </Card>
 
             <StepperNavigation
               :editable="editable"
               :next-callback="nextCallback"
               :prev-callback="prevCallback"
             >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
+          </template>
+        </Steps>
+
+        <!--
+      Location
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Location"
+              icon="fa-location-dot"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            />
+          </template>
+          <template #content="{ prevCallback, nextCallback }">
+            <Message
+              v-if="validationErrors.length"
+              severity="error"
+              icon="pi pi-exclamation-circle"
+              :closable="false"
+              class="text-center mt-0"
+            >
+              {{ VALIDATION_BANNER_TEXT }}
+            </Message>
+
+            <Card>
+              <template #title>
+                <div class="flex">
+                  <span class="section-header">
+                    Has the location of this project been affected by natural disaster?
+                  </span>
+                </div>
+                <Divider type="solid" />
+              </template>
               <template #content>
                 <div class="formgrid grid">
                   <RadioList
@@ -1277,12 +1253,12 @@ onBeforeMount(async () => {
                     </Card>
                   </div>
                 </div>
-                <!-- <Map
+                <Map
                   ref="mapRef"
                   :disabled="!editable"
                   :latitude="mapLatitude"
                   :longitude="mapLongitude"
-                /> -->
+                />
               </template>
             </Card>
             <Card>
@@ -1377,295 +1353,6 @@ onBeforeMount(async () => {
                   :disabled="!editable"
                 />
               </template>
-            </StepperNavigation>
-          </template>
-        </Steps>
-
-        <!--
-      Location
-      -->
-        <Steps>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Location"
-              icon="fa-location-dot"
-              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="text-center mt-0"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
-
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span class="section-header">
-                    {{ t('submissionIntakeForm.naturalDisasterCard') }}
-                  </span>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.naturalDisaster"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      {{ t('submissionIntakeForm.projectLocationCard') }}
-                    </span>
-                    <div
-                      v-tooltip.right="t('submissionIntakeForm.addressTooltip')"
-                      v-tooltip.focus.right="t('submissionIntakeForm.addressTooltip')"
-                      tabindex="0"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.projectLocation"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="PROJECT_LOCATION_LIST"
-                    @on-click="handleProjectLocationClick"
-                  />
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <EditableSelect
-                            class="col-12"
-                            name="addressSearch"
-                            :get-option-label="getAddressSearchLabel"
-                            :options="addressGeocoderOptions"
-                            :placeholder="'Type to search the address of your housing project'"
-                            :bold="false"
-                            :disabled="!editable"
-                            @on-input="onAddressSearchInput"
-                            @on-change="onAddressSelect"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.streetAddress"
-                            disabled
-                            placeholder="Street address"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.locality"
-                            disabled
-                            placeholder="Locality"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.province"
-                            disabled
-                            placeholder="Province"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between 48 and 60'
-                                : ''
-                            "
-                            placeholder="Latitude"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between -114 and -139'
-                                : ''
-                            "
-                            placeholder="Longitude"
-                          />
-                          <div
-                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
-                          >
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between 48 and 60"
-                            placeholder="Latitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between -114 and -139"
-                            placeholder="Longitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
-                        </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                </div>
-                <Map
-                  ref="mapRef"
-                  :disabled="!editable"
-                  :latitude="mapLatitude"
-                  :longitude="mapLongitude"
-                />
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      {{ t('submissionIntakeForm.additionalLocationCard') }}
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
-                          </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
-                          </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <TextArea
-                  class="col-12"
-                  name="location.projectLocationDescription"
-                  :disabled="!editable"
-                />
-              </template>
             </Card>
 
             <StepperNavigation
@@ -1697,10 +1384,11 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Permits & Reports"
               icon="fa-file"
-              :errors="
-                validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              "
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              }"
             />
           </template>
           <template #content="{ prevCallback }">
@@ -1717,13 +1405,12 @@ onBeforeMount(async () => {
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">
-                    {{ t('submissionIntakeForm.provincialPermitsCard') }}
-                  </span>
+                  <span class="section-header">Have you applied for any provincial permits for this project?</span>
                   <div
-                    v-tooltip.right="t('submissionIntakeForm.appliedPermitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.appliedPermitsTooltip')"
-                    tabindex="0"
+                    v-tooltip.right="
+                      `Early information on your permitting needs will help us
+                    coordinate and expedite the authorization process.`
+                    "
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -1749,12 +1436,11 @@ onBeforeMount(async () => {
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
                       "
-                      ref="appliedPermitsContainer"
                       class="col-12"
                     >
                       <div class="mb-2">
                         <span class="app-primary-color">
-                          Sharing this information will authorize the navigators to seek additional information about
+                          * Sharing this information will authorize the navigators to seek additional information about
                           this permit.
                         </span>
                       </div>
@@ -1791,10 +1477,9 @@ onBeforeMount(async () => {
                                 <div class="flex justify-content-center">
                                   <DatePicker
                                     class="w-full"
-                                    :name="`appliedPermits[${idx}].submittedDate`"
+                                    :name="`appliedPermits[${idx}].statusLastVerified`"
                                     :disabled="!editable"
-                                    placeholder="Date applied"
-                                    :max-date="new Date()"
+                                    placeholder="Status last verified"
                                   />
                                   <div class="flex align-items-center ml-2 mb-3">
                                     <Button
@@ -1817,17 +1502,8 @@ onBeforeMount(async () => {
                                   push({
                                     permitTypeId: undefined,
                                     trackingId: undefined,
-                                    submittedDate: undefined
-                                  });
-                                  nextTick(() => {
-                                    const addedPermit = getHTMLElement(
-                                      $refs.appliedPermitsContainer as HTMLElement,
-                                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
-                                    );
-                                    if (addedPermit) {
-                                      addedPermit.focus();
-                                    }
-                                  });
+                                    statusLastVerified: undefined
+                                  })
                                 "
                               >
                                 <font-awesome-icon
@@ -1866,12 +1542,13 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex">
                   <span class="section-header">
-                    {{ t('submissionIntakeForm.investigatePermitsCard') }}
+                    Select all provincially issued permits you think you might need (optional)
                   </span>
                   <div
-                    v-tooltip.right="t('submissionIntakeForm.potentialPermitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.potentialPermitsTooltip')"
-                    tabindex="0"
+                    v-tooltip.right="
+                      `Early information on your permitting needs will help us
+                    coordinate and expedite the authorization process.`
+                    "
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -1887,10 +1564,7 @@ onBeforeMount(async () => {
                     <div class="col-12">
                       <Card class="no-shadow">
                         <template #content>
-                          <div
-                            ref="investigatePermitsContainer"
-                            class="formgrid grid"
-                          >
+                          <div class="formgrid grid">
                             <div
                               v-for="(permit, idx) in fields"
                               :key="idx"
@@ -1929,16 +1603,9 @@ onBeforeMount(async () => {
                                 v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
                                 @click="
-                                  push({ permitTypeId: undefined });
-                                  nextTick(() => {
-                                    const newPermitDropdown = getHTMLElement(
-                                      $refs.investigatePermitsContainer as HTMLElement,
-                                      'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
-                                    );
-                                    if (newPermitDropdown) {
-                                      newPermitDropdown.focus();
-                                    }
-                                  });
+                                  push({
+                                    permitTypeId: undefined
+                                  })
                                 "
                               >
                                 <font-awesome-icon
@@ -1989,8 +1656,8 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-        </StepPanels>
+          </template>
+        </Steps>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
@@ -2002,10 +1669,13 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
+  <SubmissionIntakeConfirmation
+    v-else-if="assignedActivityId"
+    :assigned-activity-id="assignedActivityId"
+  />
   <IntakeAssistanceConfirmation
-    v-else-if="assistanceAssignedActivityId && assistanceAssignedEnquiryId"
+    v-else-if="assistanceAssignedActivityId"
     :assigned-activity-id="assistanceAssignedActivityId"
-    :assigned-enquiry-id="assistanceAssignedEnquiryId"
   />
 </template>
 
@@ -2076,20 +1746,7 @@ onBeforeMount(async () => {
   padding-right: 0;
 }
 
-:deep(.p-stepper-separator) {
-  background-color: #f3f2f1; // TODO Grey 20
-  height: 0.25rem;
-}
-
-:deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
-  background-color: #d8eafd; // TODO Blue 20
-}
-
 .lat-long-btn {
   height: 2.3rem;
-}
-
-:deep(.p-step-number) {
-  display: none;
 }
 </style>
