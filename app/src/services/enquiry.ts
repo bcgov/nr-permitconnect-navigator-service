@@ -179,14 +179,12 @@ const service = {
   updateIsDeletedFlag: async (enquiryId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteEnquiry = await prisma.enquiry.findUnique({
       where: {
-        enquiry_id: enquiryId,
-        updated_at: updateStamp.updatedAt,
-        updated_by: updateStamp.updatedBy
+        enquiry_id: enquiryId
       }
     });
     if (deleteEnquiry) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted },
+        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
         where: {
           activity_id: deleteEnquiry.activity_id
         }
