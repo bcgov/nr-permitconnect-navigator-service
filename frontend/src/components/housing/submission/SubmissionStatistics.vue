@@ -77,7 +77,7 @@ watch(
       </thead>
       <tbody>
         <tr>
-          <td class="col-9">Total submissions</td>
+          <td class="col-9">Total Submissions and Enquiries</td>
           <td class="col-1 text-right">{{ statistics.total_submissions }}</td>
           <td class="col-2 text-right">{{ getPercentage(statistics.total_submissions) }}%</td>
         </tr>
