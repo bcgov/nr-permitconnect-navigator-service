@@ -12,13 +12,11 @@ import {
   AutoComplete,
   DatePicker,
   Checkbox,
-  FormAutosave,
-  FormNavigationGuard,
+  Select,
   InputMask,
   InputNumber,
   RadioList,
   InputText,
-  Select,
   StepperHeader,
   StepperNavigation,
   TextArea
@@ -36,16 +34,14 @@ import {
   Divider,
   Message,
   Stepper,
-  Step,
-  StepList,
-  StepPanel,
-  StepPanels,
+  Steps,
   useConfirm,
   useToast
 } from '@/lib/primevue';
+import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
@@ -76,7 +72,6 @@ interface SubmissionForm extends Submission {
   appliedPermits?: Array<Permit>;
   investigatePermits?: Array<Permit>;
 }
-
 // Types
 type GeocoderEntry = {
   geometry: { coordinates: Array<number>; [key: string]: any };
@@ -84,10 +79,18 @@ type GeocoderEntry = {
 };
 
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
+type Props = {
   activityId?: string;
   submissionId?: string;
-}>();
+};
+
+const props = withDefaults(defineProps<Props>(), {
+  activityId: undefined,
+  submissionId: undefined
+});
+
+const router = useRouter();
+const route = useRoute();
 
 // Constants
 const VALIDATION_BANNER_TEXT =
@@ -105,11 +108,11 @@ const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
-const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
+const loadForm: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -122,10 +125,13 @@ const validationErrors = computed(() => {
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
 });
 
+const { formUpdated, stopAutoSave } = useAutoSave(() => {
+  const values = formRef.value?.values;
+  if (values) onSaveDraft(values, true);
+});
+
 // Actions
 const confirm = useConfirm();
-const router = useRouter();
-const route = useRoute();
 const toast = useToast();
 
 const getBackButtonConfig = computed(() => {
@@ -141,6 +147,12 @@ const getBackButtonConfig = computed(() => {
     };
   }
 });
+
+const checkSubmittable = (stepNumber: number) => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (stepNumber === 3) isSubmittable.value = true;
+};
 
 function confirmSubmit(data: any) {
   const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
@@ -168,6 +180,33 @@ function handleProjectLocationClick() {
     formRef.value?.setFieldValue('location.province', null);
   }
 }
+
+const onAddressSearchInput = async (e: IInputEvent) => {
+  const input = e.target.value;
+  addressGeocoderOptions.value =
+    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+};
+
+const onAddressSelect = async (e: SelectChangeEvent) => {
+  if (e.originalEvent instanceof InputEvent) return;
+
+  if (e.value as GeocoderEntry) {
+    const properties = e.value?.properties;
+    const geometry = e.value?.geometry;
+
+    mapLatitude.value = geometry.coordinates[1];
+    mapLongitude.value = geometry.coordinates[0];
+
+    formRef.value?.setFieldValue(
+      'location.streetAddress',
+      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
+    );
+    formRef.value?.setFieldValue('location.locality', properties?.localityName);
+    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
+    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
+  }
+};
 
 async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   try {
@@ -202,34 +241,7 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   }
 }
 
-async function onAddressSearchInput(e: IInputEvent) {
-  const input = e.target.value;
-  addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
-}
-
-async function onAddressSelect(e: SelectChangeEvent) {
-  if (e.originalEvent instanceof InputEvent) return;
-
-  if (e.value as GeocoderEntry) {
-    const properties = e.value?.properties;
-    const geometry = e.value?.geometry;
-
-    mapLatitude.value = geometry.coordinates[1];
-    mapLongitude.value = geometry.coordinates[0];
-
-    formRef.value?.setFieldValue(
-      'location.streetAddress',
-      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
-    );
-    formRef.value?.setFieldValue('location.locality', properties?.localityName);
-    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
-    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
-    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
-  }
-}
-
-async function onLatLongInputClick() {
+const onLatLongInputClick = async () => {
   const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
   const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
 
@@ -238,7 +250,7 @@ async function onLatLongInputClick() {
     mapLatitude.value = location.latitude;
     mapLongitude.value = location.longitude;
   }
-}
+};
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
@@ -315,6 +327,7 @@ async function onSaveDraft(
       if (showToast) toast.success('Draft autosaved');
     } else {
       if (showToast) toast.success('Draft saved');
+      formUpdated.value = false;
     }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
@@ -323,20 +336,9 @@ async function onSaveDraft(
   }
 
   if (assistanceRequired && response?.data?.activityId) {
+    formUpdated.value = false;
     handleEnquirySubmit(draftData, response.data.activityId);
-    autoSaveRef.value?.stopAutoSave();
-  }
-}
-
-function onStepChange(stepNumber: number) {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
-
-  // Save a draft on very first stepper navigation if no activityId yet
-  // Need this to generate an activityId for the file uploads
-  if (!formRef.value?.values.activityId) {
-    onSaveDraft(formRef.value?.values, true, false);
+    stopAutoSave();
   }
 }
 
@@ -345,21 +347,17 @@ async function onSubmit(data: any) {
 
   try {
     let response;
-
-    autoSaveRef.value?.stopAutoSave();
-
     if (data.submissionId) {
       response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
     } else {
       response = await submissionService.createDraft({ ...data, submit: true });
     }
-
     if (response.data.activityId) {
       assignedActivityId.value = response.data.activityId;
       formRef.value?.setFieldValue('activityId', response.data.activityId);
-
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
+      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -399,89 +397,92 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
 }
 
 onBeforeMount(async () => {
-  try {
+  if (props.submissionId && props.activityId) {
     let response,
       permits: Array<Permit> = [],
-      documents: Array<Document> = [];
+      documents: Array<Document> = [],
+      submissionId = props.submissionId,
+      activityId = props.activityId;
 
-    if (submissionId && activityId) {
+    try {
       response = (await submissionService.getSubmission(submissionId)).data;
       permits = (await permitService.listPermits(activityId)).data;
       documents = (await documentService.listDocuments(activityId)).data;
       submissionStore.setDocuments(documents);
       editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+
+      initialFormValues.value = {
+        activityId: response?.activityId,
+        submissionId: response?.submissionId,
+        applicant: {
+          contactFirstName: response?.contactFirstName,
+          contactLastName: response?.contactLastName,
+          contactPhoneNumber: response?.contactPhoneNumber,
+          contactEmail: response?.contactEmail,
+          contactApplicantRelationship: response?.contactApplicantRelationship,
+          contactPreference: response?.contactPreference
+        },
+        basic: {
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: response?.isDevelopedInBC,
+          registeredName: response?.companyNameRegistered
+        },
+        housing: {
+          projectName: response?.projectName,
+          projectDescription: response?.projectDescription,
+          singleFamilySelected: !!response?.singleFamilyUnits,
+          multiFamilySelected: !!response?.multiFamilyUnits,
+          singleFamilyUnits: response?.singleFamilyUnits,
+          multiFamilyUnits: response?.multiFamilyUnits,
+          otherSelected: !!response?.otherUnits,
+          otherUnitsDescription: response?.otherUnitsDescription,
+          otherUnits: response?.otherUnits,
+          hasRentalUnits: response?.hasRentalUnits,
+          rentalUnits: response?.rentalUnits,
+          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+          indigenousDescription: response?.indigenousDescription,
+          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+          nonProfitDescription: response?.nonProfitDescription,
+          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+          housingCoopDescription: response?.housingCoopDescription
+        },
+        location: {
+          naturalDisaster: response?.naturalDisaster,
+          projectLocation: response?.projectLocation,
+          streetAddress: response?.streetAddress,
+          locality: response?.locality,
+          province: response?.province,
+          latitude: response?.latitude,
+          longitude: response?.longitude,
+          ltsaPIDLookup: response?.locationPIDs,
+          geomarkUrl: response?.geomarkUrl,
+          projectLocationDescription: response?.projectLocationDescription
+        },
+        appliedPermits: permits
+          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .map((x: Permit) => ({
+            ...x,
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          })),
+        permits: {
+          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+        },
+        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+      };
+
+      await nextTick();
+      // Move map pin
+      onLatLongInputClick();
+      loadForm.value = true;
+    } catch {
+      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
     }
-
-    initialFormValues.value = {
-      activityId: response?.activityId,
-      submissionId: response?.submissionId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
-      basic: {
-        consentToFeedback: response?.consentToFeedback,
-        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-        isDevelopedInBC: response?.isDevelopedInBC,
-        registeredName: response?.companyNameRegistered
-      },
-      housing: {
-        projectName: response?.projectName,
-        projectDescription: response?.projectDescription,
-        singleFamilySelected: !!response?.singleFamilyUnits,
-        multiFamilySelected: !!response?.multiFamilyUnits,
-        singleFamilyUnits: response?.singleFamilyUnits,
-        multiFamilyUnits: response?.multiFamilyUnits,
-        otherSelected: !!response?.otherUnits,
-        otherUnitsDescription: response?.otherUnitsDescription,
-        otherUnits: response?.otherUnits,
-        hasRentalUnits: response?.hasRentalUnits,
-        rentalUnits: response?.rentalUnits,
-        financiallySupportedBC: response?.financiallySupportedBC,
-        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-        indigenousDescription: response?.indigenousDescription,
-        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-        nonProfitDescription: response?.nonProfitDescription,
-        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-        housingCoopDescription: response?.housingCoopDescription
-      },
-      location: {
-        naturalDisaster: response?.naturalDisaster,
-        projectLocation: response?.projectLocation,
-        streetAddress: response?.streetAddress,
-        locality: response?.locality,
-        province: response?.province,
-        latitude: response?.latitude,
-        longitude: response?.longitude,
-        ltsaPIDLookup: response?.locationPIDs,
-        geomarkUrl: response?.geomarkUrl,
-        projectLocationDescription: response?.projectLocationDescription
-      },
-      appliedPermits: permits
-        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-        .map((x: Permit) => ({
-          ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-        })),
-      permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
-      },
-      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-    };
-
-    await nextTick();
-
-    // Move map pin
-    onLatLongInputClick();
-  } catch {
-    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+  } else {
+    initialFormValues.value = {};
+    loadForm.value = true;
   }
-
-  // Clearing the document store on page load
+  // clearing the document store on page load
   submissionStore.setDocuments([]);
 });
 </script>
@@ -489,30 +490,27 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
+      :confirm-leave="editable && !!formUpdated"
+      confirm-message="Are you sure you want to leave this page?
+      Any unsaved changes will be lost. Please save as draft first."
       :route-name="getBackButtonConfig.routeName"
       :text="getBackButtonConfig.text"
     />
-
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Project Investigation Form</h3>
     </div>
-    <div>{{ activeStep }}</div>
+
     <Form
-      v-if="initialFormValues"
+      v-if="loadForm"
       id="form"
-      v-slot="{ setFieldValue, errors, meta, values }"
+      v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
+      @change="() => (formUpdated = true)"
     >
-      <FormNavigationGuard v-if="editable" />
-      <FormAutosave
-        ref="autoSaveRef"
-        :callback="() => onSaveDraft(values)"
-      />
-
       <SubmissionAssistance
         v-if="editable && values?.applicant"
         :form-errors="errors"
@@ -530,71 +528,29 @@ onBeforeMount(async () => {
         name="activityId"
       />
 
-      <Stepper :value="activeStep">
-        <StepList>
-          <Step :value="0">
+      <Stepper
+        v-model:activeStep="activeStep"
+        @update:active-step="checkSubmittable"
+      >
+        <!--
+      Contact Information
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
             <StepperHeader
-              :index="0"
+              :index="index"
               :active-step="activeStep"
-              :click-callback="() => (activeStep = 0)"
+              :click-callback="clickCallback"
               title="Contact Information"
               icon="fa-user"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
-              }"
-              @click="
-                () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
-                }
-              "
-            />
-          </Step>
-          <Step :value="1">
-            <StepperHeader
-              :index="1"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 1)"
-              title="Housing"
-              icon="fa-house"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
-              }"
-            />
-          </Step>
-          <Step :value="2">
-            <StepperHeader
-              :index="2"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 2)"
-              title="Location"
-              icon="fa-location-dot"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
-              }"
-            />
-          </Step>
-          <Step :value="3">
-            <StepperHeader
-              :index="3"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 3)"
-              title="Permits & Reports"
-              icon="fa-file"
-              :class="{
                 'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.BASIC)
               }"
-              @click="
-                () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
-                }
-              "
             />
-          </Step>
-        </StepList>
-        <StepPanels>
-          <StepPanel :value="0">
+          </template>
+          <template #content="{ nextCallback }">
             <CollectionDisclaimer />
 
             <Message
@@ -662,7 +618,6 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-
             <Card>
               <template #title>
                 <span class="section-header">
@@ -730,9 +685,52 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-          </StepPanel>
 
-          <StepPanel :value="1">
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="nextCallback"
+              :prev-disabled="true"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
+          </template>
+        </Steps>
+
+        <!--
+      Housing
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Housing"
+              icon="fa-house"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            />
+          </template>
+          <template #content="{ prevCallback, nextCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -809,7 +807,7 @@ onBeforeMount(async () => {
                     label="Single-family"
                     :bold="false"
                     :disabled="!editable"
-                    :invalid="!!errors.housing && meta.touched"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                   />
                   <div class="col-6">
                     <div class="flex">
@@ -818,7 +816,7 @@ onBeforeMount(async () => {
                         label="Multi-family"
                         :bold="false"
                         :disabled="!editable"
-                        :invalid="!!errors.housing && meta.touched"
+                        :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                       />
                       <div
                         v-tooltip.right="
@@ -851,7 +849,7 @@ onBeforeMount(async () => {
                     label="Other"
                     :bold="false"
                     :disabled="!editable"
-                    :invalid="!!errors?.housing && meta.touched"
+                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
                   />
                   <div class="col-6" />
                   <InputText
@@ -869,7 +867,7 @@ onBeforeMount(async () => {
                   />
                   <div class="col-12">
                     <ErrorMessage
-                      v-show="meta.touched"
+                      v-show="formRef?.meta?.touched"
                       name="housing"
                     />
                   </div>
@@ -1050,275 +1048,47 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-          </StepPanel>
-          <StepPanel value="2">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="text-center mt-0"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
 
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span class="section-header">
-                    Has the location of this project been affected by natural disaster?
-                  </span>
-                </div>
-                <Divider type="solid" />
-              </template>
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="nextCallback"
+              :prev-callback="prevCallback"
+            >
               <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.naturalDisaster"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide one of the following project locations</span>
-                    <div
-                      v-tooltip.right="`A civic address contains a street name and number where a non-civid does not.`"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.projectLocation"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="PROJECT_LOCATION_LIST"
-                    @on-click="handleProjectLocationClick"
-                  />
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <EditableSelect
-                            class="col-12"
-                            name="addressSearch"
-                            :get-option-label="getAddressSearchLabel"
-                            :options="addressGeocoderOptions"
-                            :placeholder="'Search the address of your housing project'"
-                            :bold="false"
-                            :disabled="!editable"
-                            @on-input="onAddressSearchInput"
-                            @on-change="onAddressSelect"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.streetAddress"
-                            disabled
-                            placeholder="Street address"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.locality"
-                            disabled
-                            placeholder="Locality"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.province"
-                            disabled
-                            placeholder="Province"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between 48 and 60'
-                                : ''
-                            "
-                            placeholder="Latitude"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between -114 and -139'
-                                : ''
-                            "
-                            placeholder="Longitude"
-                          />
-                          <div
-                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
-                          >
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between 48 and 60"
-                            placeholder="Latitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between -114 and -139"
-                            placeholder="Longitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
-                        </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                </div>
-                <!-- <Map
-                  ref="mapRef"
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
                   :disabled="!editable"
-                  :latitude="mapLatitude"
-                  :longitude="mapLongitude"
-                /> -->
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide additional location details (optional)</span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
-                          </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
-                          </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location? (optional)
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <TextArea
-                  class="col-12"
-                  name="location.projectLocationDescription"
-                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
                 />
               </template>
-            </Card>
-          </StepPanel>
-          <StepPanel :value="2">
+            </StepperNavigation>
+          </template>
+        </Steps>
+
+        <!--
+      Location
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Location"
+              icon="fa-location-dot"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            />
+          </template>
+          <template #content="{ prevCallback, nextCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1584,8 +1354,44 @@ onBeforeMount(async () => {
                 />
               </template>
             </Card>
-          </StepPanel>
-          <StepPanel :value="3">
+
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="nextCallback"
+              :prev-callback="prevCallback"
+            >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
+          </template>
+        </Steps>
+
+        <!--
+      Permits & Reports
+      -->
+        <Steps>
+          <template #header="{ index, clickCallback }">
+            <StepperHeader
+              :index="index"
+              :active-step="activeStep"
+              :click-callback="clickCallback"
+              title="Permits & Reports"
+              icon="fa-file"
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              }"
+            />
+          </template>
+          <template #content="{ prevCallback }">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1850,8 +1656,8 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </StepPanel>
-        </StepPanels>
+          </template>
+        </Steps>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
@@ -1942,9 +1748,5 @@ onBeforeMount(async () => {
 
 .lat-long-btn {
   height: 2.3rem;
-}
-
-:deep(.p-step-number) {
-  display: none;
 }
 </style>
