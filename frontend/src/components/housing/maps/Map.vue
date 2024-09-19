@@ -14,17 +14,16 @@ import {
   OSM_URL_TEMPLATE
 } from '@/utils/constants/mapping';
 
-type Props = {
+// Props
+const {
+  disabled = false,
+  latitude = undefined,
+  longitude = undefined
+} = defineProps<{
   disabled?: boolean;
   latitude?: number;
   longitude?: number;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  disabled: false,
-  latitude: undefined,
-  longitude: undefined
-});
+}>();
 
 // Actions
 let marker: L.Marker;
@@ -87,15 +86,15 @@ onMounted(async () => {
 });
 
 onUpdated(async () => {
-  if (props.latitude && props.longitude) {
-    const addressLocation = { lat: props.latitude, lng: props.longitude };
+  if (latitude && longitude) {
+    const addressLocation = { lat: latitude, lng: longitude };
     map.flyTo(addressLocation, 17);
     setAddressMarker(addressLocation);
   }
 });
 
 watch(
-  () => props.disabled,
+  () => disabled,
   (val) => {
     if (val) disableInteraction();
     else enableInteraction();

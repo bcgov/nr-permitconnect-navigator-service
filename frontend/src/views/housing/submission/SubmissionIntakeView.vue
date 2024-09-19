@@ -8,18 +8,13 @@ import { useTypeStore } from '@/store';
 import type { ComputedRef, Ref } from 'vue';
 
 // Props
-type Props = {
+const { activityId = undefined, submissionId = undefined } = defineProps<{
   activityId?: string;
   submissionId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  submissionId: undefined
-});
+}>();
 
 // State
-const key: ComputedRef<string> = computed(() => JSON.stringify(props));
+const key: ComputedRef<string> = computed(() => JSON.stringify({ activityId, submissionId }));
 const loading: Ref<boolean> = ref(true);
 
 // Actions
@@ -34,7 +29,7 @@ onMounted(async () => {
   <SubmissionIntakeForm
     v-if="!loading"
     :key="key"
-    :activity-id="props.activityId"
-    :submission-id="props.submissionId"
+    :activity-id="activityId"
+    :submission-id="submissionId"
   />
 </template>

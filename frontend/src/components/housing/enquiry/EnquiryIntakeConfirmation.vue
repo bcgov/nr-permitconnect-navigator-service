@@ -4,16 +4,15 @@ import { Message } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 
 // Props
-type Props = {
+const {
+  assignedActivityId,
+  showHeader = true,
+  showHomeLink = true
+} = defineProps<{
   assignedActivityId: string;
   showHeader?: boolean;
   showHomeLink?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  showHeader: true,
-  showHomeLink: true
-});
+}>();
 </script>
 
 <template>
@@ -26,7 +25,7 @@ const props = withDefaults(defineProps<Props>(), {
     >
       Your enquiry has been successfully submitted.
     </Message>
-    <h3>Confirmation ID: {{ props.assignedActivityId }}</h3>
+    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
       A Housing Navigator will review your submission and contact you. Please check your email for the confirmation
       email and keep the confirmation ID for future reference.

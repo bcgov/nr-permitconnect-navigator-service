@@ -22,16 +22,14 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
 
-//Emits
-const emit = defineEmits(['submission:delete']);
-
 // Props
-type Props = {
+const { loading, submissions } = defineProps<{
   loading: boolean;
   submissions: Array<Submission> | undefined;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {});
+// Emits
+const emit = defineEmits(['submission:delete']);
 
 // Store
 const authzStore = useAuthZStore();
@@ -110,7 +108,7 @@ function isFinanciallySupported(data: Submission) {
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
-    :value="props.submissions"
+    :value="submissions"
     data-key="submissionId"
     scrollable
     responsive-layout="scroll"
@@ -245,13 +243,11 @@ function isFinanciallySupported(data: Submission) {
       style="min-width: 125px"
     />
     <Column
-      field="assignedTo"
+      field="user.fullName"
       header="Assigned to"
       :sortable="true"
       style="min-width: 200px"
-    >
-      <template #body="{ data }">{{ data?.user?.fullName }}</template>
-    </Column>
+    />
     <Column
       field="hasRelatedEnquiry"
       header="Related enquiry"

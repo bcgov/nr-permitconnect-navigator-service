@@ -1,7 +1,7 @@
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 import { userService, accessRequestService, yarsService } from '../services';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 import type { AccessRequest, User } from '../types';
 
 const controller = {

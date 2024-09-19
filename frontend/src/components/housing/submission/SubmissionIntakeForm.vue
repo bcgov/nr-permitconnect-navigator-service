@@ -41,7 +41,7 @@ import {
 import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
-import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
@@ -72,6 +72,7 @@ interface SubmissionForm extends Submission {
   appliedPermits?: Array<Permit>;
   investigatePermits?: Array<Permit>;
 }
+
 // Types
 type GeocoderEntry = {
   geometry: { coordinates: Array<number>; [key: string]: any };
@@ -79,18 +80,10 @@ type GeocoderEntry = {
 };
 
 // Props
-type Props = {
+const { activityId = undefined, submissionId = undefined } = defineProps<{
   activityId?: string;
   submissionId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  submissionId: undefined
-});
-
-const router = useRouter();
-const route = useRoute();
+}>();
 
 // Constants
 const VALIDATION_BANNER_TEXT =
@@ -132,6 +125,8 @@ const { formUpdated, stopAutoSave } = useAutoSave(() => {
 
 // Actions
 const confirm = useConfirm();
+const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 
 const getBackButtonConfig = computed(() => {
@@ -312,6 +307,7 @@ async function onSaveDraft(
   let response;
   try {
     if (data.submissionId) {
+      console.log('save draft');
       response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
       response = await submissionService.createDraft(draftData);
@@ -397,12 +393,10 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
 }
 
 onBeforeMount(async () => {
-  if (props.submissionId && props.activityId) {
+  if (submissionId && activityId) {
     let response,
       permits: Array<Permit> = [],
-      documents: Array<Document> = [],
-      submissionId = props.submissionId,
-      activityId = props.activityId;
+      documents: Array<Document> = [];
 
     try {
       response = (await submissionService.getSubmission(submissionId)).data;
@@ -423,6 +417,7 @@ onBeforeMount(async () => {
           contactPreference: response?.contactPreference
         },
         basic: {
+          consentToFeedback: response?.consentToFeedback,
           isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
           isDevelopedInBC: response?.isDevelopedInBC,
           registeredName: response?.companyNameRegistered
@@ -1644,7 +1639,6 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-disabled="true"
               :prev-callback="prevCallback"
-              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button

@@ -38,21 +38,16 @@ interface EnquiryForm extends Enquiry {
 }
 
 // Props
-type Props = {
+const { editable = true, enquiry } = defineProps<{
   editable?: boolean;
   enquiry: any;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  editable: true
-});
+}>();
 
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-const editable: Ref<boolean> = ref(props.editable);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
@@ -153,8 +148,6 @@ function onRelatedActivityInput(e: IInputEvent) {
 
 const onSubmit = async (values: any) => {
   try {
-    editable.value = false;
-
     const submitData: Enquiry = omit(setEmptyStringsToNull(values) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.isRelated = submitData.relatedActivityId ? BasicResponse.YES : BasicResponse.NO;
@@ -173,18 +166,16 @@ const onSubmit = async (values: any) => {
     toast.success('Form saved');
   } catch (e: any) {
     toast.error('Failed to save enquiry', e);
-  } finally {
-    editable.value = true;
   }
 };
 
 onMounted(async () => {
-  if (props.enquiry?.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [props.enquiry.assignedUserId] })).data;
+  if (enquiry?.assignedUserId) {
+    assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }
   initialFormValues.value = {
-    ...props.enquiry,
-    submittedAt: new Date(props.enquiry?.submittedAt),
+    ...enquiry,
+    submittedAt: new Date(enquiry?.submittedAt),
     user: assigneeOptions.value[0] ?? null
   };
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
@@ -320,17 +311,17 @@ onMounted(async () => {
       />
 
       <div
-        v-if="props.editable"
+        v-if="editable"
         class="field col-12 mt-5"
       >
         <Button
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!props.editable"
+          :disabled="!editable"
         />
         <CancelButton
-          :editable="props.editable"
+          :editable="editable"
           @clicked="onCancel"
         />
       </div>

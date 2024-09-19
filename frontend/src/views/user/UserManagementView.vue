@@ -64,7 +64,8 @@ function assignUserStatus(request: UserAccessRequest) {
   return request;
 }
 
-function onDenyRevocation(user: UserAccessRequest) {
+//function onDenyRevocation(user: UserAccessRequest) {
+function onDenyRevocation() {
   confirm.require({
     message: 'This user’s revocation request will be denied, and they will remain an authorized user.',
     header: 'Deny revocation request',
@@ -73,9 +74,8 @@ function onDenyRevocation(user: UserAccessRequest) {
     rejectLabel: 'Cancel',
     accept: async () => {
       try {
-        console.log('TODO');
+        // TODO
         // const response = await accessRequestService.denyAccessRequest(user.accessRequest?.accessRequestId as string);
-
         // if (response) {
         //   usersAndAccessRequests.value = usersAndAccessRequests.value.filter(
         //     (userAccessRequest) => userAccessRequest.user.userId !== response.data.userId

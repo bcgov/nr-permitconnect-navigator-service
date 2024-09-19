@@ -1,11 +1,19 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { Calendar } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  label = '',
+  name,
+  disabled = false,
+  showTime = false,
+  bold = true,
+  placeholder = '',
+  maxDate = undefined
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -14,20 +22,9 @@ type Props = {
   bold?: boolean;
   placeholder?: string;
   maxDate?: Date;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  disabled: false,
-  showTime: false,
-  bold: true,
-  placeholder: '',
-  maxDate: undefined
-});
-
-const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
+const { errorMessage, value } = useField<Date>(name);
 </script>
 
 <template>
@@ -47,13 +44,13 @@ const { errorMessage, value } = useField<Date>(toRef(props, 'name'));
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
-      :show-time="props.showTime"
+      :show-time="showTime"
       hour-format="24"
       show-icon
       icon-display="input"
       date-format="yy/mm/dd"
-      :placeholder="props.placeholder"
-      :max-date="props.maxDate"
+      :placeholder="placeholder"
+      :max-date="maxDate"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

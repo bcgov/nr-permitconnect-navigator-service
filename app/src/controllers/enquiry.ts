@@ -6,8 +6,8 @@ import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { Enquiry } from '../types';
+import type { NextFunction, Request, Response } from 'express';
+import type { Enquiry, EnquiryIntake } from '../types';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {
@@ -32,9 +32,8 @@ const controller = {
     }
   },
 
-  generateEnquiryData: async (req: Request) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = req.body;
+  generateEnquiryData: async (req: Request<never, never, EnquiryIntake>) => {
+    const data = req.body;
 
     const activityId =
       data.activityId ??
@@ -79,7 +78,7 @@ const controller = {
     };
   },
 
-  createDraft: async (req: Request, res: Response, next: NextFunction) => {
+  createDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
       const enquiry = await controller.generateEnquiryData(req);
 
@@ -138,13 +137,10 @@ const controller = {
     }
   },
 
-  updateEnquiry: async (req: Request, res: Response, next: NextFunction) => {
+  updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
-
       const result = await enquiryService.updateEnquiry({
-        ...data,
+        ...req.body,
         ...generateUpdateStamps(req.currentContext)
       } as Enquiry);
 
@@ -154,7 +150,7 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request, res: Response, next: NextFunction) => {
+  updateDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
       const enquiry = await controller.generateEnquiryData(req);
 
@@ -170,13 +166,15 @@ const controller = {
     }
   },
 
-  updateIsDeletedFlag: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
+  updateIsDeletedFlag: async (
+    req: Request<{ enquiryId: string }, never, { isDeleted: boolean }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const data: any = req.body;
       const response = await enquiryService.updateIsDeletedFlag(
         req.params.enquiryId,
-        data.isDeleted,
+        req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
       res.status(200).json(response);

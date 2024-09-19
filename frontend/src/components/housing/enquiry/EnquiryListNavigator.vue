@@ -22,12 +22,10 @@ import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
 
 // Props
-type Props = {
+const { loading, enquiries } = defineProps<{
   loading: boolean;
   enquiries: Array<Enquiry> | undefined;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Emit
 const emit = defineEmits(['enquiry:delete']);
@@ -70,7 +68,7 @@ const filters = ref({
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
-    :value="props.enquiries"
+    :value="enquiries"
     data-key="enquiryId"
     scrollable
     responsive-layout="scroll"
