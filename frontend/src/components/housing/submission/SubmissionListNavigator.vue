@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import {
@@ -18,9 +18,18 @@ import { submissionService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
+import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
+
+// Types
+type Pagination = {
+  rows: number;
+  order: number;
+  field: string;
+  page: number;
+};
 
 // Props
 const { loading, submissions } = defineProps<{
@@ -35,7 +44,15 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
+const route = useRoute();
 const selection: Ref<Submission | undefined> = ref(undefined);
+const dataTable = ref(null);
+const pagination: Ref<Pagination> = ref({
+  rows: toNumber(route.query.rows as string) ?? 10,
+  order: toNumber(route.query.order as string) ?? -1,
+  field: (route.query.field as string) ?? 'submittedAt',
+  page: toNumber(route.query.page as string) ?? 0
+});
 
 // Actions
 const confirmDialog = useConfirm();
@@ -101,10 +118,24 @@ function isFinanciallySupported(data: Submission) {
     return BasicResponse.NO;
   }
 }
+
+// Actions
+function updateQueryParams() {
+  router.replace({
+    name: RouteName.HOUSING_SUBMISSIONS,
+    query: {
+      rows: pagination.value.rows ?? undefined,
+      order: pagination.value.order ?? undefined,
+      field: pagination.value.field ?? undefined,
+      page: pagination.value.page ?? undefined
+    }
+  });
+}
 </script>
 
 <template>
   <DataTable
+    ref="dataTable"
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
@@ -113,13 +144,33 @@ function isFinanciallySupported(data: Submission) {
     scrollable
     responsive-layout="scroll"
     :paginator="true"
-    :rows="10"
-    sort-field="submittedAt"
-    :sort-order="-1"
+    :rows="pagination.rows"
+    :sort-field="pagination.field"
+    :sort-order="pagination.order"
     paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
     current-page-report-template="{first}-{last} of {totalRecords}"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
+    :first="pagination.page && pagination.rows ? pagination.page * pagination.rows : 0"
+    @update:sort-field="
+      (e) => {
+        pagination.field = e;
+        updateQueryParams();
+      }
+    "
+    @update:sort-order="
+      (e) => {
+        pagination.order = e ?? -1;
+        updateQueryParams();
+      }
+    "
+    @page="
+      (e) => {
+        pagination.page = e.page;
+        pagination.rows = e.rows;
+        updateQueryParams();
+      }
+    "
   >
     <template #empty>
       <div class="flex justify-content-center">

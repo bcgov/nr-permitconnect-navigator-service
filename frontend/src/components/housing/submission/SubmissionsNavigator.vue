@@ -45,6 +45,42 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 // Actions
 const toast = useToast();
 
+function assignEnquiriesAndFullName() {
+  const relatedActivityIds = new Set();
+
+  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
+
+  submissions.value.forEach((sub) => {
+    if (relatedActivityIds.has(sub.activityId)) {
+      sub.hasRelatedEnquiry = true;
+    } else {
+      sub.hasRelatedEnquiry = false;
+    }
+  });
+
+  submissions.value.forEach((sub) => {
+    if (sub.user) {
+      sub.user.fullName =
+        sub.user.firstName && sub.user.lastName
+          ? `${sub.user.lastName}, ${sub.user.firstName}`
+          : sub.user.firstName || sub.user.lastName || '';
+    }
+  });
+}
+
+// Set multiPermitsNeeded property of each submission to Yes/No (count)
+// if the submission have more than one permit with needed Yes
+function assignMultiPermitsNeeded() {
+  submissions.value.forEach((sub) => {
+    const multiPermitsNeededCount = permits.value.filter(
+      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
+    ).length;
+
+    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
+    else sub.multiPermitsNeeded = BasicResponse.NO;
+  });
+}
+
 function getBringForwardDate(bf: BringForward) {
   const { pastOrToday } = getBringForwardInterval(bf);
   return pastOrToday ? 'today' : formatDate(bf.bringForwardDate);
@@ -70,11 +106,6 @@ function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
-function onEnquiryDelete(enquiryId: string, activityId: string) {
-  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
-  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
-  refreshStatistics();
-}
 
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
@@ -90,6 +121,29 @@ function getQueryObject(bf: BringForward) {
     initialTab: NOTES_TAB_INDEX.ENQUIRY,
     enquiryId: bf.enquiryId
   };
+}
+
+function onEnquiryDelete(enquiryId: string, activityId: string) {
+  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+}
+
+function onSubmissionDelete(submissionId: string, activityId: string) {
+  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+}
+
+function refreshStatistics() {
+  submissionService
+    .getStatistics()
+    .then((response) => {
+      statistics.value = response.data;
+    })
+    .catch((e) => {
+      toast.error('Failed to refresh statistics', e.message);
+    });
 }
 
 onMounted(async () => {
@@ -132,59 +186,6 @@ onMounted(async () => {
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
 });
-
-function onSubmissionDelete(submissionId: string, activityId: string) {
-  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
-  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
-  refreshStatistics();
-}
-
-function refreshStatistics() {
-  submissionService
-    .getStatistics()
-    .then((response) => {
-      statistics.value = response.data;
-    })
-    .catch((e) => {
-      toast.error('Failed to refresh statistics', e.message);
-    });
-}
-
-function assignEnquiriesAndFullName() {
-  const relatedActivityIds = new Set();
-
-  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
-
-  submissions.value.forEach((sub) => {
-    if (relatedActivityIds.has(sub.activityId)) {
-      sub.hasRelatedEnquiry = true;
-    } else {
-      sub.hasRelatedEnquiry = false;
-    }
-  });
-
-  submissions.value.forEach((sub) => {
-    if (sub.user) {
-      sub.user.fullName =
-        sub.user.firstName && sub.user.lastName
-          ? `${sub.user.lastName}, ${sub.user.firstName}`
-          : sub.user.firstName || sub.user.lastName || '';
-    }
-  });
-}
-
-// Set multiPermitsNeeded property of each submission to Yes/No (count)
-// if the submission have more than one permit with needed Yes
-function assignMultiPermitsNeeded() {
-  submissions.value.forEach((sub) => {
-    const multiPermitsNeededCount = permits.value.filter(
-      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
-    ).length;
-
-    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
-    else sub.multiPermitsNeeded = BasicResponse.NO;
-  });
-}
 
 watch(accordionIndex, () => {
   if (accordionIndex.value !== null) {
@@ -229,6 +230,7 @@ watch(accordionIndex, () => {
           </div>
         </AccordionTab>
       </Accordion>
+
       <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"

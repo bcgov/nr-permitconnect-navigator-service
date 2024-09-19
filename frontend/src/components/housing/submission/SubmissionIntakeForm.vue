@@ -307,7 +307,6 @@ async function onSaveDraft(
   let response;
   try {
     if (data.submissionId) {
-      console.log('save draft');
       response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
       response = await submissionService.createDraft(draftData);
