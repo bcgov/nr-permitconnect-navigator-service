@@ -143,12 +143,6 @@ const getBackButtonConfig = computed(() => {
   }
 });
 
-const checkSubmittable = (stepNumber: number) => {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
-};
-
 function confirmSubmit(data: any) {
   const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
 
@@ -175,33 +169,6 @@ function handleProjectLocationClick() {
     formRef.value?.setFieldValue('location.province', null);
   }
 }
-
-const onAddressSearchInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-  addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
-};
-
-const onAddressSelect = async (e: DropdownChangeEvent) => {
-  if (e.originalEvent instanceof InputEvent) return;
-
-  if (e.value as GeocoderEntry) {
-    const properties = e.value?.properties;
-    const geometry = e.value?.geometry;
-
-    mapLatitude.value = geometry.coordinates[1];
-    mapLongitude.value = geometry.coordinates[0];
-
-    formRef.value?.setFieldValue(
-      'location.streetAddress',
-      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
-    );
-    formRef.value?.setFieldValue('location.locality', properties?.localityName);
-    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
-    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
-    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
-  }
-};
 
 async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   try {
@@ -236,7 +203,34 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   }
 }
 
-const onLatLongInputClick = async () => {
+async function onAddressSearchInput(e: IInputEvent) {
+  const input = e.target.value;
+  addressGeocoderOptions.value =
+    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+}
+
+async function onAddressSelect(e: DropdownChangeEvent) {
+  if (e.originalEvent instanceof InputEvent) return;
+
+  if (e.value as GeocoderEntry) {
+    const properties = e.value?.properties;
+    const geometry = e.value?.geometry;
+
+    mapLatitude.value = geometry.coordinates[1];
+    mapLongitude.value = geometry.coordinates[0];
+
+    formRef.value?.setFieldValue(
+      'location.streetAddress',
+      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
+    );
+    formRef.value?.setFieldValue('location.locality', properties?.localityName);
+    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
+    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
+  }
+}
+
+async function onLatLongInputClick() {
   const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
   const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
 
@@ -245,7 +239,7 @@ const onLatLongInputClick = async () => {
     mapLatitude.value = location.latitude;
     mapLongitude.value = location.longitude;
   }
-};
+}
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
@@ -334,6 +328,18 @@ async function onSaveDraft(
     formUpdated.value = false;
     handleEnquirySubmit(draftData, response.data.activityId);
     stopAutoSave();
+  }
+}
+
+function onStepChange(stepNumber: number) {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (stepNumber === 3) isSubmittable.value = true;
+
+  // Save a draft on very first stepper navigation if no activityId yet
+  // Need this to generate an activityId for the file uploads
+  if (!formRef.value?.values.activityId && formUpdated) {
+    onSaveDraft(formRef.value?.values, true, false);
   }
 }
 
@@ -524,7 +530,7 @@ onBeforeMount(async () => {
 
       <Stepper
         v-model:activeStep="activeStep"
-        @update:active-step="checkSubmittable"
+        @update:active-step="onStepChange"
       >
         <!--
       Contact Information
@@ -712,11 +718,6 @@ onBeforeMount(async () => {
               :class="{
                 'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
               }"
-              @click="
-                () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
-                }
-              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1070,11 +1071,6 @@ onBeforeMount(async () => {
               :class="{
                 'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
               }"
-              @click="
-                () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
-                }
-              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
