@@ -9,6 +9,7 @@ import BackButton from '@/components/common/BackButton.vue';
 import {
   EditableDropdown,
   Dropdown,
+  FormNavigationGuard,
   InputMask,
   InputText,
   RadioList,
@@ -293,9 +294,6 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   <div v-if="!assignedActivityId">
     <div class="mb-2 p-0">
       <BackButton
-        :confirm-leave="editable && !!formUpdated"
-        confirm-message="Are you sure you want to leave this page?
-      Any unsaved changes will be lost. Please save as draft first."
         :route-name="getBackButtonConfig.routeName"
         :text="getBackButtonConfig.text"
       />
@@ -317,6 +315,8 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
       @submit="confirmSubmit"
       @change="formUpdated = true"
     >
+      <FormNavigationGuard v-if="editable && !!formUpdated" />
+
       <input
         type="hidden"
         name="activityId"

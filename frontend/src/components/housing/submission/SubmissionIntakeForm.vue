@@ -13,6 +13,7 @@ import {
   Calendar,
   Checkbox,
   Dropdown,
+  FormNavigationGuard,
   InputMask,
   InputNumber,
   RadioList,
@@ -307,7 +308,6 @@ async function onSaveDraft(
   let response;
   try {
     if (data.submissionId) {
-      console.log('save draft');
       response = await submissionService.updateDraft(draftData.submissionId, draftData);
     } else {
       response = await submissionService.createDraft(draftData);
@@ -485,12 +485,10 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
-      :confirm-leave="editable && !!formUpdated"
-      confirm-message="Are you sure you want to leave this page?
-      Any unsaved changes will be lost. Please save as draft first."
       :route-name="getBackButtonConfig.routeName"
       :text="getBackButtonConfig.text"
     />
+
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Project Investigation Form</h3>
     </div>
@@ -506,6 +504,8 @@ onBeforeMount(async () => {
       @submit="confirmSubmit"
       @change="() => (formUpdated = true)"
     >
+      <FormNavigationGuard v-if="editable && !!formUpdated" />
+
       <SubmissionAssistance
         v-if="editable && values?.applicant"
         :form-errors="errors"
