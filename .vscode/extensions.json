@@ -9,6 +9,6 @@
     "redhat.vscode-yaml",
     "ryanluker.vscode-coverage-gutters",
     "vue.volar",
-    "vue.vscode-typescript-vue-plugin"
+    "42crunch.vscode-openapi"
   ]
 }
