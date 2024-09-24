@@ -20,7 +20,8 @@ vi.mock('vue-router', () => ({
     params: {},
     query: {}
   }),
-  onBeforeRouteUpdate: vi.fn()
+  onBeforeRouteUpdate: vi.fn(),
+  onBeforeRouteLeave: vi.fn()
 }));
 
 const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');

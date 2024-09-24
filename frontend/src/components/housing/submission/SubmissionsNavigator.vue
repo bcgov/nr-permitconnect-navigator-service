@@ -2,6 +2,7 @@
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
 import { onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
@@ -32,7 +33,9 @@ const authzStore = useAuthZStore();
 const { getProfile } = storeToRefs(authnStore);
 
 // State
+const route = useRoute();
 const accordionIndex: Ref<number | null> = ref(null);
+const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
@@ -44,6 +47,43 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
 const toast = useToast();
+const router = useRouter();
+
+function assignEnquiriesAndFullName() {
+  const relatedActivityIds = new Set();
+
+  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
+
+  submissions.value.forEach((sub) => {
+    if (relatedActivityIds.has(sub.activityId)) {
+      sub.hasRelatedEnquiry = true;
+    } else {
+      sub.hasRelatedEnquiry = false;
+    }
+  });
+
+  submissions.value.forEach((sub) => {
+    if (sub.user) {
+      sub.user.fullName =
+        sub.user.firstName && sub.user.lastName
+          ? `${sub.user.lastName}, ${sub.user.firstName}`
+          : sub.user.firstName || sub.user.lastName || '';
+    }
+  });
+}
+
+// Set multiPermitsNeeded property of each submission to Yes/No (count)
+// if the submission have more than one permit with needed Yes
+function assignMultiPermitsNeeded() {
+  submissions.value.forEach((sub) => {
+    const multiPermitsNeededCount = permits.value.filter(
+      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
+    ).length;
+
+    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
+    else sub.multiPermitsNeeded = BasicResponse.NO;
+  });
+}
 
 function getBringForwardDate(bf: BringForward) {
   const { pastOrToday } = getBringForwardInterval(bf);
@@ -70,11 +110,6 @@ function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
-function onEnquiryDelete(enquiryId: string, activityId: string) {
-  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
-  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
-  refreshStatistics();
-}
 
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
@@ -90,6 +125,29 @@ function getQueryObject(bf: BringForward) {
     initialTab: NOTES_TAB_INDEX.ENQUIRY,
     enquiryId: bf.enquiryId
   };
+}
+
+function onEnquiryDelete(enquiryId: string, activityId: string) {
+  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+}
+
+function onSubmissionDelete(submissionId: string, activityId: string) {
+  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
+  refreshStatistics();
+}
+
+function refreshStatistics() {
+  submissionService
+    .getStatistics()
+    .then((response) => {
+      statistics.value = response.data;
+    })
+    .catch((e) => {
+      toast.error('Failed to refresh statistics', e.message);
+    });
 }
 
 onMounted(async () => {
@@ -133,59 +191,6 @@ onMounted(async () => {
   if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
 });
 
-function onSubmissionDelete(submissionId: string, activityId: string) {
-  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
-  bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
-  refreshStatistics();
-}
-
-function refreshStatistics() {
-  submissionService
-    .getStatistics()
-    .then((response) => {
-      statistics.value = response.data;
-    })
-    .catch((e) => {
-      toast.error('Failed to refresh statistics', e.message);
-    });
-}
-
-function assignEnquiriesAndFullName() {
-  const relatedActivityIds = new Set();
-
-  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
-
-  submissions.value.forEach((sub) => {
-    if (relatedActivityIds.has(sub.activityId)) {
-      sub.hasRelatedEnquiry = true;
-    } else {
-      sub.hasRelatedEnquiry = false;
-    }
-  });
-
-  submissions.value.forEach((sub) => {
-    if (sub.user) {
-      sub.user.fullName =
-        sub.user.firstName && sub.user.lastName
-          ? `${sub.user.lastName}, ${sub.user.firstName}`
-          : sub.user.firstName || sub.user.lastName || '';
-    }
-  });
-}
-
-// Set multiPermitsNeeded property of each submission to Yes/No (count)
-// if the submission have more than one permit with needed Yes
-function assignMultiPermitsNeeded() {
-  submissions.value.forEach((sub) => {
-    const multiPermitsNeededCount = permits.value.filter(
-      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
-    ).length;
-
-    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
-    else sub.multiPermitsNeeded = BasicResponse.NO;
-  });
-}
-
 watch(accordionIndex, () => {
   if (accordionIndex.value !== null) {
     window.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value.toString());
@@ -193,10 +198,34 @@ watch(accordionIndex, () => {
     window.sessionStorage.removeItem(StorageKey.BF_ACCORDION_IDX);
   }
 });
+
+// Watch for changes in the active tab index
+watch(activeTabIndex, (newIndex) => {
+  // wipe out the query when switching tabs otherwise append the tab index to the query
+  if (route.query.tab != newIndex.toString()) {
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSIONS,
+      query: {
+        tab: newIndex.toString()
+      }
+    });
+  } else {
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSIONS,
+      query: {
+        ...route.query,
+        tab: newIndex.toString()
+      }
+    });
+  }
+});
 </script>
 
 <template>
-  <TabView v-if="!loading">
+  <TabView
+    v-if="!loading"
+    v-model:activeIndex="activeTabIndex"
+  >
     <TabPanel header="Projects">
       <Accordion
         v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
@@ -229,6 +258,7 @@ watch(accordionIndex, () => {
           </div>
         </AccordionTab>
       </Accordion>
+
       <SubmissionListNavigator
         :loading="loading"
         :submissions="submissions"
