@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import BackButton from '@/components/common/BackButton.vue';
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
@@ -30,6 +30,7 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
+const router = useRouter();
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -76,10 +77,17 @@ function onEnquiryFormSaved() {
 </script>
 
 <template>
-  <BackButton
-    :route-name="RouteName.HOUSING_SUBMISSIONS"
-    text="Back to Submissions"
-  />
+  <Button
+    class="p-0"
+    text
+    @click="router.back()"
+  >
+    <font-awesome-icon
+      icon="fa fa-arrow-circle-left"
+      class="mr-1 app-primary-color"
+    />
+    <span class="app-primary-color">Back to Submissions</span>
+  </Button>
 
   <h1>
     Enquiry submission:

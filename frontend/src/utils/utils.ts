@@ -259,3 +259,14 @@ export function toKebabCase(input: string | undefined) {
     .replace(/[\s_]+/g, '-')
     .toLowerCase();
 }
+
+/**
+ * @function toNumber
+ * Converts a string to number if possible
+ * @param  {string} input The string to convert
+ * @returns {number | undefined} The number if possible
+ */
+export function toNumber(input: string): number | undefined {
+  const i = parseInt(input);
+  return Number.isNaN(i) ? undefined : i;
+}
