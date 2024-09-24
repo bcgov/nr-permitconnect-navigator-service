@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
@@ -30,7 +30,9 @@ import SubmissionIntakeConfirmation from '@/components/housing/submission/Submis
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
-  AccordionTab,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
   Button,
   Card,
   Divider,
@@ -493,6 +495,12 @@ onBeforeMount(async () => {
   // Clearing the document store on page load
   submissionStore.setDocuments([]);
 });
+
+watchEffect(() => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (activeStep.value === 3) isSubmittable.value = true;
+});
 </script>
 
 <template>
@@ -505,7 +513,6 @@ onBeforeMount(async () => {
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Project Investigation Form</h3>
     </div>
-    <div>{{ activeStep }}</div>
     <Form
       v-if="initialFormValues"
       id="form"
@@ -739,6 +746,26 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="() => activeStep++"
+              :prev-disabled="true"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
           </StepPanel>
 
           <StepPanel :value="1">
@@ -1059,273 +1086,21 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-          </StepPanel>
-          <StepPanel value="2">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="text-center mt-0"
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
-
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span class="section-header">
-                    Has the location of this project been affected by natural disaster?
-                  </span>
-                </div>
-                <Divider type="solid" />
-              </template>
               <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.naturalDisaster"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide one of the following project locations</span>
-                    <div
-                      v-tooltip.right="`A civic address contains a street name and number where a non-civid does not.`"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.projectLocation"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="PROJECT_LOCATION_LIST"
-                    @on-click="handleProjectLocationClick"
-                  />
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <EditableSelect
-                            class="col-12"
-                            name="addressSearch"
-                            :get-option-label="getAddressSearchLabel"
-                            :options="addressGeocoderOptions"
-                            :placeholder="'Search the address of your housing project'"
-                            :bold="false"
-                            :disabled="!editable"
-                            @on-input="onAddressSearchInput"
-                            @on-change="onAddressSelect"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.streetAddress"
-                            disabled
-                            placeholder="Street address"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.locality"
-                            disabled
-                            placeholder="Locality"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.province"
-                            disabled
-                            placeholder="Province"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between 48 and 60'
-                                : ''
-                            "
-                            placeholder="Latitude"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between -114 and -139'
-                                : ''
-                            "
-                            placeholder="Longitude"
-                          />
-                          <div
-                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
-                          >
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between 48 and 60"
-                            placeholder="Latitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between -114 and -139"
-                            placeholder="Longitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
-                        </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                </div>
-                <!-- <Map
-                  ref="mapRef"
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
                   :disabled="!editable"
-                  :latitude="mapLatitude"
-                  :longitude="mapLongitude"
-                /> -->
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide additional location details (optional)</span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
-                          </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
-                          </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location? (optional)
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <TextArea
-                  class="col-12"
-                  name="location.projectLocationDescription"
-                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
                 />
               </template>
-            </Card>
+            </StepperNavigation>
           </StepPanel>
           <StepPanel :value="2">
             <Message
@@ -1510,67 +1285,67 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
+                <Accordion :value="parcelAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                  target="_blank"
+                                >
+                                  LTSA PID Lookup
+                                </a>
+                              </label>
+                            </div>
+                            <!-- eslint-disable max-len -->
+                            <InputText
+                              class="col-12"
+                              name="location.ltsaPIDLookup"
+                              :bold="false"
+                              :disabled="!editable"
+                              help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                            />
+                            <!-- eslint-enable max-len -->
                           </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
+                <Accordion :value="geomarkAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Geomark</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://apps.gov.bc.ca/pub/geomark/overview"
+                                  target="_blank"
+                                >
+                                  Open Geomark Web Service
+                                </a>
+                              </label>
+                            </div>
+                            <InputText
+                              class="col-12"
+                              name="location.geomarkUrl"
+                              :bold="false"
+                              :disabled="!editable"
+                              placeholder="Type in URL"
+                            />
                           </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
               </template>
             </Card>
@@ -1593,6 +1368,21 @@ onBeforeMount(async () => {
                 />
               </template>
             </Card>
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
+            >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
           </StepPanel>
           <StepPanel :value="3">
             <Message
@@ -1846,7 +1636,7 @@ onBeforeMount(async () => {
             <StepperNavigation
               :editable="editable"
               :next-disabled="true"
-              :prev-callback="prevCallback"
+              :prev-callback="() => activeStep--"
               @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>

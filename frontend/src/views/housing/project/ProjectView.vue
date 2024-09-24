@@ -6,7 +6,16 @@ import { useRouter } from 'vue-router';
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
-import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  Button,
+  Card,
+  Divider,
+  useToast
+} from '@/lib/primevue';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -253,20 +262,24 @@ onMounted(async () => {
       v-if="permitsNotNeeded?.length"
       class="app-primary-color"
     >
-      <AccordionTab header="Not needed">
-        <div>
-          We have also investigated the following permits as requested. These permits are not required for this project.
-        </div>
-        <ul class="mt-4 mb-0">
-          <li
-            v-for="permit in permitsNotNeeded"
-            :key="permit.permitId"
-            class="m-0"
-          >
-            {{ permit.businessDomain }}: {{ permit.name }}
-          </li>
-        </ul>
-      </AccordionTab>
+      <AccordionPanel>
+        <AccordionHeader>Not needed</AccordionHeader>
+        <AccordionContent>
+          <div>
+            We have also investigated the following permits as requested. These permits are not required for this
+            project.
+          </div>
+          <ul class="mt-4 mb-0">
+            <li
+              v-for="permit in permitsNotNeeded"
+              :key="permit.permitId"
+              class="m-0"
+            >
+              {{ permit.businessDomain }}: {{ permit.name }}
+            </li>
+          </ul>
+        </AccordionContent>
+      </AccordionPanel>
     </Accordion>
     <h3 class="mt-8 mb-5">Submitted applications</h3>
     <div

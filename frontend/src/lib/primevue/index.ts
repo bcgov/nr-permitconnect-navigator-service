@@ -1,5 +1,10 @@
 // Add imports as needed
 export { default as Accordion } from 'primevue/accordion';
+
+export { default as AccordionContent } from 'primevue/accordioncontent';
+export { default as AccordionHeader } from 'primevue/accordionheader';
+export { default as AccordionPanel } from 'primevue/accordionpanel';
+
 export { default as AccordionTab } from 'primevue/accordiontab';
 export { default as AutoComplete } from 'primevue/autocomplete';
 export { FilterMatchMode } from '@primevue/core/api';
