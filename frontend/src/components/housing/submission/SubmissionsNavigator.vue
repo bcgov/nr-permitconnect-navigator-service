@@ -9,7 +9,15 @@ import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNaviga
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
-import { Accordion, AccordionTab, InputSwitch, TabPanel, TabView, useToast } from '@/lib/primevue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  TabPanel,
+  TabView,
+  useToast
+} from '@/lib/primevue';
 import { enquiryService, noteService, permitService, submissionService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
@@ -271,31 +279,34 @@ watch(showCompleted, () => {
         v-model:active-index="accordionIndex"
         class="mb-3"
       >
-        <AccordionTab header="My bring forward notifications">
-          <div class="flex flex-column">
-            <div
-              v-for="(bf, index) of myBringForward"
-              :key="index"
-              class="flex mb-1"
-            >
-              <span
-                class="text-xl p-1 w-full"
-                :class="getBringForwardStyling(bf)"
+        <AccordionPanel>
+          <AccordionHeader>My bring forward notifications</AccordionHeader>
+          <AccordionContent>
+            <div class="flex flex-column">
+              <div
+                v-for="(bf, index) of myBringForward"
+                :key="index"
+                class="flex mb-1"
               >
-                Bring forward {{ getBringForwardDate(bf) }}:
-                <router-link
-                  :to="{
-                    name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
-                    query: getQueryObject(bf),
-                    hash: `#${bf.noteId}`
-                  }"
+                <span
+                  class="text-xl p-1 w-full"
+                  :class="getBringForwardStyling(bf)"
                 >
-                  {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
-                </router-link>
-              </span>
+                  Bring forward {{ getBringForwardDate(bf) }}:
+                  <router-link
+                    :to="{
+                      name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                      query: getQueryObject(bf),
+                      hash: `#${bf.noteId}`
+                    }"
+                  >
+                    {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
+                  </router-link>
+                </span>
+              </div>
             </div>
-          </div>
-        </AccordionTab>
+          </AccordionContent>
+        </AccordionPanel>
       </Accordion>
 
       <SubmissionListNavigator

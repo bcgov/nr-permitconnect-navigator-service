@@ -30,7 +30,9 @@ import SubmissionAssistance from '@/components/housing/submission/SubmissionAssi
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
-  AccordionTab,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
   Button,
   Card,
   Divider,
@@ -542,6 +544,12 @@ onBeforeMount(async () => {
     router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
 });
+
+watchEffect(() => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (activeStep.value === 3) isSubmittable.value = true;
+});
 </script>
 
 <template>
@@ -554,7 +562,6 @@ onBeforeMount(async () => {
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Housing Project Intake Form</h3>
     </div>
-    <div>{{ activeStep }}</div>
     <Form
       v-if="initialFormValues"
       id="form"
@@ -753,6 +760,26 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+            <StepperNavigation
+              :editable="editable"
+              :next-callback="() => activeStep++"
+              :prev-disabled="true"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            >
+              <template #content>
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
+                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
+                />
+              </template>
+            </StepperNavigation>
           </StepPanel>
 
             <StepperNavigation
@@ -1280,101 +1307,7 @@ onBeforeMount(async () => {
                 <!-- <Map
                   ref="mapRef"
                   :disabled="!editable"
-                  :latitude="mapLatitude"
-                  :longitude="mapLongitude"
-                /> -->
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide additional location details (optional)</span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
-                          </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
-                          </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location? (optional)
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <TextArea
-                  class="col-12"
-                  name="location.projectLocationDescription"
-                  :disabled="!editable"
+                  @click="onSaveDraft(values)"
                 />
               </template>
             </StepperNavigation>
@@ -1584,67 +1517,67 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
+                <Accordion :value="parcelAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                  target="_blank"
+                                >
+                                  LTSA PID Lookup
+                                </a>
+                              </label>
+                            </div>
+                            <!-- eslint-disable max-len -->
+                            <InputText
+                              class="col-12"
+                              name="location.ltsaPIDLookup"
+                              :bold="false"
+                              :disabled="!editable"
+                              help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                            />
+                            <!-- eslint-enable max-len -->
                           </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
+                <Accordion :value="geomarkAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Geomark</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://apps.gov.bc.ca/pub/geomark/overview"
+                                  target="_blank"
+                                >
+                                  Open Geomark Web Service
+                                </a>
+                              </label>
+                            </div>
+                            <InputText
+                              class="col-12"
+                              name="location.geomarkUrl"
+                              :bold="false"
+                              :disabled="!editable"
+                              placeholder="Type in URL"
+                            />
                           </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
               </template>
             </Card>
@@ -1976,7 +1909,7 @@ onBeforeMount(async () => {
             <StepperNavigation
               :editable="editable"
               :next-disabled="true"
-              :prev-callback="prevCallback"
+              :prev-callback="() => activeStep--"
               @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
