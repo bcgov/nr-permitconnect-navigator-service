@@ -157,6 +157,7 @@ onMounted(() => {
   .p-menubar {
     border: none;
     padding: 0;
+    background-color: $app-link-text;
 
     :deep(.p-menuitem) {
       &.p-focus {
