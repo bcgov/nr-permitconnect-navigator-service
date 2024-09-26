@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
-import { Button, Message, TabPanel, TabView } from '@/lib/primevue';
+import { Button, Message, Tab, TabList, TabPanel, TabPanels, Tabs } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import { useAuthZStore, useEnquiryStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
@@ -110,77 +110,83 @@ function onEnquiryFormSaved() {
       (Completed)
     </span>
   </h1>
-  <TabView v-model:activeIndex="activeTab">
-    <TabPanel header="Information">
-      <Message
-        v-if="relatedSubmission"
-        severity="info"
-        class="text-center"
-        :closable="false"
-      >
-        This activity is linked to Activity
-        <router-link
-          :to="{
-            name: RouteName.HOUSING_SUBMISSION,
-            query: { activityId: getEnquiry?.relatedActivityId, submissionId: relatedSubmission.submissionId }
-          }"
+  <Tabs :value="activeTab">
+    <TabList>
+      <Tab :value="0">Information</Tab>
+      <Tab :value="1">Notes</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel :value="0">
+        <Message
+          v-if="relatedSubmission"
+          severity="error"
+          class="text-center"
+          :closable="false"
         >
-          {{ getEnquiry?.relatedActivityId }}
-        </router-link>
-      </Message>
+          This activity is linked to Activity
+          <router-link
+            :to="{
+              name: RouteName.HOUSING_SUBMISSION,
+              query: { activityId: getEnquiry?.relatedActivityId, submissionId: relatedSubmission.submissionId }
+            }"
+          >
+            {{ getEnquiry?.relatedActivityId }}
+          </router-link>
+        </Message>
 
-      <Message
-        v-if="getEnquiry?.relatedActivityId && !relatedSubmission"
-        severity="error"
-        class="text-center"
-        :closable="false"
-      >
-        This activity is linked to an invalid Activity
-      </Message>
-      <span v-if="!loading && getEnquiry">
-        <EnquiryForm
-          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
-          :enquiry="getEnquiry"
-          @enquiry-form:saved="onEnquiryFormSaved"
-        />
-      </span>
-    </TabPanel>
-    <TabPanel header="Notes">
-      <div class="flex align-items-center pb-2">
-        <div class="flex-grow-1">
-          <p class="font-bold">Notes ({{ getNotes.length }})</p>
-        </div>
-        <Button
-          aria-label="Add note"
-          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
-          @click="noteModalVisible = true"
+        <Message
+          v-if="getEnquiry?.relatedActivityId && !relatedSubmission"
+          severity="error"
+          class="text-center"
+          :closable="false"
         >
-          <font-awesome-icon
-            class="pr-2"
-            icon="fa-solid fa-plus"
+          This activity is linked to an invalid Activity
+        </Message>
+        <span v-if="!loading && getEnquiry">
+          <EnquiryForm
+            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
+            :enquiry="getEnquiry"
+            @enquiry-form:saved="onEnquiryFormSaved"
           />
-          Add note
-        </Button>
-      </div>
-      <div
-        v-for="(note, index) in getNotes"
-        :key="note.noteId"
-        :index="index"
-        class="col-12"
-      >
-        <NoteCard
-          :editable="!isCompleted"
-          :note="note"
-          @delete-note="onDeleteNote"
-          @update-note="onUpdateNote"
+        </span>
+      </TabPanel>
+      <TabPanel :value="1">
+        <div class="flex align-items-center pb-2">
+          <div class="flex-grow-1">
+            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+          </div>
+          <Button
+            aria-label="Add note"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+            @click="noteModalVisible = true"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-plus"
+            />
+            Add note
+          </Button>
+        </div>
+        <div
+          v-for="(note, index) in getNotes"
+          :key="note.noteId"
+          :index="index"
+          class="col-12"
+        >
+          <NoteCard
+            :editable="!isCompleted"
+            :note="note"
+            @delete-note="onDeleteNote"
+            @update-note="onUpdateNote"
+          />
+        </div>
+        <NoteModal
+          v-if="noteModalVisible"
+          v-model:visible="noteModalVisible"
+          :activity-id="activityId"
+          @add-note="onAddNote"
         />
-      </div>
-      <NoteModal
-        v-if="noteModalVisible"
-        v-model:visible="noteModalVisible"
-        :activity-id="activityId"
-        @add-note="onAddNote"
-      />
-    </TabPanel>
-  </TabView>
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>

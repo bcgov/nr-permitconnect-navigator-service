@@ -12,8 +12,11 @@ import {
   IconField,
   InputIcon,
   InputText,
+  Tab,
+  TabList,
   TabPanel,
-  TabView,
+  TabPanels,
+  Tabs,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -288,67 +291,73 @@ onMounted(async () => {
     v-model:visible="userProcessModalVisible"
     @user-action:process="onProcessUserAccessRequest"
   />
-  <TabView
+  <Tabs
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
-    v-model:activeIndex="activeTab"
+    :value="activeTab"
   >
-    <TabPanel header="Manage users">
-      <div class="flex justify-content-between">
-        <Button
-          label="Create new user"
-          type="submit"
-          icon="pi pi-plus"
-          @click="createUserModalVisible = true"
+    <TabList>
+      <Tab :value="0">Manage users</Tab>
+      <Tab :value="1">Revocation requests</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel :value="0">
+        <div class="flex justify-content-between">
+          <Button
+            label="Create new user"
+            type="submit"
+            icon="pi pi-plus"
+            @click="createUserModalVisible = true"
+          />
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+              class="width"
+            />
+          </IconField>
+        </div>
+        <UserTable
+          v-model:filters="filters"
+          :users-and-access-request="usersAndAccessRequests"
+          class="mt-4"
+          @user-table:manage="
+            (userAccessRequest: UserAccessRequest) => {
+              selectedUserAccessRequest = userAccessRequest;
+              manageUserModalVisible = true;
+            }
+          "
+          @user-table:process-request="
+            (userAccessRequest: UserAccessRequest) => {
+              selectedUserAccessRequest = userAccessRequest;
+              userProcessModalVisible = true;
+            }
+          "
+          @user-table:revoke="onRevoke"
         />
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-request="usersAndAccessRequests"
-        class="mt-4"
-        @user-table:manage="
-          (userAccessRequest: UserAccessRequest) => {
-            selectedUserAccessRequest = userAccessRequest;
-            manageUserModalVisible = true;
-          }
-        "
-        @user-table:process-request="
-          (userAccessRequest: UserAccessRequest) => {
-            selectedUserAccessRequest = userAccessRequest;
-            userProcessModalVisible = true;
-          }
-        "
-        @user-table:revoke="onRevoke"
-      />
-    </TabPanel>
-    <TabPanel header="Revocation requests">
-      <div class="flex justify-content-end">
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-request="getRevocationRequests"
-        class="mt-4"
-        :revocation="true"
-        @user-table:revoke="onRevoke"
-        @user-table:deny-revocation="onDenyRevocation"
-      />
-    </TabPanel>
-  </TabView>
+      </TabPanel>
+      <TabPanel :value="1">
+        <div class="flex justify-content-end">
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+              class="width"
+            />
+          </IconField>
+        </div>
+        <UserTable
+          v-model:filters="filters"
+          :users-and-access-request="getRevocationRequests"
+          class="mt-4"
+          :revocation="true"
+          @user-table:revoke="onRevoke"
+          @user-table:deny-revocation="onDenyRevocation"
+        />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
   <div v-else>
     <div class="flex justify-content-between">
       <Button

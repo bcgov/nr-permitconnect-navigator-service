@@ -1,11 +1,9 @@
 // Add imports as needed
 export { default as Accordion } from 'primevue/accordion';
-
 export { default as AccordionContent } from 'primevue/accordioncontent';
 export { default as AccordionHeader } from 'primevue/accordionheader';
 export { default as AccordionPanel } from 'primevue/accordionpanel';
-
-export { default as AccordionTab } from 'primevue/accordiontab';
+export { default as AccordionTab } from 'primevue/accordiontab'; // delete?
 export { default as AutoComplete } from 'primevue/autocomplete';
 export { FilterMatchMode } from '@primevue/core/api';
 export { default as Breadcrumb } from 'primevue/breadcrumb';
@@ -35,8 +33,11 @@ export { default as Password } from 'primevue/password';
 export { default as ProgressBar } from 'primevue/progressbar';
 export { default as ProgressSpinner } from 'primevue/progressspinner';
 export { default as RadioButton } from 'primevue/radiobutton';
-export { default as TabView } from 'primevue/tabview';
+export { default as Tab } from 'primevue/tab';
+export { default as TabList } from 'primevue/tablist';
 export { default as TabPanel } from 'primevue/tabpanel';
+export { default as TabPanels } from 'primevue/tabpanels';
+export { default as Tabs } from 'primevue/tabs';
 export { default as Textarea } from 'primevue/textarea';
 export { default as Timeline } from 'primevue/timeline';
 export { default as Toast } from 'primevue/toast';
@@ -51,3 +52,4 @@ export { default as Step } from 'primevue/step';
 export { useConfirm } from 'primevue/useconfirm';
 
 export { useToast } from './useToast';
+// Tabs TabList Tab TabPanels TabPanel
