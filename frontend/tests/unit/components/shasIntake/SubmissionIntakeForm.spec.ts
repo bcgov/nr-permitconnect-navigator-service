@@ -23,6 +23,7 @@ vi.mock('vue-router', () => ({
     params: {},
     query: {}
   }),
+  onBeforeRouteLeave: vi.fn(),
   onBeforeRouteUpdate: vi.fn()
 }));
 

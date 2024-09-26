@@ -6,6 +6,7 @@ export { default as CopyToClipboard } from './CopyToClipboard.vue';
 export { default as Dropdown } from './Dropdown.vue';
 export { default as EditableDropdown } from './EditableDropdown.vue';
 export { default as Editor } from './Editor.vue';
+export { default as FormAutosave } from './FormAutosave.vue';
 export { default as FormNavigationGuard } from './FormNavigationGuard.vue';
 export { default as GridRow } from './GridRow.vue';
 export { default as InputMask } from './InputMask.vue';
