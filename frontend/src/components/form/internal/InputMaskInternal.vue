@@ -44,5 +44,6 @@ const normalizedValue = computed({
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
+    @blur="handleBlur"
   />
 </template>

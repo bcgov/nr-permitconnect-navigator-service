@@ -22,10 +22,10 @@ import {
   InputIcon,
   InputText,
   Tab,
+  Tabs,
   TabList,
   TabPanel,
-  TabPanels,
-  Tabs
+  TabPanels
 } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';

@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
-import { Button, Message, Tab, TabList, TabPanel, TabPanels, Tabs } from '@/lib/primevue';
+import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import { useAuthZStore, useEnquiryStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';

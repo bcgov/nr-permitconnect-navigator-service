@@ -17,8 +17,8 @@ import {
   FormNavigationGuard,
   InputMask,
   InputNumber,
-  RadioList,
   InputText,
+  RadioList,
   Select,
   StepperHeader,
   StepperNavigation,
@@ -37,9 +37,9 @@ import {
   Card,
   Divider,
   Message,
-  Stepper,
   Step,
   StepList,
+  Stepper,
   StepPanel,
   StepPanels,
   useConfirm,
@@ -1675,7 +1675,7 @@ watchEffect(() => {
                       :bold="false"
                       :disabled="!editable"
                       :options="YES_NO_UNSURE_LIST"
-                      @on-change="(e) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
+                      @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
                     />
                     <div
                       v-if="

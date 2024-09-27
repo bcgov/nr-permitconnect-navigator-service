@@ -71,9 +71,10 @@ onMounted(() => {
       :option-label="(option: any) => getOptionLabel(option)"
       :placeholder="placeholder"
       :suggestions="suggestions"
-      @input="(e: IInputEvent) => emit('onInput', e)"
+      @blur="handleBlur"
       @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
+      @input="(e: IInputEvent) => emit('onInput', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div class="mt-2">

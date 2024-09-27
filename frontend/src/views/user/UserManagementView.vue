@@ -13,10 +13,10 @@ import {
   InputIcon,
   InputText,
   Tab,
+  Tabs,
   TabList,
   TabPanel,
   TabPanels,
-  Tabs,
   useConfirm,
   useToast
 } from '@/lib/primevue';

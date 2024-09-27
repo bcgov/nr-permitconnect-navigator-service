@@ -4,15 +4,15 @@ import { computed, onMounted, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
 import {
-  DatePicker,
   CancelButton,
   Checkbox,
-  Select,
+  DatePicker,
   EditableSelect,
   FormNavigationGuard,
   InputMask,
   InputNumber,
   InputText,
+  Select,
   SectionHeader,
   TextArea
 } from '@/components/form';

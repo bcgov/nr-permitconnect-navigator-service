@@ -51,6 +51,7 @@ onMounted(() => {
             :value="option"
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
+            @blur="handleBlur"
             @click="emit('onClick', value)"
           />
           <span

@@ -17,7 +17,6 @@ const {
 
 // Actions
 function scrollToTop() {
-  // TODO (still p-stepper or p-steps after rename??)
   const stepperPanel = document.querySelector('.p-stepper');
   if (stepperPanel) {
     window.scroll(0, 0);
