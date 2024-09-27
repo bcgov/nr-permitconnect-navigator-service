@@ -21,7 +21,7 @@ const {
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 
 // Actions
 watch(value, () => {
@@ -47,6 +47,7 @@ watch(value, () => {
             :value="option"
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
+            @blur="handleBlur"
             @click="emit('onClick', value)"
           />
           <span

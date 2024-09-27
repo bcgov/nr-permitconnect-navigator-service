@@ -13,7 +13,7 @@ const { label, name, mask, placeholder, disabled, bold } = defineProps<{
   bold: boolean;
 }>();
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -34,5 +34,6 @@ const { errorMessage, value } = useField<string>(name);
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
+    @blur="handleBlur"
   />
 </template>

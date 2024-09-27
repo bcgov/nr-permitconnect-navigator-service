@@ -24,7 +24,7 @@ const {
   maxDate?: Date;
 }>();
 
-const { errorMessage, value } = useField<Date>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -51,6 +51,7 @@ const { errorMessage, value } = useField<Date>(name);
       date-format="yy/mm/dd"
       :placeholder="placeholder"
       :max-date="maxDate"
+      @blur="handleBlur"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>

@@ -22,7 +22,7 @@ const {
 }>();
 
 // State
-const { errorMessage, value } = useField<number>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -45,6 +45,7 @@ const { errorMessage, value } = useField<number>(name);
       :disabled="disabled"
       :min-fraction-digits="0"
       :max-fraction-digits="6"
+      @blur="handleBlur"
     />
     <small
       v-if="helpText"

@@ -30,7 +30,7 @@ const {
 // Emits
 const emit = defineEmits(['onInput', 'onChange']);
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -54,6 +54,7 @@ const { errorMessage, value } = useField<string>(name);
       :disabled="disabled"
       :options="options"
       :option-label="(option: Array<unknown>) => getOptionLabel(option)"
+      @blur="handleBlur"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: SelectChangeEvent) => emit('onChange', e)"
     />

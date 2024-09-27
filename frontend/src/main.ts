@@ -11,25 +11,13 @@ import { createApp } from 'vue';
 
 import App from '@/App.vue';
 import getRouter from '@/router';
+import { LaraOverrided } from '@/ThemeOverride';
 import { AuthService, ConfigService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
-// import 'primevue/resources/themes/saga-blue/theme.css';
-// import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import '@/assets/main.scss';
-
-import Aura from '@primevue/themes/aura';
-import { definePreset } from '@primevue/themes';
-
-const MyPreset = definePreset(Aura, {
-  semantic: {
-    content: {
-      background: '{border.radius.md}'
-    }
-  }
-});
 
 /**
  * @function initializeApp
@@ -50,10 +38,10 @@ function initializeApp(): void {
   app.use(getRouter());
   app.use(PrimeVue, {
     theme: {
-      preset: Aura,
+      preset: LaraOverrided,
       options: {
         prefix: 'p',
-        darkModeSelector: '.p-app-dark',
+        darkModeSelector: 'dark',
         cssLayer: false
       }
     }

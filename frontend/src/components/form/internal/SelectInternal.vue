@@ -33,7 +33,7 @@ const {
 // Emits
 const emit = defineEmits(['onChange']);
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -60,6 +60,7 @@ const { errorMessage, value } = useField<string>(name);
     :option-value="optionValue"
     :loading="loading"
     @change="(e: SelectChangeEvent) => emit('onChange', e)"
+    @blur="handleBlur"
   />
   <label
     v-if="floatLabel"
