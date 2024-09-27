@@ -3,7 +3,7 @@ import { onMounted, ref } from 'vue';
 
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import SubmissionListProponent from '@/components/housing/submission/SubmissionListProponent.vue';
-import { TabPanel, Tabs, Tab, TabList, TabPanels } from '@/lib/primevue';
+import { Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import type { Ref } from 'vue';
 import type { Enquiry, Submission } from '@/types';

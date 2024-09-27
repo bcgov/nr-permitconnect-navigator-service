@@ -4,13 +4,13 @@ import { computed, onMounted, ref } from 'vue';
 import { date, mixed, object, string } from 'yup';
 
 import {
-  DatePicker,
   CancelButton,
-  Select,
+  DatePicker,
   EditableSelect,
   FormNavigationGuard,
   InputMask,
   InputText,
+  Select,
   SectionHeader,
   TextArea
 } from '@/components/form';

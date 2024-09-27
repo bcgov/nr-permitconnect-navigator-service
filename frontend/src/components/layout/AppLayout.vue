@@ -34,4 +34,3 @@ const authzStore = useAuthZStore();
     </footer>
   </div>
 </template>
-@/store/authnStore

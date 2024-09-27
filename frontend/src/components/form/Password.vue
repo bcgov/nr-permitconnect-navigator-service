@@ -20,7 +20,7 @@ const {
   bold?: boolean;
 }>();
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -43,6 +43,7 @@ const { errorMessage, value } = useField<string>(name);
       :class="{ 'p-invalid': errorMessage }"
       :feedback="false"
       toggle-mask
+      @blur="handleBlur"
     />
     <small :id="`${name}-help`">{{ helptext }}</small>
     <div>
