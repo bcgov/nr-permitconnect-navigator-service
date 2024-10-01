@@ -29,6 +29,13 @@ export const GROUP_NAME_LIST = [
   GroupName.SUPERVISOR
 ];
 
+export const MANAGED_GROUP_NAME_LIST = [
+  GroupName.ADMIN,
+  GroupName.NAVIGATOR,
+  GroupName.NAVIGATOR_READ_ONLY,
+  GroupName.SUPERVISOR
+];
+
 export const SPATIAL_FILE_FORMATS = [
   '.cpg',
   '.dbf',
