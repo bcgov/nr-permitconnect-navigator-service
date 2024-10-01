@@ -12,6 +12,7 @@ export type Submission = {
   contactFirstName: string;
   contactLastName: string;
   companyNameRegistered: string;
+  consentToFeedback?: boolean;
   isDevelopedInBC: string;
   contactApplicantRelationship: string;
   contactPreference: string;
@@ -22,6 +23,7 @@ export type Submission = {
   projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
+  multiPermitsNeeded: string;
   otherUnitsDescription: string;
   otherUnits: string;
   hasRentalUnits: string;

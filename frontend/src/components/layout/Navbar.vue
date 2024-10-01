@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { Permissions, default as PermissionService } from '@/services/permissionService';
+import { useAuthZStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_CONTACT } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
@@ -19,10 +20,11 @@ type NavItem = {
   mailTo?: string;
 };
 
+// Store
+const authzStore = useAuthZStore();
+
 // State
 const items: Ref<Array<NavItem>> = ref([]);
-
-const permissionService = new PermissionService();
 
 onMounted(() => {
   items.value = [
@@ -35,41 +37,42 @@ onMounted(() => {
       label: 'Housing',
       items: [
         {
-          label: 'Work with a Housing Navigator',
+          label: 'Start a new project investigation',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_INTAKE
         },
         {
           label: 'Submit an enquiry',
           route: RouteName.HOUSING_ENQUIRY_INTAKE,
-          access: Permissions.NAVIGATION_HOUSING_ENQUIRY
+          access: NavigationPermission.HOUSING_ENQUIRY
         },
         {
-          label: 'Drafts and submissions',
+          label: 'View my drafts and previous entries',
           route: RouteName.HOUSING_SUBMISSIONS,
-          access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS_SUB
+          access: NavigationPermission.HOUSING_SUBMISSIONS_SUB
         },
         {
-          label: 'Status of application/permit',
+          label: 'Check the status of your applications/permits',
           route: RouteName.HOUSING_PROJECTS_LIST,
-          access: Permissions.NAVIGATION_HOUSING_STATUS_TRACKER
+          access: NavigationPermission.HOUSING_STATUS_TRACKER
         }
       ],
-      access: Permissions.NAVIGATION_HOUSING_DROPDOWN
+      access: NavigationPermission.HOUSING_DROPDOWN
     },
     {
       label: 'Submissions',
       route: RouteName.HOUSING_SUBMISSIONS,
-      access: Permissions.NAVIGATION_HOUSING_SUBMISSIONS
+      access: NavigationPermission.HOUSING_SUBMISSIONS
     },
     {
       label: 'User Management',
-      access: Permissions.NAVIGATION_HOUSING_USER_MANAGEMENT
+      route: RouteName.USER_MANAGEMENT,
+      access: NavigationPermission.HOUSING_USER_MANAGEMENT
     },
     {
       label: 'Developer',
       route: RouteName.DEVELOPER,
-      access: Permissions.NAVIGATION_DEVELOPER
+      access: NavigationPermission.DEVELOPER
     },
     {
       label: 'Help',
@@ -77,7 +80,7 @@ onMounted(() => {
         {
           label: 'Contact a Navigator',
           mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_INTAKE
         },
         {
           label: 'Report a problem',
@@ -87,7 +90,7 @@ onMounted(() => {
         {
           label: 'User Guide',
           route: RouteName.HOUSING_GUIDE,
-          access: Permissions.NAVIGATION_HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_USER_GUIDE
         }
       ],
       public: true
@@ -100,7 +103,7 @@ onMounted(() => {
   <nav class="navigation-main pl-2 lg:pl-6">
     <Menubar :model="items">
       <template #item="{ item, props, hasSubmenu }">
-        <span v-if="item.public || permissionService.can(item.access)">
+        <span v-if="item.public || authzStore.canNavigate(item.access)">
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"
@@ -108,22 +111,35 @@ onMounted(() => {
             custom
           >
             <a
+              :aria-labelledby="item.label as string"
               :href="href"
               v-bind="props.action"
               @click="navigate"
             >
-              <span class="flex">{{ item.label }}</span>
+              <span
+                :id="item.label as string"
+                class="flex"
+              >
+                {{ item.label }}
+              </span>
             </a>
           </router-link>
           <a
             v-else-if="item.mailTo"
+            :aria-labelledby="item.label as string"
             :href="item.mailTo"
             class="mail-link"
           >
-            <span class="flex">{{ item.label }}</span>
+            <span
+              :id="item.label as string"
+              class="flex"
+            >
+              {{ item.label }}
+            </span>
           </a>
           <a
             v-else
+            :aria-labelledby="item.label as string"
             :href="item.url"
             :target="item.target"
             v-bind="props.action"
@@ -131,6 +147,7 @@ onMounted(() => {
             <span class="flex">{{ item.label }}</span>
             <span
               v-if="hasSubmenu"
+              :id="item.label as string"
               class="pi pi-angle-down mt-1 ml-1"
             />
           </a>
@@ -153,6 +170,14 @@ onMounted(() => {
   .p-menubar {
     border: none;
     padding: 0;
+
+    :deep(.p-menuitem) {
+      &.p-focus {
+        > .p-menuitem-content {
+          background-color: #5a7da9;
+        }
+      }
+    }
 
     :deep(.p-menuitem-content) {
       background-color: #38598a;

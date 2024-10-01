@@ -1,35 +1,34 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { InputNumber } from '@/lib/primevue';
 
 // Props
-type Props = {
+
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  bold = true
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  bold: true
-});
+}>();
 
 // State
-const { errorMessage, value } = useField<number>(toRef(props, 'name'));
+const { errorMessage, value } = useField<number>(name);
 </script>
 
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -38,6 +37,7 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
     <InputNumber
       v-model="value"
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       :name="name"
       :placeholder="placeholder"
       class="w-full"
@@ -46,7 +46,10 @@ const { errorMessage, value } = useField<number>(toRef(props, 'name'));
       :min-fraction-digits="0"
       :max-fraction-digits="6"
     />
-    <small :id="`${name}-help`">
+    <small
+      v-if="helpText"
+      :id="`${name}-help`"
+    >
       {{ helpText }}
     </small>
     <div class="mt-2">

@@ -1,8 +1,8 @@
-import { currentUser } from '../../middleware/authentication';
-import { expressListRoutes } from '../utils';
-
 import express from 'express';
 
+import { currentContext } from '../../middleware/authentication';
+
+import accessRequest from './accessRequest';
 import activity from './activity';
 import docs from './docs';
 import document from './document';
@@ -13,17 +13,33 @@ import roadmap from './roadmap';
 import sso from './sso';
 import submission from './submission';
 import user from './user';
+import yars from './yars';
+
+import { Initiative } from '../../utils/enums/application';
 
 const router = express.Router();
-router.use(currentUser);
+router.use(currentContext(Initiative.HOUSING));
 
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/activity', '/document', '/enquiry', '/note', '/permit', '/roadmap', '/sso', '/submission', '/user']
+    endpoints: [
+      '/accessRequest',
+      '/activity',
+      '/document',
+      '/enquiry',
+      '/note',
+      '/permit',
+      '/roadmap',
+      '/sso',
+      '/submission',
+      '/user',
+      '/yars'
+    ]
   });
 });
 
+router.use('/accessRequest', accessRequest);
 router.use('/activity', activity);
 router.use('/docs', docs);
 router.use('/document', document);
@@ -34,6 +50,7 @@ router.use('/roadmap', roadmap);
 router.use('/sso', sso);
 router.use('/submission', submission);
 router.use('/user', user);
+router.use('/yars', yars);
 
 expressListRoutes(router, { prefix: 'api/v1' });
 

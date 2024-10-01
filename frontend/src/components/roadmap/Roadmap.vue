@@ -17,11 +17,9 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-type Props = {
+const { activityId } = defineProps<{
   activityId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -73,7 +71,7 @@ const confirmSubmit = (data: any) => {
     accept: async () => {
       try {
         await roadmapService.send(
-          props.activityId,
+          activityId,
           selectedFiles.value.map((x: Document) => x.documentId),
           setEmptyStringsToNull(data)
         );

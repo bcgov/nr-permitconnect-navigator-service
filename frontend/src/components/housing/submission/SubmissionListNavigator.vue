@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import {
@@ -15,30 +15,55 @@ import {
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
-import PermissionService, { Permissions } from '@/services/permissionService';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { useAuthZStore } from '@/store';
+import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
+import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Submission } from '@/types';
 
-//Emits
-const emit = defineEmits(['submission:delete']);
-
-// Props
-type Props = {
-  loading: boolean;
-  submissions: Array<Submission> | undefined;
+// Types
+type Pagination = {
+  rows?: number;
+  order?: number;
+  field?: string;
+  page?: number;
 };
 
-const props = withDefaults(defineProps<Props>(), {});
+// Props
+const { loading, submissions } = defineProps<{
+  loading: boolean;
+  submissions: Array<Submission> | undefined;
+}>();
+
+// Emits
+const emit = defineEmits(['submission:delete']);
+
+// Store
+const authzStore = useAuthZStore();
 
 // State
+const route = useRoute();
 const selection: Ref<Submission | undefined> = ref(undefined);
+const dataTable = ref(null);
+const pagination: Ref<Pagination> = ref({
+  rows: 10,
+  order: -1,
+  field: 'submittedAt',
+  page: 0
+});
+
+// read from query params if tab is set to enquiry otherwise use default values
+if (!route.query.tab || route.query.tab === '0') {
+  pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
+  pagination.value.order = toNumber(route.query.order as string) ?? -1;
+  pagination.value.field = (route.query.field as string) ?? 'submittedAt';
+  pagination.value.page = toNumber(route.query.page as string) ?? 0;
+}
 
 // Actions
 const confirmDialog = useConfirm();
-const permissionService = new PermissionService();
 const router = useRouter();
 const toast = useToast();
 
@@ -101,25 +126,62 @@ function isFinanciallySupported(data: Submission) {
     return BasicResponse.NO;
   }
 }
+
+// Actions
+function updateQueryParams() {
+  router.replace({
+    name: RouteName.HOUSING_SUBMISSIONS,
+    query: {
+      rows: pagination.value.rows ?? undefined,
+      order: pagination.value.order ?? undefined,
+      field: pagination.value.field ?? undefined,
+      page: pagination.value.page ?? undefined,
+      tab: route.query.tab ?? 0
+    }
+  });
+}
 </script>
 
 <template>
   <DataTable
+    ref="dataTable"
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
-    :value="props.submissions"
+    :value="submissions"
     data-key="submissionId"
     scrollable
     responsive-layout="scroll"
     :paginator="true"
-    :rows="10"
-    sort-field="submittedAt"
-    :sort-order="-1"
+    :rows="pagination.rows"
+    :sort-field="pagination.field"
+    :sort-order="pagination.order"
     paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
     current-page-report-template="{first}-{last} of {totalRecords}"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
+    :first="pagination.page && pagination.rows ? pagination.page * pagination.rows : 0"
+    @update:sort-field="
+      (e) => {
+        pagination.field = e;
+        pagination.page = 0;
+        updateQueryParams();
+      }
+    "
+    @update:sort-order="
+      (e) => {
+        pagination.order = e ?? -1;
+        pagination.page = 0;
+        updateQueryParams();
+      }
+    "
+    @page="
+      (e) => {
+        pagination.page = e.page;
+        pagination.rows = e.rows;
+        updateQueryParams();
+      }
+    "
   >
     <template #empty>
       <div class="flex justify-content-center">
@@ -132,7 +194,7 @@ function isFinanciallySupported(data: Submission) {
     <template #header>
       <div class="flex justify-content-between">
         <Button
-          v-if="permissionService.can(Permissions.HOUSING_SUBMISSION_CREATE)"
+          v-if="authzStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
@@ -233,6 +295,12 @@ function isFinanciallySupported(data: Submission) {
     <Column
       field="queuePriority"
       header="Priority"
+      :sortable="true"
+      style="min-width: 125px"
+    />
+    <Column
+      field="multiPermitsNeeded"
+      header="Multi-authorization project"
       :sortable="true"
       style="min-width: 125px"
     />

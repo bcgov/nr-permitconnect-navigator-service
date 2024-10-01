@@ -2,6 +2,22 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { activityService } from '../../services';
 import { uuidToActivityId } from '../../utils/utils';
+import { CurrentContext } from '../../types';
+
+export function generateCreateStamps(currentContext: CurrentContext | undefined) {
+  return {
+    createdBy: currentContext?.userId,
+    createdAt: new Date().toISOString()
+  };
+}
+
+export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
+  return {
+    updatedBy: currentContext?.userId,
+    updatedAt: new Date().toISOString()
+  };
+}
+
 /**
  * @function generateUniqueActivityId
  * Generate a new activityId, which are truncated UUIDs

@@ -40,8 +40,8 @@ export default {
    * @function getSubmissions
    * @returns {Promise} An axios response
    */
-  getSubmissions(self?: boolean) {
-    return appAxios().get('submission', { params: { self } });
+  getSubmissions() {
+    return appAxios().get('submission');
   },
 
   /**
@@ -104,6 +104,6 @@ export default {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('submission/emailConfirmation', { emailData });
+    return appAxios().put('submission/emailConfirmation', emailData);
   }
 };

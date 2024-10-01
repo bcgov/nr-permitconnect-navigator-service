@@ -11,19 +11,17 @@ import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
 
 // Props
-type Props = {
+const {
+  activityId = undefined,
+  accept = undefined,
+  disabled = false,
+  reject = undefined
+} = defineProps<{
   activityId?: string;
   accept?: string[];
   reject?: string[];
   disabled?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  accept: undefined,
-  disabled: false,
-  reject: undefined
-});
+}>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -37,7 +35,7 @@ const uploading: Ref<Boolean> = ref(false);
 const toast = useToast();
 
 const onFileUploadClick = () => {
-  if (props.disabled) {
+  if (disabled) {
     toast.info('Document uploading is currently disabled');
     return;
   }
@@ -46,7 +44,7 @@ const onFileUploadClick = () => {
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
-  if (props.disabled) {
+  if (disabled) {
     toast.info('Document uploading is currently disabled');
     return;
   }
@@ -60,9 +58,9 @@ const onUpload = async (files: Array<File>) => {
   await Promise.allSettled(
     files.map((file: File) => {
       return new Promise((resolve, reject) => {
-        if (props.activityId) {
+        if (activityId) {
           documentService
-            .createDocument(file, props.activityId, getConfig.value.coms.bucketId)
+            .createDocument(file, activityId, getConfig.value.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 submissionStore.addDocument(response.data);
@@ -90,9 +88,9 @@ const filteredDocuments = computed(() => {
   let documents = submissionStore.getDocuments;
   return documents.filter(
     (document) =>
-      (!props.accept && !props.reject) ||
-      props.accept?.some((ext) => document.filename.endsWith(ext)) ||
-      props.reject?.every((ext) => !document.filename.endsWith(ext)) ||
+      (!accept && !reject) ||
+      accept?.some((ext) => document.filename.endsWith(ext)) ||
+      reject?.every((ext) => !document.filename.endsWith(ext)) ||
       document.filename.endsWith('.pdf')
   );
 });
@@ -119,7 +117,7 @@ const filteredDocuments = computed(() => {
           :multiple="true"
           :custom-upload="true"
           :auto="true"
-          :disabled="props.disabled"
+          :disabled="disabled"
           @uploader="onFileUploadDragAndDrop"
         >
           <template #empty>
@@ -143,7 +141,7 @@ const filteredDocuments = computed(() => {
           ref="fileInput"
           type="file"
           class="hidden"
-          :accept="props.accept ? props.accept.join(',') : '*'"
+          :accept="accept ? accept.join(',') : '*'"
           multiple
           @change="(event: any) => onUpload(Array.from(event.target.files))"
           @click="(event: any) => (event.target.value = null)"
@@ -161,7 +159,7 @@ const filteredDocuments = computed(() => {
     >
       <DocumentCardLite
         :document="document"
-        :delete-button="!props.disabled"
+        :delete-button="!disabled"
         class="hover-hand hover-shadow mb-2"
         @click="documentService.downloadDocument(document.documentId, document.filename)"
       />

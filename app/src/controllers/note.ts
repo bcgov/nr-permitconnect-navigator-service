@@ -1,21 +1,15 @@
-import { NIL } from 'uuid';
-
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { enquiryService, noteService, submissionService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
 
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
-import type { BringForward } from '../types';
+import type { NextFunction, Request, Response } from 'express';
+import type { BringForward, Note } from '../types';
 
 const controller = {
-  async createNote(req: Request, res: Response, next: NextFunction) {
+  async createNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      // TODO: define body type in request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const body = req.body as any;
       const response = await noteService.createNote({
-        ...body,
-        createdBy: userId
+        ...req.body,
+        ...generateCreateStamps(req.currentContext)
       });
       res.status(201).json(response);
     } catch (e: unknown) {
@@ -25,7 +19,7 @@ const controller = {
 
   async deleteNote(req: Request<{ noteId: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await noteService.deleteNote(req.params.noteId);
+      const response = await noteService.deleteNote(req.params.noteId, generateUpdateStamps(req.currentContext));
 
       res.status(200).json(response);
     } catch (e: unknown) {
@@ -33,7 +27,11 @@ const controller = {
     }
   },
 
-  async listBringForward(req: Request<never, { bringForwardState?: string }>, res: Response, next: NextFunction) {
+  async listBringForward(
+    req: Request<never, never, never, { bringForwardState?: string }>,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
       let response = new Array<BringForward>();
       const notes = await noteService.listBringForward(req.query.bringForwardState);
@@ -76,16 +74,12 @@ const controller = {
     }
   },
 
-  async updateNote(req: Request, res: Response, next: NextFunction) {
+  async updateNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      // TODO: define body type in request
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const body = req.body as any;
       const response = await noteService.updateNote({
-        ...body,
-        createdBy: userId,
-        updatedAt: new Date().toISOString()
+        ...req.body,
+        ...generateCreateStamps(req.currentContext),
+        ...generateUpdateStamps(req.currentContext)
       });
 
       res.status(200).json(response);

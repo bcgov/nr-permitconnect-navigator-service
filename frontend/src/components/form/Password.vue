@@ -1,43 +1,44 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { Password } from '@/lib/primevue';
 
-type Props = {
+// Props
+const {
+  helptext = '',
+  type = 'text',
+  label = '',
+  name,
+  placeholder = '',
+  bold = true
+} = defineProps<{
   helptext?: string;
   label?: string;
   name: string;
   placeholder?: string;
   type?: string;
   bold?: boolean;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  helptext: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  bold: true
-});
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
-      :for="props.name"
+      :for="name"
     >
-      {{ props.label }}
+      {{ label }}
     </label>
     <Password
       v-model="value"
-      :aria-describedby="`${props.name}-help`"
-      :name="props.name"
-      :type="props.type"
-      :placeholder="props.placeholder"
+      :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
+      :name="name"
+      :type="type"
+      :placeholder="placeholder"
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :feedback="false"
@@ -46,7 +47,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     <small :id="`${name}-help`">{{ helptext }}</small>
     <div>
       <ErrorMessage
-        :name="props.name"
+        :name="name"
         class="app-error-message"
       />
     </div>

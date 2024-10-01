@@ -2,32 +2,16 @@
 import { storeToRefs } from 'pinia';
 
 import { CopyToClipboard } from '@/components/form';
-import { Button, Dropdown } from '@/lib/primevue';
-import { useAuthStore, useConfigStore } from '@/store';
-import { ButtonMode, RouteName } from '@/utils/enums/application';
-import { ACCESS_ROLES_LIST } from '@/utils/constants/application';
-import { useRouter } from 'vue-router';
-import { PermissionService } from '@/services';
+import { Dropdown } from '@/lib/primevue';
+import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
+import { ButtonMode } from '@/utils/enums/application';
+import { GROUP_NAME_LIST } from '@/utils/constants/application';
 
 // Store
-const authStore = useAuthStore();
-const { getAccessToken, getProfile } = storeToRefs(authStore);
+const authnStore = useAuthNStore();
+const { getAccessToken, getProfile } = storeToRefs(authnStore);
 const { getConfig } = storeToRefs(useConfigStore());
-
-const permissionService = new PermissionService();
-const router = useRouter();
-
-async function searchIdirUsers() {
-  await permissionService.searchIdirUsers({ firstName: 'Kyle' });
-}
-
-async function searchBasicBceidUsers() {
-  await permissionService.searchBasicBceidUsers({ guid: 'tb914nlltlo4mz05viha1b4hdyi4xnad' });
-}
-
-async function ssoGetRoles() {
-  await permissionService.getRoles();
-}
+const authzStore = useAuthZStore();
 </script>
 
 <template>
@@ -38,11 +22,10 @@ async function ssoGetRoles() {
       <div class="w-2 mr-2">
         <Dropdown
           class="w-full"
-          :options="ACCESS_ROLES_LIST"
+          :options="GROUP_NAME_LIST"
           @change="
             (e) => {
-              permissionService.setRoleOverride(e.value);
-              router.push({ name: RouteName.HOME });
+              authzStore.setGroupOverride(e.value);
             }
           "
         />
@@ -84,19 +67,6 @@ async function ssoGetRoles() {
       </div>
     </div>
     {{ getProfile }}
-
-    <div class="flex align-items-center mt-3">
-      <h3 class="mr-2">SSO Test</h3>
-      <div>
-        <Button @click="searchIdirUsers">SSO search idir</Button>
-      </div>
-      <div>
-        <Button @click="searchBasicBceidUsers">SSO search basic bceid</Button>
-      </div>
-      <div>
-        <Button @click="ssoGetRoles">SSO get roles</Button>
-      </div>
-    </div>
   </div>
 </template>
 

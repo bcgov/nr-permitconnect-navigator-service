@@ -4,11 +4,9 @@ import { Message } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 
 // Props
-type Props = {
+const { assignedActivityId } = defineProps<{
   assignedActivityId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 </script>
 
 <template>
@@ -21,11 +19,11 @@ const props = withDefaults(defineProps<Props>(), {});
     >
       Your application has been successfully submitted.
     </Message>
-    <h3>Confirmation ID: {{ props.assignedActivityId }}</h3>
+    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
-      Your submission will be reviewed by a Housing Navigator. You may be contacted if needed. Please check your email
-      for the confirmation email and keep the confirmation ID for future reference.
+      Your submission will be reviewed and you will be contacted by a Housing Navigator. Please check your email for the
+      confirmation email and keep the confirmation ID for future reference.
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
   </div>
 </template>

@@ -29,6 +29,7 @@ export type ChefsSubmissionExport = {
   IndigenousHousingProviderName: string;
   intakeStatus: string;
   isBCHousingSupported: string;
+  isCompany: string;
   isCompanyRegistered: string;
   isIndigenousHousingProviderSupported: string;
   isNonProfitSupported: string;
@@ -40,6 +41,7 @@ export type ChefsSubmissionExport = {
   longitude: number;
   naturalDisasterInd: boolean;
   otherProjectType: string;
+  companyName: string;
   companyNameRegistered: string;
   province: string;
   queuePriority: string;
@@ -48,7 +50,9 @@ export type ChefsSubmissionExport = {
   multiFamilyUnits: string;
   multiFamilyUnits1: string;
   isRentalUnit: string;
+  addressType: string;
   streetAddress: string;
+  previousPermits: string;
   createdAt: string;
   createdBy: string;
 

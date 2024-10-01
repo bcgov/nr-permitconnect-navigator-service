@@ -1,3 +1,7 @@
+const PCNS_URL = window.location.origin;
+const BC_EMAIL_BANNER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/446ee8ee-e302-4cb8-b44d-24a1f583edba';
+const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e62f-41f5-81fd-6eff6cb66d52';
+
 export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   const baseTemplate =
     'Dear {{ contactName }},\n\n' +
@@ -59,13 +63,56 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   return newText;
 };
 
-export const confirmationTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   const baseTemplate =
-    'Dear {{ contactName }},\n\n' +
-    'The confirmation ID for your submission is: {{ activityId }}.\n\n' +
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'Dear {{ contactName }},<br><br>' +
+    '<b>Confirmation ID: {{ activityId }}</b><br><br>' +
     // eslint-disable-next-line max-len
-    'A Housing Navigator will review your submission and contact you. Keep the Confirmation ID for future reference.\n\n' +
-    'Regards,\n\n' +
-    'Permit Connect Navigator Service';
+    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your confirmation ID for future reference.<br><br>' +
+    'View your project submission <a href="' +
+    PCNS_URL +
+    '/housing/submission/intake?activityId={{ activityId }}&submissionId={{ submissionId }}">here<a>.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+  const baseTemplate =
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'Dear {{ contactName }},<br><br>' +
+    '<b>Confirmation ID: {{ activityId }}</b><br><br>' +
+    // eslint-disable-next-line max-len
+    'Thank you for submitting an enquiry to the Navigator Service. We have successfully received your enquiry. A Navigator will review your enquiry and contact you. Please keep your confirmation ID for future reference.<br><br>' +
+    '<b>Enquiry detail:</b><br><br>' +
+    '{{ enquiryDescription }}<br><br>' +
+    'View your enquiry <a href="' +
+    PCNS_URL +
+    '/housing/enquiry/intake?activityId={{ activityId }}&enquiryId={{ enquiryId }}">here<a>.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
   return replacePlaceholders(baseTemplate, replaceConfig);
 };

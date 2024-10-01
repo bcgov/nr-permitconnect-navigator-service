@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { AutoComplete } from '@/lib/primevue';
@@ -8,7 +7,21 @@ import type { IInputEvent } from '@/interfaces';
 import type { AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 
 // Props
-type Props = {
+
+const {
+  helpText = '',
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  suggestions,
+  getOptionLabel = (e: string) => e,
+  bold = true,
+  forceSelection = false,
+  loading = false,
+  editable = false,
+  delay = 300
+} = defineProps<{
   helpText?: string;
   label?: string;
   name: string;
@@ -21,30 +34,17 @@ type Props = {
   loading?: boolean;
   editable?: boolean;
   delay?: number;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  helpText: '',
-  type: 'text',
-  label: '',
-  placeholder: '',
-  disabled: false,
-  getOptionLabel: (e: string) => e,
-  bold: true,
-  forceSelection: false,
-  loading: false,
-  editable: false,
-  delay: 300
-});
+}>();
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <div class="field">
     <label
+      :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
     >
@@ -53,6 +53,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
     <AutoComplete
       v-model="value"
       :aria-describedby="`${name}-help`"
+      :aria-labelledby="`${name}-label`"
       class="w-full"
       :class="{ 'p-invalid': errorMessage }"
       :delay="delay"
@@ -60,11 +61,11 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
       :editable="editable"
       :force-selection="forceSelection"
       input-class="w-full"
-      :loading="false"
+      :loading="loading"
       :name="name"
-      :option-label="(option: any) => props.getOptionLabel(option)"
+      :option-label="(option: any) => getOptionLabel(option)"
       :placeholder="placeholder"
-      :suggestions="props.suggestions"
+      :suggestions="suggestions"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"

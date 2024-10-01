@@ -1,28 +1,24 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField } from 'vee-validate';
 
 import { InputMask } from '@/lib/primevue';
 
 // Props
-type Props = {
-  helpText: string;
+const { label, name, mask, placeholder, disabled, bold } = defineProps<{
   label: string;
   name: string;
   mask: string;
   placeholder: string;
   disabled: boolean;
   bold: boolean;
-  floatLabel: boolean;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {});
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <label
+    :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
   >
@@ -31,6 +27,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <InputMask
     v-model="value"
     :aria-describedby="`${name}-help`"
+    :aria-labelledby="`${name}-label`"
     :name="name"
     :mask="mask"
     :placeholder="placeholder"

@@ -1,6 +1,6 @@
 import { setActivePinia, createPinia } from 'pinia';
 
-// import { useAuthStore } from '@/store';
+// import { useAuthZStore } from '@/store';
 // import { AuthService } from '@/services';
 
 describe.skip('Auth Store', () => {
@@ -17,7 +17,7 @@ describe.skip('Auth Store', () => {
     // const p = AuthService.prototype;
     // const o = p.getOidcSettings;
     // const oo = o();
-    // const store = useAuthStore();
+    // const store = useAuthZStore();
     // const userManager = AuthService.getUserManager();
     // const addAccessTokenExpiredSpy = jest.spyOn(userManager.events, 'addAccessTokenExpired');
     // const addAccessTokenExpiringSpy = jest.spyOn(userManager.events, 'addAccessTokenExpiring');

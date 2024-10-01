@@ -1,16 +1,17 @@
-import { NIL } from 'uuid';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { permitService } from '../services';
 
-import { permitService, userService } from '../services';
-import { getCurrentIdentity } from '../utils/utils';
-
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 import type { Permit } from '../types';
 
 const controller = {
-  createPermit: async (req: Request, res: Response, next: NextFunction) => {
+  createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      const response = await permitService.createPermit({ ...(req.body as Permit), updatedBy: userId });
+      const response = await permitService.createPermit({
+        ...req.body,
+        ...generateCreateStamps(req.currentContext),
+        ...generateUpdateStamps(req.currentContext)
+      });
       res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
@@ -35,19 +36,21 @@ const controller = {
     }
   },
 
-  async listPermits(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
+  async listPermits(req: Request<never, never, never, { activityId?: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await permitService.listPermits(req.params.activityId);
+      const response = await permitService.listPermits(req.query?.activityId);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  updatePermit: async (req: Request, res: Response, next: NextFunction) => {
+  updatePermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const userId = await userService.getCurrentUserId(getCurrentIdentity(req.currentUser, NIL), NIL);
-      const response = await permitService.updatePermit({ ...(req.body as Permit), updatedBy: userId });
+      const response = await permitService.updatePermit({
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      });
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

@@ -21,24 +21,17 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-type Props = {
-  deleteButton?: boolean;
+const { selectable = false, selected = false } = defineProps<{
   document: Document;
   selectable?: boolean;
   selected?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  deleteButton: true,
-  selectable: false,
-  selected: false
-});
+}>();
 
 // Emits
 const emit = defineEmits(['document:clicked']);
 
 // State
-const isSelected: Ref<boolean> = ref(props.selected);
+const isSelected: Ref<boolean> = ref(selected);
 
 // Actions
 const displayIcon = (mimeType = '') => {
@@ -65,9 +58,9 @@ const displayIcon = (mimeType = '') => {
 };
 
 function onClick() {
-  if (props.selectable) {
+  if (selectable) {
     isSelected.value = !isSelected.value;
-    emit('document:clicked', { document: props.document, selected: isSelected.value });
+    emit('document:clicked', { document: document, selected: isSelected.value });
   }
 }
 </script>
@@ -81,33 +74,33 @@ function onClick() {
     <template #header>
       <img
         alt="document header"
-        :src="displayIcon(props.document.mimeType)"
+        :src="displayIcon(document.mimeType)"
         class="document-image"
       />
     </template>
     <template #content>
       <div class="grid">
         <div
-          v-tooltip.bottom="`${props.document.filename} Uploaded by ${props.document.createdByFullName}`"
+          v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap"
           style="overflow: hidden"
         >
-          <a href="#">{{ props.document.filename }}</a>
+          <a href="#">{{ document.filename }}</a>
         </div>
         <h6 class="col-8 text-left mt-0 mb-0 pt-0 pb-0">
-          {{ formatDateLong(props.document.createdAt as string).split(',')[0] }},
+          {{ formatDateLong(document.createdAt as string).split(',')[0] }},
         </h6>
         <h6 class="col-8 text-left mt-1 mb-0 pt-0 pb-0">
-          {{ formatDateLong(props.document.createdAt as string).split(',')[1] }}
+          {{ formatDateLong(document.createdAt as string).split(',')[1] }}
         </h6>
       </div>
     </template>
     <template #footer>
       <div class="flex justify-content-between">
         <h6 class="col-4 text-left mt-0 mb-0 pl-0 inline-block">
-          {{ filesize(props.document.filesize) }}
+          {{ filesize(document.filesize) }}
         </h6>
-        <DeleteDocument :document="props.document" />
+        <DeleteDocument :document="document" />
       </div>
     </template>
   </Card>

@@ -28,7 +28,7 @@ const service = {
 
     return {
       identityId: identityId,
-      username: token.identity_provider_identity ? token.identity_provider_identity : token.preferred_username,
+      sub: token.sub ? token.sub : token.preferred_username,
       firstName: token.given_name,
       fullName: token.name,
       lastName: token.family_name,
@@ -67,7 +67,7 @@ const service = {
    * @throws The error encountered upon db transaction failure
    */
   createUser: async (data: User, etrx: Prisma.TransactionClient | undefined = undefined) => {
-    let response;
+    let response: User | undefined;
 
     // Logical function
     const _createUser = async (data: User, trx: Prisma.TransactionClient) => {
@@ -79,7 +79,7 @@ const service = {
       });
 
       if (exists) {
-        response = exists;
+        response = user.fromPrismaModel(exists);
       } else {
         if (data.idp) {
           const identityProvider = await service.readIdp(data.idp, trx);
@@ -89,7 +89,7 @@ const service = {
         const newUser = {
           userId: uuidv4(),
           identityId: data.identityId,
-          username: data.username,
+          sub: data.sub,
           fullName: data.fullName,
           email: data.email,
           firstName: data.firstName,
@@ -99,9 +99,13 @@ const service = {
           active: true
         };
 
-        response = await trx.user.create({
+        const createResponse = await trx.user.create({
           data: user.toPrismaModel(newUser)
         });
+
+        // TS hiccuping on the internal function
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        response = user.fromPrismaModel(createResponse);
       }
     };
 
@@ -119,17 +123,16 @@ const service = {
 
   /**
    * @function getCurrentUserId
-   * Gets userId (primary identifier of a user in db) of currentUser.
-   * if request is basic auth returns `defaultValue`
-   * @param {object} identityId the identity field of the current user
+   * Gets userId (primary identifier of a user in db) of currentContext.
+   * @param {object} sub The subject of the current user
    * @param {string} [defaultValue=undefined] An optional default return value
    * @returns {string} The current userId if applicable, or `defaultValue`
    */
-  getCurrentUserId: async (identityId: string, defaultValue: string | undefined = undefined) => {
+  getCurrentUserId: async (sub: string, defaultValue: string | undefined = undefined) => {
     // TODO: Consider conditionally skipping when identityId is undefined?
     const user = await prisma.user.findFirst({
       where: {
-        identity_id: identityId
+        sub: sub
       }
     });
 
@@ -159,7 +162,7 @@ const service = {
   login: async (token: jwt.JwtPayload) => {
     const newUser = service._tokenToUser(token);
 
-    let response;
+    let response: User | undefined | null;
     await prisma.$transaction(async (trx) => {
       const oldUser = await trx.user.findFirst({
         where: {
@@ -219,7 +222,7 @@ const service = {
    * @param {string[]} [params.userId] Optional array of uuids representing the user subject
    * @param {string[]} [params.identityId] Optionalarray of uuids representing the user identity
    * @param {string[]} [params.idp] Optional array of identity providers
-   * @param {string} [params.username] Optional username string to match on
+   * @param {string} [params.sub] Optional sub string to match on
    * @param {string} [params.email] Optional email string to match on
    * @param {string} [params.firstName] Optional firstName string to match on
    * @param {string} [params.fullName] Optional fullName string to match on
@@ -230,7 +233,7 @@ const service = {
   searchUsers: async (params: UserSearchParameters) => {
     const response = await prisma.user.findMany({
       where: {
-        OR: [
+        AND: [
           {
             user_id: { in: params.userId }
           },
@@ -241,7 +244,7 @@ const service = {
             idp: { in: params.idp, mode: 'insensitive' }
           },
           {
-            username: { contains: params.username, mode: 'insensitive' }
+            sub: { contains: params.sub, mode: 'insensitive' }
           },
           {
             email: { contains: params.email, mode: 'insensitive' }
@@ -262,7 +265,7 @@ const service = {
       }
     });
 
-    return response.map((x) => user.fromPrismaModel(x));
+    return response.map((x) => user.fromPrismaModel(x)).filter((x) => x.userId !== NIL);
   },
 
   /**
@@ -279,7 +282,7 @@ const service = {
     const oldUser = await service.readUser(userId);
     const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof User] !== value);
 
-    let response;
+    let response: User | undefined;
 
     if (diff) {
       const _updateUser = async (userId: string, data: User, trx: Prisma.TransactionClient | undefined = undefined) => {
@@ -291,7 +294,7 @@ const service = {
 
         const obj = {
           identityId: data.identityId,
-          username: data.username,
+          sub: data.sub,
           fullName: data.fullName,
           email: data.email,
           firstName: data.firstName,
@@ -302,12 +305,14 @@ const service = {
         };
 
         // TODO: Add support for updating userId primary key in the event it changes
-        response = await trx?.user.update({
+        const updateResponse = await trx?.user.update({
           data: { ...user.toPrismaModel(obj), updated_by: obj.updatedBy },
           where: {
             user_id: userId
           }
         });
+
+        if (updateResponse) response = user.fromPrismaModel(updateResponse);
       };
 
       // Call with proper transaction

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, InputSwitch } from '@/lib/primevue';
-import { useAuthStore } from '@/store';
+import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -11,33 +11,28 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 import type { BringForward } from '@/types';
 
+// Props
+const { bringForward = [], myAssignedTo = new Set<string>() } = defineProps<{
+  bringForward?: Array<BringForward>;
+  myAssignedTo: Set<string>;
+}>();
+
 // Constants
 const NOTES_TAB_INDEX = {
   ENQUIRY: 1,
   SUBMISSION: 3
 };
 
-// Props
-type Props = {
-  bringForward?: Array<BringForward>;
-  myAssignedTo: Set<string>;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  bringForward: () => [],
-  myAssignedTo: () => new Set<string>()
-});
-
 // Store
-const { getProfile } = storeToRefs(useAuthStore());
+const { getProfile } = storeToRefs(useAuthNStore());
 
 // State
-const bringForwards: Ref<Array<BringForward>> = ref(props.bringForward);
+const bringForwards: Ref<Array<BringForward>> = ref(bringForward);
 const filterToUser: Ref<boolean> = ref(false);
 
 // Actions
 watchEffect(() => {
-  bringForwards.value = props.bringForward;
+  bringForwards.value = bringForward;
 });
 
 // return the query object for the router link based on the submission type
@@ -57,7 +52,7 @@ function getQueryObject(bf: BringForward) {
 }
 
 function filterForMyBringForwards(bf: BringForward): boolean {
-  return bf.createdByFullName === getProfile.value?.name || props.myAssignedTo.has(bf.submissionId ?? '');
+  return bf.createdByFullName === getProfile.value?.name || myAssignedTo.has(bf.submissionId ?? '');
 }
 </script>
 

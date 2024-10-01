@@ -1,25 +1,36 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { onBeforeMount, ref, toRaw } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, ref, toRaw } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
-import { Dropdown, InputMask, InputText, RadioList, StepperNavigation, TextArea } from '@/components/form';
+import {
+  EditableDropdown,
+  Dropdown,
+  FormNavigationGuard,
+  InputMask,
+  InputText,
+  RadioList,
+  StepperNavigation,
+  TextArea
+} from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { useAutoSave } from '@/composables/formAutoSave';
-import { activityService, enquiryService, submissionService } from '@/services';
+import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
-import { ACTIVITY_ID_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
+import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
-import { confirmationTemplate } from '@/utils/templates';
+import { confirmationTemplateEnquiry } from '@/utils/templates';
 
 import type { Ref } from 'vue';
+import type { IInputEvent } from '@/interfaces';
+import type { Submission } from '@/types';
 
 const { formUpdated, stopAutoSave } = useAutoSave(async () => {
   const values = formRef.value?.values;
@@ -29,17 +40,9 @@ const { formUpdated, stopAutoSave } = useAutoSave(async () => {
 });
 
 // Props
-type Props = {
-  activityId?: string;
+const { enquiryId = undefined } = defineProps<{
   enquiryId?: string;
-  submissionId?: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  enquiryId: undefined,
-  submissionId: undefined
-});
+}>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -47,7 +50,12 @@ const { getConfig } = storeToRefs(useConfigStore());
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
+const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const loadForm: Ref<boolean> = ref(false);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
+const projectActivityIds: Ref<Array<string>> = ref([]);
+const submissions: Ref<Array<Submission>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
@@ -81,7 +89,22 @@ const formSchema = object({
 // Actions
 const confirm = useConfirm();
 const router = useRouter();
+const route = useRoute();
 const toast = useToast();
+
+const getBackButtonConfig = computed(() => {
+  if (route.query.activityId) {
+    return {
+      text: 'Back to my drafts and previous entries',
+      routeName: RouteName.HOUSING_SUBMISSIONS
+    };
+  } else {
+    return {
+      text: 'Back to Housing',
+      routeName: RouteName.HOUSING
+    };
+  }
+});
 
 async function confirmNext(data: any) {
   const validateResult = await formRef?.value?.validate();
@@ -172,7 +195,7 @@ async function onSubmit(data: any) {
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
       // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId);
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
       stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
@@ -193,16 +216,18 @@ async function onSubmit(data: any) {
     }
   }
 }
-async function loadEnquiry(enquiryId: string) {
+async function loadEnquiry() {
   let formVal;
   try {
-    formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
-    editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+    if (enquiryId) {
+      formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+    }
   } catch (e: any) {
     router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }
 
-  formRef.value?.setValues({
+  initialFormValues.value = {
     activityId: formVal?.activityId,
     enquiryId: formVal?.enquiryId,
     applicant: {
@@ -219,18 +244,38 @@ async function loadEnquiry(enquiryId: string) {
       enquiryDescription: formVal?.enquiryDescription,
       applyForPermitConnect: formVal?.applyForPermitConnect
     }
-  });
+  };
 }
 
-onBeforeMount(() => {
-  if (props.enquiryId) loadEnquiry(props.enquiryId);
+function onRelatedActivityInput(e: IInputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
+}
+
+onBeforeMount(async () => {
+  if (enquiryId) loadEnquiry();
+  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
+  submissions.value = (await submissionService.getSubmissions()).data;
+
+  loadForm.value = true;
 });
 
-async function emailConfirmation(activityId: string) {
+async function emailConfirmation(activityId: string, enquiryId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
-  const body = confirmationTemplate({
+
+  // Get the first two sentences of the enquiry description
+  // If there are more than two sentences in enquiryDescription, add '..' to the end
+  const enquiryDescription = formRef.value?.values.basic.enquiryDescription || '';
+  let firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
+  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
+  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
+
+  const body = confirmationTemplateEnquiry({
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
-    '{{ activityId }}': activityId
+    '{{ activityId }}': activityId,
+    '{{ enquiryDescription }}': firstTwoSentences.trim(),
+    '{{ enquiryId }}': enquiryId
   });
   let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
@@ -238,53 +283,40 @@ async function emailConfirmation(activityId: string) {
     to: [applicantEmail],
     cc: configCC,
     subject: 'Confirmation of Submission', // eslint-disable-line quotes
-    bodyType: 'text',
+    bodyType: 'html',
     body: body
   };
   await submissionService.emailConfirmation(emailData);
-}
-
-async function checkActivityIdValidity(event: Event) {
-  const target = event.target as HTMLInputElement;
-  const activityId = target.value;
-  const hexidecimal = parseInt(activityId, 16);
-
-  if (activityId) {
-    if (activityId.length === ACTIVITY_ID_LENGTH && hexidecimal) {
-      const valid = (await activityService.checkActivityIdValidity(activityId)).data.valid;
-      if (!valid) {
-        toast.warn(`Confirmation ID ${activityId} does not exist, please check again.`);
-      }
-    } else {
-      toast.warn('Confirmation ID is not the right format, please check again.');
-    }
-  }
 }
 </script>
 
 <template>
   <div v-if="!assignedActivityId">
-    <div class="mb-3 p-0">
+    <div class="mb-2 p-0">
       <BackButton
-        :confirm-leave="editable && !!formUpdated"
-        confirm-message="Are you sure you want to leave this page?
-      Any unsaved changes will be lost. Please save as draft first."
-        :route-name="RouteName.HOUSING"
-        text="Back to Housing"
+        :route-name="getBackButtonConfig.routeName"
+        :text="getBackButtonConfig.text"
       />
+    </div>
+    <div class="flex justify-content-center align-items-center app-primary-color mb-2 mt-3">
+      <h3>Enquiry Form</h3>
     </div>
 
     <CollectionDisclaimer />
 
     <Form
+      v-if="loadForm"
       v-slot="{ values }"
       ref="formRef"
       keep-values
+      :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
       @change="formUpdated = true"
     >
+      <FormNavigationGuard v-if="editable && !!formUpdated" />
+
       <input
         type="hidden"
         name="activityId"
@@ -393,12 +425,20 @@ async function checkActivityIdValidity(event: Event) {
         </template>
         <template #content>
           <div class="formgrid grid">
-            <InputText
-              class="col-6"
+            <EditableDropdown
+              class="col-3"
               name="basic.relatedActivityId"
-              placeholder="Confirmation ID"
+              label="Confirmation ID"
               :disabled="!editable"
-              @on-change="checkActivityIdValidity"
+              :options="filteredProjectActivityIds"
+              :get-option-label="
+                (e: string) => {
+                  const name = submissions.find((x) => x.activityId === e)?.projectName;
+                  if (name) return `${e} - ${name}`;
+                  else return e;
+                }
+              "
+              @on-input="onRelatedActivityInput"
             />
           </div>
         </template>

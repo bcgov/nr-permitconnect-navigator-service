@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { onBeforeMount, nextTick, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
@@ -13,6 +13,7 @@ import {
   Calendar,
   Checkbox,
   Dropdown,
+  FormNavigationGuard,
   InputMask,
   InputNumber,
   RadioList,
@@ -41,7 +42,7 @@ import {
 import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
-import { SPATIAL_FILE_FORMATS, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
@@ -57,7 +58,7 @@ import {
   ProjectLocation,
   SubmissionType
 } from '@/utils/enums/housing';
-import { confirmationTemplate } from '@/utils/templates';
+import { confirmationTemplateSubmission } from '@/utils/templates';
 import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -72,6 +73,7 @@ interface SubmissionForm extends Submission {
   appliedPermits?: Array<Permit>;
   investigatePermits?: Array<Permit>;
 }
+
 // Types
 type GeocoderEntry = {
   geometry: { coordinates: Array<number>; [key: string]: any };
@@ -79,19 +81,15 @@ type GeocoderEntry = {
 };
 
 // Props
-type Props = {
+const { activityId = undefined, submissionId = undefined } = defineProps<{
   activityId?: string;
   submissionId?: string;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  activityId: undefined,
-  submissionId: undefined
-});
-const router = useRouter();
 // Constants
 const VALIDATION_BANNER_TEXT =
-  'One or more of the required fields are missing or contains invalid data. Please check the highlighted fields.';
+  // eslint-disable-next-line max-len
+  'One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red.';
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -107,15 +105,19 @@ const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
+const initialFormValues: Ref<undefined | object> = ref(undefined);
+const loadForm: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
-const spacialAccordionIndex: Ref<number | undefined> = ref(undefined);
-const validationErrors: Ref<string[]> = ref([]);
-const formModified: Ref<boolean> = ref(false);
+const validationErrors = computed(() => {
+  // Parse errors from vee-validate into a string[] of category headings
+  if (!formRef?.value?.errors) return [];
+  else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
+});
 
 const { formUpdated, stopAutoSave } = useAutoSave(() => {
   const values = formRef.value?.values;
@@ -124,13 +126,23 @@ const { formUpdated, stopAutoSave } = useAutoSave(() => {
 
 // Actions
 const confirm = useConfirm();
+const router = useRouter();
+const route = useRoute();
 const toast = useToast();
 
-const checkSubmittable = (stepNumber: number) => {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
-};
+const getBackButtonConfig = computed(() => {
+  if (route.query.activityId) {
+    return {
+      text: 'Back to my drafts and previous entries',
+      routeName: RouteName.HOUSING_SUBMISSIONS
+    };
+  } else {
+    return {
+      text: 'Back to Housing',
+      routeName: RouteName.HOUSING
+    };
+  }
+});
 
 function confirmSubmit(data: any) {
   const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
@@ -159,33 +171,6 @@ function handleProjectLocationClick() {
   }
 }
 
-const onAddressSearchInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-  addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
-};
-
-const onAddressSelect = async (e: DropdownChangeEvent) => {
-  if (e.originalEvent instanceof InputEvent) return;
-
-  if (e.value as GeocoderEntry) {
-    const properties = e.value?.properties;
-    const geometry = e.value?.geometry;
-
-    mapLatitude.value = geometry.coordinates[1];
-    mapLongitude.value = geometry.coordinates[0];
-
-    formRef.value?.setFieldValue(
-      'location.streetAddress',
-      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
-    );
-    formRef.value?.setFieldValue('location.locality', properties?.localityName);
-    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
-    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
-    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
-  }
-};
-
 async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   try {
     const formattedData = Object.assign(
@@ -207,6 +192,8 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
       assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
     } else {
       toast.error('Failed to submit enquiry');
     }
@@ -217,7 +204,34 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
   }
 }
 
-const onLatLongInputClick = async () => {
+async function onAddressSearchInput(e: IInputEvent) {
+  const input = e.target.value;
+  addressGeocoderOptions.value =
+    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+}
+
+async function onAddressSelect(e: DropdownChangeEvent) {
+  if (e.originalEvent instanceof InputEvent) return;
+
+  if (e.value as GeocoderEntry) {
+    const properties = e.value?.properties;
+    const geometry = e.value?.geometry;
+
+    mapLatitude.value = geometry.coordinates[1];
+    mapLongitude.value = geometry.coordinates[0];
+
+    formRef.value?.setFieldValue(
+      'location.streetAddress',
+      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
+    );
+    formRef.value?.setFieldValue('location.locality', properties?.localityName);
+    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
+    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
+  }
+}
+
+async function onLatLongInputClick() {
   const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
   const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
 
@@ -226,12 +240,31 @@ const onLatLongInputClick = async () => {
     mapLatitude.value = location.latitude;
     mapLongitude.value = location.longitude;
   }
-};
+}
 
-function onInvalidSubmit(e: any) {
-  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
-  formModified.value = false;
+async function onInvalidSubmit() {
+  switch (validationErrors.value[0]) {
+    case IntakeFormCategory.APPLICANT:
+    case IntakeFormCategory.BASIC:
+      activeStep.value = 0;
+      break;
+
+    case IntakeFormCategory.HOUSING:
+      activeStep.value = 1;
+      break;
+
+    case IntakeFormCategory.LOCATION:
+      activeStep.value = 2;
+      break;
+
+    case IntakeFormCategory.PERMITS:
+    case IntakeFormCategory.APPLIED_PERMITS:
+      activeStep.value = 3;
+      break;
+  }
+
+  await nextTick();
+  document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
@@ -295,6 +328,19 @@ async function onSaveDraft(
   if (assistanceRequired && response?.data?.activityId) {
     formUpdated.value = false;
     handleEnquirySubmit(draftData, response.data.activityId);
+    stopAutoSave();
+  }
+}
+
+function onStepChange(stepNumber: number) {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (stepNumber === 3) isSubmittable.value = true;
+
+  // Save a draft on very first stepper navigation if no activityId yet
+  // Need this to generate an activityId for the file uploads
+  if (!formRef.value?.values.activityId && formUpdated) {
+    onSaveDraft(formRef.value?.values, true, false);
   }
 }
 
@@ -312,7 +358,7 @@ async function onSubmit(data: any) {
       assignedActivityId.value = response.data.activityId;
       formRef.value?.setFieldValue('activityId', response.data.activityId);
       // Send confirmation email
-      emailConfirmation(response.data.activityId);
+      emailConfirmation(response.data.activityId, response.data.submissionId);
       stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
@@ -324,11 +370,12 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailConfirmation(activityId: string) {
+async function emailConfirmation(activityId: string, submissionId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
-  const body = confirmationTemplate({
+  const body = confirmationTemplateSubmission({
     '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
-    '{{ activityId }}': activityId
+    '{{ activityId }}': activityId,
+    '{{ submissionId }}': submissionId
   });
   let applicantEmail = formRef.value?.values.applicant.contactEmail;
   let emailData = {
@@ -336,7 +383,7 @@ async function emailConfirmation(activityId: string) {
     to: [applicantEmail],
     cc: configCC,
     subject: 'Confirmation of Submission', // eslint-disable-line quotes
-    bodyType: 'text',
+    bodyType: 'html',
     body: body
   };
   await submissionService.emailConfirmation(emailData);
@@ -351,86 +398,91 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-async function loadSubmission(submissionId: string, activityId: string) {
-  let response,
-    permits: Array<Permit> = [],
-    documents: Array<Document> = [];
-  try {
-    response = (await submissionService.getSubmission(submissionId)).data;
-    permits = (await permitService.listPermits(activityId)).data;
-    documents = (await documentService.listDocuments(activityId)).data;
-    submissionStore.setDocuments(documents);
-    editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-
-    formRef.value?.setValues({
-      activityId: response?.activityId,
-      submissionId: response?.submissionId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
-      basic: {
-        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-        isDevelopedInBC: response?.isDevelopedInBC,
-        registeredName: response?.companyNameRegistered
-      },
-      housing: {
-        projectName: response?.projectName,
-        projectDescription: response?.projectDescription,
-        singleFamilySelected: !!response?.singleFamilyUnits,
-        multiFamilySelected: !!response?.multiFamilyUnits,
-        singleFamilyUnits: response?.singleFamilyUnits,
-        multiFamilyUnits: response?.multiFamilyUnits,
-        otherSelected: !!response?.otherUnits,
-        otherUnitsDescription: response?.otherUnitsDescription,
-        otherUnits: response?.otherUnits,
-        hasRentalUnits: response?.hasRentalUnits,
-        rentalUnits: response?.rentalUnits,
-        financiallySupportedBC: response?.financiallySupportedBC,
-        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-        indigenousDescription: response?.indigenousDescription,
-        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-        nonProfitDescription: response?.nonProfitDescription,
-        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-        housingCoopDescription: response?.housingCoopDescription
-      },
-      location: {
-        naturalDisaster: response?.naturalDisaster,
-        projectLocation: response?.projectLocation,
-        streetAddress: response?.streetAddress,
-        locality: response?.locality,
-        province: response?.province,
-        latitude: response?.latitude,
-        longitude: response?.longitude,
-        ltsaPIDLookup: response?.locationPIDs,
-        geomarkUrl: response?.geomarkUrl,
-        projectLocationDescription: response?.projectLocationDescription
-      },
-      appliedPermits: permits
-        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-        .map((x: Permit) => ({
-          ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-        })),
-      permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits,
-        checkProvincialPermits: response?.checkProvincialPermits
-      },
-      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-    });
-    // Move map pin
-    onLatLongInputClick();
-  } catch {
-    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
-  }
-}
-
 onBeforeMount(async () => {
-  if (props.submissionId && props.activityId) loadSubmission(props.submissionId, props.activityId);
+  if (submissionId && activityId) {
+    let response,
+      permits: Array<Permit> = [],
+      documents: Array<Document> = [];
+
+    try {
+      response = (await submissionService.getSubmission(submissionId)).data;
+      permits = (await permitService.listPermits(activityId)).data;
+      documents = (await documentService.listDocuments(activityId)).data;
+      submissionStore.setDocuments(documents);
+      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+
+      initialFormValues.value = {
+        activityId: response?.activityId,
+        submissionId: response?.submissionId,
+        applicant: {
+          contactFirstName: response?.contactFirstName,
+          contactLastName: response?.contactLastName,
+          contactPhoneNumber: response?.contactPhoneNumber,
+          contactEmail: response?.contactEmail,
+          contactApplicantRelationship: response?.contactApplicantRelationship,
+          contactPreference: response?.contactPreference
+        },
+        basic: {
+          consentToFeedback: response?.consentToFeedback,
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: response?.isDevelopedInBC,
+          registeredName: response?.companyNameRegistered
+        },
+        housing: {
+          projectName: response?.projectName,
+          projectDescription: response?.projectDescription,
+          singleFamilySelected: !!response?.singleFamilyUnits,
+          multiFamilySelected: !!response?.multiFamilyUnits,
+          singleFamilyUnits: response?.singleFamilyUnits,
+          multiFamilyUnits: response?.multiFamilyUnits,
+          otherSelected: !!response?.otherUnits,
+          otherUnitsDescription: response?.otherUnitsDescription,
+          otherUnits: response?.otherUnits,
+          hasRentalUnits: response?.hasRentalUnits,
+          rentalUnits: response?.rentalUnits,
+          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+          indigenousDescription: response?.indigenousDescription,
+          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+          nonProfitDescription: response?.nonProfitDescription,
+          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+          housingCoopDescription: response?.housingCoopDescription
+        },
+        location: {
+          naturalDisaster: response?.naturalDisaster,
+          projectLocation: response?.projectLocation,
+          streetAddress: response?.streetAddress,
+          locality: response?.locality,
+          province: response?.province,
+          latitude: response?.latitude,
+          longitude: response?.longitude,
+          ltsaPIDLookup: response?.locationPIDs,
+          geomarkUrl: response?.geomarkUrl,
+          projectLocationDescription: response?.projectLocationDescription
+        },
+        appliedPermits: permits
+          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .map((x: Permit) => ({
+            ...x,
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          })),
+        permits: {
+          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+        },
+        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+      };
+
+      await nextTick();
+      // Move map pin
+      onLatLongInputClick();
+      loadForm.value = true;
+    } catch {
+      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+    }
+  } else {
+    initialFormValues.value = {};
+    loadForm.value = true;
+  }
   // clearing the document store on page load
   submissionStore.setDocuments([]);
 });
@@ -439,29 +491,29 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!assignedActivityId && !assistanceAssignedActivityId">
     <BackButton
-      :confirm-leave="editable && !!formUpdated"
-      confirm-message="Are you sure you want to leave this page?
-      Any unsaved changes will be lost. Please save as draft first."
-      :route-name="RouteName.HOUSING"
-      text="Back to Housing"
+      :route-name="getBackButtonConfig.routeName"
+      :text="getBackButtonConfig.text"
     />
 
+    <div class="flex justify-content-center app-primary-color mt-3">
+      <h3>Project Investigation Form</h3>
+    </div>
+
     <Form
+      v-if="loadForm"
       id="form"
       v-slot="{ setFieldValue, errors, values }"
       ref="formRef"
+      :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
-      @invalid-submit="(e) => onInvalidSubmit(e)"
+      @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
-      @change="
-        () => {
-          formUpdated = true;
-          formModified = true;
-        }
-      "
+      @change="() => (formUpdated = true)"
     >
+      <FormNavigationGuard v-if="editable && !!formUpdated" />
+
       <SubmissionAssistance
-        v-if="!(props.activityId || props.submissionId) && values?.applicant"
+        v-if="editable && values?.applicant"
         :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onSaveDraft(values, true, false, true)"
@@ -479,7 +531,7 @@ onBeforeMount(async () => {
 
       <Stepper
         v-model:activeStep="activeStep"
-        @update:active-step="checkSubmittable"
+        @update:active-step="onStepChange"
       >
         <!--
       Contact Information
@@ -494,9 +546,8 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(IntakeFormCategory.APPLICANT) ||
-                    validationErrors.includes(IntakeFormCategory.BASIC)) &&
-                  !formModified
+                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.BASIC)
               }"
             />
           </template>
@@ -504,7 +555,7 @@ onBeforeMount(async () => {
             <CollectionDisclaimer />
 
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -640,11 +691,6 @@ onBeforeMount(async () => {
               :editable="editable"
               :next-callback="nextCallback"
               :prev-disabled="true"
-              @click="
-                () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
-                }
-              "
             >
               <template #content>
                 <Button
@@ -671,18 +717,13 @@ onBeforeMount(async () => {
               title="Housing"
               icon="fa-house"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING) && !formModified
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
               }"
-              @click="
-                () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
-                }
-              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -701,7 +742,7 @@ onBeforeMount(async () => {
                   <InputText
                     class="col-6"
                     name="housing.projectName"
-                    label="Project name - well known title like Capital Park"
+                    label="Project name - your preferred name for your project"
                     :bold="false"
                     :disabled="!editable"
                   />
@@ -727,12 +768,18 @@ onBeforeMount(async () => {
                     placeholder="Provide us with additional information - short description about the project and/or project website link"
                     :disabled="!editable"
                   />
-                  <!-- eslint-enable max-len -->
-                  <label class="col-12">Upload documents about your housing project (optional)</label>
+                  <!-- prettier-ignore -->
+                  <label class="col-12">
+                    Upload documents about your housing project (pdfs, maps,
+                    <a
+                      href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                      target="_blank"
+                      class="text-blue-500 underline"
+                    >shape files</a>, etc)
+                  </label>
                   <AdvancedFileUpload
                     :activity-id="values.activityId"
                     :disabled="!editable"
-                    :reject="SPATIAL_FILE_FORMATS"
                   />
                 </div>
               </template>
@@ -857,9 +904,7 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
-                      Is this project being financially supported by any of the following?
-                    </span>
+                    <span class="section-header">Is this project associated with any of the following?</span>
                   </div>
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
@@ -1025,18 +1070,13 @@ onBeforeMount(async () => {
               title="Location"
               icon="fa-location-dot"
               :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION) && !formModified
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
               }"
-              @click="
-                () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
-                }
-              "
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1130,17 +1170,28 @@ onBeforeMount(async () => {
                             class="col-4"
                             name="location.latitude"
                             disabled
-                            help-text="Provide a coordinate between 48 and 60"
+                            :help-text="
+                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                                ? 'Provide a coordinate between 48 and 60'
+                                : ''
+                            "
                             placeholder="Latitude"
                           />
                           <InputNumber
                             class="col-4"
                             name="location.longitude"
                             disabled
-                            help-text="Provide a coordinate between -114 and -139"
+                            :help-text="
+                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                                ? 'Provide a coordinate between -114 and -139'
+                                : ''
+                            "
                             placeholder="Longitude"
                           />
-                          <div class="col-12 text-blue-500">
+                          <div
+                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
+                            class="col-12 text-blue-500"
+                          >
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
                           </div>
@@ -1210,7 +1261,7 @@ onBeforeMount(async () => {
                   v-model:active-index="parcelAccordionIndex"
                   class="mb-3"
                 >
-                  <AccordionTab header="Parcel ID">
+                  <AccordionTab header="Parcel ID (PID Number)">
                     <Card class="no-shadow">
                       <template #content>
                         <div class="formgrid grid">
@@ -1233,32 +1284,6 @@ onBeforeMount(async () => {
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
                           />
                           <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
-                </Accordion>
-                <Accordion
-                  v-model:active-index="spacialAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Spatial file or PDF upload">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12 text-blue-500 mb-2">
-                            <a
-                              href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                              target="_blank"
-                            >
-                              See acceptable file formats
-                            </a>
-                          </div>
-                          <AdvancedFileUpload
-                            :activity-id="values.activityId"
-                            :accept="SPATIAL_FILE_FORMATS"
-                            :disabled="!editable"
-                          />
                         </div>
                       </template>
                     </Card>
@@ -1301,7 +1326,7 @@ onBeforeMount(async () => {
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
                     <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location?
+                      Is there anything else you would like to tell us about this project's location? (optional)
                     </span>
                   </div>
                 </div>
@@ -1347,15 +1372,14 @@ onBeforeMount(async () => {
               icon="fa-file"
               :class="{
                 'app-error-color':
-                  (validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                    validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)) &&
-                  !formModified
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
               }"
             />
           </template>
           <template #content="{ prevCallback }">
             <Message
-              v-if="validationErrors.length && !formModified"
+              v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
@@ -1401,7 +1425,7 @@ onBeforeMount(async () => {
                       class="col-12"
                     >
                       <div class="mb-2">
-                        <span class="text-red-500">
+                        <span class="app-primary-color">
                           * Sharing this information will authorize the navigators to seek additional information about
                           this permit.
                         </span>
@@ -1480,30 +1504,6 @@ onBeforeMount(async () => {
                       </Card>
                     </div>
                   </FieldArray>
-                </div>
-              </template>
-            </Card>
-            <Card
-              v-if="
-                values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
-                values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
-              "
-            >
-              <template #title>
-                <div class="flex">
-                  <span class="section-header">Would you like to have the status of the above permit(s) checked?</span>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="permits.checkProvincialPermits"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
                 </div>
               </template>
             </Card>
@@ -1609,12 +1609,27 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+            <Card>
+              <template #content>
+                <div class="mb-2 flex align-items-center">
+                  <Checkbox
+                    class="m-0 inline-block"
+                    name="basic.consentToFeedback"
+                    :bold="false"
+                    :disabled="!editable"
+                  />
+                  <span class="font-bold inline">
+                    Check this box if you agree to be contacted for user feedback, helping us improve our digital
+                    service. Your personal information will not be shared with third parties.
+                  </span>
+                </div>
+              </template>
+            </Card>
 
             <StepperNavigation
               :editable="editable"
               :next-disabled="true"
               :prev-callback="prevCallback"
-              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button

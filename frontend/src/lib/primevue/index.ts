@@ -33,6 +33,7 @@ export { default as RadioButton } from 'primevue/radiobutton';
 export { default as TabView } from 'primevue/tabview';
 export { default as TabPanel } from 'primevue/tabpanel';
 export { default as Textarea } from 'primevue/textarea';
+export { default as Timeline } from 'primevue/timeline';
 export { default as Toast } from 'primevue/toast';
 export { default as Toolbar } from 'primevue/toolbar';
 export { default as Sidebar } from 'primevue/sidebar';

@@ -21,8 +21,8 @@ export default {
    * @function getEnquiries
    * @returns {Promise} An axios response
    */
-  getEnquiries(self?: boolean) {
-    return appAxios().get('enquiry', { params: { self } });
+  getEnquiries() {
+    return appAxios().get('enquiry');
   },
 
   /**

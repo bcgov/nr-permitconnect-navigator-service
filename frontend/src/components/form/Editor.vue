@@ -1,26 +1,27 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { ErrorMessage, useField } from 'vee-validate';
 
 import { Editor } from '@/lib/primevue';
 
 // Props
-type Props = {
+const {
+  helpText = '',
+  name,
+  height = '160px'
+} = defineProps<{
   helpText?: string;
   name: string;
   height?: string;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), { helpText: '', height: '160px' });
-
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <div class="field">
     <Editor
       v-model="value"
-      :editor-style="`height: ${props.height}`"
+      :editor-style="`height: ${height}`"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>

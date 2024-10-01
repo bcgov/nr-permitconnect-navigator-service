@@ -2,8 +2,8 @@
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import BackButton from '@/components/common/BackButton.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -17,24 +17,23 @@ import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
-import { RouteName } from '@/utils/enums/application';
 import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
 
 // Props
-type Props = {
+const {
+  activityId,
+  initialTab = '0',
+  submissionId
+} = defineProps<{
   activityId: string;
   initialTab?: string;
   submissionId: string;
-};
+}>();
 
-const props = withDefaults(defineProps<Props>(), {
-  initialTab: '0'
-});
-
-//Constants
+// Constants
 const SORT_ORDER = {
   ASCENDING: 1,
   DESCENDING: -1
@@ -54,44 +53,17 @@ const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission }
 const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
-const activeTab: Ref<number> = ref(Number(props.initialTab));
+const activeTab: Ref<number> = ref(Number(initialTab));
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const sortOrder: Ref<number> = ref(Number(SORT_ORDER.DESCENDING));
+const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
+const router = useRouter();
 
 // Actions
-onMounted(async () => {
-  const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
-    await Promise.all([
-      submissionService.getSubmission(props.submissionId),
-      documentService.listDocuments(props.activityId),
-      noteService.listNotes(props.activityId),
-      permitService.listPermits(props.activityId),
-      permitService.getPermitTypes(),
-      enquiryService.listRelatedEnquiries(props.activityId)
-    ])
-  ).map((r) => r.data);
-
-  submissionStore.setSubmission(submission);
-  submissionStore.setDocuments(documents);
-  submissionStore.setNotes(notes);
-  submissionStore.setPermits(permits);
-  typeStore.setPermitTypes(permitTypes);
-  submissionStore.setRelatedEnquiries(relatedEnquiries);
-
-  loading.value = false;
-});
-
-// Actions
-
-function sortComparator(sortValue: number, a: any, b: any) {
-  return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
-}
-
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
   tempDocuments = tempDocuments.filter((x) => {
@@ -123,22 +95,51 @@ const filteredDocuments = computed(() => {
   return tempDocuments;
 });
 
-function onAddNote(note: Note) {
-  submissionStore.addNote(note, true);
+const onAddNote = (note: Note) => submissionStore.addNote(note, true);
+
+const onDeleteNote = (note: Note) => submissionStore.removeNote(note);
+
+const onUpdateNote = (oldNote: Note, newNote: Note) => submissionStore.updateNote(oldNote, newNote);
+
+function sortComparator(sortValue: number | undefined, a: any, b: any) {
+  return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  submissionStore.updateNote(oldNote, newNote);
-};
-const onDeleteNote = (note: Note) => {
-  submissionStore.removeNote(note);
-};
+
+onMounted(async () => {
+  const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
+    await Promise.all([
+      submissionService.getSubmission(submissionId),
+      documentService.listDocuments(activityId),
+      noteService.listNotes(activityId),
+      permitService.listPermits(activityId),
+      permitService.getPermitTypes(),
+      enquiryService.listRelatedEnquiries(activityId)
+    ])
+  ).map((r) => r.data);
+
+  submissionStore.setSubmission(submission);
+  submissionStore.setDocuments(documents);
+  submissionStore.setNotes(notes);
+  submissionStore.setPermits(permits);
+  typeStore.setPermitTypes(permitTypes);
+  submissionStore.setRelatedEnquiries(relatedEnquiries);
+
+  loading.value = false;
+});
 </script>
 
 <template>
-  <BackButton
-    :route-name="RouteName.HOUSING_SUBMISSIONS"
-    text="Back to Submissions"
-  />
+  <Button
+    class="p-0"
+    text
+    @click="router.back()"
+  >
+    <font-awesome-icon
+      icon="fa fa-arrow-circle-left"
+      class="mr-1 app-primary-color"
+    />
+    <span class="app-primary-color">Back to Submissions</span>
+  </Button>
 
   <h1>
     <span v-if="getSubmission?.projectName">
@@ -160,7 +161,7 @@ const onDeleteNote = (note: Note) => {
     </TabPanel>
     <TabPanel header="Files">
       <div class="mb-3 border-dashed file-upload border-round-md">
-        <FileUpload :activity-id="props.activityId" />
+        <FileUpload :activity-id="activityId" />
       </div>
       <div class="flex flex-row justify-content-between pb-3">
         <div class="flex align-items-center">
@@ -355,7 +356,7 @@ const onDeleteNote = (note: Note) => {
 
         <PermitModal
           v-model:visible="permitModalVisible"
-          :activity-id="props.activityId"
+          :activity-id="activityId"
         />
       </span>
     </TabPanel>
@@ -391,14 +392,14 @@ const onDeleteNote = (note: Note) => {
       <NoteModal
         v-if="noteModalVisible"
         v-model:visible="noteModalVisible"
-        :activity-id="props.activityId"
+        :activity-id="activityId"
         @add-note="onAddNote"
       />
     </TabPanel>
     <TabPanel header="Roadmap">
       <Roadmap
         v-if="!loading"
-        :activity-id="props.activityId"
+        :activity-id="activityId"
       />
     </TabPanel>
     <TabPanel header="Related enquiries">

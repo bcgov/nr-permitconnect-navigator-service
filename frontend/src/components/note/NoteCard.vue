@@ -10,11 +10,9 @@ import type { Ref } from 'vue';
 import type { Note } from '@/types';
 
 // Props
-type Props = {
+const { note } = defineProps<{
   note: Note;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Emits
 const emit = defineEmits(['updateNote', 'deleteNote']);
@@ -25,8 +23,8 @@ const userName: Ref<string> = ref('');
 
 // Actions
 onMounted(() => {
-  if (props.note.createdBy) {
-    userService.searchUsers({ userId: [props.note.createdBy] }).then((res) => {
+  if (note.createdBy) {
+    userService.searchUsers({ userId: [note.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';
     });
   }
@@ -34,17 +32,17 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card :id="props.note.noteId">
+  <Card :id="note.noteId">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex-grow-1">
           <h3 class="mb-0">
-            {{ props.note.title }}
+            {{ note.title }}
             <span
-              v-if="props.note.bringForwardState"
+              v-if="note.bringForwardState"
               data-test="bf-title"
             >
-              {{ `(${props.note.bringForwardState})` }}
+              {{ `(${note.bringForwardState})` }}
             </span>
           </h3>
         </div>
@@ -69,7 +67,7 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Date:</span>
-              {{ props.note.createdAt ? formatDateShort(props.note.createdAt) : undefined }}
+              {{ note.createdAt ? formatDateShort(note.createdAt) : undefined }}
             </p>
           </div>
         </div>
@@ -87,31 +85,31 @@ onMounted(() => {
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Note type:</span>
-              {{ props.note.noteType }}
+              {{ note.noteType }}
             </p>
           </div>
         </div>
         <div
-          v-if="props.note.bringForwardDate"
+          v-if="note.bringForwardDate"
           class="col-12 md:col-6 lg:col-3"
         >
           <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Bring forward date:</span>
-              {{ props.note.bringForwardDate ? formatDate(props.note.bringForwardDate) : '' }}
+              {{ note.bringForwardDate ? formatDate(note.bringForwardDate) : '' }}
             </p>
           </div>
         </div>
-        <p class="col-12 mt-0 mb-0 note-content">{{ props.note.note }}</p>
+        <p class="col-12 mt-0 mb-0 note-content">{{ note.note }}</p>
       </div>
     </template>
   </Card>
 
   <NoteModal
-    v-if="props.note && noteModalVisible"
+    v-if="note && noteModalVisible"
     v-model:visible="noteModalVisible"
-    :activity-id="props.note.activityId"
-    :note="props.note"
+    :activity-id="note.activityId"
+    :note="note"
     @delete-note="
       (note: Note) => {
         emit('deleteNote', note);

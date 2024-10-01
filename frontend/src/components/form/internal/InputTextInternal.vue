@@ -1,31 +1,33 @@
 <script setup lang="ts">
-import { toRef } from 'vue';
 import { useField } from 'vee-validate';
 
 import { InputText } from '@/lib/primevue';
 
 // Props
-type Props = {
-  helpText: string;
-  label: string;
+const {
+  label = '',
+  name,
+  placeholder = '',
+  disabled = false,
+  bold = true
+} = defineProps<{
+  label?: string;
   name: string;
-  placeholder: string;
-  disabled: boolean;
-  bold: boolean;
-  floatLabel: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+  placeholder?: string;
+  disabled?: boolean;
+  bold?: boolean;
+}>();
 
 // Emits
 const emit = defineEmits(['onChange']);
 
 // State
-const { errorMessage, value } = useField<string>(toRef(props, 'name'));
+const { errorMessage, value } = useField<string>(name);
 </script>
 
 <template>
   <label
+    :id="`${name}-label`"
     :class="{ 'font-bold': bold }"
     :for="name"
   >
@@ -34,6 +36,7 @@ const { errorMessage, value } = useField<string>(toRef(props, 'name'));
   <InputText
     v-model="value"
     :aria-describedby="`${name}-help`"
+    :aria-labelledby="`${name}-label`"
     :name="name"
     :placeholder="placeholder"
     class="w-full"

@@ -1,39 +1,37 @@
 <script setup lang="ts">
-type Props = {
+const {
+  label = undefined,
+  value = undefined,
+  link = undefined
+} = defineProps<{
   label?: string;
   value?: string;
   link?: object;
-};
-
-const props = withDefaults(defineProps<Props>(), {
-  label: undefined,
-  value: undefined,
-  link: undefined
-});
+}>();
 </script>
 
 <template>
   <div class="col-12">
     <div class="grid">
       <div
-        v-if="props.value && props.label"
+        v-if="value && label"
         class="col-fixed"
       >
         {{ label }}:
       </div>
       <div
-        v-if="props.value && props.link"
+        v-if="value && link"
         class="col wrap-block w-9"
       >
-        <router-link :to="props.link">
-          {{ props.value }}
+        <router-link :to="link">
+          {{ value }}
         </router-link>
       </div>
       <div
-        v-if="props.value && !props.link"
+        v-if="value && !link"
         class="col wrap-block w-9"
       >
-        {{ props.value }}
+        {{ value }}
       </div>
     </div>
   </div>

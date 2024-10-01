@@ -6,11 +6,10 @@ import { useSubmissionStore } from '@/store';
 import type { Document } from '@/types';
 
 // Props
-type Props = {
+const { document, disabled = false } = defineProps<{
   document: Document;
   disabled?: boolean;
-};
-const props = withDefaults(defineProps<Props>(), { disabled: false });
+}>();
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -44,13 +43,13 @@ const confirmDelete = (document: Document) => {
 <template>
   <Button
     v-tooltip.bottom="'Delete document'"
-    :disabled="props.disabled"
+    :disabled="disabled"
     class="p-button-lg p-button-text p-button-danger p-0 align-self-center"
     aria-label="Delete object"
     style="position: relative; top: 5; right: 0"
     @click="
       (e) => {
-        confirmDelete(props.document);
+        confirmDelete(document);
         e.stopPropagation();
       }
     "

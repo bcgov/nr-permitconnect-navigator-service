@@ -4,11 +4,9 @@ import { Message } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 
 // Props
-type Props = {
+const { assignedActivityId } = defineProps<{
   assignedActivityId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 </script>
 
 <template>
@@ -21,13 +19,13 @@ const props = withDefaults(defineProps<Props>(), {});
     >
       Your assistance request has been successfully submitted.
     </Message>
-    <h3>Confirmation ID: {{ props.assignedActivityId }}</h3>
+    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
       A Housing Navigator will review your submission and contact you. Your form has also been saved as draft, you can
       find it in
-      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">View my drafts and submissions page.</router-link>
+      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">My drafts and previous entries.</router-link>
       Please check your email for the confirmation email and keep the confirmation ID for future reference
     </div>
-    <div class="mt-4"><router-link :to="{ name: RouteName.HOME }">Go to Homepage</router-link></div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
   </div>
 </template>

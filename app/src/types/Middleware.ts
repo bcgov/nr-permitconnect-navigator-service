@@ -1,3 +1,3 @@
-import type { NextFunction, Request, Response } from '../interfaces/IExpress';
+import type { NextFunction, Request, Response } from 'express';
 
-export type Middleware = (req: Request, _res: Response, next: NextFunction) => void;
+export type Middleware = (req: Request, res: Response, next: NextFunction) => void;

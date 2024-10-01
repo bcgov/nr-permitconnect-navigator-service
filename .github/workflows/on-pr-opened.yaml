@@ -59,6 +59,17 @@ jobs:
           namespace_environment: dev
           openshift_server: ${{ secrets.OPENSHIFT_SERVER }}
           openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+      - name: Login to OpenShift Cluster
+        uses: redhat-actions/oc-login@v1
+        with:
+          openshift_server_url: ${{ secrets.OPENSHIFT_SERVER }}
+          openshift_token:  ${{ secrets.OPENSHIFT_TOKEN }}
+          insecure_skip_tls_verify: true
+          namespace: ${{ env.NAMESPACE_PREFIX }}-dev
+      - name: Run database seeds
+        shell: bash
+        run: |
+          kubectl exec $(oc get pods --selector='app.kubernetes.io/instance=pr-${{ github.event.number }},app.kubernetes.io/name=nr-permitconnect-navigator-service' -o custom-columns=POD:.metadata.name --no-headers | head -1) -- sh -c "cd ./sbin && npx knex seed:run --specific=dev_groups.js"
       - name: Release Comment on PR
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         if: success()

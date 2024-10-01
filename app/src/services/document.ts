@@ -1,5 +1,6 @@
 import prisma from '../db/dataConnection';
 import { document } from '../db/models';
+import { IStamps } from '../interfaces/IStamps';
 
 const service = {
   /**
@@ -18,7 +19,7 @@ const service = {
     filename: string,
     mimeType: string,
     filesize: number,
-    userId: string //userId added to track who uploaded the document
+    createStamp: Partial<IStamps>
   ) => {
     const response = await prisma.document.create({
       data: {
@@ -27,7 +28,8 @@ const service = {
         filename: filename,
         mime_type: mimeType,
         filesize: filesize,
-        created_by: userId //created_by added to track who uploaded the document
+        created_at: createStamp.createdAt,
+        created_by: createStamp.createdBy
       }
     });
     const doc = document.fromPrismaModel(response);
@@ -57,6 +59,22 @@ const service = {
     });
 
     return document.fromPrismaModel(response);
+  },
+
+  /**
+   * @function getDocument
+   * Get a document
+   * @param {string} documentId Document ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getDocument: async (documentId: string) => {
+    const result = await prisma.document.findFirst({
+      where: {
+        document_id: documentId
+      }
+    });
+
+    return result ? document.fromPrismaModel(result) : null;
   },
 
   /**

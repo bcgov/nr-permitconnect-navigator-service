@@ -10,6 +10,7 @@ import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { Submission, SubmissionSearchParameters } from '../types';
+import { IStamps } from '../interfaces/IStamps';
 
 /**
  * @function chefsAxios
@@ -28,27 +29,13 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 
 const service = {
   /**
-   * @function getActivityIds
-   * Gets a list of activity IDs
-   * @returns {Promise<string[]>} The result of running the findMany operation
-   */
-  getActivityIds: async () => {
-    try {
-      const result = await prisma.submission.findMany({ select: { activity_id: true } });
-      return result.map((x) => x.activity_id);
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
-  /**
    * @function createSubmission
    * Creates a new submission
    * @returns {Promise<Partial<Submission>>} The result of running the transaction
    */
   createSubmission: async (data: Partial<Submission>) => {
     const response = await prisma.submission.create({
-      data: submission.toPrismaModel(data as Submission)
+      data: { ...submission.toPrismaModel(data as Submission), created_at: data.createdAt, created_by: data.createdBy }
     });
 
     return submission.fromPrismaModel(response);
@@ -93,8 +80,10 @@ const service = {
           financially_supported_indigenous: x.financiallySupportedIndigenous,
           financially_supported_non_profit: x.financiallySupportedNonProfit,
           financially_supported_housing_coop: x.financiallySupportedHousingCoop,
+          has_applied_provincial_permits: x.hasAppliedProvincialPermits,
           housing_coop_description: x.housingCoopDescription,
           indigenous_description: x.indigenousDescription,
+          is_developed_by_company_or_org: x.isDevelopedByCompanyOrOrg,
           is_developed_in_bc: x.isDevelopedInBC,
           intake_status: x.intakeStatus,
           location_pids: x.locationPIDs,
@@ -103,6 +92,7 @@ const service = {
           longitude: parseFloat(x.longitude as unknown as string),
           natural_disaster: x.naturalDisaster === BasicResponse.YES ? true : false,
           non_profit_description: x.nonProfitDescription,
+          project_location: x.projectLocation,
           project_name: x.projectName,
           project_description: x.projectDescription,
           province: x.province,
@@ -210,7 +200,7 @@ const service = {
     }
   },
 
-  /**
+  /*
    * @function getSubmissions
    * Gets a list of submissions
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
@@ -273,15 +263,16 @@ const service = {
    * @param {string} isDeleted flag
    * @returns {Promise<Submission>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean) => {
+  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteSubmission = await prisma.submission.findUnique({
       where: {
         submission_id: submissionId
       }
     });
+
     if (deleteSubmission) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted },
+        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
         where: {
           activity_id: deleteSubmission?.activity_id
         }
@@ -299,7 +290,7 @@ const service = {
   updateSubmission: async (data: Submission) => {
     try {
       const result = await prisma.submission.update({
-        data: { ...submission.toPrismaModel(data), updated_by: data.updatedBy },
+        data: { ...submission.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
         where: {
           submission_id: data.submissionId
         }

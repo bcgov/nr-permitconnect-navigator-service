@@ -10,12 +10,10 @@ import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
 
 // Props
-type Props = {
+const { activityId, disabled = false } = defineProps<{
   activityId: string;
   disabled?: boolean;
-};
-
-const props = withDefaults(defineProps<Props>(), { disabled: false });
+}>();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -29,7 +27,7 @@ const uploading: Ref<Boolean> = ref(false);
 const toast = useToast();
 
 const onFileUploadClick = () => {
-  if (props.disabled) {
+  if (disabled) {
     toast.info('Document uploading is currently disabled');
     return;
   }
@@ -38,7 +36,7 @@ const onFileUploadClick = () => {
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
-  if (props.disabled) {
+  if (disabled) {
     toast.info('Document uploading is currently disabled');
     return;
   }
@@ -51,8 +49,7 @@ const onUpload = async (files: Array<File>) => {
     files.map(async (file: File) => {
       try {
         uploading.value = true;
-        const response = (await documentService.createDocument(file, props.activityId, getConfig.value.coms.bucketId))
-          ?.data;
+        const response = (await documentService.createDocument(file, activityId, getConfig.value.coms.bucketId))?.data;
 
         if (response) {
           submissionStore.addDocument(response);
@@ -88,7 +85,7 @@ const onUpload = async (files: Array<File>) => {
         :multiple="true"
         :custom-upload="true"
         :auto="true"
-        :disabled="props.disabled"
+        :disabled="disabled"
         @uploader="onFileUploadDragAndDrop"
       >
         <template #empty>

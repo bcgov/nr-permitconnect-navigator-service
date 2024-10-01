@@ -5,6 +5,7 @@ import { ENQUIRY_TYPE_LIST } from '../utils/constants/housing';
 import { BasicResponse } from '../utils/enums/application';
 
 export const basicIntake = Joi.object({
+  consentToFeedback: Joi.boolean(),
   isDevelopedByCompanyOrOrg: Joi.string()
     .required()
     .valid(...YES_NO_LIST),

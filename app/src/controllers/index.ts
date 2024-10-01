@@ -1,3 +1,4 @@
+export { default as accessRequestController } from './accessRequest';
 export { default as activityController } from './activity';
 export { default as documentController } from './document';
 export { default as enquiryController } from './enquiry';
@@ -7,3 +8,4 @@ export { default as roadmapController } from './roadmap';
 export { default as ssoController } from './sso';
 export { default as submissionController } from './submission';
 export { default as userController } from './user';
+export { default as yarsController } from './yars';

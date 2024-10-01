@@ -3,13 +3,13 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import { useAuthStore } from '@/store';
+import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
 // Store
-const { getIsAuthenticated } = storeToRefs(useAuthStore());
+const { getIsAuthenticated } = storeToRefs(useAuthNStore());
 
 // State
 const ready: Ref<boolean> = ref(false);

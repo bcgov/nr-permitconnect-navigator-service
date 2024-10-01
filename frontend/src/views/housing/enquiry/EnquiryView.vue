@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import BackButton from '@/components/common/BackButton.vue';
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
@@ -15,19 +15,22 @@ import { useEnquiryStore } from '@/store';
 import { storeToRefs } from 'pinia';
 
 // Props
-type Props = {
+const {
+  activityId,
+  initialTab = '0',
+  enquiryId
+} = defineProps<{
   activityId: string;
   initialTab?: string;
   enquiryId: string;
-};
-
-const props = withDefaults(defineProps<Props>(), { initialTab: '0' });
+}>();
 
 // State
-const activeTab: Ref<number> = ref(Number(props.initialTab));
+const activeTab: Ref<number> = ref(Number(initialTab));
 const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
+const router = useRouter();
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -35,9 +38,9 @@ const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // Actions
 onMounted(async () => {
-  if (props.enquiryId && props.activityId) {
+  if (enquiryId && activityId) {
     const [enquiry, notes] = (
-      await Promise.all([enquiryService.getEnquiry(props?.enquiryId), noteService.listNotes(props?.activityId)])
+      await Promise.all([enquiryService.getEnquiry(enquiryId), noteService.listNotes(activityId)])
     ).map((r) => r.data);
     enquiryStore.setEnquiry(enquiry);
     enquiryStore.setNotes(notes);
@@ -74,10 +77,17 @@ function onEnquiryFormSaved() {
 </script>
 
 <template>
-  <BackButton
-    :route-name="RouteName.HOUSING_SUBMISSIONS"
-    text="Back to Submissions"
-  />
+  <Button
+    class="p-0"
+    text
+    @click="router.back()"
+  >
+    <font-awesome-icon
+      icon="fa fa-arrow-circle-left"
+      class="mr-1 app-primary-color"
+    />
+    <span class="app-primary-color">Back to Submissions</span>
+  </Button>
 
   <h1>
     Enquiry submission:
@@ -153,7 +163,7 @@ function onEnquiryFormSaved() {
       <NoteModal
         v-if="noteModalVisible"
         v-model:visible="noteModalVisible"
-        :activity-id="props.activityId"
+        :activity-id="activityId"
         @add-note="onAddNote"
       />
     </TabPanel>

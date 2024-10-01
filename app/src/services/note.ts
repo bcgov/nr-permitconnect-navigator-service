@@ -3,6 +3,7 @@ import { note } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Note } from '../types';
+import { IStamps } from '../interfaces/IStamps';
 
 const service = {
   /**
@@ -30,17 +31,35 @@ const service = {
    * @param {string} noteId ID of the note to delete
    * @returns {Promise<Note>} The result of running the update operation
    */
-  deleteNote: async (noteId: string) => {
+  deleteNote: async (noteId: string, updateStamp: Partial<IStamps>) => {
     const result = await prisma.note.update({
       where: {
         note_id: noteId
       },
       data: {
-        is_deleted: true
+        is_deleted: true,
+        updated_at: updateStamp.updatedAt,
+        updated_by: updateStamp.updatedBy
       }
     });
 
     return note.fromPrismaModel(result);
+  },
+
+  /**
+   * @function getNote
+   * Get a note
+   * @param {string} noteId Note ID
+   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   */
+  getNote: async (noteId: string) => {
+    const result = await prisma.note.findFirst({
+      where: {
+        note_id: noteId
+      }
+    });
+
+    return result ? note.fromPrismaModel(result) : null;
   },
 
   /**

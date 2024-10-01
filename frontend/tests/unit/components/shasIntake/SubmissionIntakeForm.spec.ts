@@ -19,6 +19,10 @@ vi.mock('vue-router', () => ({
     push: vi.fn(),
     replace: vi.fn()
   }),
+  useRoute: () => ({
+    params: {},
+    query: {}
+  }),
   onBeforeRouteUpdate: vi.fn()
 }));
 
@@ -187,13 +191,6 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const permitsTest = submissionIntakeSchema.validateAt('permits', {
-      permits: {
-        hasAppliedProvincialPermits: BasicResponse.NO,
-        checkProvincialPermits: 'testString2'
-      }
-    });
-
     const appliedPermitsTest = submissionIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
@@ -208,7 +205,6 @@ describe('SubmissionIntakeForm', () => {
     await expect(basicTest).resolves.toBeTruthy();
     await expect(housingTest).resolves.toBeTruthy();
     await expect(locationTest).resolves.toBeTruthy();
-    await expect(permitsTest).resolves.toBeTruthy();
     await expect(appliedPermitsTest).resolves.toBeTruthy();
   });
 
@@ -265,13 +261,6 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const permitsTestFail = submissionIntakeSchema.validateAt('permits', {
-      permits: {
-        hasAppliedProvincialPermits: BasicResponse.YES,
-        checkProvincialPermits: 'testString2'
-      }
-    });
-
     const appliedPermitsTestFail = submissionIntakeSchema.validateAt('appliedPermits', {
       appliedPermits: [
         {
@@ -286,7 +275,6 @@ describe('SubmissionIntakeForm', () => {
     await expect(basicTestFail).rejects.toThrowError();
     await expect(housingTestFail).rejects.toThrowError();
     await expect(locationTestFail).rejects.toThrowError();
-    await expect(permitsTestFail).rejects.toThrowError();
     await expect(appliedPermitsTestFail).rejects.toThrowError();
   });
 });

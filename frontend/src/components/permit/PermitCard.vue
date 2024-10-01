@@ -12,21 +12,19 @@ import type { Ref } from 'vue';
 import type { Permit, PermitType } from '@/types';
 
 // Props
-type Props = {
+const { permit } = defineProps<{
   permit: Permit;
-};
-
-const props = withDefaults(defineProps<Props>(), {});
+}>();
 
 // Store
 const { getPermitTypes } = storeToRefs(useTypeStore());
 
 // State
-const cardData = computed(() => props.permit);
+const cardData = computed(() => permit);
 const cardUpdatedBy: Ref<string> = ref('');
 const permitModalVisible: Ref<boolean> = ref(false);
 const permitType: Ref<PermitType | undefined> = ref(
-  getPermitTypes.value.find((x) => x.permitTypeId === props.permit.permitTypeId)
+  getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId)
 );
 
 // Actions
@@ -42,7 +40,7 @@ watchEffect(() => {
 });
 
 watchEffect(() => {
-  permitType.value = getPermitTypes.value.find((x) => x.permitTypeId === props.permit.permitTypeId);
+  permitType.value = getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId);
 });
 </script>
 

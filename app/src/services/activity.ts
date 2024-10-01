@@ -1,6 +1,7 @@
 import prisma from '../db/dataConnection';
 import { activity } from '../db/models';
 import { generateUniqueActivityId } from '../db/utils/utils';
+import { IStamps } from '../interfaces/IStamps';
 
 const service = {
   /**
@@ -9,7 +10,7 @@ const service = {
    * @param {string} initiative The initiative ID
    * @returns {Promise<Activity | null>} The result of running the findFirst operation
    */
-  createActivity: async (initiative: string) => {
+  createActivity: async (initiative: string, createStamp: Partial<IStamps>) => {
     const response = await prisma.$transaction(async (trx) => {
       const initiativeResult = await trx.initiative.findFirstOrThrow({
         where: {
@@ -20,7 +21,9 @@ const service = {
       return await trx.activity.create({
         data: {
           activity_id: await generateUniqueActivityId(),
-          initiative_id: initiativeResult.initiative_id
+          initiative_id: initiativeResult.initiative_id,
+          created_at: createStamp.createdAt,
+          created_by: createStamp.createdBy
         }
       });
     });

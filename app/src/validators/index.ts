@@ -1,3 +1,4 @@
+export { default as accessRequestValidator } from './accessRequest';
 export { default as documentValidator } from './document';
 export { default as enquiryValidator } from './enquiry';
 export { default as noteValidator } from './note';

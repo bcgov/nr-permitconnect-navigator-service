@@ -8,7 +8,7 @@ import type { Ref } from 'vue';
 
 import type { IdentityProvider } from '@/types';
 
-export type AuthStoreState = {
+export type AuthNStoreState = {
   accessToken: Ref<string | undefined>;
   expiresAt: Ref<number | undefined>;
   identityId: Ref<string | undefined>;
@@ -21,13 +21,13 @@ export type AuthStoreState = {
   user: Ref<User | null>;
 };
 
-export const useAuthStore = defineStore('auth', () => {
+export const useAuthNStore = defineStore('authn', () => {
   const configService = new ConfigService();
   const authService = new AuthService();
   const userManager = authService.getUserManager();
 
   // State
-  const state: AuthStoreState = {
+  const state: AuthNStoreState = {
     accessToken: ref(undefined),
     expiresAt: ref(0),
     identityId: ref(undefined),
@@ -121,4 +121,4 @@ export const useAuthStore = defineStore('auth', () => {
   };
 });
 
-export default useAuthStore;
+export default useAuthNStore;
