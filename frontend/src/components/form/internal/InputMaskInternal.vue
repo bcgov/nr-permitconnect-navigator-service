@@ -8,7 +8,7 @@ const { label, name, mask, placeholder, disabled, bold } = defineProps<{
   label: string;
   name: string;
   mask: string;
-  placeholder: string;
+  placeholder?: string;
   disabled: boolean;
   bold: boolean;
 }>();

@@ -15,7 +15,7 @@ type NavItem = {
   label: string;
   route?: string;
   public?: boolean;
-  access?: string;
+  access?: NavigationPermission | Array<NavigationPermission>;
   items?: Array<NavItem>;
   mailTo?: string;
 };
@@ -39,12 +39,12 @@ onMounted(() => {
         {
           label: 'Start a new project investigation',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
-          access: NavigationPermission.HOUSING_INTAKE
+          access: NavigationPermission.HOUSING_SUBMISSION_INTAKE
         },
         {
           label: 'Submit an enquiry',
           route: RouteName.HOUSING_ENQUIRY_INTAKE,
-          access: NavigationPermission.HOUSING_ENQUIRY
+          access: NavigationPermission.HOUSING_ENQUIRY_INTAKE
         },
         {
           label: 'View my drafts and previous entries',
@@ -80,7 +80,7 @@ onMounted(() => {
         {
           label: 'Contact a Navigator',
           mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
-          access: NavigationPermission.HOUSING_INTAKE
+          access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE, NavigationPermission.HOUSING_ENQUIRY_INTAKE]
         },
         {
           label: 'Report a problem',
