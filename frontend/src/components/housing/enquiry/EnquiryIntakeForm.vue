@@ -125,136 +125,6 @@ function confirmSubmit(data: any) {
   });
 }
 
-function onInvalidSubmit(e: any) {
-  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
-}
-
-async function onSaveDraft(data: any, isAutoSave = false) {
-  editable.value = false;
-
-  try {
-    let response;
-    if (data.enquiryId) {
-      response = await enquiryService.updateDraft(data.enquiryId, data);
-    } else {
-      response = await enquiryService.createDraft(data);
-    }
-
-    if (response.data.enquiryId && response.data.activityId) {
-      formRef.value?.setFieldValue('enquiryId', response.data.enquiryId);
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
-    }
-
-    if (isAutoSave) {
-      toast.success('Draft autosaved');
-    } else {
-      toast.success('Draft saved');
-    }
-  } catch (e: any) {
-    toast.error('Failed to save draft', e);
-  } finally {
-    editable.value = true;
-  }
-}
-
-async function onSubmit(data: any) {
-  editable.value = false;
-
-  let enquiryResponse, submissionResponse;
-
-  autoSaveRef.value?.stopAutoSave();
-
-  try {
-    // Need to first create the submission to relate to if asking to apply
-    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
-      submissionResponse = await submissionService.createDraft({ applicant: data.applicant });
-      if (submissionResponse.data.activityId) {
-        formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
-      } else {
-        throw new Error('Failed to retrieve correct submission draft data');
-      }
-    }
-
-    if (data.enquiryId) {
-      enquiryResponse = await enquiryService.updateDraft(data.enquiryId, { ...data, submit: true });
-    } else {
-      enquiryResponse = await enquiryService.createDraft({ ...data, submit: true });
-    }
-
-    if (enquiryResponse.data.activityId) {
-      assignedActivityId.value = enquiryResponse.data.activityId;
-      formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
-      formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
-
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
-    } else {
-      throw new Error('Failed to retrieve correct enquiry draft data');
-    }
-  } catch (e: any) {
-    toast.error('Failed to save intake', e);
-  } finally {
-    editable.value = true;
-
-    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
-      router.push({
-        name: RouteName.HOUSING_SUBMISSION_INTAKE,
-        query: {
-          activityId: submissionResponse?.data.activityId,
-          submissionId: submissionResponse?.data.submissionId
-        }
-      });
-    }
-  }
-}
-
-async function loadEnquiry() {
-  try {
-    let response;
-
-    if (enquiryId) {
-      response = (await enquiryService.getEnquiry(enquiryId as string)).data;
-      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-    }
-
-    initialFormValues.value = {
-      activityId: response?.activityId,
-      enquiryId: response?.enquiryId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
-      basic: {
-        isRelated: response?.isRelated,
-        relatedActivityId: response?.relatedActivityId,
-        enquiryDescription: response?.enquiryDescription,
-        applyForPermitConnect: response?.applyForPermitConnect
-      }
-    };
-  } catch (e: any) {
-    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
-  }
-}
-
-function onRelatedActivityInput(e: IInputEvent) {
-  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
-    id.toUpperCase().includes(e.target.value.toUpperCase())
-  );
-}
-
-onBeforeMount(async () => {
-  loadEnquiry();
-  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
-  submissions.value = (await submissionService.getSubmissions()).data;
-});
-
 async function emailConfirmation(activityId: string, enquiryId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
 
@@ -282,6 +152,143 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   };
   await submissionService.emailConfirmation(emailData);
 }
+
+async function loadEnquiry() {
+  try {
+    if (enquiryId) {
+      const formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+
+      initialFormValues.value = {
+        activityId: formVal?.activityId,
+        enquiryId: formVal?.enquiryId,
+        applicant: {
+          contactFirstName: formVal?.contactFirstName,
+          contactLastName: formVal?.contactLastName,
+          contactPhoneNumber: formVal?.contactPhoneNumber,
+          contactEmail: formVal?.contactEmail,
+          contactApplicantRelationship: formVal?.contactApplicantRelationship,
+          contactPreference: formVal?.contactPreference
+        },
+        basic: {
+          isRelated: formVal?.isRelated,
+          relatedActivityId: formVal?.relatedActivityId,
+          enquiryDescription: formVal?.enquiryDescription,
+          applyForPermitConnect: formVal?.applyForPermitConnect
+        }
+      };
+    }
+  } catch (e: any) {
+    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
+  }
+}
+
+function onInvalidSubmit(e: any) {
+  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
+  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function onSaveDraft(data: any, isAutoSave = false) {
+  editable.value = false;
+
+  try {
+    let response = await enquiryService.updateDraft(data);
+
+    if (response.data.activityId && response.data.enquiryId) {
+      formRef.value?.setFieldValue('activityId', response.data.activityId);
+      formRef.value?.setFieldValue('enquiryId', response.data.enquiryId);
+
+      // Update route query for refreshing
+      router.replace({
+        name: RouteName.HOUSING_ENQUIRY_INTAKE,
+        query: {
+          activityId: response.data.activityId,
+          enquiryId: response.data.enquiryId
+        }
+      });
+    } else {
+      throw new Error('Failed to retrieve correct draft data');
+    }
+
+    if (isAutoSave) {
+      toast.success('Draft autosaved');
+    } else {
+      toast.success('Draft saved');
+    }
+  } catch (e: any) {
+    toast.error('Failed to save draft', e);
+  } finally {
+    editable.value = true;
+  }
+}
+
+function onRelatedActivityInput(e: IInputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
+}
+
+async function onSubmit(data: any) {
+  editable.value = false;
+
+  let enquiryResponse, submissionResponse;
+
+  autoSaveRef.value?.stopAutoSave();
+
+  try {
+    // Need to first create the submission to relate to if asking to apply
+    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
+      submissionResponse = await submissionService.submitDraft({ applicant: data.applicant });
+      if (submissionResponse.data.activityId) {
+        formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
+      } else {
+        throw new Error('Failed to retrieve correct submission draft data');
+      }
+    }
+
+    enquiryResponse = await enquiryService.submitDraft(data);
+
+    if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
+      assignedActivityId.value = enquiryResponse.data.activityId;
+      formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
+      formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
+
+      // Update route query for refreshing
+      router.replace({
+        name: RouteName.HOUSING_ENQUIRY_INTAKE,
+        query: {
+          activityId: enquiryResponse.data.activityId,
+          enquiryId: enquiryResponse.data.enquiryId
+        }
+      });
+
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
+    } else {
+      throw new Error('Failed to retrieve correct enquiry draft data');
+    }
+  } catch (e: any) {
+    toast.error('Failed to save intake', e);
+  } finally {
+    editable.value = true;
+
+    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
+      router.push({
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+        query: {
+          activityId: submissionResponse?.data.activityId,
+          submissionId: submissionResponse?.data.submissionId
+        }
+      });
+    }
+  }
+}
+
+onBeforeMount(async () => {
+  loadEnquiry();
+  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
+  submissions.value = (await submissionService.getSubmissions()).data;
+});
 </script>
 
 <template>
@@ -311,7 +318,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
       <FormNavigationGuard v-if="editable" />
       <FormAutosave
         ref="autoSaveRef"
-        :callback="() => onSaveDraft(values)"
+        :callback="() => onSaveDraft(values, true)"
       />
 
       <input

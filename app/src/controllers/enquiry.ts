@@ -78,22 +78,6 @@ const controller = {
     };
   },
 
-  createDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
-    try {
-      const enquiry = await controller.generateEnquiryData(req);
-
-      // Create new enquiry
-      const result = await enquiryService.createEnquiry({
-        ...enquiry,
-        ...generateCreateStamps(req.currentContext)
-      });
-
-      res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.deleteEnquiry(req.params.enquiryId);
@@ -137,6 +121,32 @@ const controller = {
     }
   },
 
+  submitDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body.activityId && req.body.enquiryId;
+
+      const enquiry = await controller.generateEnquiryData(req);
+
+      let result;
+      if (update) {
+        result = await enquiryService.updateEnquiry({
+          ...enquiry,
+          ...generateUpdateStamps(req.currentContext)
+        } as Enquiry);
+      } else {
+        // Create new enquiry
+        result = await enquiryService.createEnquiry({
+          ...enquiry,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
+
+      res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
       const result = await enquiryService.updateEnquiry({
@@ -152,13 +162,23 @@ const controller = {
 
   updateDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
+      const update = req.body.activityId && req.body.enquiryId;
+
       const enquiry = await controller.generateEnquiryData(req);
 
-      // Update enquiry
-      const result = await enquiryService.updateEnquiry({
-        ...(enquiry as Enquiry),
-        ...generateUpdateStamps(req.currentContext)
-      });
+      let result;
+      if (update) {
+        result = await enquiryService.updateEnquiry({
+          ...enquiry,
+          ...generateUpdateStamps(req.currentContext)
+        } as Enquiry);
+      } else {
+        // Create new enquiry
+        result = await enquiryService.createEnquiry({
+          ...enquiry,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
 
       res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {

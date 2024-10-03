@@ -176,17 +176,17 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
           isRelated: BasicResponse.YES,
           relatedActivityId: relatedActivityId,
           enquiryType: SubmissionType.ASSISTANCE
-        },
-        submit: true
+        }
       },
       { applicant: values?.[IntakeFormCategory.APPLICANT] }
     );
 
-    const enquiryResponse = await enquiryService.createDraft(formattedData);
+    const enquiryResponse = await enquiryService.submitDraft(formattedData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
       assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
     } else {
@@ -283,6 +283,9 @@ async function onSaveDraft(
   assistanceRequired: boolean = false
 ) {
   editable.value = false;
+
+  autoSaveRef.value?.stopAutoSave();
+
   // Cleanup unneeded data to be saved to draft
   const draftData = omit(data as SubmissionForm, ['addressSearch']);
 
@@ -296,15 +299,20 @@ async function onSaveDraft(
 
   let response;
   try {
-    if (data.submissionId) {
-      response = await submissionService.updateDraft(draftData.submissionId, draftData);
-    } else {
-      response = await submissionService.createDraft(draftData);
-    }
+    response = await submissionService.updateDraft(draftData);
 
-    if (response.data.submissionId && response.data.activityId) {
-      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
+    if (response.data.activityId && response.data.submissionId) {
       formRef.value?.setFieldValue('activityId', response.data.activityId);
+      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
+
+      // Update route query for refreshing
+      router.replace({
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+        query: {
+          activityId: response.data.activityId,
+          submissionId: response.data.submissionId
+        }
+      });
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -321,7 +329,6 @@ async function onSaveDraft(
 
   if (assistanceRequired && response?.data?.activityId) {
     handleEnquirySubmit(draftData, response.data.activityId);
-    autoSaveRef.value?.stopAutoSave();
   }
 }
 
@@ -341,19 +348,21 @@ async function onSubmit(data: any) {
   editable.value = false;
 
   try {
-    let response;
-
     autoSaveRef.value?.stopAutoSave();
 
-    if (data.submissionId) {
-      response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
-    } else {
-      response = await submissionService.createDraft({ ...data, submit: true });
-    }
+    const response = await submissionService.submitDraft(data);
 
-    if (response.data.activityId) {
+    if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
+
+      // Update route query for refreshing
+      router.replace({
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+        query: {
+          activityId: response.data.activityId,
+          submissionId: response.data.submissionId
+        }
+      });
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
@@ -475,7 +484,7 @@ onBeforeMount(async () => {
     // Move map pin
     onLatLongInputClick();
   } catch {
-    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+    router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
 
   // Clearing the document store on page load
@@ -507,7 +516,7 @@ onBeforeMount(async () => {
       <FormNavigationGuard v-if="editable" />
       <FormAutosave
         ref="autoSaveRef"
-        :callback="() => onSaveDraft(values)"
+        :callback="() => onSaveDraft(values, true)"
       />
 
       <SubmissionAssistance

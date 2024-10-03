@@ -8,24 +8,11 @@ import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, Middleware } from '../../types';
+import type { Enquiry, EnquiryIntake } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
-
-const decideValidation = (validator: Middleware) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const body: any = req.body;
-
-    if (body.submit) {
-      return validator(req, _res, next);
-    } else {
-      return next();
-    }
-  };
-};
 
 /** Gets a list of enquiries */
 router.get(
@@ -61,24 +48,23 @@ router.delete(
   }
 );
 
-/** Creates an enquiry with Draft status */
+/** Creates or updates an intake and set status to Draft */
 router.put(
-  '/draft',
+  '/draft/',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
-  decideValidation(enquiryValidator.createDraft),
+  enquiryValidator.createOrUpdateDraft,
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
-    enquiryController.createDraft(req, res, next);
+    enquiryController.updateDraft(req, res, next);
   }
 );
 
-/** Updates an enquiry with Draft status */
+/** Creates or updates an intake and set status to Submitted */
 router.put(
-  '/draft/:enquiryId',
-  hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
-  hasAccess('enquiryId'),
-  decideValidation(enquiryValidator.updateDraft),
+  '/draft/submit',
+  hasAuthorization(Resource.ENQUIRY, Action.CREATE),
+  enquiryValidator.createOrUpdateDraft,
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
-    enquiryController.updateDraft(req, res, next);
+    enquiryController.submitDraft(req, res, next);
   }
 );
 

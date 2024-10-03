@@ -8,25 +8,17 @@ import { YES_NO_LIST } from '../utils/constants/application';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
-  createDraft: {
+  createOrUpdateDraft: {
     body: Joi.object({
       applicant: applicant,
       basic: basicEnquiry,
-      submit: Joi.boolean()
+      activityId: Joi.string(),
+      enquiryId: Joi.string()
     })
   },
   deleteEnquiry: {
     params: Joi.object({
       enquiryId: uuidv4.required()
-    })
-  },
-  updateDraft: {
-    body: Joi.object({
-      applicant: applicant,
-      basic: basicEnquiry,
-      submit: Joi.boolean(),
-      enquiryId: Joi.string().required(),
-      activityId: Joi.string().required()
     })
   },
   updateIsDeletedFlag: {
@@ -73,9 +65,8 @@ const schema = {
 };
 
 export default {
-  createDraft: validate(schema.createDraft),
+  createOrUpdateDraft: validate(schema.createOrUpdateDraft),
   deleteEnquiry: validate(schema.deleteEnquiry),
-  updateDraft: validate(schema.updateDraft),
   updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateEnquiry: validate(schema.updateEnquiry)
 };
