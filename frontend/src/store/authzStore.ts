@@ -10,8 +10,9 @@ export enum NavigationPermission {
   HOUSING = 'housing',
   HOUSING_DROPDOWN = 'housing.dropdown',
   HOUSING_ENQUIRY = 'housing.enquiry',
-  HOUSING_INTAKE = 'housing.intake',
+  HOUSING_ENQUIRY_INTAKE = 'housing.enquiry.intake',
   HOUSING_SUBMISSION = 'housing.submission',
+  HOUSING_SUBMISSION_INTAKE = 'housing.submission.intake',
   HOUSING_SUBMISSIONS = 'housing.submissions',
   HOUSING_SUBMISSIONS_SUB = 'housing.submissions.sub',
   HOUSING_STATUS_TRACKER = 'housing.statustracker',
@@ -26,6 +27,7 @@ const NavigationAuthorizationMap = [
     group: GroupName.ADMIN,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
+      NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS,
@@ -37,6 +39,7 @@ const NavigationAuthorizationMap = [
     group: GroupName.NAVIGATOR,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
+      NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS
@@ -44,16 +47,19 @@ const NavigationAuthorizationMap = [
   },
   {
     group: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [NavigationPermission.HOUSING_SUBMISSION, NavigationPermission.HOUSING_SUBMISSIONS]
+    permissions: [
+      NavigationPermission.HOUSING_ENQUIRY,
+      NavigationPermission.HOUSING_SUBMISSION,
+      NavigationPermission.HOUSING_SUBMISSIONS
+    ]
   },
   {
     group: GroupName.PROPONENT,
     permissions: [
       NavigationPermission.HOUSING,
       NavigationPermission.HOUSING_DROPDOWN,
-      NavigationPermission.HOUSING_ENQUIRY,
-      NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_SUBMISSION,
+      NavigationPermission.HOUSING_ENQUIRY_INTAKE,
+      NavigationPermission.HOUSING_SUBMISSION_INTAKE,
       NavigationPermission.HOUSING_SUBMISSIONS_SUB
     ]
   },
@@ -61,6 +67,7 @@ const NavigationAuthorizationMap = [
     group: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.HOUSING_DROPDOWN,
+      NavigationPermission.HOUSING_ENQUIRY,
       NavigationPermission.HOUSING_STATUS_TRACKER,
       NavigationPermission.HOUSING_SUBMISSION,
       NavigationPermission.HOUSING_SUBMISSIONS,

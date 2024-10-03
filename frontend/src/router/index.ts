@@ -113,7 +113,7 @@ const routes: Array<RouteRecordRaw> = [
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: [NavigationPermission.HOUSING_INTAKE]
+                  access: [NavigationPermission.HOUSING_ENQUIRY_INTAKE]
                 }
               }
             ]
@@ -138,7 +138,7 @@ const routes: Array<RouteRecordRaw> = [
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
-                  access: [NavigationPermission.HOUSING_INTAKE]
+                  access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE]
                 }
               }
             ]
