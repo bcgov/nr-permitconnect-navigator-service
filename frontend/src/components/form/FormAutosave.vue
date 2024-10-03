@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { useFormValues, useIsFormDirty } from 'vee-validate';
-import { ref, watch } from 'vue';
+import { onBeforeUnmount, ref, watch } from 'vue';
 
 import type { Ref } from 'vue';
 
+// Constants
+const DEFAULT_DELAY = 10000;
+
 // Props
-const { callback, delay = 10000 } = defineProps<{
+const { callback, delay = DEFAULT_DELAY } = defineProps<{
   callback: (...args: any[]) => any;
   delay?: number;
 }>();
@@ -24,6 +27,10 @@ function stopAutoSave() {
     timeoutId.value = null;
   }
 }
+
+onBeforeUnmount(() => {
+  stopAutoSave();
+});
 
 watch(values.value, () => {
   if (timeoutId.value) {
