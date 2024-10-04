@@ -13,6 +13,7 @@ import {
   Calendar,
   Checkbox,
   Dropdown,
+  FormAutosave,
   FormNavigationGuard,
   InputMask,
   InputNumber,
@@ -39,7 +40,6 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -102,11 +102,11 @@ const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
+const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
-const initialFormValues: Ref<undefined | object> = ref(undefined);
-const loadForm: Ref<boolean> = ref(false);
+const initialFormValues: Ref<any | undefined> = ref(undefined);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -117,11 +117,6 @@ const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
   if (!formRef?.value?.errors) return [];
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
-});
-
-const { formUpdated, stopAutoSave } = useAutoSave(() => {
-  const values = formRef.value?.values;
-  if (values) onSaveDraft(values, true);
 });
 
 // Actions
@@ -317,7 +312,6 @@ async function onSaveDraft(
       if (showToast) toast.success('Draft autosaved');
     } else {
       if (showToast) toast.success('Draft saved');
-      formUpdated.value = false;
     }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
@@ -326,9 +320,8 @@ async function onSaveDraft(
   }
 
   if (assistanceRequired && response?.data?.activityId) {
-    formUpdated.value = false;
     handleEnquirySubmit(draftData, response.data.activityId);
-    stopAutoSave();
+    autoSaveRef.value?.stopAutoSave();
   }
 }
 
@@ -339,7 +332,7 @@ function onStepChange(stepNumber: number) {
 
   // Save a draft on very first stepper navigation if no activityId yet
   // Need this to generate an activityId for the file uploads
-  if (!formRef.value?.values.activityId && formUpdated) {
+  if (!formRef.value?.values.activityId) {
     onSaveDraft(formRef.value?.values, true, false);
   }
 }
@@ -349,17 +342,21 @@ async function onSubmit(data: any) {
 
   try {
     let response;
+
+    autoSaveRef.value?.stopAutoSave();
+
     if (data.submissionId) {
       response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
     } else {
       response = await submissionService.createDraft({ ...data, submit: true });
     }
+
     if (response.data.activityId) {
       assignedActivityId.value = response.data.activityId;
       formRef.value?.setFieldValue('activityId', response.data.activityId);
+
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
-      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -399,91 +396,89 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
 }
 
 onBeforeMount(async () => {
-  if (submissionId && activityId) {
+  try {
     let response,
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
-    try {
+    if (submissionId && activityId) {
       response = (await submissionService.getSubmission(submissionId)).data;
       permits = (await permitService.listPermits(activityId)).data;
       documents = (await documentService.listDocuments(activityId)).data;
       submissionStore.setDocuments(documents);
       editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-
-      initialFormValues.value = {
-        activityId: response?.activityId,
-        submissionId: response?.submissionId,
-        applicant: {
-          contactFirstName: response?.contactFirstName,
-          contactLastName: response?.contactLastName,
-          contactPhoneNumber: response?.contactPhoneNumber,
-          contactEmail: response?.contactEmail,
-          contactApplicantRelationship: response?.contactApplicantRelationship,
-          contactPreference: response?.contactPreference
-        },
-        basic: {
-          consentToFeedback: response?.consentToFeedback,
-          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-          isDevelopedInBC: response?.isDevelopedInBC,
-          registeredName: response?.companyNameRegistered
-        },
-        housing: {
-          projectName: response?.projectName,
-          projectDescription: response?.projectDescription,
-          singleFamilySelected: !!response?.singleFamilyUnits,
-          multiFamilySelected: !!response?.multiFamilyUnits,
-          singleFamilyUnits: response?.singleFamilyUnits,
-          multiFamilyUnits: response?.multiFamilyUnits,
-          otherSelected: !!response?.otherUnits,
-          otherUnitsDescription: response?.otherUnitsDescription,
-          otherUnits: response?.otherUnits,
-          hasRentalUnits: response?.hasRentalUnits,
-          rentalUnits: response?.rentalUnits,
-          financiallySupportedBC: response?.financiallySupportedBC,
-          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-          indigenousDescription: response?.indigenousDescription,
-          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-          nonProfitDescription: response?.nonProfitDescription,
-          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-          housingCoopDescription: response?.housingCoopDescription
-        },
-        location: {
-          naturalDisaster: response?.naturalDisaster,
-          projectLocation: response?.projectLocation,
-          streetAddress: response?.streetAddress,
-          locality: response?.locality,
-          province: response?.province,
-          latitude: response?.latitude,
-          longitude: response?.longitude,
-          ltsaPIDLookup: response?.locationPIDs,
-          geomarkUrl: response?.geomarkUrl,
-          projectLocationDescription: response?.projectLocationDescription
-        },
-        appliedPermits: permits
-          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-          .map((x: Permit) => ({
-            ...x,
-            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-          })),
-        permits: {
-          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
-        },
-        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-      };
-
-      await nextTick();
-      // Move map pin
-      onLatLongInputClick();
-      loadForm.value = true;
-    } catch {
-      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
     }
-  } else {
-    initialFormValues.value = {};
-    loadForm.value = true;
+
+    initialFormValues.value = {
+      activityId: response?.activityId,
+      submissionId: response?.submissionId,
+      applicant: {
+        contactFirstName: response?.contactFirstName,
+        contactLastName: response?.contactLastName,
+        contactPhoneNumber: response?.contactPhoneNumber,
+        contactEmail: response?.contactEmail,
+        contactApplicantRelationship: response?.contactApplicantRelationship,
+        contactPreference: response?.contactPreference
+      },
+      basic: {
+        consentToFeedback: response?.consentToFeedback,
+        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+        isDevelopedInBC: response?.isDevelopedInBC,
+        registeredName: response?.companyNameRegistered
+      },
+      housing: {
+        projectName: response?.projectName,
+        projectDescription: response?.projectDescription,
+        singleFamilySelected: !!response?.singleFamilyUnits,
+        multiFamilySelected: !!response?.multiFamilyUnits,
+        singleFamilyUnits: response?.singleFamilyUnits,
+        multiFamilyUnits: response?.multiFamilyUnits,
+        otherSelected: !!response?.otherUnits,
+        otherUnitsDescription: response?.otherUnitsDescription,
+        otherUnits: response?.otherUnits,
+        hasRentalUnits: response?.hasRentalUnits,
+        rentalUnits: response?.rentalUnits,
+        financiallySupportedBC: response?.financiallySupportedBC,
+        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+        indigenousDescription: response?.indigenousDescription,
+        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+        nonProfitDescription: response?.nonProfitDescription,
+        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+        housingCoopDescription: response?.housingCoopDescription
+      },
+      location: {
+        naturalDisaster: response?.naturalDisaster,
+        projectLocation: response?.projectLocation,
+        streetAddress: response?.streetAddress,
+        locality: response?.locality,
+        province: response?.province,
+        latitude: response?.latitude,
+        longitude: response?.longitude,
+        ltsaPIDLookup: response?.locationPIDs,
+        geomarkUrl: response?.geomarkUrl,
+        projectLocationDescription: response?.projectLocationDescription
+      },
+      appliedPermits: permits
+        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+        .map((x: Permit) => ({
+          ...x,
+          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+        })),
+      permits: {
+        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+      },
+      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+    };
+
+    await nextTick();
+
+    // Move map pin
+    onLatLongInputClick();
+  } catch {
+    router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
-  // clearing the document store on page load
+
+  // Clearing the document store on page load
   submissionStore.setDocuments([]);
 });
 </script>
@@ -500,17 +495,20 @@ onBeforeMount(async () => {
     </div>
 
     <Form
-      v-if="loadForm"
+      v-if="initialFormValues"
       id="form"
-      v-slot="{ setFieldValue, errors, values }"
+      v-slot="{ setFieldValue, errors, meta, values }"
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
-      @change="() => (formUpdated = true)"
     >
-      <FormNavigationGuard v-if="editable && !!formUpdated" />
+      <FormNavigationGuard v-if="editable" />
+      <FormAutosave
+        ref="autoSaveRef"
+        :callback="() => onSaveDraft(values)"
+      />
 
       <SubmissionAssistance
         v-if="editable && values?.applicant"
@@ -798,7 +796,7 @@ onBeforeMount(async () => {
                     label="Single-family"
                     :bold="false"
                     :disabled="!editable"
-                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                    :invalid="!!errors.housing && meta.touched"
                   />
                   <div class="col-6">
                     <div class="flex">
@@ -807,7 +805,7 @@ onBeforeMount(async () => {
                         label="Multi-family"
                         :bold="false"
                         :disabled="!editable"
-                        :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                        :invalid="!!errors.housing && meta.touched"
                       />
                       <div
                         v-tooltip.right="
@@ -840,7 +838,7 @@ onBeforeMount(async () => {
                     label="Other"
                     :bold="false"
                     :disabled="!editable"
-                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                    :invalid="!!errors?.housing && meta.touched"
                   />
                   <div class="col-6" />
                   <InputText
@@ -858,7 +856,7 @@ onBeforeMount(async () => {
                   />
                   <div class="col-12">
                     <ErrorMessage
-                      v-show="formRef?.meta?.touched"
+                      v-show="meta.touched"
                       name="housing"
                     />
                   </div>

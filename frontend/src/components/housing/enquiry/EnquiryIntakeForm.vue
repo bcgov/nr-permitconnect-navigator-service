@@ -14,12 +14,12 @@ import {
   InputText,
   RadioList,
   StepperNavigation,
-  TextArea
+  TextArea,
+  FormAutosave
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
-import { useAutoSave } from '@/composables/formAutoSave';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
@@ -32,13 +32,6 @@ import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
 
-const { formUpdated, stopAutoSave } = useAutoSave(async () => {
-  const values = formRef.value?.values;
-  if (values) {
-    await onSaveDraft(values, true);
-  }
-});
-
 // Props
 const { enquiryId = undefined } = defineProps<{
   enquiryId?: string;
@@ -49,10 +42,10 @@ const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
+const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const loadForm: Ref<boolean> = ref(false);
 const initialFormValues: Ref<undefined | object> = ref(undefined);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const submissions: Ref<Array<Submission>> = ref([]);
@@ -159,7 +152,6 @@ async function onSaveDraft(data: any, isAutoSave = false) {
       toast.success('Draft autosaved');
     } else {
       toast.success('Draft saved');
-      formUpdated.value = false;
     }
   } catch (e: any) {
     toast.error('Failed to save draft', e);
@@ -172,6 +164,8 @@ async function onSubmit(data: any) {
   editable.value = false;
 
   let enquiryResponse, submissionResponse;
+
+  autoSaveRef.value?.stopAutoSave();
 
   try {
     // Need to first create the submission to relate to if asking to apply
@@ -194,9 +188,9 @@ async function onSubmit(data: any) {
       assignedActivityId.value = enquiryResponse.data.activityId;
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
+
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
-      stopAutoSave();
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
     }
@@ -216,35 +210,37 @@ async function onSubmit(data: any) {
     }
   }
 }
+
 async function loadEnquiry() {
-  let formVal;
   try {
+    let response;
+
     if (enquiryId) {
-      formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
-      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+      response = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
     }
+
+    initialFormValues.value = {
+      activityId: response?.activityId,
+      enquiryId: response?.enquiryId,
+      applicant: {
+        contactFirstName: response?.contactFirstName,
+        contactLastName: response?.contactLastName,
+        contactPhoneNumber: response?.contactPhoneNumber,
+        contactEmail: response?.contactEmail,
+        contactApplicantRelationship: response?.contactApplicantRelationship,
+        contactPreference: response?.contactPreference
+      },
+      basic: {
+        isRelated: response?.isRelated,
+        relatedActivityId: response?.relatedActivityId,
+        enquiryDescription: response?.enquiryDescription,
+        applyForPermitConnect: response?.applyForPermitConnect
+      }
+    };
   } catch (e: any) {
     router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }
-
-  initialFormValues.value = {
-    activityId: formVal?.activityId,
-    enquiryId: formVal?.enquiryId,
-    applicant: {
-      contactFirstName: formVal?.contactFirstName,
-      contactLastName: formVal?.contactLastName,
-      contactPhoneNumber: formVal?.contactPhoneNumber,
-      contactEmail: formVal?.contactEmail,
-      contactApplicantRelationship: formVal?.contactApplicantRelationship,
-      contactPreference: formVal?.contactPreference
-    },
-    basic: {
-      isRelated: formVal?.isRelated,
-      relatedActivityId: formVal?.relatedActivityId,
-      enquiryDescription: formVal?.enquiryDescription,
-      applyForPermitConnect: formVal?.applyForPermitConnect
-    }
-  };
 }
 
 function onRelatedActivityInput(e: IInputEvent) {
@@ -254,11 +250,9 @@ function onRelatedActivityInput(e: IInputEvent) {
 }
 
 onBeforeMount(async () => {
-  if (enquiryId) loadEnquiry();
+  loadEnquiry();
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
   submissions.value = (await submissionService.getSubmissions()).data;
-
-  loadForm.value = true;
 });
 
 async function emailConfirmation(activityId: string, enquiryId: string) {
@@ -305,7 +299,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     <CollectionDisclaimer />
 
     <Form
-      v-if="loadForm"
+      v-if="initialFormValues"
       v-slot="{ values }"
       ref="formRef"
       keep-values
@@ -313,9 +307,12 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
-      @change="formUpdated = true"
     >
-      <FormNavigationGuard v-if="editable && !!formUpdated" />
+      <FormNavigationGuard v-if="editable" />
+      <FormAutosave
+        ref="autoSaveRef"
+        :callback="() => onSaveDraft(values)"
+      />
 
       <input
         type="hidden"
