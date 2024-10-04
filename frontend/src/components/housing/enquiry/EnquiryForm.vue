@@ -14,6 +14,7 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import { Button, Message, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
@@ -30,7 +31,7 @@ import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Enquiry, User } from '@/types';
+import type { ATSUser, Enquiry, User } from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -48,6 +49,7 @@ const emit = defineEmits(['enquiryForm:saved']);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
@@ -151,7 +153,7 @@ const onSubmit = async (values: any) => {
     const submitData: Enquiry = omit(setEmptyStringsToNull(values) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.isRelated = submitData.relatedActivityId ? BasicResponse.YES : BasicResponse.NO;
-
+    submitData.atsClientNumber = submitData.atsClientNumber?.toString();
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);
     formRef.value?.resetForm({
@@ -194,6 +196,7 @@ onMounted(async () => {
   </Message>
   <Form
     v-if="initialFormValues"
+    v-slot="{ setFieldValue, values }"
     ref="formRef"
     :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
@@ -268,7 +271,6 @@ onMounted(async () => {
         label="Contact email"
         :disabled="!editable"
       />
-
       <SectionHeader title="Enquiry detail" />
 
       <TextArea
@@ -277,6 +279,25 @@ onMounted(async () => {
         label=""
         :disabled="!editable"
       />
+
+      <SectionHeader title="ATS" />
+
+      <div class="flex align-items-center mb-2">
+        <InputText
+          v-if="values.atsClientNumber"
+          class="col-3 flex-auto"
+          name="atsClientNumber"
+          label="ATS Client #"
+          :disabled="true"
+        />
+        <Button
+          aria-label="Link to ATS"
+          class="h-2rem ml-2"
+          @click="atsUserLinkModalVisible = true"
+        >
+          Link to ATS
+        </Button>
+      </div>
 
       <SectionHeader title="Submission state" />
 
@@ -326,5 +347,14 @@ onMounted(async () => {
         />
       </div>
     </div>
+    <ATSUserLinkModal
+      v-model:visible="atsUserLinkModalVisible"
+      @ats-user-link:link="
+        (atsUser: ATSUser) => {
+          setFieldValue('atsClientNumber', atsUser.atsClientNumber);
+          atsUserLinkModalVisible = false;
+        }
+      "
+    />
   </Form>
 </template>

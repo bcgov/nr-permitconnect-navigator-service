@@ -4,6 +4,7 @@ export type Enquiry = {
   enquiryId: string;
   activityId: string;
   assignedUserId?: string;
+  atsClientNumber?: string;
   enquiryType: string;
   submittedAt: string;
   submittedBy: string;

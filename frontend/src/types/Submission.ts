@@ -43,7 +43,6 @@ export type Submission = {
   longitude: number;
   geomarkUrl: string;
   naturalDisaster: string;
-  addedToATS: boolean;
   atsClientNumber?: string;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;

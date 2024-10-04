@@ -6,6 +6,7 @@ export type Enquiry = {
   enquiryId: string; // Primary key
   activityId: string;
   assignedUserId: string | null;
+  atsClientNumber: string | null;
   enquiryType: string | null;
   submittedAt: string;
   submittedBy: string;

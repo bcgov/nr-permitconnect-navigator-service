@@ -180,6 +180,16 @@ spec:
                 secretKeyRef:
                   key: password
                   name: {{ include "pcns.configname" . }}-sso
+            - name: SERVER_ATS_CLIENTID
+              valueFrom:
+                secretKeyRef:
+                  key: username
+                  name: {{ include "pcns.configname" . }}-ats
+            - name: SERVER_ATS_CLIENTSECRET
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ include "pcns.configname" . }}-ats
           envFrom:
             - configMapRef:
                 name: {{ include "pcns.configname" . }}-config

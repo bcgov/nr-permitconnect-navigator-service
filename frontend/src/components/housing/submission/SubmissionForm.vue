@@ -16,6 +16,7 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import { Button, Message, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
@@ -35,7 +36,7 @@ import { applicantValidator, assignedToValidator, latitudeValidator, longitudeVa
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Submission, User } from '@/types';
+import type { ATSUser, Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 // Interfaces
@@ -55,6 +56,7 @@ const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -123,12 +125,7 @@ const formSchema = object({
   geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
-  addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: string().when('addedToATS', {
-    is: (val: boolean) => val,
-    then: (schema) => schema.required().max(255).label('ATS Client #'),
-    otherwise: () => string().notRequired()
-  }),
+  atsClientNumber: string().notRequired().max(255).label('ATS Client #'),
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -194,6 +191,7 @@ const onSubmit = async (values: any) => {
     const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
+    submitData.atsClientNumber = submitData.atsClientNumber?.toString();
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
     submissionStore.setSubmission(result.data);
     formRef.value?.resetForm({
@@ -268,7 +266,6 @@ onMounted(async () => {
     longitude: submission.longitude,
     geomarkUrl: submission.geomarkUrl,
     naturalDisaster: submission.naturalDisaster,
-    addedToATS: submission.addedToATS,
     atsClientNumber: submission.atsClientNumber,
     ltsaCompleted: submission.ltsaCompleted,
     bcOnlineCompleted: submission.bcOnlineCompleted,
@@ -609,28 +606,30 @@ onMounted(async () => {
       />
       <div class="col-6" />
 
-      <SectionHeader title="Other" />
-
-      <Checkbox
-        class="col-12"
-        name="addedToATS"
-        label="Authorized Tracking System (ATS) updated"
-        :disabled="!editable"
-        :bold="true"
-      />
-
-      <div
-        v-if="values.addedToATS"
-        class="w-full"
-      >
+      <SectionHeader title="ATS" />
+      <div class="flex align-items-center mb-2">
         <InputText
-          class="col-3"
+          v-if="values.atsClientNumber"
+          class="col-3 flex-auto"
           name="atsClientNumber"
           label="ATS Client #"
-          :disabled="!editable"
+          :disabled="true"
         />
-        <div class="col-9" />
+        <Button
+          aria-label="Link to ATS"
+          class="h-2rem ml-2"
+          @click="
+            () => {
+              atsUserLinkModalVisible = true;
+            }
+          "
+        >
+          Link to ATS
+        </Button>
       </div>
+
+      <SectionHeader title="Other" />
+
       <Checkbox
         class="col-12"
         name="ltsaCompleted"
@@ -704,5 +703,15 @@ onMounted(async () => {
         />
       </div>
     </div>
+    <ATSUserLinkModal
+      v-model:visible="atsUserLinkModalVisible"
+      @ats-user-link:link="
+        (atsUser: ATSUser) => {
+          console.log(atsUser);
+          setFieldValue('atsClientNumber', atsUser.atsClientNumber);
+          atsUserLinkModalVisible = false;
+        }
+      "
+    />
   </Form>
 </template>

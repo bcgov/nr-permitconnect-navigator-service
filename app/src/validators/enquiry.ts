@@ -33,6 +33,7 @@ const schema = {
     body: Joi.object({
       enquiryId: Joi.string().required(),
       activityId: Joi.string().required(),
+      atsClientNumber: Joi.string().allow(null).max(255),
       enquiryType: Joi.string().allow(null),
       submittedAt: Joi.date(),
       submittedBy: Joi.string().max(255).required(),
