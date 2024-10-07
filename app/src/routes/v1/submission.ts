@@ -52,22 +52,21 @@ router.get(
   }
 );
 
-/** Creates a submission with Draft status */
+/** Creates or updates an intake and set status to Draft */
 router.put(
   '/draft',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
-    submissionController.createDraft(req, res, next);
+    submissionController.updateDraft(req, res, next);
   }
 );
 
-/** Updates a submission with Draft status */
+/** Creates or updates an intake and set status to Submitted */
 router.put(
-  '/draft/:submissionId',
-  hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
-  hasAccess('submissionId'),
+  '/draft/submit',
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
-    submissionController.updateDraft(req, res, next);
+    submissionController.submitDraft(req, res, next);
   }
 );
 

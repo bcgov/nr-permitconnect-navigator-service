@@ -29,6 +29,40 @@ import type {
 } from '../types';
 
 const controller = {
+  /**
+   * @function assignPriority
+   * Assigns a priority level to a submission based on given criteria
+   * Criteria defined below
+   */
+  assignPriority: (submission: Partial<Submission>) => {
+    const matchesPriorityOneCriteria = // Priority 1 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
+      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+
+    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
+      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
+      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
+      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
+      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
+
+    if (matchesPriorityOneCriteria) {
+      submission.queuePriority = 1;
+    } else if (matchesPriorityTwoCriteria) {
+      submission.queuePriority = 2;
+    } else {
+      // Prioriy 3 Criteria:
+      submission.queuePriority = 3; // Everything Else
+    }
+  },
+
   checkAndStoreNewSubmissions: async () => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
 
@@ -308,6 +342,19 @@ const controller = {
     return submissionData;
   },
 
+  /**
+   * @function emailConfirmation
+   * Send an email with the confirmation of submission
+   */
+  emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
+    try {
+      const { data, status } = await emailService.email(req.body);
+      res.status(status).json(data);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
       let response = await submissionService.getSubmissions();
@@ -315,28 +362,6 @@ const controller = {
         response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
       }
       res.status(200).json(response.map((x) => x.activityId));
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  createDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
-    try {
-      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
-      );
-
-      // Create new submission
-      const result = await submissionService.createSubmission({
-        ...submission,
-        ...generateCreateStamps(req.currentContext)
-      });
-
-      // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
     }
@@ -443,25 +468,75 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+  submitDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
+      const update = req.body.activityId && req.body.submissionId;
+
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req,
-        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+        IntakeStatus.SUBMITTED
       );
 
-      // Update submission
-      const result = await submissionService.updateSubmission({
-        ...submission,
-        ...generateUpdateStamps(req.currentContext)
-      });
+      let result;
+
+      if (update) {
+        // Update submission
+        result = await submissionService.updateSubmission({
+          ...submission,
+          ...generateUpdateStamps(req.currentContext)
+        });
+      } else {
+        // Create new submission
+        result = await submissionService.createSubmission({
+          ...submission,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
 
       // Remove already existing permits for this activity
       await permitService.deletePermitsByActivity(submission.activityId);
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
+
+      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  updateDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body.activityId && req.body.submissionId;
+
+      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+        req,
+        IntakeStatus.DRAFT
+      );
+
+      let result;
+
+      if (update) {
+        // Update submission
+        result = await submissionService.updateSubmission({
+          ...submission,
+          ...generateUpdateStamps(req.currentContext)
+        });
+      } else {
+        // Create new submission
+        result = await submissionService.createSubmission({
+          ...submission,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
+
+      // Remove already existing permits for this activity
+      await permitService.deletePermitsByActivity(submission.activityId);
+
+      // Create each permit
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
       res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
@@ -495,53 +570,6 @@ const controller = {
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
-    }
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the confirmation of submission
-   */
-  emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
-    try {
-      const { data, status } = await emailService.email(req.body);
-      res.status(status).json(data);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  /**
-   * @function assignPriority
-   * Assigns a priority level to a submission based on given criteria
-   * Criteria defined below
-   */
-  assignPriority: (submission: Partial<Submission>) => {
-    const matchesPriorityOneCriteria = // Priority 1 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
-      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
-      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
-      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
-
-    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
-      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
-      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
-      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
-      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
-
-    if (matchesPriorityOneCriteria) {
-      submission.queuePriority = 1;
-    } else if (matchesPriorityTwoCriteria) {
-      submission.queuePriority = 2;
-    } else {
-      // Prioriy 3 Criteria:
-      submission.queuePriority = 3; // Everything Else
     }
   }
 };

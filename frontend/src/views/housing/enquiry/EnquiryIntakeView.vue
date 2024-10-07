@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 
-import type { ComputedRef, Ref } from 'vue';
+import type { Ref } from 'vue';
 
 // Props
 const {
@@ -18,7 +18,6 @@ const {
 }>();
 
 // State
-const key: ComputedRef<string> = computed(() => JSON.stringify({ activityId, enquiryId, submissionId }));
 const loading: Ref<boolean> = ref(true);
 
 // Actions
@@ -31,7 +30,6 @@ onMounted(async () => {
   <!-- 'key' prop remounts component when it changes -->
   <EnquiryIntakeForm
     v-if="!loading"
-    :key="key"
     :activity-id="activityId"
     :enquiry-id="enquiryId"
     :submission-id="submissionId"

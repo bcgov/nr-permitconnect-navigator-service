@@ -13,14 +13,6 @@ export default {
   },
 
   /**
-   * @function createDraft
-   * @returns {Promise} An axios response
-   */
-  createDraft(data?: any) {
-    return appAxios().put('submission/draft', data);
-  },
-
-  /**
    * @function createSubmission
    * @returns {Promise} An axios response
    */
@@ -69,11 +61,19 @@ export default {
   },
 
   /**
+   * @function submitDraft
+   * @returns {Promise} An axios response
+   */
+  submitDraft(data?: any) {
+    return appAxios().put('submission/draft/submit', data);
+  },
+
+  /**
    * @function updateDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(submissionId: string, data?: any) {
-    return appAxios().put(`submission/draft/${submissionId}`, data);
+  updateDraft(data?: any) {
+    return appAxios().put('submission/draft', data);
   },
 
   /**
