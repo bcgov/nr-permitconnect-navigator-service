@@ -155,29 +155,31 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
 
 async function loadEnquiry() {
   try {
-    if (enquiryId) {
-      const formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
-      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
+    let response;
 
-      initialFormValues.value = {
-        activityId: formVal?.activityId,
-        enquiryId: formVal?.enquiryId,
-        applicant: {
-          contactFirstName: formVal?.contactFirstName,
-          contactLastName: formVal?.contactLastName,
-          contactPhoneNumber: formVal?.contactPhoneNumber,
-          contactEmail: formVal?.contactEmail,
-          contactApplicantRelationship: formVal?.contactApplicantRelationship,
-          contactPreference: formVal?.contactPreference
-        },
-        basic: {
-          isRelated: formVal?.isRelated,
-          relatedActivityId: formVal?.relatedActivityId,
-          enquiryDescription: formVal?.enquiryDescription,
-          applyForPermitConnect: formVal?.applyForPermitConnect
-        }
-      };
+    if (enquiryId) {
+      response = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = response?.intakeStatus === IntakeStatus.DRAFT;
     }
+
+    initialFormValues.value = {
+      activityId: response?.activityId,
+      enquiryId: response?.enquiryId,
+      applicant: {
+        contactFirstName: response?.contactFirstName,
+        contactLastName: response?.contactLastName,
+        contactPhoneNumber: response?.contactPhoneNumber,
+        contactEmail: response?.contactEmail,
+        contactApplicantRelationship: response?.contactApplicantRelationship,
+        contactPreference: response?.contactPreference
+      },
+      basic: {
+        isRelated: response?.isRelated,
+        relatedActivityId: response?.relatedActivityId,
+        enquiryDescription: response?.enquiryDescription,
+        applyForPermitConnect: response?.applyForPermitConnect
+      }
+    };
   } catch (e: any) {
     router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
   }

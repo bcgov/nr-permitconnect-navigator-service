@@ -497,8 +497,8 @@ const controller = {
       await permitService.deletePermitsByActivity(submission.activityId);
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
       res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
@@ -535,8 +535,8 @@ const controller = {
       await permitService.deletePermitsByActivity(submission.activityId);
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
       res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {

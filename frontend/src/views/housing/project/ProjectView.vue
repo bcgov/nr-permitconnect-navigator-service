@@ -151,12 +151,11 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
       applyForPermitConnect: BasicResponse.NO,
       enquiryDescription: enquiryDescription?.trim(),
       relatedActivityId: getSubmission.value.activityId
-    },
-    submit: true
+    }
   };
 
   try {
-    const response = await enquiryService.createDraft(enquiryData);
+    const response = await enquiryService.submitDraft(enquiryData);
     enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
   } catch (e: any) {
     toast.error('Failed to submit enquiry', e);
