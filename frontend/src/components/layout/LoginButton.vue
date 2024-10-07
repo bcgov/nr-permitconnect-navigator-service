@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import { Button } from '@/lib/primevue';
@@ -11,6 +12,7 @@ const authnStore = useAuthNStore();
 const { getIsAuthenticated } = storeToRefs(authnStore);
 
 // Actions
+const { t } = useI18n();
 const router = useRouter();
 
 function isLoginEnabled() {
@@ -39,7 +41,7 @@ function logout() {
     outlined
     @click="login()"
   >
-    Log in
+    {{ t('login') }}
   </Button>
   <Button
     v-else-if="getIsAuthenticated"
@@ -47,7 +49,7 @@ function logout() {
     outlined
     @click="logout()"
   >
-    Log out
+    {{ t('logout') }}
   </Button>
 </template>
 
