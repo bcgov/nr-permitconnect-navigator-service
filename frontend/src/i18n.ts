@@ -1,23 +1,22 @@
 import { createI18n } from 'vue-i18n';
 
-import en from '@/locales/en.json';
+import enCA from '@/locales/en-CA.json';
 
-// Type-define 'en' as the master schema for the resource
-type MessageSchema = typeof en;
+const messages = {
+  'en-CA': enCA
+};
 
-export const SUPPORT_LOCALES = ['en'];
+export const SUPPORT_LOCALES = ['en-CA'];
 
-let i18n;
+// Create VueI18n instance with options
+const instance = createI18n({
+  legacy: false, // Set to false to use Composition API
+  locale: 'en-CA',
+  fallbackLocale: 'en-CA',
+  messages, // Set locale messages
+  globalInjection: true
+});
 
-export function setupI18n(options = { locale: 'en' }) {
-  i18n = createI18n<[MessageSchema], 'en'>({
-    legacy: false, // Don't touch this
-    locale: options.locale,
-    fallbackLocale: 'en',
-    messages: {
-      en: en
-    }
-  });
+export default instance;
 
-  return i18n;
-}
+export const i18n = instance.global;

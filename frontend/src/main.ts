@@ -10,7 +10,7 @@ import { createPersistedState } from 'pinia-plugin-persistedstate';
 import { createApp } from 'vue';
 
 import App from '@/App.vue';
-import { setupI18n } from '@/i18n';
+import i18n from '@/i18n';
 import getRouter from '@/router';
 import { AuthService, ConfigService } from '@/services';
 
@@ -36,9 +36,9 @@ function initializeApp(): void {
     })
   );
 
-  app.use(setupI18n());
   app.use(pinia);
   app.use(getRouter());
+  app.use(i18n);
   app.use(PrimeVue);
   app.use(ToastService);
   app.use(ConfirmationService);

@@ -41,7 +41,7 @@ function logout() {
     outlined
     @click="login()"
   >
-    {{ t('login') }}
+    {{ t('loginButton.login') }}
   </Button>
   <Button
     v-else-if="getIsAuthenticated"
@@ -49,7 +49,7 @@ function logout() {
     outlined
     @click="logout()"
   >
-    {{ t('logout') }}
+    {{ t('loginButton.logout') }}
   </Button>
 </template>
 

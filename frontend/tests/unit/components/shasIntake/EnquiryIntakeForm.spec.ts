@@ -3,13 +3,21 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import { submissionService } from '@/services';
-import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import type { AxiosResponse } from 'axios';
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
+
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
+import { submissionService } from '@/services';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
+
+import type { AxiosResponse } from 'axios';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({

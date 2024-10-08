@@ -253,7 +253,7 @@ onMounted(async () => {
       active: true,
       idp: [IdentityProvider.IDIR],
       includeUserGroups: true,
-      group: MANAGED_GROUP_NAME_LIST
+      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
     })
   ).data;
 
