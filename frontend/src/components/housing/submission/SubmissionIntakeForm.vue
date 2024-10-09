@@ -1,24 +1,24 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
-import { EditableDropdown } from '@/components/form';
 import {
   AutoComplete,
-  Calendar,
+  DatePicker,
   Checkbox,
-  Dropdown,
+  EditableSelect,
   FormAutosave,
   FormNavigationGuard,
   InputMask,
   InputNumber,
-  RadioList,
   InputText,
+  RadioList,
+  Select,
   StepperHeader,
   StepperNavigation,
   TextArea
@@ -30,13 +30,18 @@ import SubmissionIntakeConfirmation from '@/components/housing/submission/Submis
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
-  AccordionTab,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
   Button,
   Card,
   Divider,
   Message,
+  Step,
+  StepList,
   Stepper,
-  StepperPanel,
+  StepPanel,
+  StepPanels,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -63,9 +68,9 @@ import { omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, Submission } from '@/types';
+import type { Document, Permit, PermitType, Submission } from '@/types';
 
 // Interfaces
 interface SubmissionForm extends Submission {
@@ -205,7 +210,7 @@ async function onAddressSearchInput(e: IInputEvent) {
     ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
 }
 
-async function onAddressSelect(e: DropdownChangeEvent) {
+async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
 
   if (e.value as GeocoderEntry) {
@@ -490,6 +495,12 @@ onBeforeMount(async () => {
   // Clearing the document store on page load
   submissionStore.setDocuments([]);
 });
+
+watchEffect(() => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+  if (activeStep.value === 3) isSubmittable.value = true;
+});
 </script>
 
 <template>
@@ -502,7 +513,6 @@ onBeforeMount(async () => {
     <div class="flex justify-content-center app-primary-color mt-3">
       <h3>Project Investigation Form</h3>
     </div>
-
     <Form
       v-if="initialFormValues"
       id="form"
@@ -536,29 +546,71 @@ onBeforeMount(async () => {
         name="activityId"
       />
 
-      <Stepper
-        v-model:activeStep="activeStep"
-        @update:active-step="onStepChange"
-      >
-        <!--
-      Contact Information
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
+      <Stepper :value="activeStep">
+        <StepList>
+          <Step :value="0">
             <StepperHeader
-              :index="index"
+              :index="0"
               :active-step="activeStep"
-              :click-callback="clickCallback"
+              :click-callback="() => (activeStep = 0)"
               title="Contact Information"
               icon="fa-user"
               :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
-                  validationErrors.includes(IntakeFormCategory.BASIC)
+                'app-error-color': validationErrors.includes(IntakeFormCategory.APPLICANT)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            />
+          </Step>
+          <Step :value="1">
+            <StepperHeader
+              :index="1"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 1)"
+              title="Housing"
+              icon="fa-house"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
               }"
             />
-          </template>
-          <template #content="{ nextCallback }">
+          </Step>
+          <Step :value="2">
+            <StepperHeader
+              :index="2"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 2)"
+              title="Location"
+              icon="fa-location-dot"
+              :class="{
+                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
+              }"
+            />
+          </Step>
+          <Step :value="3">
+            <StepperHeader
+              :index="3"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 3)"
+              title="Permits & Reports"
+              icon="fa-file"
+              :class="{
+                'app-error-color':
+                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              }"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
+            />
+          </Step>
+        </StepList>
+        <StepPanels>
+          <StepPanel :value="0">
             <CollectionDisclaimer />
 
             <Message
@@ -607,7 +659,7 @@ onBeforeMount(async () => {
                     :bold="false"
                     :disabled="!editable"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="applicant.contactApplicantRelationship"
                     label="Relationship to project"
@@ -615,7 +667,7 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="applicant.contactPreference"
                     label="Preferred contact method"
@@ -626,6 +678,7 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+
             <Card>
               <template #title>
                 <span class="section-header">
@@ -693,11 +746,15 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
+              :next-callback="() => activeStep++"
               :prev-disabled="true"
+              @click="
+                () => {
+                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                }
+              "
             >
               <template #content>
                 <Button
@@ -709,26 +766,9 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
 
-        <!--
-      Housing
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Housing"
-              icon="fa-house"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
-              }"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          <StepPanel :value="1">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -827,14 +867,14 @@ onBeforeMount(async () => {
                       </div>
                     </div>
                   </div>
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.singleFamilyUnits"
                     :disabled="!editable || !values.housing.singleFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
@@ -856,7 +896,7 @@ onBeforeMount(async () => {
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
-                  <Dropdown
+                  <Select
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
@@ -896,7 +936,7 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <Dropdown
+                  <Select
                     v-if="values.housing.hasRentalUnits === BasicResponse.YES"
                     class="col-6"
                     name="housing.rentalUnits"
@@ -1046,11 +1086,10 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1062,26 +1101,8 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
-
-        <!--
-      Location
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Location"
-              icon="fa-location-dot"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
-              }"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          </StepPanel>
+          <StepPanel :value="2">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1144,7 +1165,7 @@ onBeforeMount(async () => {
                     <Card class="no-shadow">
                       <template #content>
                         <div class="grid nested-grid">
-                          <EditableDropdown
+                          <EditableSelect
                             class="col-12"
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
@@ -1264,67 +1285,67 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
+                <Accordion :value="parcelAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                  target="_blank"
+                                >
+                                  LTSA PID Lookup
+                                </a>
+                              </label>
+                            </div>
+                            <!-- eslint-disable max-len -->
+                            <InputText
+                              class="col-12"
+                              name="location.ltsaPIDLookup"
+                              :bold="false"
+                              :disabled="!editable"
+                              help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                            />
+                            <!-- eslint-enable max-len -->
                           </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
-                <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
-                >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
+                <Accordion :value="geomarkAccordionIndex">
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Geomark</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="formgrid grid">
+                            <div class="col-12">
+                              <label>
+                                <a
+                                  href="https://apps.gov.bc.ca/pub/geomark/overview"
+                                  target="_blank"
+                                >
+                                  Open Geomark Web Service
+                                </a>
+                              </label>
+                            </div>
+                            <InputText
+                              class="col-12"
+                              name="location.geomarkUrl"
+                              :bold="false"
+                              :disabled="!editable"
+                              placeholder="Type in URL"
+                            />
                           </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
               </template>
             </Card>
@@ -1347,11 +1368,10 @@ onBeforeMount(async () => {
                 />
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1363,28 +1383,8 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
-
-        <!--
-      Permits & Reports
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Permits & Reports"
-              icon="fa-file"
-              :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              }"
-            />
-          </template>
-          <template #content="{ prevCallback }">
+          </StepPanel>
+          <StepPanel :value="3">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1422,7 +1422,7 @@ onBeforeMount(async () => {
                       :bold="false"
                       :disabled="!editable"
                       :options="YES_NO_UNSURE_LIST"
-                      @on-change="(e) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
+                      @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
                     />
                     <div
                       v-if="
@@ -1450,13 +1450,13 @@ onBeforeMount(async () => {
                                 type="hidden"
                                 :name="`appliedPermits[${idx}].permitId`"
                               />
-                              <Dropdown
+                              <Select
                                 class="col-4"
                                 :disabled="!editable"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
                                 :options="getPermitTypes"
-                                :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                                 option-value="permitTypeId"
                                 :loading="getPermitTypes === undefined"
                               />
@@ -1468,7 +1468,7 @@ onBeforeMount(async () => {
                               />
                               <div class="col-4">
                                 <div class="flex justify-content-center">
-                                  <Calendar
+                                  <DatePicker
                                     class="w-full"
                                     :name="`appliedPermits[${idx}].statusLastVerified`"
                                     :disabled="!editable"
@@ -1566,13 +1566,13 @@ onBeforeMount(async () => {
                             >
                               <div class="col-4">
                                 <div class="flex justify-content-center">
-                                  <Dropdown
+                                  <Select
                                     class="w-full"
                                     :disabled="!editable"
                                     :name="`investigatePermits[${idx}].permitTypeId`"
                                     placeholder="Select Permit type"
                                     :options="getPermitTypes"
-                                    :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+                                    :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                                     option-value="permitTypeId"
                                     :loading="getPermitTypes === undefined"
                                   />
@@ -1636,7 +1636,8 @@ onBeforeMount(async () => {
             <StepperNavigation
               :editable="editable"
               :next-disabled="true"
-              :prev-callback="prevCallback"
+              :prev-callback="() => activeStep--"
+              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button
@@ -1648,8 +1649,8 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
+        </StepPanels>
       </Stepper>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
@@ -1740,5 +1741,9 @@ onBeforeMount(async () => {
 
 .lat-long-btn {
   height: 2.3rem;
+}
+
+:deep(.p-step-number) {
+  display: none;
 }
 </style>

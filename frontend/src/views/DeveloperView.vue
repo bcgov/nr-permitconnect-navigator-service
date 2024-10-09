@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 
 import { CopyToClipboard } from '@/components/form';
-import { Dropdown } from '@/lib/primevue';
+import { Select } from '@/lib/primevue';
 import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
 import { ButtonMode } from '@/utils/enums/application';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
@@ -20,7 +20,7 @@ const authzStore = useAuthZStore();
     <div class="px-2 py-1 flex align-items-center">
       <p class="m-0 mr-2">Begin viewing site as:</p>
       <div class="w-2 mr-2">
-        <Dropdown
+        <Select
           class="w-full"
           :options="GROUP_NAME_LIST"
           @change="

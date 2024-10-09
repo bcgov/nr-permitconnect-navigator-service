@@ -7,12 +7,12 @@ import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import {
-  EditableDropdown,
-  Dropdown,
+  EditableSelect,
   FormNavigationGuard,
   InputMask,
   InputText,
   RadioList,
+  Select,
   StepperNavigation,
   TextArea,
   FormAutosave
@@ -369,7 +369,7 @@ onBeforeMount(async () => {
               :bold="false"
               :disabled="!editable"
             />
-            <Dropdown
+            <Select
               class="col-6"
               name="applicant.contactApplicantRelationship"
               label="Relationship to project"
@@ -377,7 +377,7 @@ onBeforeMount(async () => {
               :disabled="!editable"
               :options="PROJECT_RELATIONSHIP_LIST"
             />
-            <Dropdown
+            <Select
               class="col-6"
               name="applicant.contactPreference"
               label="Preferred contact method"
@@ -431,7 +431,7 @@ onBeforeMount(async () => {
         </template>
         <template #content>
           <div class="formgrid grid">
-            <EditableDropdown
+            <EditableSelect
               class="col-3"
               name="basic.relatedActivityId"
               label="Confirmation ID"

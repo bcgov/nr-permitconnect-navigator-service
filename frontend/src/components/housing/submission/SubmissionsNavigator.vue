@@ -9,7 +9,18 @@ import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNaviga
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
-import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  Tab,
+  Tabs,
+  TabList,
+  TabPanel,
+  TabPanels,
+  useToast
+} from '@/lib/primevue';
 import { enquiryService, noteService, permitService, submissionService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
@@ -222,79 +233,91 @@ watch(activeTabIndex, (newIndex) => {
 </script>
 
 <template>
-  <TabView
+  <Tabs
     v-if="!loading"
-    v-model:activeIndex="activeTabIndex"
+    value="0"
   >
-    <TabPanel header="Projects">
-      <Accordion
+    <TabList>
+      <Tab value="0">Projects</Tab>
+      <Tab value="1">Enquiries</Tab>
+      <Tab value="2">Statistics</Tab>
+      <Tab
         v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
-        v-model:active-index="accordionIndex"
-        class="mb-3"
+        value="3"
       >
-        <AccordionTab header="My bring forward notifications">
-          <div class="flex flex-column">
-            <div
-              v-for="(bf, index) of myBringForward"
-              :key="index"
-              class="flex mb-1"
-            >
-              <span
-                class="text-xl p-1 w-full"
-                :class="getBringForwardStyling(bf)"
-              >
-                Bring forward {{ getBringForwardDate(bf) }}:
-                <router-link
-                  :to="{
-                    name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
-                    query: getQueryObject(bf),
-                    hash: `#${bf.noteId}`
-                  }"
+        Bring Forward Calendar
+      </Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel value="0">
+        <Accordion
+          v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
+          v-model:active-index="accordionIndex"
+          class="mb-3"
+        >
+          <AccordionPanel>
+            <AccordionHeader>My bring forward notifications</AccordionHeader>
+            <AccordionContent>
+              <div class="flex flex-column">
+                <div
+                  v-for="(bf, index) of myBringForward"
+                  :key="index"
+                  class="flex mb-1"
                 >
-                  {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
-                </router-link>
-              </span>
-            </div>
-          </div>
-        </AccordionTab>
-      </Accordion>
-
-      <SubmissionListNavigator
-        :loading="loading"
-        :submissions="submissions"
-        @submission:delete="onSubmissionDelete"
-      />
-    </TabPanel>
-    <TabPanel header="Enquiries">
-      <EnquiryListNavigator
-        :loading="loading"
-        :enquiries="enquiries"
-        @enquiry:delete="onEnquiryDelete"
-      />
-    </TabPanel>
-    <TabPanel header="Statistics">
-      <SubmissionStatistics
-        v-if="statistics"
-        v-model:statistics="statistics"
-      />
-      <div v-else>
-        <span v-if="loading">
-          <Spinner />
-          Loading statistics...
-        </span>
-        <span v-else>Failed to load statistics.</span>
-      </div>
-    </TabPanel>
-    <TabPanel
-      v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
-      header="Bring Forward Calendar"
-    >
-      <SubmissionBringForwardCalendar
-        :bring-forward="bringForward"
-        :my-assigned-to="myAssignedTo"
-      />
-    </TabPanel>
-  </TabView>
+                  <span
+                    class="text-xl p-1 w-full"
+                    :class="getBringForwardStyling(bf)"
+                  >
+                    Bring forward {{ getBringForwardDate(bf) }}:
+                    <router-link
+                      :to="{
+                        name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                        query: getQueryObject(bf),
+                        hash: `#${bf.noteId}`
+                      }"
+                    >
+                      {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
+                    </router-link>
+                  </span>
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
+        <SubmissionListNavigator
+          :loading="loading"
+          :submissions="submissions"
+          @submission:delete="onSubmissionDelete"
+        />
+      </TabPanel>
+      <TabPanel value="1">
+        <EnquiryListNavigator
+          :loading="loading"
+          :enquiries="enquiries"
+          @enquiry:delete="onEnquiryDelete"
+        />
+      </TabPanel>
+      <TabPanel value="2">
+        <SubmissionStatistics
+          v-if="statistics"
+          v-model:statistics="statistics"
+        />
+        <div v-else>
+          <span v-if="loading">
+            <Spinner />
+            Loading statistics...
+          </span>
+          <span v-else>Failed to load statistics.</span>
+        </div>
+      </TabPanel>
+      <TabPanel value="3">
+        <SubmissionBringForwardCalendar
+          :bring-forward="bringForward"
+          :my-assigned-to="myAssignedTo"
+        />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>
 
 <style scoped lang="scss">

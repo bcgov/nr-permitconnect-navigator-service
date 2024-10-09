@@ -20,7 +20,7 @@ const {
   invalid?: boolean;
 }>();
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -34,6 +34,7 @@ const { errorMessage, value } = useField<string>(name);
         :name="name"
         :class="{ 'p-invalid': errorMessage || invalid }"
         :disabled="disabled"
+        @blur="handleBlur"
       />
       <label
         :id="`${name}-label`"
