@@ -4,6 +4,8 @@ import { onMounted, ref } from 'vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
+import { useAuthZStore } from '@/store';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -49,6 +51,7 @@ onMounted(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.UPDATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
