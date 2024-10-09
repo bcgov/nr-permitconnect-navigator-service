@@ -40,27 +40,27 @@ body {
 }
 
 h1 {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
   font-size: 2.25rem;
 }
 
 h2 {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
   font-size: 2rem;
 }
 
 h3 {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
   font-size: 1.75rem;
 }
 
 h4 {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
   font-size: 1.5rem;
 }
 
 h5 {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
   font-size: 1.25rem;
 }
 
@@ -76,10 +76,10 @@ p {
 
 a,
 a:visited {
-  color: $app-link-text;
+  color: var(--p-linktext);
   text-decoration: underline;
   &:hover {
-    color: $app-link-text-hover;
+    color: var(--p-linktexthover);
   }
 }
 
@@ -130,48 +130,48 @@ label {
 }
 
 .app-primary-color {
-  color: $app-primary !important;
+  color: var(--p-primary-color) !important;
 }
 
 .app-error-color {
-  color: $app-error !important;
+  color: var(--p-red-500) !important;
 }
 
 .app-error-message {
-  color: $app-error;
+  color: var(--p-red-500);
   font-size: 0.8rem;
 }
 
 /* ---------- primevue overrides ------------ */
 
 /* buttons */
-.p-button:hover {
-  text-decoration: underline;
-  opacity: 0.8;
-}
+// .p-button:hover {
+//   text-decoration: underline;
+//   opacity: 0.8;
+// }
 
-.p-button .p-button-icon:before {
-  text-decoration: none;
-  display: inline-block;
-}
+// .p-button .p-button-icon:before {
+//   text-decoration: none;
+//   display: inline-block;
+// }
 
-.p-button {
-  border-width: 2px;
-  &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
-    color: $app-primary;
-    &:not(.p-button-outlined, .p-button-text) {
-      background-color: $app-primary;
-      border-color: $app-primary;
-      color: $app-outline-on-primary;
-    }
-  }
-}
+// .p-button {
+//   border-width: 2px;
+//   &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
+//     color: var(--p-primary-color);
+//     &:not(.p-button-outlined, .p-button-text) {
+//       background-color: var(--p-primary-color);
+//       border-color: var(--p-primary-color);
+//       color: var(--p-outlineonprimary);
+//     }
+//   }
+// }
 
-.p-button-outlined {
-  border-width: 2px;
-}
+// .p-button-outlined {
+//   border-width: 2px;
+// }
 .p-confirm-dialog-reject {
-  border: 2px solid $app-primary;
+  border: 2px solid var(--p-primary-color);
 }
 
 /* checkboxes, radios, input switches */
@@ -184,21 +184,21 @@ label {
 .p-checkbox.p-highlight .p-checkbox-box,
 .p-radiobutton.p-highlight .p-radiobutton-box,
 .p-toggleswitch-checked .p-toggleswitch-slider:not(.p-disabled) {
-  background: $app-primary;
-  border-color: $app-primary;
+  background: var(--p-primary-color);
+  border-color: var(--p-primary-color);
 }
 
 /* datatable */
 .p-datatable {
   &.p-datatable-striped tbody > tr {
     &:nth-child(even) {
-      background-color: $app-table-stripe-background;
+      background-color: var(--p-tablestripebackground);
     }
   }
   tbody {
     tr {
       &.p-highlight {
-        background: $app-highlight-background !important;
+        background: var(--p-highlightbackground) !important;
       }
       &:focus {
         outline: none !important;
@@ -230,7 +230,7 @@ label {
 .app-info-dialog {
   .p-dialog-header {
     .svg-inline--fa {
-      color: $app-primary;
+      color: var(--p-primary-color);
       font-size: 1.8rem;
     }
 
@@ -244,7 +244,7 @@ label {
 
 /* side panel */
 .side-panel > div .svg-inline--fa {
-  color: $app-primary;
+  color: var(--p-primary-color);
   font-size: 1.8rem;
 }
 

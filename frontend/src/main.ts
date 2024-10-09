@@ -11,7 +11,7 @@ import { createApp } from 'vue';
 
 import App from '@/App.vue';
 import getRouter from '@/router';
-import { LaraOverrided } from '@/ThemeOverride';
+import { ThemeOverride } from '@/ThemeOverride';
 import { AuthService, ConfigService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
@@ -38,7 +38,7 @@ function initializeApp(): void {
   app.use(getRouter());
   app.use(PrimeVue, {
     theme: {
-      preset: LaraOverrided,
+      preset: ThemeOverride,
       options: {
         prefix: 'p',
         darkModeSelector: 'dark',
@@ -46,6 +46,7 @@ function initializeApp(): void {
       }
     }
   });
+  // app.use(PrimeVue, { unstyled: true });
   app.use(ToastService);
   app.use(ConfirmationService);
   app.component('FontAwesomeIcon', FontAwesomeIcon);

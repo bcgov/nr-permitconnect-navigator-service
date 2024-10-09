@@ -1,19 +1,20 @@
 /* --------- variable overrides for primevue--------- */
 // ref: https://primevue.org/colors/
 :root {
-  --text-color: #495057;
-  --primary-color: #036;
+  // --text-color: #495057;
+  // --primary-color: #036;
 }
 
 /* -------- custom css variables --------- */
 // buttons, links
 $app-primary: #036;
+$app-error: #D8292F;
+
 $app-link-text: #1a5a96;
 $app-link-text-hover: #00f;
 $app-hover: #4696EC;
 $app-outline-on-primary: #fff;
 $app-out-of-focus: #ccc;
-$app-error: #D8292F;
 $app-green: #2e8540;
 $app-grey: #e9ecef;
 
