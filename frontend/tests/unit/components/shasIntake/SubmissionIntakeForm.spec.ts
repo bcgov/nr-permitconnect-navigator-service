@@ -10,9 +10,15 @@ import { submissionIntakeSchema } from '@/components/housing/submission/Submissi
 import { permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
 
 import type { AxiosResponse } from 'axios';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
