@@ -8,11 +8,11 @@ import { useRouter } from 'vue-router';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
-import { EditableSelect } from '@/components/form';
 import {
   AutoComplete,
   DatePicker,
   Checkbox,
+  EditableSelect,
   FormAutosave,
   FormNavigationGuard,
   InputMask,

@@ -1,45 +1,132 @@
-import Lara from '@primevue/themes/lara';
+// Design tokens ref https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
+import Material from '@primevue/themes/material';
+
 import { definePreset } from '@primevue/themes';
 
-export const LaraOverrided = definePreset(Lara, {
+//https://maketintsandshades.com/#003366
+
+// Must use lower case for key values unless you want pain
+// bcblue.500 is BC mandated blue
+
+// For colors UI/UX gives us (BC gov sanctioned), ask for hues on either side and assume original colour is 500
+// Could be defining hues for design colours for the design guidelines
+// Otherwise, ask them to use https://primevue.org/theming/styled/#colors in the table
+
+// Bring up slate hue range, replace hard set variables.scss
+export const ThemeOverride = definePreset(Material, {
   primitive: {
-    cyan: {
-      50: '#ecfeff',
-      100: '#cffafe',
-      200: '#a5f3fc',
-      300: '#67e8f9',
-      400: '#22d3ee',
-      500: '#06b6d4',
-      600: '#0891b2',
-      700: '#0e7490',
-      800: '#155e75',
-      900: '#164e63',
-      950: '#083344'
+    // bcblue: {
+    //   50: '#F1F8FE',
+    //   100: '#D8EAFD',
+    //   200: '#A8D0FB',
+    //   300: '#1E5189',
+    //   400: '#3470B1',
+    //   500: '#013366',
+    //   600: '#3470B1',
+    //   700: '#1E5189',
+    //   800: '#A8D0FB',
+    //   900: '#D8EAFD',
+    //   950: '#F1F8FE'
+    // },
+    bcactiveblue: '#2E5DD7',
+    bcblue: {
+      50: '#F1F8FE',
+      100: '#F1F8FE',
+      200: '#D8EAFD',
+      300: '#C1DDFC',
+      400: '#A8D0FB',
+      500: '#91C4FA',
+      600: '#7AB8F9',
+      700: '#5595D9',
+      800: '#3470B1',
+      900: '#1E5189',
+      950: '#013366'
     },
-    white: '#fff',
+    // Override base red theme
+    // For base values see: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
+    red: {
+      50: '#CE3E39',
+      100: '#CE3E39',
+      200: '#CE3E39',
+      300: '#CE3E39',
+      400: '#CE3E39',
+      500: '#CE3E39',
+      600: '#CE3E39',
+      700: '#CE3E39',
+      800: '#CE3E39',
+      900: '#CE3E39',
+      950: '#CE3E39'
+    },
+    greyscale: {
+      50: '#FAF9F8',
+      100: '#F3F2F1',
+      200: '#ECEAE8',
+      300: '#E0DEDC',
+      400: '#D1CFCD',
+      500: '#C6C5C3',
+      600: '#9F9D9C',
+      700: '#605E5C',
+      800: '#3D3C3B',
+      900: '#353433',
+      950: '#252423'
+    },
+    linktext: '#1a5a96',
+    linktexthover: '#0000ff',
+    hover: '#4696EC',
+    outlineonprimary: '#fff',
+    outoffocus: '#ccc',
+    green: '#2e8540',
     grey: '#e9ecef',
-    surfaceBackground: '#f8f9fa'
+    highlightbackground: '#d9e1e8',
+    tablestripebackground: '#f2f2f2'
   },
+
   semantic: {
     primary: {
-      50: '#036',
-      100: '#036',
-      200: '#036',
-      300: '#036',
-      400: '#036',
-      500: '#036',
-      600: '#036',
-      700: '#036',
-      800: '#036',
-      900: '#036',
-      950: '#036'
+      50: '{bcblue.50}',
+      100: '{bcblue.100}',
+      200: '{bcblue.200}',
+      300: '{bcblue.300}',
+      400: '{bcblue.400}',
+      500: '{bcblue.500}',
+      600: '{bcblue.600}',
+      700: '{bcblue.700}',
+      800: '{bcblue.800}',
+      900: '{bcblue.900}',
+      950: '{bcblue.950}'
     },
+
     colorScheme: {
       light: {
-        highlight: {
-          background: '{surfaceBackground}'
+        // For demo
+
+        surface: {
+          0: '#ffffff',
+          50: '{greyscale.50}',
+          100: '{greyscale.100}',
+          200: '{greyscale.200}',
+          300: '{greyscale.300}',
+          400: '{greyscale.400}',
+          500: '{greyscale.500}',
+          600: '{greyscale.600}',
+          700: '{greyscale.700}',
+          800: '{greyscale.800}',
+          900: '{greyscale.900}',
+          950: '{greyscale.950}'
+        },
+        primary: {
+          color: '{primary.950}',
+          contrastColor: '#ffffff',
+          hoverColor: '{primary.900}',
+          activeColor: '{primary.900}'
         }
       }
+    }
+  },
+
+  button: {
+    primary: {
+      background: '{red.500}'
     }
   }
 });
