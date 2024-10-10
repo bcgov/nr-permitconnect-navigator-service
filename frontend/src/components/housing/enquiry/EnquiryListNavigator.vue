@@ -15,7 +15,8 @@ import {
   useToast
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
+import { useAuthZStore } from '@/store';
+import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
@@ -241,6 +242,7 @@ function updateQueryParams() {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete enquiry"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.DELETE)"
           @click="
             onDelete(data.enquiryId, data.activityId);
             selection = data;

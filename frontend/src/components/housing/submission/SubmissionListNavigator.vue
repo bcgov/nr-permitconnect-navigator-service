@@ -384,6 +384,7 @@ function updateQueryParams() {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete submission"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.DELETE)"
           @click="
             onDelete(data.submissionId, data.activityId);
             selection = data;

@@ -38,7 +38,7 @@ import type { IInputEvent } from '@/interfaces';
 import type { Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
-// Interfacefs
+// Interfaces
 interface SubmissionForm extends Submission {
   locationAddress: string;
   user?: User;

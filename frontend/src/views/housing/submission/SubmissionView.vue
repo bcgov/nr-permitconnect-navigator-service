@@ -16,7 +16,8 @@ import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -156,12 +157,18 @@ onMounted(async () => {
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
-        <SubmissionForm :submission="getSubmission" />
+        <SubmissionForm
+          :editable="useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
+          :submission="getSubmission"
+        />
       </span>
     </TabPanel>
     <TabPanel header="Files">
       <div class="mb-3 border-dashed file-upload border-round-md">
-        <FileUpload :activity-id="activityId" />
+        <FileUpload
+          :activity-id="activityId"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+        />
       </div>
       <div class="flex flex-row justify-content-between pb-3">
         <div class="flex align-items-center">
@@ -280,7 +287,12 @@ onMounted(async () => {
           <template #body="{ data }">
             <a
               href="#"
-              @click="documentService.downloadDocument(data.documentId, data.filename)"
+              @click="
+                () => {
+                  if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
+                    documentService.downloadDocument(data.documentId, data.filename);
+                }
+              "
             >
               {{ data.filename }}
             </a>
@@ -322,7 +334,10 @@ onMounted(async () => {
           </template>
           <template #body="{ data }">
             <div class="flex justify-content-center">
-              <DeleteDocument :document="data" />
+              <DeleteDocument
+                :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                :document="data"
+              />
             </div>
           </template>
         </Column>
@@ -336,6 +351,7 @@ onMounted(async () => {
           </div>
           <Button
             aria-label="Add permit"
+            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
             @click="permitModalVisible = true"
           >
             <font-awesome-icon
@@ -367,6 +383,7 @@ onMounted(async () => {
         </div>
         <Button
           aria-label="Add note"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
@@ -400,6 +417,7 @@ onMounted(async () => {
       <Roadmap
         v-if="!loading"
         :activity-id="activityId"
+        :editable="useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
       />
     </TabPanel>
     <TabPanel header="Related enquiries">

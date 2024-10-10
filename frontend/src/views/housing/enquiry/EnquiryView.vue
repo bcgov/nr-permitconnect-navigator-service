@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -7,12 +8,11 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Message, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
+import { useAuthZStore, useEnquiryStore } from '@/store';
+import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 
 import type { Note, Submission } from '@/types';
 import type { Ref } from 'vue';
-import { useEnquiryStore } from '@/store';
-import { storeToRefs } from 'pinia';
 
 // Props
 const {
@@ -127,6 +127,7 @@ function onEnquiryFormSaved() {
       </Message>
       <span v-if="!loading && getEnquiry">
         <EnquiryForm
+          :editable="useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
           :enquiry="getEnquiry"
           @enquiry-form:saved="onEnquiryFormSaved"
         />
@@ -139,6 +140,7 @@ function onEnquiryFormSaved() {
         </div>
         <Button
           aria-label="Add note"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon

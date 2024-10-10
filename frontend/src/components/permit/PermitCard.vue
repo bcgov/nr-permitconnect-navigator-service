@@ -5,7 +5,8 @@ import { computed, ref, watchEffect } from 'vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useTypeStore } from '@/store';
+import { useAuthZStore, useTypeStore } from '@/store';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -58,6 +59,7 @@ watchEffect(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
           @click="permitModalVisible = true"
         >
           <font-awesome-icon
