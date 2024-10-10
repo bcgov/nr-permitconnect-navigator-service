@@ -85,7 +85,8 @@ function handleCreateNewActivity() {
       }
     },
     acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel'
+    rejectLabel: 'Cancel',
+    rejectProps: { outlined: true }
   });
 }
 
