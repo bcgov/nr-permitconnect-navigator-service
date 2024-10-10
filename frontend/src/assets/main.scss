@@ -1,8 +1,24 @@
 /* -------- text and fonts -------- */
-// @import './saga-blue.scss';
 
 :root {
   font-size: 16px;
+}
+
+html {
+  font-family:
+    BCSans,
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    sans-serif;
 }
 
 body,
@@ -19,20 +35,6 @@ body {
   transition:
     color 0.5s,
     background-color 0.5s;
-  font-family:
-    BCSans,
-    Inter,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    "Fira Sans",
-    "Droid Sans",
-    "Helvetica Neue",
-    sans-serif;
   font-weight: normal;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -129,94 +131,16 @@ label {
   }
 }
 
-.app-primary-color {
-  color: var(--p-primary-color) !important;
-}
-
-.app-error-color {
-  color: var(--p-red-500) !important;
-}
-
-.app-error-message {
-  color: var(--p-red-500);
-  font-size: 0.8rem;
-}
-
 /* ---------- primevue overrides ------------ */
-
-/* buttons */
-// .p-button:hover {
-//   text-decoration: underline;
-//   opacity: 0.8;
-// }
-
-// .p-button .p-button-icon:before {
-//   text-decoration: none;
-//   display: inline-block;
-// }
-
-// .p-button {
-//   border-width: 2px;
-//   &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
-//     color: var(--p-primary-color);
-//     &:not(.p-button-outlined, .p-button-text) {
-//       background-color: var(--p-primary-color);
-//       border-color: var(--p-primary-color);
-//       color: var(--p-outlineonprimary);
-//     }
-//   }
-// }
-
-// .p-button-outlined {
-//   border-width: 2px;
-// }
-.p-confirm-dialog-reject {
-  border: 2px solid var(--p-primary-color);
-}
-
-/* checkboxes, radios, input switches */
-.p-checkbox.p-highlight {
-  &:hover {
-    opacity: 0.8;
-  }
-}
-
-.p-checkbox.p-highlight .p-checkbox-box,
-.p-radiobutton.p-highlight .p-radiobutton-box,
-.p-toggleswitch-checked .p-toggleswitch-slider:not(.p-disabled) {
-  background: var(--p-primary-color);
-  border-color: var(--p-primary-color);
-}
 
 /* datatable */
 .p-datatable {
-  &.p-datatable-striped tbody > tr {
-    &:nth-child(even) {
-      background-color: var(--p-tablestripebackground);
-    }
-  }
-  tbody {
-    tr {
-      &.p-highlight {
-        background: var(--p-highlightbackground) !important;
-      }
-      &:focus {
-        outline: none !important;
-      }
-    }
-    .p-frozen-column {
-      z-index: 1; // display over non-text elements (eg: checkboxes) in other columns
-    }
-  }
-  .p-column-title {
-    font-weight: bold;
-  }
   .p-paginator {
     justify-content: right;
   }
 }
 
-.header-right .p-column-header-content {
+.header-right .p-datatable-column-header-content {
   justify-content: right;
 }
 
@@ -224,7 +148,7 @@ label {
 .p-dialog-footer {
   display: flex;
   flex-direction: row-reverse;
-  justify-content: left;
+  justify-content: right !important;
 }
 
 .app-info-dialog {
@@ -240,12 +164,6 @@ label {
       font-weight: bold;
     }
   }
-}
-
-/* side panel */
-.side-panel > div .svg-inline--fa {
-  color: var(--p-primary-color);
-  font-size: 1.8rem;
 }
 
 /* hover effects */
