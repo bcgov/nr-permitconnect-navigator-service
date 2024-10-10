@@ -45,17 +45,17 @@ export const ThemeOverride = definePreset(Material, {
     // Override base red theme
     // For base values see: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
     red: {
-      50: '#CE3E39',
-      100: '#CE3E39',
-      200: '#CE3E39',
-      300: '#CE3E39',
-      400: '#CE3E39',
+      50: '#F1F8FE',
+      100: '#F1F8FE',
+      200: '#F1F8FE',
+      300: '#F1F8FE',
+      400: '#F1F8FE',
       500: '#CE3E39',
-      600: '#CE3E39',
-      700: '#CE3E39',
-      800: '#CE3E39',
-      900: '#CE3E39',
-      950: '#CE3E39'
+      600: '#A2312D',
+      700: '#A2312D',
+      800: '#A2312D',
+      900: '#A2312D',
+      950: '#A2312D'
     },
     greyscale: {
       50: '#FAF9F8',
@@ -95,11 +95,8 @@ export const ThemeOverride = definePreset(Material, {
       900: '{bcblue.900}',
       950: '{bcblue.950}'
     },
-
     colorScheme: {
       light: {
-        // For demo
-
         surface: {
           0: '#ffffff',
           50: '{greyscale.50}',
@@ -118,15 +115,26 @@ export const ThemeOverride = definePreset(Material, {
           color: '{primary.950}',
           contrastColor: '#ffffff',
           hoverColor: '{primary.900}',
-          activeColor: '{primary.900}'
+          activeColor: '{primary.800}'
         }
       }
     }
-  },
-
-  button: {
-    primary: {
-      background: '{red.500}'
-    }
   }
+  // components: {
+  //   button: {
+  //     colorScheme: {
+  //       light: {
+  //         root: {
+  //           primary: {
+  //             active: {
+  //               border: {
+  //                 color: '{red.500}'
+  //               }
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  //}
 });

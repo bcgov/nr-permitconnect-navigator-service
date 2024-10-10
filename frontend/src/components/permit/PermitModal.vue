@@ -279,7 +279,9 @@ async function onSubmit(data: PermitForm, { resetForm }) {
             class="flex justify-content-right"
           >
             <Button
-              class="p-button-outlined p-button-danger mr-2"
+              outlined
+              class="mr-2"
+              severity="danger"
               label="Delete"
               icon="pi pi-trash"
               @click="onDelete"
