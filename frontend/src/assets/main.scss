@@ -30,7 +30,7 @@ body::after {
 
 body {
   min-height: 100vh;
-  color: var(--text-color);
+  // color: var(--text-color);
   background: white;
   transition:
     color 0.5s,
@@ -76,14 +76,14 @@ p {
   line-height: 1.5rem;
 }
 
-a,
-a:visited {
-  color: var(--p-linktext);
-  text-decoration: underline;
-  &:hover {
-    color: var(--p-linktexthover);
-  }
-}
+// a,
+// a:visited {
+//   color: var(--p-linktext);
+//   text-decoration: underline;
+//   &:hover {
+//     color: var(--p-linktexthover);
+//   }
+// }
 
 label {
   color: #38598a;
