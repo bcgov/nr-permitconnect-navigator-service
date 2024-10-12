@@ -13,6 +13,9 @@ import { definePreset } from '@primevue/themes';
 // Otherwise, ask them to use https://primevue.org/theming/styled/#colors in the table
 
 // Bring up slate hue range, replace hard set variables.scss
+
+// Some values override base color values.
+// Base values here: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
 export const ThemeOverride = definePreset(Material, {
   primitive: {
     // bcblue: {
@@ -42,20 +45,32 @@ export const ThemeOverride = definePreset(Material, {
       900: '#1E5189',
       950: '#013366'
     },
-    // Override base red theme
-    // For base values see: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
-    red: {
-      50: '#F1F8FE',
-      100: '#F1F8FE',
-      200: '#F1F8FE',
-      300: '#F1F8FE',
-      400: '#F1F8FE',
-      500: '#CE3E39',
-      600: '#A2312D',
-      700: '#A2312D',
-      800: '#A2312D',
-      900: '#A2312D',
-      950: '#A2312D'
+    green: {
+      // Override base red theme, for base values see link at top
+      50: '#42814A',
+      100: '#42814A',
+      200: '#42814A',
+      300: '#42814A',
+      400: '#42814A',
+      500: '#42814A',
+      600: '#42814A',
+      700: '#42814A',
+      800: '#42814A',
+      900: '#42814A',
+      950: '#42814A'
+    },
+    gold: {
+      50: '#FAF9F8',
+      100: '#FEF8E8',
+      200: '#FEF0D8',
+      300: '#FDE9C4',
+      400: '#FCE2B0',
+      500: '#FBDA9D',
+      600: '#FBD389',
+      700: '#FACC75',
+      800: '#F9C462',
+      900: '#F8BA47',
+      950: '#FCBA19'
     },
     greyscale: {
       50: '#FAF9F8',
@@ -70,17 +85,29 @@ export const ThemeOverride = definePreset(Material, {
       900: '#353433',
       950: '#252423'
     },
+    red: {
+      // Override base red theme, for base values see link at top
+      50: '#F1F8FE',
+      100: '#F1F8FE',
+      200: '#F1F8FE',
+      300: '#F1F8FE',
+      400: '#F1F8FE',
+      500: '#CE3E39',
+      600: '#A2312D',
+      700: '#A2312D',
+      800: '#A2312D',
+      900: '#A2312D',
+      950: '#A2312D'
+    },
     linktext: '#1a5a96',
     linktexthover: '#0000ff',
     hover: '#4696EC',
     outlineonprimary: '#fff',
     outoffocus: '#ccc',
-    green: '#2e8540',
     grey: '#e9ecef',
     highlightbackground: '#d9e1e8',
     tablestripebackground: '#f2f2f2'
   },
-
   semantic: {
     primary: {
       50: '{bcblue.50}',
@@ -116,25 +143,37 @@ export const ThemeOverride = definePreset(Material, {
           contrastColor: '#ffffff',
           hoverColor: '{primary.900}',
           activeColor: '{primary.800}'
+        },
+        // content: {
+        // background: '{bcblue.900}'
+        // color: '{greyscale.50}'
+        // },
+        navigation: {
+          item: {
+            color: '{greyscale.50}'
+          }
+        }
+      }
+    }
+  },
+  components: {
+    menubar: {
+      colorScheme: {
+        light: {
+          root: {
+            background: '{primary.900}',
+            borderColor: '{primary.900}',
+            borderRadius: 'none',
+            padding: 'none'
+          },
+          item: {
+            // padding: '.5rem .3rem .4rem'
+          },
+          submenu: {
+            background: '{primary.900}'
+          }
         }
       }
     }
   }
-  // components: {
-  //   button: {
-  //     colorScheme: {
-  //       light: {
-  //         root: {
-  //           primary: {
-  //             active: {
-  //               border: {
-  //                 color: '{red.500}'
-  //               }
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  //}
 });
