@@ -1,5 +1,6 @@
 export type { Activity } from './Activity';
 export type { AccessRequest } from './AccessRequest';
+export type { ATSUserSearchParameters } from './ATSUserSearchParameters';
 export type { BceidSearchParameters } from './BceidSearchParameters';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';

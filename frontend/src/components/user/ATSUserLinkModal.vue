@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
@@ -8,6 +8,12 @@ import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { ATSUser } from '@/types';
+
+// Props
+const { fName, lName } = defineProps<{
+  fName: string;
+  lName: string;
+}>();
 
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
@@ -59,6 +65,14 @@ async function searchATSUsers() {
     loading.value = false;
   }
 }
+
+onMounted(async () => {
+  if (fName && lName) {
+    firstName.value = fName;
+    lastName.value = lName;
+    await searchATSUsers();
+  }
+});
 </script>
 
 <template>
@@ -69,7 +83,7 @@ async function searchATSUsers() {
     class="app-info-dialog w-max"
   >
     <template #header>
-      <span class="p-dialog-title">Search ATS</span>
+      <span class="p-dialog-title title-colour">Search ATS</span>
     </template>
     <div class="pt-1 mb-4 mr-1 grid">
       <div class="col pr-0">
@@ -170,8 +184,14 @@ async function searchATSUsers() {
       <Button
         class="p-button-solid mr-0"
         label="Link to ATS"
+        :disabled="!selectedUser"
         @click="emit('atsUserLink:link', selectedUser)"
       />
     </div>
   </Dialog>
 </template>
+<style scoped lang="scss">
+.title-colour {
+  color: $app-primary;
+}
+</style>

@@ -57,11 +57,15 @@ async function getATSClientInformation() {
 }
 
 onMounted(async () => {
+  const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
+    .filter((str) => str?.trim())
+    .join(', ');
+
   proponent.value = {
     firstName: submission.contactFirstName ?? '',
     lastName: submission.contactLastName ?? '',
     email: submission.contactEmail ?? '',
-    address: '',
+    address: locationAddressStr,
     phone: submission.contactPhoneNumber ?? ''
   };
 });
@@ -78,7 +82,9 @@ watch(visible, () => {
     :modal="true"
     class="app-info-dialog w-7"
   >
-    <h3>Proponent Details</h3>
+    <template #header>
+      <span class="p-dialog-title title-colour">Proponent Details</span>
+    </template>
     <DataTable
       :row-hover="true"
       class="datatable mt-3 mb-2"
@@ -120,7 +126,7 @@ watch(visible, () => {
         sortable
       />
     </DataTable>
-    <h3>ATS Client link</h3>
+    <h3 class="mt-4">ATS Client link</h3>
     <DataTable
       :row-hover="true"
       :loading="loading"
@@ -185,7 +191,7 @@ watch(visible, () => {
         </template>
       </Column>
     </DataTable>
-    <div class="flex justify-content-end">
+    <div class="flex justify-content-start mt-5">
       <Button
         class="p-button-solid mr-3"
         label="Save"
@@ -200,3 +206,8 @@ watch(visible, () => {
     </div>
   </Dialog>
 </template>
+<style scoped lang="scss">
+.title-colour {
+  color: $app-primary;
+}
+</style>
