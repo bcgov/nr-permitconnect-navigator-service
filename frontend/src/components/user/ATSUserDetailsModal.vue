@@ -57,11 +57,15 @@ async function getATSClientInformation() {
 }
 
 onMounted(async () => {
+  const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
+    .filter((str) => str?.trim())
+    .join(', ');
+
   proponent.value = {
     firstName: submission.contactFirstName ?? '',
     lastName: submission.contactLastName ?? '',
     email: submission.contactEmail ?? '',
-    address: '',
+    address: locationAddressStr,
     phone: submission.contactPhoneNumber ?? ''
   };
 });

@@ -26,7 +26,6 @@ export type Submission = {
   relatedPermits: string | null;
   astNotes: string | null;
   astUpdated: boolean;
-  addedToATS: boolean;
   atsClientNumber: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;

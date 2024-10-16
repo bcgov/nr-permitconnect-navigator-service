@@ -248,7 +248,6 @@ const SUBMISSION_1 = {
   astsubmissions: null,
   astNotes: null,
   astUpdated: true,
-  addedToATS: true,
   atsClientNumber: null,
   ltsaCompleted: false,
   bcOnlineCompleted: true,

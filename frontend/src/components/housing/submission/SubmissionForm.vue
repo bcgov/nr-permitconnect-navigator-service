@@ -625,6 +625,7 @@ onMounted(async () => {
           </a>
         </div>
         <Button
+          v-if="!atsClientNumber"
           aria-label="Link to ATS"
           class="h-2rem ml-2"
           @click="atsUserLinkModalVisible = true"
@@ -633,7 +634,10 @@ onMounted(async () => {
         </Button>
       </div>
 
-      <SectionHeader title="Other" />
+      <SectionHeader
+        title="Other"
+        class="mt-2"
+      />
 
       <Checkbox
         class="col-12"
