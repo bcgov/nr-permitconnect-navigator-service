@@ -37,16 +37,16 @@ function logout() {
 <template>
   <Button
     v-if="isLoginEnabled()"
-    severity="secondary"
     outlined
+    severity="primary"
     @click="login()"
   >
     {{ t('loginButton.login') }}
   </Button>
   <Button
     v-else-if="getIsAuthenticated"
-    severity="secondary"
     outlined
+    severity="primary"
     @click="logout()"
   >
     {{ t('loginButton.logout') }}

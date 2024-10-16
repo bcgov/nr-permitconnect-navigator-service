@@ -100,6 +100,7 @@ label {
   }
 }
 
+
 /* -------- layout ----------*/
 
 .app-primary-color {
@@ -125,12 +126,31 @@ label {
 
 /* ---------- primevue overrides ------------ */
 
+/* buttons */
+.p-button {
+  border-width: 2px !important;
+
+  .p-button-label:hover {
+    text-decoration: underline;
+  }
+}
+
+.p-tab {
+  text-decoration: underline;
+  font-size: var(--p-font-size);
+}
+
 /* datatable */
 .p-datatable {
   .p-paginator {
     justify-content: right;
   }
 }
+
+// .p-tab:hover {
+//   border-bottom-width: 2px;
+//   border-color: var(--p-primary-color) !important;
+// }
 
 .header-right .p-datatable-column-header-content {
   justify-content: right;
