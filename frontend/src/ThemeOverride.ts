@@ -122,6 +122,9 @@ export const ThemeOverride = definePreset(Material, {
       900: '{bcblue.900}',
       950: '{bcblue.950}'
     },
+    content: {
+      fontSize: '2rem'
+    },
     colorScheme: {
       light: {
         surface: {
@@ -144,10 +147,14 @@ export const ThemeOverride = definePreset(Material, {
           hoverColor: '{primary.900}',
           activeColor: '{primary.800}'
         },
-        // content: {
-        // background: '{bcblue.900}'
-        // color: '{greyscale.50}'
-        // },
+        content: {
+          hover: {
+            background: '{greyscale.200}'
+          }
+        },
+        highlight: {
+          background: '{surface.0}'
+        },
         navigation: {
           item: {
             color: '{greyscale.50}'
@@ -157,6 +164,31 @@ export const ThemeOverride = definePreset(Material, {
     }
   },
   components: {
+    button: {
+      root: {
+        sm: {
+          fontSize: '0.875rem',
+          paddingX: '0.875rem',
+          paddingY: '0.5rem'
+        },
+        lg: {
+          fontSize: '1.125rem',
+          paddingX: '1.125rem',
+          paddingY: '0.75rem'
+        }
+      },
+      colorScheme: {
+        light: {
+          outlined: {
+            primary: {
+              color: '{surface.0}',
+              borderColor: '{surface.0}',
+              hoverBackground: '{primary.color}'
+            }
+          }
+        }
+      }
+    },
     menubar: {
       colorScheme: {
         light: {
@@ -166,13 +198,18 @@ export const ThemeOverride = definePreset(Material, {
             borderRadius: 'none',
             padding: 'none'
           },
-          item: {
-            // padding: '.5rem .3rem .4rem'
-          },
           submenu: {
             background: '{primary.900}'
           }
         }
+      }
+    },
+    tabs: {
+      tab: {
+        color: '{primary.color}'
+      },
+      tabPanel: {
+        padding: '1.2rem 1.2rem 1.2rem 1.2rem'
       }
     }
   }

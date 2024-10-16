@@ -35,16 +35,16 @@ function logout() {
 <template>
   <Button
     v-if="isLoginEnabled()"
-    severity="secondary"
     outlined
+    severity="primary"
     @click="login()"
   >
     Log in
   </Button>
   <Button
     v-else-if="getIsAuthenticated"
-    severity="secondary"
     outlined
+    severity="primary"
     @click="logout()"
   >
     Log out
@@ -53,6 +53,7 @@ function logout() {
 
 <style scoped>
 button {
-  color: white !important;
+  /* color: white !important; */
+  /* border-width: 2px !important; */
 }
 </style>
