@@ -117,13 +117,13 @@ onMounted(() => {
             custom
           >
             <a
-              :aria-labelledby="item.label as string"
+              :aria-labelledby="item.label"
               :href="href"
               v-bind="props.action"
               @click="navigate"
             >
               <span
-                :id="item.label as string"
+                :id="item.label"
                 class="flex"
               >
                 {{ item.label }}
@@ -132,28 +132,28 @@ onMounted(() => {
           </router-link>
           <a
             v-else-if="item.mailTo"
-            :aria-labelledby="item.label as string"
+            :aria-labelledby="item.label"
             :href="item.mailTo"
-            class="mail-link"
+            :target="item.target"
+            v-bind="props.action"
           >
-            <span
-              :id="item.label as string"
-              class="flex"
-            >
+            <span :id="item.label">
               {{ item.label }}
             </span>
           </a>
           <a
             v-else
-            :aria-labelledby="item.label as string"
+            :aria-labelledby="item.label"
             :href="item.url"
             :target="item.target"
             v-bind="props.action"
           >
-            <span class="flex">{{ item.label }}</span>
+            <span class="flex">
+              {{ item.label }}
+            </span>
             <span
               v-if="hasSubmenu"
-              :id="item.label as string"
+              :id="item.label"
               class="pi pi-angle-down mt-1 ml-1"
             />
           </a>
