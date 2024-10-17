@@ -50,10 +50,3 @@ function logout() {
     Log out
   </Button>
 </template>
-
-<style scoped>
-button {
-  /* color: white !important; */
-  /* border-width: 2px !important; */
-}
-</style>

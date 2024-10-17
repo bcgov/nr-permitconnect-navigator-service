@@ -551,7 +551,7 @@ watchEffect(() => {
               }"
               @click="
                 () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                  if (!values.activityId) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -594,7 +594,7 @@ watchEffect(() => {
               }"
               @click="
                 () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                  if (!values.activityId) onSaveDraft(values, true, false);
                 }
               "
             />
@@ -609,7 +609,7 @@ watchEffect(() => {
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -743,7 +743,7 @@ watchEffect(() => {
               :prev-disabled="true"
               @click="
                 () => {
-                  if (!values.activityId && formUpdated) onSaveDraft(values, true, false);
+                  if (!values.activityId) onSaveDraft(values, true, false);
                 }
               "
             >
@@ -765,7 +765,7 @@ watchEffect(() => {
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -1099,7 +1099,7 @@ watchEffect(() => {
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -1381,7 +1381,7 @@ watchEffect(() => {
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -1664,10 +1664,34 @@ watchEffect(() => {
 </template>
 
 <style scoped lang="scss">
-.no-shadow {
+.app-error-color {
+  color: var(--p-red-500);
+}
+
+.message-banner {
+  border-left-color: var(--p-red-500);
+  border-left-width: 3px;
+  border-left-style: solid;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+
+  :deep(.p-message-content) {
+    padding: 0.5rem;
+    background-color: var(--p-red-300) !important;
+  }
+}
+
+.no-shadow {``
   box-shadow: none;
 }
 
+:deep(.p-step) {
+  button {
+    padding: 0;
+  }
+}
+
+//////////////
 :deep(.p-invalid),
 :deep(.p-card.p-component:has(.p-invalid)) {
   border-color: $app-error !important;
@@ -1705,9 +1729,9 @@ watchEffect(() => {
   }
 }
 
-:deep(.p-message-wrapper) {
-  padding: 0.5rem;
-}
+// :deep(.p-message-wrapper) {
+//   padding: 0.5rem;
+// }
 
 :deep(.p-stepper-header:first-child) {
   padding-left: 0;
@@ -1725,10 +1749,10 @@ watchEffect(() => {
   }
 }
 
-:deep(.p-stepper-panels) {
-  padding-left: 0;
-  padding-right: 0;
-}
+// :deep(.p-stepper-panels) {
+//   padding-left: 0;
+//   padding-right: 0;
+// }
 
 .lat-long-btn {
   height: 2.3rem;

@@ -332,4 +332,13 @@ watch(activeTabIndex, (newIndex) => {
 .withinMonth {
   background-color: rgb(159, 197, 248);
 }
+
+// :deep(.p-accordionheader) {
+//   flex-direction: row-reverse;
+//   justify-content: flex-end;
+
+//   .p-icon {
+//     margin-right: 1rem;
+//   }
+// }
 </style>
