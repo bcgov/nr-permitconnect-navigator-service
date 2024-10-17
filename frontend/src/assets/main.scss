@@ -76,14 +76,13 @@ p {
   line-height: 1.5rem;
 }
 
-// a,
-// a:visited {
-//   color: var(--p-linktext);
-//   text-decoration: underline;
-//   &:hover {
-//     color: var(--p-linktexthover);
-//   }
-// }
+a {
+  text-decoration: none;
+  color: var(--p-primary-color);
+  &:hover {
+    text-decoration: underline;
+  }
+}
 
 label {
   color: #38598a;
@@ -125,6 +124,16 @@ label {
 }
 
 /* ---------- primevue overrides ------------ */
+
+.p-accordionpanel {
+  .p-accordionheader {
+    justify-content: flex-start;
+    .p-icon {
+      order: -1;
+      margin-right: 1rem;
+    }
+  }
+}
 
 /* buttons */
 .p-button {
