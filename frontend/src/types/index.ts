@@ -1,4 +1,5 @@
 export type { AccessRequest } from './AccessRequest';
+export type { ATSUser } from './ATSUser';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';
 export type { BringForward } from './BringForward';
 export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';

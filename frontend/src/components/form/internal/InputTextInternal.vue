@@ -19,7 +19,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['onChange']);
+const emit = defineEmits(['onChange', 'onClick']);
 
 // State
 const { errorMessage, value } = useField<string>(name);
@@ -43,5 +43,6 @@ const { errorMessage, value } = useField<string>(name);
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
     @change="(e) => emit('onChange', e)"
+    @click="(e) => emit('onClick', e)"
   />
 </template>
