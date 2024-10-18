@@ -714,8 +714,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :f-name="values.contactFirstName"
-      :l-name="values.contactLastName"
+      :submission="submission"
       @ats-user-link:link="
         (atsUser: ATSUser) => {
           atsClientNumber = atsUser.atsClientNumber;
