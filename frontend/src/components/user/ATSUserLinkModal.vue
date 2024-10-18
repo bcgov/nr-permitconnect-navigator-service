@@ -286,7 +286,7 @@ onMounted(async () => {
       </DataTable>
       <div class="flex justify-content-end">
         <Button
-          class="p-button-solid mr-2"
+          class="p-button-solid"
           label="Push to ATS"
           icon="pi pi-upload"
           @click="createATSClient()"
