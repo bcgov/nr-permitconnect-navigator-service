@@ -170,7 +170,6 @@ model submission {
   related_permits                    String?
   ast_notes                          String?
   ast_updated                        Boolean   @default(false)
-  added_to_ats                       Boolean   @default(false)
   ats_client_number                  String?
   ltsa_completed                     Boolean   @default(false)
   bc_online_completed                Boolean   @default(false)
