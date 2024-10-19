@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { ATSUserSearchParameters } from '../types';
+import type { ATSClientResource, ATSUserSearchParameters } from '../types';
 
 /**
  * @function getToken
@@ -63,6 +63,32 @@ const service = {
       const { data, status } = await atsAxios().get('/clients', { params: params });
       return { data: data, status };
     } catch (e) {
+      if (axios.isAxiosError(e)) {
+        return {
+          data: e.response?.data.message,
+          status: e.response ? e.response.status : 500
+        };
+      } else {
+        return {
+          data: 'Error',
+          status: 500
+        };
+      }
+    }
+  },
+
+  /**
+   * @function createATSClient
+   * Creates a client in ATS
+   * @param {ATSClientResource} data The client data
+   * @returns {Promise<data | null>} The result of calling the post api
+   */
+
+  createATSClient: async (atsClient: ATSClientResource) => {
+    try {
+      const { data, status } = await atsAxios().post('/clients', atsClient);
+      return { data: data, status };
+    } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         return {
           data: e.response?.data.message,

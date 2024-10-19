@@ -195,12 +195,18 @@ onMounted(async () => {
         sortable
       />
     </DataTable>
-    <div class="flex justify-content-end">
+    <div class="flex justify-content-start">
       <Button
-        class="p-button-solid mr-0"
+        class="p-button-solid mr-3"
         label="Link to PCNS"
         :disabled="!selectedUser"
         @click="emit('atsUserLink:link', selectedUser)"
+      />
+      <Button
+        class="mr-0"
+        outlined
+        label="Cancel"
+        @click="visible = false"
       />
     </div>
   </Dialog>

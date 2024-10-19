@@ -57,6 +57,7 @@ async function createATSClient() {
     if (response.status === 201) {
       atsClientNumber.value = response.data.clientId;
       emit('atsUserLink:link', atsClientNumber.value);
+      visible.value = false;
       toast.success('New client pushed to ATS');
     } else {
       toast.error('Error pushing client to ATS');
@@ -152,15 +153,24 @@ onMounted(async () => {
           header="Location address"
         />
       </DataTable>
-      <div class="flex justify-content-end">
+      <div
+        v-if="!loading"
+        class="flex justify-content-start"
+      >
         <Button
-          class="p-button-solid"
+          class="p-button-solid mr-3"
           label="Push to ATS"
           icon="pi pi-upload"
-          visible="false"
           @click="createATSClient()"
         />
+        <Button
+          class="mr-0"
+          outlined
+          label="Cancel"
+          @click="visible = false"
+        />
       </div>
+      <Spinner v-if="loading" />
     </div>
   </Dialog>
 </template>

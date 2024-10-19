@@ -639,7 +639,7 @@ onMounted(async () => {
         <Button
           v-if="!atsClientNumber"
           aria-label="New ATS client"
-          class="h-2rem ml-4"
+          class="h-2rem ml-3"
           @click="atsUserCreateModalVisible = true"
         >
           New ATS Client
