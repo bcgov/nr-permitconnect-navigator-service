@@ -30,6 +30,12 @@
   },
   "server": {
     "apiPath": "SERVER_APIPATH",
+    "ats": {
+      "apiPath": "SERVER_ATS_APIPATH",
+      "clientId": "SERVER_ATS_CLIENTID",
+      "clientSecret": "SERVER_ATS_CLIENTSECRET",
+      "tokenUrl": "SERVER_ATS_TOKENURL"
+    },
     "bodyLimit": "SERVER_BODYLIMIT",
     "ches": {
       "apiPath": "SERVER_CHES_APIPATH",
