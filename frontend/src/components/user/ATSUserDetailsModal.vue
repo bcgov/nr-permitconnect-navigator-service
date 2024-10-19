@@ -82,51 +82,6 @@ watch(visible, () => {
     :modal="true"
     class="app-info-dialog w-7"
   >
-    <!-- <template #header>
-      <span class="p-dialog-title title-colour">Proponent Details</span>
-    </template> -->
-    <!-- <DataTable
-      :row-hover="true"
-      class="datatable mt-3 mb-2"
-      :value="[proponent]"
-      selection-mode="single"
-      :rows="1"
-    >
-      <template #empty>
-        <div class="flex justify-content-center">
-          <h5 class="m-0">No users found.</h5>
-        </div>
-      </template>
-      <template #loading>
-        <Spinner />
-      </template>
-      <Column
-        field="firstName"
-        header="First Name"
-        sortable
-      />
-      <Column
-        field="lastName"
-        header="Last Name"
-        sortable
-      />
-      <Column
-        field="phone"
-        header="Phone"
-        sortable
-      />
-      <Column
-        field="email"
-        header="Email"
-        sortable
-      />
-      <Column
-        field="address"
-        header="Location address"
-        sortable
-      />
-    </DataTable> -->
-    <!-- <h3 class="mt-4">ATS Client link</h3> -->
     <template #header>
       <span class="p-dialog-title title-colour">ATS Client link</span>
     </template>

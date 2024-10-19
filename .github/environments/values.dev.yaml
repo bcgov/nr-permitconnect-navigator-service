@@ -13,6 +13,8 @@ config:
     FRONTEND_OPENSTREETMAP_APIPATH: https://tile.openstreetmap.org
     FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
     SERVER_APIPATH: /api/v1
+    SERVER_ATS_APIPATH: https://i1api.nrs.gov.bc.ca/ats-api/v1
+    SERVER_ATS_TOKENURL: https://i1api.nrs.gov.bc.ca/oauth2/v1/oauth/token?grant_type=client_credentials&disableDeveloperFilter=true&scope=ATS_API.*
     SERVER_BODYLIMIT: 30mb
     SERVER_CHEFS_APIPATH: https://submit.digital.gov.bc.ca/app/api/v1
     SERVER_CHES_APIPATH: https://ches-dev.api.gov.bc.ca/api/v1
