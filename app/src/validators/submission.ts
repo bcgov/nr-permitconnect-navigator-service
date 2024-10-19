@@ -169,11 +169,7 @@ const schema = {
         .required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
       addedToATS: Joi.boolean().required(),
-      atsClientNumber: Joi.when('addedToATS', {
-        is: true,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
+      atsClientNumber: Joi.string().allow(null).max(255),
       ltsaCompleted: Joi.boolean().required(),
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),
