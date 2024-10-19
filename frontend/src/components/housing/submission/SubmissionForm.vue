@@ -17,6 +17,7 @@ import {
   TextArea
 } from '@/components/form';
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
@@ -60,6 +61,7 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsClientNumber: Ref<string | undefined> = ref(undefined);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
+const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -632,7 +634,15 @@ onMounted(async () => {
           class="h-2rem ml-2"
           @click="atsUserLinkModalVisible = true"
         >
-          Link to ATS
+          Search ATS
+        </Button>
+        <Button
+          v-if="!atsClientNumber"
+          aria-label="New ATS client"
+          class="h-2rem ml-4"
+          @click="atsUserCreateModalVisible = true"
+        >
+          New ATS Client
         </Button>
       </div>
       <Checkbox
@@ -723,8 +733,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :f-name="values.contactFirstName"
-      :l-name="values.contactLastName"
+      :submission="submission"
       @ats-user-link:link="
         (atsUser: ATSUser) => {
           atsClientNumber = atsUser.atsClientNumber;
@@ -740,6 +749,17 @@ onMounted(async () => {
         () => {
           atsClientNumber = undefined;
           atsUserDetailsModalVisible = false;
+        }
+      "
+    />
+    <ATSUserCreateModal
+      v-model:visible="atsUserCreateModalVisible"
+      :submission="submission"
+      @ats-user-link:link="
+        (atsClientId: string) => {
+          atsClientNumber = atsClientId;
+          submissionStore.setSubmission({ ...submission, atsClientNumber: atsClientId ?? null });
+          atsUserCreateModalVisible = false;
         }
       "
     />

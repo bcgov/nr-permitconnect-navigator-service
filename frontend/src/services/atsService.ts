@@ -10,5 +10,13 @@ export default {
 
   searchATSUsers(params?: any) {
     return appAxios().get('ats/clients', { params: params });
+  },
+
+  /**
+   * @function createATSClient
+   * @returns {Promise} An axios response
+   */
+  createATSClient(data?: any) {
+    return appAxios().post('ats/client', data);
   }
 };

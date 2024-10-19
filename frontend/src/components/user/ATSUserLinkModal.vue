@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { onMounted, ref } from 'vue';
+import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
 
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ATSUser } from '@/types';
+import type { ATSUser, Submission } from '@/types';
 
 // Props
-const { fName, lName } = defineProps<{
-  fName: string;
-  lName: string;
+const { submission } = defineProps<{
+  submission: Submission;
 }>();
 
 // Emits
@@ -25,7 +24,9 @@ const firstName: Ref<string> = ref('');
 const lastName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
 const phone: Ref<string> = ref('');
+const proponent: Ref<ATSUser | undefined> = ref(undefined);
 const selectedUser: Ref<ATSUser | undefined> = ref(undefined);
+const showCreateATS = defineModel<boolean>('showCreateATS');
 const users: Ref<Array<ATSUser>> = ref([]);
 const visible = defineModel<boolean>('visible');
 
@@ -45,6 +46,8 @@ async function searchATSUsers() {
       phone: phone.value,
       email: email.value
     });
+
+    showCreateATS.value = true;
 
     users.value = response.data.clients.map((client: any) => {
       // Combine address lines and filter out empty lines
@@ -67,8 +70,21 @@ async function searchATSUsers() {
 }
 
 onMounted(async () => {
-  firstName.value = fName;
-  lastName.value = lName;
+  if (submission.contactFirstName && submission.contactLastName) {
+    firstName.value = submission.contactFirstName;
+    lastName.value = submission.contactLastName;
+  }
+  const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
+    .filter((str) => str?.trim())
+    .join(', ');
+
+  proponent.value = {
+    firstName: submission.contactFirstName ?? '',
+    lastName: submission.contactLastName ?? '',
+    email: submission.contactEmail ?? '',
+    address: locationAddressStr,
+    phone: submission.contactPhoneNumber ?? ''
+  };
 });
 </script>
 
@@ -136,6 +152,8 @@ onMounted(async () => {
       data-key="atsClientNumber"
       :rows="5"
       :paginator="true"
+      paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
+      current-page-report-template="{first}-{last} of {totalRecords}"
     >
       <template #empty>
         <div class="flex justify-content-center">
