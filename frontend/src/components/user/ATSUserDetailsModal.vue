@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ATSUser } from '@/types';
+import type { ATSClientResource } from '@/types';
 
 // Props
-const { submission } = defineProps<{
-  submission: any;
+const { atsClientNumber } = defineProps<{
+  atsClientNumber: string | null;
 }>();
 
 // Emits
@@ -19,8 +19,7 @@ const emit = defineEmits(['atsUserDetails:unLink']);
 
 // State
 const loading: Ref<boolean> = ref(false);
-const atsUsers: Ref<Array<ATSUser>> = ref([]);
-const proponent: Ref<ATSUser | undefined> = ref(undefined);
+const users: Ref<Array<ATSClientResource>> = ref([]);
 
 const visible = defineModel<boolean>('visible');
 
@@ -33,21 +32,16 @@ async function getATSClientInformation() {
     loading.value = true;
 
     const response = await atsService.searchATSUsers({
-      clientId: submission.atsClientNumber
+      clientId: atsClientNumber
     });
 
-    atsUsers.value = response.data.clients.map((client: any) => {
+    users.value = response.data.clients;
+
+    users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
       const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
-
-      return {
-        atsClientNumber: client.clientId,
-        firstName: client.firstName,
-        lastName: client.surName,
-        email: client.address.email,
-        phone: client.address.primaryPhone ?? client.address.secondaryPhone,
-        address: address
-      };
+      client.formattedAddress = address;
+      client.phone = client.address.primaryPhone ?? client.address.secondaryPhone;
     });
   } catch (error) {
     if (!axios.isCancel(error)) toast.error('Error searching for users ' + error);
@@ -56,22 +50,8 @@ async function getATSClientInformation() {
   }
 }
 
-onMounted(async () => {
-  const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
-    .filter((str) => str?.trim())
-    .join(', ');
-
-  proponent.value = {
-    firstName: submission.contactFirstName ?? '',
-    lastName: submission.contactLastName ?? '',
-    email: submission.contactEmail ?? '',
-    address: locationAddressStr,
-    phone: submission.contactPhoneNumber ?? ''
-  };
-});
-
 watch(visible, () => {
-  getATSClientInformation();
+  if (atsClientNumber) getATSClientInformation();
 });
 </script>
 
@@ -89,7 +69,7 @@ watch(visible, () => {
       :row-hover="true"
       :loading="loading"
       class="datatable mt-3 mb-2"
-      :value="atsUsers"
+      :value="users"
       selection-mode="single"
       data-key="atsClientNumber"
       :rows="1"
@@ -104,7 +84,7 @@ watch(visible, () => {
       </template>
 
       <Column
-        field="atsClientNumber"
+        field="clientId"
         header="Client #"
       />
       <Column
@@ -112,7 +92,7 @@ watch(visible, () => {
         header="First Name"
       />
       <Column
-        field="lastName"
+        field="surName"
         header="Last Name"
       />
       <Column
@@ -120,11 +100,11 @@ watch(visible, () => {
         header="Phone"
       />
       <Column
-        field="email"
+        field="address.email"
         header="Email"
       />
       <Column
-        field="address"
+        field="formattedAddress"
         header="Location address"
       />
       <Column
@@ -135,8 +115,8 @@ watch(visible, () => {
         <template #body="{ data }">
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
-            aria-label="Delete enquiry"
-            @click="atsUsers = atsUsers.filter((atsUser) => atsUser.atsClientNumber !== data.atsClientNumber)"
+            aria-label="Delete user"
+            @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >
             <font-awesome-icon icon="fa-solid fa-trash" />
           </Button>
@@ -147,7 +127,7 @@ watch(visible, () => {
       <Button
         class="p-button-solid mr-3"
         label="Save"
-        @click="atsUsers.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
+        @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
       />
       <Button
         class="mr-0"
