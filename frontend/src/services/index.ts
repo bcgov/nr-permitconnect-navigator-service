@@ -1,4 +1,5 @@
 export { default as accessRequestService } from './accessRequestService';
+export { default as atsService } from './atsService';
 export { default as AuthService } from './authService';
 export { default as ConfigService } from './configService';
 export { default as activityService } from './activityService';
