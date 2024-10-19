@@ -1,14 +1,23 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { onMounted, ref } from 'vue';
-import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 
 import { Spinner } from '@/components/layout';
+import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
-import { BasicResponse } from '@/utils/enums/application';
+import { BasicResponse, Initiative } from '@/utils/enums/application';
+import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ATSUser, Submission } from '@/types';
+import type { ATSClientResource, Submission } from '@/types';
+
+// Types
+type ATSUser = {
+  address: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  phone: string;
+};
 
 // Props
 const { submission } = defineProps<{
@@ -18,14 +27,10 @@ const { submission } = defineProps<{
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
 
-// Constants
-const REGION_BC = 'BC';
-
 // State
 const atsClientNumber: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
-const proponent: Ref<ATSUser | undefined> = ref(undefined);
-const selectedUser: Ref<ATSUser | undefined> = ref(undefined);
+const atsUser: Ref<ATSUser | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -33,11 +38,9 @@ const visible = defineModel<boolean>('visible');
 const toast = useToast();
 
 async function createATSClient() {
-  selectedUser.value = undefined;
   try {
     loading.value = true;
-
-    const data = setEmptyStringsToNullAndOmitNulls({
+    const data = {
       '@type': 'ClientResource',
       address: {
         '@type': 'AddressResource',
@@ -49,52 +52,34 @@ async function createATSClient() {
       },
       firstName: submission.contactFirstName,
       surName: submission.contactLastName,
-      regionName: REGION_BC,
+      regionName: Initiative.HOUSING,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    });
+    };
 
-    const response = await atsService.createATSClient(data);
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+
+    const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
       atsClientNumber.value = response.data.clientId;
       emit('atsUserLink:link', atsClientNumber.value);
+      visible.value = false;
       toast.success('New client pushed to ATS');
     } else {
       toast.error('Error pushing client to ATS');
     }
   } catch (error) {
-    if (!axios.isCancel(error)) toast.error('Error pushing client to ATS ' + error);
+    toast.error('Error pushing client to ATS ' + error);
   } finally {
     loading.value = false;
   }
 }
 
-function setEmptyStringsToNullAndOmitNulls(obj: Record<string, any>): Record<string, any> {
-  const result: Record<string, any> = {};
-
-  for (const key in obj) {
-    if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      if (typeof obj[key] === 'string' && obj[key].trim() === '') {
-        // Skip adding this key if the value is an empty string
-        continue;
-      } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-        const nestedResult = setEmptyStringsToNullAndOmitNulls(obj[key]);
-        if (Object.keys(nestedResult).length > 0) {
-          result[key] = nestedResult;
-        }
-      } else if (obj[key] !== null) {
-        result[key] = obj[key];
-      }
-    }
-  }
-
-  return result;
-}
-onMounted(async () => {
+onMounted(() => {
   const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
     .filter((str) => str?.trim())
     .join(', ');
 
-  proponent.value = {
+  atsUser.value = {
     firstName: submission.contactFirstName ?? '',
     lastName: submission.contactLastName ?? '',
     email: submission.contactEmail ?? '',
@@ -112,13 +97,13 @@ onMounted(async () => {
     class="app-info-dialog w-max"
   >
     <template #header>
-      <span class="p-dialog-title title-colour">Create new client in ATS</span>
+      <span class="p-dialog-title app-primary-color">Create new client in ATS</span>
     </template>
     <div>
       <DataTable
         :row-hover="true"
         class="datatable mt-3 mb-4"
-        :value="[proponent]"
+        :value="[atsUser]"
         selection-mode="single"
         :rows="1"
       >
@@ -140,7 +125,7 @@ onMounted(async () => {
           header="Last Name"
         />
         <Column
-          field="lastName"
+          field="phone"
           header="Phone"
         />
         <Column
@@ -152,20 +137,24 @@ onMounted(async () => {
           header="Location address"
         />
       </DataTable>
-      <div class="flex justify-content-end">
+      <div
+        v-if="!loading"
+        class="flex justify-content-start"
+      >
         <Button
-          class="p-button-solid"
+          class="p-button-solid mr-3"
           label="Push to ATS"
           icon="pi pi-upload"
-          visible="false"
           @click="createATSClient()"
         />
+        <Button
+          class="mr-0"
+          outlined
+          label="Cancel"
+          @click="visible = false"
+        />
       </div>
+      <Spinner v-if="loading" />
     </div>
   </Dialog>
 </template>
-<style scoped lang="scss">
-.title-colour {
-  color: $app-primary;
-}
-</style>
