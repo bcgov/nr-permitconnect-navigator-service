@@ -193,6 +193,8 @@ function onInvalidSubmit(e: any) {
 async function onSaveDraft(data: any, isAutoSave = false) {
   editable.value = false;
 
+  autoSaveRef.value?.stopAutoSave();
+
   try {
     let response = await enquiryService.updateDraft(data);
 

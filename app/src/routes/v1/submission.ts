@@ -65,6 +65,7 @@ router.put(
 router.put(
   '/draft/submit',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
+  submissionValidator.createSubmission,
   (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
     submissionController.submitDraft(req, res, next);
   }
@@ -80,7 +81,7 @@ router.put(
   }
 );
 
-/** Creates a submission */
+/** Creates a blank submission */
 router.put(
   '/',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),

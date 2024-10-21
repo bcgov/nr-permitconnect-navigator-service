@@ -52,7 +52,6 @@ router.delete(
 router.put(
   '/draft/',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
-  enquiryValidator.createOrUpdateDraft,
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
     enquiryController.updateDraft(req, res, next);
   }
@@ -62,7 +61,7 @@ router.put(
 router.put(
   '/draft/submit',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
-  enquiryValidator.createOrUpdateDraft,
+  enquiryValidator.createEnquiry,
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
     enquiryController.submitDraft(req, res, next);
   }

@@ -51,7 +51,7 @@ export const housing = Joi.object({
     otherwise: Joi.forbidden()
   }),
   otherUnitsDescription: Joi.when('otherSelected', {
-    is: Joi.exist(),
+    is: true,
     then: Joi.string().required().max(255).trim(),
     otherwise: Joi.forbidden()
   }),

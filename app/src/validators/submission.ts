@@ -26,10 +26,13 @@ const schema = {
   },
   createSubmission: {
     body: Joi.object({
+      submissionId: uuidv4.allow(null),
+      activityId: Joi.string().min(8).max(8).allow(null),
       applicant: applicant,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
       housing: housing,
+      location: Joi.any(),
       investigatePermits: Joi.array()
         .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
         .allow(null),
