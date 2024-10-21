@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.24](https://img.shields.io/badge/Version-0.0.24-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.7.0](https://img.shields.io/badge/AppVersion-0.7.0-informational?style=flat-square)
+![Version: 0.0.25](https://img.shields.io/badge/Version-0.0.25-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.7.0](https://img.shields.io/badge/AppVersion-0.7.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -19,10 +19,6 @@ PermitConnect Navigator Service
 ## Requirements
 
 Kubernetes: `>= 1.13.0`
-
-| Repository | Name | Version |
-|------------|------|---------|
-| https://bcgov.github.io/nr-patroni-chart | patroni | 0.0.4 |
 
 ## Values
 
@@ -58,7 +54,6 @@ Kubernetes: `>= 1.13.0`
 | objectStorageSecretOverride.username | string | `nil` |  |
 | oidcSecretOverride.password | string | `nil` |  |
 | oidcSecretOverride.username | string | `nil` |  |
-| patroni.enabled | bool | `false` |  |
 | podAnnotations | object | `{}` | Annotations for app pods |
 | podSecurityContext | object | `{}` | Privilege and access control settings |
 | replicaCount | int | `2` | Number of pod replicas running in the deployment |
