@@ -16,6 +16,8 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
@@ -35,7 +37,7 @@ import { applicantValidator, assignedToValidator, latitudeValidator, longitudeVa
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Submission, User } from '@/types';
+import type { ATSUser, Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 // Interfaces
@@ -55,6 +57,9 @@ const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const atsClientNumber: Ref<string | undefined> = ref(undefined);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
+const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -124,11 +129,7 @@ const formSchema = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: string().when('addedToATS', {
-    is: (val: boolean) => val,
-    then: (schema) => schema.required().max(255).label('ATS Client #'),
-    otherwise: () => string().notRequired()
-  }),
+  atsClientNumber: string().notRequired().max(255).label('ATS Client #'),
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -194,6 +195,7 @@ const onSubmit = async (values: any) => {
     const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
+    submitData.atsClientNumber = atsClientNumber.value?.toString() ?? null;
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
     submissionStore.setSubmission(result.data);
     formRef.value?.resetForm({
@@ -279,6 +281,7 @@ onMounted(async () => {
     applicationStatus: submission.applicationStatus,
     waitingOn: submission.waitingOn
   };
+  atsClientNumber.value = submission.atsClientNumber ?? undefined;
 });
 </script>
 
@@ -609,28 +612,42 @@ onMounted(async () => {
       />
       <div class="col-6" />
 
-      <SectionHeader title="Other" />
-
+      <SectionHeader title="ATS" />
+      <div class="flex align-items-center mb-2">
+        <div
+          v-if="atsClientNumber"
+          class="ml-2 mr-2"
+        >
+          <h5 class="inline mr-2">Client #</h5>
+          <a
+            class="atsclass"
+            @click="atsUserDetailsModalVisible = true"
+          >
+            {{ atsClientNumber }}
+          </a>
+        </div>
+        <Button
+          v-if="!atsClientNumber"
+          aria-label="Link to ATS"
+          class="h-2rem ml-2"
+          @click="atsUserLinkModalVisible = true"
+        >
+          Link to ATS
+        </Button>
+      </div>
       <Checkbox
-        class="col-12"
+        class="col-12 mt-2"
         name="addedToATS"
         label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
         :bold="true"
       />
 
-      <div
-        v-if="values.addedToATS"
-        class="w-full"
-      >
-        <InputText
-          class="col-3"
-          name="atsClientNumber"
-          label="ATS Client #"
-          :disabled="!editable"
-        />
-        <div class="col-9" />
-      </div>
+      <SectionHeader
+        title="Other"
+        class="mt-2"
+      />
+
       <Checkbox
         class="col-12"
         name="ltsaCompleted"
@@ -704,5 +721,33 @@ onMounted(async () => {
         />
       </div>
     </div>
+    <ATSUserLinkModal
+      v-model:visible="atsUserLinkModalVisible"
+      :f-name="values.contactFirstName"
+      :l-name="values.contactLastName"
+      @ats-user-link:link="
+        (atsUser: ATSUser) => {
+          atsClientNumber = atsUser.atsClientNumber;
+          submissionStore.setSubmission({ ...submission, atsClientNumber: atsUser.atsClientNumber ?? null });
+          atsUserLinkModalVisible = false;
+        }
+      "
+    />
+    <ATSUserDetailsModal
+      v-model:visible="atsUserDetailsModalVisible"
+      :submission="submission"
+      @ats-user-details:un-link="
+        () => {
+          atsClientNumber = undefined;
+          atsUserDetailsModalVisible = false;
+        }
+      "
+    />
   </Form>
 </template>
+
+<style scoped lang="scss">
+:deep(.atsclass) {
+  cursor: pointer;
+}
+</style>
