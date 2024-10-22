@@ -8,7 +8,7 @@ import { YES_NO_LIST } from '../utils/constants/application';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
-  createOrUpdateDraft: {
+  createEnquiry: {
     body: Joi.object({
       applicant: applicant,
       basic: basicEnquiry,
@@ -65,7 +65,7 @@ const schema = {
 };
 
 export default {
-  createOrUpdateDraft: validate(schema.createOrUpdateDraft),
+  createEnquiry: validate(schema.createEnquiry),
   deleteEnquiry: validate(schema.deleteEnquiry),
   updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateEnquiry: validate(schema.updateEnquiry)
