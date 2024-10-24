@@ -12,8 +12,6 @@ export const ACCESS_REQUEST_STATUS = [
   AccessRequestStatus.REJECTED
 ];
 
-export const ACTIVITY_ID_LENGTH = 8;
-
 export const DELIMITER = '/';
 
 export const PCNS_CONTACT = {

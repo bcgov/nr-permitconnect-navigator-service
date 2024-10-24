@@ -3,8 +3,8 @@ import express from 'express';
 import { currentContext } from '../../middleware/authentication';
 
 import accessRequest from './accessRequest';
-import activity from './activity';
 import ats from './ats';
+import docs from './docs';
 import document from './document';
 import enquiry from './enquiry';
 import note from './note';
@@ -25,8 +25,8 @@ router.get('/', (_req, res) => {
   res.status(200).json({
     endpoints: [
       '/accessRequest',
-      '/activity',
       '/ats',
+      '/docs',
       '/document',
       '/enquiry',
       '/note',
@@ -41,7 +41,7 @@ router.get('/', (_req, res) => {
 });
 
 router.use('/accessRequest', accessRequest);
-router.use('/activity', activity);
+router.use('/docs', docs);
 router.use('/ats', ats);
 router.use('/document', document);
 router.use('/enquiry', enquiry);

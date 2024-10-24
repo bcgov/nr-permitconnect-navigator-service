@@ -81,6 +81,11 @@ const controller = {
   deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.deleteEnquiry(req.params.enquiryId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -106,6 +111,11 @@ const controller = {
   getEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.getEnquiry(req.params.enquiryId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -133,6 +143,10 @@ const controller = {
           ...enquiry,
           ...generateUpdateStamps(req.currentContext)
         } as Enquiry);
+
+        if (!result) {
+          return res.status(404).json({ message: 'Enquiry not found' });
+        }
       } else {
         // Create new enquiry
         result = await enquiryService.createEnquiry({
@@ -154,6 +168,10 @@ const controller = {
         ...generateUpdateStamps(req.currentContext)
       } as Enquiry);
 
+      if (!result) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(result);
     } catch (e: unknown) {
       next(e);
@@ -172,12 +190,20 @@ const controller = {
           ...enquiry,
           ...generateUpdateStamps(req.currentContext)
         } as Enquiry);
+
+        if (!result) {
+          return res.status(404).json({ message: 'Enquiry not found' });
+        }
       } else {
         // Create new enquiry
         result = await enquiryService.createEnquiry({
           ...enquiry,
           ...generateCreateStamps(req.currentContext)
         });
+      }
+
+      if (!result) {
+        return res.status(404).json({ message: 'Enquiry not found' });
       }
 
       res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
@@ -197,6 +223,11 @@ const controller = {
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
