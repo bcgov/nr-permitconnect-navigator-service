@@ -10,11 +10,12 @@ files
 **/e2e/videos
 node_modules
 sbin
+/.42c
 # Ignore only top-level package-lock.json
 /package-lock.json
 
 # Ignore Helm subcharts
-charts/**/charts
+charts/**/chartsß
 Chart.lock
 
 # local env files

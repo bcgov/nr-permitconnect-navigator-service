@@ -50,7 +50,7 @@ router.delete(
 
 /** Creates or updates an intake and set status to Draft */
 router.put(
-  '/draft/',
+  '/draft',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
     enquiryController.updateDraft(req, res, next);
