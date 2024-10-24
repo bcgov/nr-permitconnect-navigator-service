@@ -172,6 +172,11 @@ label {
   justify-content: right !important;
 }
 
+.app-error-message {
+  color: var(--p-error-color);
+  font-size: 0.8rem;
+}
+
 .app-info-dialog {
   .p-dialog-header {
     .svg-inline--fa {

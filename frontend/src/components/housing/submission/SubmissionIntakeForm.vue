@@ -1944,23 +1944,23 @@ watchEffect(() => {
 
 <style scoped lang="scss">
 .app-error-color {
-  color: var(--p-red-500);
+  color: var(--p-red-500) !important;
 }
 
 .message-banner {
   border-left-color: var(--p-red-500);
-  border-left-width: 3px;
+  border-left-width: 5px;
   border-left-style: solid;
   border-radius: 3px;
   margin-bottom: 1rem;
 
   :deep(.p-message-content) {
     padding: 0.5rem;
-    background-color: var(--p-red-300) !important;
+    background-color: var(--p-red-50) !important;
   }
 }
 
-.no-shadow {``
+.no-shadow {
   box-shadow: none;
 }
 
