@@ -46,7 +46,7 @@ export const ThemeOverride = definePreset(Material, {
       950: '#013366'
     },
     green: {
-      // Override base red theme, for base values see link at top
+      // Override base green theme, for base values see link at top
       50: '#42814A',
       100: '#42814A',
       200: '#42814A',
@@ -87,7 +87,7 @@ export const ThemeOverride = definePreset(Material, {
     },
     red: {
       // Override base red theme, for base values see link at top
-      50: '#F1F8FE',
+      50: '#FFCDD2',
       100: '#F1F8FE',
       200: '#F1F8FE',
       300: '#F1F8FE',
@@ -98,6 +98,19 @@ export const ThemeOverride = definePreset(Material, {
       800: '#A2312D',
       900: '#A2312D',
       950: '#A2312D'
+    },
+    white: {
+      50: '#EDEBE9',
+      100: '#EDEBE9',
+      200: '#EDEBE9',
+      300: '#EDEBE9',
+      400: '#EDEBE9',
+      500: '#EDEBE9',
+      600: '#EDEBE9',
+      700: '#EDEBE9',
+      800: '#EDEBE9',
+      900: '#EDEBE9',
+      950: '#EDEBE9'
     },
     linktext: '#1a5a96',
     linktexthover: '#0000ff',
@@ -125,6 +138,13 @@ export const ThemeOverride = definePreset(Material, {
     content: {
       fontSize: '2rem'
     },
+    formField: {
+      focusRing: {
+        color: '{primary.400}',
+        width: '2px'
+      }
+    },
+    errorColor: '{red.500}',
     colorScheme: {
       light: {
         surface: {
@@ -151,6 +171,12 @@ export const ThemeOverride = definePreset(Material, {
           hover: {
             background: '{greyscale.200}'
           }
+        },
+        formField: {
+          hoverBorderColor: '{primary.700}',
+          focusBorderColor: '{primary.300}',
+          invalidBorderColor: '{red.500}',
+          floatLabelInvalidColor: '{red.500}'
         },
         highlight: {
           background: '{surface.0}'
@@ -203,6 +229,16 @@ export const ThemeOverride = definePreset(Material, {
           }
         }
       }
+    },
+    radiobutton: {
+      root: {},
+      icon: {
+        size: '10px',
+        checkedColor: '{white.50}',
+        checkedHoverColor: '{white.50}',
+        disabledColor: '{form.field.disabled.color}'
+      },
+      css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick}'
     },
     tabs: {
       tab: {

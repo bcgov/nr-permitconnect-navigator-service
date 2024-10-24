@@ -80,3 +80,11 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+:deep(.p-invalid) {
+  .p-autocomplete-input {
+    border-color: var(--p-red-500);
+  }
+}
+</style>
