@@ -17,6 +17,7 @@ import {
   TextArea
 } from '@/components/form';
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
@@ -37,7 +38,7 @@ import { applicantValidator, assignedToValidator, latitudeValidator, longitudeVa
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSUser, Submission, User } from '@/types';
+import type { ATSClientResource, Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 // Interfaces
@@ -57,9 +58,9 @@ const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-const atsClientNumber: Ref<string | undefined> = ref(undefined);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
+const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -195,7 +196,6 @@ const onSubmit = async (values: any) => {
     const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
-    submitData.atsClientNumber = atsClientNumber.value?.toString() ?? null;
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
     submissionStore.setSubmission(result.data);
     formRef.value?.resetForm({
@@ -281,7 +281,6 @@ onMounted(async () => {
     applicationStatus: submission.applicationStatus,
     waitingOn: submission.waitingOn
   };
-  atsClientNumber.value = submission.atsClientNumber ?? undefined;
 });
 </script>
 
@@ -615,7 +614,7 @@ onMounted(async () => {
       <SectionHeader title="ATS" />
       <div class="flex align-items-center mb-2">
         <div
-          v-if="atsClientNumber"
+          v-if="values.atsClientNumber"
           class="ml-2 mr-2"
         >
           <h5 class="inline mr-2">Client #</h5>
@@ -623,16 +622,28 @@ onMounted(async () => {
             class="atsclass"
             @click="atsUserDetailsModalVisible = true"
           >
-            {{ atsClientNumber }}
+            {{ values.atsClientNumber }}
           </a>
         </div>
+        <input
+          type="hidden"
+          name="atsClientNumber"
+        />
         <Button
-          v-if="!atsClientNumber"
+          v-if="!values.atsClientNumber"
           aria-label="Link to ATS"
           class="h-2rem ml-2"
           @click="atsUserLinkModalVisible = true"
         >
-          Link to ATS
+          Search ATS
+        </Button>
+        <Button
+          v-if="!values.atsClientNumber"
+          aria-label="New ATS client"
+          class="h-2rem ml-3"
+          @click="atsUserCreateModalVisible = true"
+        >
+          New ATS Client
         </Button>
       </div>
       <Checkbox
@@ -723,23 +734,31 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :f-name="values.contactFirstName"
-      :l-name="values.contactLastName"
+      :submission="submission"
       @ats-user-link:link="
-        (atsUser: ATSUser) => {
-          atsClientNumber = atsUser.atsClientNumber;
-          submissionStore.setSubmission({ ...submission, atsClientNumber: atsUser.atsClientNumber ?? null });
+        (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientResource.clientId?.toString());
         }
       "
     />
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
-      :submission="submission"
+      :ats-client-number="values.atsClientNumber"
       @ats-user-details:un-link="
         () => {
-          atsClientNumber = undefined;
           atsUserDetailsModalVisible = false;
+          setFieldValue('atsClientNumber', null);
+        }
+      "
+    />
+    <ATSUserCreateModal
+      v-model:visible="atsUserCreateModalVisible"
+      :submission="submission"
+      @ats-user-link:link="
+        (atsClientId: string) => {
+          atsUserCreateModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientId.toString());
         }
       "
     />
