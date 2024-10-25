@@ -146,6 +146,8 @@ label {
 /* buttons */
 .p-button {
   border-width: 2px !important;
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
 
   .p-button-label:hover {
     text-decoration: underline;

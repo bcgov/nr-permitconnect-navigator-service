@@ -107,7 +107,7 @@ export enum ToastTimeout {
   ERROR = 5000,
   INFO = 3000,
   STICKY = 0,
-  SUCCESS = 30000,
+  SUCCESS = 3000,
   WARNING = 5000
 }
 

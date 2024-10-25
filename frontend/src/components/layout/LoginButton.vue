@@ -52,3 +52,10 @@ function logout() {
     {{ t('loginButton.logout') }}
   </Button>
 </template>
+
+<style scoped lang="scss">
+button {
+  border-color: var(--p-surface-0);
+  color: var(--p-surface-0);
+}
+</style>

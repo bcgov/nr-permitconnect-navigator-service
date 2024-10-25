@@ -267,7 +267,7 @@ async function onInvalidSubmit() {
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
+function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
     if (fieldsLength === 0) {
       push({

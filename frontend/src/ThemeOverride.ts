@@ -47,17 +47,17 @@ export const ThemeOverride = definePreset(Material, {
     },
     green: {
       // Override base green theme, for base values see link at top
-      50: '#42814A',
-      100: '#42814A',
-      200: '#42814A',
-      300: '#42814A',
-      400: '#42814A',
+      50: '#ffffff',
+      100: '#d9e6db',
+      200: '#b3cdb7',
+      300: '#8eb392',
+      400: '#689a6e',
       500: '#42814A',
       600: '#42814A',
-      700: '#42814A',
-      800: '#42814A',
-      900: '#42814A',
-      950: '#42814A'
+      700: '#35673b',
+      800: '#284d2c',
+      900: '#1a341e',
+      950: '#0d1a0f'
     },
     gold: {
       50: '#FAF9F8',
@@ -135,6 +135,7 @@ export const ThemeOverride = definePreset(Material, {
       900: '{bcblue.900}',
       950: '{bcblue.950}'
     },
+    disabledOpacity: '0.6',
     content: {
       fontSize: '2rem'
     },
@@ -200,19 +201,11 @@ export const ThemeOverride = definePreset(Material, {
         lg: {
           fontSize: '1.125rem',
           paddingX: '1.125rem',
-          paddingY: '0.75rem'
+          paddingY: '0.7rem'
         }
       },
       colorScheme: {
-        light: {
-          outlined: {
-            primary: {
-              color: '{surface.0}',
-              borderColor: '{surface.0}',
-              hoverBackground: '{primary.color}'
-            }
-          }
-        }
+        light: {}
       }
     },
     menubar: {
@@ -246,6 +239,29 @@ export const ThemeOverride = definePreset(Material, {
       },
       tabPanel: {
         padding: '1.2rem 1.2rem 1.2rem 1.2rem'
+      }
+    },
+    toast: {
+      colorScheme: {
+        light: {
+          success: {
+            background: '{green.100}',
+            borderColor: '{green.500}',
+            color: '{green.500}',
+            detailColor: '{surface.300}',
+            closeButton: {
+              hoverBackground: '{green.200}',
+              focusRing: {
+                color: '{green.600}',
+                shadow: 'none'
+              }
+            }
+          },
+          warn: {},
+          error: {},
+          secondary: {},
+          contrast: {}
+        }
       }
     }
   }
