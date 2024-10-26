@@ -26,6 +26,7 @@ const confirmDelete = (document: Document) => {
       acceptLabel: 'Confirm',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => {
         documentService
           .deleteDocument(document.documentId)

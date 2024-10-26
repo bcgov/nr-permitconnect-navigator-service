@@ -164,7 +164,13 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-:deep(.p-menubar-item-link) {
-  padding: 0.5rem 0.4rem 0.7rem;
+a:hover {
+  text-decoration: none;
+}
+
+:deep(.p-menubar-submenu) {
+  li:first-child {
+    border-top: 2px solid #fcba19;
+  }
 }
 </style>

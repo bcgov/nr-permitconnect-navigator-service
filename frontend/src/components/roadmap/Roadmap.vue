@@ -69,6 +69,7 @@ const confirmSubmit = (data: any) => {
     header: 'Confirm sending this Permit Roadmap',
     acceptLabel: 'Send',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: async () => {
       try {
         await roadmapService.send(

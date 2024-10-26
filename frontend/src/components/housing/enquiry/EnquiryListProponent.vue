@@ -34,6 +34,7 @@ function onDelete(enquiryId: string) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       enquiryService
         .deleteEnquiry(enquiryId)

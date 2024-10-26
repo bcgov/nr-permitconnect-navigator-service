@@ -107,6 +107,7 @@ function onDelete() {
       acceptLabel: 'Confirm',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => {
         permitService
           .deletePermit(permit?.permitId as string)

@@ -34,6 +34,7 @@ function onDelete(submissionId: string) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       submissionService
         .deleteSubmission(submissionId)

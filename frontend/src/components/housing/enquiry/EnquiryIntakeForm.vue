@@ -111,6 +111,7 @@ async function confirmNext(data: any) {
     header: 'Please confirm',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => onSubmit(toRaw(data))
   });
 }
@@ -121,6 +122,7 @@ function confirmSubmit(data: any) {
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => onSubmit(data)
   });
 }

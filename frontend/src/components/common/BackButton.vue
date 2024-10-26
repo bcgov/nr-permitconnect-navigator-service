@@ -28,6 +28,7 @@ function onConfirmLeave() {
     acceptLabel: 'Leave',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => router.push({ name: routeName })
   });
 }

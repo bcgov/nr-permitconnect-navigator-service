@@ -47,6 +47,7 @@ const confirmSubmit = () => {
     header: 'Please confirm assistance',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       emit('onSubmitAssistance');
     }
