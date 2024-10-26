@@ -153,6 +153,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: async () => {
       try {
         const omittedUser = omit(userAccessRequest.user, ['groups', 'status']);

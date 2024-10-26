@@ -78,6 +78,7 @@ function onDelete() {
       acceptLabel: 'Confirm',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => {
         noteService
           .deleteNote(note?.noteId as string)

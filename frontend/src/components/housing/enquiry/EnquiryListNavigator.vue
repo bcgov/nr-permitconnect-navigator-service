@@ -71,6 +71,7 @@ function onDelete(enquiryId: string, activityId: string) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       enquiryService
         .updateIsDeletedFlag(enquiryId, true)

@@ -18,20 +18,6 @@ import { definePreset } from '@primevue/themes';
 // Base values here: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
 export const ThemeOverride = definePreset(Material, {
   primitive: {
-    // bcblue: {
-    //   50: '#F1F8FE',
-    //   100: '#D8EAFD',
-    //   200: '#A8D0FB',
-    //   300: '#1E5189',
-    //   400: '#3470B1',
-    //   500: '#013366',
-    //   600: '#3470B1',
-    //   700: '#1E5189',
-    //   800: '#A8D0FB',
-    //   900: '#D8EAFD',
-    //   950: '#F1F8FE'
-    // },
-    bcactiveblue: '#2E5DD7',
     bcblue: {
       50: '#F1F8FE',
       100: '#F1F8FE',
@@ -46,7 +32,7 @@ export const ThemeOverride = definePreset(Material, {
       950: '#013366'
     },
     green: {
-      // Override base green theme, for base values see link at top
+      // Override base green hues, for base values see link at top
       50: '#ffffff',
       100: '#d9e6db',
       200: '#b3cdb7',
@@ -86,40 +72,21 @@ export const ThemeOverride = definePreset(Material, {
       950: '#252423'
     },
     red: {
-      // Override base red theme, for base values see link at top
-      50: '#FFCDD2',
-      100: '#F1F8FE',
-      200: '#F1F8FE',
-      300: '#F1F8FE',
-      400: '#F1F8FE',
+      // Override base red hues, for base values see link at top
+      50: '#F4E1E2',
+      100: '#F4E1E2',
+      200: '#F4E1E2',
+      300: '#F4E1E2',
+      400: '#CE3E39',
       500: '#CE3E39',
-      600: '#A2312D',
-      700: '#A2312D',
+      600: '#CE3E39',
+      700: '#CE3E39',
       800: '#A2312D',
       900: '#A2312D',
       950: '#A2312D'
     },
-    white: {
-      50: '#EDEBE9',
-      100: '#EDEBE9',
-      200: '#EDEBE9',
-      300: '#EDEBE9',
-      400: '#EDEBE9',
-      500: '#EDEBE9',
-      600: '#EDEBE9',
-      700: '#EDEBE9',
-      800: '#EDEBE9',
-      900: '#EDEBE9',
-      950: '#EDEBE9'
-    },
-    linktext: '#1a5a96',
-    linktexthover: '#0000ff',
-    hover: '#4696EC',
-    outlineonprimary: '#fff',
-    outoffocus: '#ccc',
-    grey: '#e9ecef',
-    highlightbackground: '#d9e1e8',
-    tablestripebackground: '#f2f2f2'
+    disabledcolor: '#EDEBE9',
+    white: '#FFFFFF'
   },
   semantic: {
     primary: {
@@ -149,7 +116,7 @@ export const ThemeOverride = definePreset(Material, {
     colorScheme: {
       light: {
         surface: {
-          0: '#ffffff',
+          0: '{white}',
           50: '{greyscale.50}',
           100: '{greyscale.100}',
           200: '{greyscale.200}',
@@ -164,7 +131,7 @@ export const ThemeOverride = definePreset(Material, {
         },
         primary: {
           color: '{primary.950}',
-          contrastColor: '#ffffff',
+          contrastColor: '{white}',
           hoverColor: '{primary.900}',
           activeColor: '{primary.800}'
         },
@@ -177,7 +144,11 @@ export const ThemeOverride = definePreset(Material, {
           hoverBorderColor: '{primary.700}',
           focusBorderColor: '{primary.300}',
           invalidBorderColor: '{red.500}',
-          floatLabelInvalidColor: '{red.500}'
+          floatLabelInvalidColor: '{red.500}',
+          disabledBackground: '{disabledcolor}',
+          disabledColor: '{primary.color}',
+          paddingX: '0.5rem',
+          paddingY: '0.5rem'
         },
         highlight: {
           background: '{surface.0}'
@@ -191,6 +162,11 @@ export const ThemeOverride = definePreset(Material, {
     }
   },
   components: {
+    accordion: {
+      header: {
+        padding: '1rem'
+      }
+    },
     button: {
       root: {
         sm: {
@@ -205,10 +181,28 @@ export const ThemeOverride = definePreset(Material, {
         }
       },
       colorScheme: {
-        light: {}
+        light: {
+          root: {
+            danger: {}
+          }
+        }
       }
     },
     menubar: {
+      baseItem: {
+        borderRadius: 'none'
+      },
+      item: {
+        focusBackground: '{primary.activeColor}',
+        focusColor: '{surface.0}',
+        activeBackground: '{primary.activeColor}',
+        activeColor: '{surface.0}',
+        borderRadius: 'none',
+        padding: '0.45rem 0.45rem'
+      },
+      submenu: {
+        padding: 'none'
+      },
       colorScheme: {
         light: {
           root: {
@@ -227,11 +221,11 @@ export const ThemeOverride = definePreset(Material, {
       root: {},
       icon: {
         size: '10px',
-        checkedColor: '{white.50}',
-        checkedHoverColor: '{white.50}',
+        checkedColor: '{disabledcolor}',
+        checkedHoverColor: '{disabledcolor}',
         disabledColor: '{form.field.disabled.color}'
       },
-      css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick}'
+      css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick }'
     },
     tabs: {
       tab: {
@@ -256,11 +250,7 @@ export const ThemeOverride = definePreset(Material, {
                 shadow: 'none'
               }
             }
-          },
-          warn: {},
-          error: {},
-          secondary: {},
-          contrast: {}
+          }
         }
       }
     }

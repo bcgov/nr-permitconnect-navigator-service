@@ -150,6 +150,7 @@ function confirmSubmit(data: GenericObject) {
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => onSubmit(submitData)
   });
 }

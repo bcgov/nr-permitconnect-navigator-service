@@ -30,7 +30,6 @@ body::after {
 
 body {
   min-height: 100vh;
-  // color: var(--text-color);
   background: white;
   transition:
     color 0.5s,
@@ -77,7 +76,6 @@ p {
 }
 
 a {
-  text-decoration: none;
   color: var(--p-primary-color);
   &:hover {
     text-decoration: underline;
@@ -156,12 +154,11 @@ label {
   .p-paginator {
     justify-content: right;
   }
-}
 
-// .p-tab:hover {
-//   border-bottom-width: 2px;
-//   border-color: var(--p-primary-color) !important;
-// }
+  .p-datatable-frozen-column {
+    background: inherit !important;
+  }
+}
 
 .header-right .p-datatable-column-header-content {
   justify-content: right;

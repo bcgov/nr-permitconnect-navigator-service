@@ -86,8 +86,8 @@ function handleCreateNewActivity() {
       }
     },
     acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
-    rejectProps: { outlined: true }
+    rejectProps: { outlined: true },
+    rejectLabel: 'Cancel'
   });
 }
 
@@ -103,6 +103,7 @@ function onDelete(submissionId: string, activityId: string) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       submissionService
         .updateIsDeletedFlag(submissionId, true)
