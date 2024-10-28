@@ -9,12 +9,6 @@ export type Enquiry = {
   enquiryType: string | null;
   submittedAt: string;
   submittedBy: string;
-  contactFirstName: string | null;
-  contactLastName: string | null;
-  contactPhoneNumber: string | null;
-  contactEmail: string | null;
-  contactPreference: string | null;
-  contactApplicantRelationship: string | null;
   isRelated: string | null;
   relatedActivityId: string | null;
   enquiryDescription: string | null;
