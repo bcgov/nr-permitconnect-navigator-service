@@ -73,7 +73,7 @@ router.put(
 
 // Send an email with the confirmation of submission
 router.put(
-  '/emailConfirmation',
+  '/email',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.emailConfirmation,
   (req: Request<never, never, Email>, res: Response, next: NextFunction): void => {

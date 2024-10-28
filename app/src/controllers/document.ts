@@ -31,6 +31,11 @@ const controller = {
   async deleteDocument(req: Request<{ documentId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await documentService.deleteDocument(req.params.documentId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Document not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

@@ -393,6 +393,11 @@ const controller = {
   deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.deleteSubmission(req.params.submissionId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -411,6 +416,10 @@ const controller = {
   getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         if (response?.submittedBy !== getCurrentUsername(req.currentContext)) {
@@ -485,6 +494,10 @@ const controller = {
           ...submission,
           ...generateUpdateStamps(req.currentContext)
         });
+
+        if (!result) {
+          return res.status(404).json({ message: 'Submission not found' });
+        }
       } else {
         // Create new submission
         result = await submissionService.createSubmission({
@@ -523,6 +536,10 @@ const controller = {
           ...submission,
           ...generateUpdateStamps(req.currentContext)
         });
+
+        if (!result) {
+          return res.status(404).json({ message: 'Submission not found' });
+        }
       } else {
         // Create new submission
         result = await submissionService.createSubmission({
@@ -555,6 +572,11 @@ const controller = {
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -567,6 +589,11 @@ const controller = {
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

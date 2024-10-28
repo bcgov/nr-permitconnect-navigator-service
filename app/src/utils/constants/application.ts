@@ -1,7 +1,5 @@
 import { BasicResponse, GroupName } from '../enums/application';
 
-export const ACTIVITY_ID_LENGTH = 8;
-
 /** Default CORS settings used across the entire application */
 export const DEFAULTCORS = Object.freeze({
   /** Tells browsers to cache preflight requests for Access-Control-Max-Age seconds */

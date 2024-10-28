@@ -21,6 +21,10 @@ const controller = {
     try {
       const response = await noteService.deleteNote(req.params.noteId, generateUpdateStamps(req.currentContext));
 
+      if (!response) {
+        return res.status(404).json({ message: 'Note not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -81,6 +85,10 @@ const controller = {
         ...generateCreateStamps(req.currentContext),
         ...generateUpdateStamps(req.currentContext)
       });
+
+      if (!response) {
+        return res.status(404).json({ message: 'Note not found' });
+      }
 
       res.status(200).json(response);
     } catch (e: unknown) {
