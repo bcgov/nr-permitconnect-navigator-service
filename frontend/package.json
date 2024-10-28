@@ -1,10 +1,10 @@
 {
   "name": "nr-permitting-navigator-service-frontend",
   "version": "0.4.0",
+  "license": "Apache-2.0",
   "private": true,
   "description": "",
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
-  "license": "Apache-2.0",
   "scripts": {
     "build": "vite build",
     "build:dts": "vue-tsc --declaration --emitDeclarationOnly",

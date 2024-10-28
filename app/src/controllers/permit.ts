@@ -21,6 +21,11 @@ const controller = {
   deletePermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.deletePermit(req.params.permitId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Permit not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -51,6 +56,11 @@ const controller = {
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
+
+      if (!response) {
+        return res.status(404).json({ message: 'Permit not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
