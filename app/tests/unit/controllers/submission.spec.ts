@@ -218,8 +218,6 @@ const SUBMISSION_1 = {
   submittedBy: '100-100',
   locationPIDs: null,
   companyNameRegistered: null,
-  contactFirstName: null,
-  contactLastName: null,
   contactPhoneNumber: null,
   contactEmail: null,
   contactPreference: null,
@@ -398,10 +396,7 @@ describe('createSubmission', () => {
 
     const req = {
       body: {
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
+        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -429,8 +424,6 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -741,10 +734,7 @@ describe('submitDraft', () => {
       body: {
         activityId: '00000000',
         submissionId: '11111111',
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
+        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -772,8 +762,6 @@ describe('submitDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -965,10 +953,7 @@ describe('updateDraft', () => {
       body: {
         activityId: '00000000',
         submissionId: '11111111',
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
+        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -996,8 +981,6 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
