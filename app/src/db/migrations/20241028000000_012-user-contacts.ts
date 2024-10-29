@@ -85,29 +85,51 @@ export async function up(knex: Knex): Promise<void> {
 
       // Split data
       .then(() =>
-        knex.schema.raw(`DROP TABLE IF EXISTS temp;
-          DELETE FROM public.activity_contact;
-          DELETE FROM public.contact;
+        knex.schema.raw(`DO $$
+          DECLARE ver integer;
+          BEGIN
+            SELECT cast(array_to_string(numbers[1 : array_upper(numbers,1) -1], '.') as integer)
+              FROM
+            (SELECT string_to_array(current_setting('server_version'), '.') numbers) n INTO ver;
 
-          CREATE TABLE temp (contact_id uuid, activity_id text, contact_first_name text, contact_last_name text, contact_email text, contact_phone_number text, contact_preference text, contact_applicant_relationship text);
+            DROP TABLE IF EXISTS temp;
+            DELETE FROM public.activity_contact;
+            DELETE FROM public.contact;
 
-          INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-          SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-          FROM public.submission;
+            CREATE TABLE temp (contact_id uuid, activity_id text, contact_first_name text, contact_last_name text, contact_email text, contact_phone_number text, contact_preference text, contact_applicant_relationship text);
 
-          INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-          SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-          FROM public.enquiry;
+            -- gen_random_uuid does not exist until PSQL13. 12 and lower required a trusted extension
+            IF ver >= 13
+            THEN
+              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
+              SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
+              FROM public.submission;
 
-          INSERT INTO public.contact (contact_id, first_name, last_name, email, phone_number, contact_preference, contact_applicant_relationship)
-          SELECT contact_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-          FROM public.temp;
+              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
+              SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
+              FROM public.enquiry;
+            ELSE
+              CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-          INSERT INTO public.activity_contact (activity_id, contact_id)
-          SELECT activity_id, contact_id
-          FROM public.temp;
+              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
+              SELECT uuid_generate_v4(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
+              FROM public.submission;
 
-          DROP TABLE IF EXISTS temp;`)
+              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
+              SELECT uuid_generate_v4(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
+              FROM public.enquiry;
+            END IF;
+
+            INSERT INTO public.contact (contact_id, first_name, last_name, email, phone_number, contact_preference, contact_applicant_relationship)
+            SELECT contact_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
+            FROM public.temp;
+
+            INSERT INTO public.activity_contact (activity_id, contact_id)
+            SELECT activity_id, contact_id
+            FROM public.temp;
+
+            DROP TABLE IF EXISTS temp;
+          END $$;`)
       )
 
       // Drop old columns
@@ -216,3 +238,20 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('contact'))
   );
 }
+
+/*
+DO $$
+DECLARE ver integer;
+BEGIN
+  SELECT cast(array_to_string(numbers[1 : array_upper(numbers,1) -1], '.') as integer)
+    FROM
+  (SELECT string_to_array(current_setting('server_version'), '.') numbers) INTO ver;
+
+  IF ver >= 13
+  THEN
+    RAISE notice 'greater';
+  ELSE
+    RAISE notice 'lower';
+  END IF;
+END $$;
+*/
