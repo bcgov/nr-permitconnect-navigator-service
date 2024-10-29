@@ -519,7 +519,6 @@ onMounted(async () => {
         :options="YES_NO_UNSURE_LIST"
         @on-change="
           (e: SelectChangeEvent) => {
-            console.log('subForm', e);
             if (e.value !== BasicResponse.YES) setFieldValue('rentalUnits', null);
           }
         "

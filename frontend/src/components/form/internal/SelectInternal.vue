@@ -71,3 +71,9 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     {{ label }}
   </label>
 </template>
+
+<style scoped lang="scss">
+input::placeholder {
+  font-size: 3rem;
+}
+</style>

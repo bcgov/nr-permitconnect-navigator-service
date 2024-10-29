@@ -54,18 +54,6 @@ const toHousing = (): void => {
   background-color: $app-primary;
   opacity: 0.9;
 }
-
-.p-button {
-  border-width: 2px;
-  &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
-    color: $app-primary;
-    &:not(.p-button-outlined, .p-button-text) {
-      background-color: white;
-      border-color: white;
-      color: $app-primary;
-    }
-  }
-}
 </style>
 
 <style scoped lang="scss">

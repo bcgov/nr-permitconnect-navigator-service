@@ -282,6 +282,8 @@ watch(showCompleted, () => {
         <Accordion
           v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
           v-model:active-index="accordionIndex"
+          collapse-icon="pi pi-chevron-up"
+          expand-icon="pi pi-chevron-down"
           class="mb-3"
         >
           <AccordionPanel>
