@@ -7,6 +7,8 @@
  */
 
 /* eslint-disable max-len */
+import { v4 as uuidv4 } from 'uuid';
+
 import stamps from '../stamps';
 
 import type { Knex } from 'knex';
@@ -84,43 +86,51 @@ export async function up(knex: Knex): Promise<void> {
       )
 
       // Split data
-      .then(() =>
-        knex.schema.raw(`DO $$
-          DECLARE ver integer;
-          BEGIN
-            SELECT cast(array_to_string(numbers[1 : array_upper(numbers,1) -1], '.') as integer)
-              FROM
-            (SELECT string_to_array(current_setting('server_version'), '.') numbers) n INTO ver;
+      .then(async () => {
+        await knex.raw(`DROP TABLE IF EXISTS temp;
+             DELETE FROM public.activity_contact;
+             DELETE FROM public.contact;
 
-            DROP TABLE IF EXISTS temp;
-            DELETE FROM public.activity_contact;
-            DELETE FROM public.contact;
+             CREATE TABLE temp (contact_id uuid, activity_id text, contact_first_name text, contact_last_name text, contact_email text, contact_phone_number text, contact_preference text, contact_applicant_relationship text);`);
 
-            CREATE TABLE temp (contact_id uuid, activity_id text, contact_first_name text, contact_last_name text, contact_email text, contact_phone_number text, contact_preference text, contact_applicant_relationship text);
+        let submissions = await knex
+          .select(
+            's.activity_id',
+            's.contact_first_name',
+            's.contact_last_name',
+            's.contact_email',
+            's.contact_phone_number',
+            's.contact_preference',
+            's.contact_applicant_relationship'
+          )
+          .from({ s: 'public.submission' });
 
-            -- gen_random_uuid does not exist until PSQL13. 12 and lower required a trusted extension
-            IF ver >= 13
-            THEN
-              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-              SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-              FROM public.submission;
+        submissions = submissions.map((x) => ({
+          contact_id: uuidv4(),
+          ...x
+        }));
 
-              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-              SELECT gen_random_uuid(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-              FROM public.enquiry;
-            ELSE
-              CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        let enquiries = await knex
+          .select(
+            'e.activity_id',
+            'e.contact_first_name',
+            'e.contact_last_name',
+            'e.contact_email',
+            'e.contact_phone_number',
+            'e.contact_preference',
+            'e.contact_applicant_relationship'
+          )
+          .from({ e: 'public.enquiry' });
 
-              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-              SELECT uuid_generate_v4(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-              FROM public.submission;
+        enquiries = enquiries.map((x) => ({
+          contact_id: uuidv4(),
+          ...x
+        }));
 
-              INSERT INTO temp (contact_id, activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship)
-              SELECT uuid_generate_v4(), activity_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
-              FROM public.enquiry;
-            END IF;
+        if (submissions && submissions.length) await knex('public.temp').insert(submissions);
+        if (enquiries && enquiries.length) await knex('public.temp').insert(enquiries);
 
-            INSERT INTO public.contact (contact_id, first_name, last_name, email, phone_number, contact_preference, contact_applicant_relationship)
+        await knex.raw(`INSERT INTO public.contact (contact_id, first_name, last_name, email, phone_number, contact_preference, contact_applicant_relationship)
             SELECT contact_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship
             FROM public.temp;
 
@@ -128,9 +138,8 @@ export async function up(knex: Knex): Promise<void> {
             SELECT activity_id, contact_id
             FROM public.temp;
 
-            DROP TABLE IF EXISTS temp;
-          END $$;`)
-      )
+            DROP TABLE IF EXISTS temp;`);
+      })
 
       // Drop old columns
       .then(() =>

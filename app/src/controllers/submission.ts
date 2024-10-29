@@ -223,14 +223,8 @@ const controller = {
       investigatePermits: Array<Permit> = [];
 
     if (data.applicant) {
-      applicant = {
-        contactFirstName: data.applicant.contactFirstName,
-        contactLastName: data.applicant.contactLastName,
-        contactPhoneNumber: data.applicant.contactPhoneNumber,
-        contactEmail: data.applicant.contactEmail,
-        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
-        contactPreference: data.applicant.contactPreference
-      };
+      // TODO: User contact information
+      applicant = {};
     }
 
     if (data.basic) {
