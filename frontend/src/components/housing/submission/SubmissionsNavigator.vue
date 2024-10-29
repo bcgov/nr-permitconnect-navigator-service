@@ -14,6 +14,7 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionPanel,
+  ToggleSwitch,
   Tab,
   Tabs,
   TabList,
@@ -262,6 +263,18 @@ watch(showCompleted, () => {
 </script>
 
 <template>
+  <div
+    v-if="showToggle"
+    class="flex justify-content-end mr-3"
+  >
+    <span class="app-primary-color">
+      {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
+    </span>
+    <ToggleSwitch
+      v-model="showCompleted"
+      class="ml-2"
+    />
+  </div>
   <Tabs
     v-if="!loading"
     value="0"
