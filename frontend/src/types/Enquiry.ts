@@ -1,5 +1,7 @@
 import type { IStamps } from '@/interfaces';
 
+import { ApplicationStatus } from '@/utils/enums/housing';
+
 export type Enquiry = {
   enquiryId: string;
   activityId: string;
@@ -18,6 +20,6 @@ export type Enquiry = {
   enquiryDescription?: string;
   applyForPermitConnect?: string;
   intakeStatus: string;
-  enquiryStatus: string;
+  enquiryStatus: ApplicationStatus;
   waitingOn?: string;
 } & Partial<IStamps>;

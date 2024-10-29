@@ -15,7 +15,8 @@ import type { Ref } from 'vue';
 import type { Permit, PermitType } from '@/types';
 
 // Props
-const { permit } = defineProps<{
+const { editable, permit } = defineProps<{
+  editable?: boolean;
   permit: Permit;
 }>();
 
@@ -65,7 +66,7 @@ watchEffect(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
+          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
           @click="permitModalVisible = true"
         >
           <font-awesome-icon

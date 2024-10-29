@@ -9,11 +9,11 @@ import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNaviga
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
-import { Accordion, AccordionTab, TabPanel, TabView, useToast } from '@/lib/primevue';
+import { Accordion, AccordionTab, InputSwitch, TabPanel, TabView, useToast } from '@/lib/primevue';
 import { enquiryService, noteService, permitService, submissionService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
-import { SubmissionType } from '@/utils/enums/housing';
+import { ApplicationStatus, SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
@@ -24,6 +24,11 @@ import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/ty
 const NOTES_TAB_INDEX = {
   ENQUIRY: 1,
   SUBMISSION: 3
+};
+
+const TAB_INDEX = {
+  SUBMISSION: 0,
+  ENQUIRY: 1
 };
 
 // Store
@@ -42,6 +47,8 @@ const myBringForward: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const permits: Ref<Array<Permit>> = ref([]);
 const loading: Ref<boolean> = ref(true);
+const showCompleted: Ref<boolean> = ref(false);
+const showToggle: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
@@ -218,10 +225,25 @@ watch(activeTabIndex, (newIndex) => {
       }
     });
   }
+
+  // Show toggle only for submissions and enquiries tab
+  showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY ? true : false;
 });
 </script>
 
 <template>
+  <div
+    v-if="showToggle"
+    class="flex justify-content-end mr-3"
+  >
+    <span class="app-primary-color">
+      {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
+    </span>
+    <InputSwitch
+      v-model="showCompleted"
+      class="ml-2"
+    />
+  </div>
   <TabView
     v-if="!loading"
     v-model:activeIndex="activeTabIndex"
@@ -261,14 +283,22 @@ watch(activeTabIndex, (newIndex) => {
 
       <SubmissionListNavigator
         :loading="loading"
-        :submissions="submissions"
+        :submissions="
+          showCompleted
+            ? submissions.filter((x) => x.applicationStatus === ApplicationStatus.COMPLETED)
+            : submissions.filter((x) => x.applicationStatus !== ApplicationStatus.COMPLETED)
+        "
         @submission:delete="onSubmissionDelete"
       />
     </TabPanel>
     <TabPanel header="Enquiries">
       <EnquiryListNavigator
         :loading="loading"
-        :enquiries="enquiries"
+        :enquiries="
+          showCompleted
+            ? enquiries.filter((x) => x.enquiryStatus === ApplicationStatus.COMPLETED)
+            : enquiries.filter((x) => x.enquiryStatus !== ApplicationStatus.COMPLETED)
+        "
         @enquiry:delete="onEnquiryDelete"
       />
     </TabPanel>
