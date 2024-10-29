@@ -338,18 +338,6 @@ async function onSaveDraft(
   }
 }
 
-function onStepChange(stepNumber: number) {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
-
-  // Save a draft on very first stepper navigation if no activityId yet
-  // Need this to generate an activityId for the file uploads
-  if (!formRef.value?.values.activityId) {
-    onSaveDraft(formRef.value?.values, true, false);
-  }
-}
-
 async function onSubmit(data: any) {
   editable.value = false;
 
@@ -1286,7 +1274,11 @@ watchEffect(() => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <Accordion :value="parcelAccordionIndex">
+                <Accordion
+                  collapse-icon="pi pi-chevron-up"
+                  expand-icon="pi pi-chevron-down"
+                  :value="parcelAccordionIndex"
+                >
                   <AccordionPanel value="0">
                     <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
                     <AccordionContent>
@@ -1318,7 +1310,12 @@ watchEffect(() => {
                     </AccordionContent>
                   </AccordionPanel>
                 </Accordion>
-                <Accordion :value="geomarkAccordionIndex">
+                <Accordion
+                  collapse-icon="pi pi-chevron-up"
+                  expand-icon="pi pi-chevron-down"
+                  :value="geomarkAccordionIndex"
+                  class="mt-4 mb-2"
+                >
                   <AccordionPanel value="0">
                     <AccordionHeader>Geomark</AccordionHeader>
                     <AccordionContent>
@@ -1695,13 +1692,16 @@ watchEffect(() => {
   box-shadow: none;
 }
 
+.test {
+  background-color: green !important;
+}
+
 :deep(.p-step) {
   button {
     padding: 0;
   }
 }
 
-//////////////
 :deep(.p-invalid),
 :deep(.p-card.p-component:has(.p-invalid)) {
   border-color: $app-error !important;
@@ -1715,6 +1715,7 @@ watchEffect(() => {
   margin-bottom: 1rem;
 
   .section-header {
+    font-weight: bold;
     padding-left: 1rem;
     padding-right: 0.5rem;
   }
@@ -1739,10 +1740,6 @@ watchEffect(() => {
   }
 }
 
-// :deep(.p-message-wrapper) {
-//   padding: 0.5rem;
-// }
-
 :deep(.p-stepper-header:first-child) {
   padding-left: 0;
 
@@ -1758,11 +1755,6 @@ watchEffect(() => {
     padding-right: 0;
   }
 }
-
-// :deep(.p-stepper-panels) {
-//   padding-left: 0;
-//   padding-right: 0;
-// }
 
 .lat-long-btn {
   height: 2.3rem;

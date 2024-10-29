@@ -148,7 +148,8 @@ export const ThemeOverride = definePreset(Material, {
           disabledBackground: '{disabledcolor}',
           disabledColor: '{primary.color}',
           paddingX: '0.5rem',
-          paddingY: '0.5rem'
+          paddingY: '0.5rem',
+          placeholderColor: '{surface.700}'
         },
         highlight: {
           background: '{surface.0}'
@@ -183,12 +184,28 @@ export const ThemeOverride = definePreset(Material, {
       colorScheme: {
         light: {
           root: {
-            danger: {}
+            secondary: {
+              background: '{surface.0}',
+              color: '{primary.color}'
+            }
           }
         }
       }
     },
+    card: {
+      body: {
+        padding: '1rem'
+      }
+    },
+    datatable: {
+      paginatorBottom: {
+        borderWidth: '0'
+      }
+    },
     menubar: {
+      root: {
+        gap: '0'
+      },
       baseItem: {
         borderRadius: 'none'
       },
@@ -218,7 +235,6 @@ export const ThemeOverride = definePreset(Material, {
       }
     },
     radiobutton: {
-      root: {},
       icon: {
         size: '10px',
         checkedColor: '{disabledcolor}',
@@ -226,6 +242,18 @@ export const ThemeOverride = definePreset(Material, {
         disabledColor: '{form.field.disabled.color}'
       },
       css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick }'
+    },
+    progressspinner: {
+      colorScheme: {
+        light: {
+          root: {
+            'color.1': '{primary.color}',
+            'color.2': '{primary.color}',
+            'color.3': '{primary.color}',
+            'color.4': '{primary.color}'
+          }
+        }
+      }
     },
     tabs: {
       tab: {

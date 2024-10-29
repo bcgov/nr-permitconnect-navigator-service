@@ -132,13 +132,11 @@ label {
 
 /* ---------- primevue overrides ------------ */
 
-.p-accordionpanel {
-  .p-accordionheader {
-    justify-content: flex-start;
-    .p-icon {
-      order: -1;
-      margin-right: 1rem;
-    }
+.p-accordionheader {
+  justify-content: flex-start !important;
+  .p-accordionheader-toggle-icon {
+    order: -1;
+    margin-right: 1rem;
   }
 }
 
@@ -153,19 +151,10 @@ label {
   }
 }
 
-.p-tab {
-  text-decoration: underline;
-  font-size: var(--p-font-size);
-}
-
 /* datatable */
 .p-datatable {
   .p-paginator {
     justify-content: right;
-  }
-
-  .p-datatable-frozen-column {
-    background: inherit !important;
   }
 }
 
@@ -178,6 +167,33 @@ label {
   display: flex;
   flex-direction: row-reverse;
   justify-content: right !important;
+}
+
+/* tabs */
+.p-tab {
+  text-decoration: underline;
+  font-size: var(--p-font-size);
+}
+
+/* tooltip */
+.p-tooltip {
+  &.p-tooltip-top .p-tooltip-arrow {
+      border-top-color: var(--p-surface-800);
+    }
+  &.p-tooltip-right .p-tooltip-arrow {
+    border-right-color: var(--p-surface-800);
+  }
+  &.p-tooltip-bottom .p-tooltip-arrow {
+    border-bottom-color: var(--p-surface-800);
+  }
+  &.p-tooltip-left .p-tooltip-arrow {
+    border-left-color: var(--p-surface-800);
+  }
+
+  .p-tooltip-text {
+    background-color: var(--p-surface-800);
+    color: var(--p-surface-0);
+  }
 }
 
 .app-error-message {

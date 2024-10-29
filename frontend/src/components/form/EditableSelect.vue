@@ -67,3 +67,13 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+:deep(.p-select-label::placeholder) {
+  font-size: 1rem;
+}
+
+:deep(input) {
+  height: 2.35rem !important;
+}
+</style>

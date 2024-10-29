@@ -84,22 +84,20 @@ const items = ref([
 </template>
 
 <style scoped lang="scss">
-.p-button {
+:deep(.p-button) {
   border-width: 2px;
   border-style: solid;
   border-radius: 0.5rem;
-  border-color: $app-primary;
+  border-color: var(--p-primary-color);
   width: 550px;
   height: 80px;
-  background-color: #fff;
-  color: $app-primary;
+  justify-content: left;
   box-shadow: 0 6px 6px -1px rgb(145, 145, 145);
-}
-
-.p-button:hover {
-  opacity: 1;
-  background-color: $app-primary;
-  color: $app-outline-on-primary;
+  &:hover {
+    background-color: var(--p-primary-color);
+    border-color: var(--p-primary-color);
+    color: var(--p-white);
+  }
 }
 
 .housing {

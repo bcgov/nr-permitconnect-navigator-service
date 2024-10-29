@@ -18,7 +18,10 @@ const toHousing = (): void => {
       <h1 class="font-bold mb-0">Welcome to the</h1>
       <h1 class="font-bold mt-0">Permit Connect Services</h1>
       <h2 class="mb-3">Choose your project type</h2>
-      <Button @click="toHousing">
+      <Button
+        severity="secondary"
+        @click="toHousing"
+      >
         <font-awesome-icon
           icon="fa-solid fa-house"
           class="mr-1"
@@ -51,18 +54,6 @@ const toHousing = (): void => {
   height: 100%;
   background-color: $app-primary;
   opacity: 0.9;
-}
-
-.p-button {
-  border-width: 2px;
-  &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
-    color: $app-primary;
-    &:not(.p-button-outlined, .p-button-text) {
-      background-color: white;
-      border-color: white;
-      color: $app-primary;
-    }
-  }
 }
 </style>
 

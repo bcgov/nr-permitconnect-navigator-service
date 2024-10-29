@@ -542,6 +542,7 @@ onBeforeMount(async () => {
   margin-bottom: 1rem;
 
   .section-header {
+    font-weight: bold;
     padding-left: 1rem;
     padding-right: 0.5rem;
   }

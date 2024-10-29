@@ -37,6 +37,7 @@ const { t } = useI18n();
   margin-bottom: 1rem;
 
   .section-header {
+    font-weight: bold;
     padding-left: 1rem;
     padding-right: 0.5rem;
   }
@@ -46,8 +47,6 @@ const { t } = useI18n();
   }
 
   :deep(.p-card-body) {
-    padding-bottom: 0.5rem;
-
     padding-left: 0;
     padding-right: 0;
   }

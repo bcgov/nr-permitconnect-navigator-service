@@ -168,13 +168,18 @@ const filteredDocuments = computed(() => {
 </template>
 
 <style scoped lang="scss">
-:deep(.p-fileupload-buttonbar) {
+:deep(.p-fileupload-header) {
   display: none;
 }
 
 :deep(.p-fileupload-content) {
   padding: 0;
   border: none;
+
+  .p-button {
+    padding: 0;
+    border: none;
+  }
 }
 
 .file-input {
