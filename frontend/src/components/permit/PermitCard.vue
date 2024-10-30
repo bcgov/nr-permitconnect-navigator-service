@@ -2,11 +2,13 @@
 import { storeToRefs } from 'pinia';
 import { computed, ref, watchEffect } from 'vue';
 
+import StatusPill from '@/components/common/StatusPill.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAuthZStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
+import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -46,7 +48,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Card>
+  <Card :class="{ completed: cardData.status === PermitStatus.COMPLETED }">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex-grow-1">
@@ -56,6 +58,10 @@ watchEffect(() => {
             <span>{{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}</span>
           </p>
         </div>
+        <StatusPill
+          v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
+          :auth-status="permit.authStatus"
+        />
         <Button
           class="p-button-outlined"
           aria-label="Edit"
@@ -105,13 +111,14 @@ watchEffect(() => {
               <span class="key font-bold">Submitted date:</span>
               {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
             </p>
-            <p class="col-12">
-              <span class="key font-bold">Authorization Status:</span>
-              {{ cardData.authStatus }}
-            </p>
+
             <p class="col-12">
               <span class="key font-bold">Status verified date:</span>
               {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Status:</span>
+              {{ cardData.status }}
             </p>
           </div>
         </div>
@@ -158,15 +165,25 @@ p {
 }
 
 .p-card {
-  border-style: solid;
-  border-width: 1px;
-
+  border-radius: 1em;
   :deep(.p-card-content) {
     padding-bottom: 0;
   }
+
+  :deep(.p-card-body) {
+    border-style: solid;
+    border-width: 0.06em;
+    border-radius: 1em;
+    border-color: #05366260;
+    box-shadow: 0em 0.1em 0.1em 0.1em #0000001a;
+  }
+}
+
+.completed {
+  background-color: #05366210;
 }
 
 .darkgrey {
-  color: darkgrey;
+  color: #605e5c;
 }
 </style>
