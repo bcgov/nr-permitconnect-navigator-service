@@ -1,5 +1,6 @@
 import { IStamps } from '../interfaces/IStamps';
 
+import type { Contact } from './Contact';
 import type { User } from './User';
 
 export type Submission = {
@@ -52,5 +53,6 @@ export type Submission = {
   housingCoopDescription: string | null;
   submissionType: string | null;
   relatedEnquiries: string | null;
+  contacts: Array<Contact>;
   user: User | null;
 } & Partial<IStamps>;

@@ -35,6 +35,7 @@ import {
 import { BasicResponse, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
+import { emailValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -77,7 +78,19 @@ const formSchema = object({
   submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
-  ...applicantValidator,
+  contacts: array().of(
+    object({
+      contactApplicantRelationship: string()
+        .required()
+        .oneOf(PROJECT_RELATIONSHIP_LIST)
+        .label('Relationship to project'),
+      contactPreference: string().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
+      email: emailValidator('Contact email must be valid').required().label('Contact email'),
+      firstName: string().required().max(255).label('Contact first name'),
+      lastName: string().required().max(255).label('Contact last name'),
+      phoneNumber: string().required().label('Contact phone number')
+    })
+  ),
   companyNameRegistered: string().notRequired().max(255).label('Company'),
   consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
   isDevelopedInBC: string().when('companyNameRegistered', {
@@ -254,14 +267,8 @@ onMounted(async () => {
     submissionType: submission.submissionType,
     submittedAt: new Date(submission.submittedAt),
     relatedEnquiries: submission.relatedEnquiries,
-    contactFirstName: submission.contactFirstName,
-    contactLastName: submission.contactLastName,
     companyNameRegistered: submission.companyNameRegistered,
     isDevelopedInBC: submission.isDevelopedInBC,
-    contactApplicantRelationship: submission.contactApplicantRelationship,
-    contactPreference: submission.contactPreference,
-    contactPhoneNumber: submission.contactPhoneNumber,
-    contactEmail: submission.contactEmail,
     consentToFeedback: submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     projectName: submission.projectName,
     projectDescription: submission.projectDescription,
@@ -295,6 +302,7 @@ onMounted(async () => {
     aaiUpdated: submission.aaiUpdated,
     astNotes: submission.astNotes,
     intakeStatus: submission.intakeStatus,
+    contacts: submission.contacts,
     user: assigneeOptions.value[0] ?? null,
     applicationStatus: submission.applicationStatus,
     waitingOn: submission.waitingOn
@@ -355,13 +363,13 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        name="contactFirstName"
+        :name="`contacts.${0}.firstName`"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactLastName"
+        :name="`contacts.${0}.lastName`"
         label="Last name"
         :disabled="!editable"
       />
@@ -388,28 +396,28 @@ onMounted(async () => {
       />
       <Dropdown
         class="col-3"
-        name="contactApplicantRelationship"
+        :name="`contacts.${0}.contactApplicantRelationship`"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        name="contactPreference"
+        :name="`contacts.${0}.contactPreference`"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        name="contactPhoneNumber"
+        :name="`contacts.${0}.phoneNumber`"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactEmail"
+        :name="`contacts.${0}.email`"
         label="Contact email"
         :disabled="!editable"
       />
