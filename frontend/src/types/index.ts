@@ -3,6 +3,7 @@ export type { ATSClientResource } from './ATSClientResource';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';
 export type { BringForward } from './BringForward';
 export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';
+export type { Contact } from './Contact';
 export type { Document } from './Document';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';

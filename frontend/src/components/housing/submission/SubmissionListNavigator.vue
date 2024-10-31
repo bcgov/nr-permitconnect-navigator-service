@@ -255,13 +255,13 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
-      field="contactFirstName"
+      :field="`contacts.0.firstName`"
       header="First name"
       :sortable="true"
       style="min-width: 150px"
     />
     <Column
-      field="contactLastName"
+      field="contacts.0.lastName"
       header="Last name"
       :sortable="true"
       style="min-width: 150px"

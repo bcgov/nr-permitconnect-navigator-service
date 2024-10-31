@@ -1,5 +1,6 @@
 export { default as activity } from './activity';
 export { default as access_request } from './access_request';
+export { default as contact } from './contact';
 export { default as document } from './document';
 export { default as enquiry } from './enquiry';
 export { default as identity_provider } from './identity_provider';

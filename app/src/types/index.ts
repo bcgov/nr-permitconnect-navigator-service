@@ -6,6 +6,7 @@ export type { BceidSearchParameters } from './BceidSearchParameters';
 export type { BringForward } from './BringForward';
 export type { ChefsFormConfig, ChefsFormConfigData } from './ChefsFormConfig';
 export type { ChefsSubmissionExport } from './ChefsSubmissionExport';
+export type { Contact } from './Contact';
 export type { CurrentAuthorization } from './CurrentAuthorization';
 export type { CurrentContext } from './CurrentContext';
 export type { Document } from './Document';

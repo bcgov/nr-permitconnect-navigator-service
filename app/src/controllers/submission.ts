@@ -2,7 +2,14 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, emailService, enquiryService, submissionService, permitService } from '../services';
+import {
+  activityService,
+  contactService,
+  emailService,
+  enquiryService,
+  submissionService,
+  permitService
+} from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
@@ -19,6 +26,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   ChefsFormConfig,
   ChefsFormConfigData,
+  Contact,
   Submission,
   ChefsSubmissionExport,
   Permit,
@@ -579,6 +587,22 @@ const controller = {
 
   updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
+      const contacts = req.body.contacts;
+
+      await Promise.all(
+        contacts.map(async (x: Contact) => {
+          if (!x.contactId)
+            await contactService.createContact(req.body.activityId, {
+              ...x,
+              contactId: uuidv4(),
+              ...generateCreateStamps(req.currentContext)
+            });
+          else {
+            await contactService.updateContact({ ...x, ...generateCreateStamps(req.currentContext) });
+          }
+        })
+      );
+
       const response = await submissionService.updateSubmission({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
