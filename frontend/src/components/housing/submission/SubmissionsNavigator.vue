@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -134,6 +134,18 @@ function getQueryObject(bf: BringForward) {
   };
 }
 
+const getSubmissions = computed(() => {
+  return showCompleted.value
+    ? submissions.value.filter((x) => x.applicationStatus === ApplicationStatus.COMPLETED)
+    : submissions.value.filter((x) => x.applicationStatus !== ApplicationStatus.COMPLETED);
+});
+
+const getEnquiries = computed(() => {
+  return showCompleted.value
+    ? enquiries.value.filter((x) => x.enquiryStatus === ApplicationStatus.COMPLETED)
+    : enquiries.value.filter((x) => x.enquiryStatus !== ApplicationStatus.COMPLETED);
+});
+
 function onEnquiryDelete(enquiryId: string, activityId: string) {
   enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
   bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
@@ -227,7 +239,7 @@ watch(activeTabIndex, (newIndex) => {
   }
 
   // Show toggle only for submissions and enquiries tab
-  showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY ? true : false;
+  showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY;
 });
 </script>
 
@@ -283,22 +295,14 @@ watch(activeTabIndex, (newIndex) => {
 
       <SubmissionListNavigator
         :loading="loading"
-        :submissions="
-          showCompleted
-            ? submissions.filter((x) => x.applicationStatus === ApplicationStatus.COMPLETED)
-            : submissions.filter((x) => x.applicationStatus !== ApplicationStatus.COMPLETED)
-        "
+        :submissions="getSubmissions"
         @submission:delete="onSubmissionDelete"
       />
     </TabPanel>
     <TabPanel header="Enquiries">
       <EnquiryListNavigator
         :loading="loading"
-        :enquiries="
-          showCompleted
-            ? enquiries.filter((x) => x.enquiryStatus === ApplicationStatus.COMPLETED)
-            : enquiries.filter((x) => x.enquiryStatus !== ApplicationStatus.COMPLETED)
-        "
+        :enquiries="getEnquiries"
         @enquiry:delete="onEnquiryDelete"
       />
     </TabPanel>

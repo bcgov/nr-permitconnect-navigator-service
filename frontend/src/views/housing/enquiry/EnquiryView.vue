@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
@@ -10,6 +10,7 @@ import { Button, Message, TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
 import { useAuthZStore, useEnquiryStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/housing';
 
 import type { Note, Submission } from '@/types';
 import type { Ref } from 'vue';
@@ -37,6 +38,11 @@ const enquiryStore = useEnquiryStore();
 const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // Actions
+
+const isCompleted = computed(() => {
+  return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
+});
+
 onMounted(async () => {
   if (enquiryId && activityId) {
     const [enquiry, notes] = (
@@ -97,6 +103,12 @@ function onEnquiryFormSaved() {
     >
       {{ getEnquiry.activityId }}
     </span>
+    <span
+      v-if="isCompleted"
+      class="ml-0"
+    >
+      (Completed)
+    </span>
   </h1>
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Information">
@@ -127,7 +139,7 @@ function onEnquiryFormSaved() {
       </Message>
       <span v-if="!loading && getEnquiry">
         <EnquiryForm
-          :editable="useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
+          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
           :enquiry="getEnquiry"
           @enquiry-form:saved="onEnquiryFormSaved"
         />
@@ -140,7 +152,7 @@ function onEnquiryFormSaved() {
         </div>
         <Button
           aria-label="Add note"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
@@ -157,6 +169,7 @@ function onEnquiryFormSaved() {
         class="col-12"
       >
         <NoteCard
+          :editable="!isCompleted"
           :note="note"
           @delete-note="onDeleteNote"
           @update-note="onUpdateNote"
