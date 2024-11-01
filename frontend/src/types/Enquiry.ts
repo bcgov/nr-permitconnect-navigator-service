@@ -1,3 +1,4 @@
+import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
 
 import { ApplicationStatus } from '@/utils/enums/housing';
@@ -22,4 +23,5 @@ export type Enquiry = {
   intakeStatus: string;
   enquiryStatus: ApplicationStatus;
   waitingOn?: string;
+  contacts: Array<Contact>;
 } & Partial<IStamps>;

@@ -255,7 +255,7 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
-      :field="`contacts.0.firstName`"
+      field="contacts.0.firstName"
       header="First name"
       :sortable="true"
       style="min-width: 150px"

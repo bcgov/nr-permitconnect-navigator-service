@@ -1,13 +1,13 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, enquiryService, noteService, userService } from '../services';
+import { activityService, contactService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake } from '../types';
+import type { Contact, Enquiry, EnquiryIntake } from '../types';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {
@@ -157,6 +157,22 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
+      const contacts = req.body.contacts;
+
+      await Promise.all(
+        contacts.map(async (x: Contact) => {
+          if (!x.contactId)
+            await contactService.createContact(req.body.activityId, {
+              ...x,
+              contactId: uuidv4(),
+              ...generateCreateStamps(req.currentContext)
+            });
+          else {
+            await contactService.updateContact({ ...x, ...generateCreateStamps(req.currentContext) });
+          }
+        })
+      );
+
       const result = await enquiryService.updateEnquiry({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)

@@ -13,10 +13,21 @@ const service = {
    */
   createEnquiry: async (data: Partial<Enquiry>) => {
     const response = await prisma.enquiry.create({
-      data: { ...enquiry.toPrismaModel(data as Enquiry), created_at: data.createdAt, created_by: data.createdBy }
+      data: { ...enquiry.toPrismaModel(data as Enquiry), created_at: data.createdAt, created_by: data.createdBy },
+      include: {
+        activity: {
+          include: {
+            activity_contact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        }
+      }
     });
 
-    return enquiry.fromPrismaModel(response);
+    return enquiry.fromPrismaModelWithContact(response);
   },
 
   /**
@@ -61,6 +72,15 @@ const service = {
           }
         },
         include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          },
           user: true
         }
       });
@@ -82,10 +102,21 @@ const service = {
       const result = await prisma.enquiry.findFirst({
         where: {
           enquiry_id: enquiryId
+        },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          }
         }
       });
 
-      return result ? enquiry.fromPrismaModel(result) : null;
+      return result ? enquiry.fromPrismaModelWithContact(result) : null;
     } catch (e: unknown) {
       throw e;
     }
@@ -103,7 +134,18 @@ const service = {
   searchEnquiries: async (params: EnquirySearchParameters) => {
     try {
       const result = await prisma.enquiry.findMany({
-        include: { user: params.includeUser },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          },
+          user: params.includeUser
+        },
         where: {
           AND: [
             {
@@ -119,7 +161,11 @@ const service = {
         }
       });
 
-      return result.map((x) => enquiry.fromPrismaModel(x));
+      const enquiries = params.includeUser
+        ? result.map((x) => enquiry.fromPrismaModelWithUser(x))
+        : result.map((x) => enquiry.fromPrismaModelWithContact(x));
+
+      return enquiries;
     } catch (e: unknown) {
       throw e;
     }
@@ -160,10 +206,21 @@ const service = {
         data: { ...enquiry.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
         where: {
           enquiry_id: data.enquiryId
+        },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          }
         }
       });
 
-      return enquiry.fromPrismaModel(result);
+      return enquiry.fromPrismaModelWithContact(result);
     } catch (e: unknown) {
       throw e;
     }
@@ -180,6 +237,17 @@ const service = {
     const deleteEnquiry = await prisma.enquiry.findUnique({
       where: {
         enquiry_id: enquiryId
+      },
+      include: {
+        activity: {
+          include: {
+            activity_contact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        }
       }
     });
     if (deleteEnquiry) {
@@ -189,7 +257,7 @@ const service = {
           activity_id: deleteEnquiry.activity_id
         }
       });
-      return enquiry.fromPrismaModel(deleteEnquiry);
+      return enquiry.fromPrismaModelWithContact(deleteEnquiry);
     }
   }
 };
