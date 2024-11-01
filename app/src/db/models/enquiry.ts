@@ -1,17 +1,44 @@
 import { Prisma } from '@prisma/client';
 
+import contact from './contact';
 import user from './user';
 
 import type { Enquiry } from '../../types';
 
 // Define types
 const _enquiry = Prisma.validator<Prisma.enquiryDefaultArgs>()({});
-const _enquiryWithGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({});
-const _enquiryWithUserGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({ include: { user: true } });
+const _enquiryWithContactGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({
+  include: {
+    activity: {
+      include: {
+        activity_contact: {
+          include: {
+            contact: true
+          }
+        }
+      }
+    }
+  }
+});
+const _enquiryWithUserGraph = Prisma.validator<Prisma.enquiryDefaultArgs>()({
+  include: {
+    activity: {
+      include: {
+        activity_contact: {
+          include: {
+            contact: true
+          }
+        }
+      }
+    },
+    user: true
+  }
+});
 
 type PrismaRelationEnquiry = Prisma.enquiryGetPayload<typeof _enquiry>;
-type PrismaGraphEnquiry = Prisma.enquiryGetPayload<typeof _enquiryWithGraph>;
-type PrismaGraphEnquiryUser = Prisma.enquiryGetPayload<typeof _enquiryWithUserGraph>;
+type PrismaGraphEnquiry = Prisma.enquiryGetPayload<typeof _enquiry>;
+type PrismaGraphEnquiryWithContact = Prisma.enquiryGetPayload<typeof _enquiryWithContactGraph>;
+type PrismaGraphEnquiryWithUser = Prisma.enquiryGetPayload<typeof _enquiryWithUserGraph>;
 
 export default {
   toPrismaModel(input: Enquiry): PrismaRelationEnquiry {
@@ -51,6 +78,7 @@ export default {
       intakeStatus: input.intake_status,
       enquiryStatus: input.enquiry_status,
       waitingOn: input.waiting_on,
+      contacts: [],
       user: null,
       createdAt: input.created_at?.toISOString() ?? null,
       createdBy: input.created_by,
@@ -59,10 +87,17 @@ export default {
     };
   },
 
-  fromPrismaModelWithUser(input: PrismaGraphEnquiryUser | null): Enquiry | null {
-    if (!input) return null;
-
+  fromPrismaModelWithContact(input: PrismaGraphEnquiryWithContact): Enquiry {
     const enquiry = this.fromPrismaModel(input);
+    if (enquiry && input.activity.activity_contact) {
+      enquiry.contacts = input.activity.activity_contact.map((x) => contact.fromPrismaModel(x.contact));
+    }
+
+    return enquiry;
+  },
+
+  fromPrismaModelWithUser(input: PrismaGraphEnquiryWithUser): Enquiry {
+    const enquiry = this.fromPrismaModelWithContact(input);
     if (enquiry && input.user) {
       enquiry.user = user.fromPrismaModel(input.user);
     }

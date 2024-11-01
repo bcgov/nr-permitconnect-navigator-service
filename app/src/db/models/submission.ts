@@ -10,7 +10,7 @@ import type { Submission } from '../../types';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithContact = Prisma.validator<Prisma.submissionDefaultArgs>()({
+const _submissionWithContactGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
   include: {
     activity: {
       include: {
@@ -23,7 +23,7 @@ const _submissionWithContact = Prisma.validator<Prisma.submissionDefaultArgs>()(
     }
   }
 });
-const _submissionWithUser = Prisma.validator<Prisma.submissionDefaultArgs>()({
+const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
   include: {
     activity: {
       include: {
@@ -40,8 +40,8 @@ const _submissionWithUser = Prisma.validator<Prisma.submissionDefaultArgs>()({
 
 type PrismaRelationSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, keyof Stamps>;
 type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submission>;
-type PrismaGraphSubmissionWithContact = Prisma.submissionGetPayload<typeof _submissionWithContact>;
-type PrismaGraphSubmissionWithUser = Prisma.submissionGetPayload<typeof _submissionWithUser>;
+type PrismaGraphSubmissionWithContact = Prisma.submissionGetPayload<typeof _submissionWithContactGraph>;
+type PrismaGraphSubmissionWithUser = Prisma.submissionGetPayload<typeof _submissionWithUserGraph>;
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
