@@ -9,8 +9,8 @@ import {
   submissionService
 } from '../../../src/services';
 import type { Permit, Submission } from '../../../src/types';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
-import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
+import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/housing';
+import { AuthType, BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
