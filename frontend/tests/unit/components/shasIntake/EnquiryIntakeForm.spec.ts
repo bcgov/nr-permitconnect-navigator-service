@@ -291,6 +291,7 @@ describe('EnquiryIntakeForm', () => {
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
+      console.log(Object.keys(result.errors));
       expect(Object.keys(result.errors).length).toBe(1);
       expect(result.errors[`${[IntakeFormCategory.CONTACTS]}[0].email`]).toBeTruthy();
     });

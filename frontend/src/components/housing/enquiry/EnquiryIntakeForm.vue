@@ -31,6 +31,7 @@ import { contactValidator } from '@/validators';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
+import { emailValidator } from '@/validators/common';
 
 // Props
 const { enquiryId = undefined } = defineProps<{
