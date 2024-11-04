@@ -78,19 +78,7 @@ const formSchema = object({
   submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
-  contacts: array().of(
-    object({
-      contactApplicantRelationship: string()
-        .required()
-        .oneOf(PROJECT_RELATIONSHIP_LIST)
-        .label('Relationship to project'),
-      contactPreference: string().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-      email: emailValidator('Contact email must be valid').required().label('Contact email'),
-      firstName: string().required().max(255).label('Contact first name'),
-      lastName: string().required().max(255).label('Contact last name'),
-      phoneNumber: string().required().label('Contact phone number')
-    })
-  ),
+  contacts: array().of(object(contactValidator)),
   companyNameRegistered: string().notRequired().max(255).label('Company'),
   consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
   isDevelopedInBC: string().when('companyNameRegistered', {

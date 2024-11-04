@@ -1,46 +1,47 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import prisma from '../db/dataConnection';
 import { contact } from '../db/models';
-import { Contact } from '../types';
+import { generateCreateStamps } from '../db/utils/utils';
+import { Contact, CurrentContext } from '../types';
 
 const service = {
   /**
-   * @function createContact
-   * Create a contact for an activity
-   * @returns {Promise<Contact>} The result of running the create operation
+   * @function upsertContacts
+   * Creates or updates the given contacts
+   * Generates IDs and timestamps automatically
+   * @returns {Promise<void>} The result of running the transaction
    */
-  createContact: async (activityId: string, data: Contact) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const contactResponse = await trx.contact.create({
-        data: contact.toPrismaModel(data)
-      });
+  upsertContacts: async (activityId: string, data: Array<Contact>, currentContext: CurrentContext) => {
+    return await prisma.$transaction(async (trx) => {
+      await Promise.all(
+        data.map(async (x: Contact) => {
+          if (!x.contactId) {
+            const response = await trx.contact.create({
+              data: contact.toPrismaModel({
+                ...x,
+                contactId: uuidv4(),
+                ...generateCreateStamps(currentContext)
+              })
+            });
 
-      await trx.activity_contact.create({
-        data: {
-          activity_id: activityId,
-          contact_id: contactResponse.contact_id
-        }
-      });
-
-      return contactResponse;
+            await trx.activity_contact.create({
+              data: {
+                activity_id: activityId,
+                contact_id: response.contact_id
+              }
+            });
+          } else {
+            await trx.contact.update({
+              data: contact.toPrismaModel({ ...x, ...generateCreateStamps(currentContext) }),
+              where: {
+                contact_id: x.contactId
+              }
+            });
+          }
+        })
+      );
     });
-
-    return contact.fromPrismaModel(response);
-  },
-
-  /**
-   * @function updateContact
-   * Update a contact for an activity
-   * @returns {Promise<Contact>} The result of running the update operation
-   */
-  updateContact: async (data: Contact) => {
-    const response = await prisma.contact.update({
-      data: contact.toPrismaModel(data),
-      where: {
-        contact_id: data.contactId
-      }
-    });
-
-    return contact.fromPrismaModel(response);
   }
 };
 

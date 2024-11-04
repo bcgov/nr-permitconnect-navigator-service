@@ -142,8 +142,8 @@ watchEffect(async () => {
 
   const body = roadmapTemplate({
     '{{ contactName }}':
-      submission?.contactFirstName && submission?.contactLastName
-        ? `${submission?.contactFirstName} ${submission?.contactLastName}`
+      submission?.contacts[0].firstName && submission?.contacts[0].lastName
+        ? `${submission?.contacts[0].firstName} ${submission?.contacts[0].lastName}`
         : '',
     '{{ locationAddress }}': submission?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
@@ -156,7 +156,7 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: submission?.contactEmail,
+    to: submission?.contacts[0].email,
     cc: undefined,
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
@@ -165,7 +165,7 @@ watchEffect(async () => {
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
-  formRef.value?.setFieldValue('to', submission?.contactEmail);
+  formRef.value?.setFieldValue('to', submission?.contacts[0].email);
   formRef.value?.setFieldValue('bcc', bcc);
   formRef.value?.setFieldValue('body', body);
 });

@@ -138,14 +138,16 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
   if (!getSubmission.value) return;
 
   const enquiryData = {
-    applicant: {
-      contactPreference: getSubmission.value.contactPreference,
-      contactEmail: getSubmission.value.contactEmail,
-      contactFirstName: getSubmission.value.contactFirstName,
-      contactLastName: getSubmission.value.contactLastName,
-      contactPhoneNumber: getSubmission.value.contactPhoneNumber,
-      contactApplicantRelationship: getSubmission.value.contactApplicantRelationship
-    },
+    contacts: [
+      {
+        contactPreference: getSubmission.value.contacts[0].contactPreference,
+        email: getSubmission.value.contacts[0].email,
+        firstName: getSubmission.value.contacts[0].firstName,
+        lastName: getSubmission.value.contacts[0].lastName,
+        phoneNumber: getSubmission.value.contacts[0].phoneNumber,
+        contactApplicantRelationship: getSubmission.value.contacts[0].contactApplicantRelationship
+      }
+    ],
     basic: {
       isRelated: BasicResponse.YES,
       applyForPermitConnect: BasicResponse.NO,

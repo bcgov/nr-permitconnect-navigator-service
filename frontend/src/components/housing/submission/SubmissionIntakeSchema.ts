@@ -1,11 +1,8 @@
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import {
-  CONTACT_PREFERENCE_LIST,
-  NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_RELATIONSHIP_LIST
-} from '@/utils/constants/housing';
-import { BasicResponse, Regex } from '@/utils/enums/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { BasicResponse } from '@/utils/enums/application';
 import { IntakeFormCategory, ProjectLocation } from '@/utils/enums/housing';
+import { contactValidator } from '@/validators';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
 // Form validation schema
@@ -13,14 +10,7 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
 export const submissionIntakeSchema = object({
-  [IntakeFormCategory.APPLICANT]: object({
-    contactFirstName: stringRequiredSchema.label('First name'),
-    contactLastName: stringRequiredSchema.label('Last name'),
-    contactPhoneNumber: stringRequiredSchema.label('Phone number'),
-    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
-  }),
+  [IntakeFormCategory.CONTACTS]: array().of(object(contactValidator)),
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),

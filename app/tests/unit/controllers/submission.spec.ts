@@ -1,7 +1,13 @@
 import config from 'config';
 
 import submissionController from '../../../src/controllers/submission';
-import { activityService, enquiryService, permitService, submissionService } from '../../../src/services';
+import {
+  activityService,
+  contactService,
+  enquiryService,
+  permitService,
+  submissionService
+} from '../../../src/services';
 import type { Permit, Submission } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
 import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
@@ -708,6 +714,7 @@ describe('submitDraft', () => {
   const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
+  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
 
   it('updates submission with the given activity ID', async () => {
     const req = {
@@ -718,6 +725,7 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
@@ -725,6 +733,7 @@ describe('submitDraft', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', submissionId: '11111111' });
   });
@@ -734,7 +743,6 @@ describe('submitDraft', () => {
       body: {
         activityId: '00000000',
         submissionId: '11111111',
-        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -754,11 +762,13 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -788,10 +798,12 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -824,6 +836,7 @@ describe('submitDraft', () => {
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
@@ -831,6 +844,7 @@ describe('submitDraft', () => {
     const createOrder = createPermitSpy.mock.invocationCallOrder[0];
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
@@ -882,10 +896,12 @@ describe('submitDraft', () => {
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(3);

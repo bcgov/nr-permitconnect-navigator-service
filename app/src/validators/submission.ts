@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { applicant } from './applicant';
 import { appliedPermit } from './appliedPermit';
 import { basicIntake } from './basic';
-import { activityId, email, phoneNumber, uuidv4 } from './common';
+import { activityId, email, uuidv4 } from './common';
+import { contacts } from './contacts';
 
 import { housing } from './housing';
 import { permits } from './permits';
@@ -11,10 +11,8 @@ import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
-  CONTACT_PREFERENCE_LIST,
   INTAKE_STATUS_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_RELATIONSHIP_LIST,
   SUBMISSION_TYPE_LIST
 } from '../utils/constants/housing';
 import { BasicResponse } from '../utils/enums/application';
@@ -23,14 +21,14 @@ import { IntakeStatus } from '../utils/enums/housing';
 const schema = {
   createDraft: {
     body: Joi.object({
-      applicant: applicant
+      contact: contacts
     })
   },
   createSubmission: {
     body: Joi.object({
       submissionId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
-      applicant: applicant,
+      contacts: contacts,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
       housing: housing,
@@ -184,22 +182,7 @@ const schema = {
       }),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       waitingOn: Joi.string().allow(null).max(255),
-      contacts: Joi.array()
-        .items(
-          Joi.object({
-            contactId: uuidv4.allow(null),
-            userId: uuidv4.allow(null),
-            contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
-            email: email.required(),
-            firstName: Joi.string().required().max(255),
-            lastName: Joi.string().required().max(255),
-            phoneNumber: phoneNumber.required(),
-            contactApplicantRelationship: Joi.string()
-              .required()
-              .valid(...PROJECT_RELATIONSHIP_LIST)
-          })
-        )
-        .allow(null)
+      contacts: contacts
     }),
     params: Joi.object({
       submissionId: uuidv4.required()
