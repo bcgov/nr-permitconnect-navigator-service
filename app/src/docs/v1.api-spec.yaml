@@ -811,7 +811,7 @@ paths:
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
-          $ref: '#/components/responses/NotFound'  
+          $ref: '#/components/responses/NotFound'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         default:
@@ -821,7 +821,7 @@ paths:
       summary: Create or update a draft submission
       description: >-
         Creates or updates an intake and set status to Draft
-        so unfinished/unvalidatd submissions can be saved 
+        so unfinished/unvalidatd submissions can be saved
       operationId: submission-createDraft
       tags:
         - Submission
@@ -1108,6 +1108,44 @@ components:
         type: boolean
         example: true
   schemas:
+    DB-Contact:
+      title: DB Contact
+      type: object
+      required:
+        - contactId
+      properties:
+        contactId:
+          type: string
+          description: The ID of the contact
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        userId:
+          type: string
+          description: The ID of the user associated with the contact
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        firstName:
+          type: string
+          description: First name of the contact person
+          example: John
+        lastName:
+          type: string
+          description: Last name of the contact person
+          example: Smith
+        phoneNumber:
+          type: string
+          description: Phone number for contact
+          example: (123) 456-7890
+        email:
+          type: string
+          description: Email address for contact
+          example: john.smith@example.com
+        contactApplicantRelationship:
+          type: string
+          description: Relationship of the contact person to the project
+          example: Agent
+        contactPreference:
+          type: string
+          description: Preferred method of contact
+          example: Email
     DB-Document:
       title: DB Document
       type: object
@@ -1175,30 +1213,6 @@ components:
           type: string
           description: User who submitted enquiry
           example: JSMITH
-        contactFirstName:
-          type: string
-          description: First name of contact
-          example: John
-        contactLastName:
-          type: string
-          description: Last name of contact
-          example: Smith
-        contactPhoneNumber:
-          type: string
-          description: Phone number of contact
-          example: 123-456-7890
-        contactEmail:
-          type: string
-          description: Email of contact
-          example: j.smith@email.com
-        contactApplicantRelationship:
-          type: string
-          description: Relationship of the contact
-          example: Employee
-        contactPreference:
-          type: string
-          description: Preferred contact method for the contact
-          example: email
         isRelated:
           type: string
           description: Is this related to a project
@@ -1513,22 +1527,6 @@ components:
           type: string
           description: Location PIDs
           example: 006-209-521, 007-209-522
-        contactApplicantRelationship:
-          type: string
-          description: Relationship of contact information to the project
-          example: Agent
-        contactPhoneNumber:
-          type: string
-          description: Phone number for contact
-          example: (123)-456-7890
-        contactEmail:
-          type: string
-          description: Email for contact
-          example: preferredContactTest@test.com
-        contactPreference:
-          type: string
-          description: Preferred contact method
-          example: Phone Call
         projectName:
           type: string
           description: Name of the Project
@@ -1683,14 +1681,6 @@ components:
         housingCoopDescription:
           type: string
           description: Description for COOP Housing
-        contactFirstName:
-          type: string
-          description: First name for contact
-          example: John
-        contactLastName:
-          type: string
-          description: Last name for contact
-          example: Smith
     DB-User:
       type: object
       properties:
@@ -1732,33 +1722,6 @@ components:
           type: boolean
           description: Active status of user
           example: true
-    DraftEnquiry-Applicant:
-      type: object
-      properties:
-        contactFirstName:
-          type: string
-          description: First name of contact
-          example: John
-        contactLastName:
-          type: string
-          description: Last name of contact
-          example: Smith
-        contactPhoneNumber:
-          type: string
-          description: Phone number of contact
-          example: 123-456-7890
-        contactEmail:
-          type: string
-          description: Email of contact
-          example: j.smith@email.com
-        contactApplicantRelationship:
-          type: string
-          description: Relationship of the contact
-          example: Employee
-        contactPreference:
-          type: string
-          description: Preferred contact method for the contact
-          example: email
     DraftEnquiry-Basic:
       type: object
       properties:
@@ -1834,15 +1797,17 @@ components:
     Request-CreateDraftEnquiry:
       type: object
       required:
-        - applicant
+        - contacts
         - basic
       properties:
         activityId:
           type: string
           description: Id for the activity
           example: 2DE67F13
-        applicant:
-          $ref: '#/components/schemas/DraftEnquiry-Applicant'
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Contact'
         basic:
           $ref: '#/components/schemas/DraftEnquiry-Basic'
     Request-Document:
@@ -2005,39 +1970,16 @@ components:
       title: Save draft of Submission
       type: object
       required:
-        - applicant
+        - contacts
         - basic
         - housing
         - location
         - permits
       properties:
-        applicant:
-          type: object
-          properties:
-            contactFirstName:
-              type: string
-              description: First name of the contact person
-              example: John
-            contactLastName:
-              type: string
-              description: Last name of the contact person
-              example: Smith
-            contactPhoneNumber:
-              type: string
-              description: Phone number for contact
-              example: (123) 456-7890
-            contactEmail:
-              type: string
-              description: Email address for contact
-              example: john.smith@example.com
-            contactApplicantRelationship:
-              type: string
-              description: Relationship of the contact person to the project
-              example: Agent
-            contactPreference:
-              type: string
-              description: Preferred method of contact
-              example: Email
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Contact'
         basic:
           type: object
           properties:

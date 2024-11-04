@@ -39,7 +39,7 @@ afterEach(() => {
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
 const FORM_EXPORT_1 = {
   form: {
@@ -283,12 +283,16 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1]).mockResolvedValueOnce([]);
     searchSubmissionsSpy.mockResolvedValue([]);
     createSubmissionsFromExportSpy.mockResolvedValue();
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(formExportSpy).toHaveBeenCalledTimes(2);
@@ -309,6 +313,10 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1, FORM_EXPORT_2]).mockResolvedValueOnce([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -316,7 +324,7 @@ describe.skip('checkAndStoreNewSubmissions', () => {
     createSubmissionsFromExportSpy.mockResolvedValue();
     createPermitSpy.mockResolvedValue({} as Permit);
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(formExportSpy).toHaveBeenCalledTimes(2);
@@ -351,13 +359,17 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_2]).mockResolvedValueOnce([]);
     searchSubmissionsSpy.mockResolvedValue([]);
     createSubmissionsFromExportSpy.mockResolvedValue();
     createPermitSpy.mockResolvedValue({} as Permit);
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
