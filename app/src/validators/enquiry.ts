@@ -1,21 +1,16 @@
 import Joi from 'joi';
 
-import { applicant } from './applicant';
 import { basicEnquiry } from './basic';
-import { email, phoneNumber, uuidv4 } from './common';
+import { uuidv4 } from './common';
+import { contacts } from './contacts';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST } from '../utils/constants/application';
-import {
-  APPLICATION_STATUS_LIST,
-  CONTACT_PREFERENCE_LIST,
-  INTAKE_STATUS_LIST,
-  PROJECT_RELATIONSHIP_LIST
-} from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
   createEnquiry: {
     body: Joi.object({
-      applicant: applicant,
+      contacts: contacts,
       basic: basicEnquiry,
       activityId: Joi.string(),
       enquiryId: Joi.string()
@@ -55,22 +50,7 @@ const schema = {
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       waitingOn: Joi.string().allow(null).max(255),
-      contacts: Joi.array()
-        .items(
-          Joi.object({
-            contactId: uuidv4.allow(null),
-            userId: uuidv4.allow(null),
-            contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
-            email: email.required(),
-            firstName: Joi.string().required().max(255),
-            lastName: Joi.string().required().max(255),
-            phoneNumber: phoneNumber.required(),
-            contactApplicantRelationship: Joi.string()
-              .required()
-              .valid(...PROJECT_RELATIONSHIP_LIST)
-          })
-        )
-        .allow(null),
+      contacts: contacts,
       createdAt: Joi.date().allow(null),
       createdBy: Joi.string().allow(null),
       updatedAt: Joi.date().allow(null),

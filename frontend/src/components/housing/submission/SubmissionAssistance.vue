@@ -23,7 +23,7 @@ const checkApplicantValuesValid = (
   errors: Record<string, string | undefined>
 ): boolean => {
   // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.APPLICANT];
+  let applicant = values?.[IntakeFormCategory.CONTACTS];
   if (Object.values(applicant).some((x) => !x)) {
     return false;
   }
@@ -33,7 +33,7 @@ const checkApplicantValuesValid = (
   const errorList = Object.keys(errors);
 
   for (const error of errorList) {
-    if (error.includes(IntakeFormCategory.APPLICANT)) {
+    if (error.includes(IntakeFormCategory.CONTACTS)) {
       isValid = false;
       break;
     }

@@ -1,5 +1,6 @@
-import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
+import { Contact } from './Contact';
 import { Permit } from './Permit';
+import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
 
 export type SubmissionIntake = {
   activityId?: string;
@@ -8,15 +9,6 @@ export type SubmissionIntake = {
   applicationStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
   submit?: boolean;
-
-  applicant?: {
-    contactFirstName?: string;
-    contactLastName?: string;
-    contactPhoneNumber?: string;
-    contactEmail?: string;
-    contactApplicantRelationship?: string;
-    contactPreference?: string;
-  };
 
   basic?: {
     consentToFeedback?: boolean;
@@ -62,4 +54,6 @@ export type SubmissionIntake = {
   appliedPermits?: Array<Permit>;
 
   investigatePermits?: Array<Permit>;
+
+  contacts: Array<Contact>;
 };

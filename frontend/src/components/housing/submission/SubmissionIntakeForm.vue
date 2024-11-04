@@ -178,7 +178,7 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
           enquiryType: SubmissionType.ASSISTANCE
         }
       },
-      { applicant: values?.[IntakeFormCategory.APPLICANT] }
+      { contacts: values?.[IntakeFormCategory.CONTACTS] }
     );
 
     const enquiryResponse = await enquiryService.submitDraft(formattedData);
@@ -239,7 +239,7 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.APPLICANT:
+    case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -379,11 +379,11 @@ async function onSubmit(data: any) {
 async function emailConfirmation(activityId: string, submissionId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplateSubmission({
-    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
+    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
     '{{ activityId }}': activityId,
     '{{ submissionId }}': submissionId
   });
-  let applicantEmail = formRef.value?.values.applicant.contactEmail;
+  let applicantEmail = formRef.value?.values.contacts[0].email;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
@@ -421,14 +421,7 @@ onBeforeMount(async () => {
     initialFormValues.value = {
       activityId: response?.activityId,
       submissionId: response?.submissionId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
+      contacts: response?.contacts,
       basic: {
         consentToFeedback: response?.consentToFeedback,
         isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
@@ -553,7 +546,7 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.CONTACTS) ||
                   validationErrors.includes(IntakeFormCategory.BASIC)
               }"
             />
@@ -580,21 +573,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    name="applicant.contactFirstName"
+                    :name="`contacts.${0}.firstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.contactLastName"
+                    :name="`contacts.${0}.lastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    name="applicant.contactPhoneNumber"
+                    :name="`contacts.${0}.phoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -602,14 +595,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.contactEmail"
+                    :name="`contacts.${0}.email`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.contactApplicantRelationship"
+                    :name="`contacts.${0}.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -617,7 +610,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.contactPreference"
+                    :name="`contacts.${0}.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"

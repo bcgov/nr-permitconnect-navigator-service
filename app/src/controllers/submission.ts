@@ -26,14 +26,14 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   ChefsFormConfig,
   ChefsFormConfigData,
-  Contact,
   Submission,
   ChefsSubmissionExport,
   Permit,
   Email,
   StatisticsFilters,
   SubmissionIntake,
-  SubmissionSearchParameters
+  SubmissionSearchParameters,
+  CurrentContext
 } from '../types';
 
 const controller = {
@@ -71,7 +71,7 @@ const controller = {
     }
   },
 
-  checkAndStoreNewSubmissions: async () => {
+  checkAndStoreNewSubmissions: async (currentContext: CurrentContext) => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
 
     // Mapping of SHAS intake permit names to PCNS types
@@ -163,14 +163,8 @@ const controller = {
               activityId: data.form.confirmationId,
               applicationStatus: ApplicationStatus.NEW,
               companyNameRegistered: data.companyNameRegistered ?? data.companyName,
-              contactEmail: data.contactEmail,
-              contactPreference: camelCaseToTitleCase(data.contactPreference),
               projectName: data.projectName,
               projectDescription: data.projectDescription,
-              contactPhoneNumber: data.contactPhoneNumber,
-              contactFirstName: data.contactFirstName,
-              contactLastName: data.contactLastName,
-              contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
               financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
               housingCoopDescription: data.housingCoopName,
@@ -202,7 +196,17 @@ const controller = {
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
               hasAppliedProvincialPermits: toTitleCase(data.previousPermits),
-              permits: permits
+              permits: permits,
+              contacts: [
+                {
+                  email: data.contactEmail,
+                  contactPreference: camelCaseToTitleCase(data.contactPreference),
+                  phoneNumber: data.contactPhoneNumber,
+                  firstName: data.contactFirstName,
+                  lastName: data.contactLastName,
+                  contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship)
+                }
+              ]
             };
           });
         })
@@ -215,6 +219,11 @@ const controller = {
     const notStored = exportData.filter((x) => !stored.some((activityId: string) => activityId === x.activityId));
     await submissionService.createSubmissionsFromExport(notStored);
 
+    // Create each contact
+    notStored.map((x) =>
+      x.contacts?.map(async (y) => await contactService.upsertContacts(x.activityId as string, [y], currentContext))
+    );
+
     // Create each permit
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
@@ -226,14 +235,9 @@ const controller = {
       data.activityId ??
       (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
-    let applicant, basic, housing, location, permits;
+    let basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
       investigatePermits: Array<Permit> = [];
-
-    if (data.applicant) {
-      // TODO: User contact information
-      applicant = {};
-    }
 
     if (data.basic) {
       basic = {
@@ -319,7 +323,6 @@ const controller = {
     // Put new submission together
     const submissionData = {
       submission: {
-        ...applicant,
         ...basic,
         ...housing,
         ...location,
@@ -443,7 +446,7 @@ const controller = {
   getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
-      await controller.checkAndStoreNewSubmissions();
+      await controller.checkAndStoreNewSubmissions(req.currentContext);
 
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
@@ -489,6 +492,8 @@ const controller = {
       );
 
       let result;
+
+      await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
 
       if (update) {
         // Update submission
@@ -587,21 +592,7 @@ const controller = {
 
   updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
-      const contacts = req.body.contacts;
-
-      await Promise.all(
-        contacts.map(async (x: Contact) => {
-          if (!x.contactId)
-            await contactService.createContact(req.body.activityId, {
-              ...x,
-              contactId: uuidv4(),
-              ...generateCreateStamps(req.currentContext)
-            });
-          else {
-            await contactService.updateContact({ ...x, ...generateCreateStamps(req.currentContext) });
-          }
-        })
-      );
+      await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
 
       const response = await submissionService.updateSubmission({
         ...req.body,

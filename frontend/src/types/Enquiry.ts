@@ -10,12 +10,6 @@ export type Enquiry = {
   enquiryType: string;
   submittedAt: string;
   submittedBy: string;
-  contactFirstName?: string;
-  contactLastName?: string;
-  contactPhoneNumber?: string;
-  contactEmail?: string;
-  contactPreference?: string;
-  contactApplicantRelationship?: string;
   isRelated?: string;
   relatedActivityId?: string;
   enquiryDescription?: string;
