@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { date, mixed, object, string } from 'yup';
 
 import {
@@ -14,11 +14,11 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
-import { Button, Message, useToast } from '@/lib/primevue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { BasicResponse, Regex } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
@@ -90,12 +90,17 @@ const intakeSchema = object({
 });
 
 // Actions
+const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
+
+const isCompleted = computed(() => {
+  return enquiry.enquiryStatus === ApplicationStatus.COMPLETED;
+});
 
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
@@ -144,6 +149,19 @@ function onRelatedActivityInput(e: IInputEvent) {
   filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
     id.toUpperCase().includes(e.target.value.toUpperCase())
   );
+}
+
+function onReOpen() {
+  confirm.require({
+    message: 'Please confirm that you want to re-open this enquiry',
+    header: 'Re-open enquiry?',
+    acceptLabel: 'Confirm',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
+      onSubmit(formRef.value?.values);
+    }
+  });
 }
 
 const onSubmit = async (values: any) => {
@@ -200,7 +218,7 @@ onMounted(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard />
+    <FormNavigationGuard v-if="!isCompleted" />
 
     <div class="formgrid grid">
       <Dropdown
@@ -310,19 +328,24 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <div
-        v-if="editable"
-        class="field col-12 mt-5"
-      >
+      <div class="field col-12 mt-5">
         <Button
+          v-if="!isCompleted"
           label="Save"
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
         />
         <CancelButton
+          v-if="!isCompleted"
           :editable="editable"
           @clicked="onCancel"
+        />
+        <Button
+          v-if="isCompleted"
+          label="Re-open enquiry"
+          icon="pi pi-check"
+          @click="onReOpen()"
         />
       </div>
     </div>

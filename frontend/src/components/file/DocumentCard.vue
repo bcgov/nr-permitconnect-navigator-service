@@ -22,8 +22,13 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-const { selectable = false, selected = false } = defineProps<{
+const {
+  editable = true,
+  selectable = false,
+  selected = false
+} = defineProps<{
   document: Document;
+  editable?: boolean;
   selectable?: boolean;
   selected?: boolean;
 }>();
@@ -102,7 +107,7 @@ function onClick() {
           {{ filesize(document.filesize) }}
         </h6>
         <DeleteDocument
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
           :document="document"
         />
       </div>

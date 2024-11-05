@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
 import {
@@ -19,7 +19,7 @@ import {
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
-import { Button, Message, useToast } from '@/lib/primevue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -33,7 +33,7 @@ import {
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
@@ -142,11 +142,16 @@ const formSchema = object({
 });
 
 // Actions
+const confirm = useConfirm();
 const toast = useToast();
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
+
+const isCompleted = computed(() => {
+  return submission.applicationStatus === ApplicationStatus.COMPLETED;
+});
 
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
@@ -189,6 +194,19 @@ function onInvalidSubmit(e: any) {
   }
 
   first?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function onReOpen() {
+  confirm.require({
+    message: 'Please confirm that you want to re-open this submission',
+    header: 'Re-open submission?',
+    acceptLabel: 'Confirm',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      formRef.value?.setFieldValue('applicationStatus', ApplicationStatus.IN_PROGRESS);
+      onSubmit(formRef.value?.values);
+    }
+  });
 }
 
 const onSubmit = async (values: any) => {
@@ -303,7 +321,7 @@ onMounted(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard />
+    <FormNavigationGuard v-if="!isCompleted" />
 
     <div class="formgrid grid">
       <Dropdown
@@ -633,6 +651,7 @@ onMounted(async () => {
           v-if="!values.atsClientNumber"
           aria-label="Link to ATS"
           class="h-2rem ml-2"
+          :disabled="!editable"
           @click="atsUserLinkModalVisible = true"
         >
           Search ATS
@@ -716,19 +735,24 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <div
-        v-if="editable"
-        class="field col-12 mt-5"
-      >
+      <div class="field col-12 mt-5">
         <Button
+          v-if="!isCompleted"
           label="Save"
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
         />
         <CancelButton
+          v-if="!isCompleted"
           :editable="editable"
           @clicked="onCancel"
+        />
+        <Button
+          v-if="isCompleted"
+          label="Re-open submission"
+          icon="pi pi-check"
+          @click="onReOpen()"
         />
       </div>
     </div>

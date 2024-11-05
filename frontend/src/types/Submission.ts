@@ -1,3 +1,5 @@
+import { ApplicationStatus } from '@/utils/enums/housing';
+
 import type { IStamps } from '@/interfaces';
 import type { User } from './User';
 
@@ -51,7 +53,7 @@ export type Submission = {
   astNotes: string;
   intakeStatus: string;
   assignedUserId?: string;
-  applicationStatus: string;
+  applicationStatus: ApplicationStatus;
   waitingOn?: string;
   user?: User;
 } & Partial<IStamps>;

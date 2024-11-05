@@ -18,6 +18,7 @@ import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, T
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -96,6 +97,10 @@ const filteredDocuments = computed(() => {
   return tempDocuments;
 });
 
+const isCompleted = computed(() => {
+  return getSubmission.value?.applicationStatus === ApplicationStatus.COMPLETED;
+});
+
 const onAddNote = (note: Note) => submissionStore.addNote(note, true);
 
 const onDeleteNote = (note: Note) => submissionStore.removeNote(note);
@@ -152,13 +157,19 @@ onMounted(async () => {
     >
       {{ getSubmission.activityId }}
     </span>
+    <span
+      v-if="isCompleted"
+      class="ml-0"
+    >
+      (Completed)
+    </span>
   </h1>
 
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
         <SubmissionForm
-          :editable="useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
+          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
           :submission="getSubmission"
         />
       </span>
@@ -167,7 +178,7 @@ onMounted(async () => {
       <div class="mb-3 border-dashed file-upload border-round-md">
         <FileUpload
           :activity-id="activityId"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
         />
       </div>
       <div class="flex flex-row justify-content-between pb-3">
@@ -265,6 +276,7 @@ onMounted(async () => {
             >
               <DocumentCard
                 :document="document"
+                :editable="!isCompleted"
                 class="hover-hand hover-shadow"
                 @click="documentService.downloadDocument(document.documentId, document.filename)"
               />
@@ -335,7 +347,7 @@ onMounted(async () => {
           <template #body="{ data }">
             <div class="flex justify-content-center">
               <DeleteDocument
-                :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
                 :document="data"
               />
             </div>
@@ -351,7 +363,7 @@ onMounted(async () => {
           </div>
           <Button
             aria-label="Add permit"
-            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
             @click="permitModalVisible = true"
           >
             <font-awesome-icon
@@ -367,7 +379,10 @@ onMounted(async () => {
           :index="index"
           class="col-12"
         >
-          <PermitCard :permit="permit" />
+          <PermitCard
+            :editable="!isCompleted"
+            :permit="permit"
+          />
         </div>
 
         <PermitModal
@@ -383,7 +398,7 @@ onMounted(async () => {
         </div>
         <Button
           aria-label="Add note"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
@@ -400,6 +415,7 @@ onMounted(async () => {
         class="col-12"
       >
         <NoteCard
+          :editable="!isCompleted"
           :note="note"
           @delete-note="onDeleteNote"
           @update-note="onUpdateNote"
@@ -417,7 +433,7 @@ onMounted(async () => {
       <Roadmap
         v-if="!loading"
         :activity-id="activityId"
-        :editable="useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
+        :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
       />
     </TabPanel>
     <TabPanel header="Related enquiries">

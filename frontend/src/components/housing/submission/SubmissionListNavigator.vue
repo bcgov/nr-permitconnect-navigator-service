@@ -293,6 +293,12 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
+      field="submissionType"
+      header="Submission type"
+      :sortable="true"
+      style="min-width: 200px"
+    />
+    <Column
       field="queuePriority"
       header="Priority"
       :sortable="true"

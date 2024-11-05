@@ -12,7 +12,8 @@ import type { Ref } from 'vue';
 import type { Note } from '@/types';
 
 // Props
-const { note } = defineProps<{
+const { editable = true, note } = defineProps<{
+  editable?: boolean;
   note: Note;
 }>();
 
@@ -51,7 +52,7 @@ onMounted(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.UPDATE)"
+          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.UPDATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
