@@ -5,6 +5,7 @@ import { ref } from 'vue';
 import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { useConfigStore, useSubmissionStore } from '@/store';
+import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
@@ -52,6 +53,7 @@ const onUpload = async (files: Array<File>) => {
         const response = (await documentService.createDocument(file, activityId, getConfig.value.coms.bucketId))?.data;
 
         if (response) {
+          response.extension = getFilenameAndExtension(response.filename).extension;
           submissionStore.addDocument(response);
           toast.success('Document uploaded');
         }

@@ -20,9 +20,10 @@ import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
+import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Note } from '@/types';
+import type { Document, Note } from '@/types';
 
 // Props
 const {
@@ -122,6 +123,10 @@ onMounted(async () => {
       enquiryService.listRelatedEnquiries(activityId)
     ])
   ).map((r) => r.data);
+
+  documents.forEach((d: Document) => {
+    d.extension = getFilenameAndExtension(d.filename).extension;
+  });
 
   submissionStore.setSubmission(submission);
   submissionStore.setDocuments(documents);
@@ -258,7 +263,7 @@ onMounted(async () => {
             class="w-6rem"
           />
           <Column
-            field="mimeType"
+            field="extension"
             sortable
             header="Type"
             class="w-10rem"
@@ -329,7 +334,7 @@ onMounted(async () => {
           </template>
         </Column>
         <Column
-          field="mimeType"
+          field="extension"
           header="Type"
           sortable
         />
