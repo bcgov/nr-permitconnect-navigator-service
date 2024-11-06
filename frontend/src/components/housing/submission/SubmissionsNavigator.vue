@@ -246,14 +246,12 @@ watch(activeTabIndex, (newIndex) => {
 <template>
   <div
     v-if="showToggle"
-    class="flex justify-content-end mr-3"
+    class="flex justify-content-end mr-3 align-items-center"
   >
-    <span class="app-primary-color">
-      {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
-    </span>
+    <span class="app-primary-color mt-0 mb-0">Show completed submissions</span>
     <InputSwitch
       v-model="showCompleted"
-      class="ml-2"
+      class="ml-2 mt-0 mb-0"
     />
   </div>
   <TabView
