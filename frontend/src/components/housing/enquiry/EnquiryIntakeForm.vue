@@ -24,7 +24,7 @@ import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
-import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
 

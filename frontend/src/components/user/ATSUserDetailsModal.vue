@@ -23,7 +23,6 @@ const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
-
 const toast = useToast();
 
 async function getATSClientInformation() {

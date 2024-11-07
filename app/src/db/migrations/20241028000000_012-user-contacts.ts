@@ -188,7 +188,6 @@ export async function down(knex: Knex): Promise<void> {
 
       .then(() =>
         knex.schema.alterTable('submission', function (table) {
-          // Don't bring back contact_name, this should've been dropped long ago
           table.text('contact_first_name');
           table.text('contact_last_name');
           table.text('contact_email');
@@ -196,6 +195,11 @@ export async function down(knex: Knex): Promise<void> {
           table.text('contact_preference');
           table.text('contact_applicant_relationship');
         })
+      )
+
+      .then(() =>
+        knex.schema.raw(`ALTER TABLE public.submission
+          ADD COLUMN IF NOT EXISTS contact_name TEXT;`)
       )
 
       // Retrieve data
@@ -247,20 +251,3 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('contact'))
   );
 }
-
-/*
-DO $$
-DECLARE ver integer;
-BEGIN
-  SELECT cast(array_to_string(numbers[1 : array_upper(numbers,1) -1], '.') as integer)
-    FROM
-  (SELECT string_to_array(current_setting('server_version'), '.') numbers) INTO ver;
-
-  IF ver >= 13
-  THEN
-    RAISE notice 'greater';
-  ELSE
-    RAISE notice 'lower';
-  END IF;
-END $$;
-*/
