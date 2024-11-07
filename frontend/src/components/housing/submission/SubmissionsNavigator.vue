@@ -20,6 +20,9 @@ import { formatDate } from '@/utils/formatters';
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/types';
 
+// Emits
+const emit = defineEmits(['submissionsNavigator:completed']);
+
 // Constants
 const NOTES_TAB_INDEX = {
   ENQUIRY: 1,
@@ -241,19 +244,21 @@ watch(activeTabIndex, (newIndex) => {
   // Show toggle only for submissions and enquiries tab
   showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY;
 });
+
+watch(showCompleted, () => {
+  emit('submissionsNavigator:completed', showCompleted.value);
+});
 </script>
 
 <template>
   <div
     v-if="showToggle"
-    class="flex justify-content-end mr-3"
+    class="flex justify-content-end mr-3 align-items-center"
   >
-    <span class="app-primary-color">
-      {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
-    </span>
+    <span class="app-primary-color mt-0 mb-0">Show completed submissions</span>
     <InputSwitch
       v-model="showCompleted"
-      class="ml-2"
+      class="ml-2 mt-0 mb-0 mr-2"
     />
   </div>
   <TabView

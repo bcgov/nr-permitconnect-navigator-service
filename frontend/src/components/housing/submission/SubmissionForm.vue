@@ -660,6 +660,7 @@ onMounted(async () => {
           v-if="!values.atsClientNumber"
           aria-label="New ATS client"
           class="h-2rem ml-3"
+          :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
           New ATS Client
