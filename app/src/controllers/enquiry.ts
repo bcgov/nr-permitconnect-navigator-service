@@ -41,7 +41,6 @@ const controller = {
 
     let basic;
 
-    // Create applicant information
     if (data.basic) {
       basic = {
         enquiryType: data.basic.enquiryType,
@@ -64,6 +63,25 @@ const controller = {
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
     };
+  },
+
+  createEnquiry: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
+    try {
+      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
+
+      // Create or update contacts
+      await contactService.upsertContacts(enquiry.activityId, req.body.contacts, req.currentContext);
+
+      // Create new enquiry
+      const result = await enquiryService.createEnquiry({
+        ...enquiry,
+        ...generateCreateStamps(req.currentContext)
+      });
+
+      res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
+    } catch (e: unknown) {
+      next(e);
+    }
   },
 
   deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
@@ -119,39 +137,6 @@ const controller = {
     }
   },
 
-  submitDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
-    try {
-      const update = req.body.activityId && req.body.enquiryId;
-
-      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
-
-      let result;
-
-      await contactService.upsertContacts(enquiry.activityId, req.body.contacts, req.currentContext);
-
-      if (update) {
-        result = await enquiryService.updateEnquiry({
-          ...enquiry,
-          ...generateUpdateStamps(req.currentContext)
-        } as Enquiry);
-
-        if (!result) {
-          return res.status(404).json({ message: 'Enquiry not found' });
-        }
-      } else {
-        // Create new enquiry
-        result = await enquiryService.createEnquiry({
-          ...enquiry,
-          ...generateCreateStamps(req.currentContext)
-        });
-      }
-
-      res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
       await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
@@ -166,40 +151,6 @@ const controller = {
       }
 
       res.status(200).json(result);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  updateDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
-    try {
-      const update = req.body.activityId && req.body.enquiryId;
-
-      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.DRAFT);
-
-      let result;
-      if (update) {
-        result = await enquiryService.updateEnquiry({
-          ...enquiry,
-          ...generateUpdateStamps(req.currentContext)
-        } as Enquiry);
-
-        if (!result) {
-          return res.status(404).json({ message: 'Enquiry not found' });
-        }
-      } else {
-        // Create new enquiry
-        result = await enquiryService.createEnquiry({
-          ...enquiry,
-          ...generateCreateStamps(req.currentContext)
-        });
-      }
-
-      if (!result) {
-        return res.status(404).json({ message: 'Enquiry not found' });
-      }
-
-      res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {
       next(e);
     }

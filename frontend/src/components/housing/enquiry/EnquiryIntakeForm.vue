@@ -42,7 +42,7 @@ const { enquiryId = undefined } = defineProps<{
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
+const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -152,7 +152,7 @@ async function loadEnquiry() {
 
     if (enquiryId) {
       response = (await enquiryService.getEnquiry(enquiryId as string)).data;
-      editable.value = response?.intakeStatus === IntakeStatus.DRAFT;
+      editable.value = response?.intakeStatus !== IntakeStatus.SUBMITTED;
     }
 
     initialFormValues.value = {
@@ -176,42 +176,6 @@ function onInvalidSubmit(e: any) {
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSaveDraft(data: any, isAutoSave = false) {
-  editable.value = false;
-
-  autoSaveRef.value?.stopAutoSave();
-
-  try {
-    let response = await enquiryService.updateDraft(data);
-
-    if (response.data.activityId && response.data.enquiryId) {
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
-      formRef.value?.setFieldValue('enquiryId', response.data.enquiryId);
-
-      // Update route query for refreshing
-      router.replace({
-        name: RouteName.HOUSING_ENQUIRY_INTAKE,
-        query: {
-          activityId: response.data.activityId,
-          enquiryId: response.data.enquiryId
-        }
-      });
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
-    }
-
-    if (isAutoSave) {
-      toast.success('Draft autosaved');
-    } else {
-      toast.success('Draft saved');
-    }
-  } catch (e: any) {
-    toast.error('Failed to save draft', e);
-  } finally {
-    editable.value = true;
-  }
-}
-
 function onRelatedActivityInput(e: IInputEvent) {
   filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
     id.toUpperCase().includes(e.target.value.toUpperCase())
@@ -222,8 +186,6 @@ async function onSubmit(data: any) {
   editable.value = false;
 
   let enquiryResponse, submissionResponse;
-
-  autoSaveRef.value?.stopAutoSave();
 
   try {
     // Need to first create the submission to relate to if asking to apply
@@ -236,7 +198,7 @@ async function onSubmit(data: any) {
       }
     }
 
-    enquiryResponse = await enquiryService.submitDraft(data);
+    enquiryResponse = await enquiryService.createEnquiry(data);
 
     if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
@@ -253,7 +215,7 @@ async function onSubmit(data: any) {
         }
       });
     } else {
-      throw new Error('Failed to retrieve correct enquiry draft data');
+      throw new Error('Failed to retrieve correct enquiry data');
     }
   } catch (e: any) {
     toast.error('Failed to save intake', e);
@@ -304,10 +266,6 @@ onBeforeMount(async () => {
       @submit="confirmSubmit"
     >
       <FormNavigationGuard v-if="editable" />
-      <FormAutosave
-        ref="autoSaveRef"
-        :callback="() => onSaveDraft(values, true)"
-      />
 
       <input
         type="hidden"
@@ -479,22 +437,6 @@ onBeforeMount(async () => {
           </div>
         </template>
       </Card>
-      <StepperNavigation
-        :editable="editable"
-        :next-callback="() => confirmNext(values)"
-        :prev-disabled="true"
-        :next-disabled="values.basic?.applyForPermitConnect !== BasicResponse.YES || !editable"
-      >
-        <template #content>
-          <Button
-            class="p-button-sm"
-            outlined
-            label="Save draft"
-            :disabled="!editable"
-            @click="onSaveDraft(values)"
-          />
-        </template>
-      </StepperNavigation>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
           label="Submit"
