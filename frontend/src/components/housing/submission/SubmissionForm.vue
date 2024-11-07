@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
-import { boolean, number, object, string } from 'yup';
+import { array, boolean, number, object, string } from 'yup';
 
 import {
   Calendar,
@@ -34,8 +34,7 @@ import {
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
-import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
-import { emailValidator } from '@/validators/common';
+import { assignedToValidator, contactValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';

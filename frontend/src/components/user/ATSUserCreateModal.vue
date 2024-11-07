@@ -47,11 +47,11 @@ async function createATSClient() {
         addressLine1: submission.streetAddress,
         city: submission.locality,
         provinceCode: submission.province,
-        primaryPhone: submission.contactPhoneNumber,
-        email: submission.contactEmail
+        primaryPhone: submission.contacts[0]?.phoneNumber,
+        email: submission.contacts[0]?.email
       },
-      firstName: submission.contactFirstName,
-      surName: submission.contactLastName,
+      firstName: submission.contacts[0]?.firstName,
+      surName: submission.contacts[0]?.lastName,
       regionName: Initiative.HOUSING,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
@@ -80,11 +80,11 @@ onMounted(() => {
     .join(', ');
 
   atsUser.value = {
-    firstName: submission.contactFirstName ?? '',
-    lastName: submission.contactLastName ?? '',
-    email: submission.contactEmail ?? '',
+    firstName: submission.contacts[0]?.firstName ?? '',
+    lastName: submission.contacts[0]?.lastName ?? '',
+    email: submission.contacts[0]?.email ?? '',
     address: locationAddressStr,
-    phone: submission.contactPhoneNumber ?? ''
+    phone: submission.contacts[0]?.phoneNumber ?? ''
   };
 });
 </script>

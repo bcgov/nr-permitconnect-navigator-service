@@ -1116,10 +1116,12 @@ components:
       properties:
         contactId:
           type: string
+          format: uuid
           description: The ID of the contact
           example: b76469a3-896c-4435-aa83-b8b87db6f701
         userId:
           type: string
+          format: uuid
           description: The ID of the user associated with the contact
           example: b76469a3-896c-4435-aa83-b8b87db6f701
         firstName:
@@ -1136,14 +1138,17 @@ components:
           example: (123) 456-7890
         email:
           type: string
+          format: email
           description: Email address for contact
           example: john.smith@example.com
         contactApplicantRelationship:
           type: string
+          enum: [Owner, Employee, Agent, Consultant, Other]
           description: Relationship of the contact person to the project
           example: Agent
         contactPreference:
           type: string
+          enum: [Phone call, Email, Either]
           description: Preferred method of contact
           example: Email
     DB-Document:

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
-import { date, mixed, object, string } from 'yup';
+import { array, date, mixed, object, string } from 'yup';
 
 import {
   Calendar,

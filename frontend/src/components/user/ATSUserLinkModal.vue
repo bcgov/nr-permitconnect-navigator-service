@@ -28,7 +28,6 @@ const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
-
 const toast = useToast();
 
 async function searchATSUsers() {
@@ -58,9 +57,9 @@ async function searchATSUsers() {
 }
 
 onMounted(() => {
-  if (submission.contactFirstName && submission.contactLastName) {
-    firstName.value = submission.contactFirstName;
-    lastName.value = submission.contactLastName;
+  if (submission.contacts[0]?.firstName && submission.contacts[0]?.lastName) {
+    firstName.value = submission.contacts[0]?.firstName;
+    lastName.value = submission.contacts[0]?.lastName;
   }
 });
 </script>
