@@ -277,21 +277,21 @@ watch(showCompleted, () => {
   </div>
   <Tabs
     v-if="!loading"
-    value="0"
+    :value="activeTabIndex"
   >
     <TabList>
-      <Tab value="0">Projects</Tab>
-      <Tab value="1">Enquiries</Tab>
-      <Tab value="2">Statistics</Tab>
+      <Tab :value="0">Projects</Tab>
+      <Tab :value="1">Enquiries</Tab>
+      <Tab :value="2">Statistics</Tab>
       <Tab
         v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
-        value="3"
+        :value="3"
       >
         Bring Forward Calendar
       </Tab>
     </TabList>
     <TabPanels>
-      <TabPanel value="0">
+      <TabPanel :value="0">
         <Accordion
           v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
           v-model:active-index="accordionIndex"
@@ -334,14 +334,14 @@ watch(showCompleted, () => {
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>
-      <TabPanel value="1">
+      <TabPanel :value="1">
         <EnquiryListNavigator
           :loading="loading"
           :enquiries="getEnquiries"
           @enquiry:delete="onEnquiryDelete"
         />
       </TabPanel>
-      <TabPanel value="2">
+      <TabPanel :value="2">
         <SubmissionStatistics
           v-if="statistics"
           v-model:statistics="statistics"
@@ -354,7 +354,7 @@ watch(showCompleted, () => {
           <span v-else>Failed to load statistics.</span>
         </div>
       </TabPanel>
-      <TabPanel value="3">
+      <TabPanel :value="3">
         <SubmissionBringForwardCalendar
           :bring-forward="bringForward"
           :my-assigned-to="myAssignedTo"
@@ -376,13 +376,4 @@ watch(showCompleted, () => {
 .withinMonth {
   background-color: rgb(159, 197, 248);
 }
-
-// :deep(.p-accordionheader) {
-//   flex-direction: row-reverse;
-//   justify-content: flex-end;
-
-//   .p-icon {
-//     margin-right: 1rem;
-//   }
-// }
 </style>

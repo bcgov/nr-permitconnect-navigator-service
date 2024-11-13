@@ -74,6 +74,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
 }
 
 :deep(input) {
-  height: 2.35rem !important;
+  font-size: 1rem;
+  padding: 0.6rem;
 }
 </style>

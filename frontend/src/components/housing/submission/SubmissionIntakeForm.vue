@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref, watchEffect } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
@@ -485,11 +485,17 @@ onBeforeMount(async () => {
   submissionStore.setDocuments([]);
 });
 
-watchEffect(() => {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (activeStep.value === 3) isSubmittable.value = true;
-});
+watch(
+  () => activeStep.value,
+  () => {
+    // Trigger autosave on form step change, if it has activityId
+    if (activityId && formRef?.value) onSaveDraft(formRef?.value?.values, true, false);
+
+    // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+    if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+    if (activeStep.value === 3) isSubmittable.value = true;
+  }
+);
 </script>
 
 <template>
