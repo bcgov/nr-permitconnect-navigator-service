@@ -10,6 +10,9 @@ import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
+// Types
+type GroupList = { id: string; text: string };
+
 // Store
 const authzStore = useAuthZStore();
 const { getGroupOverride } = storeToRefs(authzStore);
@@ -45,8 +48,8 @@ onMounted(() => {
         v-model="group"
         class="w-full"
         :options="GROUP_NAME_LIST"
-        :option-label="(e: any) => t(`${e.text}`)"
-        :option-value="(e: any) => e.id"
+        :option-label="(e: GroupList) => t(`${e.text}`)"
+        :option-value="(e: GroupList) => e.id"
         @change="(e) => setGroup(e)"
       />
     </div>

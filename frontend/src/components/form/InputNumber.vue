@@ -22,7 +22,7 @@ const {
 }>();
 
 // State
-const { errorMessage, handleBlur, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<number>(name);
 </script>
 
 <template>

@@ -546,11 +546,17 @@ onBeforeMount(async () => {
   }
 });
 
-watchEffect(() => {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (activeStep.value === 3) isSubmittable.value = true;
-});
+watch(
+  () => activeStep.value,
+  () => {
+    // Trigger autosave on form step change, if it has activityId
+    if (activityId && formRef?.value) onSaveDraft(formRef?.value?.values, true, false);
+
+    // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+    if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+    if (activeStep.value === 3) isSubmittable.value = true;
+  }
+);
 </script>
 
 <template>

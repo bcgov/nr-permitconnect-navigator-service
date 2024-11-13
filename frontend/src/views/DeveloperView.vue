@@ -8,6 +8,9 @@ import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
 import { ButtonMode } from '@/utils/enums/application';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 
+// Types
+type GroupList = { id: string; text: string };
+
 // Store
 const authnStore = useAuthNStore();
 const { getAccessToken, getProfile } = storeToRefs(authnStore);
@@ -36,8 +39,8 @@ const { t } = useI18n();
         <Select
           class="w-full"
           :options="GROUP_NAME_LIST"
-          :option-label="(e: any) => t(`${e.text}`)"
-          :option-value="(e: any) => e.id"
+          :option-label="(e: GroupList) => t(`${e.text}`)"
+          :option-value="(e: GroupList) => e.id"
           @change="
             (e) => {
               authzStore.setGroupOverride(e.value);

@@ -20,17 +20,6 @@ import 'primeicons/primeicons.css';
 import 'primeflex/primeflex.css';
 import '@/assets/main.scss';
 
-import Aura from '@primevue/themes/aura';
-import { definePreset } from '@primevue/themes';
-
-const MyPreset = definePreset(Aura, {
-  semantic: {
-    content: {
-      background: '{border.radius.md}'
-    }
-  }
-});
-
 /**
  * @function initializeApp
  * Initializes and mounts the Vue instance
