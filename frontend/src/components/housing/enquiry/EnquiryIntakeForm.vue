@@ -26,11 +26,11 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/cons
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
-import { emailValidator } from '@/validators/common';
 
 // Props
 const { enquiryId = undefined } = defineProps<{
@@ -52,19 +52,7 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  contacts: array().of(
-    object({
-      contactApplicantRelationship: string()
-        .required()
-        .oneOf(PROJECT_RELATIONSHIP_LIST)
-        .label('Relationship to project'),
-      contactPreference: string().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-      email: emailValidator('Contact email must be valid').required().label('Contact email'),
-      firstName: string().required().max(255).label('Contact first name'),
-      lastName: string().required().max(255).label('Contact last name'),
-      phoneNumber: string().required().label('Contact phone number')
-    })
-  ),
+  contacts: array().of(object(contactValidator)),
   [IntakeFormCategory.BASIC]: object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {

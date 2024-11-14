@@ -27,7 +27,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
-import { emailValidator } from '@/validators/common';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -60,19 +60,7 @@ const intakeSchema = object({
   enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  contacts: array().of(
-    object({
-      contactApplicantRelationship: string()
-        .required()
-        .oneOf(PROJECT_RELATIONSHIP_LIST)
-        .label('Relationship to project'),
-      contactPreference: string().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-      email: emailValidator('Contact email must be valid').required().label('Contact email'),
-      firstName: string().required().max(255).label('Contact first name'),
-      lastName: string().required().max(255).label('Contact last name'),
-      phoneNumber: string().required().label('Contact phone number')
-    })
-  ),
+  contacts: array().of(object(contactValidator)),
   enquiryDescription: string().required().label('Enquiry detail'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: mixed()
