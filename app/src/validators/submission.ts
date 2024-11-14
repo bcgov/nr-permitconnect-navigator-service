@@ -55,6 +55,11 @@ const schema = {
       submissionId: uuidv4.required()
     })
   },
+  deleteSubmissionDraft: {
+    params: Joi.object({
+      submissionDraftId: uuidv4.required()
+    })
+  },
   getStatistics: {
     query: Joi.object({
       dateFrom: Joi.date().allow(null),
@@ -195,6 +200,7 @@ export default {
   createSubmission: validate(schema.createSubmission),
   emailConfirmation: validate(schema.emailConfirmation),
   deleteSubmission: validate(schema.deleteSubmission),
+  deleteSubmissionDraft: validate(schema.deleteSubmissionDraft),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
   searchSubmissions: validate(schema.searchSubmissions),

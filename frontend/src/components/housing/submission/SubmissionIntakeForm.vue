@@ -64,14 +64,8 @@ import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, Submission } from '@/types';
-
-// Interfaces
-interface SubmissionForm extends Submission {
-  addressSearch?: string;
-  appliedPermits?: Array<Permit>;
-  investigatePermits?: Array<Permit>;
-}
+import type { Document, Permit, SubmissionIntake } from '@/types';
+import type { GenericObject } from 'vee-validate';
 
 // Types
 type GeocoderEntry = {
@@ -79,10 +73,19 @@ type GeocoderEntry = {
   properties: { [key: string]: string };
 };
 
+type SubmissionForm = {
+  addressSearch?: string;
+} & SubmissionIntake;
+
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
+const {
+  activityId = undefined,
+  submissionId = undefined,
+  submissionDraftId = undefined
+} = defineProps<{
   activityId?: string;
   submissionId?: string;
+  submissionDraftId?: string;
 }>();
 
 // Constants
@@ -139,8 +142,8 @@ const getBackButtonConfig = computed(() => {
   }
 });
 
-function confirmSubmit(data: any) {
-  const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
+function confirmSubmit(data: GenericObject) {
+  const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
     message: 'Are you sure you wish to submit this form?',
@@ -173,11 +176,14 @@ const getAddressSearchLabel = (e: GeocoderEntry) => {
 function handleProjectLocationClick() {
   let location = formRef?.value?.values?.location;
   if (location?.latitude || location?.longitude) {
-    formRef?.value?.setFieldValue('location.latitude', null);
-    formRef?.value?.setFieldValue('location.longitude', null);
-    formRef.value?.setFieldValue('location.streetAddress', null);
-    formRef.value?.setFieldValue('location.locality', null);
-    formRef.value?.setFieldValue('location.province', null);
+    const resetFields = [
+      'location.latitude',
+      'location.longitude',
+      'location.streetAddress',
+      'location.locality',
+      'location.province'
+    ];
+    resetFields.forEach((x) => formRef?.value?.setFieldValue(x, null));
   }
 }
 
@@ -292,50 +298,46 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(
-  data: any,
-  isAutoSave: boolean = false,
-  showToast: boolean = true,
-  assistanceRequired: boolean = false
-) {
+async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
   editable.value = false;
 
   autoSaveRef.value?.stopAutoSave();
 
-  // Cleanup unneeded data to be saved to draft
-  const draftData = omit(data as SubmissionForm, ['addressSearch']);
-
   // Remove empty permits
-  if (Array.isArray(draftData.appliedPermits)) {
-    draftData.appliedPermits = draftData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  if (Array.isArray(data.appliedPermits)) {
+    data.appliedPermits = data.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
-  if (Array.isArray(draftData.investigatePermits)) {
-    draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
+  if (Array.isArray(data.investigatePermits)) {
+    data.investigatePermits = data.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
   }
 
-  let response;
   try {
-    response = await submissionService.updateDraft(draftData);
+    const response = await submissionService.updateDraft({
+      submissionDraftId: submissionDraftId,
+      data: data
+    });
 
-    if (response.data.activityId && response.data.submissionId) {
-      syncFormAndRoute(response.data.activityId, response.data.submissionId);
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
+    if (response.data.submissionDraftId) {
+      // Update route query for refreshing
+      router.replace({
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+        query: {
+          submissionDraftId: response.data.submissionDraftId
+        }
+      });
     }
-    if (isAutoSave) {
-      if (showToast) toast.success('Draft autosaved');
-    } else {
-      if (showToast) toast.success('Draft saved');
-    }
+
+    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
   }
 
-  if (assistanceRequired && response?.data?.activityId) {
-    handleEnquirySubmit(draftData, response.data.activityId);
-  }
+  // TODO: Handle activityId for assistance submit
+  // if (assistanceRequired && response?.data?.activityId) {
+  //   handleEnquirySubmit(draftData, response.data.activityId);
+  // }
 }
 
 function onStepChange(stepNumber: number) {
@@ -436,60 +438,64 @@ onBeforeMount(async () => {
       editable.value = response.intakeStatus === IntakeStatus.DRAFT;
     }
 
-    initialFormValues.value = {
-      activityId: response?.activityId,
-      submissionId: response?.submissionId,
-      contacts: response?.contacts,
-      basic: {
-        consentToFeedback: response?.consentToFeedback,
-        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-        isDevelopedInBC: response?.isDevelopedInBC,
-        registeredName: response?.companyNameRegistered
-      },
-      housing: {
-        projectName: response?.projectName,
-        projectDescription: response?.projectDescription,
-        singleFamilySelected: !!response?.singleFamilyUnits,
-        multiFamilySelected: !!response?.multiFamilyUnits,
-        singleFamilyUnits: response?.singleFamilyUnits,
-        multiFamilyUnits: response?.multiFamilyUnits,
-        otherSelected: !!response?.otherUnits,
-        otherUnitsDescription: response?.otherUnitsDescription,
-        otherUnits: response?.otherUnits,
-        hasRentalUnits: response?.hasRentalUnits,
-        rentalUnits: response?.rentalUnits,
-        financiallySupportedBC: response?.financiallySupportedBC,
-        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-        indigenousDescription: response?.indigenousDescription,
-        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-        nonProfitDescription: response?.nonProfitDescription,
-        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-        housingCoopDescription: response?.housingCoopDescription
-      },
-      location: {
-        naturalDisaster: response?.naturalDisaster,
-        projectLocation: response?.projectLocation,
-        streetAddress: response?.streetAddress,
-        locality: response?.locality,
-        province: response?.province,
-        latitude: response?.latitude,
-        longitude: response?.longitude,
-        ltsaPIDLookup: response?.locationPIDs,
-        geomarkUrl: response?.geomarkUrl,
-        projectLocationDescription: response?.projectLocationDescription
-      },
-      appliedPermits: permits
-        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-        .map((x: Permit) => ({
-          ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-        })),
-      permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
-      },
-      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-    };
-
+    if (submissionDraftId) {
+      response = (await submissionService.getSubmissionDraft(submissionDraftId)).data;
+      initialFormValues.value = response.data;
+    } else {
+      initialFormValues.value = {
+        activityId: response?.activityId,
+        submissionId: response?.submissionId,
+        contacts: response?.contacts,
+        basic: {
+          consentToFeedback: response?.consentToFeedback,
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: response?.isDevelopedInBC,
+          registeredName: response?.companyNameRegistered
+        },
+        housing: {
+          projectName: response?.projectName,
+          projectDescription: response?.projectDescription,
+          singleFamilySelected: !!response?.singleFamilyUnits,
+          multiFamilySelected: !!response?.multiFamilyUnits,
+          singleFamilyUnits: response?.singleFamilyUnits,
+          multiFamilyUnits: response?.multiFamilyUnits,
+          otherSelected: !!response?.otherUnits,
+          otherUnitsDescription: response?.otherUnitsDescription,
+          otherUnits: response?.otherUnits,
+          hasRentalUnits: response?.hasRentalUnits,
+          rentalUnits: response?.rentalUnits,
+          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+          indigenousDescription: response?.indigenousDescription,
+          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+          nonProfitDescription: response?.nonProfitDescription,
+          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+          housingCoopDescription: response?.housingCoopDescription
+        },
+        location: {
+          naturalDisaster: response?.naturalDisaster,
+          projectLocation: response?.projectLocation,
+          streetAddress: response?.streetAddress,
+          locality: response?.locality,
+          province: response?.province,
+          latitude: response?.latitude,
+          longitude: response?.longitude,
+          ltsaPIDLookup: response?.locationPIDs,
+          geomarkUrl: response?.geomarkUrl,
+          projectLocationDescription: response?.projectLocationDescription
+        },
+        appliedPermits: permits
+          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .map((x: Permit) => ({
+            ...x,
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          })),
+        permits: {
+          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+        },
+        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+      };
+    }
     await nextTick();
 
     // Move map pin
@@ -529,14 +535,14 @@ onBeforeMount(async () => {
         ref="autoSaveRef"
         :callback="() => onSaveDraft(values, true)"
       />
-
+      <!--
       <SubmissionAssistance
         v-if="editable && values?.applicant"
         :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onSaveDraft(values, true, false, true)"
       />
-
+      -->
       <input
         type="hidden"
         name="submissionId"

@@ -52,6 +52,24 @@ router.get(
   }
 );
 
+/** Gets a list of submission drafts */
+router.get(
+  '/draft/:submissionDraftId',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getDraft(req, res, next);
+  }
+);
+
+/** Gets a list of submission drafts */
+router.get(
+  '/draft',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getDrafts(req, res, next);
+  }
+);
+
 /** Creates or updates an intake and set status to Draft */
 router.put(
   '/draft',
@@ -99,6 +117,17 @@ router.delete(
   submissionValidator.deleteSubmission,
   (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
     submissionController.deleteSubmission(req, res, next);
+  }
+);
+
+/** Hard deletes a submission draft */
+router.delete(
+  '/draft/:submissionDraftId',
+  hasAuthorization(Resource.SUBMISSION, Action.DELETE),
+  hasAccess('submissionDraftId'),
+  submissionValidator.deleteSubmissionDraft,
+  (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction): void => {
+    submissionController.deleteSubmissionDraft(req, res, next);
   }
 );
 

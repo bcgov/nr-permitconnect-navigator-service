@@ -1,18 +1,11 @@
-import { Contact } from './Contact';
-import { Permit } from './Permit';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
+import type { Contact } from './Contact';
+import type { Permit } from './Permit';
 
 export type SubmissionIntake = {
-  activityId?: string;
-  submissionId?: string;
-  submittedAt?: string;
-  applicationStatus?: ApplicationStatus;
-  submissionType?: SubmissionType;
-
   basic?: {
     consentToFeedback?: boolean;
-    isDevelopedByCompanyOrOrg?: string | null;
-    isDevelopedInBC?: string | null;
+    isDevelopedByCompanyOrOrg?: string;
+    isDevelopedInBC?: string;
     registeredName?: string;
   };
 
@@ -22,12 +15,12 @@ export type SubmissionIntake = {
     singleFamilyUnits?: string;
     multiFamilyUnits?: string;
     otherUnitsDescription?: string;
-    otherUnits?: string | null;
-    hasRentalUnits?: string | null;
-    financiallySupportedBC?: string | null;
-    financiallySupportedIndigenous?: string | null;
-    financiallySupportedNonProfit?: string | null;
-    financiallySupportedHousingCoop?: string | null;
+    otherUnits?: string;
+    hasRentalUnits?: string;
+    financiallySupportedBC?: string;
+    financiallySupportedIndigenous?: string;
+    financiallySupportedNonProfit?: string;
+    financiallySupportedHousingCoop?: string;
     rentalUnits?: string;
     indigenousDescription?: string;
     nonProfitDescription?: string;
@@ -39,15 +32,15 @@ export type SubmissionIntake = {
     projectLocation?: string;
     projectLocationDescription?: string;
     ltsaPIDLookup?: string;
-    latitude?: number | null;
-    longitude?: number | null;
+    latitude?: number;
+    longitude?: number;
     streetAddress?: string;
     locality?: string;
     province?: string;
   };
 
   permits?: {
-    hasAppliedProvincialPermits?: string | null;
+    hasAppliedProvincialPermits?: string;
   };
 
   appliedPermits?: Array<Permit>;

@@ -12,5 +12,6 @@ export { default as permitService } from './permit';
 export { default as permitNoteService } from './permitNote';
 export { default as ssoService } from './sso';
 export { default as submissionService } from './submission';
+export { default as submissionDraftService } from './submissionDraft';
 export { default as userService } from './user';
 export { default as yarsService } from './yars';

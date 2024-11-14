@@ -8,6 +8,7 @@ import {
   emailService,
   enquiryService,
   submissionService,
+  submissionDraftService,
   permitService
 } from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
@@ -33,7 +34,8 @@ import type {
   StatisticsFilters,
   SubmissionIntake,
   SubmissionSearchParameters,
-  CurrentContext
+  CurrentContext,
+  SubmissionDraft
 } from '../types';
 
 const controller = {
@@ -409,6 +411,50 @@ const controller = {
     }
   },
 
+  deleteDraft: async (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionDraftService.deleteDraft(req.params.submissionDraftId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission draft not found' });
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getDraft: async (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionDraftService.getDraft(req.params.submissionDraftId);
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (response?.createdBy !== getCurrentUsername(req.currentContext)) {
+          res.status(403).send();
+        }
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getDrafts: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let response = await submissionDraftService.getDrafts();
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter((x: SubmissionDraft) => x?.createdBy === req.currentContext.userId);
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getStatistics: async (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getStatistics(req.query);
@@ -526,43 +572,28 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+  updateDraft: async (req: Request<never, never, SubmissionDraft>, res: Response, next: NextFunction) => {
     try {
-      const update = req.body.activityId && req.body.submissionId;
+      const update = req.body.submissionDraftId;
 
-      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        IntakeStatus.DRAFT
-      );
-
-      let result;
+      let response;
 
       if (update) {
         // Update submission
-        result = await submissionService.updateSubmission({
-          ...submission,
+        response = await submissionDraftService.updateDraft({
+          ...req.body,
           ...generateUpdateStamps(req.currentContext)
         });
-
-        if (!result) {
-          return res.status(404).json({ message: 'Submission not found' });
-        }
       } else {
         // Create new submission
-        result = await submissionService.createSubmission({
-          ...submission,
+        response = await submissionDraftService.createDraft({
+          ...req.body,
+          submissionDraftId: uuidv4(),
           ...generateCreateStamps(req.currentContext)
         });
       }
 
-      // Remove already existing permits for this activity
-      await permitService.deletePermitsByActivity(submission.activityId);
-
-      // Create each permit
-      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
-
-      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
+      res.status(update ? 200 : 201).json({ submissionDraftId: response.submissionDraftId });
     } catch (e: unknown) {
       next(e);
     }

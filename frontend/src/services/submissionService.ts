@@ -29,11 +29,35 @@ export default {
   },
 
   /**
+   * @function deleteSubmissionDraft
+   * @returns {Promise} An axios response
+   */
+  deleteSubmissionDraft(submissionDraftId: string) {
+    return appAxios().delete(`submission/draft/${submissionDraftId}`);
+  },
+
+  /**
    * @function getSubmissions
    * @returns {Promise} An axios response
    */
   getSubmissions() {
     return appAxios().get('submission');
+  },
+
+  /**
+   * @function getSubmissionDraft
+   * @returns {Promise} An axios response
+   */
+  getSubmissionDraft(submissionDraftId: string) {
+    return appAxios().get(`submission/draft/${submissionDraftId}`);
+  },
+
+  /**
+   * @function getSubmissionDrafts
+   * @returns {Promise} An axios response
+   */
+  getSubmissionDrafts() {
+    return appAxios().get('submission/draft');
   },
 
   /**

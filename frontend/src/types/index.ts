@@ -19,6 +19,8 @@ export type { PermitForm } from './PermitForm';
 export type { PermitType } from './PermitType';
 export type { Statistics } from './Statistics';
 export type { Submission } from './Submission';
+export type { SubmissionDraft } from './SubmissionDraft';
+export type { SubmissionIntake } from './SubmissionIntake';
 export type { User } from './User';
 export type { UserAccessRequest } from './UserAccessRequest';
 export type { UserSearchParameters } from './UserSearchParameters';

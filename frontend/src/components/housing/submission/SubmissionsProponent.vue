@@ -7,25 +7,33 @@ import { TabPanel, TabView } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import type { Ref } from 'vue';
 import type { Enquiry, Submission } from '@/types';
+import SubmissionDraftListProponent from './SubmissionDraftListProponent.vue';
 
 // State
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
+const submissionDrafts: Ref<Array<any>> = ref([]);
 
 // Actions
-function onEnquiryDelete(enquiryId: string) {
-  enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
-}
-
 function onSubmissionDelete(submissionId: string) {
   submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
 }
 
+function onSubmissionDraftDelete(submissionDraftId: string) {
+  submissionDrafts.value = submissionDrafts.value.filter((x) => x.submissionDraftId !== submissionDraftId);
+}
+
 onMounted(async () => {
-  [enquiries.value, submissions.value] = (
-    await Promise.all([enquiryService.getEnquiries(), submissionService.getSubmissions()])
+  [enquiries.value, submissions.value, submissionDrafts.value] = (
+    await Promise.all([
+      enquiryService.getEnquiries(),
+      submissionService.getSubmissions(),
+      submissionService.getSubmissionDrafts()
+    ])
   ).map((r) => r.data);
+
+  submissionDrafts.value = submissionDrafts.value.map((x, index) => ({ ...x, index: index + 1 }));
 
   loading.value = false;
 });
@@ -44,7 +52,13 @@ onMounted(async () => {
       <EnquiryListProponent
         :loading="loading"
         :enquiries="enquiries"
-        @enquiry:delete="onEnquiryDelete"
+      />
+    </TabPanel>
+    <TabPanel header="Drafts">
+      <SubmissionDraftListProponent
+        :loading="loading"
+        :drafts="submissionDrafts"
+        @submission-draft:delete="onSubmissionDraftDelete"
       />
     </TabPanel>
   </TabView>

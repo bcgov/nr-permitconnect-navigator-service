@@ -111,7 +111,8 @@ const paramMap = new Map<string, (id: string) => any>([
   ['enquiryId', enquiryService.getEnquiry],
   ['noteId', noteService.getNote],
   ['permitId', permitService.getPermit],
-  ['submissionId', submissionService.getSubmission]
+  ['submissionId', submissionService.getSubmission],
+  ['submissionDraftId', submissionService.getDraft]
 ]);
 
 /**

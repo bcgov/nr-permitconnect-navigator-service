@@ -27,6 +27,7 @@ export type { PermitType } from './PermitType';
 export type { StatisticsFilters } from './StatisticsFilters';
 export type { Submission } from './Submission';
 export type { SubmissionIntake } from './SubmissionIntake';
+export type { SubmissionDraft } from './SubmissionDraft';
 export type { SubmissionSearchParameters } from './SubmissionSearchParameters';
 export type { User } from './User';
 export type { UserAccessRequest } from './UserAccessRequest';
