@@ -26,7 +26,6 @@ import {
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import IntakeAssistanceConfirmation from './IntakeAssistanceConfirmation.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
-import SubmissionIntakeConfirmation from '@/components/housing/submission/SubmissionIntakeConfirmation.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
@@ -102,6 +101,7 @@ const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
+const assistanceAssignedEnquiryId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -143,7 +143,7 @@ function confirmSubmit(data: any) {
   const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
+    message: 'Are you sure you wish to submit this form?',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
@@ -201,6 +201,7 @@ async function handleEnquirySubmit(values: any, relatedActivityId: string) {
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
       assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+      assistanceAssignedEnquiryId.value = enquiryResponse.data.enquiryId;
 
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
@@ -354,17 +355,16 @@ async function onSubmit(data: any) {
     if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
 
-      // Update route query for refreshing
-      router.replace({
-        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+      // Send confirmation email
+      emailConfirmation(response.data.activityId, response.data.submissionId);
+
+      router.push({
+        name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
         query: {
           activityId: response.data.activityId,
           submissionId: response.data.submissionId
         }
       });
-
-      // Send confirmation email
-      emailConfirmation(response.data.activityId, response.data.submissionId);
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -759,7 +759,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Help us learn more about your housing project</span>
+                <span class="section-header">Tell us your project name</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -772,41 +772,6 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                   />
                   <div class="col-6" />
-                  <div class="col-12">
-                    <div class="flex align-items-center">
-                      <label>Provide additional information</label>
-                      <div
-                        v-tooltip.right="
-                          `Provide us with additional information -
-                         short description about the project, project website link, or upload a document.`
-                        "
-                        class="pl-2 mb-2"
-                      >
-                        <font-awesome-icon icon="fa-solid fa-circle-question" />
-                      </div>
-                    </div>
-                  </div>
-                  <!-- eslint-disable max-len -->
-                  <TextArea
-                    class="col-12"
-                    name="housing.projectDescription"
-                    placeholder="Provide us with additional information - short description about the project and/or project website link"
-                    :disabled="!editable"
-                  />
-                  <!-- prettier-ignore -->
-                  <label class="col-12">
-                    Upload documents about your housing project (pdfs, maps,
-                    <a
-                      href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                      target="_blank"
-                      class="text-blue-500 underline"
-                    >shape files</a>, etc)
-                  </label>
-                  <AdvancedFileUpload
-                    :activity-id="values.activityId"
-                    :disabled="!editable"
-                    :generate-activity-id="generateActivityId"
-                  />
                 </div>
               </template>
             </Card>
@@ -818,17 +783,27 @@ onBeforeMount(async () => {
               </template>
               <template #content>
                 <div class="formgrid grid">
-                  <Checkbox
+                  <div class="col-12">
+                    <Checkbox
+                      name="housing.singleFamilySelected"
+                      label="Single-family"
+                      :bold="false"
+                      :disabled="!editable"
+                      :invalid="!!errors.housing && meta.touched"
+                    />
+                  </div>
+                  <Dropdown
+                    v-if="values.housing.singleFamilySelected"
                     class="col-6"
-                    name="housing.singleFamilySelected"
-                    label="Single-family"
-                    :bold="false"
-                    :disabled="!editable"
-                    :invalid="!!errors.housing && meta.touched"
+                    name="housing.singleFamilyUnits"
+                    :disabled="!editable || !values.housing.singleFamilySelected"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
+                    placeholder="How many expected units?"
                   />
-                  <div class="col-6">
+                  <div class="col-12">
                     <div class="flex">
                       <Checkbox
+                        class="align-content-center"
                         name="housing.multiFamilySelected"
                         label="Multi-family"
                         :bold="false"
@@ -847,35 +822,33 @@ onBeforeMount(async () => {
                     </div>
                   </div>
                   <Dropdown
-                    class="col-6"
-                    name="housing.singleFamilyUnits"
-                    :disabled="!editable || !values.housing.singleFamilySelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
-                  />
-                  <Dropdown
-                    class="col-6"
+                    v-if="values.housing.multiFamilySelected"
+                    class="col-6 align-content-center"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <Checkbox
-                    class="col-6"
-                    name="housing.otherSelected"
-                    label="Other"
-                    :bold="false"
-                    :disabled="!editable"
-                    :invalid="!!errors?.housing && meta.touched"
-                  />
-                  <div class="col-6" />
+                  <div class="col-12">
+                    <Checkbox
+                      name="housing.otherSelected"
+                      label="Other"
+                      :bold="false"
+                      :disabled="!editable"
+                      :invalid="!!errors?.housing && meta.touched"
+                    />
+                  </div>
                   <InputText
-                    class="col-6"
+                    v-if="values.housing.otherSelected"
+                    class="col-6 mb-2"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
+                  <div class="col-6" />
+
                   <Dropdown
+                    v-if="values.housing.otherSelected"
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
@@ -1065,6 +1038,52 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+            <Card>
+              <template #title>
+                <span class="section-header">Help us learn more about your housing project</span>
+                <Divider type="solid" />
+              </template>
+              <template #content>
+                <div class="col-12 my-0 py-0">
+                  <div class="flex align-items-center">
+                    <label>Provide additional information</label>
+                    <div
+                      v-tooltip.right="
+                        `Provide us with additional information -
+                         short description about the project, project website link, or upload a document.`
+                      "
+                      class="pl-2 mb-2"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-circle-question" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- eslint-disable max-len -->
+                <TextArea
+                  class="col-12 mb-0 pb-0"
+                  name="housing.projectDescription"
+                  placeholder="Provide us with additional information - short description about the project and/or project website link"
+                  :disabled="!editable"
+                />
+                <label class="col-12 mt-0 pt-0">
+                  Upload documents about your housing project (pdfs, maps,
+                  <a
+                    href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                    target="_blank"
+                    class="text-blue-500 underline"
+                  >
+                    shape files
+                  </a>
+                  , etc)
+                </label>
+                <AdvancedFileUpload
+                  :activity-id="values.activityId"
+                  :disabled="!editable"
+                  :generate-activity-id="generateActivityId"
+                />
+              </template>
+            </Card>
 
             <StepperNavigation
               :editable="editable"
@@ -1168,7 +1187,7 @@ onBeforeMount(async () => {
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
                             :options="addressGeocoderOptions"
-                            :placeholder="'Search the address of your housing project'"
+                            :placeholder="'Type to search the address of your housing project'"
                             :bold="false"
                             :disabled="!editable"
                             @on-input="onAddressSearchInput"
@@ -1452,7 +1471,7 @@ onBeforeMount(async () => {
                     >
                       <div class="mb-2">
                         <span class="app-primary-color">
-                          * Sharing this information will authorize the navigators to seek additional information about
+                          Sharing this information will authorize the navigators to seek additional information about
                           this permit.
                         </span>
                       </div>
@@ -1680,13 +1699,10 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
-  <SubmissionIntakeConfirmation
-    v-else-if="assignedActivityId"
-    :assigned-activity-id="assignedActivityId"
-  />
   <IntakeAssistanceConfirmation
-    v-else-if="assistanceAssignedActivityId"
+    v-else-if="assistanceAssignedActivityId && assistanceAssignedEnquiryId"
     :assigned-activity-id="assistanceAssignedActivityId"
+    :assigned-enquiry-id="assistanceAssignedEnquiryId"
   />
 </template>
 

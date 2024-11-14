@@ -1,0 +1,44 @@
+<script setup lang="ts">
+import { Message } from '@/lib/primevue';
+
+import { RouteName } from '@/utils/enums/application';
+
+// Props
+const { activityId, submissionId } = defineProps<{
+  activityId: string;
+  submissionId: string;
+}>();
+</script>
+
+<template>
+  <div>
+    <h2>Confirmation of Submission</h2>
+    <Message
+      class="border-none"
+      severity="success"
+      :closable="false"
+    >
+      Your application has been successfully submitted.
+    </Message>
+    <h3 class="inline-block mr-2">Confirmation ID:</h3>
+    <router-link
+      :to="{
+        name: RouteName.HOUSING_SUBMISSION_INTAKE,
+        query: { activityId: activityId, submissionId: submissionId }
+      }"
+    >
+      <span class="text-2xl">{{ activityId }}</span>
+    </router-link>
+    <div>
+      Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check
+      your email for the confirmation email and keep the confirmation ID for future reference.
+    </div>
+    <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
+  </div>
+</template>
+
+<style scoped lang="scss">
+.inline-block {
+  display: inline-block;
+}
+</style>

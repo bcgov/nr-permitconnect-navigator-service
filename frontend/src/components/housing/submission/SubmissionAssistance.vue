@@ -43,7 +43,7 @@ const checkApplicantValuesValid = (
 
 const confirmSubmit = () => {
   confirm.require({
-    message: 'Are you sure you want to request assistance for this form? Please review this form before submitting.',
+    message: 'Are you sure you want to request assistance for this form?',
     header: 'Please confirm assistance',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',

@@ -18,7 +18,6 @@ import {
   FormAutosave
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
@@ -41,7 +40,6 @@ const { enquiryId = undefined } = defineProps<{
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
@@ -117,7 +115,7 @@ async function confirmNext(data: any) {
 
 function confirmSubmit(data: any) {
   confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
+    message: 'Are you sure you wish to submit this form?',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
@@ -253,21 +251,19 @@ async function onSubmit(data: any) {
     enquiryResponse = await enquiryService.submitDraft(data);
 
     if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
-      assignedActivityId.value = enquiryResponse.data.activityId;
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
 
-      // Update route query for refreshing
-      router.replace({
-        name: RouteName.HOUSING_ENQUIRY_INTAKE,
+      // Send confirmation email
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
+
+      router.push({
+        name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
         query: {
           activityId: enquiryResponse.data.activityId,
           enquiryId: enquiryResponse.data.enquiryId
         }
       });
-
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
     } else {
       throw new Error('Failed to retrieve correct enquiry draft data');
     }
@@ -296,7 +292,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="!assignedActivityId">
+  <div>
     <div class="mb-2 p-0">
       <BackButton
         :route-name="getBackButtonConfig.routeName"
@@ -521,10 +517,6 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
-  <EnquiryIntakeConfirmation
-    v-else
-    :assigned-activity-id="assignedActivityId"
-  />
 </template>
 
 <style scoped lang="scss">
