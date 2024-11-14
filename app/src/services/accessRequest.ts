@@ -36,20 +36,6 @@ const service = {
   },
 
   /**
-   * @function deleteAccessRequests
-   * Deletes the access request
-   * @returns {Promise<object>} The result of running the delete operation
-   */
-  deleteAccessRequest: async (accessRequestId: string) => {
-    const response = await prisma.access_request.delete({
-      where: {
-        access_request_id: accessRequestId
-      }
-    });
-    return access_request.fromPrismaModel(response);
-  },
-
-  /**
    * @function getAccessRequest
    * Get an access request
    * @param {string} accessRequestId The access request data to retrieve
@@ -72,6 +58,23 @@ const service = {
   getAccessRequests: async () => {
     const response = await prisma.access_request.findMany();
     return response.map((x) => access_request.fromPrismaModel(x));
+  },
+
+  /**
+   * @function updateAccessRequest
+   * Updates a specific enquiry
+   * @param {Enquiry} data Enquiry to update
+   * @returns {Promise<Enquiry | null>} The result of running the update operation
+   */
+  updateAccessRequest: async (data: AccessRequest) => {
+    const result = await prisma.access_request.update({
+      data: { ...access_request.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
+      where: {
+        access_request_id: data.accessRequestId
+      }
+    });
+
+    return access_request.fromPrismaModel(result);
   }
 };
 

@@ -19,7 +19,6 @@ const controller = {
         req.currentAuthorization?.groups.some(
           (group: GroupName) => group === GroupName.DEVELOPER || group === GroupName.ADMIN
         ) ?? false;
-
       const existingUser = !!user.userId;
 
       // Groups the current user can modify
@@ -43,10 +42,15 @@ const controller = {
         res.status(404).json({ message: 'User not found' });
       } else {
         userGroups = await yarsService.getSubjectGroups(userResponse.sub);
+
         if (accessRequest.grant && !modifyableGroups.includes(accessRequest.group as GroupName)) {
           res.status(403).json({ message: 'Cannot modify requested group' });
         }
-        if (accessRequest.group && userGroups.map((x) => x.groupName).includes(accessRequest.group)) {
+        if (
+          accessRequest.grant &&
+          accessRequest.group &&
+          userGroups.map((x) => x.groupName).includes(accessRequest.group)
+        ) {
           res.status(409).json({ message: 'User is already assigned this group' });
         }
         if (userResponse.idp !== IdentityProvider.IDIR) {
@@ -58,7 +62,6 @@ const controller = {
       }
 
       const isGroupUpdate = existingUser && accessRequest.grant;
-
       let response;
 
       if (isGroupUpdate) {
@@ -149,13 +152,13 @@ const controller = {
           if (req.body.approve) {
             if (accessRequest.grant) {
               if (!accessRequest.group || !accessRequest.group.length) {
-                res.status(422).json({ message: 'Must provided a role to grant' });
+                return res.status(422).json({ message: 'Must provided a role to grant' });
               }
               if (accessRequest.group && groups.map((x) => x.groupName).includes(accessRequest.group)) {
-                res.status(409).json({ message: 'User is already assigned this role' });
+                return res.status(409).json({ message: 'User is already assigned this role' });
               }
               if (userResponse.idp !== IdentityProvider.IDIR) {
-                res.status(409).json({ message: 'User must be an IDIR user to be assigned this role' });
+                return res.status(409).json({ message: 'User must be an IDIR user to be assigned this role' });
               }
 
               await yarsService.assignGroup(
@@ -176,14 +179,17 @@ const controller = {
                 await yarsService.removeGroup(userResponse.sub, initiative, g.groupName);
               }
             }
+
+            // Update access request status
+            accessRequest.status = AccessRequestStatus.APPROVED;
+            await accessRequestService.updateAccessRequest(accessRequest);
+          } else {
+            accessRequest.status = AccessRequestStatus.REJECTED;
+            await accessRequestService.updateAccessRequest(accessRequest);
           }
-
-          // Delete the request after processing
-          await accessRequestService.deleteAccessRequest(accessRequest.accessRequestId);
         } else {
-          res.status(404).json({ message: 'User does not exist' });
+          return res.status(404).json({ message: 'User does not exist' });
         }
-
         res.status(204).end();
       }
     } catch (e: unknown) {

@@ -2,17 +2,15 @@
 import { ref } from 'vue';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import { useAuthZStore } from '@/store';
-import { NavigationPermission } from '@/store/authzStore';
 import { AccessRequestStatus } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { UserAccessRequest } from '@/types';
 
 // Props
-const { usersAndAccessRequest, revocation = false } = defineProps<{
-  usersAndAccessRequest: Array<UserAccessRequest>;
-  revocation?: boolean;
+const { usersAndAccessRequests, requestTable = false } = defineProps<{
+  usersAndAccessRequests: Array<UserAccessRequest>;
+  requestTable?: boolean;
 }>();
 
 // Constants
@@ -20,19 +18,18 @@ const DEFAULT_SORT_ORDER = 1;
 const DEFAULT_SORT_FIELD = 'fullName';
 
 // Emits
-const emit = defineEmits([
-  'userTable:processRequest',
-  'userTable:denyRevocation',
-  'userTable:delete',
-  'userTable:manage',
-  'userTable:revoke'
-]);
-
-// Store
-const authzStore = useAuthZStore();
+const emit = defineEmits(['userTable:approveRequest', 'userTable:denyRequest', 'userTable:manage', 'userTable:revoke']);
 
 // State
 const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
+
+function getStatusClass(data: UserAccessRequest) {
+  let statusClass = 'default-status';
+  if (data.accessRequest && data.user.status !== AccessRequestStatus.APPROVED) {
+    statusClass = data.accessRequest.grant ? 'pending-approval-status' : 'pending-revoke-status';
+  }
+  return statusClass;
+}
 </script>
 
 <template>
@@ -40,7 +37,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
     v-model:selection="selection"
     :row-hover="true"
     class="datatable"
-    :value="usersAndAccessRequest"
+    :value="usersAndAccessRequests"
     selection-mode="single"
     :sort-field="DEFAULT_SORT_FIELD"
     :sort-order="DEFAULT_SORT_ORDER"
@@ -69,7 +66,13 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
       field="user.status"
       header="Status"
       sortable
-    />
+    >
+      <template #body="{ data }">
+        <span :class="getStatusClass(data)">
+          {{ data.user.status }}
+        </span>
+      </template>
+    </Column>
     <Column
       field="role"
       header="Role"
@@ -80,7 +83,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
       </template>
     </Column>
     <Column
-      v-if="!revocation"
+      v-if="!requestTable"
       field="manage"
       header="Manage"
       header-class="header-right"
@@ -91,7 +94,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
         <Button
           class="p-button-lg p-button-text p-0 mr-3"
           aria-label="Manage user"
-          :disabled="revocation || data.accessRequest?.status === AccessRequestStatus.PENDING"
+          :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
             () => {
               selection = data;
@@ -104,52 +107,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
       </template>
     </Column>
     <Column
-      v-if="!revocation && authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
-      field="approve/deny"
-      header="Approve/Deny"
-      header-class="header-right"
-      class="text-right"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-0 mr-3"
-          aria-label="Approve/Deny user"
-          :disabled="revocation || data.user.status === AccessRequestStatus.APPROVED"
-          @click="
-            () => {
-              emit('userTable:processRequest', data);
-            }
-          "
-        >
-          <font-awesome-icon icon="fa-solid fa-check-to-slot" />
-        </Button>
-      </template>
-    </Column>
-    <Column
-      v-if="revocation"
-      field="deny"
-      header="Deny"
-      header-class="header-right"
-      class="text-right"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
-          aria-label="Deny revoke request"
-          @click="
-            () => {
-              selection = data;
-              emit('userTable:denyRevocation', data);
-            }
-          "
-        >
-          <font-awesome-icon icon="fa-solid fa-circle-xmark" />
-        </Button>
-      </template>
-    </Column>
-    <Column
+      v-if="!requestTable"
       field="revoke"
       header="Revoke"
       header-class="header-right"
@@ -160,7 +118,7 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 mr-3"
           aria-label="Revoke user"
-          :disabled="!revocation && data.accessRequest?.status === AccessRequestStatus.PENDING"
+          :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
             () => {
               selection = data;
@@ -172,5 +130,65 @@ const selection: Ref<UserAccessRequest | undefined> = ref(undefined);
         </Button>
       </template>
     </Column>
+    <Column
+      v-if="requestTable"
+      field="approve"
+      header="Approve"
+      header-class="header-right"
+      class="text-right"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-0 mr-3"
+          aria-label="Approve request"
+          @click="
+            () => {
+              selection = data;
+              emit('userTable:approveRequest', data);
+            }
+          "
+        >
+          <font-awesome-icon icon="fa-solid fa-check-to-slot" />
+        </Button>
+      </template>
+    </Column>
+    <Column
+      v-if="requestTable"
+      field="deny"
+      header="Deny"
+      header-class="header-right"
+      class="text-right"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          aria-label="Deny request"
+          @click="
+            () => {
+              selection = data;
+              emit('userTable:denyRequest', data);
+            }
+          "
+        >
+          <font-awesome-icon icon="fa-solid fa-circle-xmark" />
+        </Button>
+      </template>
+    </Column>
   </DataTable>
 </template>
+
+<style scoped lang="scss">
+.default-status {
+  color: black;
+}
+
+.pending-approval-status {
+  color: $app-primary;
+}
+
+.pending-revoke-status {
+  color: $app-error;
+}
+</style>

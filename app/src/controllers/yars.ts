@@ -1,6 +1,7 @@
 import { yarsService } from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
+import { GroupName, Initiative } from '../utils/enums/application';
 
 const controller = {
   getGroups: async (req: Request, res: Response, next: NextFunction) => {
@@ -22,6 +23,23 @@ const controller = {
       );
 
       res.status(200).json({ groups: groups.map((x) => x.groupName), permissions });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  deleteSubjectGroup: async (
+    req: Request<never, never, { sub: string; group: GroupName }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await yarsService.removeGroup(req.body.sub, Initiative.HOUSING, req.body.group);
+
+      if (!response) {
+        return res.status(422).json({ message: 'Unable to process revocation.' });
+      }
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

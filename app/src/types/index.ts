@@ -1,5 +1,5 @@
-export type { Activity } from './Activity';
 export type { AccessRequest } from './AccessRequest';
+export type { Activity } from './Activity';
 export type { ATSClientResource } from './ATSClientResource';
 export type { ATSUserSearchParameters } from './ATSUserSearchParameters';
 export type { BceidSearchParameters } from './BceidSearchParameters';
