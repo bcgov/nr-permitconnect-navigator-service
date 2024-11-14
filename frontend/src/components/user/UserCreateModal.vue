@@ -5,13 +5,13 @@ import { onMounted, ref } from 'vue';
 import { Dropdown } from '@/components/form';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
-import { ssoService } from '@/services';
+import { ssoService, yarsService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
-import type { User } from '@/types';
+import type { Group, User } from '@/types';
 
 // Constants
 const USER_SEARCH_PARAMS: { [key: string]: string } = {
@@ -29,9 +29,9 @@ const authzStore = useAuthZStore();
 // State
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const selectableGroups: Ref<Array<GroupName>> = ref([]);
+const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
 const selectedGroup: Ref<GroupName | undefined> = ref(undefined);
-const selectedParam: Ref<string | undefined> = ref(undefined);
+const selectedParam: Ref<string | undefined> = ref('Last name');
 const selectedUser: Ref<User | undefined> = ref(undefined);
 const users: Ref<Array<User>> = ref([]);
 const visible = defineModel<boolean>('visible');
@@ -86,12 +86,20 @@ async function searchIdirUsers() {
   }
 }
 
-onMounted(() => {
-  // TODO: Map rbac groups to radio list to get cleaner labels
-  selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+onMounted(async () => {
+  const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
+
+  const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
-    selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
+    allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
+
+  selectableGroups.value = new Map(
+    allowedGroups.map((groupName) => {
+      const group = yarsGroups.find((group) => group.name === groupName);
+      return [group?.label ?? groupName.toLowerCase(), groupName];
+    })
+  );
 });
 </script>
 
@@ -106,21 +114,10 @@ onMounted(() => {
       <span class="p-dialog-title">Create new user</span>
     </template>
     <div class="flex justify-content-between align-items-center">
-      <div class="col-9 mb-2">
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="searchTag"
-            placeholder="Search by first name, last name, or email"
-            class="col-12 pl-5"
-            @update:model-value="searchIdirUsers"
-          />
-        </IconField>
-      </div>
       <Dropdown
         class="col-3 m-0"
-        name="assignRole"
-        placeholder="First name"
+        name="searchParam"
+        placeholder="Last name"
         :options="Object.values(USER_SEARCH_PARAMS)"
         @on-change="
           (param: DropdownChangeEvent) => {
@@ -129,6 +126,18 @@ onMounted(() => {
           }
         "
       />
+      <div class="col-9 mb-2">
+        <IconField icon-position="left">
+          <InputIcon class="pi pi-search" />
+          <InputText
+            v-model="searchTag"
+            placeholder="Search by first name, last name, or email"
+            class="col-12 pl-5"
+            autofocus
+            @update:model-value="searchIdirUsers"
+          />
+        </IconField>
+      </div>
     </div>
     <DataTable
       v-model:selection="selectedUser"
@@ -149,7 +158,6 @@ onMounted(() => {
       <template #loading>
         <Spinner />
       </template>
-
       <Column
         field="fullName"
         header="Username"
@@ -175,9 +183,9 @@ onMounted(() => {
       class="col-12"
       name="assignRole"
       label="Assign role"
-      :options="selectableGroups"
+      :options="[...selectableGroups.keys()]"
       :disabled="!selectedUser"
-      @on-change="(e: DropdownChangeEvent) => (selectedGroup = e.value)"
+      @on-change="(e: DropdownChangeEvent) => (selectedGroup = selectableGroups.get(e.value))"
     />
     <div class="flex-auto pl-2">
       <Button
