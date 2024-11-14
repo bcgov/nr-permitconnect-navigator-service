@@ -1,3 +1,4 @@
+import type { GroupName } from '@/utils/enums/application';
 import { appAxios } from './interceptors';
 
 import type { AxiosResponse } from 'axios';
@@ -11,5 +12,9 @@ export default {
 
   getPermissions(): Promise<AxiosResponse> {
     return appAxios().get(`${PATH}/permissions`);
+  },
+
+  deleteSubjectGroup(data: { sub: string; group: GroupName }): Promise<AxiosResponse> {
+    return appAxios().delete(`${PATH}/subject/group`, { data });
   }
 };

@@ -18,19 +18,24 @@ const authzStore = useAuthZStore();
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectableGroups: Ref<Array<GroupName>> = ref([]);
+const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
 const group: Ref<GroupName | undefined> = ref(undefined);
-const yarsGroups: Ref<Array<Group>> = ref([]);
 
 // Actions
 onMounted(async () => {
-  yarsGroups.value = (await yarsService.getGroups()).data;
+  const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
 
-  // TODO: Map rbac groups to radio list to get cleaner labels
-  selectableGroups.value = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+  const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
-    selectableGroups.value.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
+    allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
+
+  selectableGroups.value = new Map(
+    allowedGroups.map((groupName) => {
+      const group = yarsGroups.find((group) => group.name === groupName);
+      return [group?.label ?? groupName.toLowerCase(), groupName];
+    })
+  );
 });
 </script>
 
@@ -48,9 +53,9 @@ onMounted(async () => {
     <RadioList
       name="role"
       :bold="false"
-      :options="selectableGroups"
+      :options="[...selectableGroups.keys()]"
       class="mt-3 mb-4"
-      @on-change="(value) => (group = value)"
+      @on-change="(value) => (group = selectableGroups.get(value))"
     />
     <div class="flex-auto">
       <Button
