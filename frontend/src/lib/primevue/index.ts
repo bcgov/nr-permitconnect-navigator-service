@@ -54,4 +54,3 @@ export { default as Step } from 'primevue/step';
 export { useConfirm } from 'primevue/useconfirm';
 
 export { useToast } from './useToast';
-// Tabs TabList Tab TabPanels TabPanel

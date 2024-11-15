@@ -528,7 +528,7 @@ a {
 }
 
 .permit-card {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 0.063rem;
   box-shadow: 0.25rem 0.25rem 0.25rem 0rem $app-proj-black;
@@ -581,10 +581,10 @@ a {
 }
 
 :deep(.p-accordion-tab) {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px $app-proj-black;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
 }
 
 :deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {

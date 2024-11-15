@@ -24,7 +24,7 @@ const {
   maxDate?: Date;
 }>();
 
-const { errorMessage, handleBlur, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<Date>(name);
 </script>
 
 <template>

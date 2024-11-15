@@ -500,13 +500,13 @@ onMounted(async () => {
 }
 
 .list-grid-selected-icon {
-  color: $app-primary;
+  color: var(--p-primary-color);
 }
 
 .list-grid-deselected-icon {
-  color: $app-out-of-focus;
+  color: var(--p-content-hover-background);
   &:hover {
-    color: $app-hover;
+    color: var(--primary-hover-color);
   }
 }
 
@@ -515,9 +515,9 @@ onMounted(async () => {
 }
 
 .file-upload {
-  color: $app-out-of-focus;
+  color: var(--p-greyscale-500);
   &:hover {
-    color: $app-hover;
+    color: var(--p-content-hover-background);
   }
 }
 </style>

@@ -203,9 +203,9 @@ const filteredDocuments = computed(() => {
 
 .file-upload {
   width: 100%;
-  color: $app-out-of-focus;
+  color: var(--p-greyscale-500);
   &:hover {
-    color: $app-hover;
+    color: var(--p-content-hover-background);
   }
 }
 </style>
