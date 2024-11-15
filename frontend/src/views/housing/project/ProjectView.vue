@@ -368,7 +368,7 @@ a {
 }
 
 .empty-block {
-  background-color: $app-grey;
+  background-color: var(--p-greyscale-200);
 }
 .header-btn {
   max-height: 2rem;
@@ -385,50 +385,50 @@ a {
 .in-review,
 .submitted {
   background-color: none;
-  color: $app-green;
+  color: var(-p-green-500);
   border-radius: 1rem;
-  border-color: $app-green;
+  border-color: var(-p-green-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .completed,
 .issued {
-  background-color: $app-green;
+  background-color: var(-p-green-500);
   color: white;
   border-radius: 1rem;
-  border-color: $app-green;
+  border-color: var(-p-green-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .denied {
-  background-color: $app-error;
+  background-color: var(--p-red-500);
   color: white;
   border-radius: 1rem;
-  border-color: $app-error;
+  border-color: var(--p-red-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .pending {
   background-color: none;
-  color: $app-error;
+  color: var(--p-red-500);
   border-radius: 1rem;
-  border-color: $app-error;
+  border-color: var(--p-red-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .permit-card {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px $app-proj-black;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
   padding: 1.76rem 2rem 1.76rem 2rem;
   margin-bottom: 1rem;
   &:hover {
-    background-color: $app-grey;
+    background-color: var(--p-greyscale-200);
   }
 }
 
@@ -438,7 +438,7 @@ a {
 }
 
 .sub-label {
-  color: $app-proj-grey-one;
+  color: var(--p-greyscale-600);
   font-size: 0.8rem;
   margin-top: 1rem;
 }
@@ -459,20 +459,20 @@ a {
 }
 
 :deep(.p-accordion-tab) {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px $app-proj-black;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
 }
 
 :deep(.p-accordion-tab-active .p-accordion-header > a) {
-  background-color: $app-grey !important;
+  background-color: var(--p-greyscale-200) !important;
 }
 
 :deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {
   background-color: inherit;
   &:hover {
-    background-color: $app-grey;
+    background-color: var(--p-greyscale-200);
   }
 }
 

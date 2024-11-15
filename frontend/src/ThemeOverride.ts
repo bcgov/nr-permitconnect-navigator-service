@@ -8,12 +8,6 @@ import { definePreset } from '@primevue/themes';
 // Must use lower case for key values unless you want pain
 // bcblue.500 is BC mandated blue
 
-// For colors UI/UX gives us (BC gov sanctioned), ask for hues on either side and assume original colour is 500
-// Could be defining hues for design colours for the design guidelines
-// Otherwise, ask them to use https://primevue.org/theming/styled/#colors in the table
-
-// Bring up slate hue range, replace hard set variables.scss
-
 // Some values override base color values.
 // Base values here: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
 export const ThemeOverride = definePreset(Material, {
@@ -34,6 +28,7 @@ export const ThemeOverride = definePreset(Material, {
     green: {
       // Override base green hues, for base values see link at top
       50: '#ffffff',
+      75: '#FAF9F8',
       100: '#d9e6db',
       200: '#b3cdb7',
       300: '#8eb392',
@@ -169,18 +164,6 @@ export const ThemeOverride = definePreset(Material, {
       }
     },
     button: {
-      root: {
-        sm: {
-          fontSize: '0.875rem',
-          paddingX: '0.875rem',
-          paddingY: '0.5rem'
-        },
-        lg: {
-          fontSize: '1.125rem',
-          paddingX: '1.125rem',
-          paddingY: '0.7rem'
-        }
-      },
       colorScheme: {
         light: {
           root: {

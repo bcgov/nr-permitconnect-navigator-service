@@ -28,36 +28,36 @@ const { authStatus } = defineProps<{
 
 .in-review {
   background-color: none;
-  color: $app-green;
+  color: var(-p-green-500);
   border-radius: 1rem;
-  border-color: $app-green;
+  border-color: var(-p-green-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .issued {
-  background-color: $app-green;
+  background-color: var(-p-green-500);
   color: white;
   border-radius: 1rem;
-  border-color: $app-green;
+  border-color: var(-p-green-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .denied {
-  background-color: $app-error;
+  background-color: var(--p-red-500);
   color: white;
   border-radius: 1rem;
-  border-color: $app-error;
+  border-color: var(--p-red-500);
   border-style: solid;
   border-width: 1px;
 }
 
 .pending {
   background-color: none;
-  color: $app-error;
+  color: var(--p-red-500);
   border-radius: 1rem;
-  border-color: $app-error;
+  border-color: var(--p-red-500);
   border-style: solid;
   border-width: 1px;
 }

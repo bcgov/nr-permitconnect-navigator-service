@@ -52,7 +52,7 @@ const toHousing = (): void => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: $app-primary;
+  background-color: var(--p-primary-color);
   opacity: 0.9;
 }
 </style>

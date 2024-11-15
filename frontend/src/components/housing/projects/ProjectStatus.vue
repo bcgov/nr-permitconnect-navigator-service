@@ -76,25 +76,25 @@ const iconStates = {
 
 <style scoped lang="scss">
 .checkmark {
-  color: $app-green;
+  color: var(-p-green-500);
   & + :deep(.p-timeline-event-connector) {
-    background-color: $app-green;
+    background-color: var(-p-green-500);
   }
 }
 
 .empty {
   color: transparent;
-  border: 1px dashed $app-proj-grey-two;
+  border: 1px dashed var(--p-greyscale-700);
   border-radius: 50%;
   & + :deep(.p-timeline-event-connector) {
-    background-color: $app-proj-grey-two;
+    background-color: var(--p-greyscale-700);
   }
 }
 
 .exclamation {
-  color: $app-error;
+  color: var(--p-red-500);
   & + :deep(.p-timeline-event-connector) {
-    background-color: $app-error;
+    background-color: var(--p-red-500);
   }
 }
 

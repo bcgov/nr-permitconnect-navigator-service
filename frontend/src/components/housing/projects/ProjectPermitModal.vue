@@ -211,8 +211,8 @@ const onSubmitEnquiry = () => {
 .status-card {
   padding: 2rem;
   border-radius: 8px;
-  border: 1px solid $app-proj-white-one;
-  background: $app-proj-white-two;
-  box-shadow: 0px 4px 4px 0px $app-proj-black;
+  border: 1px solid var(--p-greyscale-100);
+  background: var(--p-greyscale-75);
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.03);
 }
 </style>

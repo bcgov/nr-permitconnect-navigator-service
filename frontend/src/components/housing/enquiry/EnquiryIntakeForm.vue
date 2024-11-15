@@ -571,8 +571,7 @@ onBeforeMount(async () => {
   padding: 0.5rem;
 }
 
-:deep(.p-invalid),
 :deep(.p-card.p-component:has(.p-invalid)) {
-  border-color: $app-error !important;
+  border-color: var(--p-red-500) !important;
 }
 </style>
