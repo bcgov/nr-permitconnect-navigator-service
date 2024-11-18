@@ -107,10 +107,10 @@ const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const isSubmittable: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
-const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
@@ -149,6 +149,21 @@ function confirmSubmit(data: any) {
     rejectLabel: 'Cancel',
     accept: () => onSubmit(submitData)
   });
+}
+
+async function generateActivityId() {
+  try {
+    const response = await submissionService.updateDraft({});
+    if (response.data?.activityId && response.data?.submissionId) {
+      syncFormAndRoute(response.data.activityId, response.data.submissionId);
+      return response.data.activityId;
+    } else {
+      return undefined;
+    }
+  } catch (error) {
+    toast.error('Failed to generate activity ID');
+    return undefined;
+  }
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
@@ -302,17 +317,7 @@ async function onSaveDraft(
     response = await submissionService.updateDraft(draftData);
 
     if (response.data.activityId && response.data.submissionId) {
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
-      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
-
-      // Update route query for refreshing
-      router.replace({
-        name: RouteName.HOUSING_SUBMISSION_INTAKE,
-        query: {
-          activityId: response.data.activityId,
-          submissionId: response.data.submissionId
-        }
-      });
+      syncFormAndRoute(response.data.activityId, response.data.submissionId);
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -336,12 +341,6 @@ function onStepChange(stepNumber: number) {
   // Map component misaligned if mounted while not visible. Trigger resize to fix on show
   if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
   if (stepNumber === 3) isSubmittable.value = true;
-
-  // Save a draft on very first stepper navigation if no activityId yet
-  // Need this to generate an activityId for the file uploads
-  if (!formRef.value?.values.activityId) {
-    onSaveDraft(formRef.value?.values, true, false);
-  }
 }
 
 async function onSubmit(data: any) {
@@ -402,6 +401,25 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
       .filter((x: { [key: string]: string }) => x.type === 'name')
       .map((x: { [key: string]: string }) => x?.value);
   }
+}
+
+function syncFormAndRoute(activityId: string, submissionId: string) {
+  formRef.value?.resetForm({
+    values: {
+      ...formRef.value?.values,
+      activityId: activityId,
+      submissionId: submissionId
+    }
+  });
+
+  // Update route query for refreshing
+  router.replace({
+    name: RouteName.HOUSING_SUBMISSION_INTAKE,
+    query: {
+      activityId: activityId,
+      submissionId: submissionId
+    }
+  });
 }
 
 onBeforeMount(async () => {
@@ -787,6 +805,7 @@ onBeforeMount(async () => {
                   <AdvancedFileUpload
                     :activity-id="values.activityId"
                     :disabled="!editable"
+                    :generate-activity-id="generateActivityId"
                   />
                 </div>
               </template>

@@ -15,12 +15,14 @@ const {
   activityId = undefined,
   accept = undefined,
   disabled = false,
-  reject = undefined
+  reject = undefined,
+  generateActivityId
 } = defineProps<{
   activityId?: string;
   accept?: string[];
   reject?: string[];
   disabled?: boolean;
+  generateActivityId: () => Promise<string | undefined>;
 }>();
 
 // Store
@@ -28,6 +30,7 @@ const { getConfig } = storeToRefs(useConfigStore());
 const submissionStore = useSubmissionStore();
 
 // State
+// const curActivityId: Ref<string | undefined> = ref(undefined);
 const fileInput: Ref<any> = ref(null);
 const uploading: Ref<Boolean> = ref(false);
 
@@ -54,13 +57,16 @@ const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
 
 const onUpload = async (files: Array<File>) => {
   uploading.value = true;
+  let currentActivityId: string | undefined = activityId;
+
+  currentActivityId = activityId ? activityId : await generateActivityId();
 
   await Promise.allSettled(
     files.map((file: File) => {
       return new Promise((resolve, reject) => {
-        if (activityId) {
+        if (currentActivityId) {
           documentService
-            .createDocument(file, activityId, getConfig.value.coms.bucketId)
+            .createDocument(file, currentActivityId, getConfig.value.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 submissionStore.addDocument(response.data);
@@ -80,10 +86,10 @@ const onUpload = async (files: Array<File>) => {
   uploading.value = false;
 };
 
-// filter documents based on accept and reject props
-// if accept and reject are not provided, all documents are shown
-// if accept is provided, only documents with extensions in accept are shown
-// if reject is provided, only documents with extensions not in reject are shown
+// Filter documents based on accept and reject props
+// If accept and reject are not provided, all documents are shown
+// If accept is provided, only documents with extensions in accept are shown
+// If reject is provided, only documents with extensions not in reject are shown
 const filteredDocuments = computed(() => {
   let documents = submissionStore.getDocuments;
   return documents.filter(
