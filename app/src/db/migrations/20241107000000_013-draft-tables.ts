@@ -9,6 +9,13 @@ export async function up(knex: Knex): Promise<void> {
     knex.schema
       .createTable('submission_draft', (table) => {
         table.uuid('submission_draft_id').primary();
+        table
+          .text('activity_id')
+          .notNullable()
+          .references('activity_id')
+          .inTable('activity')
+          .onUpdate('CASCADE')
+          .onDelete('CASCADE');
         table.json('data').notNullable();
         stamps(knex, table);
       })

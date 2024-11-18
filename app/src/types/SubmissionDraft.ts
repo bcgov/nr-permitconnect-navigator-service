@@ -3,5 +3,6 @@ import { SubmissionIntake } from './SubmissionIntake';
 
 export type SubmissionDraft = {
   submissionDraftId: string; // Primary key
+  activityId: string;
   data: Partial<SubmissionIntake>;
-} & IStamps;
+} & Partial<IStamps>;

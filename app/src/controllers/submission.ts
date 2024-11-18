@@ -230,12 +230,10 @@ const controller = {
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  generateSubmissionData: async (req: Request<never, never, SubmissionIntake>, intakeStatus: string) => {
-    const data = req.body;
-
+  generateSubmissionData: async (data: SubmissionIntake, intakeStatus: string, currentContext: CurrentContext) => {
     const activityId =
       data.activityId ??
-      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
 
     let basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
@@ -333,7 +331,7 @@ const controller = {
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: getCurrentUsername(req.currentContext),
+        submittedBy: getCurrentUsername(currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -342,9 +340,7 @@ const controller = {
       investigatePermits
     };
 
-    if (data.submit) {
-      controller.assignPriority(submissionData.submission);
-    }
+    controller.assignPriority(submissionData.submission);
 
     return submissionData;
   },
@@ -377,8 +373,9 @@ const controller = {
   createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        IntakeStatus.SUBMITTED
+        req.body,
+        IntakeStatus.SUBMITTED,
+        req.currentContext
       );
 
       // Create new submission
@@ -530,43 +527,26 @@ const controller = {
 
   submitDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
-      const update = req.body.activityId && req.body.submissionId;
-
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        IntakeStatus.SUBMITTED
+        req.body,
+        IntakeStatus.SUBMITTED,
+        req.currentContext
       );
 
-      let result;
-
+      // Create contacts
       await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
 
-      if (update) {
-        // Update submission
-        result = await submissionService.updateSubmission({
-          ...submission,
-          ...generateUpdateStamps(req.currentContext)
-        });
-
-        if (!result) {
-          return res.status(404).json({ message: 'Submission not found' });
-        }
-      } else {
-        // Create new submission
-        result = await submissionService.createSubmission({
-          ...submission,
-          ...generateCreateStamps(req.currentContext)
-        });
-      }
-
-      // Remove already existing permits for this activity
-      await permitService.deletePermitsByActivity(submission.activityId);
+      // Create new submission
+      const result = await submissionService.createSubmission({
+        ...submission,
+        ...generateCreateStamps(req.currentContext)
+      });
 
       // Create each permit
       await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
       await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
-      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
       next(e);
     }
@@ -574,26 +554,33 @@ const controller = {
 
   updateDraft: async (req: Request<never, never, SubmissionDraft>, res: Response, next: NextFunction) => {
     try {
-      const update = req.body.submissionDraftId;
+      const update = req.body.submissionDraftId && req.body.activityId;
 
       let response;
 
       if (update) {
-        // Update submission
+        // Update draft
         response = await submissionDraftService.updateDraft({
           ...req.body,
           ...generateUpdateStamps(req.currentContext)
         });
       } else {
-        // Create new submission
+        const activityId = (
+          await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext))
+        )?.activityId;
+
+        // Create new draft
         response = await submissionDraftService.createDraft({
           ...req.body,
           submissionDraftId: uuidv4(),
+          activityId: activityId,
           ...generateCreateStamps(req.currentContext)
         });
       }
 
-      res.status(update ? 200 : 201).json({ submissionDraftId: response.submissionDraftId });
+      res
+        .status(update ? 200 : 201)
+        .json({ submissionDraftId: response?.submissionDraftId, activityId: response?.activityId });
     } catch (e: unknown) {
       next(e);
     }

@@ -8,7 +8,14 @@ import { Action, Resource } from '../../utils/enums/application';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Email, StatisticsFilters, Submission, SubmissionIntake, SubmissionSearchParameters } from '../../types';
+import type {
+  Email,
+  StatisticsFilters,
+  Submission,
+  SubmissionDraft,
+  SubmissionIntake,
+  SubmissionSearchParameters
+} from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -56,7 +63,7 @@ router.get(
 router.get(
   '/draft/:submissionDraftId',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction): void => {
     submissionController.getDraft(req, res, next);
   }
 );
@@ -74,7 +81,7 @@ router.get(
 router.put(
   '/draft',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
-  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, SubmissionDraft>, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
   }
 );
@@ -127,7 +134,7 @@ router.delete(
   hasAccess('submissionDraftId'),
   submissionValidator.deleteSubmissionDraft,
   (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction): void => {
-    submissionController.deleteSubmissionDraft(req, res, next);
+    submissionController.deleteDraft(req, res, next);
   }
 );
 

@@ -187,22 +187,24 @@ function handleProjectLocationClick() {
   }
 }
 
-async function handleEnquirySubmit(values: any, relatedActivityId: string) {
+async function onAssistanceRequest(values: GenericObject) {
   try {
+    const draft = await onSaveDraft(values, false, false);
+
     const formattedData = Object.assign(
       {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
           isRelated: BasicResponse.YES,
-          relatedActivityId: relatedActivityId,
+          relatedActivityId: draft.activityId,
           enquiryType: SubmissionType.ASSISTANCE
         }
       },
       { contacts: values?.[IntakeFormCategory.CONTACTS] }
     );
 
-    const enquiryResponse = await enquiryService.submitDraft(formattedData);
+    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
@@ -303,17 +305,11 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
 
   autoSaveRef.value?.stopAutoSave();
 
-  // Remove empty permits
-  if (Array.isArray(data.appliedPermits)) {
-    data.appliedPermits = data.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
-  if (Array.isArray(data.investigatePermits)) {
-    data.investigatePermits = data.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
-
+  let response;
   try {
-    const response = await submissionService.updateDraft({
+    response = await submissionService.updateDraft({
       submissionDraftId: submissionDraftId,
+      activityId: data.activityId,
       data: data
     });
 
@@ -327,17 +323,19 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
       });
     }
 
+    formRef.value?.setFieldValue('activityId', response.data.activityId);
+
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
+
+    // Needed again as the setFieldValue will trigger the auto save
+    autoSaveRef.value?.stopAutoSave();
   }
 
-  // TODO: Handle activityId for assistance submit
-  // if (assistanceRequired && response?.data?.activityId) {
-  //   handleEnquirySubmit(draftData, response.data.activityId);
-  // }
+  return { activityId: response?.data.activityId, submissionDraftId: response?.data.submissionDraftId };
 }
 
 function onStepChange(stepNumber: number) {
@@ -389,7 +387,7 @@ async function emailConfirmation(activityId: string, submissionId: string) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    subject: 'Confirmation of Submission',
     bodyType: 'html',
     body: body
   };
@@ -409,15 +407,6 @@ function syncFormAndRoute(activityId: string, submissionId: string) {
   formRef.value?.resetForm({
     values: {
       ...formRef.value?.values,
-      activityId: activityId,
-      submissionId: submissionId
-    }
-  });
-
-  // Update route query for refreshing
-  router.replace({
-    name: RouteName.HOUSING_SUBMISSION_INTAKE,
-    query: {
       activityId: activityId,
       submissionId: submissionId
     }
@@ -496,6 +485,9 @@ onBeforeMount(async () => {
         investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
       };
     }
+
+    autoSaveRef.value?.stopAutoSave();
+
     await nextTick();
 
     // Move map pin
@@ -535,14 +527,14 @@ onBeforeMount(async () => {
         ref="autoSaveRef"
         :callback="() => onSaveDraft(values, true)"
       />
-      <!--
+
       <SubmissionAssistance
         v-if="editable && values?.applicant"
         :form-errors="errors"
         :form-values="values"
-        @on-submit-assistance="onSaveDraft(values, true, false, true)"
+        @on-submit-assistance="onAssistanceRequest(values)"
       />
-      -->
+
       <input
         type="hidden"
         name="submissionId"
