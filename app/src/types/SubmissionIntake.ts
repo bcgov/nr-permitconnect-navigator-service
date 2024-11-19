@@ -4,7 +4,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
 
 export type SubmissionIntake = {
   activityId?: string;
-  submissionId?: string;
+  submissionDraftId?: string;
   submittedAt?: string;
   applicationStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
@@ -54,5 +54,5 @@ export type SubmissionIntake = {
 
   investigatePermits?: Array<Permit>;
 
-  contacts: Array<Contact>;
+  contacts?: Array<Contact>;
 };

@@ -26,7 +26,7 @@ const schema = {
   },
   createSubmission: {
     body: Joi.object({
-      submissionId: uuidv4.allow(null),
+      submissionDraftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
       contacts: contacts,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),

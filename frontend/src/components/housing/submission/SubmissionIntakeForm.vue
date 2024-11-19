@@ -337,7 +337,7 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const response = await submissionService.submitDraft(data);
+    const response = await submissionService.submitDraft({ ...data, submissionDraftId });
 
     if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;

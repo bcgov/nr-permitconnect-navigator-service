@@ -327,7 +327,7 @@ const controller = {
         ...housing,
         ...location,
         ...permits,
-        submissionId: data.submissionId ?? uuidv4(),
+        submissionId: uuidv4(),
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -534,7 +534,8 @@ const controller = {
       );
 
       // Create contacts
-      await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
+      if (req.body.contacts)
+        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
 
       // Create new submission
       const result = await submissionService.createSubmission({
@@ -545,6 +546,9 @@ const controller = {
       // Create each permit
       await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
       await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
+
+      // Delete old draft
+      if (req.body.submissionDraftId) await submissionDraftService.deleteDraft(req.body.submissionDraftId);
 
       res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
