@@ -350,13 +350,13 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        :name="`contacts.${0}.firstName`"
+        :name="`contacts[0].firstName`"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts.${0}.lastName`"
+        :name="`contacts[0].lastName`"
         label="Last name"
         :disabled="!editable"
       />
@@ -383,28 +383,28 @@ onMounted(async () => {
       />
       <Dropdown
         class="col-3"
-        :name="`contacts.${0}.contactApplicantRelationship`"
+        :name="`contacts[0].contactApplicantRelationship`"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        :name="`contacts.${0}.contactPreference`"
+        :name="`contacts[0].contactPreference`"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        :name="`contacts.${0}.phoneNumber`"
+        :name="`contacts[0].phoneNumber`"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts.${0}.email`"
+        :name="`contacts[0].email`"
         label="Contact email"
         :disabled="!editable"
       />

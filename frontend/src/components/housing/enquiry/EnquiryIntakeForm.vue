@@ -286,21 +286,21 @@ onBeforeMount(async () => {
           <div class="formgrid grid">
             <InputText
               class="col-6"
-              :name="`contacts.${0}.firstName`"
+              :name="`contacts[0].firstName`"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
               class="col-6"
-              :name="`contacts.${0}.lastName`"
+              :name="`contacts[0].lastName`"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
               class="col-6"
-              :name="`contacts.${0}.phoneNumber`"
+              :name="`contacts[0].phoneNumber`"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
@@ -308,14 +308,14 @@ onBeforeMount(async () => {
             />
             <InputText
               class="col-6"
-              :name="`contacts.${0}.email`"
+              :name="`contacts[0].email`"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Dropdown
               class="col-6"
-              :name="`contacts.${0}.contactApplicantRelationship`"
+              :name="`contacts[0].contactApplicantRelationship`"
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"
@@ -323,7 +323,7 @@ onBeforeMount(async () => {
             />
             <Dropdown
               class="col-6"
-              :name="`contacts.${0}.contactPreference`"
+              :name="`contacts[0].contactPreference`"
               label="Preferred contact method"
               :bold="false"
               :disabled="!editable"

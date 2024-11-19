@@ -157,8 +157,8 @@ function confirmSubmit(data: GenericObject) {
 async function generateActivityId() {
   try {
     const response = await submissionService.updateDraft({});
-    if (response.data?.activityId && response.data?.submissionId) {
-      syncFormAndRoute(response.data.activityId, response.data.submissionId);
+    if (response.data?.activityId && response.data?.submissionDraftId) {
+      syncFormAndRoute(response.data.activityId, response.data.submissionDraftId);
       return response.data.activityId;
     } else {
       return undefined;
@@ -313,26 +313,13 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
       data: data
     });
 
-    if (response.data.submissionDraftId) {
-      // Update route query for refreshing
-      router.replace({
-        name: RouteName.HOUSING_SUBMISSION_INTAKE,
-        query: {
-          submissionDraftId: response.data.submissionDraftId
-        }
-      });
-    }
-
-    formRef.value?.setFieldValue('activityId', response.data.activityId);
+    syncFormAndRoute(response?.data.activityId, response?.data.submissionDraftId);
 
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
-
-    // Needed again as the setFieldValue will trigger the auto save
-    autoSaveRef.value?.stopAutoSave();
   }
 
   return { activityId: response?.data.activityId, submissionDraftId: response?.data.submissionDraftId };
@@ -403,14 +390,25 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function syncFormAndRoute(activityId: string, submissionId: string) {
-  formRef.value?.resetForm({
-    values: {
-      ...formRef.value?.values,
-      activityId: activityId,
-      submissionId: submissionId
-    }
-  });
+function syncFormAndRoute(activityId: string, submissionDraftId: string) {
+  if (submissionDraftId) {
+    // Update route query for refreshing
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSION_INTAKE,
+      query: {
+        submissionDraftId: submissionDraftId
+      }
+    });
+  }
+
+  if (activityId) {
+    formRef.value?.resetForm({
+      values: {
+        ...formRef.value?.values,
+        activityId: activityId
+      }
+    });
+  }
 }
 
 onBeforeMount(async () => {
@@ -529,7 +527,7 @@ onBeforeMount(async () => {
       />
 
       <SubmissionAssistance
-        v-if="editable && values?.applicant"
+        v-if="editable && values?.contacts"
         :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onAssistanceRequest(values)"
@@ -537,7 +535,7 @@ onBeforeMount(async () => {
 
       <input
         type="hidden"
-        name="submissionId"
+        name="submissionDraftId"
       />
 
       <input
@@ -589,21 +587,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.firstName`"
+                    :name="`contacts[0].firstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.lastName`"
+                    :name="`contacts[0].lastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    :name="`contacts.${0}.phoneNumber`"
+                    :name="`contacts[0].phoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -611,14 +609,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.email`"
+                    :name="`contacts[0].email`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts.${0}.contactApplicantRelationship`"
+                    :name="`contacts[0].contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -626,7 +624,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts.${0}.contactPreference`"
+                    :name="`contacts[0].contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
