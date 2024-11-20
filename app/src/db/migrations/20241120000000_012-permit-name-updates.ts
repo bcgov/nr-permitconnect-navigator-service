@@ -10,25 +10,17 @@ export async function up(knex: Knex): Promise<void> {
         when name = 'Heritage Inspection Permit' then 'Archaeology Heritage Inspection Permit'
         when name = 'Investigation Permit' then 'Archaeology Heritage Investigation Permit'
         when name = 'Contaminated Sites Remediation Permit' then 'Site Remediation Authorization'
-        when name = 'Occupant Licence to Cut' then 'Occupant Licence to Cut'
-        when name = 'Private Timber Mark' then 'Private Timber Mark'
         when name = 'Commercial General' then 'Commercial Lands Tenure'
-        when name = 'Nominal Rent Tenure' then 'Nominal Rent Tenure'
         when name = 'Residential' then 'Residential Lands Tenure'
         when name = 'Roadways - Public' then 'Public Roadways Lands Tenure'
-        when name = 'Sponsored Crown Grant' then 'Sponsored Crown Grant'
         when name = 'Utilities' then 'Lands Utility Tenure'
         when name = 'Rural subdivision' then 'Rural Subdivision'
-        when name = 'Rezoning' then 'Rezoning'
         when name = 'Municipal subdivision' then 'Municipal Subdivision'
-        when name = 'Highway Use Permit' then 'Highway Use Permit'
         when name = 'Other' then 'Other Transportation Permit'
-        when name = 'Riparian Area Development Permit' then 'Riparian Area Development Permit'
         when name = 'Change approval for work in and about a stream' then 'Change Approval for Work In and About a Stream'
         when name = 'Notification of authorized changes in and about a stream' then 'Notification for Work In and About a Stream'
         when name = 'Short-term use approval' then 'Short-term Water use approval'
         when name = 'Groundwater Licence - Wells' then 'Groundwater Licence'
-        when name = 'Surface Water Licence' then 'Surface Water Licence'
         else name
       end`)
     )
@@ -46,11 +38,51 @@ export async function up(knex: Knex): Promise<void> {
           source_system_acronym: ''
         }
       ]);
-    });
+    })
+
+    .then(() =>
+      knex.schema.raw(`update public.permit
+        set auth_status = case
+          when auth_status = 'Issued' then 'Granted'
+          when auth_status = 'Pending' then 'Pending client action'
+          when auth_status = 'In Review' then 'In progress'
+          else auth_status
+        end`)
+    )
+
+    .then(() =>
+      knex.schema.raw(`update public.permit
+        set status = case
+          when status = 'New' then 'Pre-submission'
+          when status = 'Applied' then 'Application submission'
+          when status = 'Completed' then 'Post-decision'
+          else status
+        end`)
+    );
 }
 
 export async function down(knex: Knex): Promise<void> {
   return Promise.resolve()
+    .then(() =>
+      knex.schema.raw(`update public.permit
+        set status = case
+          when status = 'Pre-submission' then 'New'
+          when status = 'Application submission' then 'Applied'
+          when status = 'Post-decision' then 'Completed'
+          else status
+        end`)
+    )
+
+    .then(() =>
+      knex.schema.raw(`update public.permit
+        set auth_status = case
+          when auth_status = 'Granted' then 'Issued'
+          when auth_status = 'Pending client action' then 'Pending'
+          when auth_status = 'In progress' then 'In Review'
+          else auth_status
+        end`)
+    )
+
     .then(() =>
       knex.schema.raw(`DELETE FROM public.permit_type
       WHERE name = 'Fish & Wildlife Fish Salvage Permit'`)
@@ -63,20 +95,13 @@ export async function down(knex: Knex): Promise<void> {
         when name = 'Archaeology Heritage Inspection Permit' then 'Heritage Inspection Permit'
         when name = 'Archaeology Heritage Investigation Permit' then 'Investigation Permit'
         when name = 'Site Remediation Authorization' then 'Contaminated Sites Remediation Permit'
-        when name = 'Occupant Licence to Cut' then 'Occupant Licence to Cut'
-        when name = 'Private Timber Mark' then 'Private Timber Mark'
         when name = 'Commercial Lands Tenure' then 'Commercial General'
-        when name = 'Nominal Rent Tenure' then 'Nominal Rent Tenure'
         when name = 'Residential Lands Tenure' then 'Residential'
         when name = 'Public Roadways Lands Tenure' then 'Roadways - Public'
-        when name = 'Sponsored Crown Grant' then 'Sponsored Crown Grant'
         when name = 'Lands Utility Tenure' then 'Utilities'
         when name = 'Rural Subdivision' then 'Rural subdivision'
-        when name = 'Rezoning' then 'Rezoning'
         when name = 'Municipal Subdivision' then 'Municipal subdivision'
-        when name = 'Highway Use Permit' then 'Highway Use Permit'
         when name = 'Other Transportation Permit' then 'Other'
-        when name = 'Riparian Area Development Permit' then 'Riparian Area Development Permit'
         when name = 'Change Approval for Work In and About a Stream' then 'Change approval for work in and about a stream'
         when name = 'Notification for Work In and About a Stream' then 'Notification of authorized changes in and about a stream'
         when name = 'Short-term Water use approval' then 'Short-term use approval'

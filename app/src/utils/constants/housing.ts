@@ -82,14 +82,24 @@ export const PROJECT_RELATIONSHIP_LIST = [
 
 export const PERMIT_AUTHORIZATION_STATUS_LIST = [
   PermitAuthorizationStatus.ISSUED,
-  PermitAuthorizationStatus.DENIED,
   PermitAuthorizationStatus.PENDING,
   PermitAuthorizationStatus.IN_REVIEW,
+  PermitAuthorizationStatus.DENIED,
+  PermitAuthorizationStatus.CANCELLED,
+  PermitAuthorizationStatus.WITHDRAWN,
+  PermitAuthorizationStatus.ABANDONED,
   PermitAuthorizationStatus.NONE
 ];
+
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 
-export const PERMIT_STATUS_LIST = [PermitStatus.NEW, PermitStatus.APPLIED, PermitStatus.COMPLETED];
+export const PERMIT_STATUS_LIST = [
+  PermitStatus.NEW,
+  PermitStatus.APPLIED,
+  PermitStatus.COMPLETED,
+  PermitStatus.TECHNICAL_REVIEW,
+  PermitStatus.PENDING
+];
 
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
 
