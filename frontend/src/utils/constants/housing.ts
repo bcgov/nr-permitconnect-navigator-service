@@ -96,7 +96,7 @@ export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIG
 
 export const PERMIT_STATUS_LIST = [PermitStatus.NEW, PermitStatus.APPLIED, PermitStatus.COMPLETED];
 
-export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
+export const PROJECT_LOCATION_LIST = [ProjectLocation.STREET_ADDRESS, ProjectLocation.LOCATION_COORDINATES];
 
 export const QUEUE_PRIORITY = [1, 2, 3];
 

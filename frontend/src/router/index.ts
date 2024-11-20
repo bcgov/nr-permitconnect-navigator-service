@@ -107,6 +107,16 @@ const routes: Array<RouteRecordRaw> = [
                 }
               },
               {
+                path: 'confirmation',
+                name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
+                component: () => import('@/views/housing/enquiry/EnquiryConfirmationView.vue'),
+                beforeEnter: accessHandler,
+                props: createProps,
+                meta: {
+                  access: [NavigationPermission.HOUSING_ENQUIRY_INTAKE]
+                }
+              },
+              {
                 path: 'intake',
                 name: RouteName.HOUSING_ENQUIRY_INTAKE,
                 component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
@@ -129,6 +139,16 @@ const routes: Array<RouteRecordRaw> = [
                 props: createProps,
                 meta: {
                   access: [NavigationPermission.HOUSING_SUBMISSION]
+                }
+              },
+              {
+                path: 'confirm',
+                name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
+                component: () => import('@/views/housing/submission/SubmissionConfirmationView.vue'),
+                beforeEnter: accessHandler,
+                props: createProps,
+                meta: {
+                  access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE]
                 }
               },
               {
