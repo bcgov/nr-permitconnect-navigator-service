@@ -52,10 +52,13 @@ export enum NumResidentialUnits {
 }
 
 export enum PermitAuthorizationStatus {
-  ISSUED = 'Issued',
+  ISSUED = 'Granted',
+  PENDING = 'Pending client action',
+  IN_REVIEW = 'In progress',
   DENIED = 'Denied',
-  PENDING = 'Pending',
-  IN_REVIEW = 'In Review',
+  CANCELLED = 'Cancelled',
+  WITHDRAWN = 'Withdrawn',
+  ABANDONED = 'Abandoned',
   NONE = 'None'
 }
 
@@ -66,9 +69,11 @@ export enum PermitNeeded {
 }
 
 export enum PermitStatus {
-  NEW = 'New',
-  APPLIED = 'Applied',
-  COMPLETED = 'Completed'
+  NEW = 'Pre-submission',
+  APPLIED = 'Application submission',
+  COMPLETED = 'Post-decision',
+  TECHNICAL_REVIEW = 'Technical review',
+  PENDING = 'Pending decision'
 }
 
 export enum PermitTrackerStatus {

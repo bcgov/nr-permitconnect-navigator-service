@@ -3,7 +3,7 @@ import config from 'config';
 import submissionController from '../../../src/controllers/submission';
 import { activityService, enquiryService, permitService, submissionService } from '../../../src/services';
 import type { Permit, Submission } from '../../../src/types';
-import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
 import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -465,20 +465,20 @@ describe('createSubmission', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           }
         ],
         investigatePermits: [
           {
             permitTypeId: 12,
-            needed: 'Under investigation',
+            needed: PermitNeeded.UNDER_INVESTIGATION,
             statusLastVerified: now
           }
         ]
@@ -504,7 +504,7 @@ describe('createSubmission', () => {
         permitTypeId: 1,
         activityId: '00000000',
         trackingId: '123',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -514,7 +514,7 @@ describe('createSubmission', () => {
         permitTypeId: 3,
         activityId: '00000000',
         trackingId: '456',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -523,7 +523,7 @@ describe('createSubmission', () => {
       expect.objectContaining({
         permitTypeId: 12,
         activityId: '00000000',
-        needed: 'Under investigation',
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: now
       })
     );
@@ -836,7 +836,7 @@ describe('submitDraft', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           }
         ]
@@ -863,7 +863,7 @@ describe('submitDraft', () => {
         permitTypeId: 1,
         activityId: '00000000',
         trackingId: '123',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -881,20 +881,20 @@ describe('submitDraft', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           }
         ],
         investigatePermits: [
           {
             permitTypeId: 12,
-            needed: 'Under investigation',
+            needed: PermitNeeded.UNDER_INVESTIGATION,
             statusLastVerified: now
           }
         ]
@@ -919,7 +919,7 @@ describe('submitDraft', () => {
         permitTypeId: 1,
         activityId: '00000000',
         trackingId: '123',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -929,7 +929,7 @@ describe('submitDraft', () => {
         permitTypeId: 3,
         activityId: '00000000',
         trackingId: '456',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -938,7 +938,7 @@ describe('submitDraft', () => {
       expect.objectContaining({
         permitTypeId: 12,
         activityId: '00000000',
-        needed: 'Under investigation',
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: now
       })
     );
@@ -1061,7 +1061,7 @@ describe('updateDraft', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           }
         ]
@@ -1088,7 +1088,7 @@ describe('updateDraft', () => {
         permitTypeId: 1,
         activityId: '00000000',
         trackingId: '123',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -1106,20 +1106,20 @@ describe('updateDraft', () => {
           {
             permitTypeId: 1,
             trackingId: '123',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
-            status: 'Applied',
+            status: PermitStatus.APPLIED,
             statusLastVerified: now
           }
         ],
         investigatePermits: [
           {
             permitTypeId: 12,
-            needed: 'Under investigation',
+            needed: PermitNeeded.UNDER_INVESTIGATION,
             statusLastVerified: now
           }
         ]
@@ -1144,7 +1144,7 @@ describe('updateDraft', () => {
         permitTypeId: 1,
         activityId: '00000000',
         trackingId: '123',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -1154,7 +1154,7 @@ describe('updateDraft', () => {
         permitTypeId: 3,
         activityId: '00000000',
         trackingId: '456',
-        status: 'Applied',
+        status: PermitStatus.APPLIED,
         statusLastVerified: now
       })
     );
@@ -1163,7 +1163,7 @@ describe('updateDraft', () => {
       expect.objectContaining({
         permitTypeId: 12,
         activityId: '00000000',
-        needed: 'Under investigation',
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: now
       })
     );
