@@ -62,6 +62,7 @@ watchEffect(() => {
         <StatusPill
           v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
           :auth-status="permit.authStatus"
+          class="mr-3"
         />
         <Button
           class="p-button-outlined"
