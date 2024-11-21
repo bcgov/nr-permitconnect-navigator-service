@@ -24,6 +24,8 @@ tags:
     description: Operations for managing Notes
   - name: Permit
     description: Operations for managing Permits
+  - name: Permit Note
+    description: Operations for Permit Notes
   - name: Roadmap
     description: Operations for validating Roadmaps
   - name: Submission
@@ -461,6 +463,13 @@ paths:
         - Permit
       parameters:
         - $ref: '#/components/parameters/Query-ActivityId'
+        - in: query
+          name: includeNotes
+          description: Whether to include associated permit notes in the response.
+          required: false
+          schema:
+            type: boolean
+            example: true
       responses:
         '200':
           description: A list of permits for the specified activity
@@ -469,7 +478,15 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-Permit'
+                  allOf:
+                    - $ref: '#/components/schemas/DB-Permit'
+                    - type: object
+                      properties:
+                        permitNotes:
+                          type: array
+                          description: List of notes associated with the permit (if `includeNotes` is true)
+                          items:
+                            $ref: '#/components/schemas/DB-PermitNote'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -583,6 +600,34 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /permit/note:
+    put:
+      summary: Create a permit note
+      description: Creates a new permit note for a specified permit.
+      operationId: createPermitNote
+      tags:
+        - Permit Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitNote'
+      responses:
+        '201':
+          description: Permit note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-PermitNote'
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /roadmap:
@@ -1321,6 +1366,50 @@ components:
           description: UUID for user that updated permit
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        permitNotes:
+          type: array
+          description: A list of notes associated with the permit (if `includeNotes` is true)
+          items:
+            $ref: '#/components/schemas/DB-PermitNote'
+    DB-PermitNote:
+      title: DB Permit Note
+      type: object
+      required:
+        - permitNoteId
+        - permitId
+        - note
+        - isDeleted
+        - createdAt
+        - createdBy
+      properties:
+        permitNoteId:
+          type: string
+          description: UUID of the permit note
+          format: uuid
+          example: e76469a3-896c-4435-aa83-b8b87db6f701
+        permitId:
+          type: string
+          description: UUID of the permit associated with the note
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        note:
+          type: string
+          description: The text content of the note
+          example: "This is a note about the permit."
+        isDeleted:
+          type: boolean
+          description: Flag indicating if the note is soft-deleted
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp of when the note was created
+          example: '2024-11-15T10:00:00.000Z'
+        createdBy:
+          type: string
+          description: The ID of the user who created the note
+          format: uuid
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
     DB-PermitType:
       title: DB Permit Type
       type: object
@@ -1876,6 +1965,22 @@ components:
           type: string
           description: ID for tracking permit
           example: H7kidnhd948594
+    Request-PermitNote:
+      title: Request Permit Note
+      type: object
+      required:
+        - permitId
+        - note
+      properties:
+        permitId:
+          type: string
+          description: UUID of the permit associated with the note
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        note:
+          type: string
+          description: The text content of the note
+          example: "This is a note about the permit."
     Request-Roadmap:
       title: Request Roadmap
       type: object

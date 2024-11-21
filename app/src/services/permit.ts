@@ -4,7 +4,7 @@ import prisma from '../db/dataConnection';
 import { permit, permit_type } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Permit } from '../types';
+import type { ListPermitsOptions, Permit } from '../types';
 
 const service = {
   /**
@@ -103,13 +103,14 @@ const service = {
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<Permit[]>} The result of running the findMany operation
    */
-  listPermits: async (activityId?: string) => {
+  listPermits: async (options?: ListPermitsOptions) => {
     const response = await prisma.permit.findMany({
       include: {
-        permit_type: true
+        permit_type: true,
+        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false
       },
       where: {
-        activity_id: activityId ? activityId : undefined
+        activity_id: options?.activityId || undefined
       },
       orderBy: {
         permit_type: {
@@ -117,6 +118,10 @@ const service = {
         }
       }
     });
+
+    if (options?.includeNotes) {
+      return response.map((x) => permit.fromPrismaModelWithNotes(x));
+    }
 
     return response.map((x) => permit.fromPrismaModel(x));
   },

@@ -4,6 +4,7 @@ export { default as documentController } from './document';
 export { default as enquiryController } from './enquiry';
 export { default as noteController } from './note';
 export { default as permitController } from './permit';
+export { default as permitNoteController } from './permitNote';
 export { default as roadmapController } from './roadmap';
 export { default as ssoController } from './sso';
 export { default as submissionController } from './submission';

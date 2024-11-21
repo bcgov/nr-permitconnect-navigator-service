@@ -430,7 +430,7 @@ onBeforeMount(async () => {
 
     if (submissionId && activityId) {
       response = (await submissionService.getSubmission(submissionId)).data;
-      permits = (await permitService.listPermits(activityId)).data;
+      permits = (await permitService.listPermits({ activityId })).data;
       documents = (await documentService.listDocuments(activityId)).data;
       submissionStore.setDocuments(documents);
       editable.value = response.intakeStatus === IntakeStatus.DRAFT;
