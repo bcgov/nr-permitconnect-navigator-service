@@ -31,11 +31,11 @@ export async function up(knex: Knex): Promise<void> {
           agency: 'Water, Land and Resource Stewardship',
           division: 'Water, Fisheries and Coast',
           branch: 'Fisheries, Aquaculture and Wild Salmon',
-          business_domain: '',
-          type: '',
-          name: 'Fish & Wildlife Fish Salvage Permit',
-          source_system: '',
-          source_system_acronym: ''
+          business_domain: 'Fish and Wildlife',
+          type: 'Fish & Wildlife Application',
+          name: 'Fish Salvage Permit',
+          source_system: 'POSSE (ELicencing)',
+          source_system_acronym: 'ELIC'
         }
       ]);
     })
