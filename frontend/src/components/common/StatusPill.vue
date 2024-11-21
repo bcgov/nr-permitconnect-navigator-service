@@ -36,8 +36,8 @@ const pillState = {
   },
   [PermitAuthorizationStatus.IN_REVIEW]: {
     badgeClass: 'green',
-    iconClass: 'outlined-green',
-    iconString: 'fas fa-circle-check',
+    iconClass: '',
+    iconString: '',
     toolTip: PermitAuthorizationStatusDescriptions.IN_REVIEW
   },
   [PermitAuthorizationStatus.NONE]: {
@@ -83,6 +83,7 @@ const getState = computed(() => {
 
 <style scoped lang="scss">
 .auth-indicator {
+  border-radius: 2px;
   border-style: solid;
   border-width: 0.1rem;
   font-size: 0.75rem;
