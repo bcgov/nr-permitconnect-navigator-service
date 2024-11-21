@@ -7,6 +7,7 @@ import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 import type { AxiosResponse } from 'axios';
 import type { Permit } from '@/types';
@@ -57,7 +58,10 @@ const wrapperSettings = (testPermitProp = testPermit) => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon']
+    stubs: ['font-awesome-icon'],
+    directives: {
+      Tooltip: Tooltip
+    }
   }
 });
 

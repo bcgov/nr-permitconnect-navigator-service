@@ -62,6 +62,19 @@ export enum PermitAuthorizationStatus {
   NONE = 'None'
 }
 
+export enum PermitAuthorizationStatusDescriptions {
+  /* eslint-disable max-len */
+  ISSUED = 'The application has successfully completed the review process. A positive final decision has been granted to the applicant.',
+  PENDING = 'The application is currently pending the applicant’s action in response to the reviewing authority’s request.',
+  IN_REVIEW = 'The application is currently active.',
+  DENIED = 'The application has completed the review process, however, the reviewing authority has decided not to approve the application.',
+  CANCELLED = 'The application has been cancelled by the reviewing authority.',
+  WITHDRAWN = 'The application has been withdrawn by the applicant.',
+  ABANDONED = 'The application has been abandoned by the applicant.',
+  NONE = ''
+  /*eslint-enable max-len */
+}
+
 export enum PermitNeeded {
   YES = 'Yes',
   UNDER_INVESTIGATION = 'Under investigation',
