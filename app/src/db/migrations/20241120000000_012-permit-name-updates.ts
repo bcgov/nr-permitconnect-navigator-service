@@ -25,6 +25,15 @@ export async function up(knex: Knex): Promise<void> {
       end`)
     )
 
+    .then(() =>
+      knex.schema.raw(`update public.permit_type
+        set agency = case
+          when agency = 'Environment and Climate Change Strategy' then 'Environment and Parks'
+          when agency = 'Transportation and Infrastructure' then 'Transportation and Transit'
+          else agency
+        end`)
+    )
+
     .then(() => {
       return knex('permit_type').insert([
         {
@@ -86,6 +95,15 @@ export async function down(knex: Knex): Promise<void> {
     .then(() =>
       knex.schema.raw(`DELETE FROM public.permit_type
       WHERE name = 'Fish & Wildlife Fish Salvage Permit'`)
+    )
+
+    .then(() =>
+      knex.schema.raw(`update public.permit_type
+        set agency = case
+          when agency = 'Environment and Parks' then 'Environment and Climate Change Strategy'
+          when agency = 'Transportation and Transit' then 'Transportation and Infrastructure'
+          else agency
+        end`)
     )
 
     .then(() =>
