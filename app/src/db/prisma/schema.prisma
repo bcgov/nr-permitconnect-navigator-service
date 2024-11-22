@@ -104,7 +104,7 @@ model note {
 }
 
 model permit {
-  permit_id            String      @id @db.Uuid
+  permit_id            String        @id @db.Uuid
   permit_type_id       Int
   activity_id          String
   issued_permit_id     String?
@@ -112,15 +112,16 @@ model permit {
   auth_status          String?
   needed               String?
   status               String?
-  submitted_date       DateTime?   @db.Timestamptz(6)
-  adjudication_date    DateTime?   @db.Timestamptz(6)
-  created_by           String?     @default("00000000-0000-0000-0000-000000000000")
-  created_at           DateTime?   @default(now()) @db.Timestamptz(6)
+  submitted_date       DateTime?     @db.Timestamptz(6)
+  adjudication_date    DateTime?     @db.Timestamptz(6)
+  created_by           String?       @default("00000000-0000-0000-0000-000000000000")
+  created_at           DateTime?     @default(now()) @db.Timestamptz(6)
   updated_by           String?
-  updated_at           DateTime?   @db.Timestamptz(6)
-  status_last_verified DateTime?   @db.Timestamptz(6)
-  activity             activity    @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
-  permit_type          permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  updated_at           DateTime?     @db.Timestamptz(6)
+  status_last_verified DateTime?     @db.Timestamptz(6)
+  activity             activity      @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "permit_activity_id_foreign")
+  permit_type          permit_type   @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permit_note          permit_note[]
 
   @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
   @@schema("public")
@@ -443,6 +444,20 @@ model subject_group {
 
   @@id([sub, group_id])
   @@schema("yars")
+}
+
+model permit_note {
+  permit_note_id String    @id @db.Uuid
+  permit_id      String    @db.Uuid
+  note           String    @default("")
+  is_deleted     Boolean   @default(false)
+  created_by     String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by     String?
+  updated_at     DateTime? @db.Timestamptz(6)
+  permit         permit    @relation(fields: [permit_id], references: [permit_id], onDelete: Cascade, map: "permit_note_permit_id_foreign")
+
+  @@schema("public")
 }
 
 view group_role_policy_vw {

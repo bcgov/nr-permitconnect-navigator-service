@@ -4,11 +4,12 @@ import { computed, ref, watchEffect } from 'vue';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
+import NotesModal from '@/components/permit/NotesModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAuthZStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -27,6 +28,7 @@ const { getPermitTypes } = storeToRefs(useTypeStore());
 const cardData = computed(() => permit);
 const cardUpdatedBy: Ref<string> = ref('');
 const permitModalVisible: Ref<boolean> = ref(false);
+const NotesModalVisible: Ref<boolean> = ref(false);
 const permitType: Ref<PermitType | undefined> = ref(
   getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId)
 );
@@ -46,10 +48,24 @@ watchEffect(() => {
 watchEffect(() => {
   permitType.value = getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId);
 });
+
+function isCompleted(authStatus: string | undefined): boolean {
+  if (!authStatus) return false;
+  switch (authStatus) {
+    case PermitAuthorizationStatus.CANCELLED:
+    case PermitAuthorizationStatus.WITHDRAWN:
+    case PermitAuthorizationStatus.ABANDONED:
+    case PermitAuthorizationStatus.DENIED:
+    case PermitAuthorizationStatus.ISSUED:
+      return true;
+    default:
+      return false;
+  }
+}
 </script>
 
 <template>
-  <Card :class="{ completed: cardData.status === PermitStatus.COMPLETED }">
+  <Card :class="{ completed: isCompleted(cardData.authStatus), selected: NotesModalVisible }">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex-grow-1">
@@ -59,23 +75,36 @@ watchEffect(() => {
             <span>{{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}</span>
           </p>
         </div>
-        <StatusPill
-          v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-          :auth-status="permit.authStatus"
-          class="mr-3"
-        />
-        <Button
-          class="p-button-outlined"
-          aria-label="Edit"
-          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
-          @click="permitModalVisible = true"
-        >
-          <font-awesome-icon
-            class="pr-2"
-            icon="fa-solid fa-edit"
+        <div class="flex justify-center flex-wrap gap-2 align-items-center">
+          <StatusPill
+            v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
+            :auth-status="permit.authStatus"
           />
-          Edit
-        </Button>
+          <Button
+            class="p-button-outlined"
+            aria-label="Add updates"
+            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
+            @click="NotesModalVisible = true"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-plus"
+            />
+            Add updates
+          </Button>
+          <Button
+            class="p-button-outlined"
+            aria-label="Edit"
+            :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
+            @click="permitModalVisible = true"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-edit"
+            />
+            Edit
+          </Button>
+        </div>
       </div>
       <Divider type="solid" />
     </template>
@@ -154,6 +183,10 @@ watchEffect(() => {
     :activity-id="cardData.activityId"
     :permit="cardData"
   />
+  <NotesModal
+    v-model:visible="NotesModalVisible"
+    :permit="cardData"
+  />
 </template>
 
 <style scoped lang="scss">
@@ -179,10 +212,19 @@ p {
     border-color: #05366260;
     box-shadow: 0em 0.1em 0.1em 0.1em #0000001a;
   }
-}
 
-.completed {
-  background-color: #05366210;
+  &.completed {
+    :deep(.p-card-body) {
+      background-color: #05366210;
+    }
+  }
+
+  &.selected {
+    :deep(.p-card-body) {
+      outline: 2px solid #2e5dd7;
+      outline-offset: 5px;
+    }
+  }
 }
 
 .darkgrey {

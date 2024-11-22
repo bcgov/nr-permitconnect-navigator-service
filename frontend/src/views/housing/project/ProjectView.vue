@@ -175,7 +175,8 @@ onMounted(async () => {
   }
 
   try {
-    const permitsValue = (await permitService.listPermits(submissionValue.activityId)).data;
+    const activityId = submissionValue.activityId;
+    const permitsValue = (await permitService.listPermits({ activityId })).data;
     submissionStore.setPermits(permitsValue);
   } catch {
     toast.error('Unable to load permits for this project, please try again later');

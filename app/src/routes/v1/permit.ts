@@ -1,5 +1,6 @@
 import express from 'express';
 
+import permitNote from './permitNote';
 import { permitController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -8,18 +9,19 @@ import { Action, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Permit } from '../../types';
+import type { ListPermitsOptions, Permit } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
+router.use('/note', permitNote);
 
 // Permit list endpoint
 router.get(
   '/',
   hasAuthorization(Resource.PERMIT, Action.READ),
   permitValidator.listPermits,
-  (req: Request<never, never, never, { activityId?: string }>, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, Partial<ListPermitsOptions>>, res: Response, next: NextFunction): void => {
     permitController.listPermits(req, res, next);
   }
 );

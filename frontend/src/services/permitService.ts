@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
 
-import type { Permit } from '@/types';
+import type { ListPermitsOptions, Permit } from '@/types';
 
 export default {
   /**
@@ -31,8 +31,8 @@ export default {
    * @function listPermits
    * @returns {Promise} An axios response
    */
-  async listPermits(activityId?: string) {
-    return appAxios().get('permit', { params: { activityId } });
+  async listPermits(options?: ListPermitsOptions) {
+    return appAxios().get('permit', { params: options });
   },
 
   /**

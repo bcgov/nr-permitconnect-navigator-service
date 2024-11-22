@@ -1,8 +1,9 @@
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { permitService } from '../services';
+import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Permit } from '../types';
+import type { ListPermitsOptions, Permit } from '../types';
 
 const controller = {
   createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
@@ -41,9 +42,14 @@ const controller = {
     }
   },
 
-  async listPermits(req: Request<never, never, never, { activityId?: string }>, res: Response, next: NextFunction) {
+  async listPermits(req: Request<never, never, never, Partial<ListPermitsOptions>>, res: Response, next: NextFunction) {
     try {
-      const response = await permitService.listPermits(req.query?.activityId);
+      const options: ListPermitsOptions = {
+        ...req.query,
+        includeNotes: isTruthy(req.query.includeNotes)
+      };
+
+      const response = await permitService.listPermits(options);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

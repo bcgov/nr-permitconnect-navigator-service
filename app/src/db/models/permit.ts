@@ -1,16 +1,20 @@
 import { Prisma } from '@prisma/client';
 
+import permit_note from './permit_note';
+
 import type { Stamps } from '../stamps';
 import type { Permit } from '../../types';
 
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
-const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_type: true }
+const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({ include: { permit_type: true } });
+const _permitWithNotesGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permit_note: true, permit_type: true }
 });
 
 type PrismaRelationPermit = Omit<Prisma.permitGetPayload<typeof _permit>, 'activity' | keyof Stamps>;
 type PrismaGraphPermit = Prisma.permitGetPayload<typeof _permitWithGraph>;
+type PrismaGraphPermitNotes = Prisma.permitGetPayload<typeof _permitWithNotesGraph>;
 
 export default {
   toPrismaModel(input: Permit): PrismaRelationPermit {
@@ -45,5 +49,14 @@ export default {
       updatedAt: input.updated_at?.toISOString() ?? null,
       updatedBy: input.updated_by
     };
+  },
+
+  fromPrismaModelWithNotes(input: PrismaGraphPermitNotes): Permit {
+    const permit = this.fromPrismaModel(input);
+    if (permit && input.permit_note) {
+      permit.permitNote = input.permit_note.map((note) => permit_note.fromPrismaModel(note));
+    }
+
+    return permit;
   }
 };

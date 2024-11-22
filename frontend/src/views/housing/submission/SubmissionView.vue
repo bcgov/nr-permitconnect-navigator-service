@@ -118,7 +118,7 @@ onMounted(async () => {
       submissionService.getSubmission(submissionId),
       documentService.listDocuments(activityId),
       noteService.listNotes(activityId),
-      permitService.listPermits(activityId),
+      permitService.listPermits({ activityId, includeNotes: true }),
       permitService.getPermitTypes(),
       enquiryService.listRelatedEnquiries(activityId)
     ])
