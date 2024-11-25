@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
-import { date, mixed, object, string } from 'yup';
+import { array, date, mixed, object, string } from 'yup';
 
 import {
   Calendar,
@@ -27,6 +27,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -55,18 +56,11 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
-const stringRequiredSchema = string().required().max(255);
-
 const intakeSchema = object({
   enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  contactFirstName: stringRequiredSchema.label('First name'),
-  contactLastName: stringRequiredSchema.label('Last name'),
-  contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-  contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference'),
-  contactPhoneNumber: stringRequiredSchema.label('Phone number'),
-  contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+  contacts: array().of(object(contactValidator)),
   enquiryDescription: string().required().label('Enquiry detail'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: mixed()
@@ -249,40 +243,40 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        name="contactFirstName"
+        :name="`contacts.${0}.firstName`"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactLastName"
+        :name="`contacts.${0}.lastName`"
         label="Last name"
         :disabled="!editable"
       />
       <Dropdown
         class="col-3"
-        name="contactApplicantRelationship"
+        :name="`contacts.${0}.contactApplicantRelationship`"
         label="Relationship to activity"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        name="contactPreference"
+        :name="`contacts.${0}.contactPreference`"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        name="contactPhoneNumber"
+        :name="`contacts.${0}.phoneNumber`"
         mask="(999) 999-9999"
         label="Phone number"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactEmail"
+        :name="`contacts.${0}.email`"
         label="Contact email"
         :disabled="!editable"
       />

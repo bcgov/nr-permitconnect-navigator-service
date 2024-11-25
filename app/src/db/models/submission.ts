@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
+import contact from './contact';
 import user from './user';
 import { BasicResponse } from '../../utils/enums/application';
 
@@ -9,12 +10,38 @@ import type { Submission } from '../../types';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({ include: { user: true } });
+const _submissionWithContactGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
+  include: {
+    activity: {
+      include: {
+        activity_contact: {
+          include: {
+            contact: true
+          }
+        }
+      }
+    }
+  }
+});
+const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
+  include: {
+    activity: {
+      include: {
+        activity_contact: {
+          include: {
+            contact: true
+          }
+        }
+      }
+    },
+    user: true
+  }
+});
 
 type PrismaRelationSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, keyof Stamps>;
-type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submissionWithGraph>;
-type PrismaGraphSubmissionUser = Prisma.submissionGetPayload<typeof _submissionWithUserGraph>;
+type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submission>;
+type PrismaGraphSubmissionWithContact = Prisma.submissionGetPayload<typeof _submissionWithContactGraph>;
+type PrismaGraphSubmissionWithUser = Prisma.submissionGetPayload<typeof _submissionWithUserGraph>;
 
 export default {
   toPrismaModel(input: Submission): PrismaRelationSubmission {
@@ -28,13 +55,6 @@ export default {
       submitted_by: input.submittedBy,
       consent_to_feedback: input.consentToFeedback,
       location_pids: input.locationPIDs,
-      contact_name: `${input.contactFirstName} ${input.contactLastName}`,
-      contact_first_name: input.contactFirstName,
-      contact_last_name: input.contactLastName,
-      contact_applicant_relationship: input.contactApplicantRelationship,
-      contact_phone_number: input.contactPhoneNumber,
-      contact_email: input.contactEmail,
-      contact_preference: input.contactPreference,
       company_name_registered: input.companyNameRegistered,
       single_family_units: input.singleFamilyUnits,
       has_rental_units: input.hasRentalUnits,
@@ -86,10 +106,6 @@ export default {
       submittedAt: input.submitted_at?.toISOString() as string,
       submittedBy: input.submitted_by,
       locationPIDs: input.location_pids,
-      contactApplicantRelationship: input.contact_applicant_relationship,
-      contactPhoneNumber: input.contact_phone_number,
-      contactEmail: input.contact_email,
-      contactPreference: input.contact_preference,
       consentToFeedback: input.consent_to_feedback,
       projectName: input.project_name,
       projectDescription: input.project_description,
@@ -131,18 +147,26 @@ export default {
       indigenousDescription: input.indigenous_description,
       nonProfitDescription: input.non_profit_description,
       housingCoopDescription: input.housing_coop_description,
-      contactFirstName: input.contact_first_name,
-      contactLastName: input.contact_last_name,
       submissionType: input.submission_type,
       relatedEnquiries: null,
       createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,
+      contacts: [],
       user: null
     };
   },
 
-  fromPrismaModelWithUser(input: PrismaGraphSubmissionUser): Submission {
+  fromPrismaModelWithContact(input: PrismaGraphSubmissionWithContact): Submission {
     const submission = this.fromPrismaModel(input);
+    if (submission && input.activity.activity_contact) {
+      submission.contacts = input.activity.activity_contact.map((x) => contact.fromPrismaModel(x.contact));
+    }
+
+    return submission;
+  },
+
+  fromPrismaModelWithUser(input: PrismaGraphSubmissionWithUser): Submission {
+    const submission = this.fromPrismaModelWithContact(input);
     if (submission && input.user) {
       submission.user = user.fromPrismaModel(input.user);
     }

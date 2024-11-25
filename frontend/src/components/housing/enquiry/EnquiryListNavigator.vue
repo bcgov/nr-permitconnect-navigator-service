@@ -183,25 +183,25 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
-      field="contactFirstName"
+      field="contacts.0.firstName"
       header="Contact first name"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contactLastName"
+      field="contacts.0.lastName"
       header="Contact last name"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contactPhoneNumber"
+      field="contacts.0.phoneNumber"
       header="Contact phone"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contactEmail"
+      field="contacts.0.email"
       header="Contact email"
       :sortable="true"
       style="min-width: 200px"

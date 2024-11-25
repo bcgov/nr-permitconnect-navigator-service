@@ -21,8 +21,8 @@ export enum ContactPreference {
 }
 
 export enum IntakeFormCategory {
-  APPLICANT = 'applicant',
   BASIC = 'basic',
+  CONTACTS = 'contacts',
   HOUSING = 'housing',
   LOCATION = 'location',
   PERMITS = 'permits',

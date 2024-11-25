@@ -14,19 +14,23 @@ const testEnquiry = {
   assignedUserId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
   submittedAt: '2024-06-12T07:00:00.000Z',
   submittedBy: 'WILSWONG',
-  contactFirstName: 'enquiryDraft1',
-  contactLastName: 'enquiryDraft1',
-  contactPhoneNumber: '(123) 456-7890',
-  contactEmail: 'test@test.weg',
-  contactPreference: 'Phone call',
-  contactApplicantRelationship: 'Owner',
   isRelated: 'Yes',
   relatedActivityId: 'D95F1DE6',
   enquiryDescription: 'D95F1DE6 Test enquiry info',
   applyForPermitConnect: null,
   intakeStatus: 'Submitted',
   updatedAt: '2024-06-13T00:00:00.000Z',
-  submissionType: 'General enquiry'
+  submissionType: 'General enquiry',
+  contacts: [
+    {
+      firstName: 'enquiryDraft1',
+      lastName: 'enquiryDraft1',
+      phoneNumber: '(123) 456-7890',
+      email: 'test@test.weg',
+      contactPreference: 'Phone call',
+      contactApplicantRelationship: 'Owner'
+    }
+  ]
 };
 
 const getSpy = vi.fn();

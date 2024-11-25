@@ -1,7 +1,7 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, enquiryService, noteService, userService } from '../services';
+import { activityService, contactService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
@@ -32,27 +32,16 @@ const controller = {
     }
   },
 
-  generateEnquiryData: async (req: Request<never, never, EnquiryIntake>) => {
+  generateEnquiryData: async (req: Request<never, never, EnquiryIntake>, intakeStatus: string) => {
     const data = req.body;
 
     const activityId =
       data.activityId ??
       (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
-    let applicant, basic;
+    let basic;
 
     // Create applicant information
-    if (data.applicant) {
-      applicant = {
-        contactFirstName: data.applicant.contactFirstName,
-        contactLastName: data.applicant.contactLastName,
-        contactPhoneNumber: data.applicant.contactPhoneNumber,
-        contactEmail: data.applicant.contactEmail,
-        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
-        contactPreference: data.applicant.contactPreference
-      };
-    }
-
     if (data.basic) {
       basic = {
         enquiryType: data.basic.enquiryType,
@@ -65,14 +54,13 @@ const controller = {
 
     // Put new enquiry together
     return {
-      ...applicant,
       ...basic,
       enquiryId: data.enquiryId ?? uuidv4(),
-      activityId: activityId,
+      activityId: activityId as string,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       submittedBy: getCurrentUsername(req.currentContext),
-      intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
+      intakeStatus: intakeStatus,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
     };
@@ -135,9 +123,12 @@ const controller = {
     try {
       const update = req.body.activityId && req.body.enquiryId;
 
-      const enquiry = await controller.generateEnquiryData(req);
+      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
 
       let result;
+
+      await contactService.upsertContacts(enquiry.activityId, req.body.contacts, req.currentContext);
+
       if (update) {
         result = await enquiryService.updateEnquiry({
           ...enquiry,
@@ -163,6 +154,8 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
+      await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
+
       const result = await enquiryService.updateEnquiry({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
@@ -182,7 +175,7 @@ const controller = {
     try {
       const update = req.body.activityId && req.body.enquiryId;
 
-      const enquiry = await controller.generateEnquiryData(req);
+      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.DRAFT);
 
       let result;
       if (update) {

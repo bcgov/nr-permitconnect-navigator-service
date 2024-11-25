@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref, toRaw } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { object, string } from 'yup';
+import { array, object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import {
@@ -23,9 +23,10 @@ import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
-import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -51,14 +52,7 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  [IntakeFormCategory.APPLICANT]: object({
-    contactFirstName: string().required().max(255).label('First name'),
-    contactLastName: string().required().max(255).label('Last name'),
-    contactPhoneNumber: string().required().max(255).label('Phone number'),
-    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
-  }),
+  contacts: array().of(object(contactValidator)),
   [IntakeFormCategory.BASIC]: object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
@@ -134,12 +128,12 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
 
   const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
+    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
     '{{ activityId }}': activityId,
     '{{ enquiryDescription }}': firstTwoSentences.trim(),
     '{{ enquiryId }}': enquiryId
   });
-  let applicantEmail = formRef.value?.values.applicant.contactEmail;
+  let applicantEmail = formRef.value?.values.contacts[0].email;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
@@ -163,14 +157,7 @@ async function loadEnquiry() {
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      applicant: {
-        contactFirstName: response?.contactFirstName,
-        contactLastName: response?.contactLastName,
-        contactPhoneNumber: response?.contactPhoneNumber,
-        contactEmail: response?.contactEmail,
-        contactApplicantRelationship: response?.contactApplicantRelationship,
-        contactPreference: response?.contactPreference
-      },
+      contacts: response?.contacts,
       basic: {
         isRelated: response?.isRelated,
         relatedActivityId: response?.relatedActivityId,
@@ -340,21 +327,21 @@ onBeforeMount(async () => {
           <div class="formgrid grid">
             <InputText
               class="col-6"
-              name="applicant.contactFirstName"
+              :name="`contacts.${0}.firstName`"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
               class="col-6"
-              name="applicant.contactLastName"
+              :name="`contacts.${0}.lastName`"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
               class="col-6"
-              name="applicant.contactPhoneNumber"
+              :name="`contacts.${0}.phoneNumber`"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
@@ -362,14 +349,14 @@ onBeforeMount(async () => {
             />
             <InputText
               class="col-6"
-              name="applicant.contactEmail"
+              :name="`contacts.${0}.email`"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Dropdown
               class="col-6"
-              name="applicant.contactApplicantRelationship"
+              :name="`contacts.${0}.contactApplicantRelationship`"
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"
@@ -377,7 +364,7 @@ onBeforeMount(async () => {
             />
             <Dropdown
               class="col-6"
-              name="applicant.contactPreference"
+              :name="`contacts.${0}.contactPreference`"
               label="Preferred contact method"
               :bold="false"
               :disabled="!editable"

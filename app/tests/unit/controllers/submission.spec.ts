@@ -1,7 +1,13 @@
 import config from 'config';
 
 import submissionController from '../../../src/controllers/submission';
-import { activityService, enquiryService, permitService, submissionService } from '../../../src/services';
+import {
+  activityService,
+  contactService,
+  enquiryService,
+  permitService,
+  submissionService
+} from '../../../src/services';
 import type { Permit, Submission } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
 import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
@@ -33,7 +39,7 @@ afterEach(() => {
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
 const FORM_EXPORT_1 = {
   form: {
@@ -140,12 +146,6 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   activityId: '5183f223',
   applicationStatus: ApplicationStatus.NEW,
   companyNameRegistered: 'COMPANY',
-  contactEmail: 'abc@dot.com',
-  contactPhoneNumber: '1234567890',
-  contactFirstName: 'ABC',
-  contactLastName: 'DEF',
-  contactPreference: 'Phone Call',
-  contactApplicantRelationship: 'Agent',
   financiallySupported: true,
   financiallySupportedBC: 'Yes',
   financiallySupportedIndigenous: 'Yes',
@@ -177,12 +177,6 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     activityId: 'c8b7d976',
     applicationStatus: ApplicationStatus.NEW,
     companyNameRegistered: 'BIGBUILD',
-    contactEmail: 'joe@dot.com',
-    contactPhoneNumber: '1114448888',
-    contactFirstName: 'Joe',
-    contactLastName: 'Smith',
-    contactPreference: 'Email',
-    contactApplicantRelationship: 'Agent',
     financiallySupported: true,
     financiallySupportedBC: 'Yes',
     financiallySupportedIndigenous: 'Yes',
@@ -230,8 +224,6 @@ const SUBMISSION_1 = {
   submittedBy: '100-100',
   locationPIDs: null,
   companyNameRegistered: null,
-  contactFirstName: null,
-  contactLastName: null,
   contactPhoneNumber: null,
   contactEmail: null,
   contactPreference: null,
@@ -291,12 +283,16 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1]).mockResolvedValueOnce([]);
     searchSubmissionsSpy.mockResolvedValue([]);
     createSubmissionsFromExportSpy.mockResolvedValue();
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(formExportSpy).toHaveBeenCalledTimes(2);
@@ -317,6 +313,10 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1, FORM_EXPORT_2]).mockResolvedValueOnce([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -324,7 +324,7 @@ describe.skip('checkAndStoreNewSubmissions', () => {
     createSubmissionsFromExportSpy.mockResolvedValue();
     createPermitSpy.mockResolvedValue({} as Permit);
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(formExportSpy).toHaveBeenCalledTimes(2);
@@ -359,13 +359,17 @@ describe.skip('checkAndStoreNewSubmissions', () => {
       }
     });
 
+    const req = {
+      currentContext: CURRENT_CONTEXT
+    };
+
     permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
     formExportSpy.mockResolvedValueOnce([FORM_EXPORT_2]).mockResolvedValueOnce([]);
     searchSubmissionsSpy.mockResolvedValue([]);
     createSubmissionsFromExportSpy.mockResolvedValue();
     createPermitSpy.mockResolvedValue({} as Permit);
 
-    await submissionController.checkAndStoreNewSubmissions();
+    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
@@ -410,10 +414,7 @@ describe('createSubmission', () => {
 
     const req = {
       body: {
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
+        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -441,8 +442,6 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -727,6 +726,7 @@ describe('submitDraft', () => {
   const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
+  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
 
   it('updates submission with the given activity ID', async () => {
     const req = {
@@ -737,6 +737,7 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
@@ -744,6 +745,7 @@ describe('submitDraft', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', submissionId: '11111111' });
   });
@@ -753,10 +755,6 @@ describe('submitDraft', () => {
       body: {
         activityId: '00000000',
         submissionId: '11111111',
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -776,16 +774,16 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
@@ -812,10 +810,12 @@ describe('submitDraft', () => {
 
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -848,6 +848,7 @@ describe('submitDraft', () => {
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
@@ -855,6 +856,7 @@ describe('submitDraft', () => {
     const createOrder = createPermitSpy.mock.invocationCallOrder[0];
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(1);
@@ -906,10 +908,12 @@ describe('submitDraft', () => {
     updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
     deletePermitsByActivitySpy.mockResolvedValue(0);
+    upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(3);
@@ -977,10 +981,7 @@ describe('updateDraft', () => {
       body: {
         activityId: '00000000',
         submissionId: '11111111',
-        applicant: {
-          contactFirstName: 'Test',
-          contactLastName: 'User'
-        },
+        applicant: {},
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -1008,8 +1009,6 @@ describe('updateDraft', () => {
     expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(updateSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        contactFirstName: req.body.applicant.contactFirstName,
-        contactLastName: req.body.applicant.contactLastName,
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',

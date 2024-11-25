@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { applicant } from './applicant';
 import { appliedPermit } from './appliedPermit';
 import { basicIntake } from './basic';
 import { activityId, email, uuidv4 } from './common';
+import { contacts } from './contacts';
 
 import { housing } from './housing';
 import { permits } from './permits';
@@ -21,14 +21,14 @@ import { IntakeStatus } from '../utils/enums/housing';
 const schema = {
   createDraft: {
     body: Joi.object({
-      applicant: applicant
+      contact: contacts
     })
   },
   createSubmission: {
     body: Joi.object({
       submissionId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
-      applicant: applicant,
+      contacts: contacts,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
       housing: housing,
@@ -181,8 +181,9 @@ const schema = {
         otherwise: uuidv4.allow(null)
       }),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      waitingOn: Joi.string().allow(null).max(255)
-    }).concat(applicant),
+      waitingOn: Joi.string().allow(null).max(255),
+      contacts: contacts
+    }),
     params: Joi.object({
       submissionId: uuidv4.required()
     })
