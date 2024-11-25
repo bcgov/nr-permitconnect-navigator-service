@@ -157,7 +157,7 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
   };
 
   try {
-    const response = await enquiryService.submitDraft(enquiryData);
+    const response = await enquiryService.createEnquiry(enquiryData);
     enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
   } catch (e: any) {
     toast.error('Failed to submit enquiry', e);

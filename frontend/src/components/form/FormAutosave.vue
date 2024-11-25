@@ -32,14 +32,12 @@ onBeforeUnmount(() => {
   stopAutoSave();
 });
 
-watch(values.value, (o, n) => {
+watch(values.value, () => {
   if (timeoutId.value) {
     clearTimeout(timeoutId.value);
   }
 
   if (isDirty.value) {
-    console.log(o);
-    console.log(n);
     timeoutId.value = setTimeout(async () => {
       await callback();
       timeoutId.value = null;

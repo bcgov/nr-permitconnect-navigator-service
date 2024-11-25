@@ -127,12 +127,12 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const firstNameInput = wrapper.get('[name="contacts.0.firstName"]');
-      const lastNameInput = wrapper.get('[name="contacts.0.lastName"]');
-      const phoneInput = wrapper.get('[name="contacts.0.phoneNumber"]');
-      const emailInput = wrapper.get('[name="contacts.0.email"]');
-      const relationsInput = wrapper.get('[name="contacts.0.contactApplicantRelationship"]');
-      const contactInput = wrapper.get('[name="contacts.0.contactPreference"]');
+      const firstNameInput = wrapper.get('[name="contacts[0].firstName"]');
+      const lastNameInput = wrapper.get('[name="contacts[0].lastName"]');
+      const phoneInput = wrapper.get('[name="contacts[0].phoneNumber"]');
+      const emailInput = wrapper.get('[name="contacts[0].email"]');
+      const relationsInput = wrapper.get('[name="contacts[0].contactApplicantRelationship"]');
+      const contactInput = wrapper.get('[name="contacts[0].contactPreference"]');
       const relatedInput = wrapper.findAll('[name="basic.isRelated"]');
 
       expect(firstNameInput.isVisible()).toBeTruthy();
@@ -291,7 +291,6 @@ describe('EnquiryIntakeForm', () => {
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
-      console.log(Object.keys(result.errors));
       expect(Object.keys(result.errors).length).toBe(1);
       expect(result.errors[`${[IntakeFormCategory.CONTACTS]}[0].email`]).toBeTruthy();
     });

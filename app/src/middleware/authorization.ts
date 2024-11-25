@@ -8,6 +8,7 @@ import {
   noteService,
   permitService,
   submissionService,
+  submissionDraftService,
   userService,
   yarsService
 } from '../services';
@@ -112,7 +113,7 @@ const paramMap = new Map<string, (id: string) => any>([
   ['noteId', noteService.getNote],
   ['permitId', permitService.getPermit],
   ['submissionId', submissionService.getSubmission],
-  ['submissionDraftId', submissionService.getDraft]
+  ['submissionDraftId', submissionDraftService.getDraft]
 ]);
 
 /**

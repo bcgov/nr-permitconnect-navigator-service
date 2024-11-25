@@ -63,18 +63,11 @@ describe('enquiryService', () => {
     expect(getSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
   });
 
-  it('calls submitDraft with correct data', async () => {
-    await enquiryService.submitDraft(testEnquiry);
+  it('calls createEnquiry with correct data', async () => {
+    await enquiryService.createEnquiry(testEnquiry);
 
     expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('enquiry/draft/submit', testEnquiry);
-  });
-
-  it('calls updateDraft with correct data', async () => {
-    await enquiryService.updateDraft(testEnquiry);
-
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('enquiry/draft', testEnquiry);
+    expect(putSpy).toHaveBeenCalledWith('enquiry', testEnquiry);
   });
 
   it('calls updateEnquiry with correct data', async () => {

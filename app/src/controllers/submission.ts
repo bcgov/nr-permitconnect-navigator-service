@@ -378,6 +378,10 @@ const controller = {
         req.currentContext
       );
 
+      // Create contacts
+      if (req.body.contacts)
+        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
+
       // Create new submission
       const result = await submissionService.createSubmission({
         ...submission,

@@ -448,7 +448,7 @@ onBeforeMount(async () => {
     } else {
       if (submissionId && activityId) {
         response = (await submissionService.getSubmission(submissionId)).data;
-        permits = (await permitService.listPermits(activityId)).data;
+        permits = (await permitService.listPermits({ activityId: activityId })).data;
         documents = (await documentService.listDocuments(activityId)).data;
         submissionStore.setDocuments(documents);
       }
