@@ -337,7 +337,32 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const response = await submissionService.submitDraft({ ...data, submissionDraftId });
+    // Convert contact fields into contacts array object then remove form keys from data
+    const submissionData = omit(
+      {
+        ...data,
+        contacts: [
+          {
+            firstName: data.contactFirstName,
+            lastName: data.contactLastName,
+            phoneNumber: data.contactPhoneNumber,
+            email: data.contactEmail,
+            contactApplicantRelationship: data.contactApplicantRelationship,
+            contactPreference: data.contactPreference
+          }
+        ]
+      },
+      [
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    const response = await submissionService.submitDraft({ ...submissionData, submissionDraftId });
 
     if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
@@ -417,22 +442,26 @@ onBeforeMount(async () => {
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
-    if (submissionId && activityId) {
-      response = (await submissionService.getSubmission(submissionId)).data;
-      permits = (await permitService.listPermits({ activityId })).data;
-      documents = (await documentService.listDocuments(activityId)).data;
-      submissionStore.setDocuments(documents);
-      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
-    }
-
     if (submissionDraftId) {
       response = (await submissionService.getSubmissionDraft(submissionDraftId)).data;
       initialFormValues.value = response.data;
     } else {
+      if (submissionId && activityId) {
+        response = (await submissionService.getSubmission(submissionId)).data;
+        permits = (await permitService.listPermits(activityId)).data;
+        documents = (await documentService.listDocuments(activityId)).data;
+        submissionStore.setDocuments(documents);
+      }
+
       initialFormValues.value = {
         activityId: response?.activityId,
         submissionId: response?.submissionId,
-        contacts: response?.contacts,
+        contactFirstName: response?.contacts[0].firstName,
+        contactLastName: response?.contacts[0].lastName,
+        contactPhoneNumber: response?.contacts[0].phoneNumber,
+        contactEmail: response?.contacts[0].email,
+        contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
+        contactPreference: response?.contacts[0].contactPreference,
         basic: {
           consentToFeedback: response?.consentToFeedback,
           isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
@@ -484,9 +513,9 @@ onBeforeMount(async () => {
       };
     }
 
-    autoSaveRef.value?.stopAutoSave();
-
     await nextTick();
+
+    editable.value = response.intakeStatus !== IntakeStatus.SUBMITTED;
 
     // Move map pin
     onLatLongInputClick();
@@ -587,21 +616,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    :name="`contacts[0].firstName`"
+                    :name="`contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts[0].lastName`"
+                    :name="`contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    :name="`contacts[0].phoneNumber`"
+                    :name="`contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -609,14 +638,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts[0].email`"
+                    :name="`contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts[0].contactApplicantRelationship`"
+                    :name="`contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -624,7 +653,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts[0].contactPreference`"
+                    :name="`contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
