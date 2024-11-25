@@ -9,18 +9,17 @@ datasource db {
   schemas  = ["public", "yars"]
 }
 
-model knex_migrations {
-  id             Int       @id @default(autoincrement())
-  name           String?   @db.VarChar(255)
-  batch          Int?
-  migration_time DateTime? @db.Timestamptz(6)
-
-  @@schema("public")
-}
-
-model knex_migrations_lock {
-  index     Int  @id @default(autoincrement())
-  is_locked Int?
+model access_request {
+  access_request_id String                     @id @db.Uuid
+  user_id           String                     @db.Uuid
+  group             String?
+  status            access_request_status_enum @default(Pending)
+  grant             Boolean
+  created_by        String?                    @default("00000000-0000-0000-0000-000000000000")
+  created_at        DateTime?                  @default(now()) @db.Timestamptz(6)
+  updated_by        String?
+  updated_at        DateTime?                  @db.Timestamptz(6)
+  user              user                       @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "access_request_user_id_foreign")
 
   @@schema("public")
 }
@@ -44,6 +43,39 @@ model activity {
   @@schema("public")
 }
 
+model activity_contact {
+  activity_id String
+  contact_id  String    @db.Uuid
+  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by  String?
+  updated_at  DateTime? @db.Timestamptz(6)
+  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "activity_contact_activity_id_foreign")
+  contact     contact   @relation(fields: [contact_id], references: [contact_id], onDelete: Cascade, map: "activity_contact_contact_id_foreign")
+
+  @@id([activity_id, contact_id])
+  @@schema("public")
+}
+
+model contact {
+  contact_id                     String             @id @db.Uuid
+  user_id                        String?            @db.Uuid
+  first_name                     String?
+  last_name                      String?
+  phone_number                   String?
+  email                          String?
+  contact_preference             String?
+  contact_applicant_relationship String?
+  created_by                     String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at                     DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by                     String?
+  updated_at                     DateTime?          @db.Timestamptz(6)
+  activity_contact               activity_contact[]
+  user                           user?              @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "contact_user_id_foreign")
+
+  @@schema("public")
+}
+
 model document {
   document_id String    @id @db.Uuid
   activity_id String
@@ -57,6 +89,30 @@ model document {
   activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "document_activity_id_foreign")
 
   @@unique([document_id, activity_id], map: "document_document_id_activity_id_unique")
+  @@schema("public")
+}
+
+model enquiry {
+  enquiry_id               String    @id @db.Uuid
+  activity_id              String
+  assigned_user_id         String?   @db.Uuid
+  enquiry_type             String?
+  submitted_at             DateTime  @db.Timestamptz(6)
+  submitted_by             String
+  is_related               String?
+  related_activity_id      String?
+  enquiry_description      String?
+  apply_for_permit_connect String?
+  intake_status            String?
+  enquiry_status           String?
+  waiting_on               String?
+  created_by               String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at               DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by               String?
+  updated_at               DateTime? @db.Timestamptz(6)
+  activity                 activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
+  user                     user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
+
   @@schema("public")
 }
 
@@ -82,6 +138,22 @@ model initiative {
   updated_at    DateTime?  @db.Timestamptz(6)
   activity      activity[]
   group         group[]
+
+  @@schema("public")
+}
+
+model knex_migrations {
+  id             Int       @id @default(autoincrement())
+  name           String?   @db.VarChar(255)
+  batch          Int?
+  migration_time DateTime? @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+model knex_migrations_lock {
+  index     Int  @id @default(autoincrement())
+  is_locked Int?
 
   @@schema("public")
 }
@@ -125,6 +197,20 @@ model permit {
   permit_note          permit_note[]
 
   @@unique([permit_id, permit_type_id, activity_id], map: "permit_permit_id_permit_type_id_activity_id_unique")
+  @@schema("public")
+}
+
+model permit_note {
+  permit_note_id String    @id @db.Uuid
+  permit_id      String    @db.Uuid
+  note           String    @default("")
+  is_deleted     Boolean   @default(false)
+  created_by     String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at     DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by     String?
+  updated_at     DateTime? @db.Timestamptz(6)
+  permit         permit    @relation(fields: [permit_id], references: [permit_id], onDelete: Cascade, map: "permit_note_permit_id_foreign")
+
   @@schema("public")
 }
 
@@ -236,45 +322,6 @@ model user {
   @@index([email], map: "user_email_index")
   @@index([identity_id], map: "user_identity_id_index")
   @@index([sub], map: "user_username_index")
-  @@schema("public")
-}
-
-model enquiry {
-  enquiry_id               String    @id @db.Uuid
-  activity_id              String
-  assigned_user_id         String?   @db.Uuid
-  enquiry_type             String?
-  submitted_at             DateTime  @db.Timestamptz(6)
-  submitted_by             String
-  is_related               String?
-  related_activity_id      String?
-  enquiry_description      String?
-  apply_for_permit_connect String?
-  intake_status            String?
-  enquiry_status           String?
-  waiting_on               String?
-  created_by               String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at               DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by               String?
-  updated_at               DateTime? @db.Timestamptz(6)
-  activity                 activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
-  user                     user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
-
-  @@schema("public")
-}
-
-model access_request {
-  access_request_id String                     @id @db.Uuid
-  user_id           String                     @db.Uuid
-  group             String?
-  status            access_request_status_enum @default(Pending)
-  grant             Boolean
-  created_by        String?                    @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?                  @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime?                  @db.Timestamptz(6)
-  user              user                       @relation(fields: [user_id], references: [user_id], onDelete: NoAction, onUpdate: NoAction, map: "access_request_user_id_foreign")
-
   @@schema("public")
 }
 
@@ -433,52 +480,6 @@ model subject_group {
 
   @@id([sub, group_id])
   @@schema("yars")
-}
-
-<<<<<<< HEAD
-model permit_note {
-  permit_note_id String    @id @db.Uuid
-  permit_id      String    @db.Uuid
-  note           String    @default("")
-  is_deleted     Boolean   @default(false)
-  created_by     String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at     DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by     String?
-  updated_at     DateTime? @db.Timestamptz(6)
-  permit         permit    @relation(fields: [permit_id], references: [permit_id], onDelete: Cascade, map: "permit_note_permit_id_foreign")
-=======
-model activity_contact {
-  activity_id String
-  contact_id  String    @db.Uuid
-  created_by  String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at  DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by  String?
-  updated_at  DateTime? @db.Timestamptz(6)
-  activity    activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "activity_contact_activity_id_foreign")
-  contact     contact   @relation(fields: [contact_id], references: [contact_id], onDelete: Cascade, map: "activity_contact_contact_id_foreign")
-
-  @@id([activity_id, contact_id])
-  @@schema("public")
-}
-
-model contact {
-  contact_id                     String             @id @db.Uuid
-  user_id                        String?            @db.Uuid
-  first_name                     String?
-  last_name                      String?
-  phone_number                   String?
-  email                          String?
-  contact_preference             String?
-  contact_applicant_relationship String?
-  created_by                     String?            @default("00000000-0000-0000-0000-000000000000")
-  created_at                     DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_by                     String?
-  updated_at                     DateTime?          @db.Timestamptz(6)
-  activity_contact               activity_contact[]
-  user                           user?              @relation(fields: [user_id], references: [user_id], onDelete: Cascade, map: "contact_user_id_foreign")
->>>>>>> 76305994 (Create migration)
-
-  @@schema("public")
 }
 
 view group_role_policy_vw {
