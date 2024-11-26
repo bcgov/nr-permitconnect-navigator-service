@@ -91,6 +91,14 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
     .sort(permitBusinessSortFcn);
 });
 
+const permitsUnderinvestigation: ComputedRef<Array<CombinedPermit>> = computed(() => {
+  return permitFilter({
+    permitNeeded: PermitNeeded.UNDER_INVESTIGATION,
+    permits: getPermits.value,
+    permitTypes: getPermitTypes.value
+  });
+});
+
 // Actions
 const router = useRouter();
 const toast = useToast();
@@ -214,7 +222,8 @@ onMounted(async () => {
       </h1>
       <Button
         class="p-button-sm header-btn"
-        label="Ask a Navigator"
+        label="Ask my Navigator"
+        outlined
         @click="enquiryModalVisible = !enquiryModalVisible"
       />
     </div>
@@ -231,16 +240,23 @@ onMounted(async () => {
     </div>
     <div><h3 class="mb-5">Required permits</h3></div>
     <div
-      v-if="!(permitsNeeded?.length || permitsNotNeeded?.length)"
-      class="empty-block p-5"
+      v-if="permitsUnderinvestigation.length && !permitsNeeded.length"
+      class="empty-block p-5 mb-2"
     >
       We are investigating the permits required for this project.
+    </div>
+    <div
+      v-if="!permitsUnderinvestigation.length && !permitsNeeded.length"
+      class="empty-block p-5 mb-2"
+    >
+      All the necessary permits have been submitted at this time. If additional permits are required as the project
+      progresses, we will update them here.
     </div>
 
     <Card
       v-for="permit in permitsNeeded"
       :key="permit.permitId"
-      class="app-primary-color permit-card"
+      class="app-primary-color permit-card mb-2"
     >
       <template #content>
         <h5 class="m-0 p-0">{{ permit.name }}</h5>
@@ -275,7 +291,7 @@ onMounted(async () => {
     <Card
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
-      class="permit-card"
+      class="permit-card--hover mb-2"
       @click="
         () => {
           permitModalVisible = true;
@@ -320,7 +336,7 @@ onMounted(async () => {
           <div class="col-6">
             <div class="label-field">Latest updates</div>
             <div class="permit-data">
-              {{ permit?.permitNote?.length ? permit?.permitNote[0].note : '' }}
+              {{ permit?.permitNote?.length ? permit?.permitNote[0].note : 'No updates at the moment.' }}
             </div>
           </div>
         </div>
@@ -375,7 +391,7 @@ a {
   border-style: solid;
   border-width: 1px;
   box-shadow: 4px 4px 4px 0px $app-proj-black;
-  &:hover {
+  &--hover:hover {
     background-color: $app-grey;
   }
 }
@@ -430,15 +446,8 @@ a {
   box-shadow: 4px 4px 4px 0px $app-proj-black;
 }
 
-:deep(.p-accordion-tab-active .p-accordion-header > a) {
-  background-color: $app-grey !important;
-}
-
 :deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {
   background-color: inherit;
-  &:hover {
-    background-color: $app-grey;
-  }
 }
 
 :deep(.p-card-body) {
