@@ -6,10 +6,10 @@ import {
   contactService,
   enquiryService,
   permitService,
-  submissionDraftService,
+  draftService,
   submissionService
 } from '../../../src/services';
-import type { Permit, Submission, SubmissionDraft } from '../../../src/types';
+import type { Permit, Submission, Draft } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
 import { AuthType, BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
@@ -876,8 +876,8 @@ describe('submitDraft', () => {
 
 describe('updateDraft', () => {
   // Mock service calls
-  const createDraftSpy = jest.spyOn(submissionDraftService, 'createDraft');
-  const updateDraftSpy = jest.spyOn(submissionDraftService, 'updateDraft');
+  const createDraftSpy = jest.spyOn(draftService, 'createDraft');
+  const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
 
   it('creates a new draft', async () => {
@@ -903,7 +903,7 @@ describe('updateDraft', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createDraftSpy.mockResolvedValue({ submissionDraftId: '11111111', activityId: '00000000' } as SubmissionDraft);
+    createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
@@ -912,18 +912,18 @@ describe('updateDraft', () => {
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        submissionDraftId: expect.stringMatching(uuidv4Pattern),
+        draftId: expect.stringMatching(uuidv4Pattern),
         activityId: '00000000'
       })
     );
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ submissionDraftId: '11111111', activityId: '00000000' });
+    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
   });
 
-  it('updates draft with the given submissionDraftId and activityId', async () => {
+  it('updates draft with the given draftId and activityId', async () => {
     const req = {
       body: {
-        submissionDraftId: '11111111',
+        draftId: '11111111',
         activityId: '00000000',
         contactFirstName: 'test',
         contactLastName: 'person',
@@ -945,7 +945,7 @@ describe('updateDraft', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    updateDraftSpy.mockResolvedValue({ submissionDraftId: '11111111', activityId: '00000000' } as SubmissionDraft);
+    updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
@@ -954,11 +954,11 @@ describe('updateDraft', () => {
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
     expect(updateDraftSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        submissionDraftId: '11111111'
+        draftId: '11111111'
       })
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ submissionDraftId: '11111111', activityId: '00000000' });
+    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
   });
 });
 

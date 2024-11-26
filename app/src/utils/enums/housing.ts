@@ -20,6 +20,10 @@ export enum ContactPreference {
   EITHER = 'Either'
 }
 
+export enum DraftCode {
+  SUBMISSION = 'SUBMISSION'
+}
+
 export enum IntakeFormCategory {
   APPLICANT = 'applicant',
   BASIC = 'basic',

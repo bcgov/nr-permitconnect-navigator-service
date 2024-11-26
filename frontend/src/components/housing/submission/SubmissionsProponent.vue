@@ -20,8 +20,8 @@ function onSubmissionDelete(submissionId: string) {
   submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
 }
 
-function onSubmissionDraftDelete(submissionDraftId: string) {
-  submissionDrafts.value = submissionDrafts.value.filter((x) => x.submissionDraftId !== submissionDraftId);
+function onSubmissionDraftDelete(draftId: string) {
+  submissionDrafts.value = submissionDrafts.value.filter((x) => x.draftId !== draftId);
 }
 
 onMounted(async () => {
@@ -29,7 +29,7 @@ onMounted(async () => {
     await Promise.all([
       enquiryService.getEnquiries(),
       submissionService.getSubmissions(),
-      submissionService.getSubmissionDrafts()
+      submissionService.getDrafts()
     ])
   ).map((r) => r.data);
 

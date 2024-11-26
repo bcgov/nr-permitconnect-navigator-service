@@ -81,11 +81,11 @@ type SubmissionForm = {
 const {
   activityId = undefined,
   submissionId = undefined,
-  submissionDraftId = undefined
+  draftId = undefined
 } = defineProps<{
   activityId?: string;
   submissionId?: string;
-  submissionDraftId?: string;
+  draftId?: string;
 }>();
 
 // Constants
@@ -157,8 +157,8 @@ function confirmSubmit(data: GenericObject) {
 async function generateActivityId() {
   try {
     const response = await submissionService.updateDraft({});
-    if (response.data?.activityId && response.data?.submissionDraftId) {
-      syncFormAndRoute(response.data.activityId, response.data.submissionDraftId);
+    if (response.data?.activityId && response.data?.draftId) {
+      syncFormAndRoute(response.data.activityId, response.data.draftId);
       return response.data.activityId;
     } else {
       return undefined;
@@ -308,12 +308,12 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
   let response;
   try {
     response = await submissionService.updateDraft({
-      submissionDraftId: submissionDraftId,
+      draftId: draftId,
       activityId: data.activityId,
       data: data
     });
 
-    syncFormAndRoute(response?.data.activityId, response?.data.submissionDraftId);
+    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
 
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
@@ -322,7 +322,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
     editable.value = true;
   }
 
-  return { activityId: response?.data.activityId, submissionDraftId: response?.data.submissionDraftId };
+  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
 }
 
 function onStepChange(stepNumber: number) {
@@ -362,7 +362,7 @@ async function onSubmit(data: any) {
       ]
     );
 
-    const response = await submissionService.submitDraft({ ...submissionData, submissionDraftId });
+    const response = await submissionService.submitDraft({ ...submissionData, draftId });
 
     if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
@@ -415,13 +415,13 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function syncFormAndRoute(activityId: string, submissionDraftId: string) {
-  if (submissionDraftId) {
+function syncFormAndRoute(activityId: string, draftId: string) {
+  if (draftId) {
     // Update route query for refreshing
     router.replace({
       name: RouteName.HOUSING_SUBMISSION_INTAKE,
       query: {
-        submissionDraftId: submissionDraftId
+        draftId: draftId
       }
     });
   }
@@ -442,9 +442,9 @@ onBeforeMount(async () => {
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
-    if (submissionDraftId) {
-      response = (await submissionService.getSubmissionDraft(submissionDraftId)).data;
-      initialFormValues.value = response.data;
+    if (draftId) {
+      response = (await submissionService.getDraft(draftId)).data;
+      initialFormValues.value = { ...response.data, activityId: response.activityId };
     } else {
       if (submissionId && activityId) {
         response = (await submissionService.getSubmission(submissionId)).data;
@@ -564,7 +564,7 @@ onBeforeMount(async () => {
 
       <input
         type="hidden"
-        name="submissionDraftId"
+        name="draftId"
       />
 
       <input

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref, toRaw } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { array, object, string } from 'yup';
 
@@ -13,9 +13,7 @@ import {
   InputMask,
   InputText,
   RadioList,
-  StepperNavigation,
-  TextArea,
-  FormAutosave
+  TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
@@ -31,7 +29,6 @@ import { contactValidator } from '@/validators';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
-import { emailValidator } from '@/validators/common';
 
 // Props
 const { enquiryId = undefined } = defineProps<{
@@ -42,7 +39,6 @@ const { enquiryId = undefined } = defineProps<{
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -91,22 +87,6 @@ const getBackButtonConfig = computed(() => {
     };
   }
 });
-
-async function confirmNext(data: any) {
-  const validateResult = await formRef?.value?.validate();
-  if (!validateResult?.valid) return;
-
-  confirm.require({
-    /* eslint-disable max-len */
-    message:
-      'After confirming, your enquiry will be submitted, and you will be directed to register your project with a Navigator.',
-    /*eslint-enable max-len */
-    header: 'Please confirm',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
-    accept: () => onSubmit(toRaw(data))
-  });
-}
 
 function confirmSubmit(data: any) {
   confirm.require({

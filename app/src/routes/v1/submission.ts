@@ -9,10 +9,10 @@ import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
+  Draft,
   Email,
   StatisticsFilters,
   Submission,
-  SubmissionDraft,
   SubmissionIntake,
   SubmissionSearchParameters
 } from '../../types';
@@ -61,9 +61,9 @@ router.get(
 
 /** Gets a list of submission drafts */
 router.get(
-  '/draft/:submissionDraftId',
+  '/draft/:draftId',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
-  (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction): void => {
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
     submissionController.getDraft(req, res, next);
   }
 );
@@ -81,7 +81,7 @@ router.get(
 router.put(
   '/draft',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
-  (req: Request<never, never, SubmissionDraft>, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Draft>, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
   }
 );
@@ -129,11 +129,11 @@ router.delete(
 
 /** Hard deletes a submission draft */
 router.delete(
-  '/draft/:submissionDraftId',
+  '/draft/:draftId',
   hasAuthorization(Resource.SUBMISSION, Action.DELETE),
-  hasAccess('submissionDraftId'),
-  submissionValidator.deleteSubmissionDraft,
-  (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction): void => {
+  hasAccess('draftId'),
+  submissionValidator.deleteDraft,
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
     submissionController.deleteDraft(req, res, next);
   }
 );

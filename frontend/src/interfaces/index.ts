@@ -1,2 +1,2 @@
-export type { IStamps } from './IStamps';
 export type { IInputEvent } from './IInputEvent';
+export type { IStamps } from './IStamps';

@@ -27,7 +27,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
 const confirm = useConfirm();
 const toast = useToast();
 
-function onDelete(submissionDraftId: string) {
+function onDelete(draftId: string) {
   confirm.require({
     message: 'Please confirm that you want to delete this draft',
     header: 'Delete draft?',
@@ -36,9 +36,9 @@ function onDelete(submissionDraftId: string) {
     rejectLabel: 'Cancel',
     accept: () => {
       submissionService
-        .deleteSubmissionDraft(submissionDraftId)
+        .deleteDraft(draftId)
         .then(() => {
-          emit('submissionDraft:delete', submissionDraftId);
+          emit('submissionDraft:delete', draftId);
           toast.success('Draft deleted');
         })
         .catch((e: any) => toast.error('Failed to delete draft', e.message));
@@ -79,11 +79,11 @@ function onDelete(submissionDraftId: string) {
       frozen
     >
       <template #body="{ data }">
-        <div :data-submissionDraftId="data.submissionDraftId">
+        <div :data-draftId="data.draftId">
           <router-link
             :to="{
               name: RouteName.HOUSING_SUBMISSION_INTAKE,
-              query: { submissionDraftId: data.submissionDraftId }
+              query: { draftId: data.draftId }
             }"
           >
             {{ data.index }}
@@ -121,7 +121,7 @@ function onDelete(submissionDraftId: string) {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
           aria-label="Delete draft"
-          @click="onDelete(data.submissionDraftId)"
+          @click="onDelete(data.draftId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
         </Button>

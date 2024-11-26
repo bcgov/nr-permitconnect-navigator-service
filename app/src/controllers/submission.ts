@@ -5,15 +5,16 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import {
   activityService,
   contactService,
+  draftService,
   emailService,
   enquiryService,
   submissionService,
-  submissionDraftService,
   permitService
 } from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
+  DraftCode,
   IntakeStatus,
   NumResidentialUnits,
   PermitNeeded,
@@ -27,15 +28,15 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   ChefsFormConfig,
   ChefsFormConfigData,
-  Submission,
   ChefsSubmissionExport,
-  Permit,
-  Email,
-  StatisticsFilters,
-  SubmissionIntake,
-  SubmissionSearchParameters,
   CurrentContext,
-  SubmissionDraft
+  Draft,
+  Email,
+  Permit,
+  StatisticsFilters,
+  Submission,
+  SubmissionIntake,
+  SubmissionSearchParameters
 } from '../types';
 
 const controller = {
@@ -412,9 +413,9 @@ const controller = {
     }
   },
 
-  deleteDraft: async (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction) => {
+  deleteDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionDraftService.deleteDraft(req.params.submissionDraftId);
+      const response = await draftService.deleteDraft(req.params.draftId);
 
       if (!response) {
         return res.status(404).json({ message: 'Submission draft not found' });
@@ -426,9 +427,9 @@ const controller = {
     }
   },
 
-  getDraft: async (req: Request<{ submissionDraftId: string }>, res: Response, next: NextFunction) => {
+  getDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionDraftService.getDraft(req.params.submissionDraftId);
+      const response = await draftService.getDraft(req.params.draftId);
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         if (response?.createdBy !== getCurrentUsername(req.currentContext)) {
@@ -444,10 +445,10 @@ const controller = {
 
   getDrafts: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await submissionDraftService.getDrafts();
+      let response = await draftService.getDrafts(DraftCode.SUBMISSION);
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter((x: SubmissionDraft) => x?.createdBy === req.currentContext.userId);
+        response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
       }
 
       res.status(200).json(response);
@@ -552,7 +553,7 @@ const controller = {
       await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
       // Delete old draft
-      if (req.body.submissionDraftId) await submissionDraftService.deleteDraft(req.body.submissionDraftId);
+      if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);
 
       res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
     } catch (e: unknown) {
@@ -560,15 +561,15 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request<never, never, SubmissionDraft>, res: Response, next: NextFunction) => {
+  updateDraft: async (req: Request<never, never, Draft>, res: Response, next: NextFunction) => {
     try {
-      const update = req.body.submissionDraftId && req.body.activityId;
+      const update = req.body.draftId && req.body.activityId;
 
       let response;
 
       if (update) {
         // Update draft
-        response = await submissionDraftService.updateDraft({
+        response = await draftService.updateDraft({
           ...req.body,
           ...generateUpdateStamps(req.currentContext)
         });
@@ -578,17 +579,16 @@ const controller = {
         )?.activityId;
 
         // Create new draft
-        response = await submissionDraftService.createDraft({
-          ...req.body,
-          submissionDraftId: uuidv4(),
+        response = await draftService.createDraft({
+          draftId: uuidv4(),
           activityId: activityId,
+          draftCode: DraftCode.SUBMISSION,
+          data: req.body.data,
           ...generateCreateStamps(req.currentContext)
         });
       }
 
-      res
-        .status(update ? 200 : 201)
-        .json({ submissionDraftId: response?.submissionDraftId, activityId: response?.activityId });
+      res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
     } catch (e: unknown) {
       next(e);
     }

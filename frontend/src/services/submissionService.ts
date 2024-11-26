@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email } from '@/types';
+import type { Email, Draft } from '@/types';
 
 export default {
   /**
@@ -29,11 +29,11 @@ export default {
   },
 
   /**
-   * @function deleteSubmissionDraft
+   * @function deleteDraft
    * @returns {Promise} An axios response
    */
-  deleteSubmissionDraft(submissionDraftId: string) {
-    return appAxios().delete(`submission/draft/${submissionDraftId}`);
+  deleteDraft(draftId: string) {
+    return appAxios().delete(`submission/draft/${draftId}`);
   },
 
   /**
@@ -45,18 +45,18 @@ export default {
   },
 
   /**
-   * @function getSubmissionDraft
+   * @function getDraft
    * @returns {Promise} An axios response
    */
-  getSubmissionDraft(submissionDraftId: string) {
-    return appAxios().get(`submission/draft/${submissionDraftId}`);
+  getDraft(draftId: string) {
+    return appAxios().get(`submission/draft/${draftId}`);
   },
 
   /**
-   * @function getSubmissionDrafts
+   * @function getDrafts
    * @returns {Promise} An axios response
    */
-  getSubmissionDrafts() {
+  getDrafts() {
     return appAxios().get('submission/draft');
   },
 
@@ -96,7 +96,7 @@ export default {
    * @function updateDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(data?: any) {
+  updateDraft(data?: Partial<Draft>) {
     return appAxios().put('submission/draft', data);
   },
 
