@@ -141,6 +141,35 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
+    put:
+      summary: Create an enquiry
+      description: Creates an enquiry and set status to Submitted
+      operationId: putEnquiry
+      tags:
+        - Enquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-CreateEnquiry'
+      responses:
+        '201':
+          description: Enquiry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-CreateEnquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /enquiry/{enquiryId}:
     get:
       summary: Get a specific enquiry
@@ -253,66 +282,6 @@ paths:
                         type: boolean
                         example: true
                   - $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /enquiry/draft:
-    put:
-      summary: Create or update a draft enquiry
-      description: >-
-        Creates or updates an intake and set status to Draft
-        so unfinished/unvalidatd enquiries can be saved
-      operationId: enquiry-createDraft
-      tags:
-        - Enquiry
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-CreateDraftEnquiry'
-      responses:
-        '201':
-          description: Draft enquiry created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-DraftEnquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        '500':
-          description: Server error
-  /enquiry/draft/submit:
-    put:
-      summary: Submit a draft enquiry
-      description: Creates or updates an intake and set status to Submitted
-      operationId: enquiry-updateDraft
-      tags:
-        - Enquiry
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-UpdateDraftEnquiry'
-      responses:
-        '200':
-          description: Draft enquiry updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-DraftEnquiry'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -938,6 +907,8 @@ paths:
           schema:
             type: array
             description: The submission types to filter on
+            items:
+              $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of submissions matching the search criteria
@@ -1107,6 +1078,15 @@ components:
       schema:
         type: boolean
         example: true
+    Query-SubmissionType:
+      in: query
+      name: submissionType
+      description: The type of submission
+      required: false
+      schema:
+        type: string
+        example: Guidance
+        enum: [Guidance, Inapplicable]
   schemas:
     DB-Contact:
       title: DB Contact
@@ -1727,29 +1707,6 @@ components:
           type: boolean
           description: Active status of user
           example: true
-    DraftEnquiry-Basic:
-      type: object
-      properties:
-        enquiryType:
-          type: string
-          description: The type of enquiry
-          example: General enquiry
-        isRelated:
-          type: string
-          description: Is this related to a project
-          example: 'yes'
-        relatedActivityId:
-          type: string
-          description: Activity id of related project
-          example: 699BFA81
-        enquiryDescription:
-          type: string
-          description: User description for enquiry
-          example: This is a description for some enquiry
-        applyForPermitConnect:
-          type: string
-          description: If applied to Permit Connect
-          example: 'yes'
     EmailData:
       type: object
       required:
@@ -1799,22 +1756,41 @@ components:
             type: string
             format: email
           description: Array of recipient email addresses
-    Request-CreateDraftEnquiry:
+    Enquiry-Basic:
+      type: object
+      properties:
+        enquiryType:
+          type: string
+          description: The type of enquiry
+          example: General enquiry
+        isRelated:
+          type: string
+          description: Is this related to a project
+          example: 'yes'
+        relatedActivityId:
+          type: string
+          description: Activity id of related project
+          example: 699BFA81
+        enquiryDescription:
+          type: string
+          description: User description for enquiry
+          example: This is a description for some enquiry
+        applyForPermitConnect:
+          type: string
+          description: If applied to Permit Connect
+          example: 'yes'
+    Request-CreateEnquiry:
       type: object
       required:
         - contacts
         - basic
       properties:
-        activityId:
-          type: string
-          description: Id for the activity
-          example: 2DE67F13
         contacts:
           type: array
           items:
             $ref: '#/components/schemas/DB-Contact'
         basic:
-          $ref: '#/components/schemas/DraftEnquiry-Basic'
+          $ref: '#/components/schemas/Enquiry-Basic'
     Request-Document:
       type: object
       properties:
@@ -2401,19 +2377,6 @@ components:
           description: Any dependencies or things waiting on
           example: Waiting on review
           maxLength: 255
-    Request-UpdateDraftEnquiry:
-      type: object
-      allOf:
-        - type: object
-          required:
-            - enquiryId
-          properties:
-            enquiryId:
-              type: string
-              description: UUID for an enquiry
-              format: uuid
-              example: b76469a3-896c-4435-aa83-b8b87db6f701
-        - $ref: '#/components/schemas/Request-CreateDraftEnquiry'
     Response-BadRequest:
       title: Response Bad Request
       type: object
@@ -2484,7 +2447,7 @@ components:
               type: boolean
               example: true
         - $ref: '#/components/schemas/DB-Enquiry'
-    Response-DraftEnquiry:
+    Response-CreateEnquiry:
       type: object
       required:
         - activityId
@@ -2601,7 +2564,7 @@ components:
             A URI reference that identifies the specific occurrence of the
             problem
     Response-SearchUsers:
-      title: Response for searching users.
+      title: Response for searching users
       type: array
       items:
         allOf:
@@ -2611,6 +2574,8 @@ components:
               groups:
                 type: array
                 description: List of groups (associated roles) for a user
+                items:
+                  type: string
                 example:
                   - NAVIGATOR
     Response-SubmissionCreate:

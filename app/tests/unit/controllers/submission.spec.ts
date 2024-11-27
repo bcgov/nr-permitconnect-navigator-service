@@ -6,11 +6,12 @@ import {
   contactService,
   enquiryService,
   permitService,
+  draftService,
   submissionService
 } from '../../../src/services';
-import type { Permit, Submission } from '../../../src/types';
+import type { Permit, Submission, Draft } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
-import { BasicResponse, Initiative } from '../../../src/utils/enums/application';
+import { AuthType, BasicResponse, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -38,6 +39,7 @@ afterEach(() => {
 });
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
@@ -723,38 +725,14 @@ describe('getSubmissions', () => {
 describe('submitDraft', () => {
   // Mock service calls
   const createPermitSpy = jest.spyOn(permitService, 'createPermit');
-  const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
+  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
   const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
-
-  it('updates submission with the given activity ID', async () => {
-    const req = {
-      body: { activityId: '000000000', submissionId: '11111111' },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
-    upsertContacts.mockResolvedValue();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.submitDraft(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', submissionId: '11111111' });
-  });
 
   it('populates data from body if it exists', async () => {
     const req = {
       body: {
-        activityId: '00000000',
-        submissionId: '11111111',
+        contacts: [{ firstName: 'test', lastName: 'person' }],
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -772,104 +750,53 @@ describe('submitDraft', () => {
     };
     const next = jest.fn();
 
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledWith(
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         isDevelopedByCompanyOrOrg: true,
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
-        submissionId: '11111111',
+        submissionId: expect.stringMatching(uuidv4Pattern),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
         intakeStatus: IntakeStatus.SUBMITTED,
         applicationStatus: ApplicationStatus.NEW
       })
     );
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
   });
 
   it('sets intake status to Submitted', async () => {
     const req = {
-      body: {
-        activityId: '00000000',
-        submissionId: '11111111'
-      },
+      body: {},
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     upsertContacts.mockResolvedValue();
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledWith(
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
+    expect(upsertContacts).toHaveBeenCalledTimes(0);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         intakeStatus: IntakeStatus.SUBMITTED
       })
     );
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('deletes all existing permits before creating new ones', async () => {
-    const now = new Date().toISOString();
-
-    const req = {
-      body: {
-        activityId: '00000000',
-        submissionId: '11111111',
-        appliedPermits: [
-          {
-            permitTypeId: 1,
-            trackingId: '123',
-            status: PermitStatus.APPLIED,
-            statusLastVerified: now
-          }
-        ]
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
-    createPermitSpy.mockResolvedValue({} as Permit);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
-    upsertContacts.mockResolvedValue();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.submitDraft(req as any, res as any, next);
-
-    const deleteOrder = deletePermitsByActivitySpy.mock.invocationCallOrder[0];
-    const createOrder = createPermitSpy.mock.invocationCallOrder[0];
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        permitTypeId: 1,
-        activityId: '00000000',
-        trackingId: '123',
-        status: PermitStatus.APPLIED,
-        statusLastVerified: now
-      })
-    );
-    expect(deleteOrder).toBeLessThan(createOrder);
   });
 
   it('creates permits if they exist', async () => {
@@ -877,8 +804,6 @@ describe('submitDraft', () => {
 
     const req = {
       body: {
-        activityId: '00000000',
-        submissionId: '11111111',
         appliedPermits: [
           {
             permitTypeId: 1,
@@ -905,17 +830,17 @@ describe('submitDraft', () => {
     };
     const next = jest.fn();
 
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
     createPermitSpy.mockResolvedValue({} as Permit);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
     upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.submitDraft(req as any, res as any, next);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
+    expect(upsertContacts).toHaveBeenCalledTimes(0);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(3);
     expect(createPermitSpy).toHaveBeenNthCalledWith(
       1,
@@ -951,37 +876,15 @@ describe('submitDraft', () => {
 
 describe('updateDraft', () => {
   // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
-  const updateSubmissionSpy = jest.spyOn(submissionService, 'updateSubmission');
+  const createDraftSpy = jest.spyOn(draftService, 'createDraft');
+  const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const deletePermitsByActivitySpy = jest.spyOn(permitService, 'deletePermitsByActivity');
 
-  it('updates submission with the given activity ID', async () => {
-    const req = {
-      body: { activityId: '000000000', submissionId: '11111111' },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateDraft(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', submissionId: '11111111' });
-  });
-
-  it('populates data from body if it exists', async () => {
+  it('creates a new draft', async () => {
     const req = {
       body: {
-        activityId: '00000000',
-        submissionId: '11111111',
-        applicant: {},
+        contactFirstName: 'test',
+        contactLastName: 'person',
         basic: {
           isDevelopedByCompanyOrOrg: true
         },
@@ -999,173 +902,63 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledWith(
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createDraftSpy).toHaveBeenCalledTimes(1);
+    expect(createDraftSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        isDevelopedByCompanyOrOrg: true,
-        projectName: 'TheProject',
-        projectLocation: 'Some place',
-        hasAppliedProvincialPermits: true,
-        submissionId: '11111111',
-        activityId: '00000000',
-        submittedAt: expect.stringMatching(isoPattern),
-        intakeStatus: IntakeStatus.DRAFT,
-        applicationStatus: ApplicationStatus.NEW
+        draftId: expect.stringMatching(uuidv4Pattern),
+        activityId: '00000000'
       })
     );
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
   });
 
-  it('sets intake status to Draft', async () => {
+  it('updates draft with the given draftId and activityId', async () => {
     const req = {
       body: {
+        draftId: '11111111',
         activityId: '00000000',
-        submissionId: '11111111',
-        submit: true
+        contactFirstName: 'test',
+        contactLastName: 'person',
+        basic: {
+          isDevelopedByCompanyOrOrg: true
+        },
+        housing: {
+          projectName: 'TheProject'
+        },
+        location: {
+          projectLocation: 'Some place'
+        },
+        permits: {
+          hasAppliedProvincialPermits: true
+        }
       },
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
+    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.updateDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(updateSubmissionSpy).toHaveBeenCalledWith(
+    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
+    expect(updateDraftSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        intakeStatus: IntakeStatus.DRAFT
+        draftId: '11111111'
       })
     );
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('deletes all existing permits before creating new ones', async () => {
-    const now = new Date().toISOString();
-
-    const req = {
-      body: {
-        activityId: '00000000',
-        submissionId: '11111111',
-        appliedPermits: [
-          {
-            permitTypeId: 1,
-            trackingId: '123',
-            status: PermitStatus.APPLIED,
-            statusLastVerified: now
-          }
-        ]
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
-    createPermitSpy.mockResolvedValue({} as Permit);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateDraft(req as any, res as any, next);
-
-    const deleteOrder = deletePermitsByActivitySpy.mock.invocationCallOrder[0];
-    const createOrder = createPermitSpy.mock.invocationCallOrder[0];
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        permitTypeId: 1,
-        activityId: '00000000',
-        trackingId: '123',
-        status: PermitStatus.APPLIED,
-        statusLastVerified: now
-      })
-    );
-    expect(deleteOrder).toBeLessThan(createOrder);
-  });
-
-  it('creates permits if they exist', async () => {
-    const now = new Date().toISOString();
-
-    const req = {
-      body: {
-        activityId: '00000000',
-        submissionId: '11111111',
-        appliedPermits: [
-          {
-            permitTypeId: 1,
-            trackingId: '123',
-            status: PermitStatus.APPLIED,
-            statusLastVerified: now
-          },
-          {
-            permitTypeId: 3,
-            trackingId: '456',
-            status: PermitStatus.APPLIED,
-            statusLastVerified: now
-          }
-        ],
-        investigatePermits: [
-          {
-            permitTypeId: 12,
-            needed: PermitNeeded.UNDER_INVESTIGATION,
-            statusLastVerified: now
-          }
-        ]
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    updateSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
-    createPermitSpy.mockResolvedValue({} as Permit);
-    deletePermitsByActivitySpy.mockResolvedValue(0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateDraft(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(deletePermitsByActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(3);
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        permitTypeId: 1,
-        activityId: '00000000',
-        trackingId: '123',
-        status: PermitStatus.APPLIED,
-        statusLastVerified: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        permitTypeId: 3,
-        activityId: '00000000',
-        trackingId: '456',
-        status: PermitStatus.APPLIED,
-        statusLastVerified: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        permitTypeId: 12,
-        activityId: '00000000',
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastVerified: now
-      })
-    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
   });
 });
 

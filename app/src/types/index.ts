@@ -10,6 +10,7 @@ export type { Contact } from './Contact';
 export type { CurrentAuthorization } from './CurrentAuthorization';
 export type { CurrentContext } from './CurrentContext';
 export type { Document } from './Document';
+export type { Draft } from './Draft';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
 export type { EnquiryIntake } from './EnquiryIntake';

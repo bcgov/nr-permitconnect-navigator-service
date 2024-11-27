@@ -48,22 +48,13 @@ router.delete(
   }
 );
 
-/** Creates or updates an intake and set status to Draft */
+/** Creates an enquiry and set status to Submitted */
 router.put(
-  '/draft',
-  hasAuthorization(Resource.ENQUIRY, Action.CREATE),
-  (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
-    enquiryController.updateDraft(req, res, next);
-  }
-);
-
-/** Creates or updates an intake and set status to Submitted */
-router.put(
-  '/draft/submit',
+  '/',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
   enquiryValidator.createEnquiry,
   (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction): void => {
-    enquiryController.submitDraft(req, res, next);
+    enquiryController.createEnquiry(req, res, next);
   }
 );
 

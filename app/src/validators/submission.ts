@@ -19,14 +19,9 @@ import { BasicResponse } from '../utils/enums/application';
 import { IntakeStatus } from '../utils/enums/housing';
 
 const schema = {
-  createDraft: {
-    body: Joi.object({
-      contact: contacts
-    })
-  },
   createSubmission: {
     body: Joi.object({
-      submissionId: uuidv4.allow(null),
+      draftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
       contacts: contacts,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
@@ -53,6 +48,11 @@ const schema = {
   deleteSubmission: {
     params: Joi.object({
       submissionId: uuidv4.required()
+    })
+  },
+  deleteDraft: {
+    params: Joi.object({
+      draftId: uuidv4.required()
     })
   },
   getStatistics: {
@@ -191,10 +191,10 @@ const schema = {
 };
 
 export default {
-  createDraft: validate(schema.createDraft),
   createSubmission: validate(schema.createSubmission),
   emailConfirmation: validate(schema.emailConfirmation),
   deleteSubmission: validate(schema.deleteSubmission),
+  deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
   searchSubmissions: validate(schema.searchSubmissions),

@@ -4,6 +4,7 @@ import { NIL } from 'uuid';
 
 import {
   documentService,
+  draftService,
   enquiryService,
   noteService,
   permitService,
@@ -108,6 +109,7 @@ export const hasAuthorization = (resource: string, action: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const paramMap = new Map<string, (id: string) => any>([
   ['documentId', documentService.getDocument],
+  ['draftId', draftService.getDraft],
   ['enquiryId', enquiryService.getEnquiry],
   ['noteId', noteService.getNote],
   ['permitId', permitService.getPermit],

@@ -64,14 +64,8 @@ import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, Submission } from '@/types';
-
-// Interfaces
-interface SubmissionForm extends Submission {
-  addressSearch?: string;
-  appliedPermits?: Array<Permit>;
-  investigatePermits?: Array<Permit>;
-}
+import type { Document, Permit, SubmissionIntake } from '@/types';
+import type { GenericObject } from 'vee-validate';
 
 // Types
 type GeocoderEntry = {
@@ -79,10 +73,19 @@ type GeocoderEntry = {
   properties: { [key: string]: string };
 };
 
+type SubmissionForm = {
+  addressSearch?: string;
+} & SubmissionIntake;
+
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
+const {
+  activityId = undefined,
+  submissionId = undefined,
+  draftId = undefined
+} = defineProps<{
   activityId?: string;
   submissionId?: string;
+  draftId?: string;
 }>();
 
 // Constants
@@ -139,8 +142,8 @@ const getBackButtonConfig = computed(() => {
   }
 });
 
-function confirmSubmit(data: any) {
-  const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
+function confirmSubmit(data: GenericObject) {
+  const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
     message: 'Are you sure you wish to submit this form?',
@@ -154,8 +157,8 @@ function confirmSubmit(data: any) {
 async function generateActivityId() {
   try {
     const response = await submissionService.updateDraft({});
-    if (response.data?.activityId && response.data?.submissionId) {
-      syncFormAndRoute(response.data.activityId, response.data.submissionId);
+    if (response.data?.activityId && response.data?.draftId) {
+      syncFormAndRoute(response.data.activityId, response.data.draftId);
       return response.data.activityId;
     } else {
       return undefined;
@@ -173,30 +176,35 @@ const getAddressSearchLabel = (e: GeocoderEntry) => {
 function handleProjectLocationClick() {
   let location = formRef?.value?.values?.location;
   if (location?.latitude || location?.longitude) {
-    formRef?.value?.setFieldValue('location.latitude', null);
-    formRef?.value?.setFieldValue('location.longitude', null);
-    formRef.value?.setFieldValue('location.streetAddress', null);
-    formRef.value?.setFieldValue('location.locality', null);
-    formRef.value?.setFieldValue('location.province', null);
+    const resetFields = [
+      'location.latitude',
+      'location.longitude',
+      'location.streetAddress',
+      'location.locality',
+      'location.province'
+    ];
+    resetFields.forEach((x) => formRef?.value?.setFieldValue(x, null));
   }
 }
 
-async function handleEnquirySubmit(values: any, relatedActivityId: string) {
+async function onAssistanceRequest(values: GenericObject) {
   try {
+    const draft = await onSaveDraft(values, false, false);
+
     const formattedData = Object.assign(
       {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
           isRelated: BasicResponse.YES,
-          relatedActivityId: relatedActivityId,
+          relatedActivityId: draft.activityId,
           enquiryType: SubmissionType.ASSISTANCE
         }
       },
       { contacts: values?.[IntakeFormCategory.CONTACTS] }
     );
 
-    const enquiryResponse = await enquiryService.submitDraft(formattedData);
+    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
@@ -292,50 +300,29 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(
-  data: any,
-  isAutoSave: boolean = false,
-  showToast: boolean = true,
-  assistanceRequired: boolean = false
-) {
+async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
   editable.value = false;
 
   autoSaveRef.value?.stopAutoSave();
 
-  // Cleanup unneeded data to be saved to draft
-  const draftData = omit(data as SubmissionForm, ['addressSearch']);
-
-  // Remove empty permits
-  if (Array.isArray(draftData.appliedPermits)) {
-    draftData.appliedPermits = draftData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
-  if (Array.isArray(draftData.investigatePermits)) {
-    draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
-
   let response;
   try {
-    response = await submissionService.updateDraft(draftData);
+    response = await submissionService.updateDraft({
+      draftId: draftId,
+      activityId: data.activityId,
+      data: data
+    });
 
-    if (response.data.activityId && response.data.submissionId) {
-      syncFormAndRoute(response.data.activityId, response.data.submissionId);
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
-    }
-    if (isAutoSave) {
-      if (showToast) toast.success('Draft autosaved');
-    } else {
-      if (showToast) toast.success('Draft saved');
-    }
+    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
+
+    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
   }
 
-  if (assistanceRequired && response?.data?.activityId) {
-    handleEnquirySubmit(draftData, response.data.activityId);
-  }
+  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
 }
 
 function onStepChange(stepNumber: number) {
@@ -350,7 +337,32 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const response = await submissionService.submitDraft(data);
+    // Convert contact fields into contacts array object then remove form keys from data
+    const submissionData = omit(
+      {
+        ...data,
+        contacts: [
+          {
+            firstName: data.contactFirstName,
+            lastName: data.contactLastName,
+            phoneNumber: data.contactPhoneNumber,
+            email: data.contactEmail,
+            contactApplicantRelationship: data.contactApplicantRelationship,
+            contactPreference: data.contactPreference
+          }
+        ]
+      },
+      [
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    const response = await submissionService.submitDraft({ ...submissionData, draftId });
 
     if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
@@ -387,7 +399,7 @@ async function emailConfirmation(activityId: string, submissionId: string) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    subject: 'Confirmation of Submission',
     bodyType: 'html',
     body: body
   };
@@ -403,23 +415,25 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function syncFormAndRoute(activityId: string, submissionId: string) {
-  formRef.value?.resetForm({
-    values: {
-      ...formRef.value?.values,
-      activityId: activityId,
-      submissionId: submissionId
-    }
-  });
+function syncFormAndRoute(activityId: string, draftId: string) {
+  if (draftId) {
+    // Update route query for refreshing
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSION_INTAKE,
+      query: {
+        draftId: draftId
+      }
+    });
+  }
 
-  // Update route query for refreshing
-  router.replace({
-    name: RouteName.HOUSING_SUBMISSION_INTAKE,
-    query: {
-      activityId: activityId,
-      submissionId: submissionId
-    }
-  });
+  if (activityId) {
+    formRef.value?.resetForm({
+      values: {
+        ...formRef.value?.values,
+        activityId: activityId
+      }
+    });
+  }
 }
 
 onBeforeMount(async () => {
@@ -428,69 +442,80 @@ onBeforeMount(async () => {
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
-    if (submissionId && activityId) {
-      response = (await submissionService.getSubmission(submissionId)).data;
-      permits = (await permitService.listPermits({ activityId })).data;
-      documents = (await documentService.listDocuments(activityId)).data;
-      submissionStore.setDocuments(documents);
-      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+    if (draftId) {
+      response = (await submissionService.getDraft(draftId)).data;
+      initialFormValues.value = { ...response.data, activityId: response.activityId };
+    } else {
+      if (submissionId && activityId) {
+        response = (await submissionService.getSubmission(submissionId)).data;
+        permits = (await permitService.listPermits({ activityId: activityId })).data;
+        documents = (await documentService.listDocuments(activityId)).data;
+        submissionStore.setDocuments(documents);
+      }
+
+      initialFormValues.value = {
+        activityId: response?.activityId,
+        submissionId: response?.submissionId,
+        contactFirstName: response?.contacts[0].firstName,
+        contactLastName: response?.contacts[0].lastName,
+        contactPhoneNumber: response?.contacts[0].phoneNumber,
+        contactEmail: response?.contacts[0].email,
+        contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
+        contactPreference: response?.contacts[0].contactPreference,
+        basic: {
+          consentToFeedback: response?.consentToFeedback,
+          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          isDevelopedInBC: response?.isDevelopedInBC,
+          registeredName: response?.companyNameRegistered
+        },
+        housing: {
+          projectName: response?.projectName,
+          projectDescription: response?.projectDescription,
+          singleFamilySelected: !!response?.singleFamilyUnits,
+          multiFamilySelected: !!response?.multiFamilyUnits,
+          singleFamilyUnits: response?.singleFamilyUnits,
+          multiFamilyUnits: response?.multiFamilyUnits,
+          otherSelected: !!response?.otherUnits,
+          otherUnitsDescription: response?.otherUnitsDescription,
+          otherUnits: response?.otherUnits,
+          hasRentalUnits: response?.hasRentalUnits,
+          rentalUnits: response?.rentalUnits,
+          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
+          indigenousDescription: response?.indigenousDescription,
+          financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
+          nonProfitDescription: response?.nonProfitDescription,
+          financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
+          housingCoopDescription: response?.housingCoopDescription
+        },
+        location: {
+          naturalDisaster: response?.naturalDisaster,
+          projectLocation: response?.projectLocation,
+          streetAddress: response?.streetAddress,
+          locality: response?.locality,
+          province: response?.province,
+          latitude: response?.latitude,
+          longitude: response?.longitude,
+          ltsaPIDLookup: response?.locationPIDs,
+          geomarkUrl: response?.geomarkUrl,
+          projectLocationDescription: response?.projectLocationDescription
+        },
+        appliedPermits: permits
+          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .map((x: Permit) => ({
+            ...x,
+            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          })),
+        permits: {
+          hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
+        },
+        investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
+      };
     }
 
-    initialFormValues.value = {
-      activityId: response?.activityId,
-      submissionId: response?.submissionId,
-      contacts: response?.contacts,
-      basic: {
-        consentToFeedback: response?.consentToFeedback,
-        isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
-        isDevelopedInBC: response?.isDevelopedInBC,
-        registeredName: response?.companyNameRegistered
-      },
-      housing: {
-        projectName: response?.projectName,
-        projectDescription: response?.projectDescription,
-        singleFamilySelected: !!response?.singleFamilyUnits,
-        multiFamilySelected: !!response?.multiFamilyUnits,
-        singleFamilyUnits: response?.singleFamilyUnits,
-        multiFamilyUnits: response?.multiFamilyUnits,
-        otherSelected: !!response?.otherUnits,
-        otherUnitsDescription: response?.otherUnitsDescription,
-        otherUnits: response?.otherUnits,
-        hasRentalUnits: response?.hasRentalUnits,
-        rentalUnits: response?.rentalUnits,
-        financiallySupportedBC: response?.financiallySupportedBC,
-        financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
-        indigenousDescription: response?.indigenousDescription,
-        financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
-        nonProfitDescription: response?.nonProfitDescription,
-        financiallySupportedHousingCoop: response?.financiallySupportedHousingCoop,
-        housingCoopDescription: response?.housingCoopDescription
-      },
-      location: {
-        naturalDisaster: response?.naturalDisaster,
-        projectLocation: response?.projectLocation,
-        streetAddress: response?.streetAddress,
-        locality: response?.locality,
-        province: response?.province,
-        latitude: response?.latitude,
-        longitude: response?.longitude,
-        ltsaPIDLookup: response?.locationPIDs,
-        geomarkUrl: response?.geomarkUrl,
-        projectLocationDescription: response?.projectLocationDescription
-      },
-      appliedPermits: permits
-        .filter((x: Permit) => x.status === PermitStatus.APPLIED)
-        .map((x: Permit) => ({
-          ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
-        })),
-      permits: {
-        hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
-      },
-      investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
-    };
-
     await nextTick();
+
+    editable.value = response.intakeStatus !== IntakeStatus.SUBMITTED;
 
     // Move map pin
     onLatLongInputClick();
@@ -531,15 +556,15 @@ onBeforeMount(async () => {
       />
 
       <SubmissionAssistance
-        v-if="editable && values?.applicant"
+        v-if="editable && values?.contacts"
         :form-errors="errors"
         :form-values="values"
-        @on-submit-assistance="onSaveDraft(values, true, false, true)"
+        @on-submit-assistance="onAssistanceRequest(values)"
       />
 
       <input
         type="hidden"
-        name="submissionId"
+        name="draftId"
       />
 
       <input
@@ -591,21 +616,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.firstName`"
+                    :name="`contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.lastName`"
+                    :name="`contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    :name="`contacts.${0}.phoneNumber`"
+                    :name="`contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -613,14 +638,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    :name="`contacts.${0}.email`"
+                    :name="`contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts.${0}.contactApplicantRelationship`"
+                    :name="`contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -628,7 +653,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contacts.${0}.contactPreference`"
+                    :name="`contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"

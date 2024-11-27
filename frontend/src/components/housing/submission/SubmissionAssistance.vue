@@ -12,6 +12,9 @@ const { formErrors, formValues } = defineProps<{
   formValues: { [key: string]: string };
 }>();
 
+// Emits
+const emit = defineEmits(['onSubmitAssistance']);
+
 // State
 const showTab: Ref<boolean> = ref(true);
 
@@ -52,8 +55,6 @@ const confirmSubmit = () => {
     }
   });
 };
-
-const emit = defineEmits(['onSubmitAssistance']);
 </script>
 
 <template>

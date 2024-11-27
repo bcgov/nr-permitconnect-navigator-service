@@ -12,7 +12,7 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { IStamps } from '../interfaces/IStamps';
 import type { Submission, SubmissionSearchParameters } from '../types';
 
-/**sa
+/**
  * @function chefsAxios
  * Returns an Axios instance for the CHEFS API
  * @param {AxiosRequestConfig} options Axios request config options
@@ -199,7 +199,7 @@ const service = {
   /**
    * @function getSubmission
    * Gets a specific submission from the PCNS database
-   * @param {string} activityId PCNS Activity ID
+   * @param {string} submissionId PCNS Submission ID
    * @returns {Promise<Submission | null>} The result of running the findFirst operation
    */
   getSubmission: async (submissionId: string) => {
@@ -227,7 +227,7 @@ const service = {
     }
   },
 
-  /*
+  /**
    * @function getSubmissions
    * Gets a list of submissions
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation

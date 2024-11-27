@@ -35,6 +35,7 @@ model activity {
   initiative       initiative         @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
   activity_contact activity_contact[]
   document         document[]
+  draft            draft[]
   enquiry          enquiry[]
   note             note[]
   permit           permit[]
@@ -480,6 +481,32 @@ model subject_group {
 
   @@id([sub, group_id])
   @@schema("yars")
+}
+
+model draft {
+  draft_id                                String     @id @db.Uuid
+  activity_id                             String
+  draft_code                              String
+  data                                    Json       @db.Json
+  created_by                              String?    @default("00000000-0000-0000-0000-000000000000")
+  created_at                              DateTime?  @default(now()) @db.Timestamptz(6)
+  updated_by                              String?
+  updated_at                              DateTime?  @db.Timestamptz(6)
+  activity                                activity   @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "draft_activity_id_foreign")
+  draft_code_draft_draft_codeTodraft_code draft_code @relation("draft_draft_codeTodraft_code", fields: [draft_code], references: [draft_code], onDelete: Cascade, map: "draft_draft_code_foreign")
+
+  @@schema("public")
+}
+
+model draft_code {
+  draft_code                         String    @id
+  created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at                         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by                         String?
+  updated_at                         DateTime? @db.Timestamptz(6)
+  draft_draft_draft_codeTodraft_code draft[]   @relation("draft_draft_codeTodraft_code")
+
+  @@schema("public")
 }
 
 view group_role_policy_vw {

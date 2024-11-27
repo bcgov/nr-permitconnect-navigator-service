@@ -8,7 +8,14 @@ import { Action, Resource } from '../../utils/enums/application';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Email, StatisticsFilters, Submission, SubmissionIntake, SubmissionSearchParameters } from '../../types';
+import type {
+  Draft,
+  Email,
+  StatisticsFilters,
+  Submission,
+  SubmissionIntake,
+  SubmissionSearchParameters
+} from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -52,11 +59,29 @@ router.get(
   }
 );
 
+/** Gets a list of submission drafts */
+router.get(
+  '/draft/:draftId',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
+    submissionController.getDraft(req, res, next);
+  }
+);
+
+/** Gets a list of submission drafts */
+router.get(
+  '/draft',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getDrafts(req, res, next);
+  }
+);
+
 /** Creates or updates an intake and set status to Draft */
 router.put(
   '/draft',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
-  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, Draft>, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
   }
 );
@@ -99,6 +124,17 @@ router.delete(
   submissionValidator.deleteSubmission,
   (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
     submissionController.deleteSubmission(req, res, next);
+  }
+);
+
+/** Hard deletes a submission draft */
+router.delete(
+  '/draft/:draftId',
+  hasAuthorization(Resource.SUBMISSION, Action.DELETE),
+  hasAccess('draftId'),
+  submissionValidator.deleteDraft,
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
+    submissionController.deleteDraft(req, res, next);
   }
 );
 
