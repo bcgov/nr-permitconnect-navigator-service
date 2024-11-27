@@ -91,14 +91,6 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
     .sort(permitBusinessSortFcn);
 });
 
-const permitsUnderinvestigation: ComputedRef<Array<CombinedPermit>> = computed(() => {
-  return permitFilter({
-    permitNeeded: PermitNeeded.UNDER_INVESTIGATION,
-    permits: getPermits.value,
-    permitTypes: getPermitTypes.value
-  });
-});
-
 // Actions
 const router = useRouter();
 const toast = useToast();
@@ -240,19 +232,12 @@ onMounted(async () => {
     </div>
     <div><h3 class="mb-5">Required permits</h3></div>
     <div
-      v-if="permitsUnderinvestigation.length && !permitsNeeded.length"
+      v-if="!permitsNeeded?.length"
       class="empty-block p-5 mb-2"
     >
-      We are investigating the permits required for this project.
+      We will update the necessary permits here as the project progresses. You may see this message while we are
+      investigating or if no application is needed at this time.
     </div>
-    <div
-      v-if="!permitsUnderinvestigation.length && !permitsNeeded.length"
-      class="empty-block p-5 mb-2"
-    >
-      All the necessary permits have been submitted at this time. If additional permits are required as the project
-      progresses, we will update them here.
-    </div>
-
     <Card
       v-for="permit in permitsNeeded"
       :key="permit.permitId"
@@ -286,12 +271,12 @@ onMounted(async () => {
       v-if="!permitsSubmitted.length"
       class="empty-block p-5"
     >
-      You will see your permit applications here once submitted.
+      We will update your submitted applications here as the project progresses.
     </div>
     <Card
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
-      class="permit-card--hover mb-2"
+      class="permit-card--hover mb-3"
       @click="
         () => {
           permitModalVisible = true;
