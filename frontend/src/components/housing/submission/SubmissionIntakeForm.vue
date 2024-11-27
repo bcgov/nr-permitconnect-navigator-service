@@ -77,6 +77,12 @@ type SubmissionForm = {
   addressSearch?: string;
 } & SubmissionIntake;
 
+type PinUpdateEvent = {
+  longitude: number;
+  latitude: number;
+  address: string;
+};
+
 // Props
 const {
   activityId = undefined,
@@ -108,9 +114,11 @@ const assistanceAssignedEnquiryId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const geoJSON: Ref<string | undefined> = ref(undefined);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
+const locationPIDs: Ref<string | undefined> = ref(undefined);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -337,6 +345,9 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
+    // Replace PIDs with the values from the map if not provided
+    // data.location.ltsaPIDLookup = data.location.ltsaPIDLookup ?? locationPIDs.value;
+
     // Convert contact fields into contacts array object then remove form keys from data
     const submissionData = omit(
       {
@@ -526,6 +537,20 @@ onBeforeMount(async () => {
   // Clearing the document store on page load
   submissionStore.setDocuments([]);
 });
+
+function onPolygonUpdate(data: any) {
+  formRef.value?.setFieldValue('location.geoJSON', data.geoJSON);
+  geoJSON.value = data.geoJSON;
+  // locationPIDs.value = data.PID;
+}
+function onPinUpdate(pinUpdateEvent: PinUpdateEvent) {
+  const addressSplit = pinUpdateEvent.address.split(',');
+  formRef.value?.setFieldValue('location.streetAddress', addressSplit[0]);
+  formRef.value?.setFieldValue('location.locality', addressSplit[1]);
+  formRef.value?.setFieldValue('location.province', addressSplit[2]);
+  formRef.value?.setFieldValue('location.latitude', pinUpdateEvent.latitude);
+  formRef.value?.setFieldValue('location.longitude', pinUpdateEvent.longitude);
+}
 </script>
 
 <template>
@@ -1303,11 +1328,69 @@ onBeforeMount(async () => {
                   </div>
                 </div>
                 <Map
+                  v-if="values.location?.projectLocation !== ProjectLocation.PIN_OR_DRAW"
                   ref="mapRef"
                   :disabled="!editable"
                   :latitude="mapLatitude"
                   :longitude="mapLongitude"
                 />
+                <div v-if="values.location?.projectLocation === ProjectLocation.PIN_OR_DRAW">
+                  <Map
+                    ref="mapRef"
+                    :pin-or-draw="true"
+                    :disabled="!editable"
+                    :latitude="mapLatitude"
+                    :longitude="mapLongitude"
+                    @map:polygon-updated="onPolygonUpdate"
+                    @map:pin-updated="onPinUpdate"
+                  />
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="grid nested-grid">
+                        <InputText
+                          class="col-4"
+                          name="location.streetAddress"
+                          disabled
+                          placeholder="Street address"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.locality"
+                          disabled
+                          placeholder="Locality"
+                        />
+                        <InputText
+                          class="col-4"
+                          name="location.province"
+                          disabled
+                          placeholder="Province"
+                        />
+                        <InputNumber
+                          class="col-4"
+                          name="location.latitude"
+                          disabled
+                          :help-text="
+                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                              ? 'Provide a coordinate between 48 and 60'
+                              : ''
+                          "
+                          placeholder="Latitude"
+                        />
+                        <InputNumber
+                          class="col-4"
+                          name="location.longitude"
+                          disabled
+                          :help-text="
+                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                              ? 'Provide a coordinate between -114 and -139'
+                              : ''
+                          "
+                          placeholder="Longitude"
+                        />
+                      </div>
+                    </template>
+                  </Card>
+                </div>
               </template>
             </Card>
             <Card>

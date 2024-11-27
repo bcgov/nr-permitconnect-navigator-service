@@ -10,8 +10,11 @@ export type Submission = {
   submittedAt: string;
   submittedBy: string;
   locationPIDs: string | null;
+  locationPIDsAuto: string | null;
   companyNameRegistered: string | null;
   consentToFeedback: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  geoJSON: any;
   projectName: string | null;
   projectDescription: string | null;
   singleFamilyUnits: string | null;
