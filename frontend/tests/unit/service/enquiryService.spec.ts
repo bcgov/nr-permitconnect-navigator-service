@@ -14,19 +14,23 @@ const testEnquiry = {
   assignedUserId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
   submittedAt: '2024-06-12T07:00:00.000Z',
   submittedBy: 'WILSWONG',
-  contactFirstName: 'enquiryDraft1',
-  contactLastName: 'enquiryDraft1',
-  contactPhoneNumber: '(123) 456-7890',
-  contactEmail: 'test@test.weg',
-  contactPreference: 'Phone call',
-  contactApplicantRelationship: 'Owner',
   isRelated: 'Yes',
   relatedActivityId: 'D95F1DE6',
   enquiryDescription: 'D95F1DE6 Test enquiry info',
   applyForPermitConnect: null,
   intakeStatus: 'Submitted',
   updatedAt: '2024-06-13T00:00:00.000Z',
-  submissionType: 'General enquiry'
+  submissionType: 'General enquiry',
+  contacts: [
+    {
+      firstName: 'enquiryDraft1',
+      lastName: 'enquiryDraft1',
+      phoneNumber: '(123) 456-7890',
+      email: 'test@test.weg',
+      contactPreference: 'Phone call',
+      contactApplicantRelationship: 'Owner'
+    }
+  ]
 };
 
 const getSpy = vi.fn();
@@ -45,13 +49,6 @@ beforeEach(() => {
 });
 
 describe('enquiryService', () => {
-  it('calls createDraft with correct data', async () => {
-    await enquiryService.createDraft(testEnquiry);
-
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('enquiry/draft', testEnquiry);
-  });
-
   it('calls deleteEnquiry with correct data', async () => {
     await enquiryService.deleteEnquiry(testEnquiry.enquiryId);
 
@@ -66,11 +63,11 @@ describe('enquiryService', () => {
     expect(getSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
   });
 
-  it('calls updateDraft with correct data', async () => {
-    await enquiryService.updateDraft(testEnquiry.enquiryId, testEnquiry);
+  it('calls createEnquiry with correct data', async () => {
+    await enquiryService.createEnquiry(testEnquiry);
 
     expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(`enquiry/draft/${testEnquiry.enquiryId}`, testEnquiry);
+    expect(putSpy).toHaveBeenCalledWith('enquiry', testEnquiry);
   });
 
   it('calls updateEnquiry with correct data', async () => {

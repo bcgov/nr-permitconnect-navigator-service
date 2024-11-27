@@ -9,6 +9,8 @@ import { AuthType, Initiative } from '../utils/enums/application';
 import type { NextFunction, Request, Response } from 'express';
 import type { CurrentContext } from '../types';
 
+// TODO: Implement a 401 for unrecognized users.
+
 /**
  * @function _spkiWrapper
  * Wraps an SPKI key with PEM header and footer

@@ -2,11 +2,11 @@ import { appAxios } from './interceptors';
 
 export default {
   /**
-   * @function createDraft
+   * @function createEnquiry
    * @returns {Promise} An axios response
    */
-  createDraft(data?: any) {
-    return appAxios().put('enquiry/draft', data);
+  createEnquiry(data?: any) {
+    return appAxios().put('enquiry', data);
   },
 
   /**
@@ -41,14 +41,6 @@ export default {
    */
   async listRelatedEnquiries(activityId: string) {
     return appAxios().get(`enquiry/list/${activityId}`);
-  },
-
-  /**
-   * @function updateDraft
-   * @returns {Promise} An axios response
-   */
-  updateDraft(enquiryId: string, data?: any) {
-    return appAxios().put(`enquiry/draft/${enquiryId}`, data);
   },
 
   /**

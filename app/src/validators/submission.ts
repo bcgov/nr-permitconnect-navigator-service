@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { applicant } from './applicant';
 import { appliedPermit } from './appliedPermit';
 import { basicIntake } from './basic';
 import { activityId, email, uuidv4 } from './common';
+import { contacts } from './contacts';
 
 import { housing } from './housing';
 import { permits } from './permits';
@@ -19,17 +19,15 @@ import { BasicResponse } from '../utils/enums/application';
 import { IntakeStatus } from '../utils/enums/housing';
 
 const schema = {
-  createDraft: {
-    body: Joi.object({
-      applicant: applicant
-    })
-  },
   createSubmission: {
     body: Joi.object({
-      applicant: applicant,
+      draftId: uuidv4.allow(null),
+      activityId: Joi.string().min(8).max(8).allow(null),
+      contacts: contacts,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
       housing: housing,
+      location: Joi.any(),
       investigatePermits: Joi.array()
         .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
         .allow(null),
@@ -50,6 +48,11 @@ const schema = {
   deleteSubmission: {
     params: Joi.object({
       submissionId: uuidv4.required()
+    })
+  },
+  deleteDraft: {
+    params: Joi.object({
+      draftId: uuidv4.required()
     })
   },
   getStatistics: {
@@ -166,11 +169,7 @@ const schema = {
         .required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
       addedToATS: Joi.boolean().required(),
-      atsClientNumber: Joi.when('addedToATS', {
-        is: true,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
+      atsClientNumber: Joi.string().allow(null).max(255),
       ltsaCompleted: Joi.boolean().required(),
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),
@@ -182,8 +181,9 @@ const schema = {
         otherwise: uuidv4.allow(null)
       }),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      waitingOn: Joi.string().allow(null).max(255)
-    }).concat(applicant),
+      waitingOn: Joi.string().allow(null).max(255),
+      contacts: contacts
+    }),
     params: Joi.object({
       submissionId: uuidv4.required()
     })
@@ -191,10 +191,10 @@ const schema = {
 };
 
 export default {
-  createDraft: validate(schema.createDraft),
   createSubmission: validate(schema.createSubmission),
   emailConfirmation: validate(schema.emailConfirmation),
   deleteSubmission: validate(schema.deleteSubmission),
+  deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
   getSubmission: validate(schema.getSubmission),
   searchSubmissions: validate(schema.searchSubmissions),

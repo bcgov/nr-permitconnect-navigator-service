@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useField } from 'vee-validate';
 
 import { InputMask } from '@/lib/primevue';
@@ -14,6 +15,15 @@ const { label, name, mask, placeholder, disabled, bold } = defineProps<{
 }>();
 
 const { errorMessage, value } = useField<string>(name);
+
+const normalizedValue = computed({
+  get: () => {
+    return value.value === '' ? undefined : value.value;
+  },
+  set: (val) => {
+    value.value = val === '' || val === undefined ? (undefined as unknown as string) : val;
+  }
+});
 </script>
 
 <template>
@@ -25,7 +35,7 @@ const { errorMessage, value } = useField<string>(name);
     {{ label }}
   </label>
   <InputMask
-    v-model="value"
+    v-model="normalizedValue"
     :aria-describedby="`${name}-help`"
     :aria-labelledby="`${name}-label`"
     :name="name"

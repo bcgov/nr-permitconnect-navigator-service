@@ -13,7 +13,8 @@ import spreadsheet from '@/assets/images/spreadsheet.svg';
 
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import { Card } from '@/lib/primevue';
-import { FileCategory } from '@/utils/enums/application';
+import { useAuthZStore } from '@/store';
+import { Action, FileCategory, Initiative, Resource } from '@/utils/enums/application';
 import { formatDateLong } from '@/utils/formatters';
 import { getFileCategory } from '@/utils/utils';
 
@@ -21,8 +22,13 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-const { selectable = false, selected = false } = defineProps<{
+const {
+  editable = true,
+  selectable = false,
+  selected = false
+} = defineProps<{
   document: Document;
+  editable?: boolean;
   selectable?: boolean;
   selected?: boolean;
 }>();
@@ -58,7 +64,7 @@ const displayIcon = (mimeType = '') => {
 };
 
 function onClick() {
-  if (selectable) {
+  if (selectable && useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ)) {
     isSelected.value = !isSelected.value;
     emit('document:clicked', { document: document, selected: isSelected.value });
   }
@@ -100,7 +106,10 @@ function onClick() {
         <h6 class="col-4 text-left mt-0 mb-0 pl-0 inline-block">
           {{ filesize(document.filesize) }}
         </h6>
-        <DeleteDocument :document="document" />
+        <DeleteDocument
+          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+          :document="document"
+        />
       </div>
     </template>
   </Card>

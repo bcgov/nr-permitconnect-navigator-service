@@ -9,13 +9,17 @@ export const basicIntake = Joi.object({
   isDevelopedByCompanyOrOrg: Joi.string()
     .required()
     .valid(...YES_NO_LIST),
-  isDevelopedInBC: Joi.string()
-    .required()
-    .valid(...YES_NO_LIST),
-  registeredName: Joi.when('isDevelopedInBC', {
+  isDevelopedInBC: Joi.when('isDevelopedByCompanyOrOrg', {
     is: BasicResponse.YES,
+    then: Joi.string()
+      .required()
+      .valid(...YES_NO_LIST),
+    otherwise: Joi.string().allow(null)
+  }),
+  registeredName: Joi.when('isDevelopedInBC', {
+    is: Joi.valid(BasicResponse.YES, BasicResponse.NO),
     then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.forbidden()
+    otherwise: Joi.string().allow(null)
   })
 });
 

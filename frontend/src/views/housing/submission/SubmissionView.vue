@@ -16,11 +16,14 @@ import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
+import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Note } from '@/types';
+import type { Document, Note } from '@/types';
 
 // Props
 const {
@@ -95,6 +98,10 @@ const filteredDocuments = computed(() => {
   return tempDocuments;
 });
 
+const isCompleted = computed(() => {
+  return getSubmission.value?.applicationStatus === ApplicationStatus.COMPLETED;
+});
+
 const onAddNote = (note: Note) => submissionStore.addNote(note, true);
 
 const onDeleteNote = (note: Note) => submissionStore.removeNote(note);
@@ -111,11 +118,15 @@ onMounted(async () => {
       submissionService.getSubmission(submissionId),
       documentService.listDocuments(activityId),
       noteService.listNotes(activityId),
-      permitService.listPermits(activityId),
+      permitService.listPermits({ activityId, includeNotes: true }),
       permitService.getPermitTypes(),
       enquiryService.listRelatedEnquiries(activityId)
     ])
   ).map((r) => r.data);
+
+  documents.forEach((d: Document) => {
+    d.extension = getFilenameAndExtension(d.filename).extension;
+  });
 
   submissionStore.setSubmission(submission);
   submissionStore.setDocuments(documents);
@@ -151,17 +162,29 @@ onMounted(async () => {
     >
       {{ getSubmission.activityId }}
     </span>
+    <span
+      v-if="isCompleted"
+      class="ml-0"
+    >
+      (Completed)
+    </span>
   </h1>
 
   <TabView v-model:activeIndex="activeTab">
     <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
-        <SubmissionForm :submission="getSubmission" />
+        <SubmissionForm
+          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
+          :submission="getSubmission"
+        />
       </span>
     </TabPanel>
     <TabPanel header="Files">
       <div class="mb-3 border-dashed file-upload border-round-md">
-        <FileUpload :activity-id="activityId" />
+        <FileUpload
+          :activity-id="activityId"
+          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+        />
       </div>
       <div class="flex flex-row justify-content-between pb-3">
         <div class="flex align-items-center">
@@ -240,7 +263,7 @@ onMounted(async () => {
             class="w-6rem"
           />
           <Column
-            field="mimeType"
+            field="extension"
             sortable
             header="Type"
             class="w-10rem"
@@ -258,6 +281,7 @@ onMounted(async () => {
             >
               <DocumentCard
                 :document="document"
+                :editable="!isCompleted"
                 class="hover-hand hover-shadow"
                 @click="documentService.downloadDocument(document.documentId, document.filename)"
               />
@@ -280,7 +304,12 @@ onMounted(async () => {
           <template #body="{ data }">
             <a
               href="#"
-              @click="documentService.downloadDocument(data.documentId, data.filename)"
+              @click="
+                () => {
+                  if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
+                    documentService.downloadDocument(data.documentId, data.filename);
+                }
+              "
             >
               {{ data.filename }}
             </a>
@@ -305,7 +334,7 @@ onMounted(async () => {
           </template>
         </Column>
         <Column
-          field="mimeType"
+          field="extension"
           header="Type"
           sortable
         />
@@ -322,7 +351,10 @@ onMounted(async () => {
           </template>
           <template #body="{ data }">
             <div class="flex justify-content-center">
-              <DeleteDocument :document="data" />
+              <DeleteDocument
+                :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                :document="data"
+              />
             </div>
           </template>
         </Column>
@@ -336,6 +368,7 @@ onMounted(async () => {
           </div>
           <Button
             aria-label="Add permit"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
             @click="permitModalVisible = true"
           >
             <font-awesome-icon
@@ -351,7 +384,10 @@ onMounted(async () => {
           :index="index"
           class="col-12"
         >
-          <PermitCard :permit="permit" />
+          <PermitCard
+            :editable="!isCompleted"
+            :permit="permit"
+          />
         </div>
 
         <PermitModal
@@ -367,6 +403,7 @@ onMounted(async () => {
         </div>
         <Button
           aria-label="Add note"
+          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon
@@ -383,6 +420,7 @@ onMounted(async () => {
         class="col-12"
       >
         <NoteCard
+          :editable="!isCompleted"
           :note="note"
           @delete-note="onDeleteNote"
           @update-note="onUpdateNote"
@@ -400,6 +438,7 @@ onMounted(async () => {
       <Roadmap
         v-if="!loading"
         :activity-id="activityId"
+        :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
       />
     </TabPanel>
     <TabPanel header="Related enquiries">

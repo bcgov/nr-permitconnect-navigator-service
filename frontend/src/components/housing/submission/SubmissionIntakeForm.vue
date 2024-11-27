@@ -13,6 +13,7 @@ import {
   Calendar,
   Checkbox,
   Dropdown,
+  FormAutosave,
   FormNavigationGuard,
   InputMask,
   InputNumber,
@@ -25,7 +26,6 @@ import {
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import IntakeAssistanceConfirmation from './IntakeAssistanceConfirmation.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
-import SubmissionIntakeConfirmation from '@/components/housing/submission/SubmissionIntakeConfirmation.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
@@ -39,7 +39,6 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { useAutoSave } from '@/composables/formAutoSave';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -65,14 +64,8 @@ import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, Submission } from '@/types';
-
-// Interfaces
-interface SubmissionForm extends Submission {
-  addressSearch?: string;
-  appliedPermits?: Array<Permit>;
-  investigatePermits?: Array<Permit>;
-}
+import type { Document, Permit, SubmissionIntake } from '@/types';
+import type { GenericObject } from 'vee-validate';
 
 // Types
 type GeocoderEntry = {
@@ -80,10 +73,19 @@ type GeocoderEntry = {
   properties: { [key: string]: string };
 };
 
+type SubmissionForm = {
+  addressSearch?: string;
+} & SubmissionIntake;
+
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
+const {
+  activityId = undefined,
+  submissionId = undefined,
+  draftId = undefined
+} = defineProps<{
   activityId?: string;
   submissionId?: string;
+  draftId?: string;
 }>();
 
 // Constants
@@ -102,26 +104,22 @@ const activeStep: Ref<number> = ref(0);
 const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
+const assistanceAssignedEnquiryId: Ref<string | undefined> = ref(undefined);
+const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
-const initialFormValues: Ref<undefined | object> = ref(undefined);
-const loadForm: Ref<boolean> = ref(false);
+const initialFormValues: Ref<any | undefined> = ref(undefined);
+const isSubmittable: Ref<boolean> = ref(false);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
-const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
   if (!formRef?.value?.errors) return [];
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
-});
-
-const { formUpdated, stopAutoSave } = useAutoSave(() => {
-  const values = formRef.value?.values;
-  if (values) onSaveDraft(values, true);
 });
 
 // Actions
@@ -144,16 +142,31 @@ const getBackButtonConfig = computed(() => {
   }
 });
 
-function confirmSubmit(data: any) {
-  const submitData: Submission = omit(data as SubmissionForm, ['addressSearch']);
+function confirmSubmit(data: GenericObject) {
+  const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
 
   confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
+    message: 'Are you sure you wish to submit this form?',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
     accept: () => onSubmit(submitData)
   });
+}
+
+async function generateActivityId() {
+  try {
+    const response = await submissionService.updateDraft({});
+    if (response.data?.activityId && response.data?.draftId) {
+      syncFormAndRoute(response.data.activityId, response.data.draftId);
+      return response.data.activityId;
+    } else {
+      return undefined;
+    }
+  } catch (error) {
+    toast.error('Failed to generate activity ID');
+    return undefined;
+  }
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
@@ -163,35 +176,41 @@ const getAddressSearchLabel = (e: GeocoderEntry) => {
 function handleProjectLocationClick() {
   let location = formRef?.value?.values?.location;
   if (location?.latitude || location?.longitude) {
-    formRef?.value?.setFieldValue('location.latitude', null);
-    formRef?.value?.setFieldValue('location.longitude', null);
-    formRef.value?.setFieldValue('location.streetAddress', null);
-    formRef.value?.setFieldValue('location.locality', null);
-    formRef.value?.setFieldValue('location.province', null);
+    const resetFields = [
+      'location.latitude',
+      'location.longitude',
+      'location.streetAddress',
+      'location.locality',
+      'location.province'
+    ];
+    resetFields.forEach((x) => formRef?.value?.setFieldValue(x, null));
   }
 }
 
-async function handleEnquirySubmit(values: any, relatedActivityId: string) {
+async function onAssistanceRequest(values: GenericObject) {
   try {
+    const draft = await onSaveDraft(values, false, false);
+
     const formattedData = Object.assign(
       {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
           isRelated: BasicResponse.YES,
-          relatedActivityId: relatedActivityId,
+          relatedActivityId: draft.activityId,
           enquiryType: SubmissionType.ASSISTANCE
-        },
-        submit: true
+        }
       },
-      { applicant: values?.[IntakeFormCategory.APPLICANT] }
+      { contacts: values?.[IntakeFormCategory.CONTACTS] }
     );
 
-    const enquiryResponse = await enquiryService.createDraft(formattedData);
+    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
       assistanceAssignedActivityId.value = enquiryResponse.data.activityId;
+      assistanceAssignedEnquiryId.value = enquiryResponse.data.enquiryId;
+
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
     } else {
@@ -244,7 +263,7 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.APPLICANT:
+    case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -281,85 +300,83 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
   }
 }
 
-async function onSaveDraft(
-  data: any,
-  isAutoSave: boolean = false,
-  showToast: boolean = true,
-  assistanceRequired: boolean = false
-) {
+async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
   editable.value = false;
-  // Cleanup unneeded data to be saved to draft
-  const draftData = omit(data as SubmissionForm, ['addressSearch']);
 
-  // Remove empty permits
-  if (Array.isArray(draftData.appliedPermits)) {
-    draftData.appliedPermits = draftData.appliedPermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
-  if (Array.isArray(draftData.investigatePermits)) {
-    draftData.investigatePermits = draftData.investigatePermits.filter((x: Partial<Permit>) => x?.permitTypeId);
-  }
+  autoSaveRef.value?.stopAutoSave();
 
   let response;
   try {
-    if (data.submissionId) {
-      response = await submissionService.updateDraft(draftData.submissionId, draftData);
-    } else {
-      response = await submissionService.createDraft(draftData);
-    }
+    response = await submissionService.updateDraft({
+      draftId: draftId,
+      activityId: data.activityId,
+      data: data
+    });
 
-    if (response.data.submissionId && response.data.activityId) {
-      formRef.value?.setFieldValue('submissionId', response.data.submissionId);
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
-    }
-    if (isAutoSave) {
-      if (showToast) toast.success('Draft autosaved');
-    } else {
-      if (showToast) toast.success('Draft saved');
-      formUpdated.value = false;
-    }
+    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
+
+    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   } finally {
     editable.value = true;
   }
 
-  if (assistanceRequired && response?.data?.activityId) {
-    formUpdated.value = false;
-    handleEnquirySubmit(draftData, response.data.activityId);
-    stopAutoSave();
-  }
+  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
 }
 
 function onStepChange(stepNumber: number) {
   // Map component misaligned if mounted while not visible. Trigger resize to fix on show
   if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
   if (stepNumber === 3) isSubmittable.value = true;
-
-  // Save a draft on very first stepper navigation if no activityId yet
-  // Need this to generate an activityId for the file uploads
-  if (!formRef.value?.values.activityId && formUpdated) {
-    onSaveDraft(formRef.value?.values, true, false);
-  }
 }
 
 async function onSubmit(data: any) {
   editable.value = false;
 
   try {
-    let response;
-    if (data.submissionId) {
-      response = await submissionService.updateDraft(data.submissionId, { ...data, submit: true });
-    } else {
-      response = await submissionService.createDraft({ ...data, submit: true });
-    }
-    if (response.data.activityId) {
+    autoSaveRef.value?.stopAutoSave();
+
+    // Convert contact fields into contacts array object then remove form keys from data
+    const submissionData = omit(
+      {
+        ...data,
+        contacts: [
+          {
+            firstName: data.contactFirstName,
+            lastName: data.contactLastName,
+            phoneNumber: data.contactPhoneNumber,
+            email: data.contactEmail,
+            contactApplicantRelationship: data.contactApplicantRelationship,
+            contactPreference: data.contactPreference
+          }
+        ]
+      },
+      [
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    const response = await submissionService.submitDraft({ ...submissionData, draftId });
+
+    if (response.data.activityId && response.data.submissionId) {
       assignedActivityId.value = response.data.activityId;
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
+
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
-      stopAutoSave();
+
+      router.push({
+        name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
+        query: {
+          activityId: response.data.activityId,
+          submissionId: response.data.submissionId
+        }
+      });
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
@@ -373,16 +390,16 @@ async function onSubmit(data: any) {
 async function emailConfirmation(activityId: string, submissionId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplateSubmission({
-    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
+    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
     '{{ activityId }}': activityId,
     '{{ submissionId }}': submissionId
   });
-  let applicantEmail = formRef.value?.values.applicant.contactEmail;
+  let applicantEmail = formRef.value?.values.contacts[0].email;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    subject: 'Confirmation of Submission',
     bodyType: 'html',
     body: body
   };
@@ -398,30 +415,53 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
+function syncFormAndRoute(activityId: string, draftId: string) {
+  if (draftId) {
+    // Update route query for refreshing
+    router.replace({
+      name: RouteName.HOUSING_SUBMISSION_INTAKE,
+      query: {
+        draftId: draftId
+      }
+    });
+  }
+
+  if (activityId) {
+    formRef.value?.resetForm({
+      values: {
+        ...formRef.value?.values,
+        activityId: activityId
+      }
+    });
+  }
+}
+
 onBeforeMount(async () => {
-  if (submissionId && activityId) {
+  try {
     let response,
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
-    try {
-      response = (await submissionService.getSubmission(submissionId)).data;
-      permits = (await permitService.listPermits(activityId)).data;
-      documents = (await documentService.listDocuments(activityId)).data;
-      submissionStore.setDocuments(documents);
-      editable.value = response.intakeStatus === IntakeStatus.DRAFT;
+    if (draftId) {
+      response = (await submissionService.getDraft(draftId)).data;
+      initialFormValues.value = { ...response.data, activityId: response.activityId };
+    } else {
+      if (submissionId && activityId) {
+        response = (await submissionService.getSubmission(submissionId)).data;
+        permits = (await permitService.listPermits({ activityId: activityId })).data;
+        documents = (await documentService.listDocuments(activityId)).data;
+        submissionStore.setDocuments(documents);
+      }
 
       initialFormValues.value = {
         activityId: response?.activityId,
         submissionId: response?.submissionId,
-        applicant: {
-          contactFirstName: response?.contactFirstName,
-          contactLastName: response?.contactLastName,
-          contactPhoneNumber: response?.contactPhoneNumber,
-          contactEmail: response?.contactEmail,
-          contactApplicantRelationship: response?.contactApplicantRelationship,
-          contactPreference: response?.contactPreference
-        },
+        contactFirstName: response?.contacts[0].firstName,
+        contactLastName: response?.contacts[0].lastName,
+        contactPhoneNumber: response?.contacts[0].phoneNumber,
+        contactEmail: response?.contacts[0].email,
+        contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
+        contactPreference: response?.contacts[0].contactPreference,
         basic: {
           consentToFeedback: response?.consentToFeedback,
           isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
@@ -471,19 +511,19 @@ onBeforeMount(async () => {
         },
         investigatePermits: permits.filter((x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION)
       };
-
-      await nextTick();
-      // Move map pin
-      onLatLongInputClick();
-      loadForm.value = true;
-    } catch {
-      router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
     }
-  } else {
-    initialFormValues.value = {};
-    loadForm.value = true;
+
+    await nextTick();
+
+    editable.value = response.intakeStatus !== IntakeStatus.SUBMITTED;
+
+    // Move map pin
+    onLatLongInputClick();
+  } catch {
+    router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
-  // clearing the document store on page load
+
+  // Clearing the document store on page load
   submissionStore.setDocuments([]);
 });
 </script>
@@ -500,28 +540,31 @@ onBeforeMount(async () => {
     </div>
 
     <Form
-      v-if="loadForm"
+      v-if="initialFormValues"
       id="form"
-      v-slot="{ setFieldValue, errors, values }"
+      v-slot="{ setFieldValue, errors, meta, values }"
       ref="formRef"
       :initial-values="initialFormValues"
       :validation-schema="submissionIntakeSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
-      @change="() => (formUpdated = true)"
     >
-      <FormNavigationGuard v-if="editable && !!formUpdated" />
+      <FormNavigationGuard v-if="editable" />
+      <FormAutosave
+        ref="autoSaveRef"
+        :callback="() => onSaveDraft(values, true)"
+      />
 
       <SubmissionAssistance
-        v-if="editable && values?.applicant"
+        v-if="editable && values?.contacts"
         :form-errors="errors"
         :form-values="values"
-        @on-submit-assistance="onSaveDraft(values, true, false, true)"
+        @on-submit-assistance="onAssistanceRequest(values)"
       />
 
       <input
         type="hidden"
-        name="submissionId"
+        name="draftId"
       />
 
       <input
@@ -546,7 +589,7 @@ onBeforeMount(async () => {
               icon="fa-user"
               :class="{
                 'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.APPLICANT) ||
+                  validationErrors.includes(IntakeFormCategory.CONTACTS) ||
                   validationErrors.includes(IntakeFormCategory.BASIC)
               }"
             />
@@ -573,21 +616,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    name="applicant.contactFirstName"
+                    :name="`contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.contactLastName"
+                    :name="`contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    name="applicant.contactPhoneNumber"
+                    :name="`contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -595,14 +638,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    name="applicant.contactEmail"
+                    :name="`contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.contactApplicantRelationship"
+                    :name="`contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -610,7 +653,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    name="applicant.contactPreference"
+                    :name="`contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
@@ -734,7 +777,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Help us learn more about your housing project</span>
+                <span class="section-header">Tell us your project name</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -747,40 +790,6 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                   />
                   <div class="col-6" />
-                  <div class="col-12">
-                    <div class="flex align-items-center">
-                      <label>Provide additional information</label>
-                      <div
-                        v-tooltip.right="
-                          `Provide us with additional information -
-                         short description about the project, project website link, or upload a document.`
-                        "
-                        class="pl-2 mb-2"
-                      >
-                        <font-awesome-icon icon="fa-solid fa-circle-question" />
-                      </div>
-                    </div>
-                  </div>
-                  <!-- eslint-disable max-len -->
-                  <TextArea
-                    class="col-12"
-                    name="housing.projectDescription"
-                    placeholder="Provide us with additional information - short description about the project and/or project website link"
-                    :disabled="!editable"
-                  />
-                  <!-- prettier-ignore -->
-                  <label class="col-12">
-                    Upload documents about your housing project (pdfs, maps,
-                    <a
-                      href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                      target="_blank"
-                      class="text-blue-500 underline"
-                    >shape files</a>, etc)
-                  </label>
-                  <AdvancedFileUpload
-                    :activity-id="values.activityId"
-                    :disabled="!editable"
-                  />
                 </div>
               </template>
             </Card>
@@ -792,22 +801,32 @@ onBeforeMount(async () => {
               </template>
               <template #content>
                 <div class="formgrid grid">
-                  <Checkbox
+                  <div class="col-12">
+                    <Checkbox
+                      name="housing.singleFamilySelected"
+                      label="Single-family"
+                      :bold="false"
+                      :disabled="!editable"
+                      :invalid="!!errors.housing && meta.touched"
+                    />
+                  </div>
+                  <Dropdown
+                    v-if="values.housing.singleFamilySelected"
                     class="col-6"
-                    name="housing.singleFamilySelected"
-                    label="Single-family"
-                    :bold="false"
-                    :disabled="!editable"
-                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                    name="housing.singleFamilyUnits"
+                    :disabled="!editable || !values.housing.singleFamilySelected"
+                    :options="NUM_RESIDENTIAL_UNITS_LIST"
+                    placeholder="How many expected units?"
                   />
-                  <div class="col-6">
+                  <div class="col-12">
                     <div class="flex">
                       <Checkbox
+                        class="align-content-center"
                         name="housing.multiFamilySelected"
                         label="Multi-family"
                         :bold="false"
                         :disabled="!editable"
-                        :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
+                        :invalid="!!errors.housing && meta.touched"
                       />
                       <div
                         v-tooltip.right="
@@ -821,35 +840,33 @@ onBeforeMount(async () => {
                     </div>
                   </div>
                   <Dropdown
-                    class="col-6"
-                    name="housing.singleFamilyUnits"
-                    :disabled="!editable || !values.housing.singleFamilySelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
-                  />
-                  <Dropdown
-                    class="col-6"
+                    v-if="values.housing.multiFamilySelected"
+                    class="col-6 align-content-center"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <Checkbox
-                    class="col-6"
-                    name="housing.otherSelected"
-                    label="Other"
-                    :bold="false"
-                    :disabled="!editable"
-                    :invalid="!!formRef?.errors?.housing && formRef?.meta?.touched"
-                  />
-                  <div class="col-6" />
+                  <div class="col-12">
+                    <Checkbox
+                      name="housing.otherSelected"
+                      label="Other"
+                      :bold="false"
+                      :disabled="!editable"
+                      :invalid="!!errors?.housing && meta.touched"
+                    />
+                  </div>
                   <InputText
-                    class="col-6"
+                    v-if="values.housing.otherSelected"
+                    class="col-6 mb-2"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
+                  <div class="col-6" />
+
                   <Dropdown
+                    v-if="values.housing.otherSelected"
                     class="col-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
@@ -858,7 +875,7 @@ onBeforeMount(async () => {
                   />
                   <div class="col-12">
                     <ErrorMessage
-                      v-show="formRef?.meta?.touched"
+                      v-show="meta.touched"
                       name="housing"
                     />
                   </div>
@@ -1039,6 +1056,52 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+            <Card>
+              <template #title>
+                <span class="section-header">Help us learn more about your housing project</span>
+                <Divider type="solid" />
+              </template>
+              <template #content>
+                <div class="col-12 my-0 py-0">
+                  <div class="flex align-items-center">
+                    <label>Provide additional information</label>
+                    <div
+                      v-tooltip.right="
+                        `Provide us with additional information -
+                         short description about the project, project website link, or upload a document.`
+                      "
+                      class="pl-2 mb-2"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-circle-question" />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- eslint-disable max-len -->
+                <TextArea
+                  class="col-12 mb-0 pb-0"
+                  name="housing.projectDescription"
+                  placeholder="Provide us with additional information - short description about the project and/or project website link"
+                  :disabled="!editable"
+                />
+                <label class="col-12 mt-0 pt-0">
+                  Upload documents about your housing project (pdfs, maps,
+                  <a
+                    href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                    target="_blank"
+                    class="text-blue-500 underline"
+                  >
+                    shape files
+                  </a>
+                  , etc)
+                </label>
+                <AdvancedFileUpload
+                  :activity-id="values.activityId"
+                  :disabled="!editable"
+                  :generate-activity-id="generateActivityId"
+                />
+              </template>
+            </Card>
 
             <StepperNavigation
               :editable="editable"
@@ -1142,7 +1205,7 @@ onBeforeMount(async () => {
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
                             :options="addressGeocoderOptions"
-                            :placeholder="'Search the address of your housing project'"
+                            :placeholder="'Type to search the address of your housing project'"
                             :bold="false"
                             :disabled="!editable"
                             @on-input="onAddressSearchInput"
@@ -1426,7 +1489,7 @@ onBeforeMount(async () => {
                     >
                       <div class="mb-2">
                         <span class="app-primary-color">
-                          * Sharing this information will authorize the navigators to seek additional information about
+                          Sharing this information will authorize the navigators to seek additional information about
                           this permit.
                         </span>
                       </div>
@@ -1654,13 +1717,10 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
-  <SubmissionIntakeConfirmation
-    v-else-if="assignedActivityId"
-    :assigned-activity-id="assignedActivityId"
-  />
   <IntakeAssistanceConfirmation
-    v-else-if="assistanceAssignedActivityId"
+    v-else-if="assistanceAssignedActivityId && assistanceAssignedEnquiryId"
     :assigned-activity-id="assistanceAssignedActivityId"
+    :assigned-enquiry-id="assistanceAssignedEnquiryId"
   />
 </template>
 

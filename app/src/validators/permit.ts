@@ -29,7 +29,8 @@ const schema = {
   },
   listPermits: {
     query: Joi.object({
-      activityId: Joi.string().min(8).max(8).allow(null)
+      activityId: Joi.string().min(8).max(8).allow(null),
+      includeNotes: Joi.boolean().allow(null)
     })
   },
   updatePermit: {

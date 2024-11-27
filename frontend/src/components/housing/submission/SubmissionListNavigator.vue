@@ -255,13 +255,13 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
-      field="contactFirstName"
+      field="contacts.0.firstName"
       header="First name"
       :sortable="true"
       style="min-width: 150px"
     />
     <Column
-      field="contactLastName"
+      field="contacts.0.lastName"
       header="Last name"
       :sortable="true"
       style="min-width: 150px"
@@ -292,6 +292,12 @@ function updateQueryParams() {
         {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
+    <Column
+      field="submissionType"
+      header="Submission type"
+      :sortable="true"
+      style="min-width: 200px"
+    />
     <Column
       field="queuePriority"
       header="Priority"
@@ -384,6 +390,7 @@ function updateQueryParams() {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete submission"
+          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.DELETE)"
           @click="
             onDelete(data.submissionId, data.activityId);
             selection = data;

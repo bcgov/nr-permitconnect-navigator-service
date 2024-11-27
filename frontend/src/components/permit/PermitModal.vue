@@ -9,11 +9,10 @@ import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
-import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
+import { PermitStatus } from '@/utils/enums/housing';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
-import type { Schema } from 'yup';
 import type { Permit, PermitForm, PermitType } from '@/types';
 
 // Props
@@ -50,39 +49,14 @@ let initialFormValues: PermitForm = {
   adjudicationDate: permit?.adjudicationDate ? new Date(permit.adjudicationDate) : undefined
 };
 
-const PERMIT_STATE_VALIDATION_MESSAGE = 'For the currently selected Authorization status, Permit state';
 // Form validation schema
 const formSchema = object({
   permitType: object().required().label('Permit'),
   needed: string().required().label('Needed'),
-  status: string()
-    .required()
-    .label(PERMIT_STATE_VALIDATION_MESSAGE)
-    .when('authStatus', {
-      is: (value: string) => !value || (PermitAuthorizationStatus.NONE as string) === value,
-      then: (schema: Schema) => schema.oneOf([PermitStatus.NEW, PermitStatus.APPLIED]).required()
-    })
-    .when('authStatus', {
-      is: (value: string) =>
-        [PermitAuthorizationStatus.IN_REVIEW as string, PermitAuthorizationStatus.PENDING as string].includes(value),
-      then: () =>
-        string().matches(
-          RegExp(`${PermitStatus.APPLIED}`),
-          `${PERMIT_STATE_VALIDATION_MESSAGE} must be ${PermitStatus.APPLIED}`
-        )
-    })
-    .when('authStatus', {
-      is: (value: string) =>
-        [PermitAuthorizationStatus.ISSUED as string, PermitAuthorizationStatus.DENIED as string].includes(value),
-      then: () =>
-        string().matches(
-          RegExp(`${PermitStatus.COMPLETED}`),
-          `${PERMIT_STATE_VALIDATION_MESSAGE} must be ${PermitStatus.COMPLETED}`
-        )
-    }),
+  status: string().required().oneOf(PERMIT_STATUS_LIST).label('Permit state'),
   agency: string().required().label('Agency'),
   businessDomain: string().label('Business domain'),
-  authStatus: string().required().oneOf(PERMIT_AUTHORIZATION_STATUS_LIST),
+  authStatus: string().required().oneOf(PERMIT_AUTHORIZATION_STATUS_LIST).label('Authorization status'),
   statusLastVerified: date()
     .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()

@@ -61,7 +61,7 @@ const service = {
       }
     });
 
-    return activity.fromPrismaModel(response);
+    return response ? activity.fromPrismaModel(response) : null;
   }
 };
 

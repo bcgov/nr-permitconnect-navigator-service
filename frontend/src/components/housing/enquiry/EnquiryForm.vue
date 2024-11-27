@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
-import { date, mixed, object, string } from 'yup';
+import { computed, onMounted, ref } from 'vue';
+import { array, date, mixed, object, string } from 'yup';
 
 import {
   Calendar,
@@ -14,11 +14,11 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
-import { Button, Message, useToast } from '@/lib/primevue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { BasicResponse, Regex } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
@@ -27,6 +27,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -55,18 +56,11 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
-const stringRequiredSchema = string().required().max(255);
-
 const intakeSchema = object({
   enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  contactFirstName: stringRequiredSchema.label('First name'),
-  contactLastName: stringRequiredSchema.label('Last name'),
-  contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-  contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference'),
-  contactPhoneNumber: stringRequiredSchema.label('Phone number'),
-  contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
+  contacts: array().of(object(contactValidator)),
   enquiryDescription: string().required().label('Enquiry detail'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: mixed()
@@ -90,12 +84,17 @@ const intakeSchema = object({
 });
 
 // Actions
+const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
+
+const isCompleted = computed(() => {
+  return enquiry.enquiryStatus === ApplicationStatus.COMPLETED;
+});
 
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
@@ -144,6 +143,19 @@ function onRelatedActivityInput(e: IInputEvent) {
   filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
     id.toUpperCase().includes(e.target.value.toUpperCase())
   );
+}
+
+function onReOpen() {
+  confirm.require({
+    message: 'Please confirm that you want to re-open this enquiry',
+    header: 'Re-open enquiry?',
+    acceptLabel: 'Confirm',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
+      onSubmit(formRef.value?.values);
+    }
+  });
 }
 
 const onSubmit = async (values: any) => {
@@ -200,7 +212,7 @@ onMounted(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard />
+    <FormNavigationGuard v-if="!isCompleted" />
 
     <div class="formgrid grid">
       <Dropdown
@@ -231,40 +243,40 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        name="contactFirstName"
+        :name="`contacts[0].firstName`"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactLastName"
+        :name="`contacts[0].lastName`"
         label="Last name"
         :disabled="!editable"
       />
       <Dropdown
         class="col-3"
-        name="contactApplicantRelationship"
+        :name="`contacts[0].contactApplicantRelationship`"
         label="Relationship to activity"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        name="contactPreference"
+        :name="`contacts[0].contactPreference`"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        name="contactPhoneNumber"
+        :name="`contacts[0].phoneNumber`"
         mask="(999) 999-9999"
         label="Phone number"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactEmail"
+        :name="`contacts[0].email`"
         label="Contact email"
         :disabled="!editable"
       />
@@ -310,19 +322,24 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <div
-        v-if="editable"
-        class="field col-12 mt-5"
-      >
+      <div class="field col-12 mt-5">
         <Button
+          v-if="!isCompleted"
           label="Save"
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
         />
         <CancelButton
+          v-if="!isCompleted"
           :editable="editable"
           @clicked="onCancel"
+        />
+        <Button
+          v-if="isCompleted"
+          label="Re-open enquiry"
+          icon="pi pi-check"
+          @click="onReOpen()"
         />
       </div>
     </div>

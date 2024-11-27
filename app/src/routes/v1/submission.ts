@@ -8,7 +8,14 @@ import { Action, Resource } from '../../utils/enums/application';
 import { submissionValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Email, StatisticsFilters, Submission, SubmissionIntake, SubmissionSearchParameters } from '../../types';
+import type {
+  Draft,
+  Email,
+  StatisticsFilters,
+  Submission,
+  SubmissionIntake,
+  SubmissionSearchParameters
+} from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -52,28 +59,46 @@ router.get(
   }
 );
 
-/** Creates a submission with Draft status */
-router.put(
-  '/draft',
-  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
-  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
-    submissionController.createDraft(req, res, next);
+/** Gets a list of submission drafts */
+router.get(
+  '/draft/:draftId',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
+    submissionController.getDraft(req, res, next);
   }
 );
 
-/** Updates a submission with Draft status */
+/** Gets a list of submission drafts */
+router.get(
+  '/draft',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getDrafts(req, res, next);
+  }
+);
+
+/** Creates or updates an intake and set status to Draft */
 router.put(
-  '/draft/:submissionId',
-  hasAuthorization(Resource.SUBMISSION, Action.UPDATE),
-  hasAccess('submissionId'),
-  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
+  '/draft',
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
+  (req: Request<never, never, Draft>, res: Response, next: NextFunction): void => {
     submissionController.updateDraft(req, res, next);
+  }
+);
+
+/** Creates or updates an intake and set status to Submitted */
+router.put(
+  '/draft/submit',
+  hasAuthorization(Resource.SUBMISSION, Action.CREATE),
+  submissionValidator.createSubmission,
+  (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction): void => {
+    submissionController.submitDraft(req, res, next);
   }
 );
 
 // Send an email with the confirmation of submission
 router.put(
-  '/emailConfirmation',
+  '/email',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
   submissionValidator.emailConfirmation,
   (req: Request<never, never, Email>, res: Response, next: NextFunction): void => {
@@ -81,7 +106,7 @@ router.put(
   }
 );
 
-/** Creates a submission */
+/** Creates a blank submission */
 router.put(
   '/',
   hasAuthorization(Resource.SUBMISSION, Action.CREATE),
@@ -99,6 +124,17 @@ router.delete(
   submissionValidator.deleteSubmission,
   (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
     submissionController.deleteSubmission(req, res, next);
+  }
+);
+
+/** Hard deletes a submission draft */
+router.delete(
+  '/draft/:draftId',
+  hasAuthorization(Resource.SUBMISSION, Action.DELETE),
+  hasAccess('draftId'),
+  submissionValidator.deleteDraft,
+  (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
+    submissionController.deleteDraft(req, res, next);
   }
 );
 

@@ -10,9 +10,15 @@ import { submissionIntakeSchema } from '@/components/housing/submission/Submissi
 import { permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
 
 import type { AxiosResponse } from 'axios';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -23,6 +29,7 @@ vi.mock('vue-router', () => ({
     params: {},
     query: {}
   }),
+  onBeforeRouteLeave: vi.fn(),
   onBeforeRouteUpdate: vi.fn()
 }));
 
@@ -137,15 +144,17 @@ describe('SubmissionIntakeForm', () => {
   });
 
   it('checks categories for valid data', async () => {
-    const applicantTest = submissionIntakeSchema.validateAt('applicant', {
-      applicant: {
-        contactFirstName: 'testcontactFirstName',
-        contactLastName: 'testcontactLastName',
-        contactPhoneNumber: '2501234567',
-        contactEmail: 'test@test.com',
-        contactApplicantRelationship: ProjectRelationship.AGENT,
-        contactPreference: ContactPreference.PHONE_CALL
-      }
+    const applicantTest = submissionIntakeSchema.validateAt('contacts', {
+      contacts: [
+        {
+          firstName: 'testFirstName',
+          lastName: 'testLastName',
+          phoneNumber: '2501234567',
+          email: 'test@test.com',
+          contactApplicantRelationship: ProjectRelationship.AGENT,
+          contactPreference: ContactPreference.PHONE_CALL
+        }
+      ]
     });
 
     const basicTest = submissionIntakeSchema.validateAt('basic', {
@@ -209,15 +218,17 @@ describe('SubmissionIntakeForm', () => {
   });
 
   it('checks categories for successful fail', async () => {
-    const applicantTestFail = submissionIntakeSchema.validateAt('applicant', {
-      applicant: {
-        contactFirstName: '',
-        contactLastName: 'testcontactLastName',
-        contactPhoneNumber: '2501234567',
-        contactEmail: 'test@test.com',
-        contactApplicantRelationship: ProjectRelationship.AGENT,
-        contactPreference: ContactPreference.PHONE_CALL
-      }
+    const applicantTestFail = submissionIntakeSchema.validateAt('contacts', {
+      contacts: [
+        {
+          firstName: '',
+          lastName: 'testcontactLastName',
+          phoneNumber: '2501234567',
+          email: 'test@test.com',
+          contactApplicantRelationship: ProjectRelationship.AGENT,
+          contactPreference: ContactPreference.PHONE_CALL
+        }
+      ]
     });
 
     const basicTestFail = submissionIntakeSchema.validateAt('basic', {

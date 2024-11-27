@@ -2,10 +2,19 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, emailService, enquiryService, submissionService, permitService } from '../services';
+import {
+  activityService,
+  contactService,
+  draftService,
+  emailService,
+  enquiryService,
+  submissionService,
+  permitService
+} from '../services';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
+  DraftCode,
   IntakeStatus,
   NumResidentialUnits,
   PermitNeeded,
@@ -19,17 +28,53 @@ import type { NextFunction, Request, Response } from 'express';
 import type {
   ChefsFormConfig,
   ChefsFormConfigData,
-  Submission,
   ChefsSubmissionExport,
-  Permit,
+  CurrentContext,
+  Draft,
   Email,
+  Permit,
   StatisticsFilters,
+  Submission,
   SubmissionIntake,
   SubmissionSearchParameters
 } from '../types';
 
 const controller = {
-  checkAndStoreNewSubmissions: async () => {
+  /**
+   * @function assignPriority
+   * Assigns a priority level to a submission based on given criteria
+   * Criteria defined below
+   */
+  assignPriority: (submission: Partial<Submission>) => {
+    const matchesPriorityOneCriteria = // Priority 1 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
+      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
+      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
+      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+
+    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
+      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
+      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
+      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
+      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
+      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
+
+    if (matchesPriorityOneCriteria) {
+      submission.queuePriority = 1;
+    } else if (matchesPriorityTwoCriteria) {
+      submission.queuePriority = 2;
+    } else {
+      // Prioriy 3 Criteria:
+      submission.queuePriority = 3; // Everything Else
+    }
+  },
+
+  checkAndStoreNewSubmissions: async (currentContext: CurrentContext) => {
     const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
 
     // Mapping of SHAS intake permit names to PCNS types
@@ -121,14 +166,8 @@ const controller = {
               activityId: data.form.confirmationId,
               applicationStatus: ApplicationStatus.NEW,
               companyNameRegistered: data.companyNameRegistered ?? data.companyName,
-              contactEmail: data.contactEmail,
-              contactPreference: camelCaseToTitleCase(data.contactPreference),
               projectName: data.projectName,
               projectDescription: data.projectDescription,
-              contactPhoneNumber: data.contactPhoneNumber,
-              contactFirstName: data.contactFirstName,
-              contactLastName: data.contactLastName,
-              contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship),
               financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
               ...financiallySupportedValues,
               housingCoopDescription: data.housingCoopName,
@@ -160,7 +199,17 @@ const controller = {
               submittedAt: data.form.createdAt,
               submittedBy: data.form.username,
               hasAppliedProvincialPermits: toTitleCase(data.previousPermits),
-              permits: permits
+              permits: permits,
+              contacts: [
+                {
+                  email: data.contactEmail,
+                  contactPreference: camelCaseToTitleCase(data.contactPreference),
+                  phoneNumber: data.contactPhoneNumber,
+                  firstName: data.contactFirstName,
+                  lastName: data.contactLastName,
+                  contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship)
+                }
+              ]
             };
           });
         })
@@ -173,31 +222,23 @@ const controller = {
     const notStored = exportData.filter((x) => !stored.some((activityId: string) => activityId === x.activityId));
     await submissionService.createSubmissionsFromExport(notStored);
 
+    // Create each contact
+    notStored.map((x) =>
+      x.contacts?.map(async (y) => await contactService.upsertContacts(x.activityId as string, [y], currentContext))
+    );
+
     // Create each permit
     notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
-  generateSubmissionData: async (req: Request<never, never, SubmissionIntake>, intakeStatus: string) => {
-    const data = req.body;
-
+  generateSubmissionData: async (data: SubmissionIntake, intakeStatus: string, currentContext: CurrentContext) => {
     const activityId =
       data.activityId ??
-      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
+      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
 
-    let applicant, basic, housing, location, permits;
+    let basic, housing, location, permits;
     let appliedPermits: Array<Permit> = [],
       investigatePermits: Array<Permit> = [];
-
-    if (data.applicant) {
-      applicant = {
-        contactFirstName: data.applicant.contactFirstName,
-        contactLastName: data.applicant.contactLastName,
-        contactPhoneNumber: data.applicant.contactPhoneNumber,
-        contactEmail: data.applicant.contactEmail,
-        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
-        contactPreference: data.applicant.contactPreference
-      };
-    }
 
     if (data.basic) {
       basic = {
@@ -283,16 +324,15 @@ const controller = {
     // Put new submission together
     const submissionData = {
       submission: {
-        ...applicant,
         ...basic,
         ...housing,
         ...location,
         ...permits,
-        submissionId: data.submissionId ?? uuidv4(),
+        submissionId: uuidv4(),
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        submittedBy: getCurrentUsername(req.currentContext),
+        submittedBy: getCurrentUsername(currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
         submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
@@ -301,11 +341,22 @@ const controller = {
       investigatePermits
     };
 
-    if (data.submit) {
-      controller.assignPriority(submissionData.submission);
-    }
+    controller.assignPriority(submissionData.submission);
 
     return submissionData;
+  },
+
+  /**
+   * @function emailConfirmation
+   * Send an email with the confirmation of submission
+   */
+  emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
+    try {
+      const { data, status } = await emailService.email(req.body);
+      res.status(status).json(data);
+    } catch (e: unknown) {
+      next(e);
+    }
   },
 
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
@@ -320,34 +371,17 @@ const controller = {
     }
   },
 
-  createDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
-    try {
-      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
-      );
-
-      // Create new submission
-      const result = await submissionService.createSubmission({
-        ...submission,
-        ...generateCreateStamps(req.currentContext)
-      });
-
-      // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        IntakeStatus.SUBMITTED
+        req.body,
+        IntakeStatus.SUBMITTED,
+        req.currentContext
       );
+
+      // Create contacts
+      if (req.body.contacts)
+        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
 
       // Create new submission
       const result = await submissionService.createSubmission({
@@ -368,6 +402,55 @@ const controller = {
   deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.deleteSubmission(req.params.submissionId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  deleteDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await draftService.deleteDraft(req.params.draftId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission draft not found' });
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await draftService.getDraft(req.params.draftId);
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (response?.createdBy !== getCurrentUsername(req.currentContext)) {
+          res.status(403).send();
+        }
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  getDrafts: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      let response = await draftService.getDrafts(DraftCode.SUBMISSION);
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -386,6 +469,10 @@ const controller = {
   getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await submissionService.getSubmission(req.params.submissionId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         if (response?.submittedBy !== getCurrentUsername(req.currentContext)) {
@@ -407,7 +494,7 @@ const controller = {
   getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check for and store new submissions in CHEFS
-      await controller.checkAndStoreNewSubmissions();
+      await controller.checkAndStoreNewSubmissions(req.currentContext);
 
       // Pull from PCNS database
       let response = await submissionService.getSubmissions();
@@ -443,27 +530,65 @@ const controller = {
     }
   },
 
-  updateDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+  submitDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
-        req,
-        req.body.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT
+        req.body,
+        IntakeStatus.SUBMITTED,
+        req.currentContext
       );
 
-      // Update submission
-      const result = await submissionService.updateSubmission({
+      // Create contacts
+      if (req.body.contacts)
+        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
+
+      // Create new submission
+      const result = await submissionService.createSubmission({
         ...submission,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateCreateStamps(req.currentContext)
       });
 
-      // Remove already existing permits for this activity
-      await permitService.deletePermitsByActivity(submission.activityId);
-
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
 
-      res.status(200).json({ activityId: result.activityId, submissionId: result.submissionId });
+      // Delete old draft
+      if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);
+
+      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  updateDraft: async (req: Request<never, never, Draft>, res: Response, next: NextFunction) => {
+    try {
+      const update = req.body.draftId && req.body.activityId;
+
+      let response;
+
+      if (update) {
+        // Update draft
+        response = await draftService.updateDraft({
+          ...req.body,
+          ...generateUpdateStamps(req.currentContext)
+        });
+      } else {
+        const activityId = (
+          await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext))
+        )?.activityId;
+
+        // Create new draft
+        response = await draftService.createDraft({
+          draftId: uuidv4(),
+          activityId: activityId,
+          draftCode: DraftCode.SUBMISSION,
+          data: req.body.data,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
+
+      res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
     } catch (e: unknown) {
       next(e);
     }
@@ -480,6 +605,11 @@ const controller = {
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -488,60 +618,20 @@ const controller = {
 
   updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
+      await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
+
       const response = await submissionService.updateSubmission({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
+
+      if (!response) {
+        return res.status(404).json({ message: 'Submission not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
-    }
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the confirmation of submission
-   */
-  emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
-    try {
-      const { data, status } = await emailService.email(req.body);
-      res.status(status).json(data);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  /**
-   * @function assignPriority
-   * Assigns a priority level to a submission based on given criteria
-   * Criteria defined below
-   */
-  assignPriority: (submission: Partial<Submission>) => {
-    const matchesPriorityOneCriteria = // Priority 1 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
-      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
-      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
-      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
-
-    const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
-      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
-      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
-      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
-      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
-
-    if (matchesPriorityOneCriteria) {
-      submission.queuePriority = 1;
-    } else if (matchesPriorityTwoCriteria) {
-      submission.queuePriority = 2;
-    } else {
-      // Prioriy 3 Criteria:
-      submission.queuePriority = 3; // Everything Else
     }
   }
 };

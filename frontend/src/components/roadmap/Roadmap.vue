@@ -17,8 +17,9 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-const { activityId } = defineProps<{
+const { activityId, editable = true } = defineProps<{
   activityId: string;
+  editable?: boolean;
 }>();
 
 // Store
@@ -141,8 +142,8 @@ watchEffect(async () => {
 
   const body = roadmapTemplate({
     '{{ contactName }}':
-      submission?.contactFirstName && submission?.contactLastName
-        ? `${submission?.contactFirstName} ${submission?.contactLastName}`
+      submission?.contacts[0].firstName && submission?.contacts[0].lastName
+        ? `${submission?.contacts[0].firstName} ${submission?.contacts[0].lastName}`
         : '',
     '{{ locationAddress }}': submission?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
@@ -155,7 +156,7 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: submission?.contactEmail,
+    to: submission?.contacts[0].email,
     cc: undefined,
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
@@ -164,7 +165,7 @@ watchEffect(async () => {
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
-  formRef.value?.setFieldValue('to', submission?.contactEmail);
+  formRef.value?.setFieldValue('to', submission?.contacts[0].email);
   formRef.value?.setFieldValue('bcc', bcc);
   formRef.value?.setFieldValue('body', body);
 });
@@ -183,24 +184,28 @@ watchEffect(async () => {
         class="col-12 lg:col-6"
         name="to"
         label="To"
+        :disabled="!editable"
       />
       <div class="col" />
       <InputText
         class="col-12 lg:col-6"
         name="cc"
         label="CC"
+        :disabled="!editable"
       />
       <div class="col" />
       <InputText
         class="col-12 lg:col-6"
         name="bcc"
         label="BCC"
+        :disabled="!editable"
       />
       <div class="col" />
       <InputText
         class="col-12 lg:col-6"
         name="subject"
         label="Subject"
+        :disabled="!editable"
       />
       <div class="col" />
       <TextArea
@@ -208,10 +213,14 @@ watchEffect(async () => {
         name="body"
         label="Note"
         :rows="10"
+        :disabled="!editable"
       />
       <div class="col-12"><label class="font-bold">Add attachments</label></div>
       <div class="col-12 pt-2">
-        <Button @click="fileSelectModalVisible = true">
+        <Button
+          :disabled="!editable"
+          @click="fileSelectModalVisible = true"
+        >
           <font-awesome-icon
             icon="fa-solid fa-plus"
             class="mr-1"
@@ -242,6 +251,7 @@ watchEffect(async () => {
           label="Send"
           type="submit"
           icon="pi pi-envelope"
+          :disabled="!editable"
         />
       </div>
     </div>

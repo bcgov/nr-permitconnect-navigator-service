@@ -4,13 +4,16 @@ import { onMounted, ref } from 'vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
+import { useAuthZStore } from '@/store';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
 
 // Props
-const { note } = defineProps<{
+const { editable = true, note } = defineProps<{
+  editable?: boolean;
   note: Note;
 }>();
 
@@ -49,6 +52,7 @@ onMounted(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
+          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.UPDATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon

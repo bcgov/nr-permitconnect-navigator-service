@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { Card, Divider } from '@/lib/primevue';
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -10,13 +14,11 @@ import { Card, Divider } from '@/lib/primevue';
     </template>
     <template #content>
       <p class="disclaimer">
-        This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the
-        Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a
-        client relationship between you or your organization and Government of British Columbia. It may also be shared
-        when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal
-        information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions
-        regarding the use of this personal information, please contact Housing Authorizations at
-        <a href="mailto:Housing.Authorizations@gov.bc.ca">Housing.Authorizations@gov.bc.ca.</a>
+        {{ t('collectionDisclaimer.disclaimer') }}
+        <!-- prettier-ignore -->
+        <span>
+          <a href="mailto:Housing.Authorizations@gov.bc.ca">Housing.Authorizations@gov.bc.ca</a>.
+        </span>
       </p>
     </template>
   </Card>

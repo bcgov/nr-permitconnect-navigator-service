@@ -1,12 +1,16 @@
 export { default as accessRequestService } from './accessRequest';
 export { default as activityService } from './activity';
+export { default as atsService } from './ats';
 export { default as comsService } from './coms';
+export { default as contactService } from './contact';
 export { default as documentService } from './document';
+export { default as draftService } from './draft';
 export { default as emailService } from './email';
 export { default as enquiryService } from './enquiry';
 export { default as initiativeService } from './initiative';
 export { default as noteService } from './note';
 export { default as permitService } from './permit';
+export { default as permitNoteService } from './permitNote';
 export { default as ssoService } from './sso';
 export { default as submissionService } from './submission';
 export { default as userService } from './user';

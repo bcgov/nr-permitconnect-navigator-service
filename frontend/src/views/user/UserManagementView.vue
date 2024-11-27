@@ -17,9 +17,10 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { accessRequestService, userService } from '@/services';
+import { accessRequestService, userService, yarsService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
+import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
 import { IdentityProvider, AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import { omit } from '@/utils/utils';
 
@@ -32,6 +33,16 @@ const PENDING_STATUSES = {
   PENDING_REVOCATION: 'Pending Revocation'
 };
 
+const REQUEST_TYPE = {
+  ACCESS: 'access',
+  REVOCATION: 'revocation'
+};
+
+const REQUEST_ACTION = {
+  APPROVE: 'Approve',
+  DENY: 'Deny'
+};
+
 // Store
 const authzStore = useAuthZStore();
 
@@ -42,12 +53,18 @@ const loading: Ref<boolean> = ref(false); // Generic loading flag
 const manageUserModalVisible: Ref<boolean> = ref(false); // Group change modal visible
 const selectedUserAccessRequest: Ref<UserAccessRequest | undefined> = ref(undefined); // Selected user to modify
 const userProcessModalVisible: Ref<boolean> = ref(false); // Approve/Deny modal visible
+const userProcessModalAction: Ref<string> = ref(''); // Approve/Deny modal action
+const userProcessRequestType: Ref<string> = ref(''); // Access or Revocation request
 const usersAndAccessRequests: Ref<Array<UserAccessRequest>> = ref([]); // Main table data
 
-const getRevocationRequests = computed(() =>
-  usersAndAccessRequests.value.filter(
-    (user) => user.accessRequest?.status === AccessRequestStatus.PENDING && user.accessRequest?.grant === false
-  )
+const getAccessRequests = computed(() =>
+  usersAndAccessRequests.value.filter((uaar) => uaar.accessRequest?.status === AccessRequestStatus.PENDING)
+);
+
+const getApprovedUsers = computed(() =>
+  usersAndAccessRequests.value.filter((uaar) => {
+    return uaar.user.status === AccessRequestStatus.APPROVED;
+  })
 );
 
 // Actions
@@ -64,64 +81,56 @@ function assignUserStatus(request: UserAccessRequest) {
   return request;
 }
 
-//function onDenyRevocation(user: UserAccessRequest) {
-function onDenyRevocation() {
-  confirm.require({
-    message: 'This user’s revocation request will be denied, and they will remain an authorized user.',
-    header: 'Deny revocation request',
-    acceptLabel: 'Deny',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    accept: async () => {
-      try {
-        // TODO
-        // const response = await accessRequestService.denyAccessRequest(user.accessRequest?.accessRequestId as string);
-        // if (response) {
-        //   usersAndAccessRequests.value = usersAndAccessRequests.value.filter(
-        //     (userAccessRequest) => userAccessRequest.user.userId !== response.data.userId
-        //   );
-        //   // removing access request from user
-        //   delete user.accessRequest;
-        //   // assigning current status to user
-        //   user = assignUserStatus(user);
-        //   usersAccessRequest.value.push(user); // adding user to access request list
-        //   toast.success('Revocation request denied');
-        //}
-      } catch (error) {
-        toast.error('Error denying revocation request');
-        throw new Error('Error denying revocation request ' + error);
-      }
-    }
-  });
+function onAccessRequestAction(userAccessRequest: UserAccessRequest, action: string) {
+  selectedUserAccessRequest.value = userAccessRequest;
+  userProcessRequestType.value = userAccessRequest.accessRequest?.grant ? REQUEST_TYPE.ACCESS : REQUEST_TYPE.REVOCATION;
+  userProcessModalAction.value = action;
+  userProcessModalVisible.value = true;
 }
 
-async function onProcessUserAccessRequest(approve: boolean) {
+async function onProcessUserAccessRequest() {
   try {
-    await accessRequestService.processUserAccessRequest(
+    const approvedAccess =
+      userProcessModalAction.value === REQUEST_ACTION.APPROVE && selectedUserAccessRequest.value?.accessRequest?.grant;
+    const deniedAccess =
+      userProcessModalAction.value === REQUEST_ACTION.DENY && selectedUserAccessRequest.value?.accessRequest?.grant;
+    const approvedRevocation =
+      userProcessModalAction.value === REQUEST_ACTION.APPROVE && !selectedUserAccessRequest.value?.accessRequest?.grant;
+    const deniedRevocation =
+      userProcessModalAction.value === REQUEST_ACTION.DENY && !selectedUserAccessRequest.value?.accessRequest?.grant;
+
+    const response = await accessRequestService.processUserAccessRequest(
       selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
       {
-        approve
+        approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
       }
     );
 
-    const idx = usersAndAccessRequests.value.findIndex(
-      (x) => x.accessRequest?.accessRequestId === selectedUserAccessRequest.value?.accessRequest?.accessRequestId
-    );
-
-    if (approve) {
-      usersAndAccessRequests.value[idx].accessRequest = undefined;
-      if (!usersAndAccessRequests.value[idx].user.groups) {
-        usersAndAccessRequests.value[idx].user.groups = Array<GroupName>();
-      }
-      usersAndAccessRequests.value[idx].user.groups.push(
-        { ...selectedUserAccessRequest.value?.accessRequest }.group as GroupName
+    if (response) {
+      const idx = usersAndAccessRequests.value.findIndex(
+        (x) => x.accessRequest?.accessRequestId === selectedUserAccessRequest.value?.accessRequest?.accessRequestId
       );
-      usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
-    } else {
-      usersAndAccessRequests.value.splice(idx, 1);
+
+      // Change status back to approved
+      if (approvedAccess || deniedRevocation) {
+        usersAndAccessRequests.value[idx].accessRequest &&
+          (usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
+            ? AccessRequestStatus.APPROVED
+            : AccessRequestStatus.REJECTED);
+        usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
+      }
+
+      // Drop from table
+      if (deniedAccess || approvedRevocation) {
+        usersAndAccessRequests.value.splice(idx, 1);
+      }
     }
 
-    toast.success(`Access request ${approve ? 'approved' : 'denied'}`);
+    toast.success(
+      `User's ${userProcessRequestType.value} request has been ${
+        approvedAccess || approvedRevocation ? 'approved' : 'denied'
+      }`
+    );
   } catch (error: any) {
     toast.error(error);
   }
@@ -129,15 +138,11 @@ async function onProcessUserAccessRequest(approve: boolean) {
 
 function onRevoke(userAccessRequest: UserAccessRequest) {
   const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
-  let message, successMessage;
 
-  if (admin) {
-    message = 'The user will now lose all access to the system.';
-    successMessage = 'User revoked';
-  } else {
-    message = 'The user will be revoked from the system upon the approval of an admin.';
-    successMessage = 'Revoke requested';
-  }
+  const message = admin
+    ? 'The user will now lose all access to the system.'
+    : 'The user will be revoked from the system upon the approval of an admin.';
+  const successMessage = admin ? 'User revoked' : 'Revoke requested';
 
   confirm.require({
     message: message,
@@ -148,13 +153,26 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     accept: async () => {
       try {
         const omittedUser = omit(userAccessRequest.user, ['groups', 'status']);
-        const response = await accessRequestService.createUserAccessRequest({
-          user: omittedUser,
-          accessRequest: {
-            grant: false
-          }
-        });
+        let response;
 
+        if (admin) {
+          // Delete subject group
+          const body = {
+            sub: userAccessRequest.user.sub,
+            group: userAccessRequest.user.groups[0]
+          };
+          response = await yarsService.deleteSubjectGroup(body);
+        } else {
+          // Create user access request
+          response = await accessRequestService.createUserAccessRequest({
+            user: omittedUser,
+            accessRequest: {
+              grant: false,
+              group: userAccessRequest.user.groups[0]
+            }
+          });
+        }
+        // Remove user from table and/or change status value
         if (response) {
           const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
@@ -168,7 +186,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           toast.success(successMessage);
         }
       } catch (error) {
-        toast.error('Error revoking user access');
+        toast.error(`Error revoking user access: ${error}`);
       }
     }
   });
@@ -195,8 +213,8 @@ async function onUserGroupChange(group: GroupName) {
         toast.success('User role updated');
       }
     }
-  } catch (error) {
-    toast.error('Error updating user role ');
+  } catch (error: any) {
+    toast.error(`Error updating user role, ${error.response.data.message}`);
   } finally {
     manageUserModalVisible.value = false;
   }
@@ -251,20 +269,45 @@ onMounted(async () => {
     await userService.searchUsers({
       active: true,
       idp: [IdentityProvider.IDIR],
-      includeUserGroups: true
+      includeUserGroups: true,
+      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
     })
   ).data;
-
   const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
+  const currentAccessRequests = new Map();
+
+  // Create map of all pending requests
+  accessRequests.forEach((request) => {
+    const currentRequest = currentAccessRequests.get(request.userId);
+    if (
+      (!currentRequest || (request.createdAt && request.createdAt > currentRequest.createdAt)) &&
+      request.status === AccessRequestStatus.PENDING
+    ) {
+      currentAccessRequests.set(request.userId, request);
+    }
+  });
 
   // Combine user and access request data
   // Filter out users who have no assigned group and no access requests
   usersAndAccessRequests.value = users
     .map((user) => {
-      const accessRequest = accessRequests.find((accessRequest) => accessRequest.userId === user.userId);
+      const accessRequest = currentAccessRequests.get(user.userId);
+      currentAccessRequests.delete(user.userId);
       return assignUserStatus({ accessRequest, user });
     })
     .filter((x) => x.user.groups.length > 0 || x.accessRequest);
+
+  // Get requesting users and add their access requests
+  const newRequestingUsers: Array<User> = (
+    await userService.searchUsers({
+      userId: Array.from(currentAccessRequests.keys())
+    })
+  ).data;
+
+  newRequestingUsers.forEach((user) => {
+    const accessRequest = currentAccessRequests.get(user.userId);
+    usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
+  });
 });
 </script>
 
@@ -284,7 +327,9 @@ onMounted(async () => {
   <UserProcessModal
     v-if="userProcessModalVisible"
     v-model:visible="userProcessModalVisible"
-    @user-action:process="onProcessUserAccessRequest"
+    v-model:action="userProcessModalAction"
+    v-model:request-type="userProcessRequestType"
+    @user-action:process="() => onProcessUserAccessRequest()"
   />
   <TabView
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
@@ -309,7 +354,7 @@ onMounted(async () => {
       </div>
       <UserTable
         v-model:filters="filters"
-        :users-and-access-request="usersAndAccessRequests"
+        :users-and-access-requests="getApprovedUsers"
         class="mt-4"
         @user-table:manage="
           (userAccessRequest: UserAccessRequest) => {
@@ -317,16 +362,10 @@ onMounted(async () => {
             manageUserModalVisible = true;
           }
         "
-        @user-table:process-request="
-          (userAccessRequest: UserAccessRequest) => {
-            selectedUserAccessRequest = userAccessRequest;
-            userProcessModalVisible = true;
-          }
-        "
         @user-table:revoke="onRevoke"
       />
     </TabPanel>
-    <TabPanel header="Revocation requests">
+    <TabPanel header="User access requests">
       <div class="flex justify-content-end">
         <IconField icon-position="left">
           <InputIcon class="pi pi-search" />
@@ -339,11 +378,15 @@ onMounted(async () => {
       </div>
       <UserTable
         v-model:filters="filters"
-        :users-and-access-request="getRevocationRequests"
+        :users-and-access-requests="getAccessRequests"
         class="mt-4"
-        :revocation="true"
-        @user-table:revoke="onRevoke"
-        @user-table:deny-revocation="onDenyRevocation"
+        :request-table="true"
+        @user-table:approve-request="
+          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
+        "
+        @user-table:deny-request="
+          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
+        "
       />
     </TabPanel>
   </TabView>
@@ -366,7 +409,7 @@ onMounted(async () => {
     </div>
     <UserTable
       v-model:filters="filters"
-      :users-and-access-request="usersAndAccessRequests"
+      :users-and-access-requests="usersAndAccessRequests"
       class="mt-4"
       @user-table:manage="
         (userAccessRequest: UserAccessRequest) => {

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref, toRaw } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { object, string } from 'yup';
+import { array, object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import {
@@ -13,31 +13,22 @@ import {
   InputMask,
   InputText,
   RadioList,
-  StepperNavigation,
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
-import { useAutoSave } from '@/composables/formAutoSave';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
-import { BasicResponse, Regex, RouteName } from '@/utils/enums/application';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
+import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
-
-const { formUpdated, stopAutoSave } = useAutoSave(async () => {
-  const values = formRef.value?.values;
-  if (values) {
-    await onSaveDraft(values, true);
-  }
-});
 
 // Props
 const { enquiryId = undefined } = defineProps<{
@@ -48,11 +39,9 @@ const { enquiryId = undefined } = defineProps<{
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
-const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const loadForm: Ref<boolean> = ref(false);
 const initialFormValues: Ref<undefined | object> = ref(undefined);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const submissions: Ref<Array<Submission>> = ref([]);
@@ -60,14 +49,7 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  [IntakeFormCategory.APPLICANT]: object({
-    contactFirstName: string().required().max(255).label('First name'),
-    contactLastName: string().required().max(255).label('Last name'),
-    contactPhoneNumber: string().required().max(255).label('Phone number'),
-    contactEmail: string().matches(new RegExp(Regex.EMAIL), 'Email must be valid').required().label('Email'),
-    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Contact Preference')
-  }),
+  contacts: array().of(object(contactValidator)),
   [IntakeFormCategory.BASIC]: object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
@@ -106,25 +88,9 @@ const getBackButtonConfig = computed(() => {
   }
 });
 
-async function confirmNext(data: any) {
-  const validateResult = await formRef?.value?.validate();
-  if (!validateResult?.valid) return;
-
-  confirm.require({
-    /* eslint-disable max-len */
-    message:
-      'After confirming, your enquiry will be submitted, and you will be directed to register your project with a Navigator.',
-    /*eslint-enable max-len */
-    header: 'Please confirm',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
-    accept: () => onSubmit(toRaw(data))
-  });
-}
-
 function confirmSubmit(data: any) {
   confirm.require({
-    message: 'Are you sure you wish to submit this form? Please review the form before submitting.',
+    message: 'Are you sure you wish to submit this form?',
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
@@ -132,40 +98,68 @@ function confirmSubmit(data: any) {
   });
 }
 
+async function emailConfirmation(activityId: string, enquiryId: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+
+  // Get the first two sentences of the enquiry description
+  // If there are more than two sentences in enquiryDescription, add '..' to the end
+  const enquiryDescription = formRef.value?.values.basic.enquiryDescription || '';
+  let firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
+  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
+  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
+
+  const body = confirmationTemplateEnquiry({
+    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
+    '{{ activityId }}': activityId,
+    '{{ enquiryDescription }}': firstTwoSentences.trim(),
+    '{{ enquiryId }}': enquiryId
+  });
+  let applicantEmail = formRef.value?.values.contacts[0].email;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    bodyType: 'html',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
+}
+
+async function loadEnquiry() {
+  try {
+    let response;
+
+    if (enquiryId) {
+      response = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      editable.value = response?.intakeStatus !== IntakeStatus.SUBMITTED;
+    }
+
+    initialFormValues.value = {
+      activityId: response?.activityId,
+      enquiryId: response?.enquiryId,
+      contacts: response?.contacts,
+      basic: {
+        isRelated: response?.isRelated,
+        relatedActivityId: response?.relatedActivityId,
+        enquiryDescription: response?.enquiryDescription,
+        applyForPermitConnect: response?.applyForPermitConnect
+      }
+    };
+  } catch (e: any) {
+    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
+  }
+}
+
 function onInvalidSubmit(e: any) {
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSaveDraft(data: any, isAutoSave = false) {
-  editable.value = false;
-
-  try {
-    let response;
-    if (data.enquiryId) {
-      response = await enquiryService.updateDraft(data.enquiryId, data);
-    } else {
-      response = await enquiryService.createDraft(data);
-    }
-
-    if (response.data.enquiryId && response.data.activityId) {
-      formRef.value?.setFieldValue('enquiryId', response.data.enquiryId);
-      formRef.value?.setFieldValue('activityId', response.data.activityId);
-    } else {
-      throw new Error('Failed to retrieve correct draft data');
-    }
-
-    if (isAutoSave) {
-      toast.success('Draft autosaved');
-    } else {
-      toast.success('Draft saved');
-      formUpdated.value = false;
-    }
-  } catch (e: any) {
-    toast.error('Failed to save draft', e);
-  } finally {
-    editable.value = true;
-  }
+function onRelatedActivityInput(e: IInputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
 }
 
 async function onSubmit(data: any) {
@@ -176,7 +170,7 @@ async function onSubmit(data: any) {
   try {
     // Need to first create the submission to relate to if asking to apply
     if (data.basic.applyForPermitConnect === BasicResponse.YES) {
-      submissionResponse = await submissionService.createDraft({ applicant: data.applicant });
+      submissionResponse = await submissionService.submitDraft({ applicant: data.applicant });
       if (submissionResponse.data.activityId) {
         formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
       } else {
@@ -184,21 +178,24 @@ async function onSubmit(data: any) {
       }
     }
 
-    if (data.enquiryId) {
-      enquiryResponse = await enquiryService.updateDraft(data.enquiryId, { ...data, submit: true });
-    } else {
-      enquiryResponse = await enquiryService.createDraft({ ...data, submit: true });
-    }
+    enquiryResponse = await enquiryService.createEnquiry(data);
 
-    if (enquiryResponse.data.activityId) {
-      assignedActivityId.value = enquiryResponse.data.activityId;
+    if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
       formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
+
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
-      stopAutoSave();
+
+      router.push({
+        name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
+        query: {
+          activityId: enquiryResponse.data.activityId,
+          enquiryId: enquiryResponse.data.enquiryId
+        }
+      });
     } else {
-      throw new Error('Failed to retrieve correct enquiry draft data');
+      throw new Error('Failed to retrieve correct enquiry data');
     }
   } catch (e: any) {
     toast.error('Failed to save intake', e);
@@ -216,82 +213,16 @@ async function onSubmit(data: any) {
     }
   }
 }
-async function loadEnquiry() {
-  let formVal;
-  try {
-    if (enquiryId) {
-      formVal = (await enquiryService.getEnquiry(enquiryId as string)).data;
-      editable.value = formVal.intakeStatus === IntakeStatus.DRAFT;
-    }
-  } catch (e: any) {
-    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
-  }
-
-  initialFormValues.value = {
-    activityId: formVal?.activityId,
-    enquiryId: formVal?.enquiryId,
-    applicant: {
-      contactFirstName: formVal?.contactFirstName,
-      contactLastName: formVal?.contactLastName,
-      contactPhoneNumber: formVal?.contactPhoneNumber,
-      contactEmail: formVal?.contactEmail,
-      contactApplicantRelationship: formVal?.contactApplicantRelationship,
-      contactPreference: formVal?.contactPreference
-    },
-    basic: {
-      isRelated: formVal?.isRelated,
-      relatedActivityId: formVal?.relatedActivityId,
-      enquiryDescription: formVal?.enquiryDescription,
-      applyForPermitConnect: formVal?.applyForPermitConnect
-    }
-  };
-}
-
-function onRelatedActivityInput(e: IInputEvent) {
-  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
-    id.toUpperCase().includes(e.target.value.toUpperCase())
-  );
-}
 
 onBeforeMount(async () => {
-  if (enquiryId) loadEnquiry();
+  loadEnquiry();
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
   submissions.value = (await submissionService.getSubmissions()).data;
-
-  loadForm.value = true;
 });
-
-async function emailConfirmation(activityId: string, enquiryId: string) {
-  const configCC = getConfig.value.ches?.submission?.cc;
-
-  // Get the first two sentences of the enquiry description
-  // If there are more than two sentences in enquiryDescription, add '..' to the end
-  const enquiryDescription = formRef.value?.values.basic.enquiryDescription || '';
-  let firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
-  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
-  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
-
-  const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': formRef.value?.values.applicant.contactFirstName,
-    '{{ activityId }}': activityId,
-    '{{ enquiryDescription }}': firstTwoSentences.trim(),
-    '{{ enquiryId }}': enquiryId
-  });
-  let applicantEmail = formRef.value?.values.applicant.contactEmail;
-  let emailData = {
-    from: configCC,
-    to: [applicantEmail],
-    cc: configCC,
-    subject: 'Confirmation of Submission', // eslint-disable-line quotes
-    bodyType: 'html',
-    body: body
-  };
-  await submissionService.emailConfirmation(emailData);
-}
 </script>
 
 <template>
-  <div v-if="!assignedActivityId">
+  <div>
     <div class="mb-2 p-0">
       <BackButton
         :route-name="getBackButtonConfig.routeName"
@@ -305,7 +236,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     <CollectionDisclaimer />
 
     <Form
-      v-if="loadForm"
+      v-if="initialFormValues"
       v-slot="{ values }"
       ref="formRef"
       keep-values
@@ -313,9 +244,8 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
       :validation-schema="formSchema"
       @invalid-submit="(e) => onInvalidSubmit(e)"
       @submit="confirmSubmit"
-      @change="formUpdated = true"
     >
-      <FormNavigationGuard v-if="editable && !!formUpdated" />
+      <FormNavigationGuard v-if="editable" />
 
       <input
         type="hidden"
@@ -336,21 +266,21 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
           <div class="formgrid grid">
             <InputText
               class="col-6"
-              name="applicant.contactFirstName"
+              :name="`contacts[0].firstName`"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
               class="col-6"
-              name="applicant.contactLastName"
+              :name="`contacts[0].lastName`"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
               class="col-6"
-              name="applicant.contactPhoneNumber"
+              :name="`contacts[0].phoneNumber`"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
@@ -358,14 +288,14 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
             />
             <InputText
               class="col-6"
-              name="applicant.contactEmail"
+              :name="`contacts[0].email`"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Dropdown
               class="col-6"
-              name="applicant.contactApplicantRelationship"
+              :name="`contacts[0].contactApplicantRelationship`"
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"
@@ -373,7 +303,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
             />
             <Dropdown
               class="col-6"
-              name="applicant.contactPreference"
+              :name="`contacts[0].contactPreference`"
               label="Preferred contact method"
               :bold="false"
               :disabled="!editable"
@@ -487,22 +417,6 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
           </div>
         </template>
       </Card>
-      <StepperNavigation
-        :editable="editable"
-        :next-callback="() => confirmNext(values)"
-        :prev-disabled="true"
-        :next-disabled="values.basic?.applyForPermitConnect !== BasicResponse.YES || !editable"
-      >
-        <template #content>
-          <Button
-            class="p-button-sm"
-            outlined
-            label="Save draft"
-            :disabled="!editable"
-            @click="onSaveDraft(values)"
-          />
-        </template>
-      </StepperNavigation>
       <div class="flex align-items-center justify-content-center mt-4">
         <Button
           label="Submit"
@@ -513,10 +427,6 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
       </div>
     </Form>
   </div>
-  <EnquiryIntakeConfirmation
-    v-else
-    :assigned-activity-id="assignedActivityId"
-  />
 </template>
 
 <style scoped lang="scss">

@@ -1,3 +1,4 @@
+import { Contact } from './Contact';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
 
 export type EnquiryIntake = {
@@ -8,15 +9,6 @@ export type EnquiryIntake = {
   enquiryType?: SubmissionType;
   submit?: boolean;
 
-  applicant?: {
-    contactFirstName?: string;
-    contactLastName?: string;
-    contactPhoneNumber?: string;
-    contactEmail?: string;
-    contactApplicantRelationship?: string;
-    contactPreference?: string;
-  };
-
   basic?: {
     enquiryType?: string;
     isRelated?: string;
@@ -24,4 +16,6 @@ export type EnquiryIntake = {
     enquiryDescription?: string;
     applyForPermitConnect: string;
   };
+
+  contacts: Array<Contact>;
 };

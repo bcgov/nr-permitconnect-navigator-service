@@ -1,5 +1,5 @@
 import { IStamps } from '../interfaces/IStamps';
-
+import { Contact } from './Contact';
 import type { User } from './User';
 
 export type Enquiry = {
@@ -9,12 +9,6 @@ export type Enquiry = {
   enquiryType: string | null;
   submittedAt: string;
   submittedBy: string;
-  contactFirstName: string | null;
-  contactLastName: string | null;
-  contactPhoneNumber: string | null;
-  contactEmail: string | null;
-  contactPreference: string | null;
-  contactApplicantRelationship: string | null;
   isRelated: string | null;
   relatedActivityId: string | null;
   enquiryDescription: string | null;
@@ -22,5 +16,6 @@ export type Enquiry = {
   intakeStatus: string | null;
   enquiryStatus: string | null;
   waitingOn: string | null;
+  contacts: Array<Contact>;
   user: User | null;
 } & Partial<IStamps>;

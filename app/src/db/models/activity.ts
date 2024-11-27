@@ -17,9 +17,7 @@ export default {
     };
   },
 
-  fromPrismaModel(input: PrismaRelationActivity | null): Activity | null {
-    if (!input) return null;
-
+  fromPrismaModel(input: PrismaRelationActivity): Activity {
     return {
       activityId: input.activity_id,
       initiativeId: input.initiative_id,

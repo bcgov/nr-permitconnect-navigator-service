@@ -44,21 +44,10 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should not throw an error when isDevelopedInBC is NO and registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBC is NO and registeredName is not provided', () => {
     const data = {
       isDevelopedByCompanyOrOrg: BasicResponse.YES,
       isDevelopedInBC: BasicResponse.NO
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeUndefined();
-  });
-
-  it('should throw an error when isDevelopedInBC is NO but registeredName is provided', () => {
-    const data = {
-      isDevelopedByCompanyOrOrg: BasicResponse.YES,
-      isDevelopedInBC: BasicResponse.NO,
-      registeredName: 'My Company'
     };
 
     const result = basicIntake.validate(data);

@@ -1,5 +1,6 @@
 import { IStamps } from '../interfaces/IStamps';
 
+import type { Contact } from './Contact';
 import type { User } from './User';
 
 export type Submission = {
@@ -10,10 +11,6 @@ export type Submission = {
   submittedBy: string;
   locationPIDs: string | null;
   companyNameRegistered: string | null;
-  contactApplicantRelationship: string | null;
-  contactPhoneNumber: string | null;
-  contactEmail: string | null;
-  contactPreference: string | null;
   consentToFeedback: boolean;
   projectName: string | null;
   projectDescription: string | null;
@@ -40,7 +37,6 @@ export type Submission = {
   waitingOn: string | null;
   intakeStatus: string | null;
   applicationStatus: string | null;
-
   isDevelopedByCompanyOrOrg: string | null;
   isDevelopedInBC: string | null;
   multiFamilyUnits: string | null;
@@ -55,9 +51,8 @@ export type Submission = {
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;
-  contactFirstName: string | null;
-  contactLastName: string | null;
   submissionType: string | null;
   relatedEnquiries: string | null;
+  contacts: Array<Contact>;
   user: User | null;
 } & Partial<IStamps>;

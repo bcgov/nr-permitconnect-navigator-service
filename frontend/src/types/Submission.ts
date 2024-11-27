@@ -1,3 +1,6 @@
+import { ApplicationStatus } from '@/utils/enums/housing';
+
+import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
 import type { User } from './User';
 
@@ -9,15 +12,9 @@ export type Submission = {
   submittedAt: string;
   relatedEnquiries: string;
   hasRelatedEnquiry: boolean;
-  contactFirstName: string;
-  contactLastName: string;
   companyNameRegistered: string;
   consentToFeedback?: boolean;
   isDevelopedInBC: string;
-  contactApplicantRelationship: string;
-  contactPreference: string;
-  contactPhoneNumber: string;
-  contactEmail: string;
   projectName: string;
   projectDescription: string;
   projectLocationDescription: string;
@@ -44,14 +41,15 @@ export type Submission = {
   geomarkUrl: string;
   naturalDisaster: string;
   addedToATS: boolean;
-  atsClientNumber?: string;
+  atsClientNumber: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   aaiUpdated: boolean;
   astNotes: string;
   intakeStatus: string;
   assignedUserId?: string;
-  applicationStatus: string;
+  applicationStatus: ApplicationStatus;
   waitingOn?: string;
+  contacts: Array<Contact>;
   user?: User;
 } & Partial<IStamps>;

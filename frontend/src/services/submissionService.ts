@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email } from '@/types';
+import type { Email, Draft } from '@/types';
 
 export default {
   /**
@@ -10,14 +10,6 @@ export default {
    */
   getActivityIds() {
     return appAxios().get('submission/activityIds');
-  },
-
-  /**
-   * @function createDraft
-   * @returns {Promise} An axios response
-   */
-  createDraft(data?: any) {
-    return appAxios().put('submission/draft', data);
   },
 
   /**
@@ -37,11 +29,35 @@ export default {
   },
 
   /**
+   * @function deleteDraft
+   * @returns {Promise} An axios response
+   */
+  deleteDraft(draftId: string) {
+    return appAxios().delete(`submission/draft/${draftId}`);
+  },
+
+  /**
    * @function getSubmissions
    * @returns {Promise} An axios response
    */
   getSubmissions() {
     return appAxios().get('submission');
+  },
+
+  /**
+   * @function getDraft
+   * @returns {Promise} An axios response
+   */
+  getDraft(draftId: string) {
+    return appAxios().get(`submission/draft/${draftId}`);
+  },
+
+  /**
+   * @function getDrafts
+   * @returns {Promise} An axios response
+   */
+  getDrafts() {
+    return appAxios().get('submission/draft');
   },
 
   /**
@@ -69,11 +85,19 @@ export default {
   },
 
   /**
+   * @function submitDraft
+   * @returns {Promise} An axios response
+   */
+  submitDraft(data?: any) {
+    return appAxios().put('submission/draft/submit', data);
+  },
+
+  /**
    * @function updateDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(submissionId: string, data?: any) {
-    return appAxios().put(`submission/draft/${submissionId}`, data);
+  updateDraft(data?: Partial<Draft>) {
+    return appAxios().put('submission/draft', data);
   },
 
   /**
@@ -104,6 +128,6 @@ export default {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('submission/emailConfirmation', emailData);
+    return appAxios().put('submission/email', emailData);
   }
 };

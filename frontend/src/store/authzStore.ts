@@ -94,7 +94,7 @@ export const useAuthZStore = defineStore('authz', () => {
   const getters = {
     can: computed(
       () => (initiative: Initiative, resource: Resource, action: Action, group?: GroupName) =>
-        state.permissions.value.find(
+        state.permissions.value.some(
           (x) =>
             initiative === x.initiative &&
             x.resource === resource &&

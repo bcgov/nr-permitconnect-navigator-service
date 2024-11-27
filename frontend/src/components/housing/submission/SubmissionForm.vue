@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
-import { boolean, number, object, string } from 'yup';
+import { computed, onMounted, ref } from 'vue';
+import { array, boolean, number, object, string } from 'yup';
 
 import {
   Calendar,
@@ -16,7 +16,10 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
-import { Button, Message, useToast } from '@/lib/primevue';
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
+import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -30,15 +33,15 @@ import {
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
-import { applicantValidator, assignedToValidator, latitudeValidator, longitudeValidator } from '@/validators';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { assignedToValidator, contactValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Submission, User } from '@/types';
+import type { ATSClientResource, Submission, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
-// Interfacefs
+// Interfaces
 interface SubmissionForm extends Submission {
   locationAddress: string;
   user?: User;
@@ -55,6 +58,9 @@ const submissionStore = useSubmissionStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
+const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
+const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -71,7 +77,7 @@ const formSchema = object({
   submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
-  ...applicantValidator,
+  contacts: array().of(object(contactValidator)),
   companyNameRegistered: string().notRequired().max(255).label('Company'),
   consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
   isDevelopedInBC: string().when('companyNameRegistered', {
@@ -124,11 +130,7 @@ const formSchema = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: string().when('addedToATS', {
-    is: (val: boolean) => val,
-    then: (schema) => schema.required().max(255).label('ATS Client #'),
-    otherwise: () => string().notRequired()
-  }),
+  atsClientNumber: string().notRequired().max(255).label('ATS Client #'),
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -140,11 +142,16 @@ const formSchema = object({
 });
 
 // Actions
+const confirm = useConfirm();
 const toast = useToast();
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
+
+const isCompleted = computed(() => {
+  return submission.applicationStatus === ApplicationStatus.COMPLETED;
+});
 
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
@@ -187,6 +194,19 @@ function onInvalidSubmit(e: any) {
   }
 
   first?.scrollIntoView({ behavior: 'smooth' });
+}
+
+function onReOpen() {
+  confirm.require({
+    message: 'Please confirm that you want to re-open this submission',
+    header: 'Re-open submission?',
+    acceptLabel: 'Confirm',
+    rejectLabel: 'Cancel',
+    accept: () => {
+      formRef.value?.setFieldValue('applicationStatus', ApplicationStatus.IN_PROGRESS);
+      onSubmit(formRef.value?.values);
+    }
+  });
 }
 
 const onSubmit = async (values: any) => {
@@ -234,14 +254,8 @@ onMounted(async () => {
     submissionType: submission.submissionType,
     submittedAt: new Date(submission.submittedAt),
     relatedEnquiries: submission.relatedEnquiries,
-    contactFirstName: submission.contactFirstName,
-    contactLastName: submission.contactLastName,
     companyNameRegistered: submission.companyNameRegistered,
     isDevelopedInBC: submission.isDevelopedInBC,
-    contactApplicantRelationship: submission.contactApplicantRelationship,
-    contactPreference: submission.contactPreference,
-    contactPhoneNumber: submission.contactPhoneNumber,
-    contactEmail: submission.contactEmail,
     consentToFeedback: submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     projectName: submission.projectName,
     projectDescription: submission.projectDescription,
@@ -275,6 +289,7 @@ onMounted(async () => {
     aaiUpdated: submission.aaiUpdated,
     astNotes: submission.astNotes,
     intakeStatus: submission.intakeStatus,
+    contacts: submission.contacts,
     user: assigneeOptions.value[0] ?? null,
     applicationStatus: submission.applicationStatus,
     waitingOn: submission.waitingOn
@@ -301,7 +316,7 @@ onMounted(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard />
+    <FormNavigationGuard v-if="!isCompleted" />
 
     <div class="formgrid grid">
       <Dropdown
@@ -335,13 +350,13 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        name="contactFirstName"
+        :name="`contacts[0].firstName`"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactLastName"
+        :name="`contacts[0].lastName`"
         label="Last name"
         :disabled="!editable"
       />
@@ -368,28 +383,28 @@ onMounted(async () => {
       />
       <Dropdown
         class="col-3"
-        name="contactApplicantRelationship"
+        :name="`contacts[0].contactApplicantRelationship`"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        name="contactPreference"
+        :name="`contacts[0].contactPreference`"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        name="contactPhoneNumber"
+        :name="`contacts[0].phoneNumber`"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        name="contactEmail"
+        :name="`contacts[0].email`"
         label="Contact email"
         :disabled="!editable"
       />
@@ -609,28 +624,56 @@ onMounted(async () => {
       />
       <div class="col-6" />
 
-      <SectionHeader title="Other" />
-
+      <SectionHeader title="ATS" />
+      <div class="flex align-items-center mb-2">
+        <div
+          v-if="values.atsClientNumber"
+          class="ml-2 mr-2"
+        >
+          <h5 class="inline mr-2">Client #</h5>
+          <a
+            class="atsclass"
+            @click="atsUserDetailsModalVisible = true"
+          >
+            {{ values.atsClientNumber }}
+          </a>
+        </div>
+        <input
+          type="hidden"
+          name="atsClientNumber"
+        />
+        <Button
+          v-if="!values.atsClientNumber"
+          aria-label="Link to ATS"
+          class="h-2rem ml-2"
+          :disabled="!editable"
+          @click="atsUserLinkModalVisible = true"
+        >
+          Search ATS
+        </Button>
+        <Button
+          v-if="!values.atsClientNumber"
+          aria-label="New ATS client"
+          class="h-2rem ml-3"
+          :disabled="!editable"
+          @click="atsUserCreateModalVisible = true"
+        >
+          New ATS Client
+        </Button>
+      </div>
       <Checkbox
-        class="col-12"
+        class="col-12 mt-2"
         name="addedToATS"
         label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
         :bold="true"
       />
 
-      <div
-        v-if="values.addedToATS"
-        class="w-full"
-      >
-        <InputText
-          class="col-3"
-          name="atsClientNumber"
-          label="ATS Client #"
-          :disabled="!editable"
-        />
-        <div class="col-9" />
-      </div>
+      <SectionHeader
+        title="Other"
+        class="mt-2"
+      />
+
       <Checkbox
         class="col-12"
         name="ltsaCompleted"
@@ -688,21 +731,62 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <div
-        v-if="editable"
-        class="field col-12 mt-5"
-      >
+      <div class="field col-12 mt-5">
         <Button
+          v-if="!isCompleted"
           label="Save"
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
         />
         <CancelButton
+          v-if="!isCompleted"
           :editable="editable"
           @clicked="onCancel"
         />
+        <Button
+          v-if="isCompleted"
+          label="Re-open submission"
+          icon="pi pi-check"
+          @click="onReOpen()"
+        />
       </div>
     </div>
+    <ATSUserLinkModal
+      v-model:visible="atsUserLinkModalVisible"
+      :submission="submission"
+      @ats-user-link:link="
+        (atsClientResource: ATSClientResource) => {
+          atsUserLinkModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientResource.clientId?.toString());
+        }
+      "
+    />
+    <ATSUserDetailsModal
+      v-model:visible="atsUserDetailsModalVisible"
+      :ats-client-number="values.atsClientNumber"
+      @ats-user-details:un-link="
+        () => {
+          atsUserDetailsModalVisible = false;
+          setFieldValue('atsClientNumber', null);
+        }
+      "
+    />
+    <ATSUserCreateModal
+      v-model:visible="atsUserCreateModalVisible"
+      :submission="submission"
+      @ats-user-link:link="
+        (atsClientId: string) => {
+          atsUserCreateModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientId.toString());
+        }
+      "
+    />
   </Form>
 </template>
+
+<style scoped lang="scss">
+:deep(.atsclass) {
+  cursor: pointer;
+}
+</style>

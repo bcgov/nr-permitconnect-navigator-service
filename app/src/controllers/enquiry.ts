@@ -1,7 +1,7 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, enquiryService, noteService, userService } from '../services';
+import { activityService, contactService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
@@ -32,26 +32,14 @@ const controller = {
     }
   },
 
-  generateEnquiryData: async (req: Request<never, never, EnquiryIntake>) => {
+  generateEnquiryData: async (req: Request<never, never, EnquiryIntake>, intakeStatus: string) => {
     const data = req.body;
 
     const activityId =
       data.activityId ??
       (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
 
-    let applicant, basic;
-
-    // Create applicant information
-    if (data.applicant) {
-      applicant = {
-        contactFirstName: data.applicant.contactFirstName,
-        contactLastName: data.applicant.contactLastName,
-        contactPhoneNumber: data.applicant.contactPhoneNumber,
-        contactEmail: data.applicant.contactEmail,
-        contactApplicantRelationship: data.applicant.contactApplicantRelationship,
-        contactPreference: data.applicant.contactPreference
-      };
-    }
+    let basic;
 
     if (data.basic) {
       basic = {
@@ -65,22 +53,24 @@ const controller = {
 
     // Put new enquiry together
     return {
-      ...applicant,
       ...basic,
       enquiryId: data.enquiryId ?? uuidv4(),
-      activityId: activityId,
+      activityId: activityId as string,
       submittedAt: data.submittedAt ?? new Date().toISOString(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       submittedBy: getCurrentUsername(req.currentContext),
-      intakeStatus: data.submit ? IntakeStatus.SUBMITTED : IntakeStatus.DRAFT,
+      intakeStatus: intakeStatus,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
       enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
     };
   },
 
-  createDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
+  createEnquiry: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
-      const enquiry = await controller.generateEnquiryData(req);
+      const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
+
+      // Create or update contacts
+      await contactService.upsertContacts(enquiry.activityId, req.body.contacts, req.currentContext);
 
       // Create new enquiry
       const result = await enquiryService.createEnquiry({
@@ -97,6 +87,11 @@ const controller = {
   deleteEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.deleteEnquiry(req.params.enquiryId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -122,6 +117,11 @@ const controller = {
   getEnquiry: async (req: Request<{ enquiryId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.getEnquiry(req.params.enquiryId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -139,28 +139,18 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
+      await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
+
       const result = await enquiryService.updateEnquiry({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       } as Enquiry);
 
+      if (!result) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(result);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  updateDraft: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
-    try {
-      const enquiry = await controller.generateEnquiryData(req);
-
-      // Update enquiry
-      const result = await enquiryService.updateEnquiry({
-        ...(enquiry as Enquiry),
-        ...generateUpdateStamps(req.currentContext)
-      });
-
-      res.status(200).json({ activityId: result.activityId, enquiryId: result.enquiryId });
     } catch (e: unknown) {
       next(e);
     }
@@ -177,6 +167,11 @@ const controller = {
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
+
+      if (!response) {
+        return res.status(404).json({ message: 'Enquiry not found' });
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

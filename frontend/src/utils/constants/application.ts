@@ -12,8 +12,6 @@ export const ACCESS_REQUEST_STATUS = [
   AccessRequestStatus.REJECTED
 ];
 
-export const ACTIVITY_ID_LENGTH = 8;
-
 export const DELIMITER = '/';
 
 export const PCNS_CONTACT = {
@@ -22,11 +20,18 @@ export const PCNS_CONTACT = {
 };
 
 export const GROUP_NAME_LIST = [
-  GroupName.ADMIN,
-  GroupName.NAVIGATOR,
-  GroupName.NAVIGATOR_READ_ONLY,
-  GroupName.PROPONENT,
-  GroupName.SUPERVISOR
+  { id: GroupName.ADMIN, text: 'groupName.admin' },
+  { id: GroupName.NAVIGATOR, text: 'groupName.navigator' },
+  { id: GroupName.NAVIGATOR_READ_ONLY, text: 'groupName.navigatorReadOnly' },
+  { id: GroupName.PROPONENT, text: 'groupName.proponent' },
+  { id: GroupName.SUPERVISOR, text: 'groupName.supervisor' }
+];
+
+export const MANAGED_GROUP_NAME_LIST = [
+  { id: GroupName.ADMIN, text: 'groupName.admin' },
+  { id: GroupName.NAVIGATOR, text: 'groupName.navigator' },
+  { id: GroupName.NAVIGATOR_READ_ONLY, text: 'groupName.navigatorReadOnly' },
+  { id: GroupName.SUPERVISOR, text: 'groupName.supervisor' }
 ];
 
 export const SPATIAL_FILE_FORMATS = [

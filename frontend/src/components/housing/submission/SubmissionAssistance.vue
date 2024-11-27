@@ -12,6 +12,9 @@ const { formErrors, formValues } = defineProps<{
   formValues: { [key: string]: string };
 }>();
 
+// Emits
+const emit = defineEmits(['onSubmitAssistance']);
+
 // State
 const showTab: Ref<boolean> = ref(true);
 
@@ -23,7 +26,7 @@ const checkApplicantValuesValid = (
   errors: Record<string, string | undefined>
 ): boolean => {
   // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.APPLICANT];
+  let applicant = values?.[IntakeFormCategory.CONTACTS];
   if (Object.values(applicant).some((x) => !x)) {
     return false;
   }
@@ -33,7 +36,7 @@ const checkApplicantValuesValid = (
   const errorList = Object.keys(errors);
 
   for (const error of errorList) {
-    if (error.includes(IntakeFormCategory.APPLICANT)) {
+    if (error.includes(IntakeFormCategory.CONTACTS)) {
       isValid = false;
       break;
     }
@@ -43,7 +46,7 @@ const checkApplicantValuesValid = (
 
 const confirmSubmit = () => {
   confirm.require({
-    message: 'Are you sure you want to request assistance for this form? Please review this form before submitting.',
+    message: 'Are you sure you want to request assistance for this form?',
     header: 'Please confirm assistance',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
@@ -52,8 +55,6 @@ const confirmSubmit = () => {
     }
   });
 };
-
-const emit = defineEmits(['onSubmitAssistance']);
 </script>
 
 <template>

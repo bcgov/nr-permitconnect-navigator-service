@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Button, Dropdown } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
@@ -7,7 +9,6 @@ import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import { storeToRefs } from 'pinia';
 
 // Store
 const authzStore = useAuthZStore();
@@ -16,6 +17,8 @@ const { getGroupOverride } = storeToRefs(authzStore);
 const group: Ref<GroupName | undefined> = ref(undefined);
 
 // Actions
+const { t } = useI18n();
+
 function clearGroup() {
   authzStore.setGroupOverride(undefined);
   group.value = undefined;
@@ -42,6 +45,8 @@ onMounted(() => {
         v-model="group"
         class="w-full"
         :options="GROUP_NAME_LIST"
+        :option-label="(e) => t(`${e.text}`)"
+        :option-value="(e) => e.id"
         @change="(e) => setGroup(e)"
       />
     </div>

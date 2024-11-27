@@ -9,8 +9,8 @@ import { ApplicationStatus } from '../utils/enums/housing';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import type { IStamps } from '../interfaces/IStamps';
 import type { Submission, SubmissionSearchParameters } from '../types';
-import { IStamps } from '../interfaces/IStamps';
 
 /**
  * @function chefsAxios
@@ -35,10 +35,21 @@ const service = {
    */
   createSubmission: async (data: Partial<Submission>) => {
     const response = await prisma.submission.create({
-      data: { ...submission.toPrismaModel(data as Submission), created_at: data.createdAt, created_by: data.createdBy }
+      data: { ...submission.toPrismaModel(data as Submission), created_at: data.createdAt, created_by: data.createdBy },
+      include: {
+        activity: {
+          include: {
+            activity_contact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        }
+      }
     });
 
-    return submission.fromPrismaModel(response);
+    return submission.fromPrismaModelWithContact(response);
   },
 
   /**
@@ -69,12 +80,6 @@ const service = {
           activity_id: x.activityId as string,
           application_status: ApplicationStatus.NEW,
           company_name_registered: x.companyNameRegistered,
-          contact_email: x.contactEmail,
-          contact_phone_number: x.contactPhoneNumber,
-          contact_first_name: x.contactFirstName,
-          contact_last_name: x.contactLastName,
-          contact_preference: x.contactPreference,
-          contact_applicant_relationship: x.contactApplicantRelationship,
           financially_supported: x.financiallySupported,
           financially_supported_bc: x.financiallySupportedBC,
           financially_supported_indigenous: x.financiallySupportedIndigenous,
@@ -123,6 +128,17 @@ const service = {
       const del = await trx.submission.delete({
         where: {
           submission_id: submissionId
+        },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          }
         }
       });
 
@@ -135,7 +151,7 @@ const service = {
       return del;
     });
 
-    return submission.fromPrismaModel(response);
+    return submission.fromPrismaModelWithContact(response);
   },
 
   /**
@@ -183,7 +199,7 @@ const service = {
   /**
    * @function getSubmission
    * Gets a specific submission from the PCNS database
-   * @param {string} activityId PCNS Activity ID
+   * @param {string} submissionId PCNS Submission ID
    * @returns {Promise<Submission | null>} The result of running the findFirst operation
    */
   getSubmission: async (submissionId: string) => {
@@ -191,23 +207,47 @@ const service = {
       const result = await prisma.submission.findFirst({
         where: {
           submission_id: submissionId
+        },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          }
         }
       });
 
-      return result ? submission.fromPrismaModel(result) : null;
+      return result ? submission.fromPrismaModelWithContact(result) : null;
     } catch (e: unknown) {
       throw e;
     }
   },
 
-  /*
+  /**
    * @function getSubmissions
    * Gets a list of submissions
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   getSubmissions: async () => {
     try {
-      const result = await prisma.submission.findMany({ include: { user: true } });
+      const result = await prisma.submission.findMany({
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          },
+          user: true
+        }
+      });
 
       return result.map((x) => submission.fromPrismaModelWithUser(x));
     } catch (e: unknown) {
@@ -227,7 +267,18 @@ const service = {
    */
   searchSubmissions: async (params: SubmissionSearchParameters) => {
     let result = await prisma.submission.findMany({
-      include: { user: params.includeUser, activity: true },
+      include: {
+        activity: {
+          include: {
+            activity_contact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        },
+        user: params.includeUser
+      },
       where: {
         AND: [
           {
@@ -251,7 +302,7 @@ const service = {
 
     const submissions = params.includeUser
       ? result.map((x) => submission.fromPrismaModelWithUser(x))
-      : result.map((x) => submission.fromPrismaModel(x));
+      : result.map((x) => submission.fromPrismaModelWithContact(x));
 
     return submissions;
   },
@@ -267,6 +318,17 @@ const service = {
     const deleteSubmission = await prisma.submission.findUnique({
       where: {
         submission_id: submissionId
+      },
+      include: {
+        activity: {
+          include: {
+            activity_contact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        }
       }
     });
 
@@ -277,7 +339,7 @@ const service = {
           activity_id: deleteSubmission?.activity_id
         }
       });
-      return submission.fromPrismaModel(deleteSubmission);
+      return submission.fromPrismaModelWithContact(deleteSubmission);
     }
   },
 
@@ -293,10 +355,21 @@ const service = {
         data: { ...submission.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
         where: {
           submission_id: data.submissionId
+        },
+        include: {
+          activity: {
+            include: {
+              activity_contact: {
+                include: {
+                  contact: true
+                }
+              }
+            }
+          }
         }
       });
 
-      return submission.fromPrismaModel(result);
+      return submission.fromPrismaModelWithContact(result);
     } catch (e: unknown) {
       throw e;
     }

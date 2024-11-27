@@ -275,7 +275,53 @@ describe('listPermits', () => {
     await permitController.listPermits(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.query.activityId);
+    expect(listSpy).toHaveBeenCalledWith(req.query);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(permitList);
+  });
+
+  it('should return 200 and include notes if requested', async () => {
+    const now = new Date();
+    const req = {
+      query: { activityId: 'ACT_ID', includeNotes: 'true' },
+      currentContext: CURRENT_CONTEXT
+    };
+
+    const permitList = [
+      {
+        permitId: '12345',
+        permitTypeId: 123,
+        activityId: 'ACT_ID',
+        issuedPermitId: '1',
+        trackingId: '2',
+        authStatus: 'ACTIVE',
+        needed: 'true',
+        status: 'FOO',
+        submittedDate: now.toISOString(),
+        adjudicationDate: now.toISOString(),
+        statusLastVerified: now.toISOString(),
+        permitNotes: [
+          {
+            permitNoteId: 'NOTE123',
+            permitId: '12345',
+            note: 'A sample note',
+            createdAt: now.toISOString(),
+            createdBy: 'abc-123'
+          }
+        ]
+      }
+    ];
+
+    listSpy.mockResolvedValue(permitList);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await permitController.listPermits(req as any, res as any, next);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith({
+      activityId: 'ACT_ID',
+      includeNotes: true
+    });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(permitList);
   });
@@ -294,7 +340,7 @@ describe('listPermits', () => {
     await permitController.listPermits(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.query.activityId);
+    expect(listSpy).toHaveBeenCalledWith(req.query);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });

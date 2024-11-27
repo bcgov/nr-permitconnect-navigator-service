@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
 import { CopyToClipboard } from '@/components/form';
 import { Dropdown } from '@/lib/primevue';
@@ -12,6 +13,9 @@ const authnStore = useAuthNStore();
 const { getAccessToken, getProfile } = storeToRefs(authnStore);
 const { getConfig } = storeToRefs(useConfigStore());
 const authzStore = useAuthZStore();
+
+// Actions
+const { t } = useI18n();
 </script>
 
 <template>
@@ -23,6 +27,8 @@ const authzStore = useAuthZStore();
         <Dropdown
           class="w-full"
           :options="GROUP_NAME_LIST"
+          :option-label="(e) => t(`${e.text}`)"
+          :option-value="(e) => e.id"
           @change="
             (e) => {
               authzStore.setGroupOverride(e.value);
