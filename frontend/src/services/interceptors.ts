@@ -110,7 +110,6 @@ export function orgBookAxios(options: AxiosRequestConfig = {}): AxiosInstance {
     paramsSerializer,
     ...options
   });
-
   instance.interceptors.request.use(
     async (cfg: InternalAxiosRequestConfig) => {
       return Promise.resolve(cfg);
@@ -122,3 +121,36 @@ export function orgBookAxios(options: AxiosRequestConfig = {}): AxiosInstance {
 
   return instance;
 }
+
+// /**
+//  * @function openMapsAxios
+//  * Returns an Axios instance for the openMaps API
+//  * @param {AxiosRequestConfig} options Axios request config options
+//  * @returns {AxiosInstance} An axios instance
+//  */
+// export function openMapsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
+//   console.log('openMapsAxios');
+//   console.log(window);
+//   console.log(window.location);
+//   const instance = axios.create({
+//     baseURL: new ConfigService().getConfig().openMaps.apiPath,
+//     timeout: 10000,
+//     headers: {
+//       'Access-Control-Allow-Origin': window.location.origin,
+//       'Access-Control-Allow-Headers': 'Access-Control-Allow-Origin,Origin',
+//       'Access-Control-Allow-Methods': 'GET,OPTIONS'
+//     },
+//     withCredentials: false,
+//     ...options
+//   });
+//   instance.interceptors.request.use(
+//     async (cfg: InternalAxiosRequestConfig) => {
+//       return Promise.resolve(cfg);
+//     },
+//     (error: Error) => {
+//       return Promise.reject(error);
+//     }
+//   );
+
+//   return instance;
+// }
