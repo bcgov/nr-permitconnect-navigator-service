@@ -199,6 +199,9 @@ oidcSecretOverride:
 ssoSecretOverride:
   username: ~
   password: ~
+atsSecretOverride:
+  username: ~
+  password: ~
 
 # Patroni subchart configuration overrides
 patroni:
