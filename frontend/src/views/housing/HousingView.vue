@@ -64,10 +64,7 @@ const items = ref([
               <div class="card">
                 <div class="flex align-items-center text-left h-full mx-3">
                   <div :class="['mr-2 text-2xl', { 'pb-4': item.bottom }]">
-                    <font-awesome-icon
-                      :icon="`fa-solid
-                  ${item.icon}`"
-                    />
+                    <font-awesome-icon :icon="`fa-solid ${item.icon}`" />
                   </div>
                   <div>
                     <div class="font-bold">{{ item.top }}</div>
