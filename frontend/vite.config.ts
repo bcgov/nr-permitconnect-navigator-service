@@ -18,7 +18,8 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: "@import '@/assets/variables.scss';" // eslint-disable-line quotes
+        additionalData: '@use "@/assets/variables.scss" as *;',
+        api: 'modern'
       }
     }
   },
