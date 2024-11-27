@@ -263,7 +263,7 @@ watch(showCompleted, () => {
   </div>
   <TabView
     v-if="!loading"
-    v-model:activeIndex="activeTabIndex"
+    v-model:active-index="activeTabIndex"
   >
     <TabPanel header="Projects">
       <Accordion

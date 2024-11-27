@@ -333,7 +333,7 @@ onMounted(async () => {
   />
   <TabView
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
-    v-model:activeIndex="activeTab"
+    v-model:active-index="activeTab"
   >
     <TabPanel header="Manage users">
       <div class="flex justify-content-between">
