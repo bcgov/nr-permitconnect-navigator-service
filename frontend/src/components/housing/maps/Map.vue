@@ -52,7 +52,7 @@ function disableInteraction() {
   map.scrollWheelZoom.disable();
   map.boxZoom.disable();
   map.keyboard.disable();
-  if (map.tap) map.tap.disable();
+  if (map.tapHold) map.tapHold.disable();
 }
 
 function enableInteraction() {
@@ -62,7 +62,7 @@ function enableInteraction() {
   map.scrollWheelZoom.enable();
   map.boxZoom.enable();
   map.keyboard.enable();
-  if (map.tap) map.tap.enable();
+  if (map.tapHold) map.tapHold.enable();
 }
 
 // Map component will be misaligned if mounted while not visible. Trigger resize to fix on show

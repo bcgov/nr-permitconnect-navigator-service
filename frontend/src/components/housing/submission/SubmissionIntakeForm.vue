@@ -601,7 +601,7 @@ onBeforeMount(async () => {
       />
 
       <Stepper
-        v-model:activeStep="activeStep"
+        v-model:active-step="activeStep"
         @update:active-step="onStepChange"
       >
         <!--
