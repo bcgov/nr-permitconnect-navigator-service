@@ -156,7 +156,11 @@ function confirmSubmit(data: GenericObject) {
 
 async function generateActivityId() {
   try {
-    const response = await submissionService.updateDraft({});
+    const response = await submissionService.updateDraft({
+      draftId: undefined,
+      activityId: undefined,
+      data: {}
+    });
     if (response.data?.activityId && response.data?.draftId) {
       syncFormAndRoute(response.data.activityId, response.data.draftId);
       return response.data.activityId;
