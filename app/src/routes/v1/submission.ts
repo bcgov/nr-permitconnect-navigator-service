@@ -63,6 +63,7 @@ router.get(
 router.get(
   '/draft/:draftId',
   hasAuthorization(Resource.SUBMISSION, Action.READ),
+  hasAccess('draftId'),
   (req: Request<{ draftId: string }>, res: Response, next: NextFunction): void => {
     submissionController.getDraft(req, res, next);
   }
