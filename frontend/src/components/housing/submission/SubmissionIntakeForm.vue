@@ -438,6 +438,9 @@ function syncFormAndRoute(activityId: string, draftId: string) {
 
 onBeforeMount(async () => {
   try {
+    // Clearing the document store on page load
+    submissionStore.setDocuments([]);
+
     let response,
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
@@ -445,6 +448,11 @@ onBeforeMount(async () => {
     if (draftId) {
       response = (await submissionService.getDraft(draftId)).data;
       initialFormValues.value = { ...response.data, activityId: response.activityId };
+
+      if (response.activityId) {
+        documents = (await documentService.listDocuments(response.activityId)).data;
+        submissionStore.setDocuments(documents);
+      }
     } else {
       if (submissionId && activityId) {
         response = (await submissionService.getSubmission(submissionId)).data;
@@ -522,9 +530,6 @@ onBeforeMount(async () => {
   } catch {
     router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
-
-  // Clearing the document store on page load
-  submissionStore.setDocuments([]);
 });
 </script>
 
