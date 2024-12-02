@@ -431,12 +431,6 @@ const controller = {
     try {
       const response = await draftService.getDraft(req.params.draftId);
 
-      if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        if (response?.createdBy !== getCurrentUsername(req.currentContext)) {
-          res.status(403).send();
-        }
-      }
-
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
