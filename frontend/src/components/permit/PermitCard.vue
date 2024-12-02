@@ -83,7 +83,7 @@ function isCompleted(authStatus: string | undefined): boolean {
           <Button
             class="p-button-outlined"
             aria-label="Add updates"
-            :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
+            :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
             @click="NotesModalVisible = true"
           >
             <font-awesome-icon
