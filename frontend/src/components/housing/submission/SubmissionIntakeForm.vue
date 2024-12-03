@@ -366,6 +366,13 @@ async function onSubmit(data: any) {
       ]
     );
 
+    // Remove empty investigate permit objects
+    const filteredInvestigatePermits = submissionData.investigatePermits.filter(
+      (x: object) => JSON.stringify(x) !== '{}'
+    );
+
+    submissionData.investigatePermits = filteredInvestigatePermits;
+
     const response = await submissionService.submitDraft({ ...submissionData, draftId });
 
     if (response.data.activityId && response.data.submissionId) {
