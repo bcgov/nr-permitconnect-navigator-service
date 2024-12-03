@@ -28,7 +28,7 @@ const { getPermitTypes } = storeToRefs(useTypeStore());
 const cardData = computed(() => permit);
 const cardUpdatedBy: Ref<string> = ref('');
 const permitModalVisible: Ref<boolean> = ref(false);
-const NotesModalVisible: Ref<boolean> = ref(false);
+const notesModalVisible: Ref<boolean> = ref(false);
 const permitType: Ref<PermitType | undefined> = ref(
   getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId)
 );
@@ -65,7 +65,7 @@ function isCompleted(authStatus: string | undefined): boolean {
 </script>
 
 <template>
-  <Card :class="{ completed: isCompleted(cardData.authStatus), selected: NotesModalVisible }">
+  <Card :class="{ completed: isCompleted(cardData.authStatus), selected: notesModalVisible }">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex-grow-1">
@@ -84,7 +84,7 @@ function isCompleted(authStatus: string | undefined): boolean {
             class="p-button-outlined"
             aria-label="Add updates"
             :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.UPDATE)"
-            @click="NotesModalVisible = true"
+            @click="notesModalVisible = true"
           >
             <font-awesome-icon
               class="pr-2"
@@ -184,7 +184,7 @@ function isCompleted(authStatus: string | undefined): boolean {
     :permit="cardData"
   />
   <NotesModal
-    v-model:visible="NotesModalVisible"
+    v-model:visible="notesModalVisible"
     :permit="cardData"
   />
 </template>

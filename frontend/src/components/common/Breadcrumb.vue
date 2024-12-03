@@ -19,7 +19,10 @@ const { home, model } = defineProps<{
     <template #item="{ item }">
       <router-link
         v-if="item.route"
-        :to="{ name: item.route }"
+        :to="{
+          name: item.route,
+          params: item.params
+        }"
       >
         <span
           class="app-primary-color cursor-pointer hover-underline"

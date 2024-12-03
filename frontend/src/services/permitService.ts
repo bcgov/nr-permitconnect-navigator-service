@@ -20,6 +20,14 @@ export default {
   },
 
   /**
+   * @function getPermit
+   * @returns {Promise} An axios response
+   */
+  getPermit(permitId: string) {
+    return appAxios().get(`permit/${permitId}`);
+  },
+
+  /**
    * @function getPermitTypes
    * @returns {Promise} An axios response
    */

@@ -67,4 +67,15 @@ router.get(
   }
 );
 
+// Permit get endpoint
+router.get(
+  '/:permitId',
+  hasAuthorization(Resource.PERMIT, Action.READ),
+  hasAccess('permitId'),
+  permitValidator.getPermit,
+  (req: Request<{ permitId: string }>, res: Response, next: NextFunction): void => {
+    permitController.getPermit(req, res, next);
+  }
+);
+
 export default router;

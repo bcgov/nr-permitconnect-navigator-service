@@ -17,6 +17,7 @@ import {
   DraftCode,
   IntakeStatus,
   NumResidentialUnits,
+  PermitAuthorizationStatus,
   PermitNeeded,
   PermitStatus,
   ProjectLocation,
@@ -295,11 +296,11 @@ const controller = {
         permitTypeId: x.permitTypeId,
         activityId: activityId as string,
         trackingId: x.trackingId,
-        status: PermitStatus.APPLIED,
-        needed: null,
+        status: x.status ?? PermitStatus.APPLIED,
+        needed: x.needed ?? PermitNeeded.YES,
         statusLastVerified: x.statusLastVerified,
         issuedPermitId: null,
-        authStatus: null,
+        authStatus: x.authStatus ?? PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: null,
         adjudicationDate: null
       }));
@@ -311,11 +312,11 @@ const controller = {
         permitTypeId: x.permitTypeId as number,
         activityId: activityId as string,
         trackingId: null,
-        status: null,
-        needed: PermitNeeded.UNDER_INVESTIGATION,
+        status: x.status ?? PermitStatus.NEW,
+        needed: x.needed ?? PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: x.statusLastVerified,
         issuedPermitId: null,
-        authStatus: null,
+        authStatus: x.authStatus ?? PermitAuthorizationStatus.NONE,
         submittedDate: null,
         adjudicationDate: null
       }));

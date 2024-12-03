@@ -56,7 +56,21 @@ const formSchema = object({
   status: string().required().oneOf(PERMIT_STATUS_LIST).label('Application stage'),
   agency: string().required().label('Agency'),
   businessDomain: string().label('Business domain'),
-  authStatus: string().required().oneOf(PERMIT_AUTHORIZATION_STATUS_LIST).label('Authorization status'),
+  authStatus: string()
+    .required()
+    .oneOf(PERMIT_AUTHORIZATION_STATUS_LIST)
+    .label('Authorization status')
+    .test(
+      'valid-auth-status',
+      'Authorization status can only be "None" if the Permit state is "Pre-submission".',
+      function (value) {
+        const { status } = this.parent;
+        return (
+          (status === PermitStatus.NEW && value === PermitAuthorizationStatus.NONE) ||
+          (status !== PermitStatus.NEW && value !== PermitAuthorizationStatus.NONE)
+        );
+      }
+    ),
   statusLastVerified: date()
     .max(new Date(), 'Status verified date cannot be in the future')
     .nullable()

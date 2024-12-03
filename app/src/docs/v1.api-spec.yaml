@@ -491,6 +491,35 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /permit/{permitId}:
+    get:
+      summary: Get a permit
+      operationId: getPermit
+      tags:
+        - Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      responses:
+        '200':
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
     put:
       summary: Update a permit
       operationId: updatePermit

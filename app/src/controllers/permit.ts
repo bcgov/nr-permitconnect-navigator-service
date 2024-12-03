@@ -33,6 +33,20 @@ const controller = {
     }
   },
 
+  getPermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await permitService.getPermit(req.params.permitId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Permit not found' });
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getPermitTypes: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.getPermitTypes();
