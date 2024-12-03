@@ -68,7 +68,7 @@ const service = {
    * @function getPermit
    * Get a permit
    * @param {string} permitId Permit ID
-   * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+   * @returns {Promise<Permit>} The result of running the findFirst operation
    */
   getPermit: async (permitId: string) => {
     const result = await prisma.permit.findFirst({
@@ -76,11 +76,12 @@ const service = {
         permit_id: permitId
       },
       include: {
-        permit_type: true
+        permit_type: true,
+        permit_note: { orderBy: { created_at: 'desc' } }
       }
     });
 
-    return result ? permit.fromPrismaModel(result) : null;
+    return result ? permit.fromPrismaModelWithNotes(result) : null;
   },
 
   /**

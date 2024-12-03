@@ -1,6 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import permit_note from './permit_note';
+import permit_type from './permit_type';
 
 import type { Stamps } from '../stamps';
 import type { Permit } from '../../types';
@@ -47,7 +48,8 @@ export default {
       adjudicationDate: input.adjudication_date?.toISOString() ?? null,
       statusLastVerified: input.status_last_verified?.toISOString() ?? null,
       updatedAt: input.updated_at?.toISOString() ?? null,
-      updatedBy: input.updated_by
+      updatedBy: input.updated_by,
+      permitType: permit_type.fromPrismaModel(input.permit_type)
     };
   },
 

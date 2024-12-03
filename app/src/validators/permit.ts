@@ -27,6 +27,11 @@ const schema = {
       permitId: uuidv4.required()
     })
   },
+  getPermit: {
+    params: Joi.object({
+      permitId: uuidv4.required()
+    })
+  },
   listPermits: {
     query: Joi.object({
       activityId: Joi.string().min(8).max(8).allow(null),
@@ -47,6 +52,7 @@ const schema = {
 export default {
   createPermit: validate(schema.createPermit),
   deletePermit: validate(schema.deletePermit),
+  getPermit: validate(schema.getPermit),
   listPermits: validate(schema.listPermits),
   updatePermit: validate(schema.updatePermit)
 };

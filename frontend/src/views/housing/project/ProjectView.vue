@@ -5,7 +5,7 @@ import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
-import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
+// import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -25,6 +25,7 @@ type PermitFilterConfig = {
   permits: Array<Permit>;
   permitStatus?: string;
   permitTypes: Array<PermitType>;
+  submitted?: boolean;
 };
 
 type CombinedPermit = Permit & PermitType;
@@ -53,8 +54,6 @@ const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
 const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
 const enquiryModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
-const permitModalVisible: Ref<boolean> = ref(false);
-const selectedPermit: Ref<CombinedPermit | undefined> = ref(undefined);
 
 const permitsNeeded = computed(() => {
   return permitFilter({
@@ -77,18 +76,11 @@ const permitsNotNeeded = computed(() => {
 });
 const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
   let firstFilter = permitFilter({
-    permitNeeded: PermitNeeded.YES,
+    submitted: true,
     permits: getPermits.value,
     permitTypes: getPermitTypes.value
   });
-
-  return firstFilter
-    .filter((item) => {
-      if (item.authStatus === PermitAuthorizationStatus.NONE || item.status === PermitStatus.NEW) return false;
-      return true;
-    })
-    .sort(permitNameSortFcn)
-    .sort(permitBusinessSortFcn);
+  return firstFilter.sort(permitNameSortFcn).sort(permitBusinessSortFcn);
 });
 
 // Actions
@@ -104,7 +96,7 @@ function permitNameSortFcn(a: CombinedPermit, b: CombinedPermit) {
 }
 
 function permitFilter(config: PermitFilterConfig) {
-  const { permitNeeded, permits, permitStatus, permitTypes } = config;
+  const { permitNeeded, permits, permitStatus, permitTypes, submitted } = config;
   let returnArray: Array<any> = permits;
 
   if (permitNeeded) {
@@ -119,6 +111,15 @@ function permitFilter(config: PermitFilterConfig) {
       const pType = permitTypes.find((pt) => pt.permitTypeId === p?.permitTypeId && p.status === permitStatus);
       if (pType) return { ...p, ...pType };
     });
+  }
+
+  if (submitted) {
+    returnArray = returnArray
+      .filter((item) => item.authStatus !== PermitAuthorizationStatus.NONE && item.status !== PermitStatus.NEW)
+      .map((p) => {
+        const pType = permitTypes.find((pt) => pt.permitTypeId === p?.permitTypeId);
+        if (pType) return { ...p, ...pType };
+      });
   }
 
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
@@ -273,68 +274,59 @@ onMounted(async () => {
     >
       We will update your submitted applications here as the project progresses.
     </div>
-    <Card
+    <router-link
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
-      class="permit-card--hover mb-3"
-      @click="
-        () => {
-          permitModalVisible = true;
-          selectedPermit = permit;
-        }
-      "
+      :to="{
+        name: RouteName.HOUSING_PROJECT_PERMIT,
+        params: { permitId: permit.permitId }
+      }"
     >
-      <template #title>
-        <div class="flex justify-content-between">
-          <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
-          <font-awesome-icon
-            class="ellipsis-icon"
-            icon="fa fa-ellipsis"
-          />
-        </div>
-        <Divider />
-      </template>
-      <template #content>
-        <div class="grid">
-          <div class="col-12 flex mb-3">
-            <StatusPill
-              class="mr-2"
-              :auth-status="permit.authStatus"
+      <Card class="permit-card--hover mb-3">
+        <template #title>
+          <div class="flex justify-content-between">
+            <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
+            <font-awesome-icon
+              class="ellipsis-icon"
+              icon="fa fa-ellipsis"
             />
-            <div>
-              <span class="label-verified mr-1">Status last verified on</span>
-              <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
+          </div>
+          <Divider />
+        </template>
+        <template #content>
+          <div class="grid">
+            <div class="col-12 flex mb-3">
+              <StatusPill
+                class="mr-2"
+                :auth-status="permit.authStatus"
+              />
+              <div>
+                <span class="label-verified mr-1">Status last verified on</span>
+                <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="label-field">Tracking ID</div>
+              <div class="permit-data">
+                {{ permit?.trackingId }}
+              </div>
+            </div>
+            <div class="col-3">
+              <div class="label-field">Agency</div>
+              <div class="permit-data">
+                {{ permit?.agency }}
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="label-field">Latest updates</div>
+              <div class="permit-data">
+                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : 'No updates at the moment.' }}
+              </div>
             </div>
           </div>
-          <div class="col-3">
-            <div class="label-field">Tracking ID</div>
-            <div class="permit-data">
-              {{ permit?.trackingId }}
-            </div>
-          </div>
-          <div class="col-3">
-            <div class="label-field">Agency</div>
-            <div class="permit-data">
-              {{ permit?.agency }}
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="label-field">Latest updates</div>
-            <div class="permit-data">
-              {{ permit?.permitNote?.length ? permit?.permitNote[0].note : 'No updates at the moment.' }}
-            </div>
-          </div>
-        </div>
-      </template>
-    </Card>
-    <ProjectPermitModal
-      v-model:visible="permitModalVisible"
-      dismissable-mask
-      :confirmation-id="enquiryConfirmationId"
-      :permit="selectedPermit"
-      @on-hide="handleDialogClose"
-      @on-sumbit-enquiry="handleEnquirySubmit"
-    />
+        </template>
+      </Card>
+    </router-link>
     <CreateEnquiryDialog
       v-model:visible="enquiryModalVisible"
       dismissable-mask

@@ -187,6 +187,16 @@ const routes: Array<RouteRecordRaw> = [
                 },
                 name: RouteName.HOUSING_PROJECT,
                 props: createProps
+              },
+              {
+                path: 'permit/:permitId',
+                component: () => import('@/views/permit/PermitStatusView.vue'),
+                beforeEnter: accessHandler,
+                meta: {
+                  access: [NavigationPermission.HOUSING_STATUS_TRACKER]
+                },
+                name: RouteName.HOUSING_PROJECT_PERMIT,
+                props: createProps
               }
             ]
           },
