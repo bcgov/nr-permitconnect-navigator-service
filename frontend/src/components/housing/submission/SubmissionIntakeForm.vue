@@ -401,11 +401,11 @@ async function onSubmit(data: any) {
 async function emailConfirmation(activityId: string, submissionId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = confirmationTemplateSubmission({
-    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
+    '{{ contactName }}': formRef.value?.values.contactFirstName,
     '{{ activityId }}': activityId,
     '{{ submissionId }}': submissionId
   });
-  let applicantEmail = formRef.value?.values.contacts[0].email;
+  let applicantEmail = formRef.value?.values.contactEmail;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
