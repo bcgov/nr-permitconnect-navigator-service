@@ -398,23 +398,27 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailConfirmation(activityId: string, submissionId: string) {
-  const configCC = getConfig.value.ches?.submission?.cc;
-  const body = confirmationTemplateSubmission({
-    '{{ contactName }}': formRef.value?.values.contactFirstName,
-    '{{ activityId }}': activityId,
-    '{{ submissionId }}': submissionId
-  });
-  let applicantEmail = formRef.value?.values.contactEmail;
-  let emailData = {
-    from: configCC,
-    to: [applicantEmail],
-    cc: configCC,
-    subject: 'Confirmation of Submission',
-    bodyType: 'html',
-    body: body
-  };
-  await submissionService.emailConfirmation(emailData);
+async function emailConfirmation(actId: string, subId: string) {
+  try {
+    const configCC = getConfig.value.ches?.submission?.cc;
+    const body = confirmationTemplateSubmission({
+      '{{ contactName }}': formRef.value?.values.contactFirstName,
+      '{{ activityId }}': actId,
+      '{{ submissionId }}': subId
+    });
+    let applicantEmail = formRef.value?.values.contactEmail;
+    let emailData = {
+      from: configCC,
+      to: [applicantEmail],
+      cc: configCC,
+      subject: 'Confirmation of Submission',
+      bodyType: 'html',
+      body: body
+    };
+    await submissionService.emailConfirmation(emailData);
+  } catch (e: any) {
+    toast.error('Failed to send confirmation email. ', e);
+  }
 }
 
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
@@ -426,22 +430,22 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-function syncFormAndRoute(activityId: string, draftId: string) {
-  if (draftId) {
+function syncFormAndRoute(actId: string, drftId: string) {
+  if (drftId) {
     // Update route query for refreshing
     router.replace({
       name: RouteName.HOUSING_SUBMISSION_INTAKE,
       query: {
-        draftId: draftId
+        draftId: drftId
       }
     });
   }
 
-  if (activityId) {
+  if (actId) {
     formRef.value?.resetForm({
       values: {
         ...formRef.value?.values,
-        activityId: activityId
+        activityId: actId
       }
     });
   }
