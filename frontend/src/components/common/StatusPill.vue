@@ -66,18 +66,20 @@ const getState = computed(() => {
 </script>
 
 <template>
-  <div
-    v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
-    class="flex justify-content-center align-items-center auth-indicator"
-    :class="[getState?.badgeClass]"
-  >
-    <font-awesome-icon
-      v-if="getState?.iconString"
-      class="icon-detail"
-      :class="[getState?.iconClass]"
-      :icon="getState?.iconString"
-    />
-    <span class="text-color">{{ authStatus }}</span>
+  <div class="flex">
+    <div
+      v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
+      class="flex justify-content-center align-items-center auth-indicator"
+      :class="[getState?.badgeClass]"
+    >
+      <font-awesome-icon
+        v-if="getState?.iconString"
+        class="icon-detail"
+        :class="[getState?.iconClass]"
+        :icon="getState?.iconString"
+      />
+      <span class="text-color">{{ authStatus }}</span>
+    </div>
   </div>
 </template>
 

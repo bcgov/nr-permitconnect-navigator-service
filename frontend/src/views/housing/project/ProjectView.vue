@@ -6,11 +6,11 @@ import { useRouter } from 'vue-router';
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
+import StatusPill from '@/components/common/StatusPill.vue';
 import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
-import { toKebabCase } from '@/utils/utils';
 
 import { enquiryService, permitService, submissionService, userService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -78,17 +78,17 @@ const permitsNotNeeded = computed(() => {
 const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
   let firstFilter = permitFilter({
     permitNeeded: PermitNeeded.YES,
-    permitStatus: PermitStatus.APPLIED,
     permits: getPermits.value,
     permitTypes: getPermitTypes.value
   });
-  let secondFilter = permitFilter({
-    permitNeeded: PermitNeeded.YES,
-    permitStatus: PermitStatus.COMPLETED,
-    permits: getPermits.value,
-    permitTypes: getPermitTypes.value
-  });
-  return firstFilter.concat(secondFilter).sort(permitNameSortFcn).sort(permitBusinessSortFcn);
+
+  return firstFilter
+    .filter((item) => {
+      if (item.authStatus === PermitAuthorizationStatus.NONE || item.status === PermitStatus.NEW) return false;
+      return true;
+    })
+    .sort(permitNameSortFcn)
+    .sort(permitBusinessSortFcn);
 });
 
 // Actions
@@ -122,12 +122,6 @@ function permitFilter(config: PermitFilterConfig) {
   }
 
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
-}
-
-function displayTrackerStatus(authStatus: string | undefined, permitState: string | undefined): string | undefined {
-  if (permitState === PermitStatus.APPLIED && authStatus === PermitAuthorizationStatus.NONE) return 'Submitted';
-
-  return authStatus;
 }
 
 function handleDialogClose() {
@@ -178,7 +172,7 @@ onMounted(async () => {
 
   try {
     const activityId = submissionValue.activityId;
-    const permitsValue = (await permitService.listPermits({ activityId })).data;
+    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
     submissionStore.setPermits(permitsValue);
   } catch {
     toast.error('Unable to load permits for this project, please try again later');
@@ -220,7 +214,8 @@ onMounted(async () => {
       </h1>
       <Button
         class="p-button-sm header-btn"
-        label="Ask a Navigator"
+        label="Ask my Navigator"
+        outlined
         @click="enquiryModalVisible = !enquiryModalVisible"
       />
     </div>
@@ -237,19 +232,19 @@ onMounted(async () => {
     </div>
     <div><h3 class="mb-5">Required permits</h3></div>
     <div
-      v-if="!(permitsNeeded?.length || permitsNotNeeded?.length)"
-      class="empty-block p-5"
+      v-if="!permitsNeeded?.length"
+      class="empty-block p-5 mb-2"
     >
-      We are investigating the permits required for this project.
+      We will update the necessary permits here as the project progresses. You may see this message while we are
+      investigating or if no application is needed at this time.
     </div>
-
     <Card
       v-for="permit in permitsNeeded"
       :key="permit.permitId"
-      class="app-primary-color permit-card hover-underline cursor-pointer"
+      class="app-primary-color permit-card mb-2"
     >
       <template #content>
-        <h5 class="m-0 p-0">{{ permit.businessDomain }}: {{ permit.name }}</h5>
+        <h5 class="m-0 p-0">{{ permit.name }}</h5>
       </template>
     </Card>
     <Accordion
@@ -266,22 +261,22 @@ onMounted(async () => {
             :key="permit.permitId"
             class="m-0"
           >
-            {{ permit.businessDomain }}: {{ permit.name }}
+            {{ permit.name }}
           </li>
         </ul>
       </AccordionTab>
     </Accordion>
     <h3 class="mt-8 mb-5">Submitted applications</h3>
     <div
-      v-if="!(permitsSubmitted.length || permitsNotNeeded.length)"
+      v-if="!permitsSubmitted.length"
       class="empty-block p-5"
     >
-      You will see your permit applications here once submitted.
+      We will update your submitted applications here as the project progresses.
     </div>
     <Card
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
-      class="permit-card"
+      class="permit-card--hover mb-3"
       @click="
         () => {
           permitModalVisible = true;
@@ -290,42 +285,44 @@ onMounted(async () => {
       "
     >
       <template #title>
-        <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.businessDomain }}: {{ permit.name }}</h5>
+        <div class="flex justify-content-between">
+          <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
+          <font-awesome-icon
+            class="ellipsis-icon"
+            icon="fa fa-ellipsis"
+          />
+        </div>
         <Divider />
       </template>
       <template #content>
         <div class="grid">
-          <div class="col-2">
-            <div :class="['authIndicator', toKebabCase(displayTrackerStatus(permit.authStatus, permit.status))]">
-              {{ displayTrackerStatus(permit.authStatus, permit.status) }}
+          <div class="col-12 flex mb-3">
+            <StatusPill
+              class="mr-2"
+              :auth-status="permit.authStatus"
+            />
+            <div>
+              <span class="label-verified mr-1">Status last verified on</span>
+              <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
             </div>
           </div>
-          <div
-            v-tooltip="{ value: permit?.statusLastVerified ? formatDate(permit.statusLastVerified) : '' }"
-            class="col-2"
-          >
+          <div class="col-3">
+            <div class="label-field">Tracking ID</div>
             <div class="permit-data">
-              {{ permit?.statusLastVerified ? formatDate(permit.statusLastVerified) : '' }}
+              {{ permit?.trackingId }}
             </div>
-            <div :class="['sub-label', { 'm-0': permit?.statusLastVerified }]">Last verified date</div>
           </div>
-          <div
-            v-tooltip="{ value: permit?.trackingId ? permit.trackingId : '' }"
-            class="col-2"
-          >
+          <div class="col-3">
+            <div class="label-field">Agency</div>
             <div class="permit-data">
-              {{ permit?.trackingId ? permit.trackingId : '' }}
+              {{ permit?.agency }}
             </div>
-            <div :class="['sub-label', { 'm-0': permit?.trackingId }]">Tracking ID</div>
           </div>
-          <div
-            v-tooltip="{ value: permit?.issuedPermitId ? permit.issuedPermitId : '' }"
-            class="col-2"
-          >
+          <div class="col-6">
+            <div class="label-field">Latest updates</div>
             <div class="permit-data">
-              {{ permit?.issuedPermitId ? permit.issuedPermitId : '' }}
+              {{ permit?.permitNote?.length ? permit?.permitNote[0].note : 'No updates at the moment.' }}
             </div>
-            <div :class="['sub-label', { 'm-0': permit?.issuedPermitId }]">Permit ID</div>
           </div>
         </div>
       </template>
@@ -357,6 +354,16 @@ a {
   text-decoration: underline;
 }
 
+.ellipsis-icon {
+  cursor: pointer;
+  width: 1.5rem;
+  color: #255a90;
+
+  &:hover {
+    color: #053662;
+  }
+}
+
 .empty-block {
   background-color: $app-grey;
 }
@@ -364,75 +371,44 @@ a {
   max-height: 2rem;
 }
 
-.authIndicator {
-  height: 30px;
-  width: 100px;
-  text-align: center;
-  line-height: 30px;
-  font-size: 0.9rem;
-}
-
-.in-review,
-.submitted {
-  background-color: none;
-  color: $app-green;
-  border-radius: 1rem;
-  border-color: $app-green;
-  border-style: solid;
-  border-width: 1px;
-}
-
-.completed,
-.issued {
-  background-color: $app-green;
-  color: white;
-  border-radius: 1rem;
-  border-color: $app-green;
-  border-style: solid;
-  border-width: 1px;
-}
-
-.denied {
-  background-color: $app-error;
-  color: white;
-  border-radius: 1rem;
-  border-color: $app-error;
-  border-style: solid;
-  border-width: 1px;
-}
-
-.pending {
-  background-color: none;
-  color: $app-error;
-  border-radius: 1rem;
-  border-color: $app-error;
-  border-style: solid;
-  border-width: 1px;
-}
-
 .permit-card {
   border-color: $app-proj-white-one;
   border-style: solid;
   border-width: 1px;
   box-shadow: 4px 4px 4px 0px $app-proj-black;
-  padding: 1.76rem 2rem 1.76rem 2rem;
-  margin-bottom: 1rem;
-  &:hover {
+  &--hover:hover {
     background-color: $app-grey;
   }
 }
 
 .permit-data {
-  overflow: hidden;
+  overflow: auto;
+  word-break: break-word;
   text-overflow: ellipsis;
 }
 
-.sub-label {
-  color: $app-proj-grey-one;
-  font-size: 0.8rem;
-  margin-top: 1rem;
+.label-field {
+  color: #474543;
+  font-family: 'BC Sans';
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
+.label-date {
+  color: #2d2d2d;
+  font-family: 'BC Sans';
+  font-size: 0.75rem;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.label-verified {
+  color: #474543;
+  font-family: 'BC Sans';
+  font-size: 0.75rem;
+  font-style: italic;
+  font-weight: 400;
+}
 :deep(.p-accordion-content) {
   padding: 4rem 4rem 4rem 4rem;
   border-style: none;
@@ -455,22 +431,12 @@ a {
   box-shadow: 4px 4px 4px 0px $app-proj-black;
 }
 
-:deep(.p-accordion-tab-active .p-accordion-header > a) {
-  background-color: $app-grey !important;
-}
-
 :deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {
   background-color: inherit;
-  &:hover {
-    background-color: $app-grey;
-  }
 }
 
 :deep(.p-card-body) {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  padding-left: 1.5rem;
-  padding-right: 1.5 rem;
+  padding: 1.5rem;
 }
 
 :deep(.p-card-content) {

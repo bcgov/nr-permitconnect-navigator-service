@@ -62,7 +62,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
     />
     <Column
       field="applicationStatus"
-      header="Activity state"
+      header="Project state"
       :sortable="true"
       style="min-width: 150px"
     />

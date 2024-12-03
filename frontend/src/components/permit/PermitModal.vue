@@ -9,7 +9,7 @@ import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
-import { PermitStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
 import type { DropdownChangeEvent } from 'primevue/dropdown';
 import type { Ref } from 'vue';
@@ -41,7 +41,7 @@ let initialFormValues: PermitForm = {
   agency: permitType.value?.agency,
   trackingId: permit?.trackingId,
   businessDomain: permitType.value?.businessDomain,
-  authStatus: permit?.authStatus,
+  authStatus: permit?.authStatus ?? PermitAuthorizationStatus.NONE,
   statusLastVerified: permit?.statusLastVerified ? new Date(permit.statusLastVerified) : undefined,
   sourceSystem: permitType.value?.sourceSystem ?? permitType.value?.sourceSystemAcronym,
   submittedDate: permit?.submittedDate ? new Date(permit.submittedDate) : undefined,
@@ -53,7 +53,7 @@ let initialFormValues: PermitForm = {
 const formSchema = object({
   permitType: object().required().label('Permit'),
   needed: string().required().label('Needed'),
-  status: string().required().oneOf(PERMIT_STATUS_LIST).label('Permit state'),
+  status: string().required().oneOf(PERMIT_STATUS_LIST).label('Application stage'),
   agency: string().required().label('Agency'),
   businessDomain: string().label('Business domain'),
   authStatus: string().required().oneOf(PERMIT_AUTHORIZATION_STATUS_LIST).label('Authorization status'),
@@ -201,7 +201,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         <Dropdown
           class="col-12 lg:col-6"
           name="status"
-          label="Permit state"
+          label="Application stage"
           :options="PERMIT_STATUS_LIST"
         />
         <Calendar

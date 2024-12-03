@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Dialog } from '@/lib/primevue';
-import { PermitAuthorizationStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/housing';
 
 const visible = defineModel<boolean>('visible');
 </script>
@@ -47,41 +47,40 @@ const visible = defineModel<boolean>('visible');
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.IN_REVIEW" />
       </div>
-      <div class="mt-2">The application is currently active.</div>
+      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.IN_REVIEW }}</div>
     </div>
     <div class="my-4">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.PENDING" />
       </div>
       <div class="mt-2">
-        The application is currently pending the applicant’s action in response to the reviewing authority’s request.
+        {{ PermitAuthorizationStatusDescriptions.PENDING }}
       </div>
     </div>
     <div class="my-4">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.ABANDONED" />
       </div>
-      <div class="mt-2">The application has been abandoned by the applicant.</div>
+      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.ABANDONED }}</div>
     </div>
     <div class="my-4">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.WITHDRAWN" />
       </div>
-      <div class="mt-2">The application has been withdrawn by the applicant.</div>
+      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.WITHDRAWN }}</div>
     </div>
     <div class="my-4">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.CANCELLED" />
       </div>
-      <div class="mt-2">The application has been cancelled by the reviewing authority.</div>
+      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.CANCELLED }}</div>
     </div>
     <div class="my-4">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.DENIED" />
       </div>
       <div class="mt-2">
-        The application has completed the review process, however, the reviewing authority has decided not to approve
-        the application.
+        {{ PermitAuthorizationStatusDescriptions.DENIED }}
       </div>
     </div>
     <div class="my-4">
@@ -89,8 +88,7 @@ const visible = defineModel<boolean>('visible');
         <StatusPill :auth-status="PermitAuthorizationStatus.ISSUED" />
       </div>
       <div class="mt-2">
-        The application has successfully completed the review process. A positive final decision has been granted to the
-        applicant.
+        {{ PermitAuthorizationStatusDescriptions.ISSUED }}
       </div>
     </div>
   </Dialog>
