@@ -564,7 +564,7 @@ onBeforeMount(async () => {
     />
 
     <div class="flex justify-content-center app-primary-color mt-3">
-      <h3>Project Investigation Form</h3>
+      <h3>Housing Project Form</h3>
     </div>
 
     <Form

@@ -10,6 +10,12 @@
     "supervisor": "SUPERVISOR",
     "admin": "ADMIN"
   },
+  "header": {
+    "name": "Permit Connect Services"
+  },
+  "headerMenu": {
+    "logout": "Log out"
+  },
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"

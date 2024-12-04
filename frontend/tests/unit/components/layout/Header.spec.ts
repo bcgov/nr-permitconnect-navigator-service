@@ -5,7 +5,13 @@ import { shallowMount } from '@vue/test-utils';
 import Header from '@/components/layout/Header.vue';
 import { StorageKey } from '@/utils/enums/application';
 
-// Mock router calls
+// Mock dependencies
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn()
