@@ -266,12 +266,6 @@ onBeforeMount(async () => {
         icon="fa-circle-question"
         @click="descriptionModalVisible = true"
       />
-      <!-- <div :onclick="(descriptionModalVisible = true)">
-        <font-awesome-icon
-          class="status-description-icon"
-          icon="fa-circle-question"
-        />
-      </div> -->
     </div>
     <div class="status-verified-message">
       <div v-if="permit?.statusLastVerified">
