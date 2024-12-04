@@ -462,7 +462,15 @@ onBeforeMount(async () => {
 
     if (draftId) {
       response = (await submissionService.getDraft(draftId)).data;
-      initialFormValues.value = { ...response.data, activityId: response.activityId };
+
+      initialFormValues.value = {
+        ...response.data,
+        activityId: response.activityId,
+        appliedPermits: response.data.appliedPermits.map((x: Partial<Permit>) => ({
+          ...x,
+          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+        }))
+      };
 
       if (response.activityId) {
         documents = (await documentService.listDocuments(response.activityId)).data;
@@ -1549,6 +1557,7 @@ onBeforeMount(async () => {
                                     :name="`appliedPermits[${idx}].statusLastVerified`"
                                     :disabled="!editable"
                                     placeholder="Status last verified"
+                                    :max-date="new Date()"
                                   />
                                   <div class="flex align-items-center ml-2 mb-3">
                                     <Button
