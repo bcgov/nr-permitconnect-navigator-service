@@ -10,16 +10,17 @@ const { t } = useI18n();
 <template>
   <header>
     <nav id="header-branding">
-      <div class="flex flex-row flex-wrap align-items-center p-2 pb-0 lg:pl-6">
+      <div class="flex flex-row flex-wrap align-items-center lg:pl-6">
         <div class="flex flex-none">
           <a href="https://www2.gov.bc.ca">
             <img
               src="@/assets/images/BCID_H_rgb_pos.png"
-              width="181"
+              class="bc-logo"
               alt="B.C. Government Logo"
             />
           </a>
         </div>
+        <div class="mx-2 bcds-header-line" />
         <div class="flex flex-grow-1 ml-2">
           <h2 class="m-0 app-primary-color">{{ t('header.name') }}</h2>
         </div>
@@ -43,5 +44,16 @@ const { t } = useI18n();
   @media not print {
     border-bottom: 2px solid #fcba19;
   }
+}
+
+.bc-logo {
+  max-height: 60px;
+  height: 60px;
+}
+
+.bcds-header-line {
+  background-color: #d8d8d8;
+  width: 1px;
+  height: 32px;
 }
 </style>
