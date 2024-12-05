@@ -99,35 +99,6 @@ label {
 
 /* -------- layout ----------*/
 
-.gov-footer {
-  background-color: #003366 !important;
-  border-top: 2px solid #fcba19;
-  a {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    color: #ffffff;
-    font-size: 1rem;
-    text-decoration: none;
-    &:hover {
-      text-decoration: underline;
-    }
-    &:focus {
-      outline: none;
-    }
-    &:visited {
-      color: #ffffff;
-    }
-  }
-
-  & > div:last-child {
-    order: 1;
-  }
-  .version {
-    color: #ffffff;
-    float: right;
-  }
-}
-
 .app-primary-color {
   color: $app-primary !important;
 }
