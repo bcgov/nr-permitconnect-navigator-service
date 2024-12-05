@@ -6,7 +6,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="gov-footer flex flex-column">
+  <div class="gov-footer flex flex-column pt-5">
     <div class="acknowledgement px-8 py-5">
       {{ t('footer.acknowledgement') }}
     </div>
@@ -75,7 +75,7 @@ const { t } = useI18n();
   .acknowledgement {
     border-top: 3px solid #fcba19;
     border-bottom: 3px solid #fcba19;
-    background-color: #003366 !important;
+    background-color: #252423 !important;
     color: #ffffff;
   }
 

@@ -158,7 +158,7 @@ function updateQueryParams() {
     :sort-order="pagination.order"
     paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
     current-page-report-template="{first}-{last} of {totalRecords}"
-    :rows-per-page-options="[10, 20, 50]"
+    :rows-per-page-options="[10, 20, 50, submissions?.length as number]"
     selection-mode="single"
     :first="pagination.page && pagination.rows ? pagination.page * pagination.rows : 0"
     @update:sort-field="
