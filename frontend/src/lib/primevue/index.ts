@@ -23,6 +23,7 @@ export { default as InputMask } from 'primevue/inputmask';
 export { default as InputNumber } from 'primevue/inputnumber';
 export { default as InputSwitch } from 'primevue/inputswitch';
 export { default as InputText } from 'primevue/inputtext';
+export { default as Menu } from 'primevue/menu';
 export { default as Menubar } from 'primevue/menubar';
 export { default as Message } from 'primevue/message';
 export { default as Panel } from 'primevue/panel';

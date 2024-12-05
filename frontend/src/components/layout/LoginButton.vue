@@ -53,8 +53,8 @@ function logout() {
   </Button>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 button {
-  color: white !important;
+  color: $app-primary !important;
 }
 </style>
