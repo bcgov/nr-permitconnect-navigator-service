@@ -1,63 +1,110 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 
-import { useConfigStore } from '@/store';
-
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
+// Actions
+const { t } = useI18n();
 </script>
 
 <template>
-  <div class="gov-footer flex justify-content-between">
-    <div>
-      <a
-        href="https://www.gov.bc.ca/"
-        target="_blank"
-      >
-        Home
-      </a>
-      <a
-        href="https://www2.gov.bc.ca/gov/content/about-gov-bc-ca"
-        target="_blank"
-      >
-        About gov.bc.ca
-      </a>
-      <a
-        href="http://gov.bc.ca/disclaimer"
-        target="_blank"
-      >
-        Disclaimer
-      </a>
-      <a
-        href="http://gov.bc.ca/privacy"
-        target="_blank"
-      >
-        Privacy
-      </a>
-      <a
-        href="http://gov.bc.ca/webaccessibility"
-        target="_blank"
-      >
-        Accessibility
-      </a>
-      <a
-        href="http://gov.bc.ca/copyright"
-        target="_blank"
-      >
-        Copyright
-      </a>
-      <a
-        href="https://www2.gov.bc.ca/gov/content/home/contact-us"
-        target="_blank"
-      >
-        Contact Us
-      </a>
+  <div class="gov-footer flex flex-column">
+    <div class="acknowledgement px-8 py-5">
+      {{ t('footer.acknowledgement') }}
     </div>
-    <div
-      v-if="getConfig"
-      class="version px-3 py-2"
-    >
-      v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
+    <div class="container px-8 py-5">
+      <div class="content pb-5">
+        <div class="flex justify-content-between">
+          <div class="flex flex-column">
+            <div class="logo">
+              <img
+                src="@/assets/images/BCID_H_rgb_pos.png"
+                class="bc-logo"
+                alt="B.C. Government Logo"
+              />
+            </div>
+            <div class="contact">
+              <!-- prettier-ignore -->
+              <p>
+                {{ t('footer.contact1') }}
+                <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">{{ t('footer.contact2') }}</a>{{ t('footer.contact3') }}
+                <a href="https://www2.gov.bc.ca/gov/content?id=FBC4210F6BC047A5884198F543C97D53">{{ t('footer.contact4') }}</a>
+              </p>
+            </div>
+          </div>
+          <div class="links pr-8">
+            <p class="font-bold">{{ t('footer.moreInfo') }}</p>
+            <div class="flex">
+              <div class="flex flex-column pr-8">
+                <a href="https://www2.gov.bc.ca/gov/content/home">{{ t('footer.home') }}</a>
+                <a href="https://www2.gov.bc.ca/gov/content?id=3C4F47288DFB454987435AB5EFEFBB7F">
+                  {{ t('footer.about') }}
+                </a>
+                <a href="https://www2.gov.bc.ca/gov/content?id=79F93E018712422FBC8E674A67A70535">
+                  {{ t('footer.disclaimer') }}
+                </a>
+                <a href="https://www2.gov.bc.ca/gov/content?id=9E890E16955E4FF4BF3B0E07B4722932">
+                  {{ t('footer.privacy') }}
+                </a>
+              </div>
+              <div class="flex flex-column">
+                <a href="https://www2.gov.bc.ca/gov/content?id=E08E79740F9C41B9B0C484685CC5E412">
+                  {{ t('footer.accessibility') }}
+                </a>
+                <a href="https://www2.gov.bc.ca/gov/content?id=1AAACC9C65754E4D89A118B875E0FBDA">
+                  {{ t('footer.copyright') }}
+                </a>
+                <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">
+                  {{ t('footer.contactUs') }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="copyright pt-5">© {{ new Date().getUTCFullYear() }} {{ t('footer.gov') }}.</div>
     </div>
   </div>
 </template>
+
+<style lang="scss" scoped>
+.bc-logo {
+  max-height: 60px;
+  height: 60px;
+}
+
+.gov-footer {
+  .acknowledgement {
+    border-top: 3px solid #fcba19;
+    border-bottom: 3px solid #fcba19;
+    background-color: #003366 !important;
+    color: #ffffff;
+  }
+
+  .container {
+    background-color: #ffffff !important;
+  }
+  .contact {
+    max-width: 400px;
+  }
+
+  .copyright {
+    border-top: 1px solid var(--text-color);
+  }
+
+  .links {
+    a {
+      padding: 0.5rem 1rem 0.5rem 0;
+      color: var(--text-color);
+      text-decoration: none;
+      &:hover {
+        text-decoration: underline;
+      }
+      &:focus {
+        outline: none;
+      }
+      &:visited {
+        color: var(--text-color);
+      }
+    }
+  }
+}
+</style>
