@@ -19,9 +19,9 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - '16.x'
           - '18.x'
           - '20.x'
+          - '22.0'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -86,9 +86,9 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - '16.x'
           - '18.x'
           - '20.x'
+          - '22.x'
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
