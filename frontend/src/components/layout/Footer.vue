@@ -75,6 +75,7 @@ const { t } = useI18n();
   .acknowledgement {
     border-top: 3px solid #fcba19;
     border-bottom: 3px solid #fcba19;
+    // TODO: Reference a surface colour once PrimeVue 4 changes come in
     background-color: #252423 !important;
     color: #ffffff;
   }
