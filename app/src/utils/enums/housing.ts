@@ -56,7 +56,7 @@ export enum NumResidentialUnits {
 }
 
 export enum PermitAuthorizationStatus {
-  ISSUED = 'Granted',
+  ISSUED = 'Approved',
   PENDING = 'Pending client action',
   IN_REVIEW = 'In progress',
   DENIED = 'Denied',

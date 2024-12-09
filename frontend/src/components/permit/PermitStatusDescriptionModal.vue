@@ -20,26 +20,31 @@ const visible = defineModel<boolean>('visible');
     <div class="my-4">
       <div class="text-lg font-bold mb-2">Application submission</div>
       <div>
-        The technical review stage is when the reviewing authority conducts a thorough evaluation of the application in
-        preparation for making a decision.
+        The application submission stage begins when an application is submitted to the Province and concludes once the
+        reviewing authority has verified its completeness and deems the application complete.
       </div>
     </div>
     <div class="my-4">
       <div class="text-lg font-bold mb-2">Technical review</div>
       <div>
-        The technical review stage is when the reviewing authority conducts a thorough evaluation of the application in
-        preparation for making a decision.
+        The technical review stage is when the reviewing authority conducts a thorough evaluation of the application and
+        prepares recommendations for making a decision. If applicable, this phase includes First Nation Consultation
+        processes.
       </div>
     </div>
     <div class="my-4">
       <div class="text-lg font-bold mb-2">Pending decision</div>
       <div>
-        The pending decision stage is when the decision-makers review the evaluation and issue their final decision.
+        The pending decision stage is when the decision-makers review the evaluation and recommendations and make their
+        final decision.
       </div>
     </div>
     <div class="my-4">
       <div class="text-lg font-bold mb-2">Post-decision</div>
-      <div>The post-decision stage is when a final decision has been made. This concludes the application.</div>
+      <div>
+        The post-decision stage is when a decision was made and notifications on the decision have been sent out, it
+        concludes the application.
+      </div>
     </div>
 
     <div class="text-2xl font-bold mb-2">Application statuses</div>

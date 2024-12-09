@@ -52,7 +52,7 @@ export enum NumResidentialUnits {
 }
 
 export enum PermitAuthorizationStatus {
-  ISSUED = 'Granted',
+  ISSUED = 'Approved',
   PENDING = 'Pending client action',
   IN_REVIEW = 'In progress',
   DENIED = 'Denied',
@@ -64,10 +64,10 @@ export enum PermitAuthorizationStatus {
 
 export enum PermitAuthorizationStatusDescriptions {
   /* eslint-disable max-len */
-  ISSUED = 'The application has successfully completed the review process. A positive final decision has been granted to the applicant.',
+  ISSUED = 'The application review process is completed and approved.',
   PENDING = 'The application is currently pending the applicant’s action in response to the reviewing authority’s request.',
   IN_REVIEW = 'The application is currently active.',
-  DENIED = 'The application has completed the review process, however, the reviewing authority has decided not to approve the application.',
+  DENIED = 'The application review process is completed, however, the reviewing authority has decided to not approve the application.',
   CANCELLED = 'The application has been cancelled by the reviewing authority.',
   WITHDRAWN = 'The application has been withdrawn by the applicant.',
   ABANDONED = 'The application has been abandoned by the applicant.',
@@ -87,15 +87,6 @@ export enum PermitStatus {
   COMPLETED = 'Post-decision',
   TECHNICAL_REVIEW = 'Technical review',
   PENDING = 'Pending decision'
-}
-
-export enum PermitTrackerStatus {
-  COMPLETED = 'Completed',
-  DENIED = 'Denied',
-  IN_REVIEW = 'In review',
-  ISSUED = 'Issued',
-  PENDING = 'Pending',
-  SUBMITTED = 'Submitted'
 }
 
 export enum ProjectRelationship {
