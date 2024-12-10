@@ -2,6 +2,22 @@
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact Housing Authorizations at"
   },
+  "footer": {
+    "about": "About gov.bc.ca",
+    "accessibility": "Accessibility",
+    "acknowledgement": "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples — First Nations, Métis, and Inuit — respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
+    "contactUs": "Contact us",
+    "contact1": "We can help in over 220 languages and through other accessible options.",
+    "contact2": "Call, email or text us",
+    "contact3": ", or",
+    "contact4": "find a service centre",
+    "copyright": "Copyright",
+    "disclaimer": "Disclaimer",
+    "gov": "Government of British Columbia",
+    "home": "Home",
+    "moreInfo": "MORE INFO",
+    "privacy": "Privacy"
+  },
   "groupName": {
     "developer": "DEVELOPER",
     "proponent": "PROPONENT",

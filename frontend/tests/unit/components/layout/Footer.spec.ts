@@ -5,7 +5,13 @@ import { mount, shallowMount } from '@vue/test-utils';
 import Footer from '@/components/layout/Footer.vue';
 import { StorageKey } from '@/utils/enums/application';
 
-// Mock router calls
+// Mock dependencies
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn()
@@ -40,13 +46,13 @@ describe('Footer.vue', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('contains 7 links', () => {
+  it('contains 9 links', () => {
     const wrapper = mount(Footer, {
       global: {
         plugins: [createTestingPinia(), PrimeVue]
       }
     });
     const links = wrapper.findAll('a');
-    expect(links).toHaveLength(7);
+    expect(links).toHaveLength(9);
   });
 });

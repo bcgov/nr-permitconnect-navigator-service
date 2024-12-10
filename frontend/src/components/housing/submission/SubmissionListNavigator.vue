@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -53,6 +53,7 @@ const pagination: Ref<Pagination> = ref({
   field: 'submittedAt',
   page: 0
 });
+const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
 
 // read from query params if tab is set to enquiry otherwise use default values
 if (!route.query.tab || route.query.tab === '0') {
@@ -127,7 +128,6 @@ function isFinanciallySupported(data: Submission) {
   }
 }
 
-// Actions
 function updateQueryParams() {
   router.replace({
     name: RouteName.HOUSING_SUBMISSIONS,
@@ -140,6 +140,12 @@ function updateQueryParams() {
     }
   });
 }
+
+onMounted(() => {
+  if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
+    rowsPerPageOptions.value.push(submissions.length);
+  }
+});
 </script>
 
 <template>
@@ -158,7 +164,7 @@ function updateQueryParams() {
     :sort-order="pagination.order"
     paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
     current-page-report-template="{first}-{last} of {totalRecords}"
-    :rows-per-page-options="[10, 20, 50]"
+    :rows-per-page-options="rowsPerPageOptions"
     selection-mode="single"
     :first="pagination.page && pagination.rows ? pagination.page * pagination.rows : 0"
     @update:sort-field="
