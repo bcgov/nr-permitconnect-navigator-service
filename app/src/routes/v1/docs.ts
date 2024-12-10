@@ -37,6 +37,14 @@ router.use(
   })
 );
 
+// router.get('/test', (_req: Request, res: Response) => {
+//   const url =
+//     'https://openmaps.gov.bc.ca/geo/pub/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&outputFormat=json&typeName=WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW&CQL_FILTER=INTERSECTS(SHAPE,%20POLYGON%20((1193370.672730913%20383239.8324306654,%201193348.609585723%20383168.66953196935,%201193474.1532485012%20383132.9849056583,%201193529.7406295289%20383223.5657357173,%201193370.672730913%20383239.8324306654)))';
+//   axios.get(url).then(function (response) {
+//     res.status(200).send(response.data);
+//   });
+// });
+
 /** OpenAPI Docs */
 router.get('/', (_req: Request, res: Response) => {
   res.send(docs.getDocHTML('v1'));
