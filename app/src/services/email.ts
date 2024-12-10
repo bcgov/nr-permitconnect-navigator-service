@@ -1,9 +1,20 @@
 import axios from 'axios';
 import config from 'config';
+import prisma from '../db/dataConnection';
+import { v4 as uuidv4 } from 'uuid';
 
 import type { AxiosInstance } from 'axios';
 import type { Email } from '../types';
 
+type Message = {
+  msgId: string;
+  to: Array<string>;
+};
+
+type Email_data = {
+  messages: Array<Message>;
+  txId: string;
+};
 /**
  * @function getToken
  * Gets Auth token using CHES client credentials
@@ -55,6 +66,9 @@ const service = {
    * @returns Axios response status and data
    */
   email: async (emailData: Email) => {
+    // Generate list of unique emails to be sent
+    const uniqueEmails = Array.from(new Set([...emailData.to, ...(emailData?.cc || []), ...(emailData?.bcc || [])]));
+
     try {
       const { data, status } = await chesAxios().post('/email', emailData, {
         headers: {
@@ -63,20 +77,46 @@ const service = {
         maxContentLength: Infinity,
         maxBodyLength: Infinity
       });
+
+      service.logEmail(data, uniqueEmails, status);
       return { data, status };
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
+        service.logEmail(null, uniqueEmails, e.response ? e.response.status : 500);
         return {
           data: e.response?.data.errors[0].message,
           status: e.response ? e.response.status : 500
         };
       } else {
+        service.logEmail(null, uniqueEmails, 500);
         return {
           data: 'Email error',
           status: 500
         };
       }
     }
+  },
+
+  /**
+   * @function logEmail
+   * Logs CHES email api calls
+   * @param {Email_data | null} data Object containing CHES response, or null on error
+   * @param {Array<string>} recipients Array of email strings
+   * @param {status} status Http status of CHES response
+   * @returns null
+   */
+  logEmail: async (data: Email_data | null, recipients: Array<string>, status: number) => {
+    await prisma.$transaction(async (trx) => {
+      await trx.email_log.createMany({
+        data: recipients.map((x) => ({
+          email_id: uuidv4(),
+          msg_id: data?.messages?.[0].msgId ?? null,
+          to: x,
+          tx_id: data?.txId ?? null,
+          http_status: status
+        }))
+      });
+    });
   },
 
   /**
