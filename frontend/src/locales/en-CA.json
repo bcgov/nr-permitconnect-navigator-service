@@ -2,6 +2,13 @@
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact Housing Authorizations at"
   },
+  "enquiryListProponent": {
+    "confirmationId": "Confirmation ID",
+    "listEmpty": "Submit a general enquiry for questions that are not related to existing projects",
+    "of": "of",
+    "state": "State",
+    "submittedDate": "Submitted date"
+  },
   "footer": {
     "about": "About gov.bc.ca",
     "accessibility": "Accessibility",
@@ -33,23 +40,37 @@
     "logout": "Log out"
   },
   "housing": {
-    "housing": "Housing",
-    "onThisPage": "On this page",
-    "myProjects": "My projects",
-    "drafts": "Drafts",
-    "generalEnquiries": "General enquiries",
-    "submitNewProject": "Submit a new project",
-    "projectState": "Project state",
     "confirmationId": "Confirmation ID",
+    "drafts": "Drafts",
+    "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
+    "generalEnquiries": "General enquiries",
+    "housing": "Housing",
     "lastUpdated": "Last updated",
-    "submitNewEnquiry": "Submit a new enquiry",
+    "myProjects": "My projects",
+    "onThisPage": "On this page",
     "of": "of",
+    "projectState": "Project state",
     "projectsEmpty": "Submit a new project to the Navigator Service to found out what permits are required",
     "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
-    "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there."
+    "submitNewEnquiry": "Submit a new enquiry",
+    "submitNewProject": "Submit a new project"
   },
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"
+  },
+  "submissionDraftListProponent": {
+    "action": "Action",
+    "ariaDeleteDraft": "Delete draft",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "deleteHeader": "Delete draft?",
+    "deleteMsg": "Please confirm that you want to delete this draft",
+    "deleteFailed": "Failed to delete draft",
+    "deleteSuccess": "Draft deleted",
+    "draftId": "Draft ID",
+    "lastEdited": "Last edited",
+    "listEmpty": "Your project submission drafts will be displayed here",
+    "of": "of"
   }
 }
