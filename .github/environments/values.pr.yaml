@@ -3,9 +3,9 @@ patroni:
   enabled: true
   replicaCount: 2
   resources:
-    limits:
-      cpu: 250m
-      memory: 384Mi
+    # limits:
+    #   cpu: 250m
+    #   memory: 384Mi
     requests:
       cpu: 20m
       memory: 192Mi
