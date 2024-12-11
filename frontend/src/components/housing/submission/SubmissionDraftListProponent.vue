@@ -5,7 +5,6 @@ import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -59,14 +58,14 @@ function onDelete(draftId: string) {
     :rows="10"
     sort-field="submittedAt"
     :sort-order="-1"
-    paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
-    current-page-report-template="{first}-{last} of {totalRecords}"
+    paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+    current-page-report-template="({currentPage} of {totalPages})"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
   >
     <template #empty>
       <div class="flex justify-content-center">
-        <h3>No items found.</h3>
+        <p class="font-bold text-xl">Your project submission drafts will be displayed here</p>
       </div>
     </template>
     <template #loading>
@@ -92,19 +91,9 @@ function onDelete(draftId: string) {
       </template>
     </Column>
     <Column
-      header="Status"
-      :sortable="true"
-      style="min-width: 150px"
-    >
-      <template #body="{}">
-        {{ IntakeStatus.DRAFT }}
-      </template>
-    </Column>
-    <Column
       field="updatedAt"
       header="Last edited"
       :sortable="true"
-      style="min-width: 150px"
     >
       <template #body="{ data }">
         {{ formatDate(data?.updatedAt) }}
@@ -115,7 +104,6 @@ function onDelete(draftId: string) {
       header="Action"
       header-class="header-right"
       class="text-right"
-      style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button

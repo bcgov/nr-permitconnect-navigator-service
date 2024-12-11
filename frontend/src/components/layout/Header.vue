@@ -37,13 +37,8 @@ const { t } = useI18n();
   background-color: white;
   color: $app-primary;
   white-space: nowrap;
-  box-shadow: 0 6px 8px -4px #b3b1b3;
-  -webkit-box-shadow: 0 6px 8px -4px #b3b1b3;
-  -moz-box-shadow: 0 6px 8px -4px #b3b1b3;
-
-  @media not print {
-    border-bottom: 2px solid #fcba19;
-  }
+  // TODO: Reference a surface colour once PrimeVue 4 changes come in
+  border-bottom: 1px solid #d8d8d8;
 }
 
 .bc-logo {
@@ -52,6 +47,7 @@ const { t } = useI18n();
 }
 
 .bcds-header-line {
+  // TODO: Reference a surface colour once PrimeVue 4 changes come in
   background-color: #d8d8d8;
   width: 1px;
   height: 32px;
