@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
@@ -18,6 +19,9 @@ const { loading, enquiries } = defineProps<{
 
 // State
 const selection: Ref<Enquiry | undefined> = ref(undefined);
+
+// Actions
+const { t } = useI18n();
 </script>
 
 <template>
@@ -33,14 +37,14 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
     sort-field="submittedAt"
     :sort-order="-1"
     paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-    current-page-report-template="({currentPage} of {totalPages})"
+    :current-page-report-template="`({currentPage} ${t('enquiryListProponent.of')} {totalPages})`"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
   >
     <template #empty>
       <div class="flex justify-content-center">
         <p class="font-bold text-xl">
-          Submit a general enquiry for questions that are not related to existing projects
+          {{ t('enquiryListProponent.listEmpty') }}
         </p>
       </div>
     </template>
@@ -49,7 +53,7 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
     </template>
     <Column
       field="activity.activityId"
-      header="Confirmation ID"
+      :header="t('enquiryListProponent.confirmationId')"
       :sortable="true"
       frozen
     >
@@ -68,13 +72,13 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
     </Column>
     <Column
       field="intakeStatus"
-      header="State"
+      :header="t('enquiryListProponent.state')"
       :sortable="true"
     />
 
     <Column
       field="submittedAt"
-      header="Submitted date"
+      :header="t('enquiryListProponent.submittedDate')"
       :sortable="true"
     >
       <template #body="{ data }">
