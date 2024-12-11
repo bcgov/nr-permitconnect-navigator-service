@@ -32,6 +32,22 @@
   "headerMenu": {
     "logout": "Log out"
   },
+  "housing": {
+    "housing": "Housing",
+    "onThisPage": "On this page",
+    "myProjects": "My projects",
+    "drafts": "Drafts",
+    "generalEnquiries": "General enquiries",
+    "submitNewProject": "Submit a new project",
+    "projectState": "Project state",
+    "confirmationId": "Confirmation ID",
+    "lastUpdated": "Last updated",
+    "submitNewEnquiry": "Submit a new enquiry",
+    "of": "of",
+    "projectsEmpty": "Submit a new project to the Navigator Service to found out what permits are required",
+    "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
+    "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there."
+  },
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"

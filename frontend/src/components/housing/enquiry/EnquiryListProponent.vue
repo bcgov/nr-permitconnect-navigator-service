@@ -2,8 +2,7 @@
 import { ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService } from '@/services';
+import { Column, DataTable } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -17,34 +16,8 @@ const { loading, enquiries } = defineProps<{
   enquiries: Array<Enquiry> | undefined;
 }>();
 
-// Emit
-const emit = defineEmits(['enquiry:delete']);
-
 // State
 const selection: Ref<Enquiry | undefined> = ref(undefined);
-
-// Actions
-const confirm = useConfirm();
-const toast = useToast();
-
-function onDelete(enquiryId: string) {
-  confirm.require({
-    message: 'Please confirm that you want to delete this draft',
-    header: 'Delete draft?',
-    acceptLabel: 'Confirm',
-    acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
-    accept: () => {
-      enquiryService
-        .deleteEnquiry(enquiryId)
-        .then(() => {
-          emit('enquiry:delete', enquiryId);
-          toast.success('Draft deleted');
-        })
-        .catch((e: any) => toast.error('Failed to delete draft', e.message));
-    }
-  });
-}
 </script>
 
 <template>
@@ -59,14 +32,16 @@ function onDelete(enquiryId: string) {
     :rows="10"
     sort-field="submittedAt"
     :sort-order="-1"
-    paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
-    current-page-report-template="{first}-{last} of {totalRecords}"
+    paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+    current-page-report-template="({currentPage} of {totalPages})"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
   >
     <template #empty>
       <div class="flex justify-content-center">
-        <h3>No items found.</h3>
+        <p class="font-bold text-xl">
+          Submit a general enquiry for questions that are not related to existing projects
+        </p>
       </div>
     </template>
     <template #loading>
@@ -93,46 +68,17 @@ function onDelete(enquiryId: string) {
     </Column>
     <Column
       field="intakeStatus"
-      header="Status"
+      header="State"
       :sortable="true"
-      style="min-width: 150px"
     />
-    <Column
-      field="updatedAt"
-      header="Last edited"
-      :sortable="true"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        {{ formatDate(data?.updatedAt) }}
-      </template>
-    </Column>
+
     <Column
       field="submittedAt"
       header="Submitted date"
       :sortable="true"
-      style="min-width: 200px"
     >
       <template #body="{ data }">
         {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
-      </template>
-    </Column>
-    <Column
-      field="action"
-      header="Action"
-      header-class="header-right"
-      class="text-right"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
-          aria-label="Delete draft"
-          :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
-          @click="onDelete(data.enquiryId)"
-        >
-          <font-awesome-icon icon="fa-solid fa-trash" />
-        </Button>
       </template>
     </Column>
   </DataTable>
