@@ -110,7 +110,7 @@ function onEnquiryFormSaved() {
       (Completed)
     </span>
   </h1>
-  <TabView v-model:activeIndex="activeTab">
+  <TabView v-model:active-index="activeTab">
     <TabPanel header="Information">
       <Message
         v-if="relatedSubmission"

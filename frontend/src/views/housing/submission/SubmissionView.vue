@@ -170,7 +170,7 @@ onMounted(async () => {
     </span>
   </h1>
 
-  <TabView v-model:activeIndex="activeTab">
+  <TabView v-model:active-index="activeTab">
     <TabPanel header="Information">
       <span v-if="!loading && getSubmission">
         <SubmissionForm
