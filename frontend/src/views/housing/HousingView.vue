@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
@@ -25,6 +26,14 @@ const loading: Ref<boolean> = ref(true);
 
 // Actions
 const { t } = useI18n();
+const router = useRouter();
+
+function onProjectClick(project: Submission) {
+  router.push({
+    name: RouteName.HOUSING_SUBMISSION_INTAKE,
+    query: { activityId: project.activityId, submissionId: project.submissionId }
+  });
+}
 
 function onSubmissionDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
@@ -131,12 +140,14 @@ onMounted(async () => {
         v-else
         :key="project.activityId"
         :index="index"
-        class="align-items-center border-round-xs shadow-3 px-4 bg"
+        class="align-items-center border-round-xs shadow-3 hover:shadow-4 px-4 custom-card hover-hand"
         :class="[index != displayedProjects.length - 1 ? 'mb-4' : '']"
+        @click="onProjectClick(project)"
       >
         <div class="grid">
           <div class="col-3 flex align-items-center">
             <router-link
+              class="no-underline"
               :to="{
                 name: RouteName.HOUSING_SUBMISSION_INTAKE,
                 query: { activityId: project.activityId, submissionId: project.submissionId }
@@ -224,8 +235,14 @@ onMounted(async () => {
 </template>
 
 <style scoped lang="scss">
-.bg {
+.custom-card {
   background-color: #f7f9fc;
+
+  &:hover {
+    a {
+      text-decoration: underline !important;
+    }
+  }
 }
 
 :deep(.p-paginator) {
