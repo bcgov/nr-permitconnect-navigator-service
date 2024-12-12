@@ -77,6 +77,7 @@ function onDelete(draftId: string) {
       field="index"
       :header="t('submissionDraftListProponent.draftId')"
       :sortable="true"
+      style="width: 45%"
       frozen
     >
       <template #body="{ data }">
@@ -106,6 +107,7 @@ function onDelete(draftId: string) {
       :header="t('submissionDraftListProponent.action')"
       header-class="header-right"
       class="text-right"
+      style="width: 10%"
     >
       <template #body="{ data }">
         <Button

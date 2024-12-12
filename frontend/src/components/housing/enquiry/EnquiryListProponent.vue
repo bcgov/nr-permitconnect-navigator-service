@@ -55,6 +55,7 @@ const { t } = useI18n();
       field="activity.activityId"
       :header="t('enquiryListProponent.confirmationId')"
       :sortable="true"
+      style="width: 45%"
       frozen
     >
       <template #body="{ data }">
@@ -80,6 +81,9 @@ const { t } = useI18n();
       field="submittedAt"
       :header="t('enquiryListProponent.submittedDate')"
       :sortable="true"
+      header-class="header-right"
+      class="text-right"
+      style="width: 10%"
     >
       <template #body="{ data }">
         {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
