@@ -106,8 +106,8 @@ const service = {
    * @returns null
    */
   logEmail: async (data: Email_data | null, recipients: Array<string>, status: number) => {
-    await prisma.$transaction(async (trx) => {
-      await trx.email_log.createMany({
+    return await prisma.$transaction(async (trx) => {
+      return await trx.email_log.createMany({
         data: recipients.map((x) => ({
           email_id: uuidv4(),
           msg_id: data?.messages?.[0].msgId ?? null,
