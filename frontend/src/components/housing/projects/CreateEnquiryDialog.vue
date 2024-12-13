@@ -7,10 +7,12 @@ import { useSubmissionStore } from '@/store';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
+import type { User } from '@/types';
 
 // Props
-const { confirmationId = '' } = defineProps<{
+const { confirmationId = '', navigator } = defineProps<{
   confirmationId?: string;
+  navigator?: User;
 }>();
 
 // Store
@@ -75,11 +77,14 @@ const handleCloseDialog = () => {
             </div>
           </div>
         </div>
+        <div class="mb-2 mt-4 font-bold">
+          <span class="query-to-nav mt-3">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
+        </div>
         <Textarea
           v-model="enquiryDescription"
           aria-describedby="ask-navigator"
           placeholder="Ask a navigator"
-          class="w-full mt-4"
+          class="w-full"
           maxlength="4000"
           rows="5"
         />

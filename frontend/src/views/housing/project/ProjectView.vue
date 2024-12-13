@@ -5,12 +5,13 @@ import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
-// import ProjectPermitModal from '@/components/housing/projects/ProjectPermitModal.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
+import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
+import { confirmationTemplateEnquiry } from '@/utils/templates';
 
 import { enquiryService, permitService, submissionService, userService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -40,6 +41,8 @@ const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
 
 // Store
 const submissionStore = useSubmissionStore();
+const { getConfig } = storeToRefs(useConfigStore());
+const { getProfile } = storeToRefs(useAuthNStore());
 const { getPermits, getSubmission } = storeToRefs(submissionStore);
 
 const typeStore = useTypeStore();
@@ -86,6 +89,31 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 // Actions
 const router = useRouter();
 const toast = useToast();
+
+async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const user = getProfile;
+
+  const body = confirmationTemplateEnquiry({
+    '{{ contactName }}': user.value?.name,
+    '{{ activityId }}': activityId,
+    '{{ enquiryDescription }}': enquiryDescription,
+    '{{ enquiryId }}': enquiryId
+  });
+  let applicantEmail = user.value?.email;
+
+  if (applicantEmail) {
+    let emailData = {
+      from: configCC,
+      to: [applicantEmail],
+      cc: configCC,
+      subject: 'Confirmation of Submission', // eslint-disable-line quotes
+      bodyType: 'html',
+      body: body
+    };
+    await submissionService.emailConfirmation(emailData);
+  }
+}
 
 function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
   return a.businessDomain > b.businessDomain ? 1 : -1;
@@ -154,6 +182,11 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
   try {
     const response = await enquiryService.createEnquiry(enquiryData);
     enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
+
+    // Send confirmation email
+    if (enquiryConfirmationId.value) {
+      emailConfirmation(response.data.activityId, response.data.enquiryId, enquiryDescription);
+    }
   } catch (e: any) {
     toast.error('Failed to submit enquiry', e);
   }
@@ -197,7 +230,12 @@ onMounted(async () => {
     v-if="!loading && getSubmission"
     class="app-primary-color"
   >
-    <div class="mt-7 mb-2 flex justify-content-between align-items-center">
+    <div class="disclaimer-block p-5 mt-5">
+      Based on the information you provided, the following permits are recommended. Please note, that this information
+      is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be
+      updated as we review your project or receive further details.
+    </div>
+    <div class="mt-8 mb-2 flex justify-content-between align-items-center">
       <h1
         class="m-0 cursor-pointer hover:underline"
         @click="
@@ -231,12 +269,12 @@ onMounted(async () => {
       </span>
       <span v-else>Navigator: -</span>
     </div>
-    <div><h3 class="mb-5">Required permits</h3></div>
+    <div><h3 class="mb-5">Recommended permits</h3></div>
     <div
       v-if="!permitsNeeded?.length"
       class="empty-block p-5 mb-2"
     >
-      We will update the necessary permits here as the project progresses. You may see this message while we are
+      We will update the recommended permits here as the project progresses. You may see this message while we are
       investigating or if no application is needed at this time.
     </div>
     <Card
@@ -330,6 +368,7 @@ onMounted(async () => {
     <CreateEnquiryDialog
       v-model:visible="enquiryModalVisible"
       dismissable-mask
+      :navigator="assignee"
       :confirmation-id="enquiryConfirmationId"
       @on-hide="handleDialogClose"
       @on-sumbit-enquiry="handleEnquirySubmit"
@@ -346,6 +385,11 @@ a {
   text-decoration: underline;
 }
 
+.disclaimer-block {
+  outline: solid 0.063rem $app-grey;
+  border-radius: 0.5rem;
+}
+
 .ellipsis-icon {
   cursor: pointer;
   width: 1.5rem;
@@ -358,7 +402,9 @@ a {
 
 .empty-block {
   background-color: $app-grey;
+  border-radius: 0.5rem;
 }
+
 .header-btn {
   max-height: 2rem;
 }
@@ -366,8 +412,8 @@ a {
 .permit-card {
   border-color: $app-proj-white-one;
   border-style: solid;
-  border-width: 1px;
-  box-shadow: 4px 4px 4px 0px $app-proj-black;
+  border-width: 0.063rem;
+  box-shadow: 0.25rem 0.25rem 0.25rem 0rem $app-proj-black;
   &--hover:hover {
     background-color: $app-grey;
   }

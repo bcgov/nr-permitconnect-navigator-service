@@ -275,6 +275,8 @@ export default function getRouter() {
           }, 500);
         });
       }
+
+      return { top: 0 };
     }
   });
 

@@ -5,7 +5,7 @@ import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntak
 import { Button, Dialog, Textarea } from '@/lib/primevue';
 import { formatDate } from '@/utils/formatters';
 
-import type { Permit, PermitType } from '@/types';
+import type { Permit, PermitType, User } from '@/types';
 import type { Ref } from 'vue';
 
 // Types
@@ -15,11 +15,13 @@ type CombinedPermit = Permit & PermitType;
 const {
   permit,
   confirmationId = '',
+  navigator,
   updatedBy
 } = defineProps<{
   permit: CombinedPermit | undefined;
   confirmationId?: string;
-  updatedBy?: string;
+  navigator: User | undefined;
+  updatedBy: string | undefined;
 }>();
 
 // State
@@ -37,7 +39,7 @@ const handleCloseDialog = () => {
 
 const onSubmitEnquiry = () => {
   if (enquiryDescription.value) {
-    const enquiryMessage = enquiryDescription.value + `\n\nRe: ${permit?.name} \nTracking ID: ${permit?.trackingId}`;
+    const enquiryMessage = `Re: ${permit?.name} \nTracking ID: ${permit?.trackingId} \n\n` + enquiryDescription.value;
     emits('onSumbitEnquiry', enquiryMessage);
   }
 };
@@ -116,6 +118,9 @@ const onSubmitEnquiry = () => {
             <div class="font-bold">{{ permit?.agency }}</div>
           </div>
         </div>
+        <div class="mb-2 mt-4 font-bold">
+          <span class="query-to-nav mt-3">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
+        </div>
         <Textarea
           v-model="enquiryDescription"
           aria-describedby="ask-navigator"
@@ -160,7 +165,7 @@ const onSubmitEnquiry = () => {
 .dialog-container {
   width: 50%;
   max-height: 90%;
-  box-shadow: 0px 4px 10px 0px rgba(0, 0, 0, 0.2);
+  box-shadow: 0rem 0.25rem 0.625rem 0rem rgba(0, 0, 0, 0.2);
 }
 
 .permit-data {
