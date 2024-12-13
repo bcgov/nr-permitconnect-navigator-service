@@ -4,10 +4,28 @@ import { computed } from 'vue';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/housing';
 
 // Props
-const { authStatus, toolTipDirection = 'right' } = defineProps<{
+const {
+  authStatus,
+  toolTipDirection = 'right',
+  enlarge = false
+} = defineProps<{
   authStatus?: string;
   toolTipDirection?: string;
+  enlarge?: boolean;
 }>();
+
+const defaultDimensions = {
+  fontSize: '0.75rem',
+  height: '1.5rem',
+  iconFontSize: '1rem',
+  lineHeight: '1.5rem'
+};
+const enlargedDimensions = {
+  fontSize: '1rem',
+  height: '2rem',
+  iconFontSize: '1.5rem',
+  lineHeight: '2rem'
+};
 
 const pillState = {
   [PermitAuthorizationStatus.ABANDONED]: {
@@ -60,6 +78,7 @@ const pillState = {
   }
 };
 
+const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensions));
 const getState = computed(() => {
   return pillState[authStatus as keyof typeof pillState];
 });
@@ -71,6 +90,12 @@ const getState = computed(() => {
       v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
       class="flex justify-content-center align-items-center auth-indicator"
       :class="[getState?.badgeClass]"
+      :style="{
+        '--font-size': dimensions.fontSize,
+        '--icon-font-size': dimensions.iconFontSize,
+        '--height': dimensions.height,
+        '--line-height': dimensions.lineHeight
+      }"
     >
       <font-awesome-icon
         v-if="getState?.iconString"
@@ -88,9 +113,9 @@ const getState = computed(() => {
   border-radius: 2px;
   border-style: solid;
   border-width: 0.1rem;
-  font-size: 0.75rem;
-  height: 1.5rem;
-  line-height: 1.5rem;
+  font-size: var(--font-size);
+  height: var(--height);
+  line-height: var(--line-height);
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   cursor: default;
@@ -102,7 +127,7 @@ const getState = computed(() => {
 }
 
 .icon-detail {
-  font-size: 1rem;
+  font-size: var(--icon-font-height);
   margin-right: 0.5rem;
 }
 
