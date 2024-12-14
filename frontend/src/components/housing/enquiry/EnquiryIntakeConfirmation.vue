@@ -27,8 +27,8 @@ const {
     </Message>
     <h3>Confirmation ID: {{ assignedActivityId }}</h3>
     <div>
-      A Housing Navigator will review your submission and contact you. Please check your email for the confirmation
-      email and keep the confirmation ID for future reference.
+      Your submission will be reviewed and you will be contacted by your Housing Navigator in 2 business days. Please
+      check your email for the confirmation email and keep the confirmation ID for future reference.
     </div>
     <div
       v-if="showHomeLink"

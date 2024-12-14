@@ -1,13 +1,16 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import PermitEnquiryModal from '@/components/permit/PermitEnquiryModal.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
+import { Button, Card, Timeline, useToast } from '@/lib/primevue';
+import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
-import { Button, Card, Timeline, useToast } from '@/lib/primevue';
+import { confirmationTemplateEnquiry } from '@/utils/templates';
 
 import { enquiryService, permitService, submissionService, userService } from '@/services';
 
@@ -23,22 +26,10 @@ const { permitId } = defineProps<{ permitId: string }>();
 
 // Constants
 const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
-const circle = (trackerStatus: string) => ({
+const complete = (trackerStatus: string) => ({
   class: 'stage-blue',
-  iconClass: 'circle',
-  iconString: 'fas fa-circle',
-  text: trackerStatus
-});
-const halfCircle = (trackerStatus: string) => ({
-  class: 'stage-blue',
-  iconClass: 'half-circle',
-  iconString: 'fa fa-circle-half-stroke',
-  text: trackerStatus
-});
-const empty = (trackerStatus: string) => ({
-  class: 'stage-grey',
-  iconClass: 'empty',
-  iconString: 'fa fa-circle',
+  iconClass: 'complete',
+  iconString: 'fas fa-circle-check',
   text: trackerStatus
 });
 const crossedCirlce = (trackerStatus: string) => ({
@@ -47,6 +38,28 @@ const crossedCirlce = (trackerStatus: string) => ({
   iconString: 'fa-solid fa-ban',
   text: trackerStatus
 });
+const current = (trackerStatus: string) => ({
+  class: 'stage-blue text-current',
+  iconClass: 'current',
+  iconString: 'fa fa-circle-dot',
+  text: trackerStatus
+});
+const empty = (trackerStatus: string) => ({
+  class: 'stage-grey',
+  iconClass: 'empty',
+  iconString: 'fa fa-circle',
+  text: trackerStatus
+});
+const previous = (trackerStatus: string) => ({
+  class: 'stage-blue-opaque',
+  iconClass: 'previous',
+  iconString: 'fas fa-circle-check',
+  text: trackerStatus
+});
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
+const { getProfile } = storeToRefs(useAuthNStore());
 
 // State
 const breadcrumbItems: Ref<Array<MenuItem>> = ref([
@@ -59,7 +72,8 @@ const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
 const enquiryModalVisible: Ref<boolean> = ref(false);
 const permit: Ref<CombinedPermit | undefined> = ref(undefined);
 const submission: Ref<Submission | undefined> = ref(undefined);
-const user: Ref<User | undefined> = ref(undefined);
+const updatedBy: Ref<string | undefined> = ref(undefined);
+const assignedNavigator: Ref<User | undefined> = ref(undefined);
 
 const statusBoxStates = {
   [PermitAuthorizationStatus.ABANDONED]: {
@@ -98,28 +112,28 @@ const statusBoxStates = {
 
 const timelineStages = {
   [PermitStatus.APPLIED]: [
-    halfCircle(PermitStatus.APPLIED),
+    current(PermitStatus.APPLIED),
     empty(PermitStatus.TECHNICAL_REVIEW),
     empty(PermitStatus.PENDING),
     empty(PermitStatus.COMPLETED)
   ],
   [PermitStatus.TECHNICAL_REVIEW]: [
-    circle(PermitStatus.APPLIED),
-    halfCircle(PermitStatus.TECHNICAL_REVIEW),
+    previous(PermitStatus.APPLIED),
+    current(PermitStatus.TECHNICAL_REVIEW),
     empty(PermitStatus.PENDING),
     empty(PermitStatus.COMPLETED)
   ],
   [PermitStatus.PENDING]: [
-    circle(PermitStatus.APPLIED),
-    circle(PermitStatus.TECHNICAL_REVIEW),
-    halfCircle(PermitStatus.PENDING),
+    previous(PermitStatus.APPLIED),
+    previous(PermitStatus.TECHNICAL_REVIEW),
+    current(PermitStatus.PENDING),
     empty(PermitStatus.COMPLETED)
   ],
   [PermitStatus.COMPLETED]: [
-    circle(PermitStatus.APPLIED),
-    circle(PermitStatus.TECHNICAL_REVIEW),
-    circle(PermitStatus.PENDING),
-    circle(PermitStatus.COMPLETED)
+    complete(PermitStatus.APPLIED),
+    complete(PermitStatus.TECHNICAL_REVIEW),
+    complete(PermitStatus.PENDING),
+    complete(PermitStatus.COMPLETED)
   ],
   terminatedStatus: [
     crossedCirlce(PermitStatus.APPLIED),
@@ -137,6 +151,31 @@ const timelineStages = {
 
 // Actions
 const toast = useToast();
+
+async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const user = getProfile;
+
+  const body = confirmationTemplateEnquiry({
+    '{{ contactName }}': user.value?.name,
+    '{{ activityId }}': activityId,
+    '{{ enquiryDescription }}': enquiryDescription,
+    '{{ enquiryId }}': enquiryId
+  });
+  let applicantEmail = user.value?.email;
+
+  if (applicantEmail) {
+    let emailData = {
+      from: configCC,
+      to: [applicantEmail],
+      cc: configCC,
+      subject: 'Confirmation of Submission', // eslint-disable-line quotes
+      bodyType: 'html',
+      body: body
+    };
+    await submissionService.emailConfirmation(emailData);
+  }
+}
 
 function getStatusBoxState(authStatus: string | undefined) {
   return authStatus && authStatus in statusBoxStates
@@ -182,6 +221,10 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
   try {
     const response = await enquiryService.createEnquiry(enquiryData);
     enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
+
+    if (enquiryConfirmationId.value) {
+      emailConfirmation(response.data.activityId, response.data.enquiryId, enquiryDescription);
+    }
   } catch (e: any) {
     toast.error('Failed to submit enquiry', e);
   }
@@ -208,8 +251,14 @@ onBeforeMount(async () => {
       },
       { label: permit?.value?.name, class: 'font-bold' }
     ];
+    if (submission.value?.assignedUserId) {
+      assignedNavigator.value = (await userService.searchUsers({ userId: [submission.value.assignedUserId] })).data[0];
+    }
 
-    user.value = (await userService.searchUsers({ userId: [permitResponse.data.updatedBy] })).data[0];
+    if (permit.value?.updatedBy) {
+      const updatedByUser = (await userService.searchUsers({ userId: [permitResponse.data.updatedBy] })).data[0];
+      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+    }
   } catch {
     toast.error('Unable to load permit or project, please try again later');
   }
@@ -222,104 +271,116 @@ onBeforeMount(async () => {
     :model="breadcrumbItems"
   />
   <div class="permit-status-view">
-    <h1 class="permit-name mb-4">
+    <h1 class="permit-name mt-7">
       {{ permit?.name }}
     </h1>
-    <p class="agency my-0">
-      <b>Agency:</b>
-      {{ permit?.agency }}
-    </p>
-    <Card>
-      <template #content>
-        <div class="permit-info">
-          <div class="info-item">
-            <b>Tracking ID:</b>
-            <span>
-              {{ permit?.trackingId }}
-            </span>
-          </div>
-          <div class="info-item">
-            <b>Submitted date:</b>
-            <span>
-              {{ formatDate(permit?.submittedDate) }}
-            </span>
-          </div>
-          <div class="info-item">
-            <b>Permit ID:</b>
-            <span>
-              {{ permit?.issuedPermitId }}
-            </span>
-          </div>
-          <div class="info-item">
-            <b>Adjudication date:</b>
-            <span>
-              {{ formatDate(permit?.adjudicationDate) }}
-            </span>
-          </div>
+    <div class="permit-info-block">
+      <div class="permit-info">
+        <div class="info-item">
+          <b>Tracking ID:</b>
+          <span>
+            {{ permit?.trackingId }}
+          </span>
         </div>
-      </template>
-    </Card>
-    <div class="status-header">
-      <h4 class="status-header-text">Application status and progress</h4>
+        <div class="info-item">
+          <b>Submitted date:</b>
+          <span>
+            {{ formatDate(permit?.submittedDate) }}
+          </span>
+        </div>
+        <div class="info-item">
+          <b>Permit ID:</b>
+          <span>
+            {{ permit?.issuedPermitId }}
+          </span>
+        </div>
+        <div class="info-item">
+          <b>Adjudication date:</b>
+          <span>
+            {{ formatDate(permit?.adjudicationDate) }}
+          </span>
+        </div>
+      </div>
+      <div class="info-item mt-4">
+        <b>Agency:</b>
+        <span>
+          {{ permit?.agency }}
+        </span>
+      </div>
+    </div>
+    <div class="status-help">
       <font-awesome-icon
         class="status-description-icon"
         icon="fa-circle-question"
         @click="descriptionModalVisible = true"
       />
-    </div>
-    <div class="status-verified-message">
-      <div v-if="permit?.statusLastVerified">
-        <p>This status was last verified on {{ formatDate(permit?.statusLastVerified) }} by {{ user?.fullName }}</p>
-      </div>
-      <div v-else>
-        <p>This status has not yet been verified.</p>
-      </div>
-    </div>
-    <div class="status-tracker">
-      <div
-        class="status-tracker-box py-3 px-4"
-        :class="[getStatusBoxState(permit?.authStatus).boxClass]"
+      <span
+        class="status-description"
+        @click="descriptionModalVisible = true"
       >
-        {{ getStatusBoxState(permit?.authStatus).message }}
-      </div>
-      <div class="status-tracker-pill-timeline mb-2">
-        <div class="status-pill">
-          <h6>Current status</h6>
-          <StatusPill :auth-status="permit?.authStatus" />
-        </div>
-        <div class="status-timeline">
-          <h6>Application progress</h6>
-          <Timeline
-            :value="getTimelineStage(permit?.authStatus, permit?.status)"
-            layout="horizontal"
-          >
-            <template #marker="slotProps">
-              <font-awesome-icon
-                :class="slotProps.item.iconClass"
-                :icon="slotProps.item.iconString"
-              />
-            </template>
-            <template #content="slotProps">
-              <div
-                class="timeline-content"
-                :class="slotProps.item.class"
-              >
-                {{ slotProps.item.text }}
-              </div>
-            </template>
-          </Timeline>
-        </div>
-      </div>
+        What does the status mean?
+      </span>
     </div>
-    <div class="updates-section mt-8">
-      <h4 class="mb-4">Updates</h4>
-      <p>For further updates on this application, please contact your Navigator.</p>
-      <Button
-        class="mb-6"
-        outlined
-        label="Ask my Navigator"
-        @click="() => (enquiryModalVisible = true)"
-      />
+    <Card>
+      <template #header>
+        <div
+          class="status-tracker-header py-3 px-4"
+          :class="[getStatusBoxState(permit?.authStatus).boxClass]"
+        >
+          <StatusPill
+            :auth-status="permit?.authStatus"
+            :enlarge="true"
+          />
+          {{ getStatusBoxState(permit?.authStatus).message }}
+        </div>
+      </template>
+      <template #content>
+        <div class="application-progress-block">
+          <div class="status-timeline">
+            <h4>Application progress</h4>
+            <Timeline
+              :value="getTimelineStage(permit?.authStatus, permit?.status)"
+              layout="horizontal"
+            >
+              <template #marker="slotProps">
+                <font-awesome-icon
+                  :class="slotProps.item.iconClass"
+                  :icon="slotProps.item.iconString"
+                />
+              </template>
+              <template #content="slotProps">
+                <div
+                  class="timeline-content"
+                  :class="slotProps.item.class"
+                >
+                  {{ slotProps.item.text }}
+                </div>
+              </template>
+            </Timeline>
+          </div>
+          <div class="status-verified-message">
+            <div v-if="updatedBy">
+              <p class="verified-text my-0">
+                This status was last verified on {{ formatDate(permit?.statusLastVerified) }} by {{ updatedBy }}
+              </p>
+            </div>
+            <div v-else>
+              <p class="verified-text my-0">This status has not yet been verified.</p>
+            </div>
+          </div>
+        </div>
+      </template>
+    </Card>
+    <div class="updates-section">
+      <h4 class="mb-4">Additional updates</h4>
+      <div class="ask-navigator mb-7">
+        <Button
+          outlined
+          label="Ask my Navigator"
+          @click="() => (enquiryModalVisible = true)"
+        />
+        <p>Contact your Navigator for this project for further updates on this application.</p>
+      </div>
       <div v-if="permit?.permitNote && permit.permitNote.length > 0">
         <div
           v-for="note in permit.permitNote"
@@ -339,7 +400,8 @@ onBeforeMount(async () => {
     v-model:visible="enquiryModalVisible"
     :permit="permit"
     :confirmation-id="enquiryConfirmationId"
-    :updated-by="user?.fullName"
+    :navigator="assignedNavigator"
+    :updated-by="updatedBy"
     @on-sumbit-enquiry="handleEnquirySubmit"
     @on-hide="handleModalClose"
   />
@@ -350,22 +412,25 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.circle {
+.complete {
   color: #1e5189;
+  font-size: 2.5rem;
   & + :deep(.p-timeline-event-connector) {
     background-color: #1e5189;
   }
 }
 
 .crossed-circle {
-  color: #9f9d9c;
+  color: #e0dedc;
+  font-size: 2.5rem;
   & + :deep(.p-timeline-event-connector) {
-    background-color: #9f9d9c;
+    background-color: #e0dedc;
   }
 }
 
-.half-circle {
+.current {
   color: #1e5189;
+  font-size: 2.5rem;
   & + :deep(.p-timeline-event-connector) {
     background-color: #e0dedc;
   }
@@ -373,10 +438,21 @@ onBeforeMount(async () => {
 
 .empty {
   color: transparent;
-  border: 1px dashed #9f9d9c;
+  border: 0.094rem dashed #9f9d9c;
   border-radius: 50%;
+  font-size: 2.5rem;
   & + :deep(.p-timeline-event-connector) {
     background-color: #e0dedc;
+  }
+}
+
+.previous {
+  color: #1e5189;
+  font-size: 2.5rem;
+  opacity: 0.5;
+  & + :deep(.p-timeline-event-connector) {
+    background-color: #1e5189;
+    opacity: 0.5;
   }
 }
 
@@ -384,14 +460,30 @@ onBeforeMount(async () => {
   color: #1e5189;
 }
 
+.stage-blue-opaque {
+  color: #1e5189;
+  opacity: 0.5;
+}
+
 .stage-grey {
   color: #9f9d9c;
+}
+
+.application-progress-block {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
+
+.ask-navigator {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
 }
 
 .permit-info {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 0.5rem;
   align-items: baseline;
 }
 
@@ -402,7 +494,7 @@ onBeforeMount(async () => {
 
 .info-item b {
   white-space: nowrap;
-  margin-right: 5px;
+  margin-right: 0.313rem;
 }
 
 .info-item span {
@@ -414,90 +506,71 @@ onBeforeMount(async () => {
   margin: 0;
 }
 
+.permit-name {
+  margin-bottom: 3.5rem;
+}
+
 .p-card {
   background: #fff;
-  border: 1px solid #efefef;
-  border-radius: 8px;
+  border: 0.063rem solid #efefef;
+  border-radius: 0.25rem;
+  box-shadow: 0rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.04);
+  position: relative;
+}
+
+.permit-info-block {
+  background: #fff;
+  border: 0.063rem solid #efefef;
+  border-radius: 0.25rem;
   box-shadow: none;
-  margin-top: 40px;
-  margin-bottom: 88px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
 }
 
 :deep(.p-timeline-event-opposite) {
   display: none;
 }
 
-.status-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
+.status-description {
+  color: $app-primary;
+  cursor: pointer;
 }
 
-.status-header-text {
-  margin: 0;
+.status-description:hover {
+  text-decoration: underline;
 }
 
 .status-description-icon {
   color: $app-primary;
-  font-size: 1rem;
   cursor: pointer;
 }
 
-.status-tracker-box {
-  border-radius: 4px;
-  border: 1px solid;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-.status-tracker-box.green {
-  background: #f6fff8;
-  border-color: #42814a;
-}
-
-.status-tracker-box.yellow {
-  background: #fef1d8;
-  border-color: #f8bb47;
-}
-
-.status-tracker-box.red {
-  background: #f4e1e2;
-  border-color: #ce3e39;
-}
-
-.status-tracker-box.grey {
-  background: #f3f2f1;
-  border-color: #353433;
-}
-
-.status-tracker-pill-timeline {
+.status-help {
   display: flex;
-  flex-direction: row;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
-  gap: 100px;
-}
-
-.status-pill {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 5rem;
+  margin-bottom: 1rem;
+  align-items: center;
 }
 
 .status-timeline {
-  flex-grow: 1;
-  overflow-x: hidden;
+  margin-bottom: 3.5rem;
 }
 
-.status-pill h6,
-.status-timeline h6 {
-  margin-top: 40px;
+.status-tracker-header {
+  align-items: center;
+  border-radius: 0.25rem;
+  background: #fafafa;
+  box-shadow: 0rem 0.25rem 0.25rem 0rem rgba(0, 0, 0, 0.04);
+  display: flex;
+  gap: 0.5rem;
 }
 
-.status-verified-message {
-  margin-bottom: 56px;
+.text-current {
+  font-weight: 700;
 }
 
 .timeline-content {
@@ -505,9 +578,16 @@ onBeforeMount(async () => {
   word-break: keep-all;
 }
 
-h6 {
-  color: $app-primary;
-  font-size: 16px;
-  margin-bottom: 22px;
+.updates-section {
+  border-radius: 0.25rem;
+  background: #fafafa;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-top: 3.5rem;
+  padding-bottom: 4rem;
+}
+
+.verified-text {
+  color: #606060;
 }
 </style>
