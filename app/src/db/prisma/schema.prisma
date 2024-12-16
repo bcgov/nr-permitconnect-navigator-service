@@ -511,10 +511,10 @@ model draft_code {
 
 model email_log {
   email_id    String    @id @db.Uuid
+  http_status Int?
   msg_id      String?   @db.Uuid
   to          String?
   tx_id       String?   @db.Uuid
-  http_status Int?
   created_by  String?   @default("00000000-0000-0000-0000-000000000000")
   created_at  DateTime? @default(now()) @db.Timestamptz(6)
   updated_by  String?

@@ -11,7 +11,7 @@ type Message = {
   to: Array<string>;
 };
 
-type Email_data = {
+type EmailData = {
   messages: Array<Message>;
   txId: string;
 };
@@ -100,19 +100,19 @@ const service = {
   /**
    * @function logEmail
    * Logs CHES email api calls
-   * @param {Email_data | null} data Object containing CHES response, or null on error
+   * @param {EmailData | null} data Object containing CHES response, or null on error
    * @param {Array<string>} recipients Array of email strings
    * @param {status} status Http status of CHES response
    * @returns null
    */
-  logEmail: async (data: Email_data | null, recipients: Array<string>, status: number) => {
+  logEmail: async (data: EmailData | null, recipients: Array<string>, status: number) => {
     return await prisma.$transaction(async (trx) => {
       return await trx.email_log.createMany({
-        data: recipients.map((x) => ({
+        data: recipients.map((recipient) => ({
           email_id: uuidv4(),
-          msg_id: data?.messages?.[0].msgId ?? null,
-          to: x,
-          tx_id: data?.txId ?? null,
+          msg_id: data?.messages?.[0].msgId,
+          to: recipient,
+          tx_id: data?.txId,
           http_status: status
         }))
       });

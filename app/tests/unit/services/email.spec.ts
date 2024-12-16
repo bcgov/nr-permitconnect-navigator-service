@@ -7,12 +7,12 @@ type Message = {
   to: Array<string>;
 };
 
-type Email_data = {
+type EmailData = {
   messages: Array<Message>;
   txId: string;
 };
 
-const chesResponse: Email_data = {
+const chesResponse: EmailData = {
   messages: [{ msgId: '9c50c187-4f89-463b-afea-ededc889dd31', to: [] }],
   txId: '508a1f8f-b5a1-4d37-a8c9-f7d7c0a86c00'
 };
