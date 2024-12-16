@@ -37,24 +37,14 @@ onMounted(() => {
       label: 'Housing',
       items: [
         {
-          label: 'Start a new project investigation',
+          label: 'Submit a housing project to the Navigator Service',
           route: RouteName.HOUSING_SUBMISSION_INTAKE,
           access: NavigationPermission.HOUSING_SUBMISSION_INTAKE
         },
         {
-          label: 'Submit an enquiry',
+          label: 'Submit general enquiries',
           route: RouteName.HOUSING_ENQUIRY_INTAKE,
           access: NavigationPermission.HOUSING_ENQUIRY_INTAKE
-        },
-        {
-          label: 'View my drafts and previous entries',
-          route: RouteName.HOUSING_SUBMISSIONS,
-          access: NavigationPermission.HOUSING_SUBMISSIONS_SUB
-        },
-        {
-          label: 'Check the status of your applications/permits',
-          route: RouteName.HOUSING_PROJECTS_LIST,
-          access: NavigationPermission.HOUSING_STATUS_TRACKER
         }
       ],
       access: NavigationPermission.HOUSING_DROPDOWN
@@ -78,9 +68,9 @@ onMounted(() => {
       label: 'Help',
       items: [
         {
-          label: 'Contact a Navigator',
-          mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
-          access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE, NavigationPermission.HOUSING_ENQUIRY_INTAKE]
+          label: 'User Guide',
+          route: RouteName.HOUSING_GUIDE,
+          access: NavigationPermission.HOUSING_USER_GUIDE
         },
         {
           label: 'Report a problem',
@@ -88,9 +78,9 @@ onMounted(() => {
           public: true
         },
         {
-          label: 'User Guide',
-          route: RouteName.HOUSING_GUIDE,
-          access: NavigationPermission.HOUSING_USER_GUIDE
+          label: 'Contact a Navigator',
+          mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
+          access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE, NavigationPermission.HOUSING_ENQUIRY_INTAKE]
         }
       ],
       public: true
@@ -163,9 +153,6 @@ onMounted(() => {
   color: #fcba19;
   display: flex;
   width: 100%;
-  box-shadow: 0 6px 8px -4px #b3b1b3;
-  -webkit-box-shadow: 0 6px 8px -4px #b3b1b3;
-  -moz-box-shadow: 0 6px 8px -4px #b3b1b3;
 
   .p-menubar {
     border: none;

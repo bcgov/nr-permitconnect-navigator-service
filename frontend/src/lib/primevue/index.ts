@@ -27,6 +27,7 @@ export { default as Menu } from 'primevue/menu';
 export { default as Menubar } from 'primevue/menubar';
 export { default as Message } from 'primevue/message';
 export { default as Panel } from 'primevue/panel';
+export { default as Paginator } from 'primevue/paginator';
 export { default as Password } from 'primevue/password';
 export { default as ProgressBar } from 'primevue/progressbar';
 export { default as ProgressSpinner } from 'primevue/progressspinner';

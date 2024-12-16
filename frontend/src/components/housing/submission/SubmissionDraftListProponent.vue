@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -25,23 +25,24 @@ const selection: Ref<Submission | undefined> = ref(undefined);
 
 // Actions
 const confirm = useConfirm();
+const { t } = useI18n();
 const toast = useToast();
 
 function onDelete(draftId: string) {
   confirm.require({
-    message: 'Please confirm that you want to delete this draft',
-    header: 'Delete draft?',
-    acceptLabel: 'Confirm',
+    message: t('submissionDraftListProponent.deleteMsg'),
+    header: t('submissionDraftListProponent.deleteHeader'),
+    acceptLabel: t('submissionDraftListProponent.confirm'),
     acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
+    rejectLabel: t('submissionDraftListProponent.cancel'),
     accept: () => {
       submissionService
         .deleteDraft(draftId)
         .then(() => {
           emit('submissionDraft:delete', draftId);
-          toast.success('Draft deleted');
+          toast.success(t('submissionDraftListProponent.deleteSuccess'));
         })
-        .catch((e: any) => toast.error('Failed to delete draft', e.message));
+        .catch((e: any) => toast.error(t('submissionDraftListProponent.deleteFailed'), e.message));
     }
   });
 }
@@ -59,14 +60,14 @@ function onDelete(draftId: string) {
     :rows="10"
     sort-field="submittedAt"
     :sort-order="-1"
-    paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
-    current-page-report-template="{first}-{last} of {totalRecords}"
+    paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+    :current-page-report-template="`({currentPage} ${t('submissionDraftListProponent.of')} {totalPages})`"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
   >
     <template #empty>
       <div class="flex justify-content-center">
-        <h3>No items found.</h3>
+        <p class="font-bold text-xl">{{ t('submissionDraftListProponent.listEmpty') }}</p>
       </div>
     </template>
     <template #loading>
@@ -74,8 +75,9 @@ function onDelete(draftId: string) {
     </template>
     <Column
       field="index"
-      header="Draft ID"
+      :header="t('submissionDraftListProponent.draftId')"
       :sortable="true"
+      style="width: 45%"
       frozen
     >
       <template #body="{ data }">
@@ -92,19 +94,9 @@ function onDelete(draftId: string) {
       </template>
     </Column>
     <Column
-      header="Status"
-      :sortable="true"
-      style="min-width: 150px"
-    >
-      <template #body="{}">
-        {{ IntakeStatus.DRAFT }}
-      </template>
-    </Column>
-    <Column
       field="updatedAt"
-      header="Last edited"
+      :header="t('submissionDraftListProponent.lastEdited')"
       :sortable="true"
-      style="min-width: 150px"
     >
       <template #body="{ data }">
         {{ formatDate(data?.updatedAt) }}
@@ -112,15 +104,15 @@ function onDelete(draftId: string) {
     </Column>
     <Column
       field="action"
-      header="Action"
+      :header="t('submissionDraftListProponent.action')"
       header-class="header-right"
       class="text-right"
-      style="min-width: 150px"
+      style="width: 10%"
     >
       <template #body="{ data }">
         <Button
           class="p-button-lg p-button-text p-button-danger p-0 pr-3"
-          aria-label="Delete draft"
+          :aria-label="t('submissionDraftListProponent.ariaDeleteDraft')"
           @click="onDelete(data.draftId)"
         >
           <font-awesome-icon icon="fa-solid fa-trash" />
