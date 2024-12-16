@@ -30,6 +30,10 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
+    - name: Install oc-cli
+      uses: redhat-actions/openshift-tools-installer@v1
+      with:
+        oc: "4.16"
     - name: Login to OpenShift Cluster
       uses: redhat-actions/oc-login@v1
       with:
