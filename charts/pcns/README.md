@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.18](https://img.shields.io/badge/Version-0.0.18-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0](https://img.shields.io/badge/AppVersion-0.4.0-informational?style=flat-square)
+![Version: 0.0.19](https://img.shields.io/badge/Version-0.0.19-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.4.0](https://img.shields.io/badge/AppVersion-0.4.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -62,8 +62,7 @@ Kubernetes: `>= 1.13.0`
 | podAnnotations | object | `{}` | Annotations for app pods |
 | podSecurityContext | object | `{}` | Privilege and access control settings |
 | replicaCount | int | `2` | Number of pod replicas running in the deployment |
-| resources.limits.cpu | string | `"200m"` | Limit Peak CPU (in millicores ex. 1000m) |
-| resources.limits.memory | string | `"256Mi"` | Limit Peak Memory (in gigabytes Gi or megabytes Mi ex. 2Gi) |
+| resources.requests | object | `{"cpu":"10m","memory":"128Mi"}` | Limit Peak Memory (in gigabytes Gi or megabytes Mi ex. 2Gi) memory: 256Mi |
 | resources.requests.cpu | string | `"10m"` | Requested CPU (in millicores ex. 500m) |
 | resources.requests.memory | string | `"128Mi"` | Requested Memory (in gigabytes Gi or megabytes Mi ex. 500Mi) |
 | route.annotations | object | `{}` | Annotations to add to the route |
