@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { computed, onBeforeMount, nextTick, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
@@ -125,21 +125,13 @@ const validationErrors = computed(() => {
 // Actions
 const confirm = useConfirm();
 const router = useRouter();
-const route = useRoute();
 const toast = useToast();
 
 const getBackButtonConfig = computed(() => {
-  if (route.query.activityId) {
-    return {
-      text: 'Back to my drafts and previous entries',
-      routeName: RouteName.HOUSING_SUBMISSIONS
-    };
-  } else {
-    return {
-      text: 'Back to Housing',
-      routeName: RouteName.HOUSING
-    };
-  }
+  return {
+    text: 'Back to Housing',
+    routeName: RouteName.HOUSING
+  };
 });
 
 function confirmSubmit(data: GenericObject) {
