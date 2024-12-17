@@ -597,7 +597,7 @@ onBeforeMount(async () => {
         @update:active-step="onStepChange"
       >
         <!--
-      Contact Information
+      Basic info
       -->
         <StepperPanel>
           <template #header="{ index, clickCallback }">
@@ -605,7 +605,7 @@ onBeforeMount(async () => {
               :index="index"
               :active-step="activeStep"
               :click-callback="clickCallback"
-              title="Contact Information"
+              title="Basic info"
               icon="fa-user"
               :class="{
                 'app-error-color':
@@ -1810,6 +1810,15 @@ onBeforeMount(async () => {
 :deep(.p-stepper-panels) {
   padding-left: 0;
   padding-right: 0;
+}
+
+:deep(.p-stepper-separator) {
+  background-color: #f3f2f1; // TODO Grey 20
+  height: 0.25rem;
+}
+
+:deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
+  background-color: #d8eafd; // TODO Blue 20
 }
 
 .lat-long-btn {
