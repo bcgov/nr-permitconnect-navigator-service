@@ -27,7 +27,7 @@ const {
     >
       Your enquiry has been successfully submitted.
     </Message>
-    <h3 class="inline-block mr-2">Confirmation ID:</h3>
+    <h3 class="inline-block mr-2">Enquiry ID:</h3>
     <router-link
       :to="{
         name: RouteName.HOUSING_ENQUIRY_INTAKE,
@@ -38,7 +38,7 @@ const {
     </router-link>
     <div>
       A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for
-      the confirmation email and keep the confirmation ID for future reference.
+      the confirmation email and keep the enquiry ID for future reference.
     </div>
     <div
       v-if="showHomeLink"

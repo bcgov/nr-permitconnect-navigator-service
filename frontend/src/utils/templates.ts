@@ -71,9 +71,9 @@ export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: s
     '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
     '<div style="margin-left: 3rem; margin-right: 3rem;">' +
     'Dear {{ contactName }},<br><br>' +
-    '<b>Confirmation ID: {{ activityId }}</b><br><br>' +
+    '<b>Project ID: {{ activityId }}</b><br><br>' +
     // eslint-disable-next-line max-len
-    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your confirmation ID for future reference.<br><br>' +
+    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
     'View your project submission <a href="' +
     PCNS_URL +
     '/housing/submission/intake?activityId={{ activityId }}&submissionId={{ submissionId }}">here<a>.<br><br>' +
@@ -97,9 +97,9 @@ export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: stri
     '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
     '<div style="margin-left: 3rem; margin-right: 3rem;">' +
     'Dear {{ contactName }},<br><br>' +
-    '<b>Confirmation ID: {{ activityId }}</b><br><br>' +
+    '<b>Enquiry ID: {{ activityId }}</b><br><br>' +
     // eslint-disable-next-line max-len
-    'Thank you for submitting an enquiry to the Navigator Service. We have successfully received your enquiry. A Navigator will review your enquiry and contact you. Please keep your confirmation ID for future reference.<br><br>' +
+    'Thank you for submitting an enquiry to the Navigator Service. We have successfully received your enquiry. A Navigator will review your enquiry and contact you. Please keep your enquiry ID for future reference.<br><br>' +
     '<b>Enquiry detail:</b><br><br>' +
     '{{ enquiryDescription }}<br><br>' +
     'View your enquiry <a href="' +

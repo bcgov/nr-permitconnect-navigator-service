@@ -53,7 +53,7 @@ const { t } = useI18n();
     </template>
     <Column
       field="activity.activityId"
-      :header="t('enquiryListProponent.confirmationId')"
+      :header="t('enquiryListProponent.enquiryId')"
       :sortable="true"
       style="width: 45%"
       frozen

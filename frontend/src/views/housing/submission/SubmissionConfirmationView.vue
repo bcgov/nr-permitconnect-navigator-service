@@ -20,7 +20,7 @@ const { activityId, submissionId } = defineProps<{
     >
       Your application has been successfully submitted.
     </Message>
-    <h3 class="inline-block mr-2">Confirmation ID:</h3>
+    <h3 class="inline-block mr-2">Project ID:</h3>
     <router-link
       :to="{
         name: RouteName.HOUSING_SUBMISSION_INTAKE,
@@ -31,7 +31,7 @@ const { activityId, submissionId } = defineProps<{
     </router-link>
     <div>
       Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check
-      your email for the confirmation email and keep the confirmation ID for future reference.
+      your email for the confirmation email and keep the project ID for future reference.
     </div>
     <div class="mt-4"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
   </div>

@@ -165,8 +165,9 @@ function updateQueryParams() {
     </template>
     <Column
       field="activity.activityId"
-      header="Activity"
+      header="Enquiry ID"
       :sortable="true"
+      style="min-width: 136px"
       frozen
     >
       <template #body="{ data }">
