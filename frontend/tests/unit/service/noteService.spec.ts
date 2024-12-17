@@ -22,11 +22,13 @@ const testNote = {
   isDeleted: false
 };
 
+const deleteSpy = vi.fn();
 const getSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
+  delete: deleteSpy,
   get: getSpy,
   put: putSpy
 } as any);
@@ -37,24 +39,33 @@ beforeEach(() => {
 
 describe('noteService', () => {
   describe('createNote', () => {
-    it('calls with given data', async () => {
-      await noteService.createNote(testNote);
+    it('calls with given data', () => {
+      noteService.createNote(testNote);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith('note', testNote);
     });
   });
 
+  describe('deleteNote', () => {
+    it('calls with given data', () => {
+      noteService.deleteNote(testNote.noteId);
+
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith(`note/${testNote.noteId}`);
+    });
+  });
+
   describe('listBringForward', () => {
-    it('does not include state when given no parameter', async () => {
-      await noteService.listBringForward();
+    it('does not include state when given no parameter', () => {
+      noteService.listBringForward();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/bringForward', { params: { bringForwardState: undefined } });
     });
 
-    it('adds Unresolved to query when given as parameter', async () => {
-      await noteService.listBringForward(BringForwardType.UNRESOLVED);
+    it('adds Unresolved to query when given as parameter', () => {
+      noteService.listBringForward(BringForwardType.UNRESOLVED);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
@@ -62,8 +73,8 @@ describe('noteService', () => {
       });
     });
 
-    it('adds Resolved to query when given as parameter', async () => {
-      await noteService.listBringForward(BringForwardType.RESOLVED);
+    it('adds Resolved to query when given as parameter', () => {
+      noteService.listBringForward(BringForwardType.RESOLVED);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/bringForward', {
@@ -73,11 +84,20 @@ describe('noteService', () => {
   });
 
   describe('listNotes', () => {
-    it('retrieves note list', async () => {
-      await noteService.listNotes('testUUID');
+    it('retrieves note list', () => {
+      noteService.listNotes('testUUID');
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith('note/list/testUUID');
+    });
+  });
+
+  describe('updateNote', () => {
+    it('calls with given data', () => {
+      noteService.updateNote(testNote);
+
+      expect(putSpy).toHaveBeenCalledTimes(1);
+      expect(putSpy).toHaveBeenCalledWith(`note/${testNote.noteId}`, testNote);
     });
   });
 });
