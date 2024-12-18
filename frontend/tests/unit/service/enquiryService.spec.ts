@@ -8,6 +8,10 @@ vi.mock('vue-router', () => ({
   })
 }));
 
+const isDeleted = true;
+
+const testActivityId = '25357C4A';
+
 const testEnquiry = {
   enquiryId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
   activityId: '45A0A36A',
@@ -35,12 +39,14 @@ const testEnquiry = {
 
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
+const patchSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   delete: deleteSpy,
+  patch: patchSpy,
   put: putSpy
 } as any);
 
@@ -49,29 +55,50 @@ beforeEach(() => {
 });
 
 describe('enquiryService', () => {
-  it('calls deleteEnquiry with correct data', async () => {
-    await enquiryService.deleteEnquiry(testEnquiry.enquiryId);
+  it('calls deleteEnquiry with correct data', () => {
+    enquiryService.deleteEnquiry(testEnquiry.enquiryId);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
   });
 
-  it('calls getEnquiry with correct data', async () => {
-    await enquiryService.getEnquiry(testEnquiry.enquiryId);
+  it('calls getEnquiries', () => {
+    enquiryService.getEnquiries();
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith('enquiry');
+  });
+
+  it('calls getEnquiry with correct data', () => {
+    enquiryService.getEnquiry(testEnquiry.enquiryId);
 
     expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
   });
 
-  it('calls createEnquiry with correct data', async () => {
-    await enquiryService.createEnquiry(testEnquiry);
+  it('calls listRelatedEnquiries with correct data', () => {
+    enquiryService.listRelatedEnquiries(testActivityId);
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(`enquiry/list/${testActivityId}`);
+  });
+
+  it('calls createEnquiry with correct data', () => {
+    enquiryService.createEnquiry(testEnquiry);
 
     expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith('enquiry', testEnquiry);
   });
 
-  it('calls updateEnquiry with correct data', async () => {
-    await enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
+  it('calls updateIsDeletedFlag with correct data', () => {
+    enquiryService.updateIsDeletedFlag(testEnquiry.enquiryId, isDeleted);
+
+    expect(patchSpy).toHaveBeenCalledTimes(1);
+    expect(patchSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}/delete`, { isDeleted: isDeleted });
+  });
+
+  it('calls updateEnquiry with correct data', () => {
+    enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
 
     expect(putSpy).toHaveBeenCalledTimes(1);
     expect(putSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`, testEnquiry);
