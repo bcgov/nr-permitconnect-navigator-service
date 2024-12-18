@@ -607,11 +607,10 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Basic info"
               icon="fa-user"
-              :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.CONTACTS) ||
-                  validationErrors.includes(IntakeFormCategory.BASIC)
-              }"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.CONTACTS) ||
+                validationErrors.includes(IntakeFormCategory.BASIC)
+              "
             />
           </template>
           <template #content="{ nextCallback }">
@@ -779,9 +778,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
-              }"
+              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1152,9 +1149,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Location"
               icon="fa-location-dot"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
-              }"
+              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1453,11 +1448,10 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Permits & Reports"
               icon="fa-file"
-              :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              }"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              "
             />
           </template>
           <template #content="{ prevCallback }">
