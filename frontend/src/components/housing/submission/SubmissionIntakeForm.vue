@@ -46,11 +46,19 @@ import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
+  PROJECT_APPLICANT_LIST,
   PROJECT_LOCATION_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { IntakeFormCategory, PermitNeeded, PermitStatus, ProjectLocation, SubmissionType } from '@/utils/enums/housing';
+import {
+  IntakeFormCategory,
+  PermitNeeded,
+  PermitStatus,
+  ProjectApplicant,
+  ProjectLocation,
+  SubmissionType
+} from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit } from '@/utils/utils';
 
@@ -669,9 +677,7 @@ onBeforeMount(async () => {
             </Card>
             <Card>
               <template #title>
-                <span class="section-header">
-                  Is this project being developed by a business, company, or organization?
-                </span>
+                <span class="section-header">Are you applying as an individual or a business?</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -681,16 +687,16 @@ onBeforeMount(async () => {
                     name="basic.isDevelopedByCompanyOrOrg"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YES_NO_LIST"
+                    :options="PROJECT_APPLICANT_LIST"
                     @on-change="
                       (e: string) => {
-                        if (e === BasicResponse.NO) setFieldValue('basic.isDevelopedInBC', null);
+                        if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBC', null);
                       }
                     "
                   />
 
                   <span
-                    v-if="values.basic?.isDevelopedByCompanyOrOrg === BasicResponse.YES"
+                    v-if="values.basic?.isDevelopedByCompanyOrOrg === ProjectApplicant.BUSINESS"
                     class="col-12"
                   >
                     <div class="flex align-items-center">
