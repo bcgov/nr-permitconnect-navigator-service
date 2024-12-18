@@ -23,7 +23,7 @@ const {
   <div class="flex flex-column align-items-center">
     <Button
       class="bg-transparent border-none inline-flex flex-column gap-2 p-1"
-      :class="[{ 'outer-border': index === activeStep }]"
+      :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
       @click="clickCallback()"
     >
       <span
@@ -39,7 +39,9 @@ const {
       >
         <font-awesome-icon
           :icon="`fa-solid ${icon}`"
-          :class="[{ 'app-primary-color': index > activeStep }]"
+          :class="[
+            { 'app-primary-color': index > activeStep && !errors, 'app-error-background app-error-border': errors }
+          ]"
         />
       </span>
     </Button>
@@ -56,5 +58,10 @@ const {
 .outer-border {
   border-radius: 50%;
   box-shadow: 0 0 0 3px #c1ddfc; // TODO: Blue 30
+}
+
+.outer-border-error {
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px $app-error !important;
 }
 </style>
