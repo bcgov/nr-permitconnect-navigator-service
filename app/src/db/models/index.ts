@@ -3,6 +3,7 @@ export { default as access_request } from './access_request';
 export { default as contact } from './contact';
 export { default as document } from './document';
 export { default as draft } from './draft';
+export { default as email_log } from './email_log';
 export { default as enquiry } from './enquiry';
 export { default as identity_provider } from './identity_provider';
 export { default as note } from './note';
