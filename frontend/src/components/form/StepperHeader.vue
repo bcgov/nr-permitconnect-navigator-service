@@ -7,13 +7,15 @@ const {
   activeStep,
   clickCallback = () => {},
   title,
-  icon
+  icon,
+  errors = false
 } = defineProps<{
   index: number;
   activeStep: number;
   clickCallback?: Function;
   title: string;
   icon: string;
+  errors?: boolean;
 }>();
 </script>
 
@@ -30,7 +32,8 @@ const {
           {
             'bg-primary border-primary': index <= activeStep,
             'surface-border': index > activeStep,
-            'border-1, p-4': index === activeStep
+            'border-1, p-4': index === activeStep,
+            'app-error-background app-error-border': errors
           }
         ]"
       >
@@ -42,7 +45,7 @@ const {
     </Button>
     <span
       class="text-xl"
-      :class="{ 'font-bold': index === activeStep, underline: index === activeStep }"
+      :class="{ 'font-bold': index === activeStep, underline: index === activeStep, 'app-error-color': errors }"
     >
       {{ title }}
     </span>
