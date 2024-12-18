@@ -80,11 +80,14 @@ export enum PermitStatus {
   PENDING = 'Pending decision'
 }
 
+export enum ProjectApplicant {
+  BUSINESS = 'Business',
+  INDIVIDUAL = 'Individual'
+}
+
 export enum ProjectRelationship {
-  OWNER = 'Owner',
-  EMPLOYEE = 'Employee',
-  AGENT = 'Agent',
-  CONSULTANT = 'Consultant',
+  OWNER = 'Property owner',
+  CONSULTANT = 'Project Consultant',
   OTHER = 'Other'
 }
 

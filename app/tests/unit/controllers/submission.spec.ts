@@ -60,7 +60,7 @@ const FORM_EXPORT_1 = {
   contactFirstName: 'ABC',
   contactLastName: 'DEF',
   contactPreference: 'phoneCall',
-  contactApplicantRelationship: 'Agent',
+  contactApplicantRelationship: 'Project Owner',
   financiallySupported: true,
   intakeStatus: 'IN PROGRESS',
   isBCHousingSupported: 'Yes',
@@ -106,7 +106,7 @@ const FORM_EXPORT_2 = {
   contactFirstName: 'Joe',
   contactLastName: 'Smith',
   contactPreference: 'Email',
-  contactApplicantRelationship: 'Agent',
+  contactApplicantRelationship: 'Project Owner',
 
   financiallySupported: true,
   intakeStatus: 'IN PROGRESS',
