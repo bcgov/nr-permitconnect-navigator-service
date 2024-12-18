@@ -49,7 +49,7 @@ describe('logEmail tests', () => {
 
     expect(prismaMock.email_log.createMany).toHaveBeenCalledWith({
       data: recipients.map((x) => ({
-        email_id: expect.any(String),
+        email_log_id: expect.any(String),
         msg_id: chesResponse.messages?.[0].msgId,
         to: x,
         tx_id: chesResponse.txId,
@@ -67,7 +67,7 @@ describe('logEmail tests', () => {
 
     expect(prismaMock.email_log.createMany).toHaveBeenCalledWith({
       data: recipients.map((x) => ({
-        email_id: expect.any(String),
+        email_log_id: expect.any(String),
         msg_id: chesResponse.messages?.[0].msgId,
         to: x,
         tx_id: chesResponse.txId,

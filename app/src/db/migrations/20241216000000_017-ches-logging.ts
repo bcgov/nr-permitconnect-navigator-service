@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     // Create public schema tables
     knex.schema
       .createTable('email_log', (table) => {
-        table.uuid('email_id').primary();
+        table.uuid('email_log_id').primary();
         table.integer('http_status').defaultTo(null);
         table.uuid('msg_id').defaultTo(null);
         table.text('to').defaultTo(null);

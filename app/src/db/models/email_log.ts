@@ -12,7 +12,7 @@ type PrismaGraphEmailLog = Prisma.email_logGetPayload<typeof _emailLogWithGraph>
 export default {
   toPrismaModel(input: EmailLog): PrismaRelationEmailLog {
     return {
-      email_id: input.emailId as string,
+      email_log_id: input.emailId as string,
       http_status: input.httpStatus,
       msg_id: input.msgId ?? null,
       to: input.to ?? null,
@@ -26,7 +26,7 @@ export default {
 
   fromPrismaModel(input: PrismaGraphEmailLog): EmailLog {
     return {
-      emailId: input.email_id,
+      emailId: input.email_log_id,
       httpStatus: Number(input.http_status),
       msgId: input.msg_id || '',
       to: input.to || '',

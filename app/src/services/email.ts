@@ -1,7 +1,8 @@
 import axios from 'axios';
 import config from 'config';
-import prisma from '../db/dataConnection';
 import { v4 as uuidv4 } from 'uuid';
+
+import prisma from '../db/dataConnection';
 
 import type { AxiosInstance } from 'axios';
 import type { Email } from '../types';
@@ -109,7 +110,7 @@ const service = {
     return await prisma.$transaction(async (trx) => {
       return await trx.email_log.createMany({
         data: recipients.map((recipient) => ({
-          email_id: uuidv4(),
+          email_log_id: uuidv4(),
           msg_id: data?.messages?.[0].msgId,
           to: recipient,
           tx_id: data?.txId,
