@@ -260,7 +260,7 @@ onMounted(async () => {
     </div>
     <div class="mb-8">
       <span class="mr-3">
-        Confirmation ID:
+        Project ID:
         <span class="font-bold">{{ getSubmission.activityId }}</span>
       </span>
       <span v-if="assignee">

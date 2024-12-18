@@ -137,7 +137,7 @@ const formSchema = object({
   astNotes: string().notRequired().max(4000).label('Automated Status Tool (AST) Notes'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
-  applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
+  applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Project state'),
   waitingOn: string().notRequired().max(255).label('waiting on')
 });
 
@@ -720,7 +720,7 @@ onMounted(async () => {
       <Dropdown
         class="col-3"
         name="applicationStatus"
-        label="Activity state"
+        label="Project state"
         :disabled="!editable"
         :options="APPLICATION_STATUS_LIST"
       />

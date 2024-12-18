@@ -237,9 +237,9 @@ onMounted(() => {
     </Column>
     <Column
       field="activityId"
-      header="Activity"
+      header="Project ID"
       :sortable="true"
-      style="min-width: 125px"
+      style="min-width: 133px"
       frozen
     >
       <template #body="{ data }">

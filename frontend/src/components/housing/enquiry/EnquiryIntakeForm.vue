@@ -54,8 +54,8 @@ const formSchema = object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
       is: (isRelated: string) => isRelated === BasicResponse.YES,
-      then: (schema) => schema.required().max(255).label('Confirmation ID'),
-      otherwise: (schema) => schema.notRequired().label('Confirmation ID')
+      then: (schema) => schema.required().max(255).label('Project ID'),
+      otherwise: (schema) => schema.notRequired().label('Project ID')
     }),
     enquiryDescription: string().required().label('Enquiry'),
     applyForPermitConnect: string()
@@ -341,11 +341,11 @@ onBeforeMount(async () => {
         <template #title>
           <div class="flex">
             <span class="section-header">
-              Enter the confirmation ID given to you when you registered your project with a Navigator
+              Enter the project ID given to you when you registered your project with a Navigator
             </span>
             <div
               v-tooltip.right="
-                `Confirmation ID can be found in the confirmation email you received at the time of submission.`
+                `Project ID can be found in the confirmation email you received at the time of submission.`
               "
             >
               <font-awesome-icon icon="fa-solid fa-circle-question" />
@@ -358,7 +358,7 @@ onBeforeMount(async () => {
             <EditableDropdown
               class="col-3"
               name="basic.relatedActivityId"
-              label="Confirmation ID"
+              label="Project ID"
               :disabled="!editable"
               :options="filteredProjectActivityIds"
               :get-option-label="

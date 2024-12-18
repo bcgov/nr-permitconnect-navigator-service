@@ -25,10 +25,10 @@ const {
     >
       Your enquiry has been successfully submitted.
     </Message>
-    <h3>Confirmation ID: {{ assignedActivityId }}</h3>
+    <h3>Enquiry ID: {{ assignedActivityId }}</h3>
     <div>
       Your submission will be reviewed and you will be contacted by your Housing Navigator in 2 business days. Please
-      check your email for the confirmation email and keep the confirmation ID for future reference.
+      check your email for the confirmation email and keep the enquiry ID for future reference.
     </div>
     <div
       v-if="showHomeLink"
