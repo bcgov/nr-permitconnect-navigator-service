@@ -10,7 +10,7 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
 export const submissionIntakeSchema = object({
-  [IntakeFormCategory.CONTACTS]: array().of(object(contactValidator)),
+  ...contactValidator,
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
@@ -158,6 +158,11 @@ export const submissionIntakeSchema = object({
         )
         .label('Last verified date'),
       trackingId: string().max(255).nullable().label('Tracking ID')
+    })
+  ),
+  [IntakeFormCategory.INVESTIGATE_PERMIS]: array().of(
+    object({
+      permitTypeId: number().required().label('Permit type')
     })
   )
 });

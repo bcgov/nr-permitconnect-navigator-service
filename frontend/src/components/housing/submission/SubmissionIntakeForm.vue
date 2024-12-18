@@ -259,7 +259,7 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.CONTACTS:
+    //case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -274,7 +274,13 @@ async function onInvalidSubmit() {
 
     case IntakeFormCategory.PERMITS:
     case IntakeFormCategory.APPLIED_PERMITS:
+    case IntakeFormCategory.INVESTIGATE_PERMIS:
       activeStep.value = 3;
+      break;
+
+    // Catches contacts as they arent in a category currently
+    default:
+      activeStep.value = 0;
       break;
   }
 
@@ -460,7 +466,7 @@ onBeforeMount(async () => {
         activityId: response.activityId,
         appliedPermits: response.data.appliedPermits.map((x: Partial<Permit>) => ({
           ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
         }))
       };
 
@@ -527,7 +533,7 @@ onBeforeMount(async () => {
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)
           .map((x: Permit) => ({
             ...x,
-            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
           })),
         permits: {
           hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
@@ -556,7 +562,7 @@ onBeforeMount(async () => {
     />
 
     <div class="flex justify-content-center app-primary-color mt-3">
-      <h3>Housing Project Form</h3>
+      <h3>Housing Project Intake Form</h3>
     </div>
 
     <Form
@@ -1540,9 +1546,9 @@ onBeforeMount(async () => {
                                 <div class="flex justify-content-center">
                                   <Calendar
                                     class="w-full"
-                                    :name="`appliedPermits[${idx}].statusLastVerified`"
+                                    :name="`appliedPermits[${idx}].submittedDate`"
                                     :disabled="!editable"
-                                    placeholder="Status last verified"
+                                    placeholder="Date applied"
                                     :max-date="new Date()"
                                   />
                                   <div class="flex align-items-center ml-2 mb-3">
@@ -1566,7 +1572,7 @@ onBeforeMount(async () => {
                                   push({
                                     permitTypeId: undefined,
                                     trackingId: undefined,
-                                    statusLastVerified: undefined
+                                    submittedDate: undefined
                                   })
                                 "
                               >
