@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 import { array, object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
@@ -71,21 +71,13 @@ const formSchema = object({
 // Actions
 const confirm = useConfirm();
 const router = useRouter();
-const route = useRoute();
 const toast = useToast();
 
 const getBackButtonConfig = computed(() => {
-  if (route.query.activityId) {
-    return {
-      text: 'Back to my drafts and previous entries',
-      routeName: RouteName.HOUSING_SUBMISSIONS
-    };
-  } else {
-    return {
-      text: 'Back to Housing',
-      routeName: RouteName.HOUSING
-    };
-  }
+  return {
+    text: 'Back to Housing',
+    routeName: RouteName.HOUSING
+  };
 });
 
 function confirmSubmit(data: any) {
