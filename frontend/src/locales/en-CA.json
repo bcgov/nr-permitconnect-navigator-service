@@ -33,6 +33,16 @@
     "supervisor": "SUPERVISOR",
     "admin": "ADMIN"
   },
+  "projectView": {
+    "createdBy": "Created by",
+    "enquiryID": "Enquiry ID",
+    "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
+    "listEmpty": "Your project related enquiries will be displayed here",
+    "rangeSeparator": "of",
+    "relatedEnquiries": "Related enquiries",
+    "status": "Status",
+    "submittedDate": "Submitted date"
+  },
   "header": {
     "name": "Permit Connect Services"
   },

@@ -1,15 +1,16 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
-import { Accordion, AccordionTab, Button, Card, Divider, useToast } from '@/lib/primevue';
+import { Accordion, AccordionTab, Button, Card, Column, DataTable, Divider, useToast } from '@/lib/primevue';
 import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
 
@@ -38,12 +39,14 @@ const { submissionId } = defineProps<{
 
 // Constants
 const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
+const DEFAULT_SORT_ORDER = -1;
+const DEFAULT_SORT_FIELD = 'submittedAt';
 
 // Store
 const submissionStore = useSubmissionStore();
 const { getConfig } = storeToRefs(useConfigStore());
 const { getProfile } = storeToRefs(useAuthNStore());
-const { getPermits, getSubmission } = storeToRefs(submissionStore);
+const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
@@ -54,6 +57,7 @@ const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
   { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
+const createdBy: Ref<User | undefined> = ref(undefined);
 const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
 const enquiryModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
@@ -88,6 +92,7 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 
 // Actions
 const router = useRouter();
+const { t } = useI18n();
 const toast = useToast();
 
 async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
@@ -181,6 +186,7 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
 
   try {
     const response = await enquiryService.createEnquiry(enquiryData);
+    submissionStore.addRelatedEnquiry(response.data);
     enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
 
     // Send confirmation email
@@ -193,12 +199,13 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
 }
 
 onMounted(async () => {
-  let submissionValue;
-  let permitTypesValue;
+  let enquiriesValue, permitTypesValue, submissionValue;
+
   try {
     [submissionValue, permitTypesValue] = (
       await Promise.all([submissionService.getSubmission(submissionId), permitService.getPermitTypes()])
     ).map((r) => r.data);
+    if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
   } catch {
     toast.error('Unable to load project, please try again later');
     router.replace({ name: RouteName.HOUSING_PROJECTS_LIST });
@@ -212,10 +219,15 @@ onMounted(async () => {
     toast.error('Unable to load permits for this project, please try again later');
   }
   submissionStore.setSubmission(submissionValue);
+  submissionStore.setRelatedEnquiries(enquiriesValue);
   typeStore.setPermitTypes(permitTypesValue);
 
   if (submissionValue?.assignedUserId) {
     assignee.value = (await userService.searchUsers({ userId: [submissionValue.assignedUserId] })).data[0];
+  }
+
+  if (submissionValue?.createdBy) {
+    createdBy.value = (await userService.searchUsers({ userId: [submissionValue.createdBy] })).data[0];
   }
   loading.value = false;
 });
@@ -252,16 +264,21 @@ onMounted(async () => {
         />
       </h1>
       <Button
+        v-if="getSubmission?.submissionType !== SubmissionType.INAPPLICABLE"
         class="p-button-sm header-btn"
         label="Ask my Navigator"
         outlined
         @click="enquiryModalVisible = !enquiryModalVisible"
       />
     </div>
-    <div class="mb-8">
+    <div class="mb-2">
       <span class="mr-3">
         Project ID:
         <span class="font-bold">{{ getSubmission.activityId }}</span>
+      </span>
+      <span class="mr-3">
+        {{ t('projectView.createdBy') }}:
+        <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
       </span>
       <span v-if="assignee">
         Navigator:
@@ -269,7 +286,13 @@ onMounted(async () => {
       </span>
       <span v-else>Navigator: -</span>
     </div>
-    <div><h3 class="mb-5">Recommended permits</h3></div>
+    <div
+      v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
+      class="inapplicable-block p-3 mt-6"
+    >
+      {{ t('projectView.inapplicableSubmissionType') }}
+    </div>
+    <div><h3 class="mb-5 mt-7">Recommended permits</h3></div>
     <div
       v-if="!permitsNeeded?.length"
       class="empty-block p-5 mb-2"
@@ -373,6 +396,78 @@ onMounted(async () => {
       @on-hide="handleDialogClose"
       @on-sumbit-enquiry="handleEnquirySubmit"
     />
+    <div>
+      <div>
+        <h3 class="mb-5 mt-7">{{ t('projectView.relatedEnquiries') }}</h3>
+      </div>
+
+      <div
+        v-if="!getRelatedEnquiries?.length"
+        class="empty-block p-5 mb-2"
+      >
+        {{ t('projectView.listEmpty') }}
+      </div>
+
+      <DataTable
+        v-else
+        :loading="loading"
+        :value="getRelatedEnquiries"
+        :row-hover="true"
+        :rows="10"
+        :sort-field="DEFAULT_SORT_FIELD"
+        :sort-order="DEFAULT_SORT_ORDER"
+        scrollable
+        responsive-layout="scroll"
+        :paginator="true"
+        paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+        :current-page-report-template="`({currentPage} ${t('projectView.rangeSeparator')} {totalPages})`"
+        :rows-per-page-options="[10, 20, 50]"
+      >
+        <template #empty>
+          <div class="flex justify-content-center">
+            <p class="font-bold text-xl">{{ t('projectView.listEmpty') }}</p>
+          </div>
+        </template>
+        <template #loading>
+          <Spinner />
+        </template>
+
+        <Column
+          field="activityId"
+          :header="t('projectView.enquiryID')"
+          style="width: 45%"
+        >
+          <template #body="{ data }">
+            <div :data-activityId="data.activityId">
+              <router-link
+                :to="{
+                  name: RouteName.HOUSING_ENQUIRY_INTAKE,
+                  query: { activityId: data.activityId, enquiryId: data.enquiryId }
+                }"
+              >
+                {{ data.activityId }}
+              </router-link>
+            </div>
+          </template>
+        </Column>
+        <Column
+          field="enquiryStatus"
+          :header="t('projectView.status')"
+          :sortable="true"
+          style="width: 42%"
+        />
+        <Column
+          field="submittedAt"
+          :header="t('projectView.submittedDate')"
+          :sortable="true"
+          style="width: 15%"
+        >
+          <template #body="{ data }">
+            {{ formatDate(data?.submittedAt) }}
+          </template>
+        </Column>
+      </DataTable>
+    </div>
   </div>
 </template>
 
@@ -407,6 +502,15 @@ a {
 
 .header-btn {
   max-height: 2rem;
+}
+
+.inapplicable-block {
+  background-color: $app-red-background;
+  border-radius: 0.5rem;
+  border-width: 0.063rem;
+  border-style: solid;
+  border-color: $app-red-border;
+  color: $app-red-text;
 }
 
 .permit-card {
