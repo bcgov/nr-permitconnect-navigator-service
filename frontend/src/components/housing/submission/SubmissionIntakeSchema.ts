@@ -150,13 +150,13 @@ export const submissionIntakeSchema = object({
   [IntakeFormCategory.APPLIED_PERMITS]: array().of(
     object({
       permitTypeId: number().required().label('Permit type'),
-      statusLastVerified: mixed()
+      submittedDate: mixed()
         .test(
-          'verified-date',
-          'Verified date must be valid or empty',
+          'submitted-date',
+          'Submitted date must be valid or empty',
           (val) => val instanceof Date || val === undefined
         )
-        .label('Last verified date'),
+        .label('Submitted date'),
       trackingId: string().max(255).nullable().label('Tracking ID')
     })
   ),

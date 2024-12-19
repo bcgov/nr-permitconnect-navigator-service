@@ -467,20 +467,19 @@ describe('createSubmission', () => {
             permitTypeId: 1,
             trackingId: '123',
             status: PermitStatus.APPLIED,
-            statusLastVerified: now
+            submittedDate: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
             status: PermitStatus.APPLIED,
-            statusLastVerified: now
+            submittedDate: now
           }
         ],
         investigatePermits: [
           {
             permitTypeId: 12,
-            needed: PermitNeeded.UNDER_INVESTIGATION,
-            statusLastVerified: now
+            needed: PermitNeeded.UNDER_INVESTIGATION
           }
         ]
       },
@@ -506,7 +505,7 @@ describe('createSubmission', () => {
         activityId: '00000000',
         trackingId: '123',
         status: PermitStatus.APPLIED,
-        statusLastVerified: now
+        submittedDate: now
       })
     );
     expect(createPermitSpy).toHaveBeenNthCalledWith(
@@ -516,7 +515,7 @@ describe('createSubmission', () => {
         activityId: '00000000',
         trackingId: '456',
         status: PermitStatus.APPLIED,
-        statusLastVerified: now
+        submittedDate: now
       })
     );
     expect(createPermitSpy).toHaveBeenNthCalledWith(
@@ -524,8 +523,7 @@ describe('createSubmission', () => {
       expect.objectContaining({
         permitTypeId: 12,
         activityId: '00000000',
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastVerified: now
+        needed: PermitNeeded.UNDER_INVESTIGATION
       })
     );
   });
@@ -809,20 +807,19 @@ describe('submitDraft', () => {
             permitTypeId: 1,
             trackingId: '123',
             status: PermitStatus.APPLIED,
-            statusLastVerified: now
+            submittedDate: now
           },
           {
             permitTypeId: 3,
             trackingId: '456',
             status: PermitStatus.APPLIED,
-            statusLastVerified: now
+            submittedDate: now
           }
         ],
         investigatePermits: [
           {
             permitTypeId: 12,
-            needed: PermitNeeded.UNDER_INVESTIGATION,
-            statusLastVerified: now
+            needed: PermitNeeded.UNDER_INVESTIGATION
           }
         ]
       },
@@ -849,7 +846,7 @@ describe('submitDraft', () => {
         activityId: '00000000',
         trackingId: '123',
         status: PermitStatus.APPLIED,
-        statusLastVerified: now
+        submittedDate: now
       })
     );
     expect(createPermitSpy).toHaveBeenNthCalledWith(
@@ -859,7 +856,7 @@ describe('submitDraft', () => {
         activityId: '00000000',
         trackingId: '456',
         status: PermitStatus.APPLIED,
-        statusLastVerified: now
+        submittedDate: now
       })
     );
     expect(createPermitSpy).toHaveBeenNthCalledWith(
@@ -867,8 +864,7 @@ describe('submitDraft', () => {
       expect.objectContaining({
         permitTypeId: 12,
         activityId: '00000000',
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastVerified: now
+        needed: PermitNeeded.UNDER_INVESTIGATION
       })
     );
   });

@@ -6,7 +6,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: '123AC!',
       status: PermitStatus.NEW,
-      statusLastVerified: '2021-01-01',
+      submittedDate: '2021-01-01',
       trackingId: 'test'
     };
     const result = appliedPermit.validate(appliedPermits);
@@ -16,7 +16,7 @@ describe('appliedPermitsSchema', () => {
   it('should not accept null for permitTypeId', () => {
     const appliedPermits = {
       status: PermitStatus.APPLIED,
-      statusLastVerified: '2021-01-01',
+      submittedDate: '2021-01-01',
       trackingId: 'test tracking id'
     };
     const result = appliedPermit.validate(appliedPermits);
@@ -27,7 +27,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.COMPLETED,
-      statusLastVerified: '2021-01-01',
+      submittedDate: '2021-01-01',
       trackingId: 'test'
     };
     const result = appliedPermit.validate(appliedPermits);
@@ -38,18 +38,18 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: 'Test',
-      statusLastVerified: '2021-01-01',
+      submittedDate: '2021-01-01',
       trackingId: 'test'
     };
     const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
   });
 
-  it('should only accept a valid date for statusLastVerified', () => {
+  it('should only accept a valid date for submitted date', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.APPLIED,
-      statusLastVerified: 'not-a-date',
+      submittedDate: 'not-a-date',
       trackingId: 'test'
     };
     const result = appliedPermit.validate(appliedPermits);
@@ -60,7 +60,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.APPLIED,
-      statusLastVerified: new Date(Date.now() + 1000).toISOString(),
+      submittedDate: new Date(Date.now() + 1000).toISOString(),
       trackingId: 'test'
     };
     const result = appliedPermit.validate(appliedPermits);
