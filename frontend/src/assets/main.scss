@@ -103,6 +103,14 @@ label {
   color: $app-primary !important;
 }
 
+.app-error-background {
+  background-color: $app-error !important;
+}
+
+.app-error-border {
+  border-color: $app-error !important;
+}
+
 .app-error-color {
   color: $app-error !important;
 }

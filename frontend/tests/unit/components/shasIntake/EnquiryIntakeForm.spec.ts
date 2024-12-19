@@ -12,7 +12,6 @@ import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
 
 import type { AxiosResponse } from 'axios';
-import type { Contact } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -40,7 +39,12 @@ getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
 getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 
 interface FormValues {
-  contacts: Array<Contact>;
+  contactFirstName: string;
+  contactLastName: string;
+  contactEmail: string;
+  contactPhoneNumber: string;
+  contactApplicantRelationship: ProjectRelationship;
+  contactPreference: ContactPreference;
   basic: {
     isRelated?: string;
     relatedActivityId?: string;
@@ -51,18 +55,12 @@ interface FormValues {
 
 function basicValidFormValues(): FormValues {
   return {
-    contacts: [
-      {
-        contactId: '0',
-        userId: undefined,
-        firstName: 'testFirst',
-        lastName: 'testLast',
-        email: 'test@email.com',
-        phoneNumber: '1234567890',
-        contactApplicantRelationship: ProjectRelationship.OWNER,
-        contactPreference: ContactPreference.EMAIL
-      }
-    ],
+    contactFirstName: 'testFirst',
+    contactLastName: 'testLast',
+    contactEmail: 'test@email.com',
+    contactPhoneNumber: '1234567890',
+    contactApplicantRelationship: ProjectRelationship.OWNER,
+    contactPreference: ContactPreference.EMAIL,
     basic: {
       isRelated: 'Yes',
       enquiryDescription: 'test description',
@@ -127,12 +125,12 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const firstNameInput = wrapper.get('[name="contacts[0].firstName"]');
-      const lastNameInput = wrapper.get('[name="contacts[0].lastName"]');
-      const phoneInput = wrapper.get('[name="contacts[0].phoneNumber"]');
-      const emailInput = wrapper.get('[name="contacts[0].email"]');
-      const relationsInput = wrapper.get('[name="contacts[0].contactApplicantRelationship"]');
-      const contactInput = wrapper.get('[name="contacts[0].contactPreference"]');
+      const firstNameInput = wrapper.get('[name="contactFirstName"]');
+      const lastNameInput = wrapper.get('[name="contactLastName"]');
+      const phoneInput = wrapper.get('[name="contactPhoneNumber"]');
+      const emailInput = wrapper.get('[name="contactEmail"]');
+      const relationsInput = wrapper.get('[name="contactApplicantRelationship"]');
+      const contactInput = wrapper.get('[name="contactPreference"]');
       const relatedInput = wrapper.findAll('[name="basic.isRelated"]');
 
       expect(firstNameInput.isVisible()).toBeTruthy();
@@ -287,12 +285,12 @@ describe('EnquiryIntakeForm', () => {
         ...basicValidFormValues()
       };
 
-      modifiedFormValues[IntakeFormCategory.CONTACTS][0].email = 'bad@email';
+      modifiedFormValues.contactEmail = 'bad@email';
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
       expect(Object.keys(result.errors).length).toBe(1);
-      expect(result.errors[`${[IntakeFormCategory.CONTACTS]}[0].email`]).toBeTruthy();
+      expect(result.errors['contactEmail']).toBeTruthy();
     });
 
     it('generates missing first and last name missing error', async () => {
@@ -305,15 +303,15 @@ describe('EnquiryIntakeForm', () => {
         ...basicValidFormValues()
       };
 
-      modifiedFormValues[IntakeFormCategory.CONTACTS][0].firstName = '';
-      modifiedFormValues[IntakeFormCategory.CONTACTS][0].lastName = '';
+      modifiedFormValues.contactFirstName = '';
+      modifiedFormValues.contactLastName = '';
 
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
       expect(Object.keys(result.errors).length).toBe(2);
-      expect(result.errors[`${[IntakeFormCategory.CONTACTS]}[0].firstName`]).toBeTruthy();
-      expect(result.errors[`${[IntakeFormCategory.CONTACTS]}[0].lastName`]).toBeTruthy();
+      expect(result.errors['contactFirstName']).toBeTruthy();
+      expect(result.errors['contactLastName']).toBeTruthy();
     });
 
     it('generates errors for isRelated', async () => {

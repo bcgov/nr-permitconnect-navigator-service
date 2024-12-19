@@ -259,7 +259,6 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -274,7 +273,13 @@ async function onInvalidSubmit() {
 
     case IntakeFormCategory.PERMITS:
     case IntakeFormCategory.APPLIED_PERMITS:
+    case IntakeFormCategory.INVESTIGATE_PERMIS:
       activeStep.value = 3;
+      break;
+
+    // Catches contacts as they arent in a category currently
+    default:
+      activeStep.value = 0;
       break;
   }
 
@@ -460,7 +465,7 @@ onBeforeMount(async () => {
         activityId: response.activityId,
         appliedPermits: response.data.appliedPermits.map((x: Partial<Permit>) => ({
           ...x,
-          statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+          submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
         }))
       };
 
@@ -527,7 +532,7 @@ onBeforeMount(async () => {
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)
           .map((x: Permit) => ({
             ...x,
-            statusLastVerified: x.statusLastVerified ? new Date(x.statusLastVerified) : undefined
+            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
           })),
         permits: {
           hasAppliedProvincialPermits: response?.hasAppliedProvincialPermits
@@ -556,7 +561,7 @@ onBeforeMount(async () => {
     />
 
     <div class="flex justify-content-center app-primary-color mt-3">
-      <h3>Housing Project Form</h3>
+      <h3>Housing Project Intake Form</h3>
     </div>
 
     <Form
@@ -571,6 +576,7 @@ onBeforeMount(async () => {
     >
       <FormNavigationGuard v-if="editable" />
       <FormAutosave
+        v-if="editable"
         ref="autoSaveRef"
         :callback="() => onSaveDraft(values, true)"
       />
@@ -597,7 +603,7 @@ onBeforeMount(async () => {
         @update:active-step="onStepChange"
       >
         <!--
-      Contact Information
+      Basic info
       -->
         <StepperPanel>
           <template #header="{ index, clickCallback }">
@@ -605,13 +611,12 @@ onBeforeMount(async () => {
               :index="index"
               :active-step="activeStep"
               :click-callback="clickCallback"
-              title="Contact Information"
+              title="Basic info"
               icon="fa-user"
-              :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.CONTACTS) ||
-                  validationErrors.includes(IntakeFormCategory.BASIC)
-              }"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.CONTACTS) ||
+                validationErrors.includes(IntakeFormCategory.BASIC)
+              "
             />
           </template>
           <template #content="{ nextCallback }">
@@ -779,9 +784,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Housing"
               icon="fa-house"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.HOUSING)
-              }"
+              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1152,9 +1155,7 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Location"
               icon="fa-location-dot"
-              :class="{
-                'app-error-color': validationErrors.includes(IntakeFormCategory.LOCATION)
-              }"
+              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
             />
           </template>
           <template #content="{ prevCallback, nextCallback }">
@@ -1453,11 +1454,10 @@ onBeforeMount(async () => {
               :click-callback="clickCallback"
               title="Permits & Reports"
               icon="fa-file"
-              :class="{
-                'app-error-color':
-                  validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                  validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              }"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              "
             />
           </template>
           <template #content="{ prevCallback }">
@@ -1546,9 +1546,9 @@ onBeforeMount(async () => {
                                 <div class="flex justify-content-center">
                                   <Calendar
                                     class="w-full"
-                                    :name="`appliedPermits[${idx}].statusLastVerified`"
+                                    :name="`appliedPermits[${idx}].submittedDate`"
                                     :disabled="!editable"
-                                    placeholder="Status last verified"
+                                    placeholder="Date applied"
                                     :max-date="new Date()"
                                   />
                                   <div class="flex align-items-center ml-2 mb-3">
@@ -1572,7 +1572,7 @@ onBeforeMount(async () => {
                                   push({
                                     permitTypeId: undefined,
                                     trackingId: undefined,
-                                    statusLastVerified: undefined
+                                    submittedDate: undefined
                                   })
                                 "
                               >
@@ -1810,6 +1810,15 @@ onBeforeMount(async () => {
 :deep(.p-stepper-panels) {
   padding-left: 0;
   padding-right: 0;
+}
+
+:deep(.p-stepper-separator) {
+  background-color: #f3f2f1; // TODO Grey 20
+  height: 0.25rem;
+}
+
+:deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
+  background-color: #d8eafd; // TODO Blue 20
 }
 
 .lat-long-btn {

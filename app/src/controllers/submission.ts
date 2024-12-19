@@ -298,10 +298,10 @@ const controller = {
         trackingId: x.trackingId,
         status: x.status ?? PermitStatus.APPLIED,
         needed: x.needed ?? PermitNeeded.YES,
-        statusLastVerified: x.statusLastVerified,
+        statusLastVerified: null,
         issuedPermitId: null,
         authStatus: x.authStatus ?? PermitAuthorizationStatus.IN_REVIEW,
-        submittedDate: null,
+        submittedDate: x.submittedDate,
         adjudicationDate: null
       }));
     }
@@ -314,7 +314,7 @@ const controller = {
         trackingId: null,
         status: x.status ?? PermitStatus.NEW,
         needed: x.needed ?? PermitNeeded.UNDER_INVESTIGATION,
-        statusLastVerified: x.statusLastVerified,
+        statusLastVerified: null,
         issuedPermitId: null,
         authStatus: x.authStatus ?? PermitAuthorizationStatus.NONE,
         submittedDate: null,

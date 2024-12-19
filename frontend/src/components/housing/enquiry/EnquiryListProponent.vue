@@ -33,7 +33,7 @@ const { t } = useI18n();
     scrollable
     responsive-layout="scroll"
     :paginator="true"
-    :rows="10"
+    :rows="5"
     sort-field="submittedAt"
     :sort-order="-1"
     paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"

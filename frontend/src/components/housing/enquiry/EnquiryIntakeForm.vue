@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { array, object, string } from 'yup';
+import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import {
@@ -29,6 +29,7 @@ import { contactValidator } from '@/validators';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
+import { omit } from '@/utils/utils';
 
 // Props
 const { enquiryId = undefined } = defineProps<{
@@ -49,7 +50,7 @@ const validationErrors: Ref<string[]> = ref([]);
 
 // Form validation schema
 const formSchema = object({
-  contacts: array().of(object(contactValidator)),
+  ...contactValidator,
   [IntakeFormCategory.BASIC]: object({
     isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
     relatedActivityId: string().when('isRelated', {
@@ -130,7 +131,12 @@ async function loadEnquiry() {
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contacts: response?.contacts,
+      contactFirstName: response?.contacts[0].firstName,
+      contactLastName: response?.contacts[0].lastName,
+      contactPhoneNumber: response?.contacts[0].phoneNumber,
+      contactEmail: response?.contacts[0].email,
+      contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
+      contactPreference: response?.contacts[0].contactPreference,
       basic: {
         isRelated: response?.isRelated,
         relatedActivityId: response?.relatedActivityId,
@@ -170,7 +176,32 @@ async function onSubmit(data: any) {
       }
     }
 
-    enquiryResponse = await enquiryService.createEnquiry(data);
+    // Convert contact fields into contacts array object then remove form keys from data
+    const enquiryData = omit(
+      {
+        ...data,
+        contacts: [
+          {
+            firstName: data.contactFirstName,
+            lastName: data.contactLastName,
+            phoneNumber: data.contactPhoneNumber,
+            email: data.contactEmail,
+            contactApplicantRelationship: data.contactApplicantRelationship,
+            contactPreference: data.contactPreference
+          }
+        ]
+      },
+      [
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    enquiryResponse = await enquiryService.createEnquiry(enquiryData);
 
     if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
       formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
@@ -258,21 +289,21 @@ onBeforeMount(async () => {
           <div class="formgrid grid">
             <InputText
               class="col-6"
-              :name="`contacts[0].firstName`"
+              name="contactFirstName"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
               class="col-6"
-              :name="`contacts[0].lastName`"
+              name="contactLastName"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
               class="col-6"
-              :name="`contacts[0].phoneNumber`"
+              name="contactPhoneNumber"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
@@ -280,14 +311,14 @@ onBeforeMount(async () => {
             />
             <InputText
               class="col-6"
-              :name="`contacts[0].email`"
+              name="contactEmail"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Dropdown
               class="col-6"
-              :name="`contacts[0].contactApplicantRelationship`"
+              name="contactApplicantRelationship"
               label="Relationship to project"
               :bold="false"
               :disabled="!editable"
@@ -295,7 +326,7 @@ onBeforeMount(async () => {
             />
             <Dropdown
               class="col-6"
-              :name="`contacts[0].contactPreference`"
+              :name="`contactPreference`"
               label="Preferred contact method"
               :bold="false"
               :disabled="!editable"

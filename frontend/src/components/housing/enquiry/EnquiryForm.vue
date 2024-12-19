@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
-import { array, date, mixed, object, string } from 'yup';
+import { date, mixed, object, string } from 'yup';
 
 import {
   Calendar,
@@ -60,7 +60,7 @@ const intakeSchema = object({
   enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  contacts: array().of(object(contactValidator)),
+  ...contactValidator,
   enquiryDescription: string().required().label('Enquiry detail'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
   user: mixed()
@@ -160,7 +160,35 @@ function onReOpen() {
 
 const onSubmit = async (values: any) => {
   try {
-    const submitData: Enquiry = omit(setEmptyStringsToNull(values) as EnquiryForm, ['user']);
+    // Convert contact fields into contacts array object then remove form keys from data
+    const valuesWithContact = omit(
+      {
+        ...values,
+        contacts: [
+          {
+            contactId: values.contactId,
+            firstName: values.contactFirstName,
+            lastName: values.contactLastName,
+            phoneNumber: values.contactPhoneNumber,
+            email: values.contactEmail,
+            contactApplicantRelationship: values.contactApplicantRelationship,
+            contactPreference: values.contactPreference
+          }
+        ]
+      },
+      [
+        'contactId',
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    // Generate final enquiry object
+    const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.isRelated = submitData.relatedActivityId ? BasicResponse.YES : BasicResponse.NO;
 
@@ -169,6 +197,13 @@ const onSubmit = async (values: any) => {
     formRef.value?.resetForm({
       values: {
         ...submitData,
+        contactId: submitData?.contacts[0].contactId,
+        contactFirstName: submitData?.contacts[0].firstName,
+        contactLastName: submitData?.contacts[0].lastName,
+        contactPhoneNumber: submitData?.contacts[0].phoneNumber,
+        contactEmail: submitData?.contacts[0].email,
+        contactApplicantRelationship: submitData?.contacts[0].contactApplicantRelationship,
+        contactPreference: submitData?.contacts[0].contactPreference,
         submittedAt: new Date(submitData.submittedAt),
         user: values.user
       }
@@ -187,6 +222,13 @@ onMounted(async () => {
   }
   initialFormValues.value = {
     ...enquiry,
+    contactId: enquiry?.contacts[0].contactId,
+    contactFirstName: enquiry?.contacts[0].firstName,
+    contactLastName: enquiry?.contacts[0].lastName,
+    contactPhoneNumber: enquiry?.contacts[0].phoneNumber,
+    contactEmail: enquiry?.contacts[0].email,
+    contactApplicantRelationship: enquiry?.contacts[0].contactApplicantRelationship,
+    contactPreference: enquiry?.contacts[0].contactPreference,
     submittedAt: new Date(enquiry?.submittedAt),
     user: assigneeOptions.value[0] ?? null
   };
@@ -243,40 +285,40 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        :name="`contacts[0].firstName`"
+        name="contactFirstName"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts[0].lastName`"
+        name="contactLastName"
         label="Last name"
         :disabled="!editable"
       />
       <Dropdown
         class="col-3"
-        :name="`contacts[0].contactApplicantRelationship`"
+        name="contactApplicantRelationship"
         label="Relationship to activity"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        :name="`contacts[0].contactPreference`"
+        name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        :name="`contacts[0].phoneNumber`"
+        name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Phone number"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts[0].email`"
+        name="contactEmail"
         label="Contact email"
         :disabled="!editable"
       />

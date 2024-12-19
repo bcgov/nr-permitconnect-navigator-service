@@ -10,7 +10,7 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
 export const submissionIntakeSchema = object({
-  [IntakeFormCategory.CONTACTS]: array().of(object(contactValidator)),
+  ...contactValidator,
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
@@ -150,14 +150,19 @@ export const submissionIntakeSchema = object({
   [IntakeFormCategory.APPLIED_PERMITS]: array().of(
     object({
       permitTypeId: number().required().label('Permit type'),
-      statusLastVerified: mixed()
+      submittedDate: mixed()
         .test(
-          'verified-date',
-          'Verified date must be valid or empty',
+          'submitted-date',
+          'Submitted date must be valid or empty',
           (val) => val instanceof Date || val === undefined
         )
-        .label('Last verified date'),
+        .label('Submitted date'),
       trackingId: string().max(255).nullable().label('Tracking ID')
+    })
+  ),
+  [IntakeFormCategory.INVESTIGATE_PERMIS]: array().of(
+    object({
+      permitTypeId: number().required().label('Permit type')
     })
   )
 });
