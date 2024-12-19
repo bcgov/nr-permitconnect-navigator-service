@@ -577,6 +577,7 @@ onBeforeMount(async () => {
     >
       <FormNavigationGuard v-if="editable" />
       <FormAutosave
+        v-if="editable"
         ref="autoSaveRef"
         :callback="() => onSaveDraft(values, true)"
       />
