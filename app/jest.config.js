@@ -3,5 +3,6 @@ module.exports = {
   clearMocks: true,
   preset: 'ts-jest',
   testEnvironment: 'node',
-  collectCoverage: true
+  collectCoverage: true,
+  setupFilesAfterEnv: ['./tests/__mocks__/prismaMock.ts']
 };

@@ -12,6 +12,7 @@ export type { CurrentContext } from './CurrentContext';
 export type { Document } from './Document';
 export type { Draft } from './Draft';
 export type { Email } from './Email';
+export type { EmailLog } from './EmailLog';
 export type { Enquiry } from './Enquiry';
 export type { EnquiryIntake } from './EnquiryIntake';
 export type { EnquirySearchParameters } from './EnquirySearchParameters';
