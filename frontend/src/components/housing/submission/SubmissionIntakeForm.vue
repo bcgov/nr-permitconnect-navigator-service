@@ -259,7 +259,6 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
-    //case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;

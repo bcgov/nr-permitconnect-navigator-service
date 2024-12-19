@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { array, object, string } from 'yup';
+import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import {

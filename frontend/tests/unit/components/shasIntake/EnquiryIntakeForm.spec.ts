@@ -12,7 +12,6 @@ import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
 
 import type { AxiosResponse } from 'axios';
-import type { Contact } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({

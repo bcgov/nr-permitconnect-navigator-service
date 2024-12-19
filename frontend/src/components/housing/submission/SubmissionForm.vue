@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
-import { array, boolean, number, object, string } from 'yup';
+import { boolean, number, object, string } from 'yup';
 
 import {
   Calendar,
@@ -77,7 +77,7 @@ const formSchema = object({
   submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
-  contacts: array().of(object(contactValidator)),
+  ...contactValidator,
   companyNameRegistered: string().notRequired().max(255).label('Company'),
   consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
   isDevelopedInBC: string().when('companyNameRegistered', {
@@ -211,7 +211,38 @@ function onReOpen() {
 
 const onSubmit = async (values: any) => {
   try {
-    const submitData: Submission = omit(setEmptyStringsToNull(values) as SubmissionForm, ['locationAddress', 'user']);
+    // Convert contact fields into contacts array object then remove form keys from data
+    const valuesWithContact = omit(
+      {
+        ...values,
+        contacts: [
+          {
+            contactId: values.contactId,
+            firstName: values.contactFirstName,
+            lastName: values.contactLastName,
+            phoneNumber: values.contactPhoneNumber,
+            email: values.contactEmail,
+            contactApplicantRelationship: values.contactApplicantRelationship,
+            contactPreference: values.contactPreference
+          }
+        ]
+      },
+      [
+        'contactId',
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference'
+      ]
+    );
+
+    // Generate final submission object
+    const submitData: Submission = omit(setEmptyStringsToNull(valuesWithContact) as SubmissionForm, [
+      'locationAddress',
+      'user'
+    ]);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
     const result = await submissionService.updateSubmission(values.submissionId, submitData);
@@ -219,6 +250,13 @@ const onSubmit = async (values: any) => {
     formRef.value?.resetForm({
       values: {
         ...submitData,
+        contactId: submitData?.contacts[0].contactId,
+        contactFirstName: submitData?.contacts[0].firstName,
+        contactLastName: submitData?.contacts[0].lastName,
+        contactPhoneNumber: submitData?.contacts[0].phoneNumber,
+        contactEmail: submitData?.contacts[0].email,
+        contactApplicantRelationship: submitData?.contacts[0].contactApplicantRelationship,
+        contactPreference: submitData?.contacts[0].contactPreference,
         locationAddress: values.locationAddress,
         user: values.user,
         consentToFeedback: values.consentToFeedback
@@ -289,7 +327,13 @@ onMounted(async () => {
     aaiUpdated: submission.aaiUpdated,
     astNotes: submission.astNotes,
     intakeStatus: submission.intakeStatus,
-    contacts: submission.contacts,
+    contactId: submission?.contacts[0].contactId,
+    contactFirstName: submission?.contacts[0].firstName,
+    contactLastName: submission?.contacts[0].lastName,
+    contactPhoneNumber: submission?.contacts[0].phoneNumber,
+    contactEmail: submission?.contacts[0].email,
+    contactApplicantRelationship: submission?.contacts[0].contactApplicantRelationship,
+    contactPreference: submission?.contacts[0].contactPreference,
     user: assigneeOptions.value[0] ?? null,
     applicationStatus: submission.applicationStatus,
     waitingOn: submission.waitingOn
@@ -350,13 +394,13 @@ onMounted(async () => {
 
       <InputText
         class="col-3"
-        :name="`contacts[0].firstName`"
+        name="contactFirstName"
         label="First name"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts[0].lastName`"
+        name="contactLastName"
         label="Last name"
         :disabled="!editable"
       />
@@ -383,28 +427,28 @@ onMounted(async () => {
       />
       <Dropdown
         class="col-3"
-        :name="`contacts[0].contactApplicantRelationship`"
+        name="contactApplicantRelationship"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Dropdown
         class="col-3"
-        :name="`contacts[0].contactPreference`"
+        name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
         class="col-3"
-        :name="`contacts[0].phoneNumber`"
+        name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!editable"
       />
       <InputText
         class="col-3"
-        :name="`contacts[0].email`"
+        name="contactEmail"
         label="Contact email"
         :disabled="!editable"
       />
