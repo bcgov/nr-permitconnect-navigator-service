@@ -10,7 +10,7 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 const stringRequiredSchema = string().required().max(255);
 
 export const submissionIntakeSchema = object({
-  ...contactValidator,
+  [IntakeFormCategory.CONTACTS]: object(contactValidator),
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
     isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),

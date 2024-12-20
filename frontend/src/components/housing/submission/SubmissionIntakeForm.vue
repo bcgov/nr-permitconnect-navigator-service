@@ -259,6 +259,7 @@ async function onLatLongInputClick() {
 
 async function onInvalidSubmit() {
   switch (validationErrors.value[0]) {
+    case IntakeFormCategory.CONTACTS:
     case IntakeFormCategory.BASIC:
       activeStep.value = 0;
       break;
@@ -275,11 +276,6 @@ async function onInvalidSubmit() {
     case IntakeFormCategory.APPLIED_PERMITS:
     case IntakeFormCategory.INVESTIGATE_PERMIS:
       activeStep.value = 3;
-      break;
-
-    // Catches contacts as they arent in a category currently
-    default:
-      activeStep.value = 0;
       break;
   }
 
@@ -344,23 +340,16 @@ async function onSubmit(data: any) {
         ...data,
         contacts: [
           {
-            firstName: data.contactFirstName,
-            lastName: data.contactLastName,
-            phoneNumber: data.contactPhoneNumber,
-            email: data.contactEmail,
-            contactApplicantRelationship: data.contactApplicantRelationship,
-            contactPreference: data.contactPreference
+            firstName: data.contacts.contactFirstName,
+            lastName: data.contacts.contactLastName,
+            phoneNumber: data.contacts.contactPhoneNumber,
+            email: data.contacts.contactEmail,
+            contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+            contactPreference: data.contacts.contactPreference
           }
         ]
       },
-      [
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference'
-      ]
+      ['contacts']
     );
 
     // Remove empty investigate permit objects
@@ -463,10 +452,11 @@ onBeforeMount(async () => {
       initialFormValues.value = {
         ...response.data,
         activityId: response.activityId,
-        appliedPermits: response.data.appliedPermits.map((x: Partial<Permit>) => ({
-          ...x,
-          submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-        }))
+        appliedPermits:
+          response.data.appliedPermits?.map((x: Partial<Permit>) => ({
+            ...x,
+            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+          })) ?? []
       };
 
       if (response.activityId) {
@@ -484,12 +474,14 @@ onBeforeMount(async () => {
       initialFormValues.value = {
         activityId: response?.activityId,
         submissionId: response?.submissionId,
-        contactFirstName: response?.contacts[0].firstName,
-        contactLastName: response?.contacts[0].lastName,
-        contactPhoneNumber: response?.contacts[0].phoneNumber,
-        contactEmail: response?.contacts[0].email,
-        contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
-        contactPreference: response?.contacts[0].contactPreference,
+        contacts: {
+          contactFirstName: response?.contacts[0].firstName,
+          contactLastName: response?.contacts[0].lastName,
+          contactPhoneNumber: response?.contacts[0].phoneNumber,
+          contactEmail: response?.contacts[0].email,
+          contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
+          contactPreference: response?.contacts[0].contactPreference
+        },
         basic: {
           consentToFeedback: response?.consentToFeedback,
           isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
@@ -547,7 +539,7 @@ onBeforeMount(async () => {
 
     // Move map pin
     onLatLongInputClick();
-  } catch {
+  } catch (e) {
     router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
 });
@@ -641,21 +633,21 @@ onBeforeMount(async () => {
                 <div class="formgrid grid">
                   <InputText
                     class="col-6"
-                    :name="`contactFirstName`"
+                    :name="`contacts.contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
                     class="col-6"
-                    :name="`contactLastName`"
+                    :name="`contacts.contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
                     class="col-6"
-                    :name="`contactPhoneNumber`"
+                    :name="`contacts.contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
@@ -663,14 +655,14 @@ onBeforeMount(async () => {
                   />
                   <InputText
                     class="col-6"
-                    :name="`contactEmail`"
+                    :name="`contacts.contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contactApplicantRelationship`"
+                    :name="`contacts.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
@@ -678,7 +670,7 @@ onBeforeMount(async () => {
                   />
                   <Dropdown
                     class="col-6"
-                    :name="`contactPreference`"
+                    :name="`contacts.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
                     :disabled="!editable"
