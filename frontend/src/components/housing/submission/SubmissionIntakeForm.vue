@@ -58,7 +58,7 @@ import {
   SubmissionType
 } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
-import { omit } from '@/utils/utils';
+import { getHTMLElement, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -1495,6 +1495,7 @@ onBeforeMount(async () => {
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
                       "
                       class="col-12"
+                      ref="appliedPermitsContainer"
                     >
                       <div class="mb-2">
                         <span class="app-primary-color">
@@ -1562,7 +1563,16 @@ onBeforeMount(async () => {
                                     permitTypeId: undefined,
                                     trackingId: undefined,
                                     submittedDate: undefined
-                                  })
+                                  });
+                                  nextTick(() => {
+                                    const addedPermit = getHTMLElement(
+                                      $refs.appliedPermitsContainer as HTMLElement,
+                                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                                    );
+                                    if (addedPermit) {
+                                      addedPermit.focus();
+                                    }
+                                  });
                                 "
                               >
                                 <font-awesome-icon
@@ -1623,7 +1633,10 @@ onBeforeMount(async () => {
                     <div class="col-12">
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid">
+                          <div
+                            class="formgrid grid"
+                            ref="investigatePermitsContainer"
+                          >
                             <div
                               v-for="(permit, idx) in fields"
                               :key="idx"
@@ -1662,9 +1675,16 @@ onBeforeMount(async () => {
                                 v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
                                 @click="
-                                  push({
-                                    permitTypeId: undefined
-                                  })
+                                  push({ permitTypeId: undefined });
+                                  nextTick(() => {
+                                    const newPermitDropdown = getHTMLElement(
+                                      $refs.investigatePermitsContainer as HTMLElement,
+                                      'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
+                                    );
+                                    if (newPermitDropdown) {
+                                      newPermitDropdown.focus();
+                                    }
+                                  });
                                 "
                               >
                                 <font-awesome-icon
