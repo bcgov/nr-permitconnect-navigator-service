@@ -115,6 +115,27 @@ export function getFilenameAndExtension(filename: string): { filename: string; e
 }
 
 /**
+ * @function getHTMLElement
+ * Return element that is inside a given element/container
+ * @param {HTMLElement} container contains element to be found
+ * @param {string} query query used to find said element
+ * @param {number} index index of element that is desired, if undefined get only/last element
+ * @returns {HTMLElement | null} HTMLElement or null if no element/not an html element
+ */
+export function getHTMLElement(container: HTMLElement, query: string, index?: number): HTMLElement | null {
+  console.log(container);
+  const elements = container.querySelectorAll(query);
+  console.log(elements);
+  const length = elements.length;
+
+  if (length === 0) return null;
+
+  const element = index !== undefined ? elements[index] : elements[length - 1];
+
+  return element instanceof HTMLElement ? element : null;
+}
+
+/**
  * @function isDebugMode
  * Checks if the app is currently running in debug mode
  * @returns {boolean} True if in debug, false otherwise
