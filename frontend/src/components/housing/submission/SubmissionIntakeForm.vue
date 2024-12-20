@@ -334,23 +334,20 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    // Convert contact fields into contacts array object then remove form keys from data
-    const submissionData = omit(
-      {
-        ...data,
-        contacts: [
-          {
-            firstName: data.contacts.contactFirstName,
-            lastName: data.contacts.contactLastName,
-            phoneNumber: data.contacts.contactPhoneNumber,
-            email: data.contacts.contactEmail,
-            contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-            contactPreference: data.contacts.contactPreference
-          }
-        ]
-      },
-      ['contacts']
-    );
+    // Convert contact fields into contacts array object
+    const submissionData = {
+      ...data,
+      contacts: [
+        {
+          firstName: data.contacts.contactFirstName,
+          lastName: data.contacts.contactLastName,
+          phoneNumber: data.contacts.contactPhoneNumber,
+          email: data.contacts.contactEmail,
+          contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+          contactPreference: data.contacts.contactPreference
+        }
+      ]
+    };
 
     // Remove empty investigate permit objects
     const filteredInvestigatePermits = submissionData.investigatePermits.filter(
@@ -388,11 +385,11 @@ async function emailConfirmation(actId: string, subId: string) {
   try {
     const configCC = getConfig.value.ches?.submission?.cc;
     const body = confirmationTemplateSubmission({
-      '{{ contactName }}': formRef.value?.values.contactFirstName,
+      '{{ contactName }}': formRef.value?.values.contacts.contactFirstName,
       '{{ activityId }}': actId,
       '{{ submissionId }}': subId
     });
-    let applicantEmail = formRef.value?.values.contactEmail;
+    let applicantEmail = formRef.value?.values.contacts.contactEmail;
     let emailData = {
       from: configCC,
       to: [applicantEmail],
