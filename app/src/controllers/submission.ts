@@ -20,7 +20,9 @@ import {
   PermitAuthorizationStatus,
   PermitNeeded,
   PermitStatus,
+  ProjectApplicant,
   ProjectLocation,
+  ProjectRelationship,
   SubmissionType
 } from '../utils/enums/housing';
 import { camelCaseToTitleCase, deDupeUnsure, getCurrentUsername, isTruthy, toTitleCase } from '../utils/utils';
@@ -161,6 +163,26 @@ const controller = {
                 .filter((x: unknown) => !!x);
             }
 
+            let parseApplicantRelationship;
+
+            switch (data.contactApplicantRelationship) {
+              case 'owner':
+                parseApplicantRelationship = ProjectRelationship.OWNER;
+                break;
+              case 'employee':
+                parseApplicantRelationship = ProjectRelationship.CONSULTANT;
+                break;
+              case 'agent':
+                parseApplicantRelationship = ProjectRelationship.CONSULTANT;
+                break;
+              case 'consultant':
+                parseApplicantRelationship = ProjectRelationship.CONSULTANT;
+                break;
+              default:
+                parseApplicantRelationship = ProjectRelationship.OTHER;
+                break;
+            }
+
             return {
               formId: x.id,
               submissionId: data.form.submissionId,
@@ -174,7 +196,8 @@ const controller = {
               housingCoopDescription: data.housingCoopName,
               intakeStatus: toTitleCase(data.form.status),
               indigenousDescription: data.IndigenousHousingProviderName,
-              isDevelopedByCompanyOrOrg: toTitleCase(data.isCompany),
+              isDevelopedByCompanyOrOrg:
+                data.isCompany === 'yes' ? ProjectApplicant.BUSINESS : ProjectApplicant.INDIVIDUAL,
               isDevelopedInBC: toTitleCase(data.isCompanyRegistered),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
@@ -208,7 +231,7 @@ const controller = {
                   phoneNumber: data.contactPhoneNumber,
                   firstName: data.contactFirstName,
                   lastName: data.contactLastName,
-                  contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship)
+                  contactApplicantRelationship: parseApplicantRelationship
                 }
               ]
             };

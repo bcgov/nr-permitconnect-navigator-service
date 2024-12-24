@@ -1,10 +1,11 @@
 import { BasicResponse } from '../../../src/utils/enums/application';
+import { ProjectApplicant } from '../../../src/utils/enums/housing';
 import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
 
 describe('basicIntakeSchema', () => {
   it('should validate when isDevelopedByCompanyOrOrg and isDevelopedInBC are valid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedByCompanyOrOrg: ProjectApplicant.BUSINESS,
       isDevelopedInBC: BasicResponse.YES,
       registeredName: 'My Company'
     };
@@ -26,7 +27,7 @@ describe('basicIntakeSchema', () => {
 
   it('should throw an error when isDevelopedInBC is invalid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedByCompanyOrOrg: ProjectApplicant.BUSINESS,
       isDevelopedInBC: 'invalid'
     };
 
@@ -34,9 +35,9 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is YES but registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBC is INDIVIDUAL but registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedByCompanyOrOrg: ProjectApplicant.INDIVIDUAL,
       isDevelopedInBC: BasicResponse.YES
     };
 
@@ -44,9 +45,9 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is NO and registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBC is INDIVIDUAL and registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: BasicResponse.YES,
+      isDevelopedByCompanyOrOrg: ProjectApplicant.INDIVIDUAL,
       isDevelopedInBC: BasicResponse.NO
     };
 

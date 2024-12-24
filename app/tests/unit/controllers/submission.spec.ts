@@ -119,6 +119,7 @@ const FORM_EXPORT_2 = {
   longitude: 178,
   naturalDisasterInd: true,
   projectName: 'BIG',
+  isDevelopedByCompanyOrOrg: 'Yes',
   projectDescription: 'some project description here',
   companyNameRegistered: 'BIGBUILD',
   queuePriority: '3',
@@ -163,6 +164,7 @@ const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: stri
   otherUnitsDescription: undefined,
   projectDescription: undefined,
   projectName: 'PROJ',
+  isDevelopedByCompanyOrOrg: 'Yes',
   queuePriority: 3,
   singleFamilyUnits: '1-49',
   hasRentalUnits: 'Unsure',
@@ -191,6 +193,7 @@ const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: stri
     naturalDisaster: BasicResponse.YES,
     projectName: 'BIG',
     projectDescription: 'some project description here',
+    isDevelopedByCompanyOrOrg: 'Yes',
     queuePriority: 3,
     singleFamilyUnits: '>500',
     hasRentalUnits: 'Yes',
@@ -418,7 +421,7 @@ describe('createSubmission', () => {
       body: {
         applicant: {},
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -444,7 +447,7 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        isDevelopedByCompanyOrOrg: true,
+        isDevelopedByCompanyOrOrg: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -732,7 +735,7 @@ describe('submitDraft', () => {
       body: {
         contacts: [{ firstName: 'test', lastName: 'person' }],
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -760,7 +763,7 @@ describe('submitDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        isDevelopedByCompanyOrOrg: true,
+        isDevelopedByCompanyOrOrg: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -882,7 +885,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: 'Business'
         },
         housing: {
           projectName: 'TheProject'
@@ -924,7 +927,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          isDevelopedByCompanyOrOrg: 'Business'
         },
         housing: {
           projectName: 'TheProject'
