@@ -1995,11 +1995,10 @@ components:
           type: object
           properties:
             isDevelopedByCompanyOrOrg:
-              type: boolean
-              description: >-
-                Indicates if the project is being developed by a company or
-                organization
-              example: true
+              type: string
+              enum: [Business, Individual]
+              description: Are you applying as an individual or a business?
+              example: 'Business'
             isDevelopedInBC:
               type: boolean
               description: >-

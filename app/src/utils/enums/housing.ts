@@ -87,7 +87,7 @@ export enum ProjectApplicant {
 
 export enum ProjectRelationship {
   OWNER = 'Property owner',
-  CONSULTANT = 'Project Consultant',
+  CONSULTANT = 'Project consultant',
   OTHER = 'Other'
 }
 

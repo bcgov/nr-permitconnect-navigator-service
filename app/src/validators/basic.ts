@@ -1,16 +1,17 @@
 import Joi from 'joi';
 
 import { YES_NO_LIST } from '../utils/constants/application';
-import { ENQUIRY_TYPE_LIST } from '../utils/constants/housing';
+import { ENQUIRY_TYPE_LIST, PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
+import { ProjectApplicant } from '../utils/enums/housing';
 import { BasicResponse } from '../utils/enums/application';
 
 export const basicIntake = Joi.object({
   consentToFeedback: Joi.boolean(),
   isDevelopedByCompanyOrOrg: Joi.string()
     .required()
-    .valid(...YES_NO_LIST),
+    .valid(...PROJECT_APPLICANT_LIST),
   isDevelopedInBC: Joi.when('isDevelopedByCompanyOrOrg', {
-    is: BasicResponse.YES,
+    is: ProjectApplicant.BUSINESS,
     then: Joi.string()
       .required()
       .valid(...YES_NO_LIST),
