@@ -5,8 +5,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
-import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
+import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
+import { Spinner } from '@/components/layout';
 import { Accordion, AccordionTab, Button, Card, Column, DataTable, Divider, useToast } from '@/lib/primevue';
 import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -38,7 +39,9 @@ const { submissionId } = defineProps<{
 }>();
 
 // Constants
-const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
+const { t } = useI18n();
+
+const BREADCRUMB_HOME: MenuItem = { label: t('projectView.crumbHousing'), route: RouteName.HOUSING };
 const DEFAULT_SORT_ORDER = -1;
 const DEFAULT_SORT_FIELD = 'submittedAt';
 
@@ -54,7 +57,7 @@ const { getPermitTypes } = storeToRefs(typeStore);
 // State
 const assignee: Ref<User | undefined> = ref(undefined);
 const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
-  { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
+  { label: t('projectView.crumbAppsPermits'), route: RouteName.HOUSING_PROJECTS_LIST },
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
 const createdBy: Ref<User | undefined> = ref(undefined);
@@ -92,7 +95,6 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 
 // Actions
 const router = useRouter();
-const { t } = useI18n();
 const toast = useToast();
 
 async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
@@ -194,7 +196,7 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
       emailConfirmation(response.data.activityId, response.data.enquiryId, enquiryDescription);
     }
   } catch (e: any) {
-    toast.error('Failed to submit enquiry', e);
+    toast.error(t('projectView.toastEnquiryFailed'), e);
   }
 }
 
@@ -207,7 +209,7 @@ onMounted(async () => {
     ).map((r) => r.data);
     if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
   } catch {
-    toast.error('Unable to load project, please try again later');
+    toast.error(t('projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.HOUSING_PROJECTS_LIST });
   }
 
@@ -216,7 +218,7 @@ onMounted(async () => {
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
     submissionStore.setPermits(permitsValue);
   } catch {
-    toast.error('Unable to load permits for this project, please try again later');
+    toast.error(t('projectView.toastPermitLoadFailed'));
   }
   submissionStore.setSubmission(submissionValue);
   submissionStore.setRelatedEnquiries(enquiriesValue);
@@ -235,7 +237,7 @@ onMounted(async () => {
 
 <template>
   <Breadcrumb
-    :home="breadcrumbHome"
+    :home="BREADCRUMB_HOME"
     :model="breadcrumbItems"
   />
   <div
@@ -243,9 +245,7 @@ onMounted(async () => {
     class="app-primary-color"
   >
     <div class="disclaimer-block p-5 mt-5">
-      Based on the information you provided, the following permits are recommended. Please note, that this information
-      is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be
-      updated as we review your project or receive further details.
+      {{ t('projectView.disclaimer') }}
     </div>
     <div class="mt-8 mb-2 flex justify-content-between align-items-center">
       <h1
@@ -292,13 +292,14 @@ onMounted(async () => {
     >
       {{ t('projectView.inapplicableSubmissionType') }}
     </div>
-    <div><h3 class="mb-5 mt-7">Recommended permits</h3></div>
+    <div>
+      <h3 class="mb-5 mt-7">{{ t('projectView.recommendedPermits') }}</h3>
+    </div>
     <div
       v-if="!permitsNeeded?.length"
       class="empty-block p-5 mb-2"
     >
-      We will update the recommended permits here as the project progresses. You may see this message while we are
-      investigating or if no application is needed at this time.
+      {{ t('projectView.recommendedPermitsDesc') }}
     </div>
     <Card
       v-for="permit in permitsNeeded"
@@ -313,9 +314,9 @@ onMounted(async () => {
       v-if="permitsNotNeeded?.length"
       class="app-primary-color"
     >
-      <AccordionTab header="Not needed">
+      <AccordionTab :header="t('projectView.notNeeded')">
         <div>
-          We have also investigated the following permits as requested. These permits are not required for this project.
+          {{ t('projectView.notNeededDesc') }}
         </div>
         <ul class="mt-4 mb-0">
           <li
@@ -328,12 +329,12 @@ onMounted(async () => {
         </ul>
       </AccordionTab>
     </Accordion>
-    <h3 class="mt-8 mb-5">Submitted applications</h3>
+    <h3 class="mt-8 mb-5">{{ t('projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
       class="empty-block p-5"
     >
-      We will update your submitted applications here as the project progresses.
+      {{ t('projectView.submittedApplicationsDesc') }}
     </div>
     <router-link
       v-for="permit in permitsSubmitted"
@@ -362,26 +363,26 @@ onMounted(async () => {
                 :auth-status="permit.authStatus"
               />
               <div>
-                <span class="label-verified mr-1">Status last verified on</span>
+                <span class="label-verified mr-1">{{ t('projectView.statusVerified') }}</span>
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
               </div>
             </div>
             <div class="col-3">
-              <div class="label-field">Tracking ID</div>
+              <div class="label-field">{{ t('projectView.trackingId') }}</div>
               <div class="permit-data">
                 {{ permit?.trackingId }}
               </div>
             </div>
             <div class="col-3">
-              <div class="label-field">Agency</div>
+              <div class="label-field">{{ t('projectView.agency') }}</div>
               <div class="permit-data">
                 {{ permit?.agency }}
               </div>
             </div>
             <div class="col-6">
-              <div class="label-field">Latest updates</div>
+              <div class="label-field">{{ t('projectView.latestUpdates') }}</div>
               <div class="permit-data">
-                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : 'No updates at the moment.' }}
+                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('projectView.noUpdates') }}
               </div>
             </div>
           </div>

@@ -34,14 +34,31 @@
     "admin": "ADMIN"
   },
   "projectView": {
+    "agency": "Agency",
     "createdBy": "Created by",
+    "crumbHousing": "Housing",
+    "crumbAppsPermits": "Applications and Permits",
+    "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
     "enquiryID": "Enquiry ID",
     "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
+    "latestUpdates": "Latest updates",
     "listEmpty": "Your project related enquiries will be displayed here",
+    "noUpdates": "No updates at the moment.",
+    "notNeeded": "Not needed",
+    "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
     "rangeSeparator": "of",
+    "recommendedPermits": "Recommended permits",
+    "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
     "relatedEnquiries": "Related enquiries",
     "status": "Status",
-    "submittedDate": "Submitted date"
+    "statusVerified": "Status last verified on",
+    "submittedApplications": "Submitted applications",
+    "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
+    "submittedDate": "Submitted date",
+    "toastEnquiryFailed": "Failed to submit enquiry",
+    "toastProjectLoadFailed": "Unable to load project, please try again later",
+    "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
+    "trackingId": "Tracking ID"
   },
   "header": {
     "name": "Permit Connect Services"
