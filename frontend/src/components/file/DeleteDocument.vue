@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { useSubmissionStore } from '@/store';
@@ -15,6 +17,7 @@ const { document, disabled = false } = defineProps<{
 const submissionStore = useSubmissionStore();
 
 // Actions
+const { t } = useI18n();
 const confirm = useConfirm();
 const toast = useToast();
 
@@ -42,11 +45,13 @@ const confirmDelete = (document: Document) => {
 
 <template>
   <Button
-    v-tooltip.bottom="'Delete document'"
+    v-tooltip.bottom="t('deleteDocument.deleteTooltip')"
+    v-tooltip.focus.bottom="t('deleteDocument.deleteTooltip')"
     :disabled="disabled"
     class="p-button-lg p-button-text p-button-danger p-0 align-self-center"
     aria-label="Delete object"
     style="position: relative; top: 5; right: 0"
+    tabindex="0"
     @click="
       (e) => {
         confirmDelete(document);

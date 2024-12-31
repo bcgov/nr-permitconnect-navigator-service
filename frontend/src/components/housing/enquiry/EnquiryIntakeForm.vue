@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
@@ -70,6 +71,7 @@ const formSchema = object({
 });
 
 // Actions
+const { t } = useI18n();
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
@@ -367,9 +369,9 @@ onBeforeMount(async () => {
               Enter the project ID given to you when you registered your project with a Navigator
             </span>
             <div
-              v-tooltip.right="
-                `Project ID can be found in the confirmation email you received at the time of submission.`
-              "
+              v-tooltip.right="t('enquiryIntakeForm.projectIdTooltip')"
+              v-tooltip.focus.right="t('enquiryIntakeForm.projectIdTooltip')"
+              tabindex="0"
             >
               <font-awesome-icon icon="fa-solid fa-circle-question" />
             </div>
@@ -416,7 +418,11 @@ onBeforeMount(async () => {
         <template #title>
           <div class="flex">
             <span class="section-header">Would you like to register your project with a Navigator?</span>
-            <div v-tooltip.right="`Consider registering if you are working or getting started on a housing project.`">
+            <div
+              v-tooltip.right="t('enquiryIntakeForm.registerEnquiryTooltip')"
+              v-tooltip.focus.right="t('enquiryIntakeForm.registerEnquiryTooltip')"
+              tabindex="0"
+            >
               <font-awesome-icon icon="fa-solid fa-circle-question" />
             </div>
           </div>

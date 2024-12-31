@@ -88,6 +88,7 @@ const getState = computed(() => {
   <div class="flex">
     <div
       v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
+      v-tooltip.focus="{ value: getState?.toolTip, modifier: toolTipDirection }"
       class="flex justify-content-center align-items-center auth-indicator"
       :class="[getState?.badgeClass]"
       :style="{
@@ -96,6 +97,7 @@ const getState = computed(() => {
         '--height': dimensions.height,
         '--line-height': dimensions.lineHeight
       }"
+      tabindex="0"
     >
       <font-awesome-icon
         v-if="getState?.iconString"

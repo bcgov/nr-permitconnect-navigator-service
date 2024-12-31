@@ -2,6 +2,13 @@
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact Housing Authorizations at"
   },
+  "deleteDocument": {
+    "deleteTooltip": "Delete document"
+  },
+  "enquiryIntakeForm": {
+    "projectIdTooltip": "Project ID can be found in the confirmation email you received at the time of submission.",
+    "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project."
+  },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",
     "listEmpty": "Submit a general enquiry for questions that are not related to existing projects",
@@ -99,5 +106,15 @@
     "lastEdited": "Last edited",
     "listEmpty": "Your project submission drafts will be displayed here",
     "of": "of"
+  },
+  "submissionIntakeForm": {
+    "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
+    "addressTooltip": "A civic address contains a street name and number where a non-civid does not.",
+    "appliedPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
+    "bcHousingTooltip": "BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.",
+    "isRegisteredTooltip": "Are you registered with OrgBook BC?",
+    "multiFamilyTooltip": "Multi-family dwelling: a residential building that contains two or more attached dwellings, including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.",
+    "potentialPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
+    "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants."
   }
 }

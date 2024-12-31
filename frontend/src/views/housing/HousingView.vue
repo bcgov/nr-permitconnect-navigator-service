@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
@@ -26,6 +26,7 @@ const loading: Ref<boolean> = ref(true);
 
 // Actions
 const { t } = useI18n();
+const route = useRoute();
 const router = useRouter();
 
 function onProjectClick(project: Submission) {
@@ -38,6 +39,19 @@ function onProjectClick(project: Submission) {
 function onSubmissionDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
+
+watch(
+  () => route.hash,
+  async (newHash) => {
+    if (newHash) {
+      await nextTick();
+      const target = document.querySelector(newHash);
+      if (target && target instanceof HTMLElement) {
+        target.focus();
+      }
+    }
+  }
+);
 
 onMounted(async () => {
   [enquiries.value, projects.value, drafts.value] = (
@@ -77,6 +91,7 @@ onMounted(async () => {
             hash: '#projects'
           }"
           class="no-underline"
+          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#projects' })"
         >
         {{ t('housing.myProjects') }}</router-link>
         |
@@ -86,6 +101,7 @@ onMounted(async () => {
             hash: '#drafts'
           }"
           class="no-underline"
+          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#drafts' })"
         >
         {{ t('housing.drafts') }}</router-link>
         |
@@ -95,6 +111,7 @@ onMounted(async () => {
             hash: '#enquiries'
           }"
           class="no-underline"
+          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#enquiries' })"
         >
         {{ t('housing.generalEnquiries') }}</router-link>
       </div>
@@ -108,24 +125,29 @@ onMounted(async () => {
       <h2
         id="projects"
         class="flex font-bold"
+        tabindex="-1"
       >
         {{ t('housing.myProjects') }}
         <div
           v-tooltip.right="t('housing.projectsTooltip')"
+          v-tooltip.focus.right="t('housing.projectsTooltip')"
           class="flex align-items-center pl-2 text-xl"
+          tabindex="0"
         >
           <font-awesome-icon icon="fa-solid fa-circle-info" />
         </div>
       </h2>
-      <router-link :to="{ name: RouteName.HOUSING_SUBMISSION_INTAKE }">
-        <Button>
-          {{ t('housing.submitNewProject') }}
-          <font-awesome-icon
-            class="ml-2"
-            icon="fa-solid fa-arrow-right"
-          />
-        </Button>
-      </router-link>
+      <Button
+        @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
+        @keydown.enter.prevent="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
+        @keydown.space.prevent="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
+      >
+        {{ t('housing.submitNewProject') }}
+        <font-awesome-icon
+          class="ml-2"
+          icon="fa-solid fa-arrow-right"
+        />
+      </Button>
     </div>
 
     <div class="w-full">
@@ -185,6 +207,7 @@ onMounted(async () => {
       <h2
         id="drafts"
         class="flex font-bold"
+        tabindex="-1"
       >
         {{ t('housing.drafts') }}
       </h2>
@@ -205,24 +228,29 @@ onMounted(async () => {
       <h2
         id="enquiries"
         class="flex font-bold"
+        tabindex="-1"
       >
         {{ t('housing.generalEnquiries') }}
         <div
           v-tooltip.right="t('housing.enquiriesTooltip')"
+          v-tooltip.focus.right="t('housing.enquiriesTooltip')"
           class="flex align-items-center pl-2 text-xl"
+          tabindex="0"
         >
           <font-awesome-icon icon="fa-solid fa-circle-info" />
         </div>
       </h2>
-      <router-link :to="{ name: RouteName.HOUSING_ENQUIRY_INTAKE }">
-        <Button>
-          {{ t('housing.submitNewEnquiry') }}
-          <font-awesome-icon
-            class="ml-2"
-            icon="fa-solid fa-arrow-right"
-          />
-        </Button>
-      </router-link>
+      <Button
+        @click="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
+        @keydown.enter.prevent="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
+        @keydown.space.prevent="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
+      >
+        {{ t('housing.submitNewEnquiry') }}
+        <font-awesome-icon
+          class="ml-2"
+          icon="fa-solid fa-arrow-right"
+        />
+      </Button>
     </div>
 
     <div class="w-full">

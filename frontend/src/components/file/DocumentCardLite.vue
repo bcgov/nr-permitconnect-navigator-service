@@ -47,8 +47,10 @@ function onClick() {
       <div class="grid">
         <div
           v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
+          v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap mt-2"
           style="overflow: hidden"
+          tabindex="0"
         >
           <a href="#">{{ document.filename }}</a>
         </div>

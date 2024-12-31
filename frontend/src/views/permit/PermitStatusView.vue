@@ -316,7 +316,10 @@ onBeforeMount(async () => {
       />
       <span
         class="status-description"
+        tabindex="0"
         @click="descriptionModalVisible = true"
+        @keydown.enter.prevent="descriptionModalVisible = true"
+        @keydown.space.prevent="descriptionModalVisible = true"
       >
         What does the status mean?
       </span>
