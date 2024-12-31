@@ -78,7 +78,7 @@ const controller = {
         ...generateCreateStamps(req.currentContext)
       });
 
-      res.status(201).json({ activityId: result.activityId, enquiryId: result.enquiryId });
+      res.status(201).json(result);
     } catch (e: unknown) {
       next(e);
     }
