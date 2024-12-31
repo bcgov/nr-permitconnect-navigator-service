@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
 import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
@@ -58,7 +59,7 @@ import {
   SubmissionType
 } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
-import { omit } from '@/utils/utils';
+import { getHTMLElement, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -123,6 +124,7 @@ const validationErrors = computed(() => {
 });
 
 // Actions
+const { t } = useI18n();
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
@@ -705,8 +707,10 @@ onBeforeMount(async () => {
                     <div class="flex align-items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
                       <div
-                        v-tooltip.right="'Are you registered with OrgBook BC?'"
+                        v-tooltip.right="t('submissionIntakeForm.isRegisteredTooltip')"
+                        v-tooltip.focus.right="t('submissionIntakeForm.isRegisteredTooltip')"
                         class="pl-2"
+                        tabindex="0"
                       >
                         <font-awesome-icon icon="fa-solid fa-circle-question" />
                       </div>
@@ -841,11 +845,10 @@ onBeforeMount(async () => {
                         :invalid="!!errors.housing && meta.touched"
                       />
                       <div
-                        v-tooltip.right="
-                          `Multi-family dwelling: a residential building that contains two or more attached dwellings,
-                    including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.`
-                        "
+                        v-tooltip.right="t('submissionIntakeForm.multiFamilyTooltip')"
+                        v-tooltip.focus.right="t('submissionIntakeForm.multiFamilyTooltip')"
                         class="pl-2"
+                        tabindex="0"
                       >
                         <font-awesome-icon icon="fa-solid fa-circle-question" />
                       </div>
@@ -899,10 +902,9 @@ onBeforeMount(async () => {
                 <div class="flex">
                   <span class="section-header">Will this project include rental units?</span>
                   <div
-                    v-tooltip.right="
-                      `Rental refers to a purpose built residentual unit, property,
-                  or dwelling that is available for long term rent by tenants.`
-                    "
+                    v-tooltip.right="t('submissionIntakeForm.rentalUnitsTooltip')"
+                    v-tooltip.focus.right="t('submissionIntakeForm.rentalUnitsTooltip')"
+                    tabindex="0"
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -967,10 +969,10 @@ onBeforeMount(async () => {
                       </label>
                       <!-- eslint-disable max-len -->
                       <div
-                        v-tooltip.right="
-                          `BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.`
-                        "
+                        v-tooltip.right="t('submissionIntakeForm.bcHousingTooltip')"
+                        v-tooltip.focus.right="t('submissionIntakeForm.bcHousingTooltip')"
                         class="mb-2"
+                        tabindex="0"
                       >
                         <font-awesome-icon
                           class="pl-2"
@@ -1078,11 +1080,10 @@ onBeforeMount(async () => {
                   <div class="flex align-items-center">
                     <label>Provide additional information</label>
                     <div
-                      v-tooltip.right="
-                        `Provide us with additional information -
-                         short description about the project, project website link, or upload a document.`
-                      "
+                      v-tooltip.right="t('submissionIntakeForm.additionalInfoTooltip')"
+                      v-tooltip.focus.right="t('submissionIntakeForm.additionalInfoTooltip')"
                       class="pl-2 mb-2"
+                      tabindex="0"
                     >
                       <font-awesome-icon icon="fa-solid fa-circle-question" />
                     </div>
@@ -1185,7 +1186,9 @@ onBeforeMount(async () => {
                   <div class="flex flex-grow-1">
                     <span class="section-header">Provide one of the following project locations</span>
                     <div
-                      v-tooltip.right="`A civic address contains a street name and number where a non-civid does not.`"
+                      v-tooltip.right="t('submissionIntakeForm.addressTooltip')"
+                      v-tooltip.focus.right="t('submissionIntakeForm.addressTooltip')"
+                      tabindex="0"
                     >
                       <font-awesome-icon icon="fa-solid fa-circle-question" />
                     </div>
@@ -1465,10 +1468,9 @@ onBeforeMount(async () => {
                 <div class="flex">
                   <span class="section-header">Have you applied for any provincial permits for this project?</span>
                   <div
-                    v-tooltip.right="
-                      `Early information on your permitting needs will help us
-                    coordinate and expedite the authorization process.`
-                    "
+                    v-tooltip.right="t('submissionIntakeForm.appliedPermitsTooltip')"
+                    v-tooltip.focus.right="t('submissionIntakeForm.appliedPermitsTooltip')"
+                    tabindex="0"
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -1494,6 +1496,7 @@ onBeforeMount(async () => {
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
                       "
+                      ref="appliedPermitsContainer"
                       class="col-12"
                     >
                       <div class="mb-2">
@@ -1562,7 +1565,16 @@ onBeforeMount(async () => {
                                     permitTypeId: undefined,
                                     trackingId: undefined,
                                     submittedDate: undefined
-                                  })
+                                  });
+                                  nextTick(() => {
+                                    const addedPermit = getHTMLElement(
+                                      $refs.appliedPermitsContainer as HTMLElement,
+                                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                                    );
+                                    if (addedPermit) {
+                                      addedPermit.focus();
+                                    }
+                                  });
                                 "
                               >
                                 <font-awesome-icon
@@ -1604,10 +1616,9 @@ onBeforeMount(async () => {
                     Select all provincially issued permits you think you might need (optional)
                   </span>
                   <div
-                    v-tooltip.right="
-                      `Early information on your permitting needs will help us
-                    coordinate and expedite the authorization process.`
-                    "
+                    v-tooltip.right="t('submissionIntakeForm.potentialPermitsTooltip')"
+                    v-tooltip.focus.right="t('submissionIntakeForm.potentialPermitsTooltip')"
+                    tabindex="0"
                   >
                     <font-awesome-icon icon="fa-solid fa-circle-question" />
                   </div>
@@ -1623,7 +1634,10 @@ onBeforeMount(async () => {
                     <div class="col-12">
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid">
+                          <div
+                            ref="investigatePermitsContainer"
+                            class="formgrid grid"
+                          >
                             <div
                               v-for="(permit, idx) in fields"
                               :key="idx"
@@ -1662,9 +1676,16 @@ onBeforeMount(async () => {
                                 v-if="editable"
                                 class="w-full flex justify-content-center font-bold"
                                 @click="
-                                  push({
-                                    permitTypeId: undefined
-                                  })
+                                  push({ permitTypeId: undefined });
+                                  nextTick(() => {
+                                    const newPermitDropdown = getHTMLElement(
+                                      $refs.investigatePermitsContainer as HTMLElement,
+                                      'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
+                                    );
+                                    if (newPermitDropdown) {
+                                      newPermitDropdown.focus();
+                                    }
+                                  });
                                 "
                               >
                                 <font-awesome-icon

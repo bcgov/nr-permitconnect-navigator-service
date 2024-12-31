@@ -99,9 +99,6 @@ const { t } = useI18n();
       &:hover {
         text-decoration: underline;
       }
-      &:focus {
-        outline: none;
-      }
       &:visited {
         color: var(--text-color);
       }

@@ -52,6 +52,6 @@ a {
 
 .p-breadcrumb {
   border: none;
-  padding: 0rem;
+  padding: 0.125rem;
 }
 </style>

@@ -250,7 +250,20 @@ onMounted(async () => {
     <div class="mt-8 mb-2 flex justify-content-between align-items-center">
       <h1
         class="m-0 cursor-pointer hover:underline"
+        tabindex="0"
         @click="
+          router.push({
+            name: RouteName.HOUSING_SUBMISSION,
+            query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }
+          })
+        "
+        @keydown.enter.prevent="
+          router.push({
+            name: RouteName.HOUSING_SUBMISSION,
+            query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }
+          })
+        "
+        @keydown.space.prevent="
           router.push({
             name: RouteName.HOUSING_SUBMISSION,
             query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }

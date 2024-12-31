@@ -62,7 +62,10 @@ const confirmSubmit = () => {
     <div :class="{ 'teleport-container': true, '--open': showTab }">
       <div
         class="assistance-tab pb-3 pt-3 pr-1 pl-1"
+        tabindex="0"
         @click="showTab = !showTab"
+        @keydown.enter.prevent="showTab = !showTab"
+        @keydown.space.prevent="showTab = !showTab"
       >
         <div class="tab-text">Assistance</div>
         <font-awesome-icon
@@ -125,6 +128,11 @@ const confirmSubmit = () => {
   border-color: #fdb913;
   border-width: 3px;
   width: 20rem;
+}
+
+:deep(.assistance-tab:focus-visible) {
+  outline: 0.25rem solid $app-hover;
+  outline-offset: 0.125rem;
 }
 
 .assistance-tab {

@@ -38,14 +38,13 @@ function onConfirmLeave() {
     v-if="!confirmLeave"
     class="p-0"
     text
+    @click="router.push({ name: routeName })"
   >
-    <router-link :to="{ name: routeName }">
-      <font-awesome-icon
-        icon="fa fa-arrow-circle-left"
-        class="mr-1 app-primary-color"
-      />
-      <span class="app-primary-color">{{ text }}</span>
-    </router-link>
+    <font-awesome-icon
+      icon="fa fa-arrow-circle-left"
+      class="mr-1 app-primary-color"
+    />
+    <span class="app-primary-color">{{ text }}</span>
   </Button>
   <Button
     v-if="confirmLeave"
