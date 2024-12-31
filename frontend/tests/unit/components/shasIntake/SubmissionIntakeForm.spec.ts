@@ -3,11 +3,12 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import { mount, RouterLinkStub } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
-import { permitService } from '@/services';
+import { documentService, permitService, submissionService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
@@ -133,6 +134,43 @@ describe('SubmissionIntakeForm', () => {
   it('renders component', async () => {
     const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
+  });
+
+  describe('onBeforeMount', () => {
+    it('keeps editable true in draft mode', async () => {
+      const getDraftSpy = vi.spyOn(submissionService, 'getDraft');
+
+      getDraftSpy.mockResolvedValue({ activityId: '123' } as any);
+
+      const wrapper = shallowMount(SubmissionIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
+
+      await nextTick();
+      await flushPromises();
+
+      const editable = (wrapper.vm as any)?.editable;
+      expect(editable).toBeTruthy();
+    });
+
+    it('sets editable to false when activity and submission ID given', async () => {
+      const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+      const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
+      const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
+
+      getSubmissionSpy.mockResolvedValue({ activityId: '123', submissionId: '456' } as any);
+      listPermitsSpy.mockResolvedValue({ permitId: '123' } as any);
+      listDocumentsSpy.mockResolvedValue({ documentId: '123' } as any);
+
+      const wrapper = shallowMount(SubmissionIntakeForm, {
+        ...wrapperSettings(),
+        props: { activityId: '123', submissionId: '456' }
+      });
+
+      await nextTick();
+      await flushPromises();
+
+      const editable = (wrapper.vm as any)?.editable;
+      expect(editable).toBeFalsy();
+    });
   });
 
   it('checks submit btn disabled conditions', async () => {
