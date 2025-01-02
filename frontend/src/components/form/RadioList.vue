@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ErrorMessage, useField } from 'vee-validate';
-import { watch } from 'vue';
+import { onMounted, watch } from 'vue';
 
 import { RadioButton } from '@/lib/primevue';
 
@@ -21,11 +21,15 @@ const {
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, value, resetField } = useField<string>(name);
 
 // Actions
 watch(value, () => {
   emit('onChange', value.value);
+});
+
+onMounted(() => {
+  resetField({ touched: false });
 });
 </script>
 

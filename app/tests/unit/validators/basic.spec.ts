@@ -35,9 +35,9 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is INDIVIDUAL but registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBC is BUSINESS but registeredName is not provided', () => {
     const data = {
-      projectApplicantType: ProjectApplicant.INDIVIDUAL,
+      projectApplicantType: ProjectApplicant.BUSINESS,
       isDevelopedInBC: BasicResponse.YES
     };
 
@@ -45,9 +45,9 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is INDIVIDUAL and registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBC is BUSINESS and registeredName is not provided', () => {
     const data = {
-      projectApplicantType: ProjectApplicant.INDIVIDUAL,
+      projectApplicantType: ProjectApplicant.BUSINESS,
       isDevelopedInBC: BasicResponse.NO
     };
 
