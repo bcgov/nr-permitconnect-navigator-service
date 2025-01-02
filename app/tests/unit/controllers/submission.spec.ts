@@ -120,7 +120,7 @@ describe('createSubmission', () => {
       body: {
         applicant: {},
         basic: {
-          projectApplicantRelationship: 'Individual'
+          projectApplicantType: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -146,7 +146,7 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        projectApplicantRelationship: 'Individual',
+        projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -408,7 +408,7 @@ describe('submitDraft', () => {
       body: {
         contacts: [{ firstName: 'test', lastName: 'person' }],
         basic: {
-          projectApplicantRelationship: 'Individual'
+          projectApplicantType: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -436,7 +436,7 @@ describe('submitDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        projectApplicantRelationship: 'Individual',
+        projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -558,7 +558,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          projectApplicantRelationship: 'Business'
+          projectApplicantType: 'Business'
         },
         housing: {
           projectName: 'TheProject'
@@ -600,7 +600,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          projectApplicantRelationship: 'Business'
+          projectApplicantType: 'Business'
         },
         housing: {
           projectName: 'TheProject'

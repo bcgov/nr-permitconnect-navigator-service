@@ -196,7 +196,7 @@ describe('SubmissionIntakeForm', () => {
 
     const basicTest = submissionIntakeSchema.validateAt('basic', {
       basic: {
-        isDevelopedByCompanyOrOrg: ProjectApplicant.BUSINESS,
+        projectApplicantType: ProjectApplicant.BUSINESS,
         isDevelopedInBC: BasicResponse.NO,
         registeredName: 'testString3'
       }
@@ -274,7 +274,7 @@ describe('SubmissionIntakeForm', () => {
 
     const basicTestFail = submissionIntakeSchema.validateAt('basic', {
       basic: {
-        isDevelopedByCompanyOrOrg: 'testString1',
+        projectApplicantType: 'testString1',
         isDevelopedInBC: 'testString2',
         registeredName: 'testString3'
       }

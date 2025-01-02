@@ -3,9 +3,9 @@ import { ProjectApplicant } from '../../../src/utils/enums/housing';
 import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
 
 describe('basicIntakeSchema', () => {
-  it('should validate when isDevelopedByCompanyOrOrg and isDevelopedInBC are valid', () => {
+  it('should validate when projectApplicantType and isDevelopedInBC are valid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: ProjectApplicant.BUSINESS,
+      projectApplicantType: ProjectApplicant.BUSINESS,
       isDevelopedInBC: BasicResponse.YES,
       registeredName: 'My Company'
     };
@@ -14,9 +14,9 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeUndefined();
   });
 
-  it('should throw an error when isDevelopedByCompanyOrOrg is invalid', () => {
+  it('should throw an error when projectApplicantType is invalid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: 'invalid',
+      projectApplicantType: 'invalid',
       isDevelopedInBC: BasicResponse.YES,
       registeredName: 'My Company'
     };
@@ -27,7 +27,7 @@ describe('basicIntakeSchema', () => {
 
   it('should throw an error when isDevelopedInBC is invalid', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: ProjectApplicant.BUSINESS,
+      projectApplicantType: ProjectApplicant.BUSINESS,
       isDevelopedInBC: 'invalid'
     };
 
@@ -37,7 +37,7 @@ describe('basicIntakeSchema', () => {
 
   it('should throw an error when isDevelopedInBC is INDIVIDUAL but registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: ProjectApplicant.INDIVIDUAL,
+      projectApplicantType: ProjectApplicant.INDIVIDUAL,
       isDevelopedInBC: BasicResponse.YES
     };
 
@@ -47,7 +47,7 @@ describe('basicIntakeSchema', () => {
 
   it('should throw an error when isDevelopedInBC is INDIVIDUAL and registeredName is not provided', () => {
     const data = {
-      isDevelopedByCompanyOrOrg: ProjectApplicant.INDIVIDUAL,
+      projectApplicantType: ProjectApplicant.INDIVIDUAL,
       isDevelopedInBC: BasicResponse.NO
     };
 

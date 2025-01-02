@@ -482,7 +482,7 @@ onBeforeMount(async () => {
         },
         basic: {
           consentToFeedback: response?.consentToFeedback,
-          isDevelopedByCompanyOrOrg: response?.isDevelopedByCompanyOrOrg,
+          projectApplicantType: response?.projectApplicantType,
           isDevelopedInBC: response?.isDevelopedInBC,
           registeredName: response?.companyNameRegistered
         },
@@ -622,7 +622,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Who is the primary contact regarding this project?</span>
+                <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -677,14 +677,14 @@ onBeforeMount(async () => {
             </Card>
             <Card>
               <template #title>
-                <span class="section-header">Are you applying as an individual or a business?</span>
+                <span class="section-header">{{ t('submissionIntakeForm.projectApplicantTypeCard') }}</span>
                 <Divider type="solid" />
               </template>
               <template #content>
                 <div class="formgrid grid">
                   <RadioList
                     class="col-12"
-                    name="basic.isDevelopedByCompanyOrOrg"
+                    name="basic.projectApplicantType"
                     :bold="false"
                     :disabled="!editable"
                     :options="PROJECT_APPLICANT_LIST"
@@ -696,7 +696,7 @@ onBeforeMount(async () => {
                   />
 
                   <span
-                    v-if="values.basic?.isDevelopedByCompanyOrOrg === ProjectApplicant.BUSINESS"
+                    v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
                     class="col-12"
                   >
                     <div class="flex align-items-center">
@@ -788,7 +788,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Tell us your project name</span>
+                <span class="section-header">{{ t('submissionIntakeForm.projectNameCard') }}</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -807,7 +807,7 @@ onBeforeMount(async () => {
 
             <Card>
               <template #title>
-                <span class="section-header">Select the types of residential units being developed</span>
+                <span class="section-header">{{ t('submissionIntakeForm.singleFamilySelectedCard') }}</span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -895,7 +895,7 @@ onBeforeMount(async () => {
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">Will this project include rental units?</span>
+                  <span class="section-header">{{ t('submissionIntakeForm.hasRentalUnitsCard') }}</span>
                   <div
                     v-tooltip.right="t('submissionIntakeForm.rentalUnitsTooltip')"
                     v-tooltip.focus.right="t('submissionIntakeForm.rentalUnitsTooltip')"
@@ -930,7 +930,9 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">Is this project associated with any of the following?</span>
+                    <span class="section-header">
+                      {{ t('submissionIntakeForm.financiallySupportedCard') }}
+                    </span>
                   </div>
                   <Button
                     class="p-button-sm mr-3 p-button-danger"
@@ -1067,7 +1069,9 @@ onBeforeMount(async () => {
             </Card>
             <Card>
               <template #title>
-                <span class="section-header">Help us learn more about your housing project</span>
+                <span class="section-header">
+                  {{ t('submissionIntakeForm.projectDescriptionCard') }}
+                </span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -1158,7 +1162,7 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex">
                   <span class="section-header">
-                    Has the location of this project been affected by natural disaster?
+                    {{ t('submissionIntakeForm.naturalDisasterCard') }}
                   </span>
                 </div>
                 <Divider type="solid" />
@@ -1179,7 +1183,9 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">Provide one of the following project locations</span>
+                    <span class="section-header">
+                      {{ t('submissionIntakeForm.projectLocationCard') }}
+                    </span>
                     <div
                       v-tooltip.right="t('submissionIntakeForm.addressTooltip')"
                       v-tooltip.focus.right="t('submissionIntakeForm.addressTooltip')"
@@ -1322,7 +1328,9 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">Provide additional location details (optional)</span>
+                    <span class="section-header">
+                      {{ t('submissionIntakeForm.additionalLocationCard') }}
+                    </span>
                   </div>
                 </div>
                 <Divider type="solid" />
@@ -1397,7 +1405,7 @@ onBeforeMount(async () => {
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
                     <span class="section-header">
-                      Is there anything else you would like to tell us about this project's location? (optional)
+                      {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
                     </span>
                   </div>
                 </div>
@@ -1461,7 +1469,9 @@ onBeforeMount(async () => {
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">Have you applied for any provincial permits for this project?</span>
+                  <span class="section-header">
+                    {{ t('submissionIntakeForm.provincialPermitsCard') }}
+                  </span>
                   <div
                     v-tooltip.right="t('submissionIntakeForm.appliedPermitsTooltip')"
                     v-tooltip.focus.right="t('submissionIntakeForm.appliedPermitsTooltip')"
@@ -1608,7 +1618,7 @@ onBeforeMount(async () => {
               <template #title>
                 <div class="flex">
                   <span class="section-header">
-                    Select all provincially issued permits you think you might need (optional)
+                    {{ t('submissionIntakeForm.investigatePermitsCard') }}
                   </span>
                   <div
                     v-tooltip.right="t('submissionIntakeForm.potentialPermitsTooltip')"
