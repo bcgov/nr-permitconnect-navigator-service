@@ -7,10 +7,10 @@ import { BasicResponse } from '../utils/enums/application';
 
 export const basicIntake = Joi.object({
   consentToFeedback: Joi.boolean(),
-  isDevelopedByCompanyOrOrg: Joi.string()
+  projectApplicantType: Joi.string()
     .required()
     .valid(...PROJECT_APPLICANT_LIST),
-  isDevelopedInBC: Joi.when('isDevelopedByCompanyOrOrg', {
+  isDevelopedInBC: Joi.when('projectApplicantType', {
     is: ProjectApplicant.BUSINESS,
     then: Joi.string()
       .required()

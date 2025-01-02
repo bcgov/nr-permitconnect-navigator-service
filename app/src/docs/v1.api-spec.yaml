@@ -1638,10 +1638,10 @@ components:
           type: string
           description: Status of the application
           example: New
-        isDevelopedByCompanyOrOrg:
+        projectApplicantType:
           type: string
           enum: [Business, Individual]
-          description: Are you applying as an individual or a business?
+          description: Are you applying as an individual or as a business?
           example: 'Business'
         isDevelopedInBC:
           type: string
@@ -1994,10 +1994,10 @@ components:
         basic:
           type: object
           properties:
-            isDevelopedByCompanyOrOrg:
+            projectApplicantType:
               type: string
               enum: [Business, Individual]
-              description: Are you applying as an individual or a business?
+              description: Are you applying as an individual or as a business?
               example: 'Business'
             isDevelopedInBC:
               type: boolean

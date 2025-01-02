@@ -196,8 +196,7 @@ const controller = {
               housingCoopDescription: data.housingCoopName,
               intakeStatus: toTitleCase(data.form.status),
               indigenousDescription: data.IndigenousHousingProviderName,
-              isDevelopedByCompanyOrOrg:
-                data.isCompany === 'yes' ? ProjectApplicant.BUSINESS : ProjectApplicant.INDIVIDUAL,
+              projectApplicantType: data.isCompany === 'yes' ? ProjectApplicant.BUSINESS : ProjectApplicant.INDIVIDUAL,
               isDevelopedInBC: toTitleCase(data.isCompanyRegistered),
               locationPIDs: data.parcelID,
               latitude: data.latitude,
@@ -267,7 +266,7 @@ const controller = {
     if (data.basic) {
       basic = {
         consentToFeedback: data.basic.consentToFeedback ?? false,
-        isDevelopedByCompanyOrOrg: data.basic.isDevelopedByCompanyOrOrg,
+        projectApplicantType: data.basic.projectApplicantType,
         isDevelopedInBC: data.basic.isDevelopedInBC,
         companyNameRegistered: data.basic.registeredName
       };

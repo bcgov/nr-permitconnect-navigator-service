@@ -37,7 +37,7 @@ export type Submission = {
   waitingOn: string | null;
   intakeStatus: string | null;
   applicationStatus: string | null;
-  isDevelopedByCompanyOrOrg: string | null;
+  projectApplicantType: string | null;
   isDevelopedInBC: string | null;
   multiFamilyUnits: string | null;
   otherUnits: string | null;

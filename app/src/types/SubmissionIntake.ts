@@ -11,7 +11,7 @@ export type SubmissionIntake = {
 
   basic?: {
     consentToFeedback?: boolean;
-    isDevelopedByCompanyOrOrg?: string | null;
+    projectApplicantType?: string | null;
     isDevelopedInBC?: string | null;
     registeredName?: string;
   };

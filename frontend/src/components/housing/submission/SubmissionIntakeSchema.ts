@@ -13,8 +13,8 @@ export const submissionIntakeSchema = object({
   [IntakeFormCategory.CONTACTS]: object(contactValidator),
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
-    isDevelopedByCompanyOrOrg: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
-    isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
+    projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
+    isDevelopedInBC: string().when('projectApplicantType', {
       is: (value: string) => value === ProjectApplicant.BUSINESS,
       then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
       otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
