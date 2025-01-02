@@ -45,7 +45,7 @@ describe('contactsSchema', () => {
         firstName: 'John',
         lastName: 'Doe',
         phoneNumber: '1234567890',
-        contactApplicantRelationship: 'Employee'
+        contactApplicantRelationship: 'Project consultant'
       }
     ];
     const result = contactsSchema.validate(contacts);
@@ -60,7 +60,7 @@ describe('contactsSchema', () => {
         firstName: 'John',
         lastName: 'Doe',
         phoneNumber: '1234567890',
-        contactApplicantRelationship: 'Employee'
+        contactApplicantRelationship: 'Project consultant'
       }
     ];
     const result = contactsSchema.validate(contacts);
@@ -75,7 +75,7 @@ describe('contactsSchema', () => {
         firstName: 'John',
         lastName: 'Doe',
         phoneNumber: '+1234567890',
-        contactApplicantRelationship: 'Employee'
+        contactApplicantRelationship: 'Project consultant'
       }
     ];
     const result = contactsSchema.validate(contacts);
@@ -90,7 +90,7 @@ describe('contactsSchema', () => {
         firstName: 'John',
         lastName: 'Doe',
         phoneNumber: '12345678901',
-        contactApplicantRelationship: 'Employee'
+        contactApplicantRelationship: 'Project consultant'
       }
     ];
     const result = contactsSchema.validate(contacts);

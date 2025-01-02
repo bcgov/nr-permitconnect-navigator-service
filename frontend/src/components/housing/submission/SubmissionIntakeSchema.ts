@@ -1,7 +1,7 @@
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse } from '@/utils/enums/application';
-import { IntakeFormCategory, ProjectLocation } from '@/utils/enums/housing';
+import { IntakeFormCategory, ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
 import { contactValidator } from '@/validators';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
@@ -13,9 +13,9 @@ export const submissionIntakeSchema = object({
   [IntakeFormCategory.CONTACTS]: object(contactValidator),
   [IntakeFormCategory.BASIC]: object({
     consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
-    isDevelopedByCompanyOrOrg: string().required().oneOf(YES_NO_LIST).label('Project developed'),
-    isDevelopedInBC: string().when('isDevelopedByCompanyOrOrg', {
-      is: (value: string) => value === BasicResponse.YES,
+    projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
+    isDevelopedInBC: string().when('projectApplicantType', {
+      is: (value: string) => value === ProjectApplicant.BUSINESS,
       then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
       otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
     }),

@@ -88,7 +88,7 @@ const service = {
           has_applied_provincial_permits: x.hasAppliedProvincialPermits,
           housing_coop_description: x.housingCoopDescription,
           indigenous_description: x.indigenousDescription,
-          is_developed_by_company_or_org: x.isDevelopedByCompanyOrOrg,
+          project_applicant_type: x.projectApplicantType,
           is_developed_in_bc: x.isDevelopedInBC,
           intake_status: x.intakeStatus,
           location_pids: x.locationPIDs,

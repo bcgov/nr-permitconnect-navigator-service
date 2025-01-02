@@ -1152,7 +1152,7 @@ components:
           example: john.smith@example.com
         contactApplicantRelationship:
           type: string
-          enum: [Owner, Employee, Agent, Consultant, Other]
+          enum: [Property owner, Project consultant, Other]
           description: Relationship of the contact person to the project
           example: Agent
         contactPreference:
@@ -1638,10 +1638,11 @@ components:
           type: string
           description: Status of the application
           example: New
-        isDevelopedByCompanyOrOrg:
+        projectApplicantType:
           type: string
-          description: Is the project being developed by a company or organization
-          example: 'Yes'
+          enum: [Business, Individual]
+          description: Are you applying as an individual or as a business?
+          example: 'Business'
         isDevelopedInBC:
           type: string
           description: Is the project developed in BC?
@@ -1993,12 +1994,11 @@ components:
         basic:
           type: object
           properties:
-            isDevelopedByCompanyOrOrg:
-              type: boolean
-              description: >-
-                Indicates if the project is being developed by a company or
-                organization
-              example: true
+            projectApplicantType:
+              type: string
+              enum: [Business, Individual]
+              description: Are you applying as an individual or as a business?
+              example: 'Business'
             isDevelopedInBC:
               type: boolean
               description: >-

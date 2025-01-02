@@ -12,6 +12,7 @@ import {
   PermitAuthorizationStatus,
   PermitNeeded,
   PermitStatus,
+  ProjectApplicant,
   ProjectLocation,
   ProjectRelationship,
   SubmissionType
@@ -72,10 +73,10 @@ export const ORG_BOOK_QUERY_PARAMS = {
   revoked: false
 };
 
+export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
+
 export const PROJECT_RELATIONSHIP_LIST = [
   ProjectRelationship.OWNER,
-  ProjectRelationship.EMPLOYEE,
-  ProjectRelationship.AGENT,
   ProjectRelationship.CONSULTANT,
   ProjectRelationship.OTHER
 ];
