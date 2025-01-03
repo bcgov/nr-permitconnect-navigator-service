@@ -246,6 +246,9 @@ const service = {
             }
           },
           user: true
+        },
+        orderBy: {
+          created_at: 'desc'
         }
       });
 

@@ -50,14 +50,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import {
-  IntakeFormCategory,
-  IntakeStatus,
-  PermitNeeded,
-  PermitStatus,
-  ProjectLocation,
-  SubmissionType
-} from '@/utils/enums/housing';
+import { IntakeFormCategory, PermitNeeded, PermitStatus, ProjectLocation, SubmissionType } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit } from '@/utils/utils';
 
@@ -300,8 +293,6 @@ function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push:
 }
 
 async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
-  editable.value = false;
-
   autoSaveRef.value?.stopAutoSave();
 
   let response;
@@ -317,8 +308,6 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
-  } finally {
-    editable.value = true;
   }
 
   return { activityId: response?.data.activityId, draftId: response?.data.draftId };
@@ -378,7 +367,6 @@ async function onSubmit(data: any) {
     }
   } catch (e: any) {
     toast.error('Failed to save intake', e);
-  } finally {
     editable.value = true;
   }
 }
@@ -468,6 +456,9 @@ onBeforeMount(async () => {
         permits = (await permitService.listPermits({ activityId: activityId })).data;
         documents = (await documentService.listDocuments(activityId)).data;
         submissionStore.setDocuments(documents);
+
+        // Set form to read-only on non draft form reopening
+        editable.value = false;
       }
 
       initialFormValues.value = {
@@ -533,8 +524,6 @@ onBeforeMount(async () => {
     }
 
     await nextTick();
-
-    editable.value = response.intakeStatus !== IntakeStatus.SUBMITTED;
 
     // Move map pin
     onLatLongInputClick();
