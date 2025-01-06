@@ -22,19 +22,6 @@ export function camelCaseToTitleCase(input: string | null): string | null {
 }
 
 /**
- * @function deDupeUnsure
- * Checks if input string is 'unsureunsure' and returns it deduplicated
- * Otherwise returns input
- * @param {string} str The input string
- * @returns {string} Deduplicated input or the input itself
- */
-export function deDupeUnsure(str: string | null): string | null {
-  if (str === 'unsureunsure') {
-    return 'unsure';
-  } else return str;
-}
-
-/**
  * @function addDashesToUuid
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
  * @param {string} str The input string uuid

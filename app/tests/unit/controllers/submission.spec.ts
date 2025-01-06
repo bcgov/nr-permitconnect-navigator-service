@@ -1,5 +1,3 @@
-import config from 'config';
-
 import submissionController from '../../../src/controllers/submission';
 import {
   activityService,
@@ -11,7 +9,7 @@ import {
 } from '../../../src/services';
 import type { Permit, Submission, Draft } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
-import { AuthType, BasicResponse, Initiative } from '../../../src/utils/enums/application';
+import { AuthType, Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -42,181 +40,6 @@ const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
-
-const FORM_EXPORT_1 = {
-  form: {
-    id: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-    submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-    confirmationId: '5183f223',
-    createdAt: new Date().toISOString(),
-    username: 'USERABC',
-    status: 'SUBMITTED'
-  },
-
-  submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  confirmationId: '5183f223',
-  contactEmail: 'abc@dot.com',
-  contactPhoneNumber: '1234567890',
-  contactFirstName: 'ABC',
-  contactLastName: 'DEF',
-  contactPreference: 'phoneCall',
-  contactApplicantRelationship: 'Agent',
-  financiallySupported: true,
-  intakeStatus: 'IN PROGRESS',
-  isBCHousingSupported: 'Yes',
-  isIndigenousHousingProviderSupported: 'Yes',
-  isNonProfitSupported: 'Yes',
-  isHousingCooperativeSupported: 'Yes',
-  parcelID: '132',
-  latitude: -48,
-  longitude: 160,
-  naturalDisasterInd: true,
-  projectName: 'PROJ',
-  isDevelopedByCompanyOrOrg: 'Yes',
-  companyNameRegistered: 'COMPANY',
-  queuePriority: '3',
-  singleFamilyUnits: '1-49',
-  multiFamilyUnits: '',
-  multiFamilyUnits1: '',
-  isRentalUnit: 'unsureunsure',
-  addressType: 'civicAddress',
-  streetAddress: '123 Some Street',
-  previousPermits: 'No',
-  createdAt: new Date().toISOString(),
-  createdBy: 'USERABC',
-
-  permitGrid: null,
-  dataGrid: null
-};
-
-const FORM_EXPORT_2 = {
-  form: {
-    id: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-    submissionId: 'c8b7d976-3d05-4e67-a813-b10888585b59',
-    confirmationId: 'c8b7d976',
-    createdAt: new Date().toISOString(),
-    username: 'USERABC',
-    status: 'SUBMITTED'
-  },
-
-  submissionId: 'c8b7d976-3d05-4e67-a813-b10888585b59',
-  confirmationId: 'c8b7d976',
-  contactEmail: 'joe@dot.com',
-  contactPhoneNumber: '1114448888',
-  contactFirstName: 'Joe',
-  contactLastName: 'Smith',
-  contactPreference: 'Email',
-  contactApplicantRelationship: 'Agent',
-
-  financiallySupported: true,
-  intakeStatus: 'IN PROGRESS',
-  isBCHousingSupported: 'Yes',
-  isIndigenousHousingProviderSupported: 'Yes',
-  isNonProfitSupported: 'Yes',
-  isHousingCooperativeSupported: 'Yes',
-  parcelID: '132',
-  latitude: -59,
-  longitude: 178,
-  naturalDisasterInd: true,
-  projectName: 'BIG',
-  projectDescription: 'some project description here',
-  companyNameRegistered: 'BIGBUILD',
-  queuePriority: '3',
-  singleFamilyUnits: '>500',
-  multiFamilyUnits: '',
-  multiFamilyUnits1: '',
-  isRentalUnit: 'yes',
-  streetAddress: '112 Other Road',
-  createdAt: new Date().toISOString(),
-  createdBy: 'USERABC',
-
-  permitGrid: [
-    {
-      previousPermitType: 'landsCrownLandTenure',
-      previousTrackingNumber2: 'tracking2',
-      previousTrackingNumber: '',
-      status: '',
-      statusLastVerifiedDate: ''
-    }
-  ],
-  dataGrid: null
-};
-
-const FORM_SUBMISSION_1: Partial<Submission & { activityId: string; formId: string; permits: Array<Permit> }> = {
-  formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-  submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: '5183f223',
-  applicationStatus: ApplicationStatus.NEW,
-  companyNameRegistered: 'COMPANY',
-  financiallySupported: true,
-  financiallySupportedBC: 'Yes',
-  financiallySupportedIndigenous: 'Yes',
-  financiallySupportedNonProfit: 'Yes',
-  financiallySupportedHousingCoop: 'Yes',
-  intakeStatus: 'Submitted',
-  locationPIDs: '132',
-  latitude: -48,
-  longitude: 160,
-  naturalDisaster: BasicResponse.YES,
-  multiFamilyUnits: '',
-  otherUnits: '',
-  otherUnitsDescription: undefined,
-  projectDescription: undefined,
-  projectName: 'PROJ',
-  queuePriority: 3,
-  singleFamilyUnits: '1-49',
-  hasRentalUnits: 'Unsure',
-  streetAddress: '123 Some Street',
-  submittedAt: FORM_EXPORT_1.form.createdAt,
-  submittedBy: 'USERABC',
-  permits: []
-};
-
-const FORM_SUBMISSION_2: Partial<Submission & { activityId: string; formId: string; permits: Array<Partial<Permit>> }> =
-  {
-    formId: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-    submissionId: 'c8b7d976-3d05-4e67-a813-b10888585b59',
-    activityId: 'c8b7d976',
-    applicationStatus: ApplicationStatus.NEW,
-    companyNameRegistered: 'BIGBUILD',
-    financiallySupported: true,
-    financiallySupportedBC: 'Yes',
-    financiallySupportedIndigenous: 'Yes',
-    financiallySupportedNonProfit: 'Yes',
-    financiallySupportedHousingCoop: 'Yes',
-    intakeStatus: 'Submitted',
-    locationPIDs: '132',
-    latitude: -59,
-    longitude: 178,
-    naturalDisaster: BasicResponse.YES,
-    projectName: 'BIG',
-    projectDescription: 'some project description here',
-    queuePriority: 3,
-    singleFamilyUnits: '>500',
-    hasRentalUnits: 'Yes',
-    streetAddress: '112 Other Road',
-    submittedAt: FORM_EXPORT_2.form.createdAt,
-    submittedBy: 'USERABC',
-    permits: [{ permitTypeId: 123, activityId: 'c8b7d976', trackingId: 'tracking2' }]
-  };
-
-const PERMIT_TYPES = [
-  {
-    permitTypeId: 123,
-    agency: 'Water, Land and Resource Stewardship',
-    division: 'Integrated Resource Operations',
-    branch: 'Lands Program',
-    businessDomain: 'Lands',
-    type: 'Commercial General',
-    family: null,
-    name: 'Commercial General',
-    nameSubtype: null,
-    acronym: null,
-    trackedInATS: true,
-    sourceSystem: null,
-    sourceSystemAcronym: 'SRC'
-  }
-];
 
 const SUBMISSION_1 = {
   submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
@@ -264,127 +87,6 @@ const SUBMISSION_1 = {
   updatedBy: 'abc-123',
   user: null
 };
-
-describe.skip('checkAndStoreNewSubmissions', () => {
-  // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
-  const permitTypesSpy = jest.spyOn(permitService, 'getPermitTypes');
-  const formExportSpy = jest.spyOn(submissionService, 'getFormExport');
-  const searchSubmissionsSpy = jest.spyOn(submissionService, 'searchSubmissions');
-  const createSubmissionsFromExportSpy = jest.spyOn(submissionService, 'createSubmissionsFromExport');
-
-  it('creates submissions', async () => {
-    (config.get as jest.Mock).mockReturnValueOnce({
-      form1: {
-        id: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-        apiKey: 'db85c1f7-a345-481f-ada0-f6f7a25c0899'
-      },
-      form2: {
-        id: '4b9fd5c1-3f26-459e-8862-3b422f72c8ed',
-        apiKey: 'e4550917-c93a-4890-b230-346f5375f41d'
-      }
-    });
-
-    const req = {
-      currentContext: CURRENT_CONTEXT
-    };
-
-    permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
-    formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1]).mockResolvedValueOnce([]);
-    searchSubmissionsSpy.mockResolvedValue([]);
-    createSubmissionsFromExportSpy.mockResolvedValue();
-
-    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
-
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(formExportSpy).toHaveBeenCalledTimes(2);
-    expect(searchSubmissionsSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionsFromExportSpy).toHaveBeenCalledWith([FORM_SUBMISSION_1]);
-    expect(createPermitSpy).toHaveBeenCalledTimes(0);
-  });
-
-  it('only creates new submissions', async () => {
-    (config.get as jest.Mock).mockReturnValueOnce({
-      form1: {
-        id: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-        apiKey: 'db85c1f7-a345-481f-ada0-f6f7a25c0899'
-      },
-      form2: {
-        id: '4b9fd5c1-3f26-459e-8862-3b422f72c8ed',
-        apiKey: 'e4550917-c93a-4890-b230-346f5375f41d'
-      }
-    });
-
-    const req = {
-      currentContext: CURRENT_CONTEXT
-    };
-
-    permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
-    formExportSpy.mockResolvedValueOnce([FORM_EXPORT_1, FORM_EXPORT_2]).mockResolvedValueOnce([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    searchSubmissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
-    createSubmissionsFromExportSpy.mockResolvedValue();
-    createPermitSpy.mockResolvedValue({} as Permit);
-
-    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
-
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(formExportSpy).toHaveBeenCalledTimes(2);
-    expect(searchSubmissionsSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionsFromExportSpy).toHaveBeenCalledWith(
-      expect.arrayContaining([
-        expect.objectContaining({
-          ...FORM_SUBMISSION_2,
-          permits: expect.arrayContaining([
-            expect.objectContaining({
-              activityId: expect.any(String),
-              permitTypeId: expect.any(Number),
-              trackingId: expect.any(String),
-              permitId: expect.any(String)
-            })
-          ])
-        })
-      ])
-    );
-    expect(createPermitSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('creates permits', async () => {
-    (config.get as jest.Mock).mockReturnValueOnce({
-      form1: {
-        id: '88f5d0de-8bf9-48f6-9e03-38ae3cde5aaa',
-        apiKey: 'db85c1f7-a345-481f-ada0-f6f7a25c0899'
-      },
-      form2: {
-        id: '4b9fd5c1-3f26-459e-8862-3b422f72c8ed',
-        apiKey: 'e4550917-c93a-4890-b230-346f5375f41d'
-      }
-    });
-
-    const req = {
-      currentContext: CURRENT_CONTEXT
-    };
-
-    permitTypesSpy.mockResolvedValue(PERMIT_TYPES);
-    formExportSpy.mockResolvedValueOnce([FORM_EXPORT_2]).mockResolvedValueOnce([]);
-    searchSubmissionsSpy.mockResolvedValue([]);
-    createSubmissionsFromExportSpy.mockResolvedValue();
-    createPermitSpy.mockResolvedValue({} as Permit);
-
-    await submissionController.checkAndStoreNewSubmissions(req.currentContext);
-
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        permitId: expect.any(String),
-        permitTypeId: 123,
-        activityId: 'c8b7d976',
-        trackingId: 'tracking2'
-      })
-    );
-  });
-});
 
 describe('createSubmission', () => {
   // Mock service calls
@@ -640,9 +342,6 @@ describe('getSubmission', () => {
 describe('getSubmissions', () => {
   const next = jest.fn();
 
-  // Mock controller calls
-  const checkAndStoreSpy = jest.spyOn(submissionController, 'checkAndStoreNewSubmissions');
-
   // Mock service calls
   const submissionsSpy = jest.spyOn(submissionService, 'getSubmissions');
 
@@ -652,14 +351,12 @@ describe('getSubmissions', () => {
       query: {}
     };
 
-    checkAndStoreSpy.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmissions(req as any, res as any, next);
 
-    expect(checkAndStoreSpy).toHaveBeenCalledTimes(1);
     expect(submissionsSpy).toHaveBeenCalledTimes(1);
     expect(submissionsSpy).toHaveBeenCalledWith();
     expect(res.status).toHaveBeenCalledWith(200);
@@ -671,33 +368,13 @@ describe('getSubmissions', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    checkAndStoreSpy.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmissions(req as any, res as any, next);
 
-    expect(checkAndStoreSpy).toHaveBeenCalledTimes(1);
     expect(submissionsSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('calls next if the submission controller fails to check/create submissions', async () => {
-    const req = {
-      currentContext: CURRENT_CONTEXT
-    };
-
-    checkAndStoreSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmissions(req as any, res as any, next);
-
-    expect(checkAndStoreSpy).toHaveBeenCalledTimes(1);
-    expect(submissionsSpy).toHaveBeenCalledTimes(0);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
   });
 
   it('calls next if the submission service fails to get submissions', async () => {
@@ -712,7 +389,6 @@ describe('getSubmissions', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await submissionController.getSubmissions(req as any, res as any, next);
 
-    expect(checkAndStoreSpy).toHaveBeenCalledTimes(1);
     expect(submissionsSpy).toHaveBeenCalledTimes(1);
     expect(submissionsSpy).toHaveBeenCalledWith();
     expect(res.status).toHaveBeenCalledTimes(0);
