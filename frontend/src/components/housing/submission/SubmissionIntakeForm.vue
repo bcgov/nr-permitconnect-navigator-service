@@ -603,7 +603,10 @@ watch(
         name="activityId"
       />
 
-      <Stepper :value="activeStep">
+      <Stepper
+        :value="activeStep"
+        @update:active-step="onStepChange"
+      >
         <StepList>
           <Step
             :value="0"

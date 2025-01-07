@@ -120,7 +120,7 @@ onMounted(async () => {
         placeholder="Last name"
         :options="Object.values(USER_SEARCH_PARAMS)"
         @on-change="
-          (param: DropdownChangeEvent) => {
+          (param: SelectChangeEvent) => {
             selectedParam = param.value;
             searchIdirUsers();
           }
@@ -144,7 +144,7 @@ onMounted(async () => {
         placeholder="First name"
         :options="Object.values(USER_SEARCH_PARAMS)"
         @on-change="
-          (param: DropdownChangeEvent) => {
+          (param: SelectChangeEvent) => {
             selectedParam = param.value;
             searchIdirUsers();
           }

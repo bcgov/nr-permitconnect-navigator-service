@@ -23,14 +23,17 @@ const { t } = useI18n();
 
 <template>
   <h2>Developer</h2>
-  <div
-    v-if="getConfig"
-    class="version px-4 py-2"
-  >
-    v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
+  <div class="flex">
+    <div>Application version:</div>
+    <div
+      v-if="getConfig"
+      class="version pl-2"
+    >
+      v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
+    </div>
   </div>
   <div>
-    <div class="px-2 py-1 flex items-center">
+    <div class="flex items-center">
       <p class="m-0 mr-2">Begin viewing site as:</p>
       <div class="w-2/12 mr-2">
         <Select

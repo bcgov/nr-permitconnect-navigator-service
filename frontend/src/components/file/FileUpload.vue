@@ -110,10 +110,12 @@ const onUpload = async (files: Array<File>) => {
             v-if="files.length > 0"
             class="flex items-center justify-center flex-col"
           >
+            <!-- eslint-disable max-len -->
             <font-awesome-icon
               icon="fa-solid fa-upload"
               class="border-2 border-dashed rounded-full p-8 text-7xl text-surface-400 dark:text-surface-400 border-surface-400 dark:border-surface-400"
             />
+            <!-- eslint-enable max-len -->
             <p class="font-bold">Upload</p>
             <p>Click or drag-and-drop</p>
           </div>

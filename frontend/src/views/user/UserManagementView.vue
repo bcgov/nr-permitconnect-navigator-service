@@ -363,7 +363,7 @@ onMounted(async () => {
         </div>
         <UserTable
           v-model:filters="filters"
-          :users-and-access-request="usersAndAccessRequests"
+          :users-and-access-requests="getApprovedUsers"
           class="mt-6"
           @user-table:manage="
             (userAccessRequest: UserAccessRequest) => {
@@ -371,61 +371,35 @@ onMounted(async () => {
               manageUserModalVisible = true;
             }
           "
-          @user-table:process-request="
-            (userAccessRequest: UserAccessRequest) => {
-              selectedUserAccessRequest = userAccessRequest;
-              userProcessModalVisible = true;
-            }
-          "
           @user-table:revoke="onRevoke"
         />
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-requests="getApprovedUsers"
-        class="mt-6"
-        @user-table:manage="
-          (userAccessRequest: UserAccessRequest) => {
-            selectedUserAccessRequest = userAccessRequest;
-            manageUserModalVisible = true;
-          }
-        "
-        @user-table:revoke="onRevoke"
-      />
-    </TabPanel>
-    <TabPanel header="User access requests">
-      <div class="flex justify-end">
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-requests="getAccessRequests"
-        class="mt-6"
-        :request-table="true"
-        @user-table:approve-request="
-          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
-        "
-        @user-table:deny-request="
-          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
-        "
-      />
-    </TabPanel>
-  </TabView>
+      </TabPanel>
+      <TabPanel header="User access requests">
+        <div class="flex justify-end">
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+              class="width"
+            />
+          </IconField>
+        </div>
+        <UserTable
+          v-model:filters="filters"
+          :users-and-access-requests="getAccessRequests"
+          class="mt-6"
+          :request-table="true"
+          @user-table:approve-request="
+            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
+          "
+          @user-table:deny-request="
+            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
+          "
+        />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
   <div v-else>
     <div class="flex justify-between">
       <Button
