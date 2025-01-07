@@ -1,4 +1,3 @@
-import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
@@ -11,7 +10,7 @@ import {
   submissionService,
   permitService
 } from '../services';
-import { BasicResponse, Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application';
 import {
   ApplicationStatus,
   DraftCode,
@@ -20,16 +19,12 @@ import {
   PermitAuthorizationStatus,
   PermitNeeded,
   PermitStatus,
-  ProjectLocation,
   SubmissionType
 } from '../utils/enums/housing';
-import { camelCaseToTitleCase, deDupeUnsure, getCurrentUsername, isTruthy, toTitleCase } from '../utils/utils';
+import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
-  ChefsFormConfig,
-  ChefsFormConfigData,
-  ChefsSubmissionExport,
   CurrentContext,
   Draft,
   Email,
@@ -73,163 +68,6 @@ const controller = {
       // Prioriy 3 Criteria:
       submission.queuePriority = 3; // Everything Else
     }
-  },
-
-  checkAndStoreNewSubmissions: async (currentContext: CurrentContext) => {
-    const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
-
-    // Mapping of SHAS intake permit names to PCNS types
-    const shasPermitMapping = new Map<string, string>([
-      ['archaeologySiteAlterationPermit', 'Alteration'],
-      ['archaeologyHeritageInspectionPermit', 'Inspection'],
-      ['archaeologyInvestigationPermit', 'Investigation'],
-      ['forestsPrivateTimberMark', 'Private Timber Mark'],
-      ['forestsOccupantLicenceToCut', 'Occupant Licence To Cut'],
-      ['landsCrownLandTenure', 'Commercial General'],
-      ['roadwaysHighwayUsePermit', 'Highway Use Permit'],
-      ['siteRemediation', 'Contaminated Sites Remediation'],
-      ['subdividingLandOutsideAMunicipality', 'Rural Subdivision'],
-      ['waterChangeApprovalForWorkInAndAboutAStream', 'Change Approval for Work in and About a Stream'],
-      ['waterLicence', 'Water Licence'],
-      ['waterNotificationOfAuthorizedChangesInAndAboutAStream', 'Notification'],
-      ['waterShortTermUseApproval', 'Use Approval'],
-      ['waterRiparianAreasProtection', 'New'],
-      ['waterRiparianAreasProtection', 'New']
-    ]);
-
-    const permitTypes = await permitService.getPermitTypes();
-
-    const exportData: Array<Partial<Submission & { activityId: string; formId: string; permits: Array<Permit> }>> =
-      await Promise.all(
-        Object.values<ChefsFormConfigData>(cfg).map(async (x: ChefsFormConfigData) => {
-          return (await submissionService.getFormExport(x.id)).map((data: ChefsSubmissionExport) => {
-            const financiallySupportedValues = {
-              financiallySupportedBC: data.isBCHousingSupported
-                ? toTitleCase(data.isBCHousingSupported)
-                : BasicResponse.NO,
-              financiallySupportedIndigenous: data.isIndigenousHousingProviderSupported
-                ? toTitleCase(data.isIndigenousHousingProviderSupported)
-                : BasicResponse.NO,
-              financiallySupportedNonProfit: data.isNonProfitSupported
-                ? toTitleCase(data.isNonProfitSupported)
-                : BasicResponse.NO,
-              financiallySupportedHousingCoop: data.isHousingCooperativeSupported
-                ? toTitleCase(data.isHousingCooperativeSupported)
-                : BasicResponse.NO
-            };
-
-            // Get unit counts ready for parsing - single, multi and other
-            const unitData = [data.singleFamilyUnits, data.multiFamilyUnits, data.multiFamilyUnits1, data.rentalUnits];
-            // Replace text instances with symbols
-            const parsedUnitData = unitData.map((element) => {
-              if (typeof element === 'string') {
-                return element?.replace('greaterthan', '>');
-              } else {
-                return element;
-              }
-            });
-
-            // Attempt to create Permits defined in SHAS intake form
-            // permitGrid/previousTrackingNumber2 is current intake version as of 2024-02-01
-            // dataGrid/previousTrackingNumber is previous intake version
-            // not attempting to go back further than that
-            const permitGrid = data.permitGrid ?? data.dataGrid ?? null;
-            let permits: Array<Permit> = [];
-            if (permitGrid) {
-              permits = permitGrid
-                .map(
-                  (x: {
-                    previousPermitType: string;
-                    previousTrackingNumber2: string;
-                    previousTrackingNumber: string;
-                    status: string;
-                    statusLastVerified: string;
-                  }) => {
-                    const permit = permitTypes.find((y) => y.type === shasPermitMapping.get(x.previousPermitType));
-                    if (permit) {
-                      return {
-                        permitId: uuidv4(),
-                        permitTypeId: permit.permitTypeId,
-                        status: x.status,
-                        statusLastVerified: x.statusLastVerified,
-                        activityId: data.form.confirmationId,
-                        trackingId: x.previousTrackingNumber2 ?? x.previousTrackingNumber
-                      };
-                    }
-                  }
-                )
-                .filter((x: unknown) => !!x);
-            }
-
-            return {
-              formId: x.id,
-              submissionId: data.form.submissionId,
-              activityId: data.form.confirmationId,
-              applicationStatus: ApplicationStatus.NEW,
-              companyNameRegistered: data.companyNameRegistered ?? data.companyName,
-              projectName: data.projectName,
-              projectDescription: data.projectDescription,
-              financiallySupported: Object.values(financiallySupportedValues).includes(BasicResponse.YES),
-              ...financiallySupportedValues,
-              housingCoopDescription: data.housingCoopName,
-              intakeStatus: toTitleCase(data.form.status),
-              indigenousDescription: data.IndigenousHousingProviderName,
-              isDevelopedByCompanyOrOrg: toTitleCase(data.isCompany),
-              isDevelopedInBC: toTitleCase(data.isCompanyRegistered),
-              locationPIDs: data.parcelID,
-              latitude: data.latitude,
-              locality: data.locality,
-              longitude: data.longitude,
-              multiFamilyUnits: parsedUnitData[1],
-              naturalDisaster: data.naturalDisasterInd ? BasicResponse.YES : BasicResponse.NO,
-              nonProfitDescription: data.nonProfitHousingSocietyName,
-              otherUnitsDescription: data.otherProjectType,
-              otherUnits: parsedUnitData[2],
-              province: data.province,
-              queuePriority: parseInt(data.queuePriority),
-              singleFamilyUnits: parsedUnitData[0],
-              hasRentalUnits: data.isRentalUnit
-                ? camelCaseToTitleCase(deDupeUnsure(data.isRentalUnit))
-                : BasicResponse.UNSURE,
-              rentalUnits: parsedUnitData[3],
-              projectLocation:
-                data.addressType === 'civicAddress'
-                  ? ProjectLocation.STREET_ADDRESS
-                  : ProjectLocation.LOCATION_COORDINATES,
-              streetAddress: data.streetAddress,
-              submittedAt: data.form.createdAt,
-              submittedBy: data.form.username,
-              hasAppliedProvincialPermits: toTitleCase(data.previousPermits),
-              permits: permits,
-              contacts: [
-                {
-                  email: data.contactEmail,
-                  contactPreference: camelCaseToTitleCase(data.contactPreference),
-                  phoneNumber: data.contactPhoneNumber,
-                  firstName: data.contactFirstName,
-                  lastName: data.contactLastName,
-                  contactApplicantRelationship: camelCaseToTitleCase(data.contactApplicantRelationship)
-                }
-              ]
-            };
-          });
-        })
-      ).then((x) => x.filter((y) => y.length).flat());
-
-    // Get a list of all activity IDs currently in our DB
-    const stored: Array<string> = (await submissionService.getSubmissions()).map((x: Submission) => x.activityId);
-
-    // Filter to entries not in our DB and create
-    const notStored = exportData.filter((x) => !stored.some((activityId: string) => activityId === x.activityId));
-    await submissionService.createSubmissionsFromExport(notStored);
-
-    // Create each contact
-    notStored.map((x) =>
-      x.contacts?.map(async (y) => await contactService.upsertContacts(x.activityId as string, [y], currentContext))
-    );
-
-    // Create each permit
-    notStored.map((x) => x.permits?.map(async (y) => await permitService.createPermit(y)));
   },
 
   generateSubmissionData: async (data: SubmissionIntake, intakeStatus: string, currentContext: CurrentContext) => {
@@ -488,10 +326,6 @@ const controller = {
 
   getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Check for and store new submissions in CHEFS
-      await controller.checkAndStoreNewSubmissions(req.currentContext);
-
-      // Pull from PCNS database
       let response = await submissionService.getSubmissions();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
