@@ -185,6 +185,14 @@ export const ThemeOverride = definePreset(Material, {
         borderWidth: '0'
       }
     },
+    menu: {
+      item: {
+        color: '{primary.color}',
+        icon: {
+          color: '{primary.color}'
+        }
+      }
+    },
     menubar: {
       root: {
         gap: '0'

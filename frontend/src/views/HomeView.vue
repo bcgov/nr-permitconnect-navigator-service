@@ -17,7 +17,7 @@ const toHousing = (): void => {
     <div class="flex items-center justify-start h-full">
       <div class="text-left text-white/90">
         <h1 class="font-bold mb-0">Welcome to the</h1>
-        <h1 class="font-bold mt-0">Permit Connect Services</h1>
+        <h1 class="font-bold mt-0 mb-6">Permit Connect Services</h1>
         <h2 class="mb-4">Choose your project type</h2>
         <Button @click="toHousing">
           <font-awesome-icon
@@ -32,6 +32,11 @@ const toHousing = (): void => {
 </template>
 
 <style scoped lang="scss">
+h1,
+h2 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .bg {
   position: fixed;
   top: 0;
@@ -54,11 +59,16 @@ const toHousing = (): void => {
   background-color: var(--p-primary-color);
   opacity: 0.9;
 }
-</style>
 
-<style scoped lang="scss">
-h1,
-h2 {
-  color: rgba(255, 255, 255, 0.9) !important;
+.p-button {
+  border-width: 2px;
+  &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
+    color: var(--p-primary-color);
+    &:not(.p-button-outlined, .p-button-text) {
+      background-color: white;
+      border-color: white;
+      color: var(--p-primary-color);
+    }
+  }
 }
 </style>

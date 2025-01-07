@@ -62,9 +62,3 @@ const toggle = (event: any) => {
     />
   </div>
 </template>
-
-<style lang="css" scoped>
-.no-click {
-  pointer-events: none;
-}
-</style>

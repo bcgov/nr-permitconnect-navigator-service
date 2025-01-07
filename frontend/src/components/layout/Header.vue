@@ -22,7 +22,7 @@ const { t } = useI18n();
         </div>
         <div class="mx-2 bcds-header-line" />
         <div class="flex grow ml-2">
-          <h2 class="m-0 app-primary-color">{{ t('header.name') }}</h2>
+          <h2 class="m-0 font-bold app-primary-color">{{ t('header.name') }}</h2>
         </div>
         <div class="flex justify-end lg:mr-12">
           <HeaderMenu />
