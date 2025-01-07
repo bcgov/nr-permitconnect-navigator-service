@@ -6,14 +6,14 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div class="gov-footer flex flex-column pt-5">
-    <div class="acknowledgement px-8 py-5">
+  <div class="gov-footer flex flex-col pt-8">
+    <div class="acknowledgement px-20 py-8">
       {{ t('footer.acknowledgement') }}
     </div>
-    <div class="container px-8 py-5">
-      <div class="content pb-5">
-        <div class="flex justify-content-between">
-          <div class="flex flex-column">
+    <div class="container px-20 py-8">
+      <div class="content pb-8">
+        <div class="flex justify-between">
+          <div class="flex flex-col">
             <div class="logo">
               <img
                 src="@/assets/images/BCID_H_rgb_pos.png"
@@ -30,10 +30,10 @@ const { t } = useI18n();
               </p>
             </div>
           </div>
-          <div class="links pr-8">
+          <div class="links pr-20">
             <p class="font-bold">{{ t('footer.moreInfo') }}</p>
             <div class="flex">
-              <div class="flex flex-column pr-8">
+              <div class="flex flex-col pr-20">
                 <a href="https://www2.gov.bc.ca/gov/content/home">{{ t('footer.home') }}</a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=3C4F47288DFB454987435AB5EFEFBB7F">
                   {{ t('footer.about') }}
@@ -45,7 +45,7 @@ const { t } = useI18n();
                   {{ t('footer.privacy') }}
                 </a>
               </div>
-              <div class="flex flex-column">
+              <div class="flex flex-col">
                 <a href="https://www2.gov.bc.ca/gov/content?id=E08E79740F9C41B9B0C484685CC5E412">
                   {{ t('footer.accessibility') }}
                 </a>
@@ -60,7 +60,7 @@ const { t } = useI18n();
           </div>
         </div>
       </div>
-      <div class="copyright pt-5">© {{ new Date().getUTCFullYear() }} {{ t('footer.gov') }}.</div>
+      <div class="copyright pt-8">© {{ new Date().getUTCFullYear() }} {{ t('footer.gov') }}.</div>
     </div>
   </div>
 </template>

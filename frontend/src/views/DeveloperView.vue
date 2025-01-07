@@ -23,19 +23,16 @@ const { t } = useI18n();
 
 <template>
   <h2>Developer</h2>
-  <div class="flex">
-    <div>Application version:</div>
-    <div
-      v-if="getConfig"
-      class="version pl-2"
-    >
-      v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
-    </div>
+  <div
+    v-if="getConfig"
+    class="version px-4 py-2"
+  >
+    v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
   </div>
   <div>
-    <div class="flex align-items-center">
+    <div class="px-2 py-1 flex items-center">
       <p class="m-0 mr-2">Begin viewing site as:</p>
-      <div class="w-2 mr-2">
+      <div class="w-2/12 mr-2">
         <Select
           class="w-full"
           :options="GROUP_NAME_LIST"
@@ -50,7 +47,7 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Config</h3>
       <div>
         <CopyToClipboard
@@ -61,7 +58,7 @@ const { t } = useI18n();
     </div>
     {{ getConfig }}
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Token</h3>
       <div>
         <CopyToClipboard
@@ -75,7 +72,7 @@ const { t } = useI18n();
       {{ getAccessToken }}
     </div>
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Profile</h3>
       <div>
         <CopyToClipboard

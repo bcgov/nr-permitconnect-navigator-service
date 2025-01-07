@@ -44,7 +44,7 @@ onMounted(async () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-3"
+    class="app-info-dialog w-3/12"
   >
     <template #header>
       <span class="p-dialog-title">Manage user role</span>
@@ -54,7 +54,7 @@ onMounted(async () => {
       name="role"
       :bold="false"
       :options="[...selectableGroups.keys()]"
-      class="mt-3 mb-4"
+      class="mt-4 mb-6"
       @on-change="(value) => (group = selectableGroups.get(value))"
     />
     <div class="flex-auto">

@@ -244,10 +244,10 @@ onMounted(async () => {
     v-if="!loading && getSubmission"
     class="app-primary-color"
   >
-    <div class="disclaimer-block p-5 mt-5">
+    <div class="disclaimer-block p-8 mt-8">
       {{ t('projectView.disclaimer') }}
     </div>
-    <div class="mt-8 mb-2 flex justify-content-between align-items-center">
+    <div class="mt-20 mb-2 flex justify-between items-center">
       <h1
         class="m-0 cursor-pointer hover:underline"
         tabindex="0"
@@ -285,11 +285,11 @@ onMounted(async () => {
       />
     </div>
     <div class="mb-2">
-      <span class="mr-3">
+      <span class="mr-4">
         Project ID:
         <span class="font-bold">{{ getSubmission.activityId }}</span>
       </span>
-      <span class="mr-3">
+      <span class="mr-4">
         {{ t('projectView.createdBy') }}:
         <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
       </span>
@@ -301,16 +301,16 @@ onMounted(async () => {
     </div>
     <div
       v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
-      class="inapplicable-block p-3 mt-6"
+      class="inapplicable-block p-4 mt-12"
     >
       {{ t('projectView.inapplicableSubmissionType') }}
     </div>
     <div>
-      <h3 class="mb-5 mt-7">{{ t('projectView.recommendedPermits') }}</h3>
+      <h3 class="mb-8 mt-16">{{ t('projectView.recommendedPermits') }}</h3>
     </div>
     <div
       v-if="!permitsNeeded?.length"
-      class="empty-block p-5 mb-2"
+      class="empty-block p-8 mb-2"
     >
       {{ t('projectView.recommendedPermitsDesc') }}
     </div>
@@ -331,7 +331,7 @@ onMounted(async () => {
         <div>
           {{ t('projectView.notNeededDesc') }}
         </div>
-        <ul class="mt-4 mb-0">
+        <ul class="mt-6 mb-0">
           <li
             v-for="permit in permitsNotNeeded"
             :key="permit.permitId"
@@ -342,10 +342,10 @@ onMounted(async () => {
         </ul>
       </AccordionTab>
     </Accordion>
-    <h3 class="mt-8 mb-5">{{ t('projectView.submittedApplications') }}</h3>
+    <h3 class="mt-20 mb-8">{{ t('projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
-      class="empty-block p-5"
+      class="empty-block p-8"
     >
       {{ t('projectView.submittedApplicationsDesc') }}
     </div>
@@ -357,9 +357,9 @@ onMounted(async () => {
         params: { permitId: permit.permitId }
       }"
     >
-      <Card class="permit-card--hover mb-3">
+      <Card class="permit-card--hover mb-4">
         <template #title>
-          <div class="flex justify-content-between">
+          <div class="flex justify-between">
             <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
             <font-awesome-icon
               class="ellipsis-icon"
@@ -369,8 +369,8 @@ onMounted(async () => {
           <Divider />
         </template>
         <template #content>
-          <div class="grid">
-            <div class="col-12 flex mb-3">
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-12 flex mb-4">
               <StatusPill
                 class="mr-2"
                 :auth-status="permit.authStatus"
@@ -380,19 +380,19 @@ onMounted(async () => {
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
               </div>
             </div>
-            <div class="col-3">
+            <div class="col-span-3">
               <div class="label-field">{{ t('projectView.trackingId') }}</div>
               <div class="permit-data">
                 {{ permit?.trackingId }}
               </div>
             </div>
-            <div class="col-3">
+            <div class="col-span-3">
               <div class="label-field">{{ t('projectView.agency') }}</div>
               <div class="permit-data">
                 {{ permit?.agency }}
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-span-6">
               <div class="label-field">{{ t('projectView.latestUpdates') }}</div>
               <div class="permit-data">
                 {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('projectView.noUpdates') }}
@@ -412,12 +412,12 @@ onMounted(async () => {
     />
     <div>
       <div>
-        <h3 class="mb-5 mt-7">{{ t('projectView.relatedEnquiries') }}</h3>
+        <h3 class="mb-8 mt-16">{{ t('projectView.relatedEnquiries') }}</h3>
       </div>
 
       <div
         v-if="!getRelatedEnquiries?.length"
-        class="empty-block p-5 mb-2"
+        class="empty-block p-8 mb-2"
       >
         {{ t('projectView.listEmpty') }}
       </div>
@@ -438,7 +438,7 @@ onMounted(async () => {
         :rows-per-page-options="[10, 20, 50]"
       >
         <template #empty>
-          <div class="flex justify-content-center">
+          <div class="flex justify-center">
             <p class="font-bold text-xl">{{ t('projectView.listEmpty') }}</p>
           </div>
         </template>

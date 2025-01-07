@@ -151,8 +151,8 @@ function onEnquiryFormSaved() {
         </span>
       </TabPanel>
       <TabPanel :value="1">
-        <div class="flex align-items-center pb-2">
-          <div class="flex-grow-1">
+        <div class="flex items-center pb-2">
+          <div class="grow">
             <p class="font-bold">Notes ({{ getNotes.length }})</p>
           </div>
           <Button
@@ -171,7 +171,7 @@ function onEnquiryFormSaved() {
           v-for="(note, index) in getNotes"
           :key="note.noteId"
           :index="index"
-          class="col-12"
+          class="col-span-12"
         >
           <NoteCard
             :editable="!isCompleted"

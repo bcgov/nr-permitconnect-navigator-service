@@ -39,13 +39,13 @@ const labels: Record<string, string> = {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-4"
+    class="app-info-dialog w-4/12"
   >
     <template #header>
       <span class="p-dialog-title">{{ headers[`${action}-${requestType}`] }}</span>
     </template>
     <div>{{ messages[`${action}-${requestType}`] }}</div>
-    <div class="flex mt-5 justify-content-between">
+    <div class="flex mt-8 justify-between">
       <span>
         <Button
           class="mr-2"

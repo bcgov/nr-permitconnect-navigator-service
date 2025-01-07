@@ -566,7 +566,7 @@ watch(
       :text="getBackButtonConfig.text"
     />
 
-    <div class="flex justify-content-center app-primary-color mt-3">
+    <div class="flex justify-center app-primary-color mt-4">
       <h3>Housing Project Intake Form</h3>
     </div>
     <Form
@@ -687,23 +687,23 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
@@ -711,14 +711,14 @@ watch(
                     :disabled="!editable"
                   />
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <Select
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
@@ -726,7 +726,7 @@ watch(
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
                   <Select
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
@@ -743,7 +743,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <RadioList
                     class="col-12"
                     name="basic.projectApplicantType"
@@ -761,7 +761,7 @@ watch(
                     v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
                     class="col-12"
                   >
-                    <div class="flex align-items-center">
+                    <div class="flex items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
                       <div
                         v-tooltip.right="t('submissionIntakeForm.isRegisteredTooltip')"
@@ -773,7 +773,7 @@ watch(
                       </div>
                     </div>
                     <RadioList
-                      class="col-12 pl-0"
+                      class="col-span-12 pl-0"
                       name="basic.isDevelopedInBC"
                       :bold="false"
                       :disabled="!editable"
@@ -782,7 +782,7 @@ watch(
                     />
                     <AutoComplete
                       v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="col-span-6 pl-0"
                       name="basic.registeredName"
                       :bold="false"
                       :disabled="!editable"
@@ -794,7 +794,7 @@ watch(
                     />
                     <InputText
                       v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
-                      class="col-6 pl-0"
+                      class="col-span-6 pl-0"
                       name="basic.registeredName"
                       :placeholder="'Type the business/company/organization name'"
                       :bold="false"
@@ -839,15 +839,15 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.projectName"
                     label="Project name - your preferred name for your project"
                     :bold="false"
                     :disabled="!editable"
                   />
-                  <div class="col-6" />
+                  <div class="col-span-6" />
                 </div>
               </template>
             </Card>
@@ -858,8 +858,8 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
-                  <div class="col-12">
+                <div class="formgrid grid grid-cols-12 gap-4">
+                  <div class="col-span-12">
                     <Checkbox
                       name="housing.singleFamilySelected"
                       label="Single-family"
@@ -870,16 +870,16 @@ watch(
                   </div>
                   <Select
                     v-if="values.housing.singleFamilySelected"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.singleFamilyUnits"
                     :disabled="!editable || !values.housing.singleFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <div class="flex">
                       <Checkbox
-                        class="align-content-center"
+                        class="content-center"
                         name="housing.multiFamilySelected"
                         label="Multi-family"
                         :bold="false"
@@ -898,13 +898,13 @@ watch(
                   </div>
                   <Select
                     v-if="values.housing.multiFamilySelected"
-                    class="col-6 align-content-center"
+                    class="col-span-6 content-center"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <Checkbox
                       name="housing.otherSelected"
                       label="Other"
@@ -915,22 +915,22 @@ watch(
                   </div>
                   <InputText
                     v-if="values.housing.otherSelected"
-                    class="col-6 mb-2"
+                    class="col-span-6 mb-2"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
-                  <div class="col-6" />
+                  <div class="col-span-6" />
 
                   <Select
                     v-if="values.housing.otherSelected"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <ErrorMessage
                       v-show="meta.touched"
                       name="housing"
@@ -954,9 +954,9 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.hasRentalUnits"
                     :bold="false"
                     :disabled="!editable"
@@ -964,7 +964,7 @@ watch(
                   />
                   <Select
                     v-if="values.housing.hasRentalUnits === BasicResponse.YES"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.rentalUnits"
                     :disabled="!editable"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
@@ -982,7 +982,7 @@ watch(
                     </span>
                   </div>
                   <Button
-                    class="p-button-sm mr-3 p-button-danger"
+                    class="p-button-sm mr-4 p-button-danger"
                     outlined
                     :disabled="!editable"
                     @click="
@@ -1000,9 +1000,9 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <div class="col mb-2">
-                    <div class="flex align-items-center">
+                    <div class="flex items-center">
                       <label>
                         <a
                           href="https://www.bchousing.org/projects-partners/partner-with-us"
@@ -1027,7 +1027,7 @@ watch(
                     </div>
                   </div>
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.financiallySupportedBC"
                     :bold="false"
                     :disabled="!editable"
@@ -1044,16 +1044,16 @@ watch(
                     </label>
                   </div>
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.financiallySupportedIndigenous"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <InputText
                       v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="col-span-6 pl-0"
                       name="housing.indigenousDescription"
                       :disabled="!editable"
                       placeholder="Name of Indigenous Housing Provider"
@@ -1070,16 +1070,16 @@ watch(
                     </label>
                   </div>
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.financiallySupportedNonProfit"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <InputText
                       v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="col-span-6 pl-0"
                       name="housing.nonProfitDescription"
                       :disabled="!editable"
                       placeholder="Name of Non-profit housing society"
@@ -1096,16 +1096,16 @@ watch(
                     </label>
                   </div>
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.financiallySupportedHousingCoop"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <InputText
                       v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="col-span-6 pl-0"
                       name="housing.housingCoopDescription"
                       :disabled="!editable"
                       placeholder="Name of Housing co-operative"
@@ -1122,8 +1122,8 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="col-12 my-0 py-0">
-                  <div class="flex align-items-center">
+                <div class="col-span-12 my-0 py-0">
+                  <div class="flex items-center">
                     <label>Provide additional information</label>
                     <div
                       v-tooltip.right="t('submissionIntakeForm.additionalInfoTooltip')"
@@ -1138,12 +1138,12 @@ watch(
 
                 <!-- eslint-disable max-len -->
                 <TextArea
-                  class="col-12 mb-0 pb-0"
+                  class="col-span-12 mb-0 pb-0"
                   name="housing.projectDescription"
                   placeholder="Provide us with additional information - short description about the project and/or project website link"
                   :disabled="!editable"
                 />
-                <label class="col-12 mt-0 pt-0">
+                <label class="col-span-12 mt-0 pt-0">
                   Upload documents about your housing project (pdfs, maps,
                   <a
                     href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
@@ -1200,9 +1200,9 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="location.naturalDisaster"
                     :bold="false"
                     :disabled="!editable"
@@ -1230,9 +1230,9 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="location.projectLocation"
                     :bold="false"
                     :disabled="!editable"
@@ -1241,13 +1241,13 @@ watch(
                   />
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
+                    class="col-span-12"
                   >
                     <Card class="no-shadow">
                       <template #content>
-                        <div class="grid nested-grid">
+                        <div class="grid grid-cols-12 gap-4 nested-grid">
                           <EditableSelect
-                            class="col-12"
+                            class="col-span-12"
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
                             :options="addressGeocoderOptions"
@@ -1258,25 +1258,25 @@ watch(
                             @on-change="onAddressSelect"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.streetAddress"
                             disabled
                             placeholder="Street address"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.locality"
                             disabled
                             placeholder="Locality"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.province"
                             disabled
                             placeholder="Province"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.latitude"
                             disabled
                             :help-text="
@@ -1287,7 +1287,7 @@ watch(
                             placeholder="Latitude"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.longitude"
                             disabled
                             :help-text="
@@ -1299,7 +1299,7 @@ watch(
                           />
                           <div
                             v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
+                            class="col-span-12 text-blue-500"
                           >
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
@@ -1310,13 +1310,13 @@ watch(
                   </div>
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
+                    class="col-span-12"
                   >
                     <Card class="no-shadow">
                       <template #content>
-                        <div class="grid nested-grid">
+                        <div class="grid grid-cols-12 gap-4 nested-grid">
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.latitude"
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
@@ -1324,7 +1324,7 @@ watch(
                             @keyup.enter="onLatLongInputClick"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.longitude"
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
@@ -1338,8 +1338,8 @@ watch(
                             @click="onLatLongInputClick"
                           />
                         </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
+                        <div class="grid grid-cols-12 gap-4 nested-grid">
+                          <div class="col-span-12 text-blue-500">
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
                           </div>
@@ -1378,8 +1378,8 @@ watch(
                     <AccordionContent>
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid">
-                            <div class="col-12">
+                          <div class="formgrid grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
                               <label>
                                 <a
                                   href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
@@ -1391,7 +1391,7 @@ watch(
                             </div>
                             <!-- eslint-disable max-len -->
                             <InputText
-                              class="col-12"
+                              class="col-span-12"
                               name="location.ltsaPIDLookup"
                               :bold="false"
                               :disabled="!editable"
@@ -1408,15 +1408,15 @@ watch(
                   collapse-icon="pi pi-chevron-up"
                   expand-icon="pi pi-chevron-down"
                   :value="geomarkAccordionIndex"
-                  class="mt-4 mb-2"
+                  class="mt-6 mb-2"
                 >
                   <AccordionPanel value="0">
                     <AccordionHeader>Geomark</AccordionHeader>
                     <AccordionContent>
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid">
-                            <div class="col-12">
+                          <div class="formgrid grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
                               <label>
                                 <a
                                   href="https://apps.gov.bc.ca/pub/geomark/overview"
@@ -1427,7 +1427,7 @@ watch(
                               </label>
                             </div>
                             <InputText
-                              class="col-12"
+                              class="col-span-12"
                               name="location.geomarkUrl"
                               :bold="false"
                               :disabled="!editable"
@@ -1443,8 +1443,8 @@ watch(
             </Card>
             <Card>
               <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
+                <div class="flex items-center">
+                  <div class="flex grow">
                     <span class="section-header">
                       {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
                     </span>
@@ -1454,7 +1454,7 @@ watch(
               </template>
               <template #content>
                 <TextArea
-                  class="col-12"
+                  class="col-span-12"
                   name="location.projectLocationDescription"
                   :disabled="!editable"
                 />
@@ -1507,13 +1507,13 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <FieldArray
                     v-slot="{ fields, push, remove }"
                     name="appliedPermits"
                   >
                     <RadioList
-                      class="col-12"
+                      class="col-span-12"
                       name="permits.hasAppliedProvincialPermits"
                       :bold="false"
                       :disabled="!editable"
@@ -1526,7 +1526,7 @@ watch(
                         values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
                       "
                       ref="appliedPermitsContainer"
-                      class="col-12"
+                      class="col-span-12"
                     >
                       <div class="mb-2">
                         <span class="app-primary-color">
@@ -1536,7 +1536,7 @@ watch(
                       </div>
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid">
+                          <div class="formgrid grid grid-cols-12 gap-4">
                             <div
                               v-for="(permit, idx) in fields"
                               :key="idx"
@@ -1548,7 +1548,7 @@ watch(
                                 :name="`appliedPermits[${idx}].permitId`"
                               />
                               <Select
-                                class="col-4"
+                                class="col-span-4"
                                 :disabled="!editable"
                                 :name="`appliedPermits[${idx}].permitTypeId`"
                                 placeholder="Select Permit type"
@@ -1558,13 +1558,13 @@ watch(
                                 :loading="getPermitTypes === undefined"
                               />
                               <InputText
-                                class="col-4"
+                                class="col-span-4"
                                 :name="`appliedPermits[${idx}].trackingId`"
                                 :disabled="!editable"
                                 placeholder="Tracking #"
                               />
-                              <div class="col-4">
-                                <div class="flex justify-content-center">
+                              <div class="col-span-4">
+                                <div class="flex justify-center">
                                   <DatePicker
                                     class="w-full"
                                     :name="`appliedPermits[${idx}].submittedDate`"
@@ -1572,7 +1572,7 @@ watch(
                                     placeholder="Date applied"
                                     :max-date="new Date()"
                                   />
-                                  <div class="flex align-items-center ml-2 mb-3">
+                                  <div class="flex items-center ml-2 mb-4">
                                     <Button
                                       v-if="editable"
                                       class="p-button-lg p-button-text p-button-danger p-0"
@@ -1585,10 +1585,10 @@ watch(
                                 </div>
                               </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-span-12">
                               <Button
                                 v-if="editable"
-                                class="w-full flex justify-content-center font-bold"
+                                class="w-full flex justify-center font-bold"
                                 @click="
                                   push({
                                     permitTypeId: undefined,
@@ -1655,26 +1655,26 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="formgrid grid grid-cols-12 gap-4">
                   <FieldArray
                     v-slot="{ fields, push, remove }"
                     name="investigatePermits"
                   >
-                    <div class="col-12">
+                    <div class="col-span-12">
                       <Card class="no-shadow">
                         <template #content>
                           <div
                             ref="investigatePermitsContainer"
-                            class="formgrid grid"
+                            class="formgrid grid grid-cols-12 gap-4"
                           >
                             <div
                               v-for="(permit, idx) in fields"
                               :key="idx"
                               :index="idx"
-                              class="w-full flex align-items-center"
+                              class="w-full flex items-center"
                             >
-                              <div class="col-4">
-                                <div class="flex justify-content-center">
+                              <div class="col-span-4">
+                                <div class="flex justify-center">
                                   <Select
                                     class="w-full"
                                     :disabled="!editable"
@@ -1685,7 +1685,7 @@ watch(
                                     option-value="permitTypeId"
                                     :loading="getPermitTypes === undefined"
                                   />
-                                  <div class="flex align-items-center ml-2 mb-4">
+                                  <div class="flex items-center ml-2 mb-6">
                                     <Button
                                       v-if="editable"
                                       class="p-button-lg p-button-text p-button-danger p-0"
@@ -1700,10 +1700,10 @@ watch(
 
                               <div class="col" />
                             </div>
-                            <div class="col-12">
+                            <div class="col-span-12">
                               <Button
                                 v-if="editable"
-                                class="w-full flex justify-content-center font-bold"
+                                class="w-full flex justify-center font-bold"
                                 @click="
                                   push({ permitTypeId: undefined });
                                   nextTick(() => {
@@ -1734,7 +1734,7 @@ watch(
             </Card>
             <Card>
               <template #content>
-                <div class="mb-2 flex align-items-center">
+                <div class="mb-2 flex items-center">
                   <Checkbox
                     class="m-0 inline-block"
                     name="basic.consentToFeedback"
@@ -1767,7 +1767,7 @@ watch(
           </StepPanel>
         </StepPanels>
       </Stepper>
-      <div class="flex align-items-center justify-content-center mt-4">
+      <div class="flex items-center justify-center mt-6">
         <Button
           label="Submit"
           type="submit"

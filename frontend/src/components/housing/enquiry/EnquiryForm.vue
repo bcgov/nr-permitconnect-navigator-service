@@ -256,22 +256,22 @@ onMounted(async () => {
   >
     <FormNavigationGuard v-if="!isCompleted" />
 
-    <div class="formgrid grid">
+    <div class="formgrid grid grid-cols-12 gap-4">
       <Select
-        class="col-3"
+        class="col-span-3"
         name="enquiryType"
         label="Submission type"
         :disabled="!editable"
         :options="ENQUIRY_TYPE_LIST"
       />
       <DatePicker
-        class="col-3"
+        class="col-span-3"
         name="submittedAt"
         label="Submission date"
         :disabled="!editable"
       />
       <EditableSelect
-        class="col-3"
+        class="col-span-3"
         name="relatedActivityId"
         label="Related submission"
         :disabled="!editable"
@@ -279,45 +279,45 @@ onMounted(async () => {
         :get-option-label="(e: string) => e"
         @on-input="onRelatedActivityInput"
       />
-      <div class="col-3" />
+      <div class="col-span-3" />
 
       <SectionHeader title="Basic information" />
 
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactFirstName"
         label="First name"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactLastName"
         label="Last name"
         :disabled="!editable"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="contactApplicantRelationship"
         label="Relationship to activity"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
-        class="col-3"
+        class="col-span-3"
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Phone number"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactEmail"
         label="Contact email"
         :disabled="!editable"
@@ -326,7 +326,7 @@ onMounted(async () => {
       <SectionHeader title="Enquiry detail" />
 
       <TextArea
-        class="col-12"
+        class="col-span-12"
         name="enquiryDescription"
         label=""
         :disabled="!editable"
@@ -335,14 +335,14 @@ onMounted(async () => {
       <SectionHeader title="Submission state" />
 
       <Select
-        class="col-3"
+        class="col-span-3"
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
       <EditableSelect
-        class="col-3"
+        class="col-span-3"
         name="user"
         label="Assigned to"
         :disabled="!editable"
@@ -351,20 +351,20 @@ onMounted(async () => {
         @on-input="onAssigneeInput"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="enquiryStatus"
         label="Activity state"
         :disabled="!editable"
         :options="APPLICATION_STATUS_LIST"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="waitingOn"
         label="Waiting on"
         :disabled="!editable"
       />
 
-      <div class="field col-12 mt-5">
+      <div class="field col-span-12 mt-8">
         <Button
           v-if="!isCompleted"
           label="Save"

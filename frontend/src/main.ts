@@ -17,7 +17,6 @@ import { AuthService, ConfigService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
 import 'primeicons/primeicons.css';
-import 'primeflex/primeflex.css';
 import '@/assets/main.scss';
 
 /**

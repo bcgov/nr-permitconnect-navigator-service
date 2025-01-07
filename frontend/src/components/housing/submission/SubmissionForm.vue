@@ -363,29 +363,29 @@ onMounted(async () => {
   >
     <FormNavigationGuard v-if="!isCompleted" />
 
-    <div class="formgrid grid">
+    <div class="formgrid grid grid-cols-12 gap-4">
       <Select
-        class="col-3"
+        class="col-span-3"
         name="queuePriority"
         label="Priority"
         :disabled="!editable"
         :options="QUEUE_PRIORITY"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="submissionType"
         label="Submission type"
         :disabled="!editable"
         :options="SUBMISSION_TYPE_LIST"
       />
       <DatePicker
-        class="col-3"
+        class="col-span-3"
         name="submittedAt"
         label="Submission date"
         :disabled="true"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="relatedEnquiries"
         label="Related enquiries"
         :disabled="true"
@@ -394,19 +394,19 @@ onMounted(async () => {
       <SectionHeader title="Basic information" />
 
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactFirstName"
         label="First name"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactLastName"
         label="Last name"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="companyNameRegistered"
         label="Company"
         :disabled="!editable"
@@ -420,41 +420,41 @@ onMounted(async () => {
         "
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="isDevelopedInBC"
         label="Company registered in B.C?"
         :disabled="!editable || !values.companyNameRegistered"
         :options="YES_NO_LIST"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="contactApplicantRelationship"
         label="Relationship to project"
         :disabled="!editable"
         :options="PROJECT_RELATIONSHIP_LIST"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="contactPreference"
         label="Preferred contact method"
         :disabled="!editable"
         :options="CONTACT_PREFERENCE_LIST"
       />
       <InputMask
-        class="col-3"
+        class="col-span-3"
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="contactEmail"
         label="Contact email"
         :disabled="!editable"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="consentToFeedback"
         label="Research opt-in"
         :disabled="!editable"
@@ -464,34 +464,34 @@ onMounted(async () => {
       <SectionHeader title="Housing" />
 
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="projectName"
         label="Project name"
         :disabled="!editable"
       />
-      <div class="col-9" />
+      <div class="col-span-9" />
       <TextArea
-        class="col-12"
+        class="col-span-12"
         name="projectDescription"
         label="Additional information about project"
         :disabled="!editable"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="singleFamilyUnits"
         label="Single family units"
         :disabled="!editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="multiFamilyUnits"
         label="Multi-family units"
         :disabled="!editable"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="otherUnitsDescription"
         label="Other type"
         :disabled="!editable"
@@ -505,14 +505,14 @@ onMounted(async () => {
         "
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="otherUnits"
         label="Other type units"
         :disabled="!editable || !values.otherUnitsDescription"
         :options="NUM_RESIDENTIAL_UNITS_LIST"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="hasRentalUnits"
         label="Rental included?"
         :disabled="!editable"
@@ -524,7 +524,7 @@ onMounted(async () => {
         "
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="rentalUnits"
         label="Rental units"
         :disabled="!editable || values.hasRentalUnits !== BasicResponse.YES"
@@ -534,15 +534,15 @@ onMounted(async () => {
       <SectionHeader title="Financially supported" />
 
       <Select
-        class="col-3"
+        class="col-span-3"
         name="financiallySupportedBC"
         label="BC Housing"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
       />
-      <div class="col-9" />
+      <div class="col-span-9" />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="financiallySupportedIndigenous"
         label="Indigenous Housing Provider"
         :disabled="!editable"
@@ -554,14 +554,14 @@ onMounted(async () => {
         "
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="indigenousDescription"
         label="Name of Indigenous Housing Provider"
         :disabled="!editable || values.financiallySupportedIndigenous !== BasicResponse.YES"
       />
-      <div class="col-6" />
+      <div class="col-span-6" />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="financiallySupportedNonProfit"
         label="Non-profit housing society"
         :disabled="!editable"
@@ -573,14 +573,14 @@ onMounted(async () => {
         "
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="nonProfitDescription"
         label="Name of Non-profit housing society"
         :disabled="!editable || values.financiallySupportedNonProfit !== BasicResponse.YES"
       />
-      <div class="col-6" />
+      <div class="col-span-6" />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="financiallySupportedHousingCoop"
         label="Housing co-operative"
         :disabled="!editable"
@@ -592,85 +592,85 @@ onMounted(async () => {
         "
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="housingCoopDescription"
         label="Name of Housing co-operative"
         :disabled="!editable || values.financiallySupportedHousingCoop !== BasicResponse.YES"
       />
-      <div class="col-6" />
+      <div class="col-span-6" />
 
       <SectionHeader title="Location" />
 
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="locationAddress"
         label="Location address"
         :disabled="true"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="streetAddress"
         label="Street address"
         :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="locality"
         label="Locality"
         :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="province"
         label="Province"
         :disabled="!editable"
         @on-change="updateLocationAddress(values, setFieldValue)"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="locationPIDs"
         label="Location PID(s)"
         :disabled="!editable"
       />
       <InputNumber
-        class="col-3"
+        class="col-span-3"
         name="latitude"
         label="Location latitude"
         help-text="Optionally provide a number between 48 and 60"
         :disabled="!editable"
       />
       <InputNumber
-        class="col-3"
+        class="col-span-3"
         name="longitude"
         label="Location longitude"
         help-text="Optionally provide a number between -114 and -139"
         :disabled="!editable"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="geomarkUrl"
         label="Geomark URL"
         :disabled="!editable"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="naturalDisaster"
         label="Affected by natural disaster?"
         :disabled="!editable"
         :options="YES_NO_LIST"
       />
       <TextArea
-        class="col-12"
+        class="col-span-12"
         name="projectLocationDescription"
         label="Additional information about location"
         :disabled="!editable"
       />
-      <div class="col-6" />
+      <div class="col-span-6" />
 
       <SectionHeader title="ATS" />
-      <div class="flex align-items-center mb-2">
+      <div class="flex items-center mb-2">
         <div
           v-if="values.atsClientNumber"
           class="ml-2 mr-2"
@@ -690,7 +690,7 @@ onMounted(async () => {
         <Button
           v-if="!values.atsClientNumber"
           aria-label="Link to ATS"
-          class="h-2rem ml-2"
+          class="h-8 ml-2"
           :disabled="!editable"
           @click="atsUserLinkModalVisible = true"
         >
@@ -699,7 +699,7 @@ onMounted(async () => {
         <Button
           v-if="!values.atsClientNumber"
           aria-label="New ATS client"
-          class="h-2rem ml-3"
+          class="h-8 ml-4"
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
@@ -707,7 +707,7 @@ onMounted(async () => {
         </Button>
       </div>
       <Checkbox
-        class="col-12 mt-2"
+        class="col-span-12 mt-2"
         name="addedToATS"
         label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
@@ -720,25 +720,25 @@ onMounted(async () => {
       />
 
       <Checkbox
-        class="col-12"
+        class="col-span-12"
         name="ltsaCompleted"
         label="Land Title Survey Authority (LTSA) completed"
         :disabled="!editable"
       />
       <Checkbox
-        class="col-12"
+        class="col-span-12"
         name="bcOnlineCompleted"
         label="BC Online completed"
         :disabled="!editable"
       />
       <Checkbox
-        class="col-12"
+        class="col-span-12"
         name="aaiUpdated"
         label="Authorization and Approvals Insight (AAI) updated"
         :disabled="!editable"
       />
       <TextArea
-        class="col-12"
+        class="col-span-12"
         name="astNotes"
         label="Automated Status Tool (AST) Notes"
         :disabled="!editable"
@@ -747,14 +747,14 @@ onMounted(async () => {
       <SectionHeader title="Submission state" />
 
       <Select
-        class="col-3"
+        class="col-span-3"
         name="intakeStatus"
         label="Intake state"
         :disabled="!editable"
         :options="INTAKE_STATUS_LIST"
       />
       <EditableSelect
-        class="col-3"
+        class="col-span-3"
         name="user"
         label="Assigned to"
         :disabled="!editable"
@@ -763,20 +763,20 @@ onMounted(async () => {
         @on-input="onAssigneeInput"
       />
       <Select
-        class="col-3"
+        class="col-span-3"
         name="applicationStatus"
         label="Project state"
         :disabled="!editable"
         :options="APPLICATION_STATUS_LIST"
       />
       <InputText
-        class="col-3"
+        class="col-span-3"
         name="waitingOn"
         label="Waiting on"
         :disabled="!editable"
       />
 
-      <div class="field col-12 mt-5">
+      <div class="field col-span-12 mt-8">
         <Button
           v-if="!isCompleted"
           label="Save"

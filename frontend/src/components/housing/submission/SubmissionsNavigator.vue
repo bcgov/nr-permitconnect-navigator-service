@@ -265,7 +265,7 @@ watch(showCompleted, () => {
 <template>
   <div
     v-if="showToggle"
-    class="flex justify-content-end mr-3"
+    class="flex justify-end mr-4"
   >
     <span class="app-primary-color">
       {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
@@ -297,12 +297,12 @@ watch(showCompleted, () => {
           v-model:active-index="accordionIndex"
           collapse-icon="pi pi-chevron-up"
           expand-icon="pi pi-chevron-down"
-          class="mb-3"
+          class="mb-4"
         >
           <AccordionPanel>
             <AccordionHeader>My bring forward notifications</AccordionHeader>
             <AccordionContent>
-              <div class="flex flex-column">
+              <div class="flex flex-col">
                 <div
                   v-for="(bf, index) of myBringForward"
                   :key="index"

@@ -73,7 +73,7 @@ function onClick() {
 
 <template>
   <Card
-    class="pb-1 text-center border-round-xl"
+    class="pb-1 text-center rounded-xl"
     :class="{ clicked: isSelected }"
     @click="onClick"
   >
@@ -85,27 +85,27 @@ function onClick() {
       />
     </template>
     <template #content>
-      <div class="grid">
+      <div class="grid grid-cols-12 gap-4">
         <div
           v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
-          class="col-12 mb-0 text-left font-semibold text-overflow-ellipsis white-space-nowrap"
+          class="col-span-12 mb-0 text-left font-semibold text-ellipsis whitespace-nowrap"
           style="overflow: hidden"
           tabindex="0"
         >
           <a href="#">{{ document.filename }}</a>
         </div>
-        <h6 class="col-8 text-left mt-0 mb-0 pt-0 pb-0">
+        <h6 class="col-span-8 text-left mt-0 mb-0 pt-0 pb-0">
           {{ formatDateLong(document.createdAt as string).split(',')[0] }},
         </h6>
-        <h6 class="col-8 text-left mt-1 mb-0 pt-0 pb-0">
+        <h6 class="col-span-8 text-left mt-1 mb-0 pt-0 pb-0">
           {{ formatDateLong(document.createdAt as string).split(',')[1] }}
         </h6>
       </div>
     </template>
     <template #footer>
-      <div class="flex justify-content-between">
-        <h6 class="col-4 text-left mt-0 mb-0 pl-0 inline-block">
+      <div class="flex justify-between">
+        <h6 class="col-span-4 text-left mt-0 mb-0 pl-0 inline-block">
           {{ filesize(document.filesize) }}
         </h6>
         <DeleteDocument

@@ -42,7 +42,7 @@ const { t } = useI18n();
     selection-mode="single"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <p class="font-bold text-xl">
           {{ t('enquiryListProponent.listEmpty') }}
         </p>

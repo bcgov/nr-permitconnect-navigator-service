@@ -69,18 +69,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-column align-items-center justify-content-start h-full">
-    <div class="flex flex-row align-items-center w-full justify-content-between shadow-2 px-3 py-1">
+  <div class="flex flex-col items-center justify-start h-full">
+    <div class="flex flex-row items-center w-full justify-between shadow px-4 py-1">
       <h1>Housing</h1>
       <img
-        class="mr-3"
+        class="mr-4"
         src="@/assets/images/housing_2.png"
         width="120"
         alt="Housing image"
       />
     </div>
 
-    <div class="flex flex-row align-items-center w-full mt-3">
+    <div class="flex flex-row items-center w-full mt-4">
       <div class="font-bold mr-2">{{ t('housing.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
@@ -121,7 +121,7 @@ onMounted(async () => {
     <!--
       Projects
     -->
-    <div class="flex flex-row align-items-center w-full justify-content-between mt-3">
+    <div class="flex flex-row items-center w-full justify-between mt-4">
       <h2
         id="projects"
         class="flex font-bold"
@@ -131,7 +131,7 @@ onMounted(async () => {
         <div
           v-tooltip.right="t('housing.projectsTooltip')"
           v-tooltip.focus.right="t('housing.projectsTooltip')"
-          class="flex align-items-center pl-2 text-xl"
+          class="flex items-center pl-2 text-xl"
           tabindex="0"
         >
           <font-awesome-icon icon="fa-solid fa-circle-info" />
@@ -153,7 +153,7 @@ onMounted(async () => {
     <div class="w-full">
       <div
         v-if="!projects.length"
-        class="flex flex-column align-items-center justify-content-center border-round-xs shadow-3 px-3 py-1 bg"
+        class="flex flex-col items-center justify-center rounded-sm shadow-md px-4 py-1 bg"
       >
         <p class="font-bold">{{ t('housing.projectsEmpty') }}</p>
       </div>
@@ -162,12 +162,12 @@ onMounted(async () => {
         v-else
         :key="project.activityId"
         :index="index"
-        class="align-items-center border-round-xs shadow-3 hover:shadow-4 px-4 custom-card hover-hand"
+        class="items-center rounded-sm shadow-md hover:shadow-lg px-6 custom-card hover-hand"
         :class="[index != displayedProjects.length - 1 ? 'mb-4' : '']"
         @click="onProjectClick(project)"
       >
-        <div class="grid">
-          <div class="col-3 flex align-items-center">
+        <div class="grid grid-cols-12 gap-4">
+          <div class="col-span-3 flex items-center">
             <router-link
               class="no-underline"
               :to="{
@@ -178,18 +178,18 @@ onMounted(async () => {
               <h4 class="mb-0">{{ project.projectName }}</h4>
             </router-link>
           </div>
-          <div class="col-3">
+          <div class="col-span-3">
             <p>{{ t('housing.projectState') }}: {{ project.applicationStatus }}</p>
           </div>
-          <div class="col-3">
+          <div class="col-span-3">
             <p>{{ t('housing.confirmationId') }}: {{ project.activityId }}</p>
           </div>
-          <div class="col-3">
+          <div class="col-span-3">
             <p>{{ t('housing.lastUpdated') }}: {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}</p>
           </div>
         </div>
       </div>
-      <div class="flex justify-content-end mt-2">
+      <div class="flex justify-end mt-2">
         <Paginator
           v-model:first="first"
           :rows="PAGE_ROWS"
@@ -203,7 +203,7 @@ onMounted(async () => {
     <!--
       Drafts
     -->
-    <div class="flex flex-row align-items-center w-full justify-content-between mt-3">
+    <div class="flex flex-row items-center w-full justify-between mt-4">
       <h2
         id="drafts"
         class="flex font-bold"
@@ -224,7 +224,7 @@ onMounted(async () => {
     <!--
       Enquiries
     -->
-    <div class="flex flex-row align-items-center w-full justify-content-between mt-3">
+    <div class="flex flex-row items-center w-full justify-between mt-4">
       <h2
         id="enquiries"
         class="flex font-bold"
@@ -234,7 +234,7 @@ onMounted(async () => {
         <div
           v-tooltip.right="t('housing.enquiriesTooltip')"
           v-tooltip.focus.right="t('housing.enquiriesTooltip')"
-          class="flex align-items-center pl-2 text-xl"
+          class="flex items-center pl-2 text-xl"
           tabindex="0"
         >
           <font-awesome-icon icon="fa-solid fa-circle-info" />

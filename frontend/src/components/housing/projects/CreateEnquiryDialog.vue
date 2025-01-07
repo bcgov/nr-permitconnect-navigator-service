@@ -40,7 +40,7 @@ const handleCloseDialog = () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
     @hide="handleCloseDialog"
   >
     <template #header>
@@ -48,7 +48,7 @@ const handleCloseDialog = () => {
     </template>
     <template #default>
       <div v-if="!confirmationId">
-        <div class="flex flex-column">
+        <div class="flex flex-col">
           <div>
             <div>
               Project ID:
@@ -56,29 +56,29 @@ const handleCloseDialog = () => {
             </div>
             <div
               v-if="getSubmission?.streetAddress"
-              class="mt-3"
+              class="mt-4"
             >
               Location:
               <span class="font-bold">{{ getSubmission?.streetAddress }}</span>
             </div>
             <div
               v-if="getSubmission?.latitude"
-              class="mt-3"
+              class="mt-4"
             >
               Latitude / Longitude:
               <span class="font-bold">{{ getSubmission?.latitude }} {{ getSubmission?.longitude }}</span>
             </div>
             <div
               v-if="getSubmission?.submittedAt"
-              class="mt-3"
+              class="mt-4"
             >
               Submission date:
               <span class="font-bold">{{ formatDate(getSubmission?.submittedAt) }}</span>
             </div>
           </div>
         </div>
-        <div class="mb-2 mt-4 font-bold">
-          <span class="query-to-nav mt-3">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
+        <div class="mb-2 mt-6 font-bold">
+          <span class="query-to-nav mt-4">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
         </div>
         <Textarea
           v-model="enquiryDescription"
@@ -88,14 +88,14 @@ const handleCloseDialog = () => {
           maxlength="4000"
           rows="5"
         />
-        <div class="max-w-full text-center mt-5">
+        <div class="max-w-full text-center mt-8">
           <Button
             class="p-button-sm header-btn"
             label="Submit Enquiry"
             @click="onSubmitEnquiry"
           />
           <Button
-            class="p-button-sm ml-3"
+            class="p-button-sm ml-4"
             outlined
             label="Cancel"
             @click="visible = false"
@@ -108,9 +108,9 @@ const handleCloseDialog = () => {
           :show-header="false"
           :show-home-link="false"
         />
-        <div class="max-w-full text-center mt-5">
+        <div class="max-w-full text-center mt-8">
           <Button
-            class="p-button-sm ml-3"
+            class="p-button-sm ml-4"
             outlined
             label="Close"
             @click="visible = false"

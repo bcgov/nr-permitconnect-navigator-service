@@ -25,7 +25,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
 
 <template>
   <div class="field">
-    <div class="flex align-items-center">
+    <div class="flex items-center">
       <Checkbox
         v-model="value"
         binary

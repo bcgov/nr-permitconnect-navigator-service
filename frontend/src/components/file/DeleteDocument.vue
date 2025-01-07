@@ -49,7 +49,7 @@ const confirmDelete = (document: Document) => {
     v-tooltip.bottom="t('deleteDocument.deleteTooltip')"
     v-tooltip.focus.bottom="t('deleteDocument.deleteTooltip')"
     :disabled="disabled"
-    class="p-button-lg p-button-text p-button-danger p-0 align-self-center"
+    class="p-button-lg p-button-text p-button-danger p-0 self-center"
     aria-label="Delete object"
     style="position: relative; top: 5; right: 0"
     tabindex="0"

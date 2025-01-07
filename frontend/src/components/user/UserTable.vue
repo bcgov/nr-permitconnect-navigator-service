@@ -43,7 +43,7 @@ function getStatusClass(data: UserAccessRequest) {
     :sort-order="DEFAULT_SORT_ORDER"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <h5 class="m-0">No users found.</h5>
       </div>
     </template>
@@ -92,7 +92,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0 mr-3"
+          class="p-button-lg p-button-text p-0 mr-4"
           aria-label="Manage user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -116,7 +116,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          class="p-button-lg p-button-text p-button-danger p-0 mr-4"
           aria-label="Revoke user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -140,7 +140,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0 mr-3"
+          class="p-button-lg p-button-text p-0 mr-4"
           aria-label="Approve request"
           @click="
             () => {
@@ -163,7 +163,7 @@ function getStatusClass(data: UserAccessRequest) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          class="p-button-lg p-button-text p-button-danger p-0 mr-4"
           aria-label="Deny request"
           @click="
             () => {

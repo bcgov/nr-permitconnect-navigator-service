@@ -192,7 +192,7 @@ onMounted(() => {
     "
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <h3>No items found.</h3>
       </div>
     </template>
@@ -200,7 +200,7 @@ onMounted(() => {
       <Spinner />
     </template>
     <template #header>
-      <div class="flex justify-content-between">
+      <div class="flex justify-between">
         <Button
           v-if="authzStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
           label="Create submission"

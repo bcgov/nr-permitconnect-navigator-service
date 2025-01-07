@@ -57,9 +57,9 @@ function filterForMyBringForwards(bf: BringForward): boolean {
 </script>
 
 <template>
-  <div class="grid">
-    <div class="col-7">
-      <div class="flex align-items-center justify-content-end pb-1">
+  <div class="grid grid-cols-12 gap-4">
+    <div class="col-span-7">
+      <div class="flex items-center justify-end pb-1">
         <ToggleSwitch
           v-model="filterToUser"
           class="mr-1"

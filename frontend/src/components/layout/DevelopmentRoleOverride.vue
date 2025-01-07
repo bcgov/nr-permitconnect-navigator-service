@@ -40,10 +40,10 @@ onMounted(() => {
 <template>
   <div
     v-if="getGroupOverride"
-    class="px-2 py-1 flex align-items-center role-override"
+    class="px-2 py-1 flex items-center role-override"
   >
     <p class="m-0 mr-2">Viewing site as:</p>
-    <div class="w-2 mr-2">
+    <div class="w-2/12 mr-2">
       <Select
         v-model="group"
         class="w-full"

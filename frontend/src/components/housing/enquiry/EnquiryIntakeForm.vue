@@ -13,6 +13,7 @@ import {
   InputMask,
   InputText,
   RadioList,
+  Select,
   TextArea
 } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
@@ -254,7 +255,7 @@ onBeforeMount(async () => {
         :text="getBackButtonConfig.text"
       />
     </div>
-    <div class="flex justify-content-center align-items-center app-primary-color mb-2 mt-3">
+    <div class="flex justify-center items-center app-primary-color mb-2 mt-4">
       <h3>Enquiry Form</h3>
     </div>
 
@@ -288,23 +289,23 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid">
+          <div class="formgrid grid grid-cols-12 gap-4">
             <InputText
-              class="col-6"
+              class="col-span-6"
               name="contactFirstName"
               label="First name"
               :bold="false"
               :disabled="!editable"
             />
             <InputText
-              class="col-6"
+              class="col-span-6"
               name="contactLastName"
               label="Last name"
               :bold="false"
               :disabled="!editable"
             />
             <InputMask
-              class="col-6"
+              class="col-span-6"
               name="contactPhoneNumber"
               mask="(999) 999-9999"
               label="Phone number"
@@ -312,14 +313,14 @@ onBeforeMount(async () => {
               :disabled="!editable"
             />
             <InputText
-              class="col-6"
+              class="col-span-6"
               name="contactEmail"
               label="Email"
               :bold="false"
               :disabled="!editable"
             />
             <Select
-              class="col-6"
+              class="col-span-6"
               name="contactApplicantRelationship"
               label="Relationship to project"
               :bold="false"
@@ -327,7 +328,7 @@ onBeforeMount(async () => {
               :options="PROJECT_RELATIONSHIP_LIST"
             />
             <Select
-              class="col-6"
+              class="col-span-6"
               :name="`contactPreference`"
               label="Preferred contact method"
               :bold="false"
@@ -345,9 +346,9 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid">
+          <div class="formgrid grid grid-cols-12 gap-4">
             <RadioList
-              class="col-12"
+              class="col-span-12"
               name="basic.isRelated"
               :bold="false"
               :disabled="!editable"
@@ -379,9 +380,9 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid">
+          <div class="formgrid grid grid-cols-12 gap-4">
             <EditableSelect
-              class="col-3"
+              class="col-span-3"
               name="basic.relatedActivityId"
               label="Project ID"
               :disabled="!editable"
@@ -404,9 +405,9 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid">
+          <div class="formgrid grid grid-cols-12 gap-4">
             <TextArea
-              class="col-12"
+              class="col-span-12"
               name="basic.enquiryDescription"
               placeholder="Type here..."
               :disabled="!editable"
@@ -429,9 +430,9 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid">
+          <div class="formgrid grid grid-cols-12 gap-4">
             <RadioList
-              class="col-12"
+              class="col-span-12"
               name="basic.applyForPermitConnect"
               :bold="false"
               :disabled="!editable"
@@ -439,14 +440,14 @@ onBeforeMount(async () => {
             />
             <div
               v-if="values.basic?.applyForPermitConnect === BasicResponse.YES && editable"
-              class="col-12 text-blue-500"
+              class="col-span-12 text-blue-500"
             >
               Please proceed to the next page to register your project with a Navigator.
             </div>
           </div>
         </template>
       </Card>
-      <div class="flex align-items-center justify-content-center mt-4">
+      <div class="flex items-center justify-center mt-6">
         <Button
           label="Submit"
           type="submit"

@@ -93,7 +93,7 @@ onMounted(() => {
   <nav class="navigation-main">
     <Menubar
       :model="items"
-      class="pl-6"
+      class="pl-12"
     >
       <template #item="{ item, props, hasSubmenu }">
         <span

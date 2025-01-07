@@ -71,11 +71,11 @@ const onUpload = async (files: Array<File>) => {
   <div>
     <div
       v-if="uploading"
-      class="h-4rem align-content-center pl-2 pr-2"
+      class="h-16 content-center pl-2 pr-2"
     >
       <ProgressBar
         mode="indeterminate"
-        class="align-self-center progress-bar"
+        class="self-center progress-bar"
       />
     </div>
     <div
@@ -91,10 +91,10 @@ const onUpload = async (files: Array<File>) => {
         @uploader="onFileUploadDragAndDrop"
       >
         <template #empty>
-          <div class="flex align-items-center justify-content-center flex-column">
+          <div class="flex items-center justify-center flex-col">
             <Button
               aria-label="Upload"
-              class="justify-content-center w-full h-4rem border-none"
+              class="justify-center w-full h-16 border-0"
               @click="onFileUploadClick"
             >
               <font-awesome-icon
@@ -108,11 +108,11 @@ const onUpload = async (files: Array<File>) => {
         <template #content="{ files }">
           <div
             v-if="files.length > 0"
-            class="flex align-items-center justify-content-center flex-column"
+            class="flex items-center justify-center flex-col"
           >
             <font-awesome-icon
               icon="fa-solid fa-upload"
-              class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
+              class="border-2 border-dashed rounded-full p-8 text-7xl text-surface-400 dark:text-surface-400 border-surface-400 dark:border-surface-400"
             />
             <p class="font-bold">Upload</p>
             <p>Click or drag-and-drop</p>

@@ -62,7 +62,7 @@ const confirmSubmit = () => {
   <Teleport to="#app">
     <div :class="{ 'teleport-container': true, '--open': showTab }">
       <div
-        class="assistance-tab pb-3 pt-3 pr-1 pl-1"
+        class="assistance-tab pb-4 pt-4 pr-1 pl-1"
         tabindex="0"
         @click="showTab = !showTab"
         @keydown.enter.prevent="showTab = !showTab"
@@ -75,12 +75,12 @@ const confirmSubmit = () => {
         />
       </div>
       <div class="assistance-modal">
-        <div class="font-bold mb-3">Need assistance with the form?</div>
+        <div class="font-bold mb-4">Need assistance with the form?</div>
         <div>
           Are you unable to complete this form and need assistance? Please follow the instructions below. You will be
           contacted by a housing navigator.
         </div>
-        <ol class="pl-3">
+        <ol class="pl-4">
           <li class="mb-1">
             Make sure the
             <span class="font-bold">'Primary Contact'</span>
@@ -91,7 +91,7 @@ const confirmSubmit = () => {
           <li class="mb-1">Try to fill out the form as much as you can.</li>
           <li class="mb-1">Click "Get assistance" below to submit the form.</li>
         </ol>
-        <div class="flex justify-content-center">
+        <div class="flex justify-center">
           <Button
             label="Get assistance"
             :disabled="!checkApplicantValuesValid(formValues, formErrors)"

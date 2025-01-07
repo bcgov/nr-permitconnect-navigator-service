@@ -134,7 +134,7 @@ async function onSubmit(data: any, { resetForm }) {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <font-awesome-icon
@@ -152,17 +152,17 @@ async function onSubmit(data: any, { resetForm }) {
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="formgrid grid">
+      <div class="formgrid grid grid-cols-12 gap-4">
         <DatePicker
-          class="col-6"
+          class="col-span-6"
           name="createdAt"
           label="Date"
           :disabled="!note"
           :show-time="true"
         />
-        <div class="col-6" />
+        <div class="col-span-6" />
         <Select
-          class="col-6"
+          class="col-span-6"
           name="noteType"
           label="Note type"
           :options="NOTE_TYPE_LIST"
@@ -174,36 +174,36 @@ async function onSubmit(data: any, { resetForm }) {
         />
         <DatePicker
           v-if="showBringForward"
-          class="col-6"
+          class="col-span-6"
           name="bringForwardDate"
           label="Bring forward date"
         />
         <div
           v-else
-          class="col-6"
+          class="col-span-6"
         />
         <InputText
-          class="col-6"
+          class="col-span-6"
           name="title"
           label="Title"
         />
         <Select
           v-if="showBringForward"
-          class="col-6"
+          class="col-span-6"
           name="bringForwardState"
           label="Bring forward state"
           :options="BRING_FORWARD_TYPE_LIST"
         />
         <div
           v-else
-          class="col-6"
+          class="col-span-6"
         />
         <TextArea
-          class="col-12"
+          class="col-span-12"
           name="note"
           label="Note"
         />
-        <div class="field col-12 flex">
+        <div class="field col-span-12 flex">
           <div class="flex-auto">
             <Button
               class="mr-2"

@@ -57,7 +57,7 @@ watch(visible, () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-7"
+    class="app-info-dialog w-7/12"
   >
     <template #header>
       <span class="p-dialog-title app-primary-color">ATS Client link</span>
@@ -65,14 +65,14 @@ watch(visible, () => {
     <DataTable
       :row-hover="true"
       :loading="loading"
-      class="datatable mt-3 mb-2"
+      class="datatable mt-4 mb-2"
       :value="users"
       selection-mode="single"
       data-key="atsClientNumber"
       :rows="1"
     >
       <template #empty>
-        <div class="flex justify-content-center">
+        <div class="flex justify-center">
           <h5 class="m-0">No users found.</h5>
         </div>
       </template>
@@ -120,9 +120,9 @@ watch(visible, () => {
         </template>
       </Column>
     </DataTable>
-    <div class="flex justify-content-start mt-5">
+    <div class="flex justify-start mt-8">
       <Button
-        class="p-button-solid mr-3"
+        class="p-button-solid mr-4"
         label="Save"
         @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
       />

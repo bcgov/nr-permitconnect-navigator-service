@@ -35,11 +35,11 @@ onMounted(() => {
 
 <template>
   <div class="field">
-    <div class="flex flex-column gap-3">
+    <div class="flex flex-col gap-4">
       <div
         v-for="option in options"
         :key="option"
-        class="flex flex-column align-items-start"
+        class="flex flex-col items-start"
       >
         <div>
           <RadioButton

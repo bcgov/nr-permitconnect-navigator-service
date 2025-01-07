@@ -108,14 +108,14 @@ onMounted(async () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <span class="p-dialog-title">Create new user</span>
     </template>
-    <div class="flex justify-content-between align-items-center">
+    <div class="flex justify-between items-center">
       <Dropdown
-        class="col-3 m-0"
+        class="col-span-3 m-0"
         name="searchParam"
         placeholder="Last name"
         :options="Object.values(USER_SEARCH_PARAMS)"
@@ -126,20 +126,20 @@ onMounted(async () => {
           }
         "
       />
-      <div class="col-9 mb-2">
+      <div class="col-span-9 mb-2">
         <IconField icon-position="left">
           <InputIcon class="pi pi-search" />
           <InputText
             v-model="searchTag"
             placeholder="Search by first name, last name, or email"
-            class="col-12 pl-5"
+            class="col-span-12 pl-8"
             autofocus
             @update:model-value="searchIdirUsers"
           />
         </IconField>
       </div>
       <Dropdown
-        class="col-3 m-0"
+        class="col-span-3 m-0"
         name="assignRole"
         placeholder="First name"
         :options="Object.values(USER_SEARCH_PARAMS)"
@@ -155,7 +155,7 @@ onMounted(async () => {
       v-model:selection="selectedUser"
       :row-hover="true"
       :loading="loading"
-      class="datatable mt-3 mb-2 pl-2 pr-2"
+      class="datatable mt-4 mb-2 pl-2 pr-2"
       :value="users"
       selection-mode="single"
       data-key="sub"
@@ -163,7 +163,7 @@ onMounted(async () => {
       :paginator="true"
     >
       <template #empty>
-        <div class="flex justify-content-center">
+        <div class="flex justify-center">
           <h5 class="m-0">No users found.</h5>
         </div>
       </template>
@@ -192,7 +192,7 @@ onMounted(async () => {
       />
     </DataTable>
     <Select
-      class="col-12"
+      class="col-span-12"
       name="assignRole"
       label="Assign role"
       :options="[...selectableGroups.keys()]"

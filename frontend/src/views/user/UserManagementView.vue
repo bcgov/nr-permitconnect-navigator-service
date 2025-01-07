@@ -345,7 +345,7 @@ onMounted(async () => {
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
-        <div class="flex justify-content-between">
+        <div class="flex justify-between">
           <Button
             label="Create new user"
             type="submit"
@@ -364,7 +364,7 @@ onMounted(async () => {
         <UserTable
           v-model:filters="filters"
           :users-and-access-request="usersAndAccessRequests"
-          class="mt-4"
+          class="mt-6"
           @user-table:manage="
             (userAccessRequest: UserAccessRequest) => {
               selectedUserAccessRequest = userAccessRequest;
@@ -391,7 +391,7 @@ onMounted(async () => {
       <UserTable
         v-model:filters="filters"
         :users-and-access-requests="getApprovedUsers"
-        class="mt-4"
+        class="mt-6"
         @user-table:manage="
           (userAccessRequest: UserAccessRequest) => {
             selectedUserAccessRequest = userAccessRequest;
@@ -402,7 +402,7 @@ onMounted(async () => {
       />
     </TabPanel>
     <TabPanel header="User access requests">
-      <div class="flex justify-content-end">
+      <div class="flex justify-end">
         <IconField icon-position="left">
           <InputIcon class="pi pi-search" />
           <InputText
@@ -415,7 +415,7 @@ onMounted(async () => {
       <UserTable
         v-model:filters="filters"
         :users-and-access-requests="getAccessRequests"
-        class="mt-4"
+        class="mt-6"
         :request-table="true"
         @user-table:approve-request="
           (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
@@ -427,7 +427,7 @@ onMounted(async () => {
     </TabPanel>
   </TabView>
   <div v-else>
-    <div class="flex justify-content-between">
+    <div class="flex justify-between">
       <Button
         label="Create new user"
         type="submit"
@@ -446,7 +446,7 @@ onMounted(async () => {
     <UserTable
       v-model:filters="filters"
       :users-and-access-requests="usersAndAccessRequests"
-      class="mt-4"
+      class="mt-6"
       @user-table:manage="
         (userAccessRequest: UserAccessRequest) => {
           selectedUserAccessRequest = userAccessRequest;

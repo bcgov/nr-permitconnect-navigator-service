@@ -14,11 +14,11 @@ const toHousing = (): void => {
   <div class="h-screen">
     <div class="bg" />
     <div class="poly" />
-    <div class="flex align-items-center justify-content-start h-full">
-      <div class="text-left text-white-alpha-90">
+    <div class="flex items-center justify-start h-full">
+      <div class="text-left text-white/90">
         <h1 class="font-bold mb-0">Welcome to the</h1>
         <h1 class="font-bold mt-0">Permit Connect Services</h1>
-        <h2 class="mb-3">Choose your project type</h2>
+        <h2 class="mb-4">Choose your project type</h2>
         <Button @click="toHousing">
           <font-awesome-icon
             icon="fa-solid fa-house"

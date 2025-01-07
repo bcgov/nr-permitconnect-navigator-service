@@ -37,7 +37,7 @@ const toggle = (event: any) => {
 <template>
   <div
     v-if="getIsAuthenticated"
-    class="card flex justify-content-center"
+    class="card flex justify-center"
   >
     <Button
       id="menu-toggle"

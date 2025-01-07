@@ -4,7 +4,7 @@ import { ProgressSpinner } from '@/lib/primevue';
 
 <template>
   <ProgressSpinner
-    class="flex justify-content-center"
+    class="flex justify-center"
     style="width: 50px; height: 50px"
     stroke-width="4"
     aria-label="Loading"

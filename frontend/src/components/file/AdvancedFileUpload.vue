@@ -103,15 +103,15 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <div class="mb-3 border-dashed file-upload border-round-md w-100">
+  <div class="mb-4 border-dashed file-upload rounded-md w-100">
     <div>
       <div
         v-if="uploading"
-        class="h-4rem align-content-center pl-2 pr-2"
+        class="h-16 content-center pl-2 pr-2"
       >
         <ProgressBar
           mode="indeterminate"
-          class="align-self-center progress-bar"
+          class="self-center progress-bar"
         />
       </div>
       <div
@@ -127,10 +127,10 @@ const filteredDocuments = computed(() => {
           @uploader="onFileUploadDragAndDrop"
         >
           <template #empty>
-            <div class="flex align-items-center justify-content-center flex-column">
+            <div class="flex items-center justify-center flex-col">
               <Button
                 aria-label="Upload"
-                class="justify-content-center w-full h-4rem border-none"
+                class="justify-center w-full h-16 border-0"
                 @click="onFileUploadClick"
               >
                 <font-awesome-icon
@@ -156,12 +156,12 @@ const filteredDocuments = computed(() => {
     </div>
   </div>
 
-  <div class="grid w-full">
+  <div class="grid grid-cols-12 gap-4 w-full">
     <div
       v-for="(document, index) in filteredDocuments"
       :key="document.documentId"
       :index="index"
-      class="col-4"
+      class="col-span-4"
     >
       <DocumentCardLite
         :document="document"

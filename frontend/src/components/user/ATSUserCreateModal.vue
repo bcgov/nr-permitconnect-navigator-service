@@ -102,13 +102,13 @@ onMounted(() => {
     <div>
       <DataTable
         :row-hover="true"
-        class="datatable mt-3 mb-4"
+        class="datatable mt-4 mb-6"
         :value="[atsUser]"
         selection-mode="single"
         :rows="1"
       >
         <template #empty>
-          <div class="flex justify-content-center">
+          <div class="flex justify-center">
             <h5 class="m-0">No users found.</h5>
           </div>
         </template>
@@ -139,10 +139,10 @@ onMounted(() => {
       </DataTable>
       <div
         v-if="!loading"
-        class="flex justify-content-start"
+        class="flex justify-start"
       >
         <Button
-          class="p-button-solid mr-3"
+          class="p-button-solid mr-4"
           label="Push to ATS"
           icon="pi pi-upload"
           @click="createATSClient()"

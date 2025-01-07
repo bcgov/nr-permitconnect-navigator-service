@@ -21,7 +21,7 @@ const {
   <div>
     <h2 v-if="showHeader">Confirmation of Submission</h2>
     <Message
-      class="border-none"
+      class="border-0"
       severity="success"
       :closable="false"
     >
@@ -42,7 +42,7 @@ const {
     </div>
     <div
       v-if="showHomeLink"
-      class="mt-4"
+      class="mt-6"
     >
       <router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link>
     </div>

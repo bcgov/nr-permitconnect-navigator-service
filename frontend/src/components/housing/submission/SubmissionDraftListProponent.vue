@@ -66,7 +66,7 @@ function onDelete(draftId: string) {
     selection-mode="single"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <p class="font-bold text-xl">{{ t('submissionDraftListProponent.listEmpty') }}</p>
       </div>
     </template>
@@ -111,7 +111,7 @@ function onDelete(draftId: string) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          class="p-button-lg p-button-text p-button-danger p-0 pr-4"
           :aria-label="t('submissionDraftListProponent.ariaDeleteDraft')"
           @click="onDelete(data.draftId)"
         >

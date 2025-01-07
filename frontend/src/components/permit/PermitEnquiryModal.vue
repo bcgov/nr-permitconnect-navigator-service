@@ -50,7 +50,7 @@ const onSubmitEnquiry = () => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6 dialog-container"
+    class="app-info-dialog w-6/12 dialog-container"
     @hide="handleCloseDialog"
   >
     <template #header>
@@ -58,8 +58,8 @@ const onSubmitEnquiry = () => {
     </template>
     <template #default>
       <div v-if="!confirmationId">
-        <div class="grid mb-3">
-          <div class="col-6 flex">
+        <div class="grid grid-cols-12 gap-4 mb-4">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Tracking ID:</div>
             <div
               v-tooltip="{ value: permit?.trackingId }"
@@ -68,7 +68,7 @@ const onSubmitEnquiry = () => {
               {{ permit?.trackingId }}
             </div>
           </div>
-          <div class="col-6 flex">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Submitted date:</div>
             <div
               v-tooltip="{ value: formatDate(permit?.submittedDate) }"
@@ -77,7 +77,7 @@ const onSubmitEnquiry = () => {
               {{ formatDate(permit?.submittedDate) }}
             </div>
           </div>
-          <div class="col-6 flex">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Permit ID:</div>
             <div
               v-tooltip="{ value: permit?.issuedPermitId }"
@@ -86,7 +86,7 @@ const onSubmitEnquiry = () => {
               {{ permit?.issuedPermitId }}
             </div>
           </div>
-          <div class="col-6 flex">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Adjudication date:</div>
             <div
               v-tooltip="{ value: formatDate(permit?.adjudicationDate) }"
@@ -95,7 +95,7 @@ const onSubmitEnquiry = () => {
               {{ formatDate(permit?.adjudicationDate) }}
             </div>
           </div>
-          <div class="col-6 flex">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Updated by:</div>
             <div
               v-tooltip="{ value: updatedBy }"
@@ -104,7 +104,7 @@ const onSubmitEnquiry = () => {
               {{ updatedBy }}
             </div>
           </div>
-          <div class="col-6 flex">
+          <div class="col-span-6 flex">
             <div class="mr-1 permit-label">Status verified date:</div>
             <div
               v-tooltip="{ value: formatDate(permit?.statusLastVerified) }"
@@ -113,13 +113,13 @@ const onSubmitEnquiry = () => {
               {{ formatDate(permit?.statusLastVerified) }}
             </div>
           </div>
-          <div class="col-12 flex">
+          <div class="col-span-12 flex">
             <div class="mr-1 permit-label">Agency:</div>
             <div class="font-bold">{{ permit?.agency }}</div>
           </div>
         </div>
-        <div class="mb-2 mt-4 font-bold">
-          <span class="query-to-nav mt-3">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
+        <div class="mb-2 mt-6 font-bold">
+          <span class="query-to-nav mt-4">To: {{ navigator?.firstName }} {{ navigator?.lastName }}</span>
         </div>
         <Textarea
           v-model="enquiryDescription"
@@ -128,14 +128,14 @@ const onSubmitEnquiry = () => {
           maxlength="4000"
           rows="5"
         />
-        <div class="max-w-full text-center mt-5">
+        <div class="max-w-full text-center mt-8">
           <Button
             class="p-button-sm header-btn"
             label="Submit Enquiry"
             @click="onSubmitEnquiry"
           />
           <Button
-            class="p-button-sm ml-3"
+            class="p-button-sm ml-4"
             outlined
             label="Cancel"
             @click="visible = false"
@@ -148,9 +148,9 @@ const onSubmitEnquiry = () => {
           :show-header="false"
           :show-home-link="false"
         />
-        <div class="max-w-full text-center mt-5">
+        <div class="max-w-full text-center mt-8">
           <Button
-            class="p-button-sm ml-3"
+            class="p-button-sm ml-4"
             outlined
             label="Close"
             @click="visible = false"

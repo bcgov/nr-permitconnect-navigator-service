@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { object, string } from 'yup';
 
-import { Calendar, TextArea } from '@/components/form';
+import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
 import { formatDateLong } from '@/utils/formatters';
 
@@ -57,7 +57,7 @@ async function onSubmit(data: any, { resetForm }) {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <font-awesome-icon
@@ -74,23 +74,23 @@ async function onSubmit(data: any, { resetForm }) {
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="formgrid grid">
-        <Calendar
-          class="col-6"
+      <div class="formgrid grid grid-cols-12 gap-4">
+        <DatePicker
+          class="col-span-6"
           name="createdAt"
           label="Date"
           :disabled="true"
           :show-time="true"
         />
         <TextArea
-          class="col-12"
+          class="col-span-12"
           name="note"
           label="Note"
           maxlength="255"
           placeholder="Please try to keep the note concise, ideally under 60 words."
           required
         />
-        <div class="field col-12 flex">
+        <div class="field col-span-12 flex">
           <div class="flex-auto">
             <Button
               class="mr-2"
@@ -107,13 +107,13 @@ async function onSubmit(data: any, { resetForm }) {
         </div>
       </div>
     </Form>
-    <div class="updates-section mt-5">
-      <h4 class="mb-4">Updates</h4>
+    <div class="updates-section mt-8">
+      <h4 class="mb-6">Updates</h4>
       <div v-if="notes.length > 0">
         <div
           v-for="note in notes"
           :key="note.permitNoteId"
-          class="mb-4"
+          class="mb-6"
         >
           <p class="mb-2 font-bold">{{ formatDateLong(note.createdAt) }}</p>
           <p class="mt-0">{{ note.note }}</p>

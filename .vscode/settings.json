@@ -19,6 +19,7 @@
   },
   "coverage-gutters.showGutterCoverage": false,
   "coverage-gutters.showLineCoverage": true,
+  "scss.lint.unknownAtRules": "ignore",
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnSave": true,
   "eslint.format.enable": true,

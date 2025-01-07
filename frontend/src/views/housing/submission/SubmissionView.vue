@@ -201,14 +201,14 @@ onMounted(async () => {
         </span>
       </TabPanel>
       <TabPanel :value="1">
-        <div class="mb-3 border-dashed file-upload border-round-md">
+        <div class="mb-4 border-dashed file-upload rounded-md">
           <FileUpload
             :activity-id="activityId"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
           />
         </div>
-        <div class="flex flex-row justify-content-between pb-3">
-          <div class="flex align-items-center">
+        <div class="flex flex-row justify-between pb-4">
+          <div class="flex items-center">
             <IconField icon-position="left">
               <InputIcon class="pi pi-search" />
               <InputText
@@ -217,7 +217,7 @@ onMounted(async () => {
               />
             </IconField>
           </div>
-          <div class="align-items-end">
+          <div class="items-end">
             <Button
               aria-label="List"
               class="view-switch-button"
@@ -244,7 +244,7 @@ onMounted(async () => {
         </div>
         <div
           v-if="gridView"
-          class="grid nested-grid"
+          class="grid grid-cols-12 gap-4 nested-grid"
         >
           <DataTable
             v-if="gridView"
@@ -263,42 +263,42 @@ onMounted(async () => {
             "
           >
             <template #empty>
-              <div class="flex justify-content-center" />
+              <div class="flex justify-center" />
             </template>
             <Column
               sortable
               field="filename"
               header="File name"
-              class="w-9rem"
+              class="w-36"
             />
             <Column
               field="createdAt"
               sortable
               header="Upload date"
-              class="w-10rem"
+              class="w-40"
             />
             <Column
               field="filesize"
               sortable
               header="Size"
-              class="w-6rem"
+              class="w-24"
             />
             <Column
               field="mimeType"
               sortable
               header="Type"
-              class="w-10rem"
+              class="w-40"
             />
             <Column />
           </DataTable>
 
-          <div class="col-12">
-            <div class="grid">
+          <div class="col-span-12">
+            <div class="grid grid-cols-12 gap-4">
               <div
                 v-for="(document, index) in filteredDocuments"
                 :key="document.documentId"
                 :index="index"
-                class="col-12 md:col-6 lg:col-4 xl:col-2"
+                class="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-2"
               >
                 <DocumentCard
                   :document="document"
@@ -366,12 +366,12 @@ onMounted(async () => {
           />
           <Column field="fileAction">
             <template #header>
-              <div class="flex justify-content-center w-full">
+              <div class="flex justify-center w-full">
                 <b>Action</b>
               </div>
             </template>
             <template #body="{ data }">
-              <div class="flex justify-content-center">
+              <div class="flex justify-center">
                 <DeleteDocument
                   :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
                   :document="data"
@@ -383,8 +383,8 @@ onMounted(async () => {
       </TabPanel>
       <TabPanel :value="2">
         <span v-if="getPermitTypes.length">
-          <div class="flex align-items-center pb-2">
-            <div class="flex-grow-1">
+          <div class="flex items-center pb-2">
+            <div class="grow">
               <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
             </div>
             <Button
@@ -403,7 +403,7 @@ onMounted(async () => {
             v-for="(permit, index) in getPermits"
             :key="permit.permitId"
             :index="index"
-            class="col-12"
+            class="col-span-12"
           >
             <PermitCard
               :editable="!isCompleted"
@@ -418,8 +418,8 @@ onMounted(async () => {
         </span>
       </TabPanel>
       <TabPanel :value="3">
-        <div class="flex align-items-center pb-2">
-          <div class="flex-grow-1">
+        <div class="flex items-center pb-2">
+          <div class="grow">
             <p class="font-bold">Notes ({{ getNotes.length }})</p>
           </div>
           <Button
@@ -438,7 +438,7 @@ onMounted(async () => {
           v-for="(note, index) in getNotes"
           :key="note.noteId"
           :index="index"
-          class="col-12"
+          class="col-span-12"
         >
           <NoteCard
             :editable="!isCompleted"
@@ -463,8 +463,8 @@ onMounted(async () => {
         />
       </TabPanel>
       <TabPanel :value="5">
-        <div class="flex align-items-center pb-2">
-          <div class="flex-grow-1">
+        <div class="flex items-center pb-2">
+          <div class="grow">
             <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
           </div>
         </div>
@@ -472,7 +472,7 @@ onMounted(async () => {
           v-for="(enquiry, index) in getRelatedEnquiries"
           :key="enquiry.enquiryId"
           :index="index"
-          class="col-12"
+          class="col-span-12"
         >
           <EnquiryCard :enquiry="enquiry" />
         </div>

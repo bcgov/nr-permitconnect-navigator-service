@@ -66,7 +66,7 @@ function onDelete(submissionId: string) {
     selection-mode="single"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <h3>No items found.</h3>
       </div>
     </template>
@@ -133,7 +133,7 @@ function onDelete(submissionId: string) {
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          class="p-button-lg p-button-text p-button-danger p-0 pr-4"
           aria-label="Delete draft"
           :disabled="data.intakeStatus !== IntakeStatus.DRAFT"
           @click="onDelete(data.submissionId)"
