@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -67,12 +67,12 @@ import {
 import { confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit } from '@/utils/utils';
 
-import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
-import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, SubmissionIntake } from '@/types';
 import type { GenericObject } from 'vee-validate';
+import type { Ref } from 'vue';
+import type { IInputEvent } from '@/interfaces';
+import type { Document, Permit, PermitType, SubmissionIntake } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -605,31 +605,68 @@ watch(
 
       <Stepper :value="activeStep">
         <StepList>
-          <Step :value="0">
-      <Stepper
-        v-model:active-step="activeStep"
-        @update:active-step="onStepChange"
-      >
-        <!--
-      Basic info
-      -->
-        <Steps>
-          <template #header="{ index, clickCallback }">
+          <Step
+            :value="0"
+            as-child
+          >
             <StepperHeader
               :index="0"
               :active-step="activeStep"
               :click-callback="() => (activeStep = 0)"
-              :click-callback="clickCallback"
               title="Basic info"
               icon="fa-user"
-          </Step>
               :errors="
                 validationErrors.includes(IntakeFormCategory.CONTACTS) ||
                 validationErrors.includes(IntakeFormCategory.BASIC)
               "
             />
           </Step>
+          <Step
+            :value="1"
+            as-child
+          >
+            <StepperHeader
+              :index="1"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 1)"
+              title="Housing"
+              icon="fa-house"
+              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
+            />
+          </Step>
+          <Step
+            :value="2"
+            as-child
+          >
+            <StepperHeader
+              :index="2"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 2)"
+              title="Location"
+              icon="fa-location-dot"
+              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
+            />
+          </Step>
+          <Step
+            :value="3"
+            as-child
+          >
+            <StepperHeader
+              :index="2"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 3)"
+              title="Permits & Reports"
+              icon="fa-file"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              "
+              :divider="false"
+            />
+          </Step>
         </StepList>
+
+        <!-- Basic info -->
         <StepPanels>
           <StepPanel :value="0">
             <CollectionDisclaimer />
@@ -771,11 +808,6 @@ watch(
               :editable="editable"
               :next-callback="() => activeStep++"
               :prev-disabled="true"
-              @click="
-                () => {
-                  if (!values.activityId) onSaveDraft(values, true, false);
-                }
-              "
             >
               <template #content>
                 <Button
@@ -789,39 +821,8 @@ watch(
             </StepperNavigation>
           </StepPanel>
 
-            <StepperNavigation
-              :editable="editable"
-              :next-callback="nextCallback"
-              :prev-disabled="true"
-            >
-              <template #content>
-                <Button
-                  class="p-button-sm"
-                  outlined
-                  label="Save draft"
-                  :disabled="!editable"
-                  @click="onSaveDraft(values)"
-                />
-              </template>
-            </StepperNavigation>
-          </template>
-        </Steps>
-
-        <!--
-      Housing
-      -->
-        <Steps>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Housing"
-              icon="fa-house"
-              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          <!-- Housing -->
+          <StepPanel :value="1">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -867,7 +868,7 @@ watch(
                       :invalid="!!errors.housing && meta.touched"
                     />
                   </div>
-                  <Dropdown
+                  <Select
                     v-if="values.housing.singleFamilySelected"
                     class="col-6"
                     name="housing.singleFamilyUnits"
@@ -1160,182 +1161,25 @@ watch(
                 />
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.naturalDisaster"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span class="section-header">Provide one of the following project locations</span>
-                    <div
-                      v-tooltip.right="`A civic address contains a street name and number where a non-civid does not.`"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="formgrid grid">
-                  <RadioList
-                    class="col-12"
-                    name="location.projectLocation"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="PROJECT_LOCATION_LIST"
-                    @on-click="handleProjectLocationClick"
-                  />
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <EditableSelect
-                            class="col-12"
-                            name="addressSearch"
-                            :get-option-label="getAddressSearchLabel"
-                            :options="addressGeocoderOptions"
-                            :placeholder="'Search the address of your housing project'"
-                            :bold="false"
-                            :disabled="!editable"
-                            @on-input="onAddressSearchInput"
-                            @on-change="onAddressSelect"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.streetAddress"
-                            disabled
-                            placeholder="Street address"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.locality"
-                            disabled
-                            placeholder="Locality"
-                          />
-                          <InputText
-                            class="col-4"
-                            name="location.province"
-                            disabled
-                            placeholder="Province"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between 48 and 60'
-                                : ''
-                            "
-                            placeholder="Latitude"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between -114 and -139'
-                                : ''
-                            "
-                            placeholder="Longitude"
-                          />
-                          <div
-                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
-                          >
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid nested-grid">
-                          <InputNumber
-                            class="col-4"
-                            name="location.latitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between 48 and 60"
-                            placeholder="Latitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <InputNumber
-                            class="col-4"
-                            name="location.longitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between -114 and -139"
-                            placeholder="Longitude"
-                            @keyup.enter="onLatLongInputClick"
-                          />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
-                        </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                </div>
-                <!-- <Map
-                  ref="mapRef"
+                <Button
+                  class="p-button-sm"
+                  outlined
+                  label="Save draft"
                   :disabled="!editable"
                   @click="onSaveDraft(values)"
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </Steps>
+          </StepPanel>
 
-        <!--
-      Location
-      -->
-        <Steps>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Location"
-              icon="fa-location-dot"
-              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          <!-- Location -->
+          <StepPanel :value="2">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1619,8 +1463,8 @@ watch(
 
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1632,27 +1476,10 @@ watch(
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </Steps>
+          </StepPanel>
 
-        <!--
-      Permits & Reports
-      -->
-        <Steps>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Permits & Reports"
-              icon="fa-file"
-              :errors="
-                validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              "
-            />
-          </template>
-          <template #content="{ prevCallback }">
+          <!-- Permits & Reports -->
+          <StepPanel :value="3">
             <Message
               v-if="validationErrors.length"
               severity="error"
@@ -1926,7 +1753,6 @@ watch(
               :editable="editable"
               :next-disabled="true"
               :prev-callback="() => activeStep--"
-              @click="() => onSaveDraft(values, true, false)"
             >
               <template #content>
                 <Button
@@ -1951,6 +1777,7 @@ watch(
       </div>
     </Form>
   </div>
+
   <IntakeAssistanceConfirmation
     v-else-if="assistanceAssignedActivityId && assistanceAssignedEnquiryId"
     :assigned-activity-id="assistanceAssignedActivityId"
@@ -2023,21 +1850,21 @@ watch(
   }
 }
 
-:deep(.p-stepper-header:first-child) {
-  padding-left: 0;
+// :deep(.p-stepper-header:first-child) {
+//   padding-left: 0;
 
-  .p-button {
-    padding-left: 0;
-  }
-}
+//   .p-button {
+//     padding-left: 0;
+//   }
+// }
 
-:deep(.p-stepper-header:last-child) {
-  padding-right: 0;
+// :deep(.p-stepper-header:last-child) {
+//   padding-right: 0;
 
-  .p-button {
-    padding-right: 0;
-  }
-}
+//   .p-button {
+//     padding-right: 0;
+//   }
+// }
 
 // :deep(.p-stepper-panels) {
 //   padding-left: 0;
@@ -2049,15 +1876,15 @@ watch(
   height: 0.25rem;
 }
 
-:deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
-  background-color: #d8eafd; // TODO Blue 20
-}
+// :deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
+//   background-color: #d8eafd; // TODO Blue 20
+// }
 
 .lat-long-btn {
   height: 2.3rem;
 }
 
-:deep(.p-step-number) {
-  display: none;
-}
+// :deep(.p-step-number) {
+//   display: none;
+// }
 </style>

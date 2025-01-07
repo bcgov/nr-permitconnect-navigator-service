@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button } from '@/lib/primevue';
+import { Button, Divider } from '@/lib/primevue';
 
 // Props
 const {
@@ -8,7 +8,8 @@ const {
   clickCallback = () => {},
   title,
   icon,
-  errors = false
+  errors = false,
+  divider = true
 } = defineProps<{
   index: number;
   activeStep: number;
@@ -16,11 +17,12 @@ const {
   title: string;
   icon: string;
   errors?: boolean;
+  divider?: boolean;
 }>();
 </script>
 
 <template>
-  <div class="flex flex-column align-items-center">
+  <div class="flex flex-column flex-auto align-items-center">
     <Button
       class="bg-transparent border-none inline-flex flex-column gap-2 p-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
@@ -52,6 +54,7 @@ const {
       {{ title }}
     </span>
   </div>
+  <Divider v-if="divider" />
 </template>
 
 <style lang="scss" scoped>

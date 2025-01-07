@@ -24,7 +24,7 @@ const items = ref([
     }
   }
 ]);
-const menu: Ref<Menu | undefined> = ref(undefined);
+const menu: Ref<typeof Menu | undefined> = ref(undefined);
 
 // Actions
 const router = useRouter();
