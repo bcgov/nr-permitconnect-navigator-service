@@ -289,7 +289,7 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid grid-cols-12 gap-4">
+          <div class="grid grid-cols-12 gap-4">
             <InputText
               class="col-span-6"
               name="contactFirstName"
@@ -346,7 +346,7 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid grid-cols-12 gap-4">
+          <div class="grid grid-cols-12 gap-4">
             <RadioList
               class="col-span-12"
               name="basic.isRelated"
@@ -380,7 +380,7 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid grid-cols-12 gap-4">
+          <div class="grid grid-cols-12 gap-4">
             <EditableSelect
               class="col-span-3"
               name="basic.relatedActivityId"
@@ -405,7 +405,7 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid grid-cols-12 gap-4">
+          <div class="grid grid-cols-12 gap-4">
             <TextArea
               class="col-span-12"
               name="basic.enquiryDescription"
@@ -430,7 +430,7 @@ onBeforeMount(async () => {
           <Divider type="solid" />
         </template>
         <template #content>
-          <div class="formgrid grid grid-cols-12 gap-4">
+          <div class="grid grid-cols-12 gap-4">
             <RadioList
               class="col-span-12"
               name="basic.applyForPermitConnect"

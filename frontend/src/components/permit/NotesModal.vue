@@ -74,7 +74,7 @@ async function onSubmit(data: any, { resetForm }) {
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="formgrid grid grid-cols-12 gap-4">
+      <div class="grid grid-cols-12 gap-4">
         <DatePicker
           class="col-span-6"
           name="createdAt"

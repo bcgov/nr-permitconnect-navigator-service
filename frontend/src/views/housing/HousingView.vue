@@ -71,7 +71,7 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col items-center justify-start h-full">
     <div class="flex flex-row items-center w-full justify-between shadow px-4 py-1">
-      <h1>Housing</h1>
+      <h1 class="font-bold">{{ t('housing.housing') }}</h1>
       <img
         class="mr-4"
         src="@/assets/images/housing_2.png"
@@ -80,7 +80,7 @@ onMounted(async () => {
       />
     </div>
 
-    <div class="flex flex-row items-center w-full mt-4">
+    <div class="flex flex-row items-center w-full my-4">
       <div class="font-bold mr-2">{{ t('housing.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
@@ -121,7 +121,7 @@ onMounted(async () => {
     <!--
       Projects
     -->
-    <div class="flex flex-row items-center w-full justify-between mt-4">
+    <div class="flex flex-row items-center w-full justify-between my-4">
       <h2
         id="projects"
         class="flex font-bold"
@@ -162,7 +162,7 @@ onMounted(async () => {
         v-else
         :key="project.activityId"
         :index="index"
-        class="items-center rounded-sm shadow-md hover:shadow-lg px-6 custom-card hover-hand"
+        class="rounded-sm shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
         :class="[index != displayedProjects.length - 1 ? 'mb-4' : '']"
         @click="onProjectClick(project)"
       >
@@ -175,16 +175,16 @@ onMounted(async () => {
                 query: { activityId: project.activityId, submissionId: project.submissionId }
               }"
             >
-              <h4 class="mb-0">{{ project.projectName }}</h4>
+              <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
             </router-link>
           </div>
-          <div class="col-span-3">
+          <div class="col-span-3 flex items-center">
             <p>{{ t('housing.projectState') }}: {{ project.applicationStatus }}</p>
           </div>
-          <div class="col-span-3">
+          <div class="col-span-3 flex items-center">
             <p>{{ t('housing.confirmationId') }}: {{ project.activityId }}</p>
           </div>
-          <div class="col-span-3">
+          <div class="col-span-3 flex items-center">
             <p>{{ t('housing.lastUpdated') }}: {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}</p>
           </div>
         </div>
@@ -224,7 +224,7 @@ onMounted(async () => {
     <!--
       Enquiries
     -->
-    <div class="flex flex-row items-center w-full justify-between mt-4">
+    <div class="flex flex-row items-center w-full justify-between mt-12">
       <h2
         id="enquiries"
         class="flex font-bold"

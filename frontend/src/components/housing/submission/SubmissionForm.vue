@@ -363,7 +363,7 @@ onMounted(async () => {
   >
     <FormNavigationGuard v-if="!isCompleted" />
 
-    <div class="formgrid grid grid-cols-12 gap-4">
+    <div class="grid grid-cols-12 gap-4">
       <Select
         class="col-span-3"
         name="queuePriority"

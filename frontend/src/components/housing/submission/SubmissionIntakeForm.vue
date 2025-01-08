@@ -566,8 +566,8 @@ watch(
       :text="getBackButtonConfig.text"
     />
 
-    <div class="flex justify-center app-primary-color mt-4">
-      <h3>Housing Project Intake Form</h3>
+    <div class="flex justify-center app-primary-color mt-3 mb-6">
+      <h3 class="font-bold">Housing Project Intake Form</h3>
     </div>
     <Form
       v-if="initialFormValues"
@@ -655,7 +655,7 @@ watch(
             as-child
           >
             <StepperHeader
-              :index="2"
+              :index="3"
               :active-step="activeStep"
               :click-callback="() => (activeStep = 3)"
               title="Permits & Reports"
@@ -690,7 +690,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <InputText
                     class="col-span-6"
                     :name="`contacts.contactFirstName`"
@@ -746,7 +746,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
                     class="col-12"
                     name="basic.projectApplicantType"
@@ -842,7 +842,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <InputText
                     class="col-span-6"
                     name="housing.projectName"
@@ -861,7 +861,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <div class="col-span-12">
                     <Checkbox
                       name="housing.singleFamilySelected"
@@ -957,7 +957,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
                     class="col-span-12"
                     name="housing.hasRentalUnits"
@@ -1003,7 +1003,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <div class="col mb-2">
                     <div class="flex items-center">
                       <label>
@@ -1203,7 +1203,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
                     class="col-span-12"
                     name="location.naturalDisaster"
@@ -1233,7 +1233,7 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
                     class="col-span-12"
                     name="location.projectLocation"
@@ -1381,7 +1381,7 @@ watch(
                     <AccordionContent>
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid grid-cols-12 gap-4">
+                          <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12">
                               <label>
                                 <a
@@ -1418,7 +1418,7 @@ watch(
                     <AccordionContent>
                       <Card class="no-shadow">
                         <template #content>
-                          <div class="formgrid grid grid-cols-12 gap-4">
+                          <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-12">
                               <label>
                                 <a
@@ -1510,118 +1510,108 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
-                  <FieldArray
-                    v-slot="{ fields, push, remove }"
-                    name="appliedPermits"
+                <FieldArray
+                  v-slot="{ fields, push, remove }"
+                  name="appliedPermits"
+                >
+                  <RadioList
+                    name="permits.hasAppliedProvincialPermits"
+                    :bold="false"
+                    :disabled="!editable"
+                    :options="YES_NO_UNSURE_LIST"
+                    @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
+                  />
+                  <div
+                    v-if="
+                      values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+                      values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
+                    "
+                    ref="appliedPermitsContainer"
                   >
-                    <RadioList
-                      class="col-span-12"
-                      name="permits.hasAppliedProvincialPermits"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                      @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
-                    />
-                    <div
-                      v-if="
-                        values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
-                        values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
-                      "
-                      ref="appliedPermitsContainer"
-                      class="col-span-12"
-                    >
-                      <div class="mb-2">
-                        <span class="app-primary-color">
-                          Sharing this information will authorize the navigators to seek additional information about
-                          this permit.
-                        </span>
-                      </div>
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div class="formgrid grid grid-cols-12 gap-4">
-                            <div
-                              v-for="(permit, idx) in fields"
-                              :key="idx"
-                              :index="idx"
-                              class="w-full flex align-items-top"
-                            >
-                              <input
-                                type="hidden"
-                                :name="`appliedPermits[${idx}].permitId`"
-                              />
-                              <Select
-                                class="col-span-4"
-                                :disabled="!editable"
-                                :name="`appliedPermits[${idx}].permitTypeId`"
-                                placeholder="Select Permit type"
-                                :options="getPermitTypes"
-                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
-                                option-value="permitTypeId"
-                                :loading="getPermitTypes === undefined"
-                              />
-                              <InputText
-                                class="col-span-4"
-                                :name="`appliedPermits[${idx}].trackingId`"
-                                :disabled="!editable"
-                                placeholder="Tracking #"
-                              />
-                              <div class="col-span-4">
-                                <div class="flex justify-center">
-                                  <DatePicker
-                                    class="w-full"
-                                    :name="`appliedPermits[${idx}].submittedDate`"
-                                    :disabled="!editable"
-                                    placeholder="Date applied"
-                                    :max-date="new Date()"
-                                  />
-                                  <div class="flex items-center ml-2 mb-4">
-                                    <Button
-                                      v-if="editable"
-                                      class="p-button-lg p-button-text p-button-danger p-0"
-                                      aria-label="Delete"
-                                      @click="remove(idx)"
-                                    >
-                                      <font-awesome-icon icon="fa-solid fa-trash" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-span-12">
+                    <div class="mb-2">
+                      <span class="app-primary-color">
+                        Sharing this information will authorize the navigators to seek additional information about this
+                        permit.
+                      </span>
+                    </div>
+                    <Card class="no-shadow">
+                      <template #content>
+                        <div
+                          v-for="(permit, idx) in fields"
+                          :key="idx"
+                          :index="idx"
+                          class="grid grid-cols-3 gap-3"
+                        >
+                          <div>
+                            <input
+                              type="hidden"
+                              :name="`appliedPermits[${idx}].permitId`"
+                            />
+                            <Select
+                              :disabled="!editable"
+                              :name="`appliedPermits[${idx}].permitTypeId`"
+                              placeholder="Select Permit type"
+                              :options="getPermitTypes"
+                              :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                              option-value="permitTypeId"
+                              :loading="getPermitTypes === undefined"
+                            />
+                          </div>
+                          <InputText
+                            :name="`appliedPermits[${idx}].trackingId`"
+                            :disabled="!editable"
+                            placeholder="Tracking #"
+                          />
+                          <div class="flex justify-center">
+                            <DatePicker
+                              class="w-full"
+                              :name="`appliedPermits[${idx}].submittedDate`"
+                              :disabled="!editable"
+                              placeholder="Date applied"
+                              :max-date="new Date()"
+                            />
+                            <div class="flex items-center ml-2 mb-4">
                               <Button
                                 v-if="editable"
-                                class="w-full flex justify-center font-bold"
-                                @click="
-                                  push({
-                                    permitTypeId: undefined,
-                                    trackingId: undefined,
-                                    submittedDate: undefined
-                                  });
-                                  nextTick(() => {
-                                    const addedPermit = getHTMLElement(
-                                      $refs.appliedPermitsContainer as HTMLElement,
-                                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
-                                    );
-                                    if (addedPermit) {
-                                      addedPermit.focus();
-                                    }
-                                  });
-                                "
+                                class="p-button-lg p-button-text p-button-danger p-0"
+                                aria-label="Delete"
+                                @click="remove(idx)"
                               >
-                                <font-awesome-icon
-                                  icon="fa-solid fa-plus"
-                                  fixed-width
-                                />
-                                Add permit
+                                <font-awesome-icon icon="fa-solid fa-trash" />
                               </Button>
                             </div>
                           </div>
-                        </template>
-                      </Card>
-                    </div>
-                  </FieldArray>
-                </div>
+                        </div>
+                        <Button
+                          v-if="editable"
+                          class="w-full flex justify-center font-bold h-10"
+                          @click="
+                            push({
+                              permitTypeId: undefined,
+                              trackingId: undefined,
+                              submittedDate: undefined
+                            });
+                            nextTick(() => {
+                              const addedPermit = getHTMLElement(
+                                $refs.appliedPermitsContainer as HTMLElement,
+                                'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                              );
+                              if (addedPermit) {
+                                addedPermit.focus();
+                              }
+                            });
+                          "
+                        >
+                          <font-awesome-icon
+                            icon="fa-solid fa-plus"
+                            fixed-width
+                          />
+                          Add permit
+                        </Button>
+                      </template>
+                    </Card>
+                  </div>
+                </FieldArray>
               </template>
             </Card>
             <Card>
@@ -1658,81 +1648,70 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid grid-cols-12 gap-4">
-                  <FieldArray
-                    v-slot="{ fields, push, remove }"
-                    name="investigatePermits"
-                  >
-                    <div class="col-span-12">
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div
-                            ref="investigatePermitsContainer"
-                            class="formgrid grid grid-cols-12 gap-4"
-                          >
-                            <div
-                              v-for="(permit, idx) in fields"
-                              :key="idx"
-                              :index="idx"
-                              class="w-full flex items-center"
-                            >
-                              <div class="col-span-4">
-                                <div class="flex justify-center">
-                                  <Select
-                                    class="w-full"
-                                    :disabled="!editable"
-                                    :name="`investigatePermits[${idx}].permitTypeId`"
-                                    placeholder="Select Permit type"
-                                    :options="getPermitTypes"
-                                    :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
-                                    option-value="permitTypeId"
-                                    :loading="getPermitTypes === undefined"
-                                  />
-                                  <div class="flex items-center ml-2 mb-6">
-                                    <Button
-                                      v-if="editable"
-                                      class="p-button-lg p-button-text p-button-danger p-0"
-                                      aria-label="Delete"
-                                      @click="remove(idx)"
-                                    >
-                                      <font-awesome-icon icon="fa-solid fa-trash" />
-                                    </Button>
-                                  </div>
-                                </div>
+                <FieldArray
+                  v-slot="{ fields, push, remove }"
+                  name="investigatePermits"
+                >
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div ref="investigatePermitsContainer">
+                        <div
+                          v-for="(permit, idx) in fields"
+                          :key="idx"
+                          :index="idx"
+                          class="grid grid-cols-3"
+                        >
+                          <div class="col-span-1">
+                            <div class="flex justify-center">
+                              <Select
+                                class="w-full"
+                                :disabled="!editable"
+                                :name="`investigatePermits[${idx}].permitTypeId`"
+                                placeholder="Select Permit type"
+                                :options="getPermitTypes"
+                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                                option-value="permitTypeId"
+                                :loading="getPermitTypes === undefined"
+                              />
+                              <div class="flex items-center ml-2 mb-6">
+                                <Button
+                                  v-if="editable"
+                                  class="p-button-lg p-button-text p-button-danger p-0"
+                                  aria-label="Delete"
+                                  @click="remove(idx)"
+                                >
+                                  <font-awesome-icon icon="fa-solid fa-trash" />
+                                </Button>
                               </div>
-
-                              <div class="col" />
-                            </div>
-                            <div class="col-span-12">
-                              <Button
-                                v-if="editable"
-                                class="w-full flex justify-center font-bold"
-                                @click="
-                                  push({ permitTypeId: undefined });
-                                  nextTick(() => {
-                                    const newPermitDropdown = getHTMLElement(
-                                      $refs.investigatePermitsContainer as HTMLElement,
-                                      'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
-                                    );
-                                    if (newPermitDropdown) {
-                                      newPermitDropdown.focus();
-                                    }
-                                  });
-                                "
-                              >
-                                <font-awesome-icon
-                                  icon="fa-solid fa-plus"
-                                  fixed-width
-                                />
-                                Add permit
-                              </Button>
                             </div>
                           </div>
-                        </template>
-                      </Card>
-                    </div>
-                  </FieldArray>
-                </div>
+                        </div>
+                        <Button
+                          v-if="editable"
+                          class="w-full flex justify-center font-bold h-10"
+                          @click="
+                            push({ permitTypeId: undefined });
+                            nextTick(() => {
+                              const newPermitDropdown = getHTMLElement(
+                                $refs.investigatePermitsContainer as HTMLElement,
+                                'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
+                              );
+                              if (newPermitDropdown) {
+                                newPermitDropdown.focus();
+                              }
+                            });
+                          "
+                        >
+                          <font-awesome-icon
+                            icon="fa-solid fa-plus"
+                            fixed-width
+                          />
+                          Add permit
+                        </Button>
+                      </div>
+                    </template>
+                  </Card>
+                </FieldArray>
               </template>
             </Card>
             <Card>
@@ -1853,41 +1832,7 @@ watch(
   }
 }
 
-// :deep(.p-stepper-header:first-child) {
-//   padding-left: 0;
-
-//   .p-button {
-//     padding-left: 0;
-//   }
-// }
-
-// :deep(.p-stepper-header:last-child) {
-//   padding-right: 0;
-
-//   .p-button {
-//     padding-right: 0;
-//   }
-// }
-
-// :deep(.p-stepper-panels) {
-//   padding-left: 0;
-//   padding-right: 0;
-// }
-
-:deep(.p-stepper-separator) {
-  background-color: #f3f2f1; // TODO Grey 20
-  height: 0.25rem;
-}
-
-// :deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
-//   background-color: #d8eafd; // TODO Blue 20
-// }
-
 .lat-long-btn {
   height: 2.3rem;
 }
-
-// :deep(.p-step-number) {
-//   display: none;
-// }
 </style>

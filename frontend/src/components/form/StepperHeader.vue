@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Divider } from '@/lib/primevue';
+import { Divider } from '@/lib/primevue';
 
 // Props
 const {
@@ -22,9 +22,10 @@ const {
 </script>
 
 <template>
-  <div class="flex flex-col flex-auto items-center">
-    <Button
-      class="bg-transparent border-0 inline-flex flex-col gap-2 p-1"
+  <div class="flex flex-col items-center">
+    <button
+      type="button"
+      class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
       @click="clickCallback()"
     >
@@ -46,25 +47,33 @@ const {
           ]"
         />
       </span>
-    </Button>
+    </button>
     <span
-      class="text-xl"
+      class="text-xl text-nowrap"
       :class="{ 'font-bold': index === activeStep, underline: index === activeStep, 'app-error-color': errors }"
     >
       {{ title }}
     </span>
   </div>
-  <Divider v-if="divider" />
+  <Divider
+    v-if="divider"
+    class="!mx-4"
+  />
 </template>
 
 <style lang="scss" scoped>
+.p-divider {
+  background-color: var(--p-greyscale-100);
+  height: 0.2rem;
+}
+
 .outer-border {
-  border-radius: 50%;
-  box-shadow: 0 0 0 3px #c1ddfc; // TODO: Blue 30
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 3px var(--p-primary-300) !important;
 }
 
 .outer-border-error {
-  border-radius: 50%;
+  border-radius: 50% !important;
   box-shadow: 0 0 0 3px $app-error !important;
 }
 </style>

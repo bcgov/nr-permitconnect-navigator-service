@@ -103,7 +103,7 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <div class="mb-4 border-dashed file-upload rounded-md w-100">
+  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-100">
     <div>
       <div
         v-if="uploading"

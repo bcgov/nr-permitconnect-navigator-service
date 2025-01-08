@@ -180,7 +180,7 @@ watchEffect(async () => {
     :validation-schema="formSchema"
     @submit="confirmSubmit"
   >
-    <div class="formgrid grid grid-cols-12 gap-4">
+    <div class="grid grid-cols-12 gap-4">
       <InputText
         class="col-span-12 lg:col-span-6"
         name="to"

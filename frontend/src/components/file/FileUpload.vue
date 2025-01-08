@@ -84,6 +84,7 @@ const onUpload = async (files: Array<File>) => {
     >
       <FileUpload
         name="fileUpload"
+        class="border-0"
         :multiple="true"
         :custom-upload="true"
         :auto="true"
