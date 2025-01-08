@@ -45,7 +45,7 @@ const schema = {
       email: Joi.string().max(255).required(),
       firstName: Joi.string().max(255).required(),
       lastName: Joi.string().max(255).required(),
-      phoneNumber: Joi.number().max(255).required(),
+      phoneNumber: phoneNumber.required(),
       contactApplicantRelationship: Joi.string()
         .required()
         .valid(...PROJECT_RELATIONSHIP_LIST),

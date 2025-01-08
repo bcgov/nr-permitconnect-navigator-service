@@ -8,6 +8,7 @@ import type { Permission } from '@/types';
 
 export enum NavigationPermission {
   HOUSING = 'housing',
+  HOUSING_CONTACT_MANAGEMENT = 'housing.contactmanagement',
   HOUSING_DROPDOWN = 'housing.dropdown',
   HOUSING_ENQUIRY = 'housing.enquiry',
   HOUSING_ENQUIRY_INTAKE = 'housing.enquiry.intake',
@@ -57,6 +58,7 @@ const NavigationAuthorizationMap = [
     group: GroupName.PROPONENT,
     permissions: [
       NavigationPermission.HOUSING,
+      NavigationPermission.HOUSING_CONTACT_MANAGEMENT,
       NavigationPermission.HOUSING_DROPDOWN,
       NavigationPermission.HOUSING_ENQUIRY_INTAKE,
       NavigationPermission.HOUSING_SUBMISSION_INTAKE,

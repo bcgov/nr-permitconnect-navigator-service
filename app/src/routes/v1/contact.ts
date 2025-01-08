@@ -14,9 +14,18 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Search users endpoint
+// Get current user's contact information endpoint
 router.get(
   '/',
+  hasAuthorization(Resource.CONTACT, Action.READ),
+  (req: Request<never, never, never, never>, res: Response, next: NextFunction): void => {
+    contactController.getCurrentUserContact(req, res, next);
+  }
+);
+
+// Search users endpoint
+router.get(
+  '/search',
   hasAuthorization(Resource.CONTACT, Action.READ),
   contactValidator.searchContacts,
   (req: Request<never, never, never, ContactSearchParameters>, res: Response, next: NextFunction): void => {

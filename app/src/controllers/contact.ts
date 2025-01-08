@@ -5,6 +5,17 @@ import type { NextFunction, Request, Response } from 'express';
 import type { Contact, ContactSearchParameters } from '../types';
 
 const controller = {
+  // Get current user's contact information
+  getCurrentUserContact: async (req: Request<never, never, never, never>, res: Response, next: NextFunction) => {
+    try {
+      const response = await contactService.searchContacts({
+        userId: [req.currentContext.userId as string]
+      });
+      res.status(200).json(response[0]);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
   searchContacts: async (
     req: Request<never, never, never, ContactSearchParameters>,
     res: Response,
@@ -12,10 +23,7 @@ const controller = {
   ) => {
     try {
       const contactIds = mixedQueryToArray(req.query.contactId);
-      let userIds = mixedQueryToArray(req.query.userId);
-
-      if (!userIds && req.currentContext.userId) userIds = [req.currentContext.userId];
-
+      const userIds = mixedQueryToArray(req.query.userId);
       const response = await contactService.searchContacts({
         userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
         contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
@@ -30,6 +38,7 @@ const controller = {
       next(e);
     }
   },
+
   updateContact: async (req: Request<never, never, Contact, never>, res: Response, next: NextFunction) => {
     try {
       const response = await contactService.upsertContacts([req.body], req.currentContext);

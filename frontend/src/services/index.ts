@@ -3,6 +3,7 @@ export { default as atsService } from './atsService';
 export { default as AuthService } from './authService';
 export { default as ConfigService } from './configService';
 export { default as comsService } from './comsService';
+export { default as contactService } from './contactService';
 export { default as documentService } from './documentService';
 export { default as enquiryService } from './enquiryService';
 export { default as externalApiService } from './externalApiService';

@@ -208,17 +208,14 @@ export async function up(knex: Knex): Promise<void> {
         // Add all navigator read only role mappings
         await addResourceRoles(navigator_read_group_id[0].group_id, Resource.CONTACT, [Action.READ, Action.UPDATE]);
 
-
         // Add all supervisor role mappings
         await addResourceRoles(superviser_group_id[0].group_id, Resource.CONTACT, [Action.READ, Action.UPDATE]);
 
         // Add all admin role mappings
         await addResourceRoles(admin_group_id[0].group_id, Resource.CONTACT, [Action.READ, Action.UPDATE]);
 
-
         // Add all proponent role mappings
         await addResourceRoles(proponent_group_id[0].group_id, Resource.CONTACT, [Action.READ, Action.UPDATE]);
-
       }
       return knex('yars.group_role').insert(items);
     });
