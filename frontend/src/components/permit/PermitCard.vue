@@ -5,7 +5,7 @@ import { computed, ref, watchEffect } from 'vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import NotesModal from '@/components/permit/NotesModal.vue';
-import { Button, Card, Divider } from '@/lib/primevue';
+import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAuthZStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
@@ -32,6 +32,7 @@ const notesModalVisible: Ref<boolean> = ref(false);
 const permitType: Ref<PermitType | undefined> = ref(
   getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId)
 );
+const permitTypeName = computed(() => permitType.value?.name ?? '');
 
 // Actions
 watchEffect(() => {
@@ -67,19 +68,11 @@ function isCompleted(authStatus: string | undefined): boolean {
 <template>
   <Card :class="{ completed: isCompleted(cardData.authStatus), selected: notesModalVisible }">
     <template #title>
-      <div class="flex align-items-center">
+      <div class="flex">
         <div class="flex-grow-1">
-          <h3 class="mb-0">{{ permitType?.name }}</h3>
-          <p class="text-xs font-italic pt-2 darkgrey">
-            <span>Last updated:</span>
-            <span>{{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}</span>
-          </p>
+          <h3 class="mb-0">{{ permitTypeName }}</h3>
         </div>
         <div class="flex justify-center flex-wrap gap-2 align-items-center">
-          <StatusPill
-            v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-            :auth-status="permit.authStatus"
-          />
           <Button
             class="p-button-outlined"
             aria-label="Add updates"
@@ -106,17 +99,60 @@ function isCompleted(authStatus: string | undefined): boolean {
           </Button>
         </div>
       </div>
-      <Divider type="solid" />
     </template>
     <template #content>
-      <div class="grid nested-grid">
+      <div :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
+        <StatusPill
+          v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
+          :auth-status="permit.authStatus"
+        />
+      </div>
+      <div class="grid nested-grid pt-3">
         <!-- Left column -->
         <div class="col-12 md:col-6 lg:col-4">
           <div class="grid">
             <p class="col-12">
+              <span class="key font-bold">Tracking ID:</span>
+              {{ cardData.trackingId }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Status verified date:</span>
+              {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Submitted date:</span>
+              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
+            </p>
+            <p class="col-12">
               <span class="key font-bold">Permit state:</span>
               {{ cardData.status }}
             </p>
+          </div>
+        </div>
+        <!-- Middle column -->
+        <div class="col-12 md:col-6 lg:col-4">
+          <div class="grid">
+            <p class="col-12">
+              <span class="key font-bold">Last updated:</span>
+              {{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Updated by:</span>
+              {{ cardUpdatedBy }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Adjudication date:</span>
+              {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
+            </p>
+            <p class="col-12">
+              <span class="key font-bold">Issued Permit ID:</span>
+              {{ cardData.issuedPermitId }}
+            </p>
+          </div>
+        </div>
+        <!-- Right column -->
+        <div class="col-12 md:col-6 lg:col-4">
+          <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Agency:</span>
               {{ permitType?.agency }}
@@ -129,50 +165,30 @@ function isCompleted(authStatus: string | undefined): boolean {
               <span class="key font-bold">Source system:</span>
               {{ permitType?.sourceSystem }}
             </p>
-          </div>
-        </div>
-        <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
             <p class="col-12">
               <span class="key font-bold">Needed:</span>
               {{ cardData.needed }}
             </p>
-            <p class="col-12">
-              <span class="key font-bold">Submitted date:</span>
-              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
-            </p>
-
-            <p class="col-12">
-              <span class="key font-bold">Status verified date:</span>
-              {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Status:</span>
-              {{ cardData.status }}
-            </p>
           </div>
         </div>
-        <!-- Right column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
-            <p class="col-12">
-              <span class="key font-bold">Tracking ID:</span>
-              {{ cardData.trackingId }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Adjudication date:</span>
-              {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Issued Permit ID:</span>
-              {{ cardData.issuedPermitId }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Updated by:</span>
-              {{ cardUpdatedBy }}
-            </p>
-          </div>
+      </div>
+      <div
+        v-if="cardData.permitNote?.length"
+        class="pb-2 pt-3"
+      >
+        <span class="key font-bold">Latest update for the client:</span>
+        <div class="pt-3">
+          <span class="font-bold">{{ ' ' + formatDateTime(cardData.permitNote[0].createdAt) }},</span>
+          {{ cardData.permitNote[0].note }}
+        </div>
+        <div>
+          <Button
+            class="previous-updates px-0"
+            text
+            @click="notesModalVisible = true"
+          >
+            Previous updates
+          </Button>
         </div>
       </div>
     </template>
@@ -186,6 +202,7 @@ function isCompleted(authStatus: string | undefined): boolean {
   <NotesModal
     v-model:visible="notesModalVisible"
     :permit="cardData"
+    :permit-name="permitTypeName"
   />
 </template>
 
@@ -203,6 +220,11 @@ p {
   border-radius: 1em;
   :deep(.p-card-content) {
     padding-bottom: 0;
+    padding-top: 0.75rem;
+  }
+
+  :deep(.p-card-title) {
+    margin-bottom: 0rem;
   }
 
   :deep(.p-card-body) {
@@ -229,5 +251,12 @@ p {
 
 .darkgrey {
   color: #605e5c;
+}
+
+.previous-updates {
+  border: 0rem;
+  padding-top: 1rem;
+  text-decoration: underline;
+  text-underline-offset: 0.175rem;
 }
 </style>

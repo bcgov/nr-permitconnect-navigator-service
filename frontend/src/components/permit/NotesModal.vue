@@ -12,8 +12,9 @@ import type { Permit, PermitNote } from '@/types';
 import permitNoteService from '@/services/permitNoteService';
 
 // Props
-const { permit } = defineProps<{
+const { permit, permitName } = defineProps<{
   permit: Permit;
+  permitName: string;
 }>();
 
 // State
@@ -66,7 +67,7 @@ async function onSubmit(data: any, { resetForm }) {
       />
       <span class="p-dialog-title">Add updates</span>
     </template>
-
+    <h4 class="mb-4">{{ permitName }}</h4>
     <Form
       ref="formRef"
       :initial-values="initialFormValues"
