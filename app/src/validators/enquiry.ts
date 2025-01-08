@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
-import { contacts } from './contacts';
+import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST } from '../utils/constants/application';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';

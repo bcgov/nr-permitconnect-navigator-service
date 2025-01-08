@@ -4,6 +4,7 @@ import { currentContext } from '../../middleware/authentication';
 
 import accessRequest from './accessRequest';
 import ats from './ats';
+import contact from './contact';
 import docs from './docs';
 import document from './document';
 import enquiry from './enquiry';
@@ -26,6 +27,7 @@ router.get('/', (_req, res) => {
     endpoints: [
       '/accessRequest',
       '/ats',
+      '/contact',
       '/docs',
       '/document',
       '/enquiry',
@@ -43,6 +45,7 @@ router.get('/', (_req, res) => {
 router.use('/accessRequest', accessRequest);
 router.use('/docs', docs);
 router.use('/ats', ats);
+router.use('/contact', contact);
 router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/note', note);

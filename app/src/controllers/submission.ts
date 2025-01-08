@@ -220,7 +220,7 @@ const controller = {
 
       // Create contacts
       if (req.body.contacts)
-        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
+        await contactService.upsertContacts(req.body.contacts, req.currentContext, submission.activityId);
 
       // Create new submission
       const result = await submissionService.createSubmission({
@@ -369,7 +369,7 @@ const controller = {
 
       // Create contacts
       if (req.body.contacts)
-        await contactService.upsertContacts(submission.activityId, req.body.contacts, req.currentContext);
+        await contactService.upsertContacts(req.body.contacts, req.currentContext, submission.activityId);
 
       // Create new submission
       const result = await submissionService.createSubmission({
@@ -447,7 +447,7 @@ const controller = {
 
   updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
-      await contactService.upsertContacts(req.body.activityId, req.body.contacts, req.currentContext);
+      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
       const response = await submissionService.updateSubmission({
         ...req.body,
