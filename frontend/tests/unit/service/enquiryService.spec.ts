@@ -32,7 +32,7 @@ const testEnquiry = {
       phoneNumber: '(123) 456-7890',
       email: 'test@test.weg',
       contactPreference: 'Phone call',
-      contactApplicantRelationship: 'Owner'
+      contactApplicantRelationship: 'Property owner'
     }
   ]
 };

@@ -276,7 +276,7 @@ model submission {
   updated_at                         DateTime? @db.Timestamptz(6)
   has_rental_units                   String?
   project_description                String?
-  is_developed_by_company_or_org     String?
+  project_applicant_type             String?
   is_developed_in_bc                 String?
   multi_family_units                 String?
   other_units                        String?

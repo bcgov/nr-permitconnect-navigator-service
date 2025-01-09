@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useField, ErrorMessage } from 'vee-validate';
+import { onMounted } from 'vue';
 
 import { AutoComplete } from '@/lib/primevue';
 
@@ -38,7 +39,11 @@ const {
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, value, resetField } = useField<string>(name);
+
+onMounted(() => {
+  resetField({ touched: false });
+});
 </script>
 
 <template>

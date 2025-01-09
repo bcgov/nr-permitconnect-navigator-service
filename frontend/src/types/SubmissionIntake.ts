@@ -4,7 +4,7 @@ import type { Permit } from './Permit';
 export type SubmissionIntake = {
   basic?: {
     consentToFeedback?: boolean;
-    isDevelopedByCompanyOrOrg?: string;
+    projectApplicantType?: string;
     isDevelopedInBC?: string;
     registeredName?: string;
   };

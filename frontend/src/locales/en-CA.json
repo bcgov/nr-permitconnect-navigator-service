@@ -115,6 +115,19 @@
     "isRegisteredTooltip": "Are you registered with OrgBook BC?",
     "multiFamilyTooltip": "Multi-family dwelling: a residential building that contains two or more attached dwellings, including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.",
     "potentialPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
-    "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants."
+    "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants.",
+    "contactCard": "Who is the primary contact regarding this project?",
+    "projectApplicantTypeCard": "Are you applying as an individual or as a business?",
+    "projectNameCard": "Tell us your project name",
+    "singleFamilySelectedCard": "Select the types of residential units being developed",
+    "hasRentalUnitsCard": "Will this project include rental units?",
+    "financiallySupportedCard": "Is this project associated with any of the following?",
+    "projectDescriptionCard": "Help us learn more about your housing project",
+    "naturalDisasterCard": "Has the location of this project been affected by natural disaster?",
+    "projectLocationCard": "Provide one of the following project locations",
+    "additionalLocationCard": "Provide additional location details (optional)",
+    "projectLocationDescriptionCard": "Is there anything else you would like to tell us about this project's location? (optional)",
+    "provincialPermitsCard": "Have you applied for any provincial permits for this project?",
+    "investigatePermitsCard": "Select all provincially issued permits you think you might need (optional)"
   }
 }

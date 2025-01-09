@@ -13,6 +13,7 @@ import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
+import { ProjectApplicant } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -188,14 +189,14 @@ describe('SubmissionIntakeForm', () => {
     //     contactLastName: 'testLastName',
     //     contactPhoneNumber: '2501234567',
     //     contactEmail: 'test@test.com',
-    //     contactApplicantRelationship: ProjectRelationship.AGENT,
+    //     contactApplicantRelationship: ProjectRelationship.OTHER,
     //     contactPreference: ContactPreference.PHONE_CALL
     //   }
     // );
 
     const basicTest = submissionIntakeSchema.validateAt('basic', {
       basic: {
-        isDevelopedByCompanyOrOrg: BasicResponse.NO,
+        projectApplicantType: ProjectApplicant.BUSINESS,
         isDevelopedInBC: BasicResponse.NO,
         registeredName: 'testString3'
       }
@@ -267,13 +268,13 @@ describe('SubmissionIntakeForm', () => {
     //   contactLastName: 'testcontactLastName',
     //   contactPhoneNumber: '2501234567',
     //   contactEmail: 'test@test.com',
-    //   contactApplicantRelationship: ProjectRelationship.AGENT,
+    //   contactApplicantRelationship: ProjectRelationship.OTHER,
     //   contactPreference: ContactPreference.PHONE_CALL
     // });
 
     const basicTestFail = submissionIntakeSchema.validateAt('basic', {
       basic: {
-        isDevelopedByCompanyOrOrg: 'testString1',
+        projectApplicantType: 'testString1',
         isDevelopedInBC: 'testString2',
         registeredName: 'testString3'
       }

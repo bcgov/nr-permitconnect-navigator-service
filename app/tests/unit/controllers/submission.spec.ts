@@ -52,7 +52,7 @@ const SUBMISSION_1 = {
   contactPhoneNumber: null,
   contactEmail: null,
   contactPreference: null,
-  contactApplicantRelationship: null,
+  contactApplicantRelationship: 'Property owner',
   projectName: null,
   projectDescription: null,
   singleFamilyUnits: null,
@@ -120,7 +120,7 @@ describe('createSubmission', () => {
       body: {
         applicant: {},
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          projectApplicantType: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -146,7 +146,7 @@ describe('createSubmission', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        isDevelopedByCompanyOrOrg: true,
+        projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -408,7 +408,7 @@ describe('submitDraft', () => {
       body: {
         contacts: [{ firstName: 'test', lastName: 'person' }],
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          projectApplicantType: 'Individual'
         },
         housing: {
           projectName: 'TheProject'
@@ -436,7 +436,7 @@ describe('submitDraft', () => {
     expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
     expect(createSubmissionSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        isDevelopedByCompanyOrOrg: true,
+        projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
@@ -558,7 +558,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          projectApplicantType: 'Business'
         },
         housing: {
           projectName: 'TheProject'
@@ -600,7 +600,7 @@ describe('updateDraft', () => {
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
-          isDevelopedByCompanyOrOrg: true
+          projectApplicantType: 'Business'
         },
         housing: {
           projectName: 'TheProject'
