@@ -146,6 +146,12 @@ label {
   }
 }
 
+.p-card {
+  .p-divider {
+    margin-bottom: 0;
+  }
+}
+
 /* datatable */
 .p-datatable {
   .p-paginator {

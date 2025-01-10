@@ -197,6 +197,10 @@ const filteredDocuments = computed(() => {
   color: var(--text-color);
 }
 
+.p-fileupload {
+  border-style: none;
+}
+
 .progress-bar {
   height: 0.3rem;
 }

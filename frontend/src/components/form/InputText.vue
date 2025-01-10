@@ -28,7 +28,7 @@ const emit = defineEmits(['onChange', 'onClick']);
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <FloatLabel v-if="floatLabel">
       <InputTextInternal
         v-bind="{ label, name, placeholder, disabled, bold }"

@@ -34,7 +34,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <div class="flex flex-col gap-4">
       <div
         v-for="option in options"

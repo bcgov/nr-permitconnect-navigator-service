@@ -38,7 +38,7 @@ const emit = defineEmits(['onChange']);
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <FloatLabel v-if="floatLabel">
       <SelectInternal
         v-bind="{ label, name, placeholder, disabled, options, optionLabel, optionValue, bold, loading, floatLabel }"

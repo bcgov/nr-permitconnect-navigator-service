@@ -27,7 +27,7 @@ const {
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <FloatLabel v-if="floatLabel">
       <InputMaskInternal v-bind="{ label, name, mask, placeholder, disabled, bold }" />
     </FloatLabel>

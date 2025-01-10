@@ -47,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <label
       :id="`${name}-label`"
       :class="{ 'font-bold': bold }"

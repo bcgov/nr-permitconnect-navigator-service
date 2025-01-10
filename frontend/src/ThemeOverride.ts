@@ -181,8 +181,12 @@ export const ThemeOverride = definePreset(Material, {
       }
     },
     datatable: {
-      paginatorBottom: {
-        borderWidth: '0'
+      paginator: {
+        bottom: {
+          border: {
+            width: '0'
+          }
+        }
       }
     },
     menu: {

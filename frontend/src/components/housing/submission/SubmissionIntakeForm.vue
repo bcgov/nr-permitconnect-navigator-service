@@ -566,8 +566,8 @@ watch(
       :text="getBackButtonConfig.text"
     />
 
-    <div class="flex justify-center app-primary-color mt-3 mb-6">
-      <h3 class="font-bold">Housing Project Intake Form</h3>
+    <div class="flex justify-center">
+      <h2>Housing Project Intake Form</h2>
     </div>
     <Form
       v-if="initialFormValues"
@@ -607,7 +607,7 @@ watch(
         :value="activeStep"
         @update:active-step="onStepChange"
       >
-        <StepList>
+        <StepList class="!mb-6">
           <Step
             :value="0"
             as-child
@@ -776,7 +776,7 @@ watch(
                       </div>
                     </div>
                     <RadioList
-                      class="col-span-12 pl-0"
+                      class="col-span-12 mt-2 pl-0"
                       name="basic.isDevelopedInBC"
                       :bold="false"
                       :disabled="!editable"
@@ -785,7 +785,7 @@ watch(
                     />
                     <AutoComplete
                       v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
-                      class="col-span-6 pl-0"
+                      class="col-span-6 mt-4 pl-0"
                       name="basic.registeredName"
                       :bold="false"
                       :disabled="!editable"
@@ -1003,8 +1003,8 @@ watch(
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col mb-2">
+                <div>
+                  <div class="mb-6">
                     <div class="flex items-center">
                       <label>
                         <a
@@ -1028,15 +1028,16 @@ watch(
                       </div>
                       <!-- eslint-enable max-len -->
                     </div>
+
+                    <RadioList
+                      name="housing.financiallySupportedBC"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                   </div>
-                  <RadioList
-                    class="col-span-12"
-                    name="housing.financiallySupportedBC"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col mb-2">
+
+                  <div class="mb-6">
                     <label>
                       <a
                         href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
@@ -1045,24 +1046,22 @@ watch(
                         Indigenous Housing Provider
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-span-12"
-                    name="housing.financiallySupportedIndigenous"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-span-12">
+                    <RadioList
+                      name="housing.financiallySupportedIndigenous"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
-                      class="col-span-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.indigenousDescription"
                       :disabled="!editable"
                       placeholder="Name of Indigenous Housing Provider"
                     />
                   </div>
-                  <div class="col mb-2">
+
+                  <div class="mb-6">
                     <label>
                       <a
                         href="https://bcnpha.ca/member-programs-list/"
@@ -1071,24 +1070,22 @@ watch(
                         Non-profit housing society
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-span-12"
-                    name="housing.financiallySupportedNonProfit"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-span-12">
+                    <RadioList
+                      name="housing.financiallySupportedNonProfit"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
-                      class="col-span-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.nonProfitDescription"
                       :disabled="!editable"
                       placeholder="Name of Non-profit housing society"
                     />
                   </div>
-                  <div class="col mb-2">
+
+                  <div>
                     <label>
                       <a
                         href="https://www.chf.bc.ca/find-co-op/"
@@ -1097,18 +1094,15 @@ watch(
                         Housing co-operative
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-span-12"
-                    name="housing.financiallySupportedHousingCoop"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-span-12">
+                    <RadioList
+                      name="housing.financiallySupportedHousingCoop"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
-                      class="col-span-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.housingCoopDescription"
                       :disabled="!editable"
                       placeholder="Name of Housing co-operative"
@@ -1334,15 +1328,17 @@ watch(
                             placeholder="Longitude"
                             @keyup.enter="onLatLongInputClick"
                           />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
+                          <div class="col-span-4">
+                            <Button
+                              class="lat-long-btn"
+                              label="Show on map"
+                              :disabled="!editable"
+                              @click="onLatLongInputClick"
+                            />
+                          </div>
                         </div>
-                        <div class="grid grid-cols-12 gap-4 nested-grid">
-                          <div class="col-span-12 text-blue-500">
+                        <div>
+                          <div class="text-blue-500">
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
                           </div>
@@ -1830,9 +1826,5 @@ watch(
     padding-left: 1rem;
     padding-right: 1rem;
   }
-}
-
-.lat-long-btn {
-  height: 2.3rem;
 }
 </style>
