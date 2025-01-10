@@ -82,8 +82,7 @@ const { t } = useI18n();
       :header="t('enquiryListProponent.submittedDate')"
       :sortable="true"
       header-class="header-right"
-      class="text-right"
-      style="width: 10%"
+      class="!text-right"
     >
       <template #body="{ data }">
         {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}

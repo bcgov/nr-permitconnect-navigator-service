@@ -14,8 +14,9 @@ const visible = defineModel<boolean>('visible');
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">Application stages</span>
+      <span class="p-dialog-title">What does the status mean?</span>
     </template>
+    <h4 class="mb-6">Application stages</h4>
     <div>The application reviewing process includes four stages.</div>
     <div class="my-6">
       <div class="text-lg font-bold mb-2">Application submission</div>

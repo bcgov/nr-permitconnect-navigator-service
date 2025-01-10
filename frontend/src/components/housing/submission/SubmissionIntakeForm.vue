@@ -1373,7 +1373,7 @@ watch(
               <template #content>
                 <Accordion
                   collapse-icon="pi pi-chevron-up"
-                  expand-icon="pi pi-chevron-down"
+                  expand-icon="pi pi-chevron-right"
                   :value="parcelAccordionIndex"
                 >
                   <AccordionPanel value="0">
@@ -1409,7 +1409,7 @@ watch(
                 </Accordion>
                 <Accordion
                   collapse-icon="pi pi-chevron-up"
-                  expand-icon="pi pi-chevron-down"
+                  expand-icon="pi pi-chevron-right"
                   :value="geomarkAccordionIndex"
                   class="mt-6 mb-2"
                 >

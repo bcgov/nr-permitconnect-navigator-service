@@ -70,8 +70,8 @@ onMounted(async () => {
 
 <template>
   <div class="flex flex-col items-center justify-start h-full">
-    <div class="flex flex-row items-center w-full justify-between shadow px-4 py-1">
-      <h1 class="font-bold">{{ t('housing.housing') }}</h1>
+    <div class="flex flex-row items-center w-full justify-between shadow px-4">
+      <h1>{{ t('housing.housing') }}</h1>
       <img
         class="mr-4"
         src="@/assets/images/housing_2.png"
@@ -80,7 +80,7 @@ onMounted(async () => {
       />
     </div>
 
-    <div class="flex flex-row items-center w-full my-4">
+    <div class="flex flex-row items-center w-full mt-4 mb-9">
       <div class="font-bold mr-2">{{ t('housing.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
@@ -121,20 +121,23 @@ onMounted(async () => {
     <!--
       Projects
     -->
-    <div class="flex flex-row items-center w-full justify-between my-4">
+    <div class="flex flex-row items-center w-full justify-between">
       <h2
         id="projects"
-        class="flex font-bold"
+        class="flex"
         tabindex="-1"
       >
         {{ t('housing.myProjects') }}
         <div
           v-tooltip.right="t('housing.projectsTooltip')"
-          v-tooltip.focus.right="t('housing.projectsTooltip')"
           class="flex items-center pl-2 text-xl"
-          tabindex="0"
         >
-          <font-awesome-icon icon="fa-solid fa-circle-info" />
+          <div
+            v-tooltip.focus.right="t('housing.projectsTooltip')"
+            tabindex="0"
+          >
+            <font-awesome-icon icon="fa-solid fa-circle-info" />
+          </div>
         </div>
       </h2>
       <Button
@@ -163,7 +166,7 @@ onMounted(async () => {
         :key="project.activityId"
         :index="index"
         class="rounded-sm shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
-        :class="[index != displayedProjects.length - 1 ? 'mb-4' : '']"
+        :class="{ 'mb-2': index != displayedProjects.length - 1 }"
         @click="onProjectClick(project)"
       >
         <div class="grid grid-cols-12 gap-4">
@@ -203,7 +206,7 @@ onMounted(async () => {
     <!--
       Drafts
     -->
-    <div class="flex flex-row items-center w-full justify-between mt-4">
+    <div class="flex flex-row items-center w-full justify-between">
       <h2
         id="drafts"
         class="flex font-bold"
@@ -224,7 +227,7 @@ onMounted(async () => {
     <!--
       Enquiries
     -->
-    <div class="flex flex-row items-center w-full justify-between mt-12">
+    <div class="flex flex-row items-center w-full justify-between">
       <h2
         id="enquiries"
         class="flex font-bold"
@@ -238,6 +241,7 @@ onMounted(async () => {
           tabindex="0"
         >
           <font-awesome-icon icon="fa-solid fa-circle-info" />
+          <div />
         </div>
       </h2>
       <Button

@@ -271,7 +271,7 @@ onBeforeMount(async () => {
     :model="breadcrumbItems"
   />
   <div class="permit-status-view">
-    <h1 class="permit-name mt-16">
+    <h1 class="permit-name">
       {{ permit?.name }}
     </h1>
     <div class="permit-info-block">
@@ -340,7 +340,7 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4>Application progress</h4>
+            <h4 class="mb-6">Application progress</h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"
@@ -507,10 +507,6 @@ onBeforeMount(async () => {
 
 .permit-info p {
   margin: 0;
-}
-
-.permit-name {
-  margin-bottom: 3.5rem;
 }
 
 .p-card {

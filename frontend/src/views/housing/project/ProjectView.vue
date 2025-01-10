@@ -8,7 +8,18 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import { Spinner } from '@/components/layout';
-import { Accordion, AccordionTab, Button, Card, Column, DataTable, Divider, useToast } from '@/lib/primevue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  Button,
+  Card,
+  Column,
+  DataTable,
+  Divider,
+  useToast
+} from '@/lib/primevue';
 import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
@@ -21,6 +32,7 @@ import { useSubmissionStore, useTypeStore } from '@/store';
 import type { ComputedRef, Ref } from 'vue';
 import type { Permit, PermitType, User } from '@/types';
 import type { MenuItem } from 'primevue/menuitem';
+import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
 // Types
 type PermitFilterConfig = {
@@ -326,23 +338,29 @@ onMounted(async () => {
     <Accordion
       v-if="permitsNotNeeded?.length"
       class="app-primary-color"
+      :value="undefined"
+      collapse-icon="pi pi-chevron-up"
+      expand-icon="pi pi-chevron-right"
     >
-      <AccordionTab :header="t('projectView.notNeeded')">
-        <div>
-          {{ t('projectView.notNeededDesc') }}
-        </div>
-        <ul class="mt-6 mb-0">
-          <li
-            v-for="permit in permitsNotNeeded"
-            :key="permit.permitId"
-            class="m-0"
-          >
-            {{ permit.name }}
-          </li>
-        </ul>
-      </AccordionTab>
+      <AccordionPanel value="0">
+        <AccordionHeader>{{ t('projectView.notNeeded') }}</AccordionHeader>
+        <AccordionContent>
+          <div>
+            {{ t('projectView.notNeededDesc') }}
+          </div>
+          <ul class="list-disc mt-4">
+            <li
+              v-for="permit in permitsNotNeeded"
+              :key="permit.permitId"
+              class="ml-12"
+            >
+              {{ permit.name }}
+            </li>
+          </ul>
+        </AccordionContent>
+      </AccordionPanel>
     </Accordion>
-    <h3 class="mt-20 mb-8">{{ t('projectView.submittedApplications') }}</h3>
+    <h3 class="my-8">{{ t('projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
       class="empty-block p-8"
@@ -412,7 +430,7 @@ onMounted(async () => {
     />
     <div>
       <div>
-        <h3 class="mb-8 mt-16">{{ t('projectView.relatedEnquiries') }}</h3>
+        <h3 class="my-8">{{ t('projectView.relatedEnquiries') }}</h3>
       </div>
 
       <div
@@ -421,66 +439,10 @@ onMounted(async () => {
       >
         {{ t('projectView.listEmpty') }}
       </div>
-
-      <DataTable
-        v-else
+      <EnquiryListProponent
         :loading="loading"
-        :value="getRelatedEnquiries"
-        :row-hover="true"
-        :rows="10"
-        :sort-field="DEFAULT_SORT_FIELD"
-        :sort-order="DEFAULT_SORT_ORDER"
-        scrollable
-        responsive-layout="scroll"
-        :paginator="true"
-        paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-        :current-page-report-template="`({currentPage} ${t('projectView.rangeSeparator')} {totalPages})`"
-        :rows-per-page-options="[10, 20, 50]"
-      >
-        <template #empty>
-          <div class="flex justify-center">
-            <p class="font-bold text-xl">{{ t('projectView.listEmpty') }}</p>
-          </div>
-        </template>
-        <template #loading>
-          <Spinner />
-        </template>
-
-        <Column
-          field="activityId"
-          :header="t('projectView.enquiryID')"
-          style="width: 45%"
-        >
-          <template #body="{ data }">
-            <div :data-activityId="data.activityId">
-              <router-link
-                :to="{
-                  name: RouteName.HOUSING_ENQUIRY_INTAKE,
-                  query: { activityId: data.activityId, enquiryId: data.enquiryId }
-                }"
-              >
-                {{ data.activityId }}
-              </router-link>
-            </div>
-          </template>
-        </Column>
-        <Column
-          field="enquiryStatus"
-          :header="t('projectView.status')"
-          :sortable="true"
-          style="width: 42%"
-        />
-        <Column
-          field="submittedAt"
-          :header="t('projectView.submittedDate')"
-          :sortable="true"
-          style="width: 15%"
-        >
-          <template #body="{ data }">
-            {{ formatDate(data?.submittedAt) }}
-          </template>
-        </Column>
-      </DataTable>
+        :enquiries="getRelatedEnquiries"
+      />
     </div>
   </div>
 </template>
@@ -565,6 +527,7 @@ a {
   font-style: italic;
   font-weight: 400;
 }
+
 :deep(.p-accordion-content) {
   padding: 4rem 4rem 4rem 4rem;
   border-style: none;
