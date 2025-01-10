@@ -8,11 +8,13 @@ import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-ut
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
-import { documentService, permitService, submissionService } from '@/services';
+import { contactService, documentService, permitService, submissionService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
+
+import type { Contact } from '@/types';
 import { ProjectApplicant } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
@@ -34,7 +36,8 @@ vi.mock('vue-router', () => ({
   onBeforeRouteUpdate: vi.fn()
 }));
 
-const usePermitService = vi.spyOn(permitService, 'getPermitTypes');
+const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
 const testPermitData = [
   {
@@ -84,6 +87,21 @@ const testPermitData = [
   }
 ];
 
+const sampleContact: Contact = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant',
+  createdBy: 'testCreatedBy',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'testUpdatedAt',
+  updatedAt: new Date().toISOString()
+};
+searchContactsSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 const wrapperSettings = () => ({
   global: {
     plugins: [
@@ -124,7 +142,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  usePermitService.mockResolvedValue({ data: testPermitData } as AxiosResponse);
+  getPermitTypesSpy.mockResolvedValue({ data: testPermitData } as AxiosResponse);
 });
 
 afterEach(() => {
@@ -176,7 +194,8 @@ describe('SubmissionIntakeForm', () => {
 
   it('checks submit btn disabled conditions', async () => {
     const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
-
+    await nextTick();
+    await flushPromises();
     const submitButton = wrapper.find('[type="submit"]');
     expect(submitButton.attributes('disabled')).toBeDefined();
   });

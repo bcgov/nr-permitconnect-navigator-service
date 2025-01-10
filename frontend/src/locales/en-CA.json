@@ -22,6 +22,7 @@
     "deleteTooltip": "Delete document"
   },
   "enquiryIntakeForm": {
+    "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
     "projectIdTooltip": "Project ID can be found in the confirmation email you received at the time of submission.",
     "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project."
   },
@@ -130,6 +131,7 @@
     "appliedPermitsShareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",
     "appliedPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "bcHousingTooltip": "BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.",
+    "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
     "isRegisteredTooltip": "Are you registered with OrgBook BC?",
     "multiFamilyTooltip": "Multi-family dwelling: a residential building that contains two or more attached dwellings, including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.",
     "potentialPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",

@@ -46,7 +46,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
-import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useConfigStore, useContactStore, useSubmissionStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
@@ -101,6 +101,7 @@ const VALIDATION_BANNER_TEXT =
   'One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red.';
 
 // Store
+const contactStore = useContactStore();
 const submissionStore = useSubmissionStore();
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
@@ -344,6 +345,7 @@ async function onSubmit(data: any) {
       ...data,
       contacts: [
         {
+          contactId: data.contacts.contactId,
           firstName: data.contacts.contactFirstName,
           lastName: data.contacts.contactLastName,
           phoneNumber: data.contacts.contactPhoneNumber,
@@ -368,6 +370,9 @@ async function onSubmit(data: any) {
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.submissionId);
+
+      // Save contact data to store
+      contactStore.setContact(submissionData.contacts[0]);
 
       router.push({
         name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
@@ -468,18 +473,22 @@ onBeforeMount(async () => {
 
         // Set form to read-only on non draft form reopening
         editable.value = false;
+      } else {
+        // Load contact data for new submission
+        response = { contacts: [contactStore.getContact] };
       }
 
       initialFormValues.value = {
         activityId: response?.activityId,
         submissionId: response?.submissionId,
         contacts: {
-          contactFirstName: response?.contacts[0].firstName,
-          contactLastName: response?.contacts[0].lastName,
-          contactPhoneNumber: response?.contacts[0].phoneNumber,
-          contactEmail: response?.contacts[0].email,
-          contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
-          contactPreference: response?.contacts[0].contactPreference
+          contactFirstName: response?.contacts[0]?.firstName,
+          contactLastName: response?.contacts[0]?.lastName,
+          contactPhoneNumber: response?.contacts[0]?.phoneNumber,
+          contactEmail: response?.contacts[0]?.email,
+          contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
+          contactPreference: response?.contacts[0]?.contactPreference,
+          contactId: response?.contacts[0]?.contactId
         },
         basic: {
           consentToFeedback: response?.consentToFeedback,
@@ -682,6 +691,13 @@ watch(
             <Card>
               <template #title>
                 <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
+                <span
+                  v-tooltip.right="t('submissionIntakeForm.contactTooltip')"
+                  v-tooltip.focus.right="t('submissionIntakeForm.contactTooltip')"
+                  tabindex="0"
+                >
+                  <font-awesome-icon icon="fa-solid fa-circle-question" />
+                </span>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -691,14 +707,14 @@ watch(
                     :name="`contacts.contactFirstName`"
                     label="First name"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactFirstName || !editable"
                   />
                   <InputText
                     class="col-span-6"
                     :name="`contacts.contactLastName`"
                     label="Last name"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactLastName || !editable"
                   />
                   <InputMask
                     class="col-span-6"
@@ -706,21 +722,21 @@ watch(
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactPhoneNumber || !editable"
                   />
                   <InputText
                     class="col-span-6"
                     :name="`contacts.contactEmail`"
                     label="Email"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactEmail || !editable"
                   />
                   <Select
                     class="col-span-6"
                     :name="`contacts.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactApplicantRelationship || !editable"
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
                   <Select
@@ -728,7 +744,7 @@ watch(
                     :name="`contacts.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="initialFormValues?.contacts?.contactPreference || !editable"
                     :options="CONTACT_PREFERENCE_LIST"
                   />
                 </div>

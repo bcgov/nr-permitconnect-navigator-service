@@ -19,18 +19,19 @@ import {
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
-import { useConfigStore } from '@/store';
+import { useConfigStore, useContactStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
+import { omit } from '@/utils/utils';
 import { contactValidator } from '@/validators';
 
+import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
-import { omit } from '@/utils/utils';
 
 // Props
 const { enquiryId = undefined } = defineProps<{
@@ -38,13 +39,14 @@ const { enquiryId = undefined } = defineProps<{
 }>();
 
 // Store
+const contactStore = useContactStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const editable: Ref<boolean> = ref(true);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<undefined | object> = ref(undefined);
+const initialFormValues: Ref<undefined | GenericObject> = ref(undefined);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const submissions: Ref<Array<Submission>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
@@ -105,12 +107,12 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
 
   const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': formRef.value?.values.contacts[0].firstName,
+    '{{ contactName }}': formRef.value?.values.contactFirstName,
     '{{ activityId }}': activityId,
     '{{ enquiryDescription }}': firstTwoSentences.trim(),
     '{{ enquiryId }}': enquiryId
   });
-  let applicantEmail = formRef.value?.values.contacts[0].email;
+  let applicantEmail = formRef.value?.values.contactEmail;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
@@ -129,17 +131,21 @@ async function loadEnquiry() {
     if (enquiryId) {
       response = (await enquiryService.getEnquiry(enquiryId as string)).data;
       editable.value = response?.intakeStatus !== IntakeStatus.SUBMITTED;
+    } else {
+      // Load contact data for new enquiry
+      response = { contacts: [contactStore.getContact] };
     }
 
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contactFirstName: response?.contacts[0].firstName,
-      contactLastName: response?.contacts[0].lastName,
-      contactPhoneNumber: response?.contacts[0].phoneNumber,
-      contactEmail: response?.contacts[0].email,
-      contactApplicantRelationship: response?.contacts[0].contactApplicantRelationship,
-      contactPreference: response?.contacts[0].contactPreference,
+      contactFirstName: response?.contacts[0]?.firstName,
+      contactLastName: response?.contacts[0]?.lastName,
+      contactPhoneNumber: response?.contacts[0]?.phoneNumber,
+      contactEmail: response?.contacts[0]?.email,
+      contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
+      contactPreference: response?.contacts[0]?.contactPreference,
+      contactId: response?.contacts[0]?.contactId,
       basic: {
         isRelated: response?.isRelated,
         relatedActivityId: response?.relatedActivityId,
@@ -190,7 +196,8 @@ async function onSubmit(data: any) {
             phoneNumber: data.contactPhoneNumber,
             email: data.contactEmail,
             contactApplicantRelationship: data.contactApplicantRelationship,
-            contactPreference: data.contactPreference
+            contactPreference: data.contactPreference,
+            contactId: data.contactId
           }
         ]
       },
@@ -200,7 +207,8 @@ async function onSubmit(data: any) {
         'contactPhoneNumber',
         'contactEmail',
         'contactApplicantRelationship',
-        'contactPreference'
+        'contactPreference',
+        'contactId'
       ]
     );
 
@@ -212,6 +220,9 @@ async function onSubmit(data: any) {
 
       // Send confirmation email
       emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
+
+      // Save contact data to store
+      contactStore.setContact(enquiryData.contacts[0]);
 
       router.push({
         name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
@@ -286,6 +297,13 @@ onBeforeMount(async () => {
       <Card>
         <template #title>
           <span class="section-header">Who is the primary contact regarding this project?</span>
+          <span
+            v-tooltip.right="t('enquiryIntakeForm.contactTooltip')"
+            v-tooltip.focus.right="t('enquiryIntakeForm.contactTooltip')"
+            tabindex="0"
+          >
+            <font-awesome-icon icon="fa-solid fa-circle-info" />
+          </span>
           <Divider type="solid" />
         </template>
         <template #content>
@@ -295,14 +313,14 @@ onBeforeMount(async () => {
               name="contactFirstName"
               label="First name"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactFirstName || !editable"
             />
             <InputText
               class="col-span-6"
               name="contactLastName"
               label="Last name"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactLastName || !editable"
             />
             <InputMask
               class="col-span-6"
@@ -310,21 +328,21 @@ onBeforeMount(async () => {
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactPhoneNumber || !editable"
             />
             <InputText
               class="col-span-6"
               name="contactEmail"
               label="Email"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactEmail || !editable"
             />
             <Select
               class="col-span-6"
               name="contactApplicantRelationship"
               label="Relationship to project"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactApplicantRelationship || !editable"
               :options="PROJECT_RELATIONSHIP_LIST"
             />
             <Select
@@ -332,7 +350,7 @@ onBeforeMount(async () => {
               :name="`contactPreference`"
               label="Preferred contact method"
               :bold="false"
-              :disabled="!editable"
+              :disabled="initialFormValues?.contactPreference || !editable"
               :options="CONTACT_PREFERENCE_LIST"
             />
           </div>
