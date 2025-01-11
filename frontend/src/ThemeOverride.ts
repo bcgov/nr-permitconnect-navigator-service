@@ -229,6 +229,17 @@ export const ThemeOverride = definePreset(Material, {
         }
       }
     },
+    message: {
+      colorScheme: {
+        light: {
+          root: {
+            success: {
+              background: '{green.100}'
+            }
+          }
+        }
+      }
+    },
     radiobutton: {
       icon: {
         size: '10px',

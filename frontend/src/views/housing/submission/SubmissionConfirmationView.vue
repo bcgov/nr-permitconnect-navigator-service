@@ -14,13 +14,12 @@ const { activityId, submissionId } = defineProps<{
   <div>
     <h2>Confirmation of Submission</h2>
     <Message
-      class="border-0"
       severity="success"
       :closable="false"
     >
       Your application has been successfully submitted.
     </Message>
-    <h3 class="inline-block mr-2">Project ID:</h3>
+    <h3 class="inline-block my-7 mr-2">Project ID:</h3>
     <router-link
       :to="{
         name: RouteName.HOUSING_SUBMISSION_INTAKE,

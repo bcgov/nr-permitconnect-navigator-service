@@ -21,13 +21,12 @@ const {
   <div>
     <h2 v-if="showHeader">Confirmation of Submission</h2>
     <Message
-      class="border-0"
       severity="success"
       :closable="false"
     >
       Your enquiry has been successfully submitted.
     </Message>
-    <h3 class="inline-block mr-2">Enquiry ID:</h3>
+    <h3 class="inline-block my-7 mr-2">Enquiry ID:</h3>
     <router-link
       :to="{
         name: RouteName.HOUSING_ENQUIRY_INTAKE,
@@ -42,7 +41,7 @@ const {
     </div>
     <div
       v-if="showHomeLink"
-      class="mt-6"
+      class="mt-7"
     >
       <router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link>
     </div>
