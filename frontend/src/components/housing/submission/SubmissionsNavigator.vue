@@ -267,9 +267,7 @@ watch(showCompleted, () => {
     v-if="showToggle"
     class="flex justify-end mr-4"
   >
-    <span class="app-primary-color">
-      {{ showCompleted ? 'Show active submissions' : 'Show completed submissions' }}
-    </span>
+    <span class="app-primary-color">Show completed submissions</span>
     <ToggleSwitch
       v-model="showCompleted"
       class="ml-2"

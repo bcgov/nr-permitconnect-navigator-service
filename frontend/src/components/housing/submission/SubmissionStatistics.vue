@@ -67,12 +67,12 @@ watch(
 
 <template>
   <div v-if="statistics">
-    <table class="text-left">
+    <table class="w-full text-left">
       <thead>
         <tr>
-          <th class="col-span-9">Statistics</th>
-          <th class="col-span-1 text-right">Number</th>
-          <th class="col-span-2 text-right">Percentage of total</th>
+          <th class="col-span-9"><div class="p-2">Statistics</div></th>
+          <th class="col-span-1 text-right"><div class="py-2">Number</div></th>
+          <th class="col-span-2 text-right"><div class="p-2">Percentage of total</div></th>
         </tr>
       </thead>
       <tbody>
@@ -304,6 +304,19 @@ table {
 
 thead {
   background-color: #d3d3d3;
+}
+
+td {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+
+td:nth-child(3n + 1) {
+  padding-left: 0.5rem;
+}
+
+td:nth-child(3n + 3) {
+  padding-right: 0.5rem;
 }
 
 tr:nth-child(even) {
