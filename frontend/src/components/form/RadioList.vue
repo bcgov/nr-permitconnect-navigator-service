@@ -21,7 +21,7 @@ const {
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value, resetField } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 // Actions
 watch(value, () => {

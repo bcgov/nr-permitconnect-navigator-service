@@ -69,7 +69,7 @@ function isCompleted(authStatus: string | undefined): boolean {
   <Card :class="{ completed: isCompleted(cardData.authStatus), selected: notesModalVisible }">
     <template #title>
       <div class="flex">
-        <div class="flex-grow-1">
+        <div class="grow">
           <h3 class="mb-0">{{ permitTypeName }}</h3>
         </div>
         <div class="flex justify-center flex-wrap gap-2 align-items-center">
@@ -107,69 +107,63 @@ function isCompleted(authStatus: string | undefined): boolean {
           :auth-status="permit.authStatus"
         />
       </div>
-      <div class="grid nested-grid pt-3">
+      <div class="grid grid-cols-3 gap-4 my-3">
         <!-- Left column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
-            <p class="col-12">
-              <span class="key font-bold">Tracking ID:</span>
-              {{ cardData.trackingId }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Status verified date:</span>
-              {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Submitted date:</span>
-              {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Permit state:</span>
-              {{ cardData.status }}
-            </p>
-          </div>
+        <div class="grid grid-cols-1 space-y-4">
+          <p>
+            <span class="key font-bold">Tracking ID:</span>
+            {{ cardData.trackingId }}
+          </p>
+          <p>
+            <span class="key font-bold">Status verified date:</span>
+            {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
+          </p>
+          <p>
+            <span class="key font-bold">Submitted date:</span>
+            {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
+          </p>
+          <p>
+            <span class="key font-bold">Permit state:</span>
+            {{ cardData.status }}
+          </p>
         </div>
         <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
-            <p class="col-12">
-              <span class="key font-bold">Last updated:</span>
-              {{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Updated by:</span>
-              {{ cardUpdatedBy }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Adjudication date:</span>
-              {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Issued Permit ID:</span>
-              {{ cardData.issuedPermitId }}
-            </p>
-          </div>
+        <div class="grid grid-cols-1 space-y-4">
+          <p>
+            <span class="key font-bold">Last updated:</span>
+            {{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}
+          </p>
+          <p>
+            <span class="key font-bold">Updated by:</span>
+            {{ cardUpdatedBy }}
+          </p>
+          <p>
+            <span class="key font-bold">Adjudication date:</span>
+            {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
+          </p>
+          <p>
+            <span class="key font-bold">Issued Permit ID:</span>
+            {{ cardData.issuedPermitId }}
+          </p>
         </div>
         <!-- Right column -->
-        <div class="col-12 md:col-6 lg:col-4">
-          <div class="grid">
-            <p class="col-12">
-              <span class="key font-bold">Agency:</span>
-              {{ permitType?.agency }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Business domain:</span>
-              {{ permitType?.businessDomain }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Source system:</span>
-              {{ permitType?.sourceSystem }}
-            </p>
-            <p class="col-12">
-              <span class="key font-bold">Needed:</span>
-              {{ cardData.needed }}
-            </p>
-          </div>
+        <div class="grid grid-cols-1 space-y-4">
+          <p>
+            <span class="key font-bold">Agency:</span>
+            {{ permitType?.agency }}
+          </p>
+          <p>
+            <span class="key font-bold">Business domain:</span>
+            {{ permitType?.businessDomain }}
+          </p>
+          <p>
+            <span class="key font-bold">Source system:</span>
+            {{ permitType?.sourceSystem }}
+          </p>
+          <p>
+            <span class="key font-bold">Needed:</span>
+            {{ cardData.needed }}
+          </p>
         </div>
       </div>
       <div
@@ -207,11 +201,6 @@ function isCompleted(authStatus: string | undefined): boolean {
 </template>
 
 <style scoped lang="scss">
-p {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .key {
   color: #38598a;
 }

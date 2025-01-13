@@ -748,7 +748,7 @@ watch(
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="basic.projectApplicantType"
                     :bold="false"
                     :disabled="!editable"
@@ -762,7 +762,7 @@ watch(
 
                   <span
                     v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
-                    class="col-12"
+                    class="col-span-12"
                   >
                     <div class="flex items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
@@ -797,7 +797,7 @@ watch(
                     />
                     <InputText
                       v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
-                      class="col-span-6 pl-0"
+                      class="col-span-6 mt-4 pl-0"
                       name="basic.registeredName"
                       :placeholder="'Type the business/company/organization name'"
                       :bold="false"
