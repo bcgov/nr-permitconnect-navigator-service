@@ -670,18 +670,20 @@ onMounted(async () => {
       <div class="col-span-6" />
 
       <SectionHeader title="ATS" />
-      <div class="flex items-center mb-2">
+      <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
           v-if="values.atsClientNumber"
-          class="ml-2 mr-2"
+          class="col-start-1 col-span-12"
         >
-          <h5 class="inline mr-2">Client #</h5>
-          <a
-            class="atsclass"
-            @click="atsUserDetailsModalVisible = true"
-          >
-            {{ values.atsClientNumber }}
-          </a>
+          <div class="flex items-center">
+            <h5 class="mr-2">Client #</h5>
+            <a
+              class="hover-hand"
+              @click="atsUserDetailsModalVisible = true"
+            >
+              {{ values.atsClientNumber }}
+            </a>
+          </div>
         </div>
         <input
           type="hidden"
@@ -689,8 +691,8 @@ onMounted(async () => {
         />
         <Button
           v-if="!values.atsClientNumber"
+          class="col-start-1 col-span-2"
           aria-label="Link to ATS"
-          class="h-8 ml-2"
           :disabled="!editable"
           @click="atsUserLinkModalVisible = true"
         >
@@ -698,8 +700,8 @@ onMounted(async () => {
         </Button>
         <Button
           v-if="!values.atsClientNumber"
+          class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
-          class="h-8 ml-4"
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
@@ -829,9 +831,3 @@ onMounted(async () => {
     />
   </Form>
 </template>
-
-<style scoped lang="scss">
-:deep(.atsclass) {
-  cursor: pointer;
-}
-</style>

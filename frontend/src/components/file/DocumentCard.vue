@@ -78,37 +78,38 @@ function onClick() {
     @click="onClick"
   >
     <template #header>
-      <img
-        alt="document header"
-        :src="displayIcon(document.mimeType)"
-        class="document-image"
-      />
+      <div class="h-full w-full flex items-center justify-center">
+        <img
+          alt="document header"
+          :src="displayIcon(document.mimeType)"
+          class="document-image"
+        />
+      </div>
     </template>
     <template #content>
-      <div class="grid grid-cols-12 gap-4">
+      <div class="grid grid-cols-1">
         <div
           v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
-          class="col-span-12 mb-0 text-left font-semibold text-ellipsis whitespace-nowrap"
+          class="text-left font-semibold text-ellipsis whitespace-nowrap"
           style="overflow: hidden"
           tabindex="0"
         >
           <a href="#">{{ document.filename }}</a>
         </div>
-        <h6 class="col-span-8 text-left mt-0 mb-0 pt-0 pb-0">
-          {{ formatDateLong(document.createdAt as string).split(',')[0] }},
-        </h6>
-        <h6 class="col-span-8 text-left mt-1 mb-0 pt-0 pb-0">
+        <h6 class="text-left">{{ formatDateLong(document.createdAt as string).split(',')[0] }},</h6>
+        <h6 class="text-left mt-1">
           {{ formatDateLong(document.createdAt as string).split(',')[1] }}
         </h6>
       </div>
     </template>
     <template #footer>
       <div class="flex justify-between">
-        <h6 class="col-span-4 text-left mt-0 mb-0 pl-0 inline-block">
+        <h6 class="text-left inline-block">
           {{ filesize(document.filesize) }}
         </h6>
         <DeleteDocument
+          class="!p-0"
           :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
           :document="document"
         />
@@ -120,9 +121,9 @@ function onClick() {
 <style scoped lang="scss">
 .document-image {
   max-height: 2.5rem;
-  position: relative;
-  top: 50%;
-  transform: translateY(-50%);
+  // position: relative;
+  // top: 50%;
+  // transform: translateY(-50%);
 }
 
 .clicked {

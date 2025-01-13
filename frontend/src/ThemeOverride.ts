@@ -80,7 +80,7 @@ export const ThemeOverride = definePreset(Material, {
       900: '#A2312D',
       950: '#A2312D'
     },
-    disabledcolor: '#EDEBE9',
+    disabledColor: '#EDEBE9',
     white: '#FFFFFF'
   },
   semantic: {
@@ -140,8 +140,8 @@ export const ThemeOverride = definePreset(Material, {
           focusBorderColor: '{primary.300}',
           invalidBorderColor: '{red.500}',
           floatLabelInvalidColor: '{red.500}',
-          disabledBackground: '{disabledcolor}',
-          disabledColor: '{primary.color}',
+          disabledBackground: '{disabledColor}',
+          disabledColor: '{surface.800}',
           paddingX: '0.5rem',
           paddingY: '0.5rem',
           placeholderColor: '{surface.700}'
@@ -243,8 +243,8 @@ export const ThemeOverride = definePreset(Material, {
     radiobutton: {
       icon: {
         size: '10px',
-        checkedColor: '{disabledcolor}',
-        checkedHoverColor: '{disabledcolor}',
+        checkedColor: '{disabledColor}',
+        checkedHoverColor: '{disabledColor}',
         disabledColor: '{form.field.disabled.color}'
       },
       css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick }'

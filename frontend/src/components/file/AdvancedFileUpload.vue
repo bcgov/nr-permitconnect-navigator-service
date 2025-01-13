@@ -103,56 +103,54 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-100">
-    <div>
-      <div
-        v-if="uploading"
-        class="h-16 content-center pl-2 pr-2"
+  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-full">
+    <div
+      v-if="uploading"
+      class="h-16 content-center pl-2 pr-2"
+    >
+      <ProgressBar
+        mode="indeterminate"
+        class="self-center progress-bar"
+      />
+    </div>
+    <div
+      v-if="!uploading"
+      class="hover-hand hover-shadow"
+    >
+      <FileUpload
+        name="fileUpload"
+        :multiple="true"
+        :custom-upload="true"
+        :auto="true"
+        :disabled="disabled"
+        @uploader="onFileUploadDragAndDrop"
       >
-        <ProgressBar
-          mode="indeterminate"
-          class="self-center progress-bar"
-        />
-      </div>
-      <div
-        v-if="!uploading"
-        class="hover-hand hover-shadow"
-      >
-        <FileUpload
-          name="fileUpload"
-          :multiple="true"
-          :custom-upload="true"
-          :auto="true"
-          :disabled="disabled"
-          @uploader="onFileUploadDragAndDrop"
-        >
-          <template #empty>
-            <div class="flex items-center justify-center flex-col">
-              <Button
-                aria-label="Upload"
-                class="justify-center w-full h-16 border-0"
-                @click="onFileUploadClick"
-              >
-                <font-awesome-icon
-                  class="pr-2"
-                  icon="fa-solid fa-upload"
-                />
-                Click or drag-and-drop
-              </Button>
-            </div>
-          </template>
-        </FileUpload>
+        <template #empty>
+          <div class="flex items-center justify-center flex-col">
+            <Button
+              aria-label="Upload"
+              class="justify-center w-full h-16 border-0"
+              @click="onFileUploadClick"
+            >
+              <font-awesome-icon
+                class="pr-2"
+                icon="fa-solid fa-upload"
+              />
+              Click or drag-and-drop
+            </Button>
+          </div>
+        </template>
+      </FileUpload>
 
-        <input
-          ref="fileInput"
-          type="file"
-          class="hidden"
-          :accept="accept ? accept.join(',') : '*'"
-          multiple
-          @change="(event: any) => onUpload(Array.from(event.target.files))"
-          @click="(event: any) => (event.target.value = null)"
-        />
-      </div>
+      <input
+        ref="fileInput"
+        type="file"
+        class="hidden"
+        :accept="accept ? accept.join(',') : '*'"
+        multiple
+        @change="(event: any) => onUpload(Array.from(event.target.files))"
+        @click="(event: any) => (event.target.value = null)"
+      />
     </div>
   </div>
 

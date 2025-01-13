@@ -68,7 +68,7 @@ const onUpload = async (files: Array<File>) => {
 </script>
 
 <template>
-  <div>
+  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-full">
     <div
       v-if="uploading"
       class="h-16 content-center pl-2 pr-2"
@@ -136,21 +136,42 @@ const onUpload = async (files: Array<File>) => {
 </template>
 
 <style scoped lang="scss">
-:deep(.p-fileupload-buttonbar) {
+:deep(.p-fileupload-header) {
   display: none;
 }
+
 :deep(.p-fileupload-content) {
   padding: 0;
   border: none;
+
+  .p-button {
+    padding: 0;
+    border: none;
+  }
 }
+
 .file-input {
   display: none;
 }
+
 .p-button.p-component {
   background-color: transparent;
   color: var(--text-color);
 }
+
+.p-fileupload {
+  border-style: none;
+}
+
 .progress-bar {
   height: 0.3rem;
+}
+
+.file-upload {
+  width: 100%;
+  color: var(--p-greyscale-500);
+  &:hover {
+    color: var(--p-content-hover-background);
+  }
 }
 </style>

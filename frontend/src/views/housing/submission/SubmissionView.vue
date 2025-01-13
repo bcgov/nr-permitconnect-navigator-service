@@ -248,7 +248,7 @@ onMounted(async () => {
         >
           <DataTable
             v-if="gridView"
-            class="remove-padding ml-2 mr-2 w-full"
+            class="remove-padding col-span-12"
             :sort-field="SORT_TYPES.CREATED_AT"
             :sort-order="SORT_ORDER.DESCENDING"
             @update:sort-order="
@@ -293,12 +293,12 @@ onMounted(async () => {
           </DataTable>
 
           <div class="col-span-12">
-            <div class="grid grid-cols-12 gap-4">
+            <div class="grid grid-cols-6 gap-4">
               <div
                 v-for="(document, index) in filteredDocuments"
                 :key="document.documentId"
                 :index="index"
-                class="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-2"
+                class="col-span-1"
               >
                 <DocumentCard
                   :document="document"
@@ -403,7 +403,7 @@ onMounted(async () => {
             v-for="(permit, index) in getPermits"
             :key="permit.permitId"
             :index="index"
-            class="col-span-12"
+            class="mb-6"
           >
             <PermitCard
               :editable="!isCompleted"
@@ -438,7 +438,7 @@ onMounted(async () => {
           v-for="(note, index) in getNotes"
           :key="note.noteId"
           :index="index"
-          class="col-span-12"
+          class="mb-6"
         >
           <NoteCard
             :editable="!isCompleted"
