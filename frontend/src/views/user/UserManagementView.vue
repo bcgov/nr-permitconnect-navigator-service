@@ -317,7 +317,7 @@ onMounted(async () => {
 
 <template>
   <ProgressLoader v-if="loading" />
-  <h3>User Management</h3>
+  <h1>User Management</h1>
   <UserCreateModal
     v-if="createUserModalVisible"
     v-model:visible="createUserModalVisible"
@@ -337,11 +337,11 @@ onMounted(async () => {
   />
   <Tabs
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
-    v-model:active-index="activeTab"
+    :value="activeTab"
   >
     <TabList>
       <Tab :value="0">Manage users</Tab>
-      <Tab :value="1">Revocation requests</Tab>
+      <Tab :value="1">User access requests</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
@@ -357,7 +357,7 @@ onMounted(async () => {
             <InputText
               v-model="filters['global'].value"
               placeholder="Search all"
-              class="width"
+              class="search-input"
             />
           </IconField>
         </div>
@@ -374,14 +374,14 @@ onMounted(async () => {
           @user-table:revoke="onRevoke"
         />
       </TabPanel>
-      <TabPanel header="User access requests">
+      <TabPanel :value="1">
         <div class="flex justify-end">
           <IconField icon-position="left">
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters['global'].value"
               placeholder="Search all"
-              class="width"
+              class="search-input"
             />
           </IconField>
         </div>
@@ -413,7 +413,7 @@ onMounted(async () => {
         <InputText
           v-model="filters['global'].value"
           placeholder="Search all"
-          class="width"
+          class="search-input"
         />
       </IconField>
     </div>
@@ -433,7 +433,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.width {
+.search-input {
   width: 20em;
 }
 </style>

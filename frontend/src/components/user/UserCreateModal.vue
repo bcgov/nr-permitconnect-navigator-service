@@ -113,8 +113,8 @@ onMounted(async () => {
     <template #header>
       <span class="p-dialog-title">Create new user</span>
     </template>
-    <div class="flex justify-between items-center">
-      <Dropdown
+    <div class="grid grid-cols-12 gap-4 items-center">
+      <Select
         class="col-span-3 m-0"
         name="searchParam"
         placeholder="Last name"
@@ -131,31 +131,19 @@ onMounted(async () => {
           <InputIcon class="pi pi-search" />
           <InputText
             v-model="searchTag"
+            class="w-full"
             placeholder="Search by first name, last name, or email"
-            class="col-span-12 pl-8"
             autofocus
             @update:model-value="searchIdirUsers"
           />
         </IconField>
       </div>
-      <Dropdown
-        class="col-span-3 m-0"
-        name="assignRole"
-        placeholder="First name"
-        :options="Object.values(USER_SEARCH_PARAMS)"
-        @on-change="
-          (param: SelectChangeEvent) => {
-            selectedParam = param.value;
-            searchIdirUsers();
-          }
-        "
-      />
     </div>
     <DataTable
       v-model:selection="selectedUser"
       :row-hover="true"
       :loading="loading"
-      class="datatable mt-4 mb-2 pl-2 pr-2"
+      class="datatable mt-4 mb-2"
       :value="users"
       selection-mode="single"
       data-key="sub"
@@ -199,7 +187,7 @@ onMounted(async () => {
       :disabled="!selectedUser"
       @on-change="(e: SelectChangeEvent) => (selectedGroup = e.value)"
     />
-    <div class="flex-auto pl-2">
+    <div class="mt-6">
       <Button
         class="mr-2"
         label="Request approval"
