@@ -1,4 +1,4 @@
-import { yarsService } from '../services.ts';
+import { yarsService } from '../services/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import { GroupName, Initiative } from '../utils/enums/application.ts';

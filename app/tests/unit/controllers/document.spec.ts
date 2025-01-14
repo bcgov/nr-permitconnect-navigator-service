@@ -1,5 +1,5 @@
-import { documentController } from '../../../src/controllers';
-import { documentService } from '../../../src/services';
+import { documentController } from '../../../src/controllers/index.ts';
+import { documentService } from '../../../src/services/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

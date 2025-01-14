@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../db/dataConnection.ts';
-import { contact } from '../db/models.ts';
+import { contact } from '../db/models/index.ts';
 import { generateCreateStamps } from '../db/utils/utils.ts';
-import { Contact, CurrentContext } from '../types.ts';
+import { Contact, CurrentContext } from '../types/index.ts';
 
 const service = {
   /**

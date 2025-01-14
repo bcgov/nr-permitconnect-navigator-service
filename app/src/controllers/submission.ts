@@ -9,7 +9,7 @@ import {
   enquiryService,
   submissionService,
   permitService
-} from '../services.ts';
+} from '../services/index.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import {
   ApplicationStatus,
@@ -33,7 +33,7 @@ import type {
   Submission,
   SubmissionIntake,
   SubmissionSearchParameters
-} from '../types.ts';
+} from '../types/index.ts';
 
 const controller = {
   /**

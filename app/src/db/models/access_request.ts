@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
 
-import { AccessRequestStatus, GroupName } from '../../utils/enums/application';
+import { AccessRequestStatus, GroupName } from '../../utils/enums/application.ts';
 
 import type { Stamps } from '../stamps.ts';
-import type { AccessRequest } from '../../types/AccessRequest';
+import type { AccessRequest } from '../../types/index.ts';
 
 // Define types
 const _accessRequest = Prisma.validator<Prisma.access_requestDefaultArgs>()({});

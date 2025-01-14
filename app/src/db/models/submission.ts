@@ -3,10 +3,10 @@ import { Decimal } from '@prisma/client/runtime/library';
 
 import contact from './contact.ts';
 import user from './user.ts';
-import { BasicResponse } from '../../utils/enums/application';
+import { BasicResponse } from '../../utils/enums/application.ts';
 
 import type { Stamps } from '../stamps.ts';
-import type { Submission } from '../../types';
+import type { Submission } from '../../types/index.ts';
 
 // Define types
 const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});

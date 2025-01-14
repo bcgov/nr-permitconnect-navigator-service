@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { ATSClientResource, ATSUserSearchParameters } from '../types.ts';
+import type { ATSClientResource, ATSUserSearchParameters } from '../types/index.ts';
 
 /**
  * @function getToken

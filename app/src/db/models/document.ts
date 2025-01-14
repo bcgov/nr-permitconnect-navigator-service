@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { Document } from '../../types';
+import type { Document } from '../../types/index.ts';
 
 // Define types
 const _document = Prisma.validator<Prisma.documentDefaultArgs>()({});

@@ -4,7 +4,7 @@ import permit_note from './permit_note.ts';
 import permit_type from './permit_type.ts';
 
 import type { Stamps } from '../stamps.ts';
-import type { Permit } from '../../types';
+import type { Permit } from '../../types/index.ts';
 
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});

@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { PermitNote } from '../../types';
+import type { PermitNote } from '../../types/index.ts';
 
 // Define types
 const _permitNote = Prisma.validator<Prisma.permit_noteDefaultArgs>()({});

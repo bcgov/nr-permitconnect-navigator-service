@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { PermitType } from '../../types';
+import type { PermitType } from '../../types/index.ts';
 
 // Define types
 const _permitType = Prisma.validator<Prisma.permit_typeDeleteArgs>()({});

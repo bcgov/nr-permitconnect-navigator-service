@@ -1,5 +1,5 @@
-import { userController } from '../../../src/controllers';
-import { userService } from '../../../src/services';
+import { userController } from '../../../src/controllers/index.ts';
+import { userService } from '../../../src/services/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

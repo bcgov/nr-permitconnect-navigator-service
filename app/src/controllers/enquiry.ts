@@ -1,13 +1,13 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
-import { activityService, contactService, enquiryService, noteService, userService } from '../services.ts';
+import { activityService, contactService, enquiryService, noteService, userService } from '../services/index.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing.ts';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake } from '../types.ts';
+import type { Enquiry, EnquiryIntake } from '../types/index.ts';
 
 const controller = {
   createRelatedNote: async (req: Request, data: Enquiry) => {

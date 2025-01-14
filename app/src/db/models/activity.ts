@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { Activity } from '../../types/Activity';
+import type { Activity } from '../../types/index.ts';
 
 // Define types
 const _activity = Prisma.validator<Prisma.activityDefaultArgs>()({});

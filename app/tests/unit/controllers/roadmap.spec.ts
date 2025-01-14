@@ -1,6 +1,6 @@
-import { roadmapController } from '../../../src/controllers';
-import { comsService, emailService, noteService } from '../../../src/services';
-import type { Note } from '../../../src/types';
+import { roadmapController } from '../../../src/controllers/index.ts';
+import { comsService, emailService, noteService } from '../../../src/services/index.ts';
+import type { Note } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

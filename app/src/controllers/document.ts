@@ -1,5 +1,5 @@
 import { generateCreateStamps } from '../db/utils/utils.ts';
-import { documentService } from '../services.ts';
+import { documentService } from '../services/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

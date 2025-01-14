@@ -1,5 +1,5 @@
-import { atsController } from '../../../src/controllers';
-import { atsService } from '../../../src/services';
+import { atsController } from '../../../src/controllers/index.ts';
+import { atsService } from '../../../src/services/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

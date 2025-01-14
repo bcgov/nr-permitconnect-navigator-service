@@ -8,7 +8,7 @@ import { join } from 'path';
 import Problem from 'api-problem';
 import querystring from 'querystring';
 
-import { name as appName, version as appVersion } from './package.json';
+import jsonPackage from './package.json' with { type: 'json' };
 import { getLogger, httpLogger } from './src/components/log.ts';
 import { DEFAULTCORS } from './src/utils/constants/application.ts';
 import { getGitRevision, readIdpList } from './src/utils/utils.ts';
@@ -71,9 +71,9 @@ appRouter.get('/api', (_req: Request, res: Response): void => {
     res.status(200).json({
       app: {
         gitRev: state.gitRev,
-        name: appName,
+        name: jsonPackage.name,
         nodeVersion: process.version,
-        version: appVersion
+        version: jsonPackage.version
       },
       endpoints: ['/api/v1'],
       versions: [1]
@@ -88,7 +88,7 @@ appRouter.get('/config', (_req: Request, res: Response, next: (err: unknown) => 
       ...config.get('frontend'),
       gitRev: state.gitRev,
       idpList: readIdpList(),
-      version: appVersion
+      version: jsonPackage.version
     });
   } catch (err) {
     next(err);

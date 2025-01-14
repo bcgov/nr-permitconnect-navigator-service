@@ -2,15 +2,15 @@
 import Problem from 'api-problem';
 import express from 'express';
 
-import { permitNoteController } from '../../controllers';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { permitNoteValidator } from '../../validators';
+import { permitNoteController } from '../../controllers/index.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { permitNoteValidator } from '../../validators/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PermitNote } from '../../types';
+import type { PermitNote } from '../../types/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

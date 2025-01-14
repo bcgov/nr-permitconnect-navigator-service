@@ -1,13 +1,13 @@
 import express from 'express';
-import { accessRequestController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { accessRequestValidator } from '../../validators';
+import { accessRequestController } from '../../controllers/index.ts';
+import { hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { accessRequestValidator } from '../../validators/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { AccessRequest, User } from '../../types';
+import type { AccessRequest, User } from '../../types/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

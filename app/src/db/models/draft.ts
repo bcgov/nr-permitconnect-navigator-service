@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import type { Draft } from '../../types';
+import type { Draft } from '../../types/index.ts';
 
 // Define types
 const _draft = Prisma.validator<Prisma.draftDefaultArgs>()({});

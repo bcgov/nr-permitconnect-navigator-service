@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { currentContext } from '../../middleware/authentication';
+import { currentContext } from '../../middleware/authentication.ts';
 
 import accessRequest from './accessRequest.ts';
 import ats from './ats.ts';
@@ -15,7 +15,7 @@ import submission from './submission.ts';
 import user from './user.ts';
 import yars from './yars.ts';
 
-import { Initiative } from '../../utils/enums/application';
+import { Initiative } from '../../utils/enums/application.ts';
 
 const router = express.Router();
 router.use(currentContext(Initiative.HOUSING));

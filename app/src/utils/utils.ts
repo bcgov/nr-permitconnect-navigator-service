@@ -4,7 +4,7 @@ import { join } from 'path';
 
 import { getLogger } from '../components/log.ts';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types.ts';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types/index.ts';
 
 const log = getLogger(module.filename);
 

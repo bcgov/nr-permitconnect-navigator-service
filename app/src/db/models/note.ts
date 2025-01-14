@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import type { Note } from '../../types';
+import type { Note } from '../../types/index.ts';
 
 // Define types
 const _note = Prisma.validator<Prisma.noteDefaultArgs>()({});

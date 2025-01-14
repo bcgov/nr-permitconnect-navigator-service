@@ -1,5 +1,5 @@
-import { noteController } from '../../../src/controllers';
-import { enquiryService, noteService, submissionService, userService } from '../../../src/services';
+import { noteController } from '../../../src/controllers/index.ts';
+import { enquiryService, noteService, submissionService, userService } from '../../../src/services/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

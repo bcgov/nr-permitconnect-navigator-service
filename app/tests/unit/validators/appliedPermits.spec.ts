@@ -1,5 +1,5 @@
-import { PermitStatus } from '../../../src/utils/enums/housing';
-import { appliedPermit } from '../../../src/validators/appliedPermit';
+import { PermitStatus } from '../../../src/utils/enums/housing.ts';
+import { appliedPermit } from '../../../src/validators/appliedPermit.ts';
 
 describe('appliedPermitsSchema', () => {
   it('should only accept numbers for permitTypeId', () => {

@@ -1,4 +1,4 @@
-import submissionController from '../../../src/controllers/submission';
+import submissionController from '../../../src/controllers/submission.ts';
 import {
   activityService,
   contactService,
@@ -6,10 +6,10 @@ import {
   permitService,
   draftService,
   submissionService
-} from '../../../src/services';
-import type { Permit, Submission, Draft } from '../../../src/types';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
-import { AuthType, Initiative } from '../../../src/utils/enums/application';
+} from '../../../src/services/index.ts';
+import type { Permit, Submission, Draft } from '../../../src/types/index.ts';
+import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing.ts';
+import { AuthType, Initiative } from '../../../src/utils/enums/application.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

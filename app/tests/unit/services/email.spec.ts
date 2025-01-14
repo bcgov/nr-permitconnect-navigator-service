@@ -1,6 +1,6 @@
-import { emailService } from '../../../src/services';
+import { emailService } from '../../../src/services/index.ts';
 
-import { prismaMock } from '../../__mocks__/prismaMock';
+import { prismaMock } from '../../__mocks__/prismaMock.ts';
 
 type Message = {
   msgId: string;

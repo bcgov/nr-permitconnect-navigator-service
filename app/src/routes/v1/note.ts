@@ -1,14 +1,14 @@
 import express from 'express';
 
-import { noteController } from '../../controllers';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { noteValidator } from '../../validators';
+import { noteController } from '../../controllers/index.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { noteValidator } from '../../validators/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Note } from '../../types';
+import type { Note } from '../../types/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

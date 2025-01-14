@@ -1,6 +1,6 @@
-import { BasicResponse } from '../../../src/utils/enums/application';
-import { ProjectApplicant } from '../../../src/utils/enums/housing';
-import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
+import { BasicResponse } from '../../../src/utils/enums/application.ts';
+import { ProjectApplicant } from '../../../src/utils/enums/housing.ts';
+import { basicIntake, basicEnquiry } from '../../../src/validators/basic.ts';
 
 describe('basicIntakeSchema', () => {
   it('should validate when projectApplicantType and isDevelopedInBC are valid', () => {

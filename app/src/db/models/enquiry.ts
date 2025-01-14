@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import contact from './contact.ts';
 import user from './user.ts';
 
-import type { Enquiry } from '../../types';
+import type { Enquiry } from '../../types/index.ts';
 
 // Define types
 const _enquiry = Prisma.validator<Prisma.enquiryDefaultArgs>()({});

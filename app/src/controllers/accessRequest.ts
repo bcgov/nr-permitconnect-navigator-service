@@ -1,8 +1,8 @@
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application.ts';
-import { userService, accessRequestService, yarsService } from '../services.ts';
+import { userService, accessRequestService, yarsService } from '../services/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { AccessRequest, User } from '../types.ts';
+import type { AccessRequest, User } from '../types/index.ts';
 
 const controller = {
   // Request to create user & access

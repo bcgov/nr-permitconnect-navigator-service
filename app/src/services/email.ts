@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import prisma from '../db/dataConnection.ts';
 
 import type { AxiosInstance } from 'axios';
-import type { Email } from '../types.ts';
+import type { Email } from '../types/index.ts';
 
 type Message = {
   msgId: string;

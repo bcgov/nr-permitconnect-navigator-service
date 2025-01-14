@@ -1,8 +1,8 @@
 import { generateCreateStamps } from '../db/utils/utils.ts';
-import { comsService, emailService, noteService } from '../services.ts';
+import { comsService, emailService, noteService } from '../services/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Email, EmailAttachment } from '../types.ts';
+import type { Email, EmailAttachment } from '../types/index.ts';
 
 const controller = {
   /**

@@ -1,5 +1,5 @@
-import { permitController } from '../../../src/controllers';
-import { permitService } from '../../../src/services';
+import { permitController } from '../../../src/controllers/index.ts';
+import { permitService } from '../../../src/services/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

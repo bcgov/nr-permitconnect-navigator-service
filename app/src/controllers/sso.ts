@@ -1,7 +1,7 @@
-import { ssoService } from '../services.ts';
+import { ssoService } from '../services/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { BceidSearchParameters, IdirSearchParameters } from '../types.ts';
+import type { BceidSearchParameters, IdirSearchParameters } from '../types/index.ts';
 
 const controller = {
   searchIdirUsers: async (

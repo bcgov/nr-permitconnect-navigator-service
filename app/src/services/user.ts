@@ -3,10 +3,10 @@ import { Prisma } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection.ts';
-import { identity_provider, user } from '../db/models.ts';
+import { identity_provider, user } from '../db/models/index.ts';
 import { parseIdentityKeyClaims } from '../utils/utils.ts';
 
-import type { User, UserSearchParameters } from '../types.ts';
+import type { User, UserSearchParameters } from '../types/index.ts';
 
 const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 

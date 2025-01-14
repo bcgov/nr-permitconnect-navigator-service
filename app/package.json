@@ -103,5 +103,6 @@
   },
   "prisma": {
     "schema": "src/db/prisma/schema.prisma"
-  }
+  },
+  "type": "module"
 }

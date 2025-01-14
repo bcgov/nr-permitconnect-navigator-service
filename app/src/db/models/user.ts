@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { User } from '../../types/User';
+import type { User } from '../../types/User.ts';
 
 // Define types
 const _user = Prisma.validator<Prisma.userDefaultArgs>()({});

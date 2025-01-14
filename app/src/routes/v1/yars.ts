@@ -1,9 +1,9 @@
 import express from 'express';
 
-import { yarsController } from '../../controllers';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { GroupName } from '../../utils/enums/application';
+import { yarsController } from '../../controllers/index.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { GroupName } from '../../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

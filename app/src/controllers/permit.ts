@@ -1,9 +1,9 @@
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
-import { permitService } from '../services.ts';
+import { permitService } from '../services/index.ts';
 import { isTruthy } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { ListPermitsOptions, Permit } from '../types.ts';
+import type { ListPermitsOptions, Permit } from '../types/index.ts';
 
 const controller = {
   createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {

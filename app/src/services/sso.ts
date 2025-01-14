@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { BceidSearchParameters, IdirSearchParameters } from '../types.ts';
+import type { BceidSearchParameters, IdirSearchParameters } from '../types/index.ts';
 
 /**
  * @function getToken

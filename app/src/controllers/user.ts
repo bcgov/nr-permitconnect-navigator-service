@@ -1,5 +1,5 @@
-import { userService, yarsService } from '../services.ts';
-import { User, UserSearchParameters } from '../types.ts';
+import { userService, yarsService } from '../services/index.ts';
+import { User, UserSearchParameters } from '../types/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils.ts';
 

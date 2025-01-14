@@ -1,5 +1,5 @@
 import prisma from '../db/dataConnection.ts';
-import { activity } from '../db/models.ts';
+import { activity } from '../db/models/index.ts';
 import { generateUniqueActivityId } from '../db/utils/utils.ts';
 import { IStamps } from '../interfaces/IStamps.ts';
 

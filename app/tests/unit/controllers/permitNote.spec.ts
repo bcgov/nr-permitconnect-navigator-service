@@ -1,5 +1,5 @@
-import { permitNoteController } from '../../../src/controllers';
-import { permitNoteService } from '../../../src/services';
+import { permitNoteController } from '../../../src/controllers/index.ts';
+import { permitNoteService } from '../../../src/services/index.ts';
 
 jest.mock('config');
 

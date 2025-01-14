@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { Contact } from '../../types/Contact';
+import type { Contact } from '../../types/index.ts';
 
 // Define types
 const _contact = Prisma.validator<Prisma.contactDefaultArgs>()({});

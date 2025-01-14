@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { submissionController } from '../../controllers';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { submissionValidator } from '../../validators';
+import { submissionController } from '../../controllers/index.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { submissionValidator } from '../../validators/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
@@ -15,7 +15,7 @@ import type {
   Submission,
   SubmissionIntake,
   SubmissionSearchParameters
-} from '../../types';
+} from '../../types/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

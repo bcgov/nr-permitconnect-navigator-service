@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import type { EmailLog } from '../../types';
+import type { EmailLog } from '../../types/index.ts';
 
 // Define types
 const _emailLog = Prisma.validator<Prisma.email_logDefaultArgs>()({});

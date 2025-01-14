@@ -3,10 +3,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../db/dataConnection.ts';
-import { access_request } from '../db/models.ts';
+import { access_request } from '../db/models/index.ts';
 import { AccessRequestStatus } from '../utils/enums/application.ts';
 
-import type { AccessRequest } from '../types.ts';
+import type { AccessRequest } from '../types/index.ts';
 
 /**
  * The User DB Service

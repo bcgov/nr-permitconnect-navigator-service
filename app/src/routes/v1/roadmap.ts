@@ -1,14 +1,14 @@
 import express from 'express';
 
-import { roadmapController } from '../../controllers';
-import { hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { roadmapValidator } from '../../validators';
+import { roadmapController } from '../../controllers/index.ts';
+import { hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { roadmapValidator } from '../../validators/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Email } from '../../types';
+import type { Email } from '../../types/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

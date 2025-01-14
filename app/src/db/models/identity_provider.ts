@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import type { Stamps } from '../stamps.ts';
-import type { IdentityProvider } from '../../types';
+import type { IdentityProvider } from '../../types/index.ts';
 
 // Define a type
 const _identityProvider = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
