@@ -1,17 +1,24 @@
-// Design tokens ref https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
+/*
+
+BCGov design system colour guide
+https://www2.gov.bc.ca/gov/content/digital/design-system/foundations/colour
+
+Good site for generating shades
+https://maketintsandshades.com/#003366
+
+PrimeVue design tokens ref
+https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
+
+*/
+
 import Material from '@primevue/themes/material';
 
 import { definePreset } from '@primevue/themes';
 
-//https://maketintsandshades.com/#003366
-
-// Must use lower/camel case for key values unless you want pain
-// bcblue.500 is BC mandated blue
-
-// Some values override base color values.
-// Base values here: https://github.com/primefaces/primevue/blob/master/packages/themes/src/presets/material/base/index.js
 export const ThemeOverride = definePreset(Material, {
+  // Must use lower case for primitive keys unless you want pain
   primitive: {
+    // bcblue.500 is BC mandated blue
     bcblue: {
       50: '#F1F8FE',
       100: '#F1F8FE',
@@ -80,8 +87,8 @@ export const ThemeOverride = definePreset(Material, {
       900: '#A2312D',
       950: '#A2312D'
     },
-    disabledColor: '#EDEBE9',
-    textSecondary: '#474543',
+    disabledcolor: '#EDEBE9',
+    textsecondary: '#474543',
     white: '#FFFFFF'
   },
   semantic: {
@@ -141,7 +148,7 @@ export const ThemeOverride = definePreset(Material, {
           focusBorderColor: '{primary.300}',
           invalidBorderColor: '{red.500}',
           floatLabelInvalidColor: '{red.500}',
-          disabledBackground: '{disabledColor}',
+          disabledBackground: '{disabledcolor}',
           disabledColor: '{surface.800}',
           paddingX: '0.5rem',
           paddingY: '0.5rem',
@@ -235,17 +242,17 @@ export const ThemeOverride = definePreset(Material, {
         light: {
           root: {
             error: {
-              color: '{textSecondary}'
+              color: '{textsecondary}'
             },
             info: {
-              color: '{textSecondary}'
+              color: '{textsecondary}'
             },
             success: {
               background: '{green.100}',
-              color: '{textSecondary}'
+              color: '{textsecondary}'
             },
             warn: {
-              color: '{textSecondary}'
+              color: '{textsecondary}'
             }
           }
         }
@@ -254,8 +261,8 @@ export const ThemeOverride = definePreset(Material, {
     radiobutton: {
       icon: {
         size: '10px',
-        checkedColor: '{disabledColor}',
-        checkedHoverColor: '{disabledColor}',
+        checkedColor: '{disabledcolor}',
+        checkedHoverColor: '{disabledcolor}',
         disabledColor: '{form.field.disabled.color}'
       },
       css: () => '.p-radiobutton-checked .p-radiobutton-box { border-width: thick }'
@@ -284,12 +291,12 @@ export const ThemeOverride = definePreset(Material, {
       colorScheme: {
         light: {
           error: {
-            color: '{textSecondary}'
+            color: '{textsecondary}'
           },
           success: {
             background: '{green.100}',
             borderColor: '{green.500}',
-            color: '{textSecondary}',
+            color: '{textsecondary}',
             detailColor: '{surface.300}',
             closeButton: {
               hoverBackground: '{green.200}',
