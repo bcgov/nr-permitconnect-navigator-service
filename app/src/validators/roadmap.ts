@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { activityId, email, uuidv4 } from './common';
+import { activityId, email, uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
 
 const schema = {

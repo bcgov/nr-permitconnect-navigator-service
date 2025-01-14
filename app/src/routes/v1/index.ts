@@ -2,18 +2,18 @@ import express from 'express';
 
 import { currentContext } from '../../middleware/authentication';
 
-import accessRequest from './accessRequest';
-import ats from './ats';
-import docs from './docs';
-import document from './document';
-import enquiry from './enquiry';
-import note from './note';
-import permit from './permit';
-import roadmap from './roadmap';
-import sso from './sso';
-import submission from './submission';
-import user from './user';
-import yars from './yars';
+import accessRequest from './accessRequest.ts';
+import ats from './ats.ts';
+import docs from './docs.ts';
+import document from './document.ts';
+import enquiry from './enquiry.ts';
+import note from './note.ts';
+import permit from './permit.ts';
+import roadmap from './roadmap.ts';
+import sso from './sso.ts';
+import submission from './submission.ts';
+import user from './user.ts';
+import yars from './yars.ts';
 
 import { Initiative } from '../../utils/enums/application';
 

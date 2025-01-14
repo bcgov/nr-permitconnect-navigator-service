@@ -1,4 +1,4 @@
-import { Contact } from './Contact';
+import { Contact } from './Contact.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/housing.ts';
 
 export type EnquiryIntake = {

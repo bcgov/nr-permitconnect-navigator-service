@@ -1,5 +1,5 @@
-import { Contact } from './Contact';
-import { Permit } from './Permit';
+import { Contact } from './Contact.ts';
+import { Permit } from './Permit.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/housing.ts';
 
 export type SubmissionIntake = {

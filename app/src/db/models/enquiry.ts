@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
-import contact from './contact';
-import user from './user';
+import contact from './contact.ts';
+import user from './user.ts';
 
 import type { Enquiry } from '../../types';
 

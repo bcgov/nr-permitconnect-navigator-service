@@ -9,10 +9,10 @@ import Problem from 'api-problem';
 import querystring from 'querystring';
 
 import { name as appName, version as appVersion } from './package.json';
-import { getLogger, httpLogger } from './src/components/log';
-import { DEFAULTCORS } from './src/utils/constants/application';
-import { getGitRevision, readIdpList } from './src/utils/utils';
-import v1Router from './src/routes/v1';
+import { getLogger, httpLogger } from './src/components/log.ts';
+import { DEFAULTCORS } from './src/utils/constants/application.ts';
+import { getGitRevision, readIdpList } from './src/utils/utils.ts';
+import v1Router from './src/routes/v1/index.ts';
 
 import type { Request, Response } from 'express';
 

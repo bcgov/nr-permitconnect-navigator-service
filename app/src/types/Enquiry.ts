@@ -1,6 +1,6 @@
 import { IStamps } from '../interfaces/IStamps.ts';
-import { Contact } from './Contact';
-import type { User } from './User';
+import { Contact } from './Contact.ts';
+import type { User } from './User.ts';
 
 export type Enquiry = {
   enquiryId: string; // Primary key

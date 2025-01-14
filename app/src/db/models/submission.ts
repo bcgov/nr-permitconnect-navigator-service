@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
-import contact from './contact';
-import user from './user';
+import contact from './contact.ts';
+import user from './user.ts';
 import { BasicResponse } from '../../utils/enums/application';
 
 import type { Stamps } from '../stamps.ts';

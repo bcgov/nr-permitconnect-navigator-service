@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
-import permit_note from './permit_note';
-import permit_type from './permit_type';
+import permit_note from './permit_note.ts';
+import permit_type from './permit_type.ts';
 
 import type { Stamps } from '../stamps.ts';
 import type { Permit } from '../../types';

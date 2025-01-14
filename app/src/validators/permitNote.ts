@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { uuidv4 } from './common';
+import { uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
 
 const sharedPermitNoteSchema = {

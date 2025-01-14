@@ -1,12 +1,12 @@
 import Joi from 'joi';
 
-import { appliedPermit } from './appliedPermit';
-import { basicIntake } from './basic';
-import { activityId, email, uuidv4 } from './common';
-import { contacts } from './contacts';
+import { appliedPermit } from './appliedPermit.ts';
+import { basicIntake } from './basic.ts';
+import { activityId, email, uuidv4 } from './common.ts';
+import { contacts } from './contacts.ts';
 
-import { housing } from './housing';
-import { permits } from './permits';
+import { housing } from './housing.ts';
+import { permits } from './permits.ts';
 import { validate } from '../middleware/validation.ts';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import {

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import permitNote from './permitNote';
+import permitNote from './permitNote.ts';
 import { permitController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';

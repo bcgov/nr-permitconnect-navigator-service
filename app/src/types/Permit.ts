@@ -1,6 +1,6 @@
 import { IStamps } from '../interfaces/IStamps.ts';
-import { PermitNote } from './PermitNote';
-import { PermitType } from './PermitType';
+import { PermitNote } from './PermitNote.ts';
+import { PermitType } from './PermitType.ts';
 
 export type Permit = {
   permitId: string; // Primary Key

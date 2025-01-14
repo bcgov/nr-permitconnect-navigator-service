@@ -1,4 +1,4 @@
-import { EmailAttachment } from './EmailAttachment';
+import { EmailAttachment } from './EmailAttachment.ts';
 
 export type Email = {
   bcc?: Array<string>;

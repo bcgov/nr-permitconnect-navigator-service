@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
-import { basicEnquiry } from './basic';
-import { uuidv4 } from './common';
-import { contacts } from './contacts';
+import { basicEnquiry } from './basic.ts';
+import { uuidv4 } from './common.ts';
+import { contacts } from './contacts.ts';
 import { validate } from '../middleware/validation.ts';
 import { YES_NO_LIST } from '../utils/constants/application.ts';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing.ts';
