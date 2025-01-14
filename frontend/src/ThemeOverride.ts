@@ -5,7 +5,7 @@ import { definePreset } from '@primevue/themes';
 
 //https://maketintsandshades.com/#003366
 
-// Must use lower case for key values unless you want pain
+// Must use lower/camel case for key values unless you want pain
 // bcblue.500 is BC mandated blue
 
 // Some values override base color values.
@@ -81,6 +81,7 @@ export const ThemeOverride = definePreset(Material, {
       950: '#A2312D'
     },
     disabledColor: '#EDEBE9',
+    textSecondary: '#474543',
     white: '#FFFFFF'
   },
   semantic: {
@@ -234,10 +235,17 @@ export const ThemeOverride = definePreset(Material, {
         light: {
           root: {
             error: {
-              color: '#474543'
+              color: '{textSecondary}'
+            },
+            info: {
+              color: '{textSecondary}'
             },
             success: {
-              background: '{green.100}'
+              background: '{green.100}',
+              color: '{textSecondary}'
+            },
+            warn: {
+              color: '{textSecondary}'
             }
           }
         }
@@ -275,10 +283,13 @@ export const ThemeOverride = definePreset(Material, {
     toast: {
       colorScheme: {
         light: {
+          error: {
+            color: '{textSecondary}'
+          },
           success: {
             background: '{green.100}',
             borderColor: '{green.500}',
-            color: '{green.500}',
+            color: '{textSecondary}',
             detailColor: '{surface.300}',
             closeButton: {
               hoverBackground: '{green.200}',

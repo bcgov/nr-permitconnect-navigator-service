@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router';
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
-import { Spinner } from '@/components/layout';
 import {
   Accordion,
   AccordionContent,
@@ -15,8 +14,6 @@ import {
   AccordionPanel,
   Button,
   Card,
-  Column,
-  DataTable,
   Divider,
   useToast
 } from '@/lib/primevue';
@@ -54,8 +51,6 @@ const { submissionId } = defineProps<{
 const { t } = useI18n();
 
 const BREADCRUMB_HOME: MenuItem = { label: t('projectView.crumbHousing'), route: RouteName.HOUSING };
-const DEFAULT_SORT_ORDER = -1;
-const DEFAULT_SORT_FIELD = 'submittedAt';
 
 // Store
 const submissionStore = useSubmissionStore();

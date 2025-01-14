@@ -43,7 +43,10 @@ const {
         <font-awesome-icon
           :icon="`fa-solid ${icon}`"
           :class="[
-            { 'app-primary-color': index > activeStep && !errors, 'app-error-background app-error-border': errors }
+            {
+              'app-primary-color': index > activeStep && !errors,
+              'app-error-background app-error-border text-white': errors
+            }
           ]"
         />
       </span>

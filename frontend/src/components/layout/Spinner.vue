@@ -3,10 +3,11 @@ import { ProgressSpinner } from '@/lib/primevue';
 </script>
 
 <template>
-  <ProgressSpinner
-    class="flex justify-center"
-    style="width: 50px; height: 50px"
-    stroke-width="4"
-    aria-label="Loading"
-  />
+  <div class="flex justify-center">
+    <ProgressSpinner
+      style="width: 50px; height: 50px"
+      stroke-width="4"
+      aria-label="Loading"
+    />
+  </div>
 </template>
