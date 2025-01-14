@@ -2,9 +2,9 @@ import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 
-import { getLogger } from '../components/log';
+import { getLogger } from '../components/log.ts';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types.ts';
 
 const log = getLogger(module.filename);
 

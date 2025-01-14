@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps';
+import { IStamps } from '../interfaces/IStamps.ts';
 import { PermitNote } from './PermitNote';
 import { PermitType } from './PermitType';
 

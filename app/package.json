@@ -48,6 +48,7 @@
     "seed": "knex seed:run",
     "serve": "ts-node-dev --respawn --transpile-only --rs --watch bin,config,dist ./bin/www",
     "start": "ts-node --transpile-only ./bin/www",
+    "start:dev": "node --experimental-strip-types ./bin/www.ts",
     "test": "jest --verbose --forceExit --detectOpenHandles",
     "typecheck": "tsc --noEmit"
   },

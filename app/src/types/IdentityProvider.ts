@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps';
+import { IStamps } from '../interfaces/IStamps.ts';
 
 export type IdentityProvider = {
   idp: string; // Primary Key

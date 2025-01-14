@@ -16,7 +16,7 @@ import {
   ProjectLocation,
   ProjectRelationship,
   SubmissionType
-} from '../enums/housing';
+} from '../enums/housing.ts';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,

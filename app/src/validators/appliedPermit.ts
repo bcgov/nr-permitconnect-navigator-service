@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { PERMIT_STATUS_LIST } from '../utils/constants/housing';
+import { PERMIT_STATUS_LIST } from '../utils/constants/housing.ts';
 
 export const appliedPermit = Joi.object({
   permitTypeId: Joi.number().required(),

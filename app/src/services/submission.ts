@@ -2,15 +2,15 @@
 import axios from 'axios';
 import config from 'config';
 
-import prisma from '../db/dataConnection';
-import { submission } from '../db/models';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { ApplicationStatus } from '../utils/enums/housing';
-import { getChefsApiKey } from '../utils/utils';
+import prisma from '../db/dataConnection.ts';
+import { submission } from '../db/models.ts';
+import { BasicResponse, Initiative } from '../utils/enums/application.ts';
+import { ApplicationStatus } from '../utils/enums/housing.ts';
+import { getChefsApiKey } from '../utils/utils.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Submission, SubmissionSearchParameters } from '../types';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Submission, SubmissionSearchParameters } from '../types.ts';
 
 /**
  * @function chefsAxios

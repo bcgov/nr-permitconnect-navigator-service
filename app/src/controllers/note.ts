@@ -1,8 +1,8 @@
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { enquiryService, noteService, submissionService, userService } from '../services';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
+import { enquiryService, noteService, submissionService, userService } from '../services.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { BringForward, Note } from '../types';
+import type { BringForward, Note } from '../types.ts';
 
 const controller = {
   async createNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {

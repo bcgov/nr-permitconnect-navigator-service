@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 
 import { AccessRequestStatus, GroupName } from '../../utils/enums/application';
 
-import type { Stamps } from '../stamps';
+import type { Stamps } from '../stamps.ts';
 import type { AccessRequest } from '../../types/AccessRequest';
 
 // Define types

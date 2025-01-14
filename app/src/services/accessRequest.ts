@@ -2,11 +2,11 @@
 // import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma from '../db/dataConnection';
-import { access_request } from '../db/models';
-import { AccessRequestStatus } from '../utils/enums/application';
+import prisma from '../db/dataConnection.ts';
+import { access_request } from '../db/models.ts';
+import { AccessRequestStatus } from '../utils/enums/application.ts';
 
-import type { AccessRequest } from '../types';
+import type { AccessRequest } from '../types.ts';
 
 /**
  * The User DB Service

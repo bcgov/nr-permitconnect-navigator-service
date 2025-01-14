@@ -1,9 +1,9 @@
-import prisma from '../db/dataConnection';
-import { note } from '../db/models';
+import prisma from '../db/dataConnection.ts';
+import { note } from '../db/models.ts';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Note } from '../types';
-import { IStamps } from '../interfaces/IStamps';
+import type { Note } from '../types.ts';
+import { IStamps } from '../interfaces/IStamps.ts';
 
 const service = {
   /**

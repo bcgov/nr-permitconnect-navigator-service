@@ -1,5 +1,5 @@
-import { IStamps } from '../interfaces/IStamps';
-import { AccessRequestStatus, GroupName } from '../utils/enums/application';
+import { IStamps } from '../interfaces/IStamps.ts';
+import { AccessRequestStatus, GroupName } from '../utils/enums/application.ts';
 
 export type AccessRequest = {
   accessRequestId: string; // Primary key

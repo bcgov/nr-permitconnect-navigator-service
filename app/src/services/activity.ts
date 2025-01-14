@@ -1,7 +1,7 @@
-import prisma from '../db/dataConnection';
-import { activity } from '../db/models';
-import { generateUniqueActivityId } from '../db/utils/utils';
-import { IStamps } from '../interfaces/IStamps';
+import prisma from '../db/dataConnection.ts';
+import { activity } from '../db/models.ts';
+import { generateUniqueActivityId } from '../db/utils/utils.ts';
+import { IStamps } from '../interfaces/IStamps.ts';
 
 const service = {
   /**

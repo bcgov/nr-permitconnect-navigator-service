@@ -1,7 +1,7 @@
-import { yarsService } from '../services';
+import { yarsService } from '../services.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import { GroupName, Initiative } from '../utils/enums/application';
+import { GroupName, Initiative } from '../utils/enums/application.ts';
 
 const controller = {
   getGroups: async (req: Request, res: Response, next: NextFunction) => {

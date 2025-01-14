@@ -5,7 +5,7 @@ import contact from './contact';
 import user from './user';
 import { BasicResponse } from '../../utils/enums/application';
 
-import type { Stamps } from '../stamps';
+import type { Stamps } from '../stamps.ts';
 import type { Submission } from '../../types';
 
 // Define types

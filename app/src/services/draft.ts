@@ -1,8 +1,8 @@
-import prisma from '../db/dataConnection';
-import { draft } from '../db/models';
+import prisma from '../db/dataConnection.ts';
+import { draft } from '../db/models.ts';
 
-import type { Draft } from '../types';
-import { DraftCode } from '../utils/enums/housing';
+import type { Draft } from '../types.ts';
+import { DraftCode } from '../utils/enums/housing.ts';
 
 const service = {
   /**

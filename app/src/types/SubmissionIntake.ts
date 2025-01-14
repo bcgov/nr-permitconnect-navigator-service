@@ -1,6 +1,6 @@
 import { Contact } from './Contact';
 import { Permit } from './Permit';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
+import { ApplicationStatus, SubmissionType } from '../utils/enums/housing.ts';
 
 export type SubmissionIntake = {
   activityId?: string;

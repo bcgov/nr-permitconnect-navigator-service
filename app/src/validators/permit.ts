@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
-import { validate } from '../middleware/validation';
+import { validate } from '../middleware/validation.ts';
 import { permitTypeSchema } from './permitType';
 
 const sharedPermitSchema = {

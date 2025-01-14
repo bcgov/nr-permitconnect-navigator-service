@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
 import {
   activityService,
   contactService,
@@ -9,8 +9,8 @@ import {
   enquiryService,
   submissionService,
   permitService
-} from '../services';
-import { Initiative } from '../utils/enums/application';
+} from '../services.ts';
+import { Initiative } from '../utils/enums/application.ts';
 import {
   ApplicationStatus,
   DraftCode,
@@ -20,8 +20,8 @@ import {
   PermitNeeded,
   PermitStatus,
   SubmissionType
-} from '../utils/enums/housing';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+} from '../utils/enums/housing.ts';
+import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
@@ -33,7 +33,7 @@ import type {
   Submission,
   SubmissionIntake,
   SubmissionSearchParameters
-} from '../types';
+} from '../types.ts';
 
 const controller = {
   /**

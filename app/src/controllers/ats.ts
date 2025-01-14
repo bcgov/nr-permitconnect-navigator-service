@@ -1,9 +1,9 @@
-import { atsService } from '../services';
+import { atsService } from '../services.ts';
 
-import { getCurrentUsername } from '../utils/utils';
+import { getCurrentUsername } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { ATSClientResource, ATSUserSearchParameters } from '../types';
+import type { ATSClientResource, ATSUserSearchParameters } from '../types.ts';
 
 const controller = {
   searchATSUsers: async (

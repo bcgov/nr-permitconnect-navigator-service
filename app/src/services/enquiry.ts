@@ -1,9 +1,9 @@
 /* eslint-disable no-useless-catch */
-import prisma from '../db/dataConnection';
-import { enquiry } from '../db/models';
-import { IStamps } from '../interfaces/IStamps';
+import prisma from '../db/dataConnection.ts';
+import { enquiry } from '../db/models.ts';
+import { IStamps } from '../interfaces/IStamps.ts';
 
-import type { Enquiry, EnquirySearchParameters } from '../types';
+import type { Enquiry, EnquirySearchParameters } from '../types.ts';
 
 const service = {
   /**

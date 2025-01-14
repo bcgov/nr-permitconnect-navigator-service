@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps';
+import stamps from '../stamps.ts';
 
 import type { Knex } from 'knex';
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { Action } from '../utils/enums/application';
+import { Action } from '../utils/enums/application.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 

@@ -3,11 +3,11 @@ import Problem from 'api-problem';
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
-import { userService } from '../services';
-import { AuthType, Initiative } from '../utils/enums/application';
+import { userService } from '../services.ts';
+import { AuthType, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { CurrentContext } from '../types';
+import type { CurrentContext } from '../types.ts';
 
 // TODO: Implement a 401 for unrecognized users.
 

@@ -4,8 +4,8 @@
 import config from 'config';
 import http from 'http';
 
-import app from '../app';
-import getLogger from '../src/components/log';
+import app from '../app.ts';
+import getLogger from '../src/components/log.ts';
 const log = getLogger(module.filename);
 
 /** Normalize a port into a number, string, or false. */
@@ -26,14 +26,12 @@ const normalizePort = (val: string) => {
 };
 
 /** Event listener for HTTP server "error" event. */
-const onError = (error: { syscall: string; code: string; }) => {
+const onError = (error: { syscall: string; code: string }) => {
   if (error.syscall !== 'listen') {
     throw error;
   }
 
-  const bind = typeof port === 'string' ?
-    'Pipe ' + port :
-    'Port ' + port;
+  const bind = typeof port === 'string' ? 'Pipe ' + port : 'Port ' + port;
 
   // handle specific listen errors with friendly messages
   switch (error.code) {
@@ -53,9 +51,7 @@ const onError = (error: { syscall: string; code: string; }) => {
 /** Event listener for HTTP server "listening" event. */
 const onListening = () => {
   const addr = server.address();
-  const bind = typeof addr === 'string' ?
-    'pipe ' + addr :
-    'port ' + addr?.port;
+  const bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr?.port;
   log.info('Listening on ' + bind);
 };
 

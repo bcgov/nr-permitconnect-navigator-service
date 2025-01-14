@@ -1,7 +1,7 @@
-import { userService, yarsService } from '../services';
-import { User, UserSearchParameters } from '../types';
-import { GroupName } from '../utils/enums/application';
-import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
+import { userService, yarsService } from '../services.ts';
+import { User, UserSearchParameters } from '../types.ts';
+import { GroupName } from '../utils/enums/application.ts';
+import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

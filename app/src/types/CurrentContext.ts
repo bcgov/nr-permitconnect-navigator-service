@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-import { AuthType, Initiative } from '../utils/enums/application';
+import { AuthType, Initiative } from '../utils/enums/application.ts';
 
 export type CurrentContext = {
   authType?: AuthType;

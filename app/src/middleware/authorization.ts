@@ -11,12 +11,12 @@ import {
   submissionService,
   userService,
   yarsService
-} from '../services';
-import { Initiative, GroupName } from '../utils/enums/application';
-import { getCurrentSubject } from '../utils/utils';
+} from '../services.ts';
+import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { getCurrentSubject } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import { CurrentAuthorization } from '../types';
+import { CurrentAuthorization } from '../types.ts';
 
 /**
  * @function hasAuthorization

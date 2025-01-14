@@ -1,6 +1,6 @@
-import prisma from '../db/dataConnection';
+import prisma from '../db/dataConnection.ts';
 
-import { Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application.ts';
 
 const service = {
   /**

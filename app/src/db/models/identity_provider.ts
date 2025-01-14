@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import type { Stamps } from '../stamps';
+import type { Stamps } from '../stamps.ts';
 import type { IdentityProvider } from '../../types';
 
 // Define a type

@@ -7,16 +7,16 @@ import { contacts } from './contacts';
 
 import { housing } from './housing';
 import { permits } from './permits';
-import { validate } from '../middleware/validation';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
+import { validate } from '../middleware/validation.ts';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import {
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
   SUBMISSION_TYPE_LIST
-} from '../utils/constants/housing';
-import { BasicResponse } from '../utils/enums/application';
-import { IntakeStatus } from '../utils/enums/housing';
+} from '../utils/constants/housing.ts';
+import { BasicResponse } from '../utils/enums/application.ts';
+import { IntakeStatus } from '../utils/enums/housing.ts';
 
 const schema = {
   createSubmission: {

@@ -1,10 +1,10 @@
 /* eslint-disable no-useless-catch */
 
-import prisma from '../db/dataConnection';
-import { permit, permit_type } from '../db/models';
+import prisma from '../db/dataConnection.ts';
+import { permit, permit_type } from '../db/models.ts';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { ListPermitsOptions, Permit } from '../types';
+import type { ListPermitsOptions, Permit } from '../types.ts';
 
 const service = {
   /**

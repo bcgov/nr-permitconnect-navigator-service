@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { uuidv4 } from './common';
-import { validate } from '../middleware/validation';
+import { validate } from '../middleware/validation.ts';
 
 const schema = {
   createUserAccessRequest: {

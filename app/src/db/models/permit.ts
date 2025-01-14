@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import permit_note from './permit_note';
 import permit_type from './permit_type';
 
-import type { Stamps } from '../stamps';
+import type { Stamps } from '../stamps.ts';
 import type { Permit } from '../../types';
 
 // Define types

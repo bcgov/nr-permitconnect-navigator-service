@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
-import { validate } from '../middleware/validation';
+import { validate } from '../middleware/validation.ts';
 
-import { BasicResponse } from '../utils/enums/application';
+import { BasicResponse } from '../utils/enums/application.ts';
 
 const addressBody = {
   '@type': Joi.string().valid('AddressResource'),

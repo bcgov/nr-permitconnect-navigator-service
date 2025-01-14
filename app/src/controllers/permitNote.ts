@@ -1,8 +1,8 @@
-import { generateCreateStamps } from '../db/utils/utils';
-import { permitNoteService } from '../services';
+import { generateCreateStamps } from '../db/utils/utils.ts';
+import { permitNoteService } from '../services.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PermitNote } from '../types';
+import type { PermitNote } from '../types.ts';
 
 const controller = {
   createPermitNote: async (req: Request<never, never, PermitNote>, res: Response, next: NextFunction) => {

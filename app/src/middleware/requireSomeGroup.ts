@@ -1,8 +1,8 @@
 // @ts-expect-error api-problem lacks a defined interface; code still works fine
 import Problem from 'api-problem';
 
-import { yarsService } from '../services';
-import { GroupName, Initiative } from '../utils/enums/application';
+import { yarsService } from '../services.ts';
+import { GroupName, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

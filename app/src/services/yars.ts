@@ -1,8 +1,8 @@
 /* eslint-disable no-useless-catch */
 
 import { comsService } from '.';
-import prisma from '../db/dataConnection';
-import { Initiative, GroupName, Action } from '../utils/enums/application';
+import prisma from '../db/dataConnection.ts';
+import { Initiative, GroupName, Action } from '../utils/enums/application.ts';
 
 const service = {
   /**
