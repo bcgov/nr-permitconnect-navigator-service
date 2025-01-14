@@ -918,13 +918,12 @@ watch(
                   </div>
                   <InputText
                     v-if="values.housing.otherSelected"
-                    class="col-span-6 mb-2"
+                    class="col-span-6"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
                   <div class="col-span-6" />
-
                   <Select
                     v-if="values.housing.otherSelected"
                     class="col-span-6"
@@ -933,12 +932,11 @@ watch(
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-span-12">
-                    <ErrorMessage
-                      v-show="meta.touched"
-                      name="housing"
-                    />
-                  </div>
+                  <ErrorMessage
+                    v-if="meta.touched"
+                    class="col-span-12"
+                    name="housing"
+                  />
                 </div>
               </template>
             </Card>
@@ -978,7 +976,7 @@ watch(
             </Card>
             <Card>
               <template #title>
-                <div class="flex align-items-center">
+                <div class="flex items-center justify-between">
                   <div class="flex flex-grow-1">
                     <span class="section-header">
                       {{ t('submissionIntakeForm.financiallySupportedCard') }}
@@ -1658,7 +1656,7 @@ watch(
                           class="grid grid-cols-3"
                         >
                           <div class="col-span-1">
-                            <div class="flex justify-center">
+                            <div class="flex">
                               <Select
                                 class="w-full"
                                 :disabled="!editable"

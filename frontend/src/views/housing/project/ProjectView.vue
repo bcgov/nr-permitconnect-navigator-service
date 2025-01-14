@@ -360,7 +360,7 @@ onMounted(async () => {
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-    <h3 class="my-8">{{ t('projectView.submittedApplications') }}</h3>
+    <h3 class="mt-20 mb-8">{{ t('projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
       class="empty-block p-8"
@@ -430,14 +430,7 @@ onMounted(async () => {
     />
     <div>
       <div>
-        <h3 class="my-8">{{ t('projectView.relatedEnquiries') }}</h3>
-      </div>
-
-      <div
-        v-if="!getRelatedEnquiries?.length"
-        class="empty-block p-8 mb-2"
-      >
-        {{ t('projectView.listEmpty') }}
+        <h3 class="mt-20 mb-8">{{ t('projectView.relatedEnquiries') }}</h3>
       </div>
       <EnquiryListProponent
         :loading="loading"

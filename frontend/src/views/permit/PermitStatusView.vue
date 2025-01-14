@@ -340,7 +340,7 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4 class="mb-6">Application progress</h4>
+            <h4 class="mt-8 mb-6">Application progress</h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"

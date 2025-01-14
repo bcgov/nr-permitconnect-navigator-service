@@ -120,11 +120,11 @@ label {
 }
 
 .app-error-color {
-  color: var(--p-red-500) !important;
+  color: var(--p-error-color) !important;
 }
 
 .app-error-message {
-  color: var(--p-red-500);
+  color: var(--p-error-color);
   font-size: 0.8rem;
 }
 
@@ -198,11 +198,6 @@ label {
     background-color: var(--p-surface-800);
     color: var(--p-surface-0);
   }
-}
-
-.app-error-message {
-  color: var(--p-error-color);
-  font-size: 0.8rem;
 }
 
 .app-info-dialog {

@@ -48,7 +48,7 @@ const visible = defineModel<boolean>('visible');
       </div>
     </div>
 
-    <div class="text-2xl font-bold mb-2">Application statuses</div>
+    <h4 class="mb-6">Application statuses</h4>
     <div class="my-6">
       <div class="flex">
         <StatusPill :auth-status="PermitAuthorizationStatus.IN_REVIEW" />

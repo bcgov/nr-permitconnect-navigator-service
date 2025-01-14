@@ -56,7 +56,6 @@ const { t } = useI18n();
       :header="t('enquiryListProponent.enquiryId')"
       :sortable="true"
       style="width: 45%"
-      frozen
     >
       <template #body="{ data }">
         <div :data-activityId="data.activityId">

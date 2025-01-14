@@ -233,6 +233,9 @@ export const ThemeOverride = definePreset(Material, {
       colorScheme: {
         light: {
           root: {
+            error: {
+              color: '#474543'
+            },
             success: {
               background: '{green.100}'
             }
