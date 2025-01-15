@@ -71,6 +71,7 @@ function onDelete(enquiryId: string, activityId: string) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       enquiryService
         .updateIsDeletedFlag(enquiryId, true)
@@ -145,7 +146,7 @@ function updateQueryParams() {
     "
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <h3>No items found.</h3>
       </div>
     </template>
@@ -153,7 +154,7 @@ function updateQueryParams() {
       <Spinner />
     </template>
     <template #header>
-      <div class="flex justify-content-end">
+      <div class="flex justify-end">
         <IconField icon-position="left">
           <InputIcon class="pi pi-search" />
           <InputText

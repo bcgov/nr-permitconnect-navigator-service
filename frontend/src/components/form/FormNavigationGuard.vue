@@ -23,6 +23,7 @@ onBeforeRouteLeave((to) => {
       acceptLabel: 'Leave',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => router.replace(to),
       reject: () => (isOpen.value = false)
     });

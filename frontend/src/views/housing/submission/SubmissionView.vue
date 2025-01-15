@@ -14,7 +14,19 @@ import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
-import { Button, Column, DataTable, IconField, InputIcon, InputText, TabPanel, TabView } from '@/lib/primevue';
+import {
+  Button,
+  Column,
+  DataTable,
+  IconField,
+  InputIcon,
+  InputText,
+  Tab,
+  Tabs,
+  TabList,
+  TabPanel,
+  TabPanels
+} from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
@@ -170,293 +182,303 @@ onMounted(async () => {
     </span>
   </h1>
 
-  <TabView v-model:active-index="activeTab">
-    <TabPanel header="Information">
-      <span v-if="!loading && getSubmission">
-        <SubmissionForm
-          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
-          :submission="getSubmission"
-        />
-      </span>
-    </TabPanel>
-    <TabPanel header="Files">
-      <div class="mb-3 border-dashed file-upload border-round-md">
-        <FileUpload
-          :activity-id="activityId"
-          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
-        />
-      </div>
-      <div class="flex flex-row justify-content-between pb-3">
-        <div class="flex align-items-center">
-          <IconField icon-position="left">
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="searchTag"
-              placeholder="Search"
-            />
-          </IconField>
+  <Tabs :value="activeTab">
+    <TabList>
+      <Tab :value="0">Information</Tab>
+      <Tab :value="1">Files</Tab>
+      <Tab :value="2">Permit</Tab>
+      <Tab :value="3">Notes</Tab>
+      <Tab :value="4">Roadmap</Tab>
+      <Tab :value="5">Related enquiries</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel :value="0">
+        <span v-if="!loading && getSubmission">
+          <SubmissionForm
+            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
+            :submission="getSubmission"
+          />
+        </span>
+      </TabPanel>
+      <TabPanel :value="1">
+        <div class="mb-4 border-dashed file-upload rounded-md">
+          <FileUpload
+            :activity-id="activityId"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+          />
         </div>
-        <div class="align-items-end">
-          <Button
-            aria-label="List"
-            class="view-switch-button"
-            @click="gridView = false"
-          >
-            <font-awesome-icon
-              icon="fa-solid fa-list"
-              class="fa-lg"
-              :class="gridView ? 'list-grid-deselected-icon' : 'list-grid-selected-icon'"
-            />
-          </Button>
-          <Button
-            aria-label="Grid"
-            class="view-switch-button"
-            @click="gridView = true"
-          >
-            <font-awesome-icon
-              icon="fa-solid fa-grip"
-              class="fa-lg"
-              :class="gridView ? 'list-grid-selected-icon' : 'list-grid-deselected-icon'"
-            />
-          </Button>
+        <div class="flex flex-row justify-between pb-4">
+          <div class="flex items-center">
+            <IconField icon-position="left">
+              <InputIcon class="pi pi-search" />
+              <InputText
+                v-model="searchTag"
+                placeholder="Search"
+              />
+            </IconField>
+          </div>
+          <div class="items-end">
+            <Button
+              aria-label="List"
+              class="view-switch-button"
+              @click="gridView = false"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-list"
+                class="fa-lg"
+                :class="gridView ? 'list-grid-deselected-icon' : 'list-grid-selected-icon'"
+              />
+            </Button>
+            <Button
+              aria-label="Grid"
+              class="view-switch-button"
+              @click="gridView = true"
+            >
+              <font-awesome-icon
+                icon="fa-solid fa-grip"
+                class="fa-lg"
+                :class="gridView ? 'list-grid-selected-icon' : 'list-grid-deselected-icon'"
+              />
+            </Button>
+          </div>
         </div>
-      </div>
-      <div
-        v-if="gridView"
-        class="grid nested-grid"
-      >
-        <DataTable
+        <div
           v-if="gridView"
-          class="remove-padding ml-2 mr-2 w-full"
+          class="grid grid-cols-12 gap-4 nested-grid"
+        >
+          <DataTable
+            v-if="gridView"
+            class="remove-padding col-span-12"
+            :sort-field="SORT_TYPES.CREATED_AT"
+            :sort-order="SORT_ORDER.DESCENDING"
+            @update:sort-order="
+              (order: number | undefined) => {
+                sortOrder = order ?? SORT_ORDER.DESCENDING;
+              }
+            "
+            @update:sort-field="
+              (field: string) => {
+                sortType = field;
+              }
+            "
+          >
+            <template #empty>
+              <div class="flex justify-center" />
+            </template>
+            <Column
+              sortable
+              field="filename"
+              header="File name"
+              class="w-36"
+            />
+            <Column
+              field="createdAt"
+              sortable
+              header="Upload date"
+              class="w-40"
+            />
+            <Column
+              field="filesize"
+              sortable
+              header="Size"
+              class="w-24"
+            />
+            <Column
+              field="mimeType"
+              sortable
+              header="Type"
+              class="w-40"
+            />
+            <Column />
+          </DataTable>
+
+          <div class="col-span-12">
+            <div class="grid grid-cols-6 gap-4">
+              <div
+                v-for="(document, index) in filteredDocuments"
+                :key="document.documentId"
+                :index="index"
+                class="col-span-1"
+              >
+                <DocumentCard
+                  :document="document"
+                  :editable="!isCompleted"
+                  class="hover-hand hover-shadow"
+                  @click="documentService.downloadDocument(document.documentId, document.filename)"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <DataTable
+          v-if="!gridView"
+          :value="filteredDocuments"
           :sort-field="SORT_TYPES.CREATED_AT"
           :sort-order="SORT_ORDER.DESCENDING"
-          @update:sort-order="
-            (order: number | undefined) => {
-              sortOrder = order ?? SORT_ORDER.DESCENDING;
-            }
-          "
-          @update:sort-field="
-            (field: string) => {
-              sortType = field;
-            }
-          "
+          :row-hover="true"
         >
-          <template #empty>
-            <div class="flex justify-content-center" />
-          </template>
           <Column
-            sortable
             field="filename"
             header="File name"
-            class="w-9rem"
-          />
+            sortable
+          >
+            <template #body="{ data }">
+              <a
+                href="#"
+                @click="
+                  () => {
+                    if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
+                      documentService.downloadDocument(data.documentId, data.filename);
+                  }
+                "
+              >
+                {{ data.filename }}
+              </a>
+            </template>
+          </Column>
           <Column
             field="createdAt"
-            sortable
             header="Upload date"
-            class="w-10rem"
-          />
+            sortable
+          >
+            <template #body="{ data }">
+              {{ formatDateLong(data.createdAt) }}
+            </template>
+          </Column>
           <Column
             field="filesize"
-            sortable
             header="Size"
-            class="w-6rem"
-          />
+            sortable
+          >
+            <template #body="{ data }">
+              {{ filesize(data.filesize) }}
+            </template>
+          </Column>
           <Column
             field="extension"
-            sortable
             header="Type"
-            class="w-10rem"
+            sortable
           />
-          <Column />
+          <Column
+            field="createdByFullName"
+            header="Uploaded by"
+            sortable
+          />
+          <Column field="fileAction">
+            <template #header>
+              <div class="flex justify-center w-full">
+                <b>Action</b>
+              </div>
+            </template>
+            <template #body="{ data }">
+              <div class="flex justify-center">
+                <DeleteDocument
+                  :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                  :document="data"
+                />
+              </div>
+            </template>
+          </Column>
         </DataTable>
-
-        <div class="col-12">
-          <div class="grid">
-            <div
-              v-for="(document, index) in filteredDocuments"
-              :key="document.documentId"
-              :index="index"
-              class="col-12 md:col-6 lg:col-4 xl:col-2"
-            >
-              <DocumentCard
-                :document="document"
-                :editable="!isCompleted"
-                class="hover-hand hover-shadow"
-                @click="documentService.downloadDocument(document.documentId, document.filename)"
-              />
+      </TabPanel>
+      <TabPanel :value="2">
+        <span v-if="getPermitTypes.length">
+          <div class="flex items-center pb-2">
+            <div class="grow">
+              <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
             </div>
+            <Button
+              aria-label="Add permit"
+              :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
+              @click="permitModalVisible = true"
+            >
+              <font-awesome-icon
+                class="pr-2"
+                icon="fa-solid fa-plus"
+              />
+              Add permit
+            </Button>
           </div>
-        </div>
-      </div>
-      <DataTable
-        v-if="!gridView"
-        :value="filteredDocuments"
-        :sort-field="SORT_TYPES.CREATED_AT"
-        :sort-order="SORT_ORDER.DESCENDING"
-        :row-hover="true"
-      >
-        <Column
-          field="filename"
-          header="File name"
-          sortable
-        >
-          <template #body="{ data }">
-            <a
-              href="#"
-              @click="
-                () => {
-                  if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
-                    documentService.downloadDocument(data.documentId, data.filename);
-                }
-              "
-            >
-              {{ data.filename }}
-            </a>
-          </template>
-        </Column>
-        <Column
-          field="createdAt"
-          header="Upload date"
-          sortable
-        >
-          <template #body="{ data }">
-            {{ formatDateLong(data.createdAt) }}
-          </template>
-        </Column>
-        <Column
-          field="filesize"
-          header="Size"
-          sortable
-        >
-          <template #body="{ data }">
-            {{ filesize(data.filesize) }}
-          </template>
-        </Column>
-        <Column
-          field="extension"
-          header="Type"
-          sortable
-        />
-        <Column
-          field="createdByFullName"
-          header="Uploaded by"
-          sortable
-        />
-        <Column field="fileAction">
-          <template #header>
-            <div class="flex justify-content-center w-full">
-              <b>Action</b>
-            </div>
-          </template>
-          <template #body="{ data }">
-            <div class="flex justify-content-center">
-              <DeleteDocument
-                :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
-                :document="data"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
-    </TabPanel>
-    <TabPanel header="Permits">
-      <span v-if="getPermitTypes.length">
-        <div class="flex align-items-center pb-2">
-          <div class="flex-grow-1">
-            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
+          <div
+            v-for="(permit, index) in getPermits"
+            :key="permit.permitId"
+            :index="index"
+            class="mb-6"
+          >
+            <PermitCard
+              :editable="!isCompleted"
+              :permit="permit"
+            />
+          </div>
+
+          <PermitModal
+            v-model:visible="permitModalVisible"
+            :activity-id="activityId"
+          />
+        </span>
+      </TabPanel>
+      <TabPanel :value="3">
+        <div class="flex items-center pb-2">
+          <div class="grow">
+            <p class="font-bold">Notes ({{ getNotes.length }})</p>
           </div>
           <Button
-            aria-label="Add permit"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
-            @click="permitModalVisible = true"
+            aria-label="Add note"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+            @click="noteModalVisible = true"
           >
             <font-awesome-icon
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            Add permit
+            Add note
           </Button>
         </div>
         <div
-          v-for="(permit, index) in getPermits"
-          :key="permit.permitId"
+          v-for="(note, index) in getNotes"
+          :key="note.noteId"
           :index="index"
-          class="col-12"
+          class="mb-6"
         >
-          <PermitCard
+          <NoteCard
             :editable="!isCompleted"
-            :permit="permit"
+            :note="note"
+            @delete-note="onDeleteNote"
+            @update-note="onUpdateNote"
           />
         </div>
 
-        <PermitModal
-          v-model:visible="permitModalVisible"
+        <NoteModal
+          v-if="noteModalVisible"
+          v-model:visible="noteModalVisible"
           :activity-id="activityId"
+          @add-note="onAddNote"
         />
-      </span>
-    </TabPanel>
-    <TabPanel header="Notes">
-      <div class="flex align-items-center pb-2">
-        <div class="flex-grow-1">
-          <p class="font-bold">Notes ({{ getNotes.length }})</p>
+      </TabPanel>
+      <TabPanel :value="4">
+        <Roadmap
+          v-if="!loading"
+          :activity-id="activityId"
+          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
+        />
+      </TabPanel>
+      <TabPanel :value="5">
+        <div class="flex items-center pb-2">
+          <div class="grow">
+            <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
+          </div>
         </div>
-        <Button
-          aria-label="Add note"
-          :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
-          @click="noteModalVisible = true"
+        <div
+          v-for="(enquiry, index) in getRelatedEnquiries"
+          :key="enquiry.enquiryId"
+          :index="index"
+          class="col-span-12"
         >
-          <font-awesome-icon
-            class="pr-2"
-            icon="fa-solid fa-plus"
-          />
-          Add note
-        </Button>
-      </div>
-      <div
-        v-for="(note, index) in getNotes"
-        :key="note.noteId"
-        :index="index"
-        class="col-12"
-      >
-        <NoteCard
-          :editable="!isCompleted"
-          :note="note"
-          @delete-note="onDeleteNote"
-          @update-note="onUpdateNote"
-        />
-      </div>
-
-      <NoteModal
-        v-if="noteModalVisible"
-        v-model:visible="noteModalVisible"
-        :activity-id="activityId"
-        @add-note="onAddNote"
-      />
-    </TabPanel>
-    <TabPanel header="Roadmap">
-      <Roadmap
-        v-if="!loading"
-        :activity-id="activityId"
-        :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
-      />
-    </TabPanel>
-    <TabPanel header="Related enquiries">
-      <div class="flex align-items-center pb-2">
-        <div class="flex-grow-1">
-          <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
+          <EnquiryCard :enquiry="enquiry" />
         </div>
-      </div>
-      <div
-        v-for="(enquiry, index) in getRelatedEnquiries"
-        :key="enquiry.enquiryId"
-        :index="index"
-        class="col-12"
-      >
-        <EnquiryCard :enquiry="enquiry" />
-      </div>
-    </TabPanel>
-  </TabView>
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
 </template>
 
 <style scoped lang="scss">
@@ -478,13 +500,13 @@ onMounted(async () => {
 }
 
 .list-grid-selected-icon {
-  color: $app-primary;
+  color: var(--p-primary-color);
 }
 
 .list-grid-deselected-icon {
-  color: $app-out-of-focus;
+  color: var(--p-content-hover-background);
   &:hover {
-    color: $app-hover;
+    color: var(--primary-hover-color);
   }
 }
 
@@ -493,9 +515,9 @@ onMounted(async () => {
 }
 
 .file-upload {
-  color: $app-out-of-focus;
+  color: var(--p-greyscale-500);
   &:hover {
-    color: $app-hover;
+    color: var(--p-content-hover-background);
   }
 }
 </style>

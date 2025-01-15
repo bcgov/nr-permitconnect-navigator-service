@@ -3,12 +3,15 @@ import { storeToRefs } from 'pinia';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Button, Dropdown } from '@/lib/primevue';
+import { Button, Select } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
+
+// Types
+type GroupList = { id: string; text: string };
 
 // Store
 const authzStore = useAuthZStore();
@@ -37,16 +40,16 @@ onMounted(() => {
 <template>
   <div
     v-if="getGroupOverride"
-    class="px-2 py-1 flex align-items-center role-override"
+    class="px-2 py-1 flex items-center role-override"
   >
     <p class="m-0 mr-2">Viewing site as:</p>
-    <div class="w-2 mr-2">
-      <Dropdown
+    <div class="w-2/12 mr-2">
+      <Select
         v-model="group"
         class="w-full"
         :options="GROUP_NAME_LIST"
-        :option-label="(e) => t(`${e.text}`)"
-        :option-value="(e) => e.id"
+        :option-label="(e: GroupList) => t(`${e.text}`)"
+        :option-value="(e: GroupList) => e.id"
         @change="(e) => setGroup(e)"
       />
     </div>

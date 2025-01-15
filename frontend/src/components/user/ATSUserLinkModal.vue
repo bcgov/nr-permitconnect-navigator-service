@@ -74,7 +74,7 @@ onMounted(() => {
     <template #header>
       <span class="p-dialog-title app-primary-color">Search ATS</span>
     </template>
-    <div class="pt-1 mb-4 mr-1 grid">
+    <div class="pt-1 mb-6 mr-1 grid grid-cols-12 gap-4">
       <div class="col pr-0">
         <InputText
           v-model="firstName"
@@ -110,7 +110,7 @@ onMounted(() => {
           class="w-full"
         />
       </div>
-      <div class="col-fixed w-1">
+      <div class="col-fixed w-1/12">
         <Button
           class="p-button-solid"
           label="Search"
@@ -122,7 +122,7 @@ onMounted(() => {
       v-model:selection="selectedUser"
       :row-hover="true"
       :loading="loading"
-      class="datatable mt-3 mb-2"
+      class="datatable mt-4 mb-2"
       :value="users"
       selection-mode="single"
       data-key="clientId"
@@ -132,7 +132,7 @@ onMounted(() => {
       current-page-report-template="{first}-{last} of {totalRecords}"
     >
       <template #empty>
-        <div class="flex justify-content-center">
+        <div class="flex justify-center">
           <h5 class="m-0">No users found.</h5>
         </div>
       </template>
@@ -171,9 +171,9 @@ onMounted(() => {
         sortable
       />
     </DataTable>
-    <div class="flex justify-content-start">
+    <div class="flex justify-start">
       <Button
-        class="p-button-solid mr-3"
+        class="p-button-solid mr-4"
         label="Link to PCNS"
         :disabled="!selectedUser"
         @click="emit('atsUserLink:link', selectedUser)"

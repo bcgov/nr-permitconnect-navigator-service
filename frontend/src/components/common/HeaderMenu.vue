@@ -24,7 +24,7 @@ const items = ref([
     }
   }
 ]);
-const menu: Ref<Menu | undefined> = ref(undefined);
+const menu: Ref<typeof Menu | undefined> = ref(undefined);
 
 // Actions
 const router = useRouter();
@@ -37,7 +37,7 @@ const toggle = (event: any) => {
 <template>
   <div
     v-if="getIsAuthenticated"
-    class="card flex justify-content-center"
+    class="card flex justify-center"
   >
     <Button
       id="menu-toggle"
@@ -62,9 +62,3 @@ const toggle = (event: any) => {
     />
   </div>
 </template>
-
-<style lang="css" scoped>
-.no-click {
-  pointer-events: none;
-}
-</style>

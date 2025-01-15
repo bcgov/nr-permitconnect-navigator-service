@@ -39,7 +39,7 @@ const {
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, value, resetField } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 onMounted(() => {
   resetField({ touched: false });
@@ -47,7 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <label
       :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
@@ -71,9 +71,10 @@ onMounted(() => {
       :option-label="(option: any) => getOptionLabel(option)"
       :placeholder="placeholder"
       :suggestions="suggestions"
-      @input="(e: IInputEvent) => emit('onInput', e)"
+      @blur="handleBlur"
       @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
+      @input="(e: IInputEvent) => emit('onInput', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div class="mt-2">
@@ -84,3 +85,11 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped lang="scss">
+:deep(.p-invalid) {
+  .p-autocomplete-input {
+    border-color: var(--p-red-500);
+  }
+}
+</style>

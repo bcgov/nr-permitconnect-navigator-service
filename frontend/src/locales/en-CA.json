@@ -11,7 +11,7 @@
   },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",
-    "listEmpty": "Submit a general enquiry for questions that are not related to existing projects",
+    "listEmpty": "Your project related enquiries will be displayed here.",
     "of": "of",
     "state": "State",
     "submittedDate": "Submitted date"
@@ -49,7 +49,7 @@
     "enquiryID": "Enquiry ID",
     "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
     "latestUpdates": "Latest updates",
-    "listEmpty": "Your project related enquiries will be displayed here",
+    "listEmpty": "Your project related enquiries will be displayed here.",
     "noUpdates": "No updates at the moment.",
     "notNeeded": "Not needed",
     "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
@@ -110,6 +110,7 @@
   "submissionIntakeForm": {
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
     "addressTooltip": "A civic address contains a street name and number where a non-civid does not.",
+    "appliedPermitsShareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",
     "appliedPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "bcHousingTooltip": "BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.",
     "isRegisteredTooltip": "Are you registered with OrgBook BC?",

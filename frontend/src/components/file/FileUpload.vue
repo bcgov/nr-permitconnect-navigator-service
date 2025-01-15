@@ -68,14 +68,14 @@ const onUpload = async (files: Array<File>) => {
 </script>
 
 <template>
-  <div>
+  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-full">
     <div
       v-if="uploading"
-      class="h-4rem align-content-center pl-2 pr-2"
+      class="h-16 content-center pl-2 pr-2"
     >
       <ProgressBar
         mode="indeterminate"
-        class="align-self-center progress-bar"
+        class="self-center progress-bar"
       />
     </div>
     <div
@@ -84,6 +84,7 @@ const onUpload = async (files: Array<File>) => {
     >
       <FileUpload
         name="fileUpload"
+        class="border-0"
         :multiple="true"
         :custom-upload="true"
         :auto="true"
@@ -91,10 +92,10 @@ const onUpload = async (files: Array<File>) => {
         @uploader="onFileUploadDragAndDrop"
       >
         <template #empty>
-          <div class="flex align-items-center justify-content-center flex-column">
+          <div class="flex items-center justify-center flex-col">
             <Button
               aria-label="Upload"
-              class="justify-content-center w-full h-4rem border-none"
+              class="justify-center w-full h-16 border-0"
               @click="onFileUploadClick"
             >
               <font-awesome-icon
@@ -108,12 +109,14 @@ const onUpload = async (files: Array<File>) => {
         <template #content="{ files }">
           <div
             v-if="files.length > 0"
-            class="flex align-items-center justify-content-center flex-column"
+            class="flex items-center justify-center flex-col"
           >
+            <!-- eslint-disable max-len -->
             <font-awesome-icon
               icon="fa-solid fa-upload"
-              class="border-2 border-dashed border-circle p-5 text-7xl text-400 border-400"
+              class="border-2 border-dashed rounded-full p-8 text-7xl text-surface-400 dark:text-surface-400 border-surface-400 dark:border-surface-400"
             />
+            <!-- eslint-enable max-len -->
             <p class="font-bold">Upload</p>
             <p>Click or drag-and-drop</p>
           </div>
@@ -133,21 +136,42 @@ const onUpload = async (files: Array<File>) => {
 </template>
 
 <style scoped lang="scss">
-:deep(.p-fileupload-buttonbar) {
+:deep(.p-fileupload-header) {
   display: none;
 }
+
 :deep(.p-fileupload-content) {
   padding: 0;
   border: none;
+
+  .p-button {
+    padding: 0;
+    border: none;
+  }
 }
+
 .file-input {
   display: none;
 }
+
 .p-button.p-component {
   background-color: transparent;
   color: var(--text-color);
 }
+
+.p-fileupload {
+  border-style: none;
+}
+
 .progress-bar {
   height: 0.3rem;
+}
+
+.file-upload {
+  width: 100%;
+  color: var(--p-greyscale-500);
+  &:hover {
+    color: var(--p-content-hover-background);
+  }
 }
 </style>

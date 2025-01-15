@@ -11,8 +11,8 @@ const {
 </script>
 
 <template>
-  <div class="col-12">
-    <div class="grid">
+  <div class="col-span-12">
+    <div class="grid grid-cols-12 gap-4">
       <div
         v-if="value && label"
         class="col-fixed"
@@ -21,7 +21,7 @@ const {
       </div>
       <div
         v-if="value && link"
-        class="col wrap-block w-9"
+        class="col wrap-block w-9/12"
       >
         <router-link :to="link">
           {{ value }}
@@ -29,7 +29,7 @@ const {
       </div>
       <div
         v-if="value && !link"
-        class="col wrap-block w-9"
+        class="col wrap-block w-9/12"
       >
         {{ value }}
       </div>

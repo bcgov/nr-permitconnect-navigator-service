@@ -69,6 +69,7 @@ const confirmSubmit = (data: any) => {
     header: 'Confirm sending this Permit Roadmap',
     acceptLabel: 'Send',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: async () => {
       try {
         await roadmapService.send(
@@ -179,44 +180,44 @@ watchEffect(async () => {
     :validation-schema="formSchema"
     @submit="confirmSubmit"
   >
-    <div class="formgrid grid">
+    <div class="grid grid-cols-12 gap-4">
       <InputText
-        class="col-12 lg:col-6"
+        class="col-span-12 lg:col-span-6"
         name="to"
         label="To"
         :disabled="!editable"
       />
       <div class="col" />
       <InputText
-        class="col-12 lg:col-6"
+        class="col-span-12 lg:col-span-6"
         name="cc"
         label="CC"
         :disabled="!editable"
       />
       <div class="col" />
       <InputText
-        class="col-12 lg:col-6"
+        class="col-span-12 lg:col-span-6"
         name="bcc"
         label="BCC"
         :disabled="!editable"
       />
       <div class="col" />
       <InputText
-        class="col-12 lg:col-6"
+        class="col-span-12 lg:col-span-6"
         name="subject"
         label="Subject"
         :disabled="!editable"
       />
       <div class="col" />
       <TextArea
-        class="col-12"
+        class="col-span-12"
         name="body"
         label="Note"
         :rows="10"
         :disabled="!editable"
       />
-      <div class="col-12"><label class="font-bold">Add attachments</label></div>
-      <div class="col-12 pt-2">
+      <div class="col-span-12"><label class="font-bold">Add attachments</label></div>
+      <div class="col-span-12 pt-2">
         <Button
           :disabled="!editable"
           @click="fileSelectModalVisible = true"
@@ -233,7 +234,7 @@ watchEffect(async () => {
           :index="index"
           class="mt-1"
         >
-          <div class="flex align-items-center">
+          <div class="flex items-center">
             <div>
               <Button
                 class="p-button-sm p-button-outlined p-button-danger p-1 mr-1"
@@ -246,7 +247,7 @@ watchEffect(async () => {
           </div>
         </div>
       </div>
-      <div class="col-12 pt-5">
+      <div class="col-span-12 pt-8">
         <Button
           label="Send"
           type="submit"

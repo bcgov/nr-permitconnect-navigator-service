@@ -89,7 +89,7 @@ const getState = computed(() => {
     <div
       v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
       v-tooltip.focus="{ value: getState?.toolTip, modifier: toolTipDirection }"
-      class="flex justify-content-center align-items-center auth-indicator"
+      class="flex justify-center items-center auth-indicator"
       :class="[getState?.badgeClass]"
       :style="{
         '--font-size': dimensions.fontSize,

@@ -67,8 +67,8 @@ onMounted(async () => {
     :model="breadcrumbItems"
   />
   <div class="app-primary-color">
-    <h1 class="mt-7">Applications and Permits</h1>
-    <div class="mt-7 mb-5 flex justify-content-between">
+    <h1>Applications and Permits</h1>
+    <div class="mb-8 flex justify-between">
       <h3 class="mb-0">My Projects</h3>
       <Button
         class="p-button-sm"

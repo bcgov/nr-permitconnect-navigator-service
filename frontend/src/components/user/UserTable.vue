@@ -43,7 +43,7 @@ function getStatusClass(data: UserAccessRequest) {
     :sort-order="DEFAULT_SORT_ORDER"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <h5 class="m-0">No users found.</h5>
       </div>
     </template>
@@ -87,12 +87,12 @@ function getStatusClass(data: UserAccessRequest) {
       field="manage"
       header="Manage"
       header-class="header-right"
-      class="text-right"
+      class="!text-right"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0 mr-3"
+          class="p-button-lg p-button-text p-0"
           aria-label="Manage user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -111,12 +111,12 @@ function getStatusClass(data: UserAccessRequest) {
       field="revoke"
       header="Revoke"
       header-class="header-right"
-      class="text-right"
+      class="!text-right"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Revoke user"
           :disabled="data.accessRequest?.status === AccessRequestStatus.PENDING"
           @click="
@@ -135,12 +135,12 @@ function getStatusClass(data: UserAccessRequest) {
       field="approve"
       header="Approve"
       header-class="header-right"
-      class="text-right"
+      class="!text-right"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-0 mr-3"
+          class="p-button-lg p-button-text p-0"
           aria-label="Approve request"
           @click="
             () => {
@@ -158,12 +158,12 @@ function getStatusClass(data: UserAccessRequest) {
       field="deny"
       header="Deny"
       header-class="header-right"
-      class="text-right"
+      class="!text-right"
       style="min-width: 150px"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 mr-3"
+          class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Deny request"
           @click="
             () => {

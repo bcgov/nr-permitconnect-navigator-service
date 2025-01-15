@@ -9,7 +9,7 @@ const authzStore = useAuthZStore();
 </script>
 
 <template>
-  <div class="flex flex-column h-screen">
+  <div class="flex flex-col h-screen">
     <!-- Header/Nav -->
     <div class="layout-head">
       <DevelopmentRoleOverride
@@ -24,12 +24,12 @@ const authzStore = useAuthZStore();
     </div>
 
     <!-- Main views -->
-    <main class="m-3 lg:mx-8 flex-auto">
+    <main class="m-4 lg:mx-20 flex-auto">
       <slot name="main" />
     </main>
 
     <!-- Footer -->
-    <footer class="flex-shrink-0">
+    <footer class="shrink-0">
       <Footer />
     </footer>
   </div>

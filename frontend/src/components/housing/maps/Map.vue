@@ -103,8 +103,8 @@ watch(
 </script>
 
 <template>
-  <div class="grid nested-grid">
-    <div class="col-12">
+  <div class="grid grid-cols-12 gap-4 nested-grid">
+    <div class="col-span-12">
       <!-- map -->
       <div id="map" />
     </div>

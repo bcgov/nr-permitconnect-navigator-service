@@ -14,11 +14,11 @@ const toHousing = (): void => {
   <div class="h-screen">
     <div class="bg" />
     <div class="poly" />
-    <div class="flex align-items-center justify-content-start h-full">
-      <div class="text-left text-white-alpha-90">
-        <h1 class="font-bold mb-0">Welcome to the</h1>
-        <h1 class="font-bold mt-0">Permit Connect Services</h1>
-        <h2 class="mb-3">Choose your project type</h2>
+    <div class="flex items-center justify-start h-full">
+      <div class="text-left text-white/90">
+        <h1 class="mb-0">Welcome to the</h1>
+        <h1 class="mt-0">Permit Connect Services</h1>
+        <h2>Choose your project type</h2>
         <Button @click="toHousing">
           <font-awesome-icon
             icon="fa-solid fa-house"
@@ -32,6 +32,11 @@ const toHousing = (): void => {
 </template>
 
 <style scoped lang="scss">
+h1,
+h2 {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
 .bg {
   position: fixed;
   top: 0;
@@ -51,26 +56,19 @@ const toHousing = (): void => {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: $app-primary;
+  background-color: var(--p-primary-color);
   opacity: 0.9;
 }
 
 .p-button {
   border-width: 2px;
   &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
-    color: $app-primary;
+    color: var(--p-primary-color);
     &:not(.p-button-outlined, .p-button-text) {
       background-color: white;
       border-color: white;
-      color: $app-primary;
+      color: var(--p-primary-color);
     }
   }
-}
-</style>
-
-<style scoped lang="scss">
-h1,
-h2 {
-  color: rgba(255, 255, 255, 0.9) !important;
 }
 </style>

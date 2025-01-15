@@ -37,8 +37,8 @@ onMounted(() => {
 <template>
   <Card :id="note.noteId">
     <template #title>
-      <div class="flex align-items-center">
-        <div class="flex-grow-1">
+      <div class="flex items-center">
+        <div class="grow">
           <h3 class="mb-0">
             {{ note.title }}
             <span
@@ -65,29 +65,29 @@ onMounted(() => {
       <Divider type="solid" />
     </template>
     <template #content>
-      <div class="grid nested-grid">
+      <div class="grid grid-cols-12 gap-4 nested-grid">
         <!-- Left column -->
-        <div class="col-12 md:col-6 lg:col-3">
-          <div class="grid">
-            <p class="col-12">
+        <div class="col-span-12 md:col-span-6 lg:col-span-3">
+          <div class="grid grid-cols-12 gap-4">
+            <p class="col-span-12">
               <span class="key font-bold">Date:</span>
               {{ note.createdAt ? formatDateShort(note.createdAt) : undefined }}
             </p>
           </div>
         </div>
         <!-- Middle column -->
-        <div class="col-12 md:col-6 lg:col-3">
-          <div class="grid">
-            <p class="col-12">
+        <div class="col-span-12 md:col-span-6 lg:col-span-3">
+          <div class="grid grid-cols-12 gap-4">
+            <p class="col-span-12">
               <span class="key font-bold">Author:</span>
               {{ userName }}
             </p>
           </div>
         </div>
         <!-- Right column -->
-        <div class="col-12 md:col-6 lg:col-3">
-          <div class="grid">
-            <p class="col-12">
+        <div class="col-span-12 md:col-span-6 lg:col-span-3">
+          <div class="grid grid-cols-12 gap-4">
+            <p class="col-span-12">
               <span class="key font-bold">Note type:</span>
               {{ note.noteType }}
             </p>
@@ -95,16 +95,16 @@ onMounted(() => {
         </div>
         <div
           v-if="note.bringForwardDate"
-          class="col-12 md:col-6 lg:col-3"
+          class="col-span-12 md:col-span-6 lg:col-span-3"
         >
-          <div class="grid">
-            <p class="col-12">
+          <div class="grid grid-cols-12 gap-4">
+            <p class="col-span-12">
               <span class="key font-bold">Bring forward date:</span>
               {{ note.bringForwardDate ? formatDate(note.bringForwardDate) : '' }}
             </p>
           </div>
         </div>
-        <p class="col-12 mt-0 mb-0 note-content">{{ note.note }}</p>
+        <p class="col-span-12 mt-0 mb-0 note-content">{{ note.note }}</p>
       </div>
     </template>
   </Card>

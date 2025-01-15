@@ -21,7 +21,7 @@ const {
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value, resetField } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 // Actions
 watch(value, () => {
@@ -34,12 +34,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="field">
-    <div class="flex flex-column gap-3">
+  <div>
+    <div class="flex flex-col gap-4">
       <div
         v-for="option in options"
         :key="option"
-        class="flex flex-column align-items-start"
+        class="flex flex-col items-start"
       >
         <div>
           <RadioButton
@@ -51,6 +51,7 @@ onMounted(() => {
             :value="option"
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
+            @blur="handleBlur"
             @click="emit('onClick', value)"
           />
           <span

@@ -90,10 +90,16 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav class="navigation-main pl-2 lg:pl-6">
-    <Menubar :model="items">
+  <nav>
+    <Menubar
+      :model="items"
+      class="!pl-12"
+    >
       <template #item="{ item, props, hasSubmenu }">
-        <span v-if="item.public || authzStore.canNavigate(item.access)">
+        <span
+          v-if="item.public || authzStore.canNavigate(item.access)"
+          class="menu-item"
+        >
           <router-link
             v-if="item.route"
             v-slot="{ href, navigate }"
@@ -101,13 +107,13 @@ onMounted(() => {
             custom
           >
             <a
-              :aria-labelledby="item.label as string"
+              :aria-labelledby="item.label"
               :href="href"
               v-bind="props.action"
               @click="navigate"
             >
               <span
-                :id="item.label as string"
+                :id="item.label"
                 class="flex"
               >
                 {{ item.label }}
@@ -116,28 +122,28 @@ onMounted(() => {
           </router-link>
           <a
             v-else-if="item.mailTo"
-            :aria-labelledby="item.label as string"
+            :aria-labelledby="item.label"
             :href="item.mailTo"
-            class="mail-link"
+            :target="item.target"
+            v-bind="props.action"
           >
-            <span
-              :id="item.label as string"
-              class="flex"
-            >
+            <span :id="item.label">
               {{ item.label }}
             </span>
           </a>
           <a
             v-else
-            :aria-labelledby="item.label as string"
+            :aria-labelledby="item.label"
             :href="item.url"
             :target="item.target"
             v-bind="props.action"
           >
-            <span class="flex">{{ item.label }}</span>
+            <span class="flex">
+              {{ item.label }}
+            </span>
             <span
               v-if="hasSubmenu"
-              :id="item.label as string"
+              :id="item.label"
               class="pi pi-angle-down mt-1 ml-1"
             />
           </a>
@@ -148,94 +154,19 @@ onMounted(() => {
 </template>
 
 <style lang="scss" scoped>
-.navigation-main {
-  background-color: #38598a;
-  color: #fcba19;
-  display: flex;
-  width: 100%;
+a:hover {
+  text-decoration: none;
+}
 
-  .p-menubar {
-    border: none;
-    padding: 0;
+:deep(.p-menubar-submenu) {
+  li:first-child {
+    border-top: 2px solid #fcba19;
+  }
+}
 
-    :deep(.p-menuitem) {
-      &.p-focus {
-        > .p-menuitem-content {
-          background-color: #5a7da9;
-        }
-      }
-    }
-
-    :deep(.p-menuitem-content) {
-      background-color: #38598a;
-      border-radius: 0;
-      padding: 0;
-    }
-
-    :deep(.p-submenu-list) {
-      border-radius: 0;
-      padding: 0;
-    }
-
-    :deep(.p-menuitem-link) {
-      padding: 0.5rem 0.8rem 0.7rem 0.8rem;
-
-      &:hover {
-        background-color: #5a7da9;
-      }
-    }
-
-    :deep(.p-menuitem.p-highlight > .p-menuitem-content) {
-      background-color: #5a7da9;
-    }
-
-    :deep(.p-menuitem .p-focus) {
-      background-color: #38598a;
-      border-radius: 0;
-    }
-
-    .mail-link {
-      padding: 0.5rem 0.8rem 0.7rem 0.8rem;
-      &:hover {
-        background-color: #5a7da9;
-      }
-    }
-
-    ul {
-      display: flex;
-      flex-direction: row;
-      margin: 0;
-      color: #ffffff;
-      list-style: none;
-
-      li {
-        margin-right: 1em;
-
-        a,
-        p {
-          display: flex;
-          font-weight: normal;
-          min-height: 2rem;
-          color: #ffffff;
-          padding: 0;
-          margin: 0;
-          text-decoration: none;
-        }
-      }
-    }
-
-    :deep(.p-submenu-list) {
-      background-color: #38598a !important;
-      width: 250px;
-
-      .p-menuitem:first-child {
-        border-top: 2px solid #fcba19;
-      }
-    }
-
-    :deep(.pi) {
-      color: #ffffff;
-    }
+:deep(.p-menubar-submenu) {
+  li:first-child {
+    border-top: 2px solid #fcba19;
   }
 }
 </style>

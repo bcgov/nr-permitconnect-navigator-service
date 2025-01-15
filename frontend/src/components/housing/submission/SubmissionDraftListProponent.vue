@@ -66,7 +66,7 @@ function onDelete(draftId: string) {
     selection-mode="single"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <p class="font-bold text-xl">{{ t('submissionDraftListProponent.listEmpty') }}</p>
       </div>
     </template>
@@ -78,7 +78,6 @@ function onDelete(draftId: string) {
       :header="t('submissionDraftListProponent.draftId')"
       :sortable="true"
       style="width: 45%"
-      frozen
     >
       <template #body="{ data }">
         <div :data-draftId="data.draftId">
@@ -106,12 +105,12 @@ function onDelete(draftId: string) {
       field="action"
       :header="t('submissionDraftListProponent.action')"
       header-class="header-right"
-      class="text-right"
+      class="!text-right !py-0"
       style="width: 10%"
     >
       <template #body="{ data }">
         <Button
-          class="p-button-lg p-button-text p-button-danger p-0 pr-3"
+          class="p-button-lg p-button-text p-button-danger"
           :aria-label="t('submissionDraftListProponent.ariaDeleteDraft')"
           @click="onDelete(data.draftId)"
         >

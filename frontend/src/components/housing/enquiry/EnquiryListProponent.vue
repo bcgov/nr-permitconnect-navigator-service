@@ -42,7 +42,7 @@ const { t } = useI18n();
     selection-mode="single"
   >
     <template #empty>
-      <div class="flex justify-content-center">
+      <div class="flex justify-center">
         <p class="font-bold text-xl">
           {{ t('enquiryListProponent.listEmpty') }}
         </p>
@@ -56,7 +56,6 @@ const { t } = useI18n();
       :header="t('enquiryListProponent.enquiryId')"
       :sortable="true"
       style="width: 45%"
-      frozen
     >
       <template #body="{ data }">
         <div :data-activityId="data.activityId">
@@ -82,8 +81,7 @@ const { t } = useI18n();
       :header="t('enquiryListProponent.submittedDate')"
       :sortable="true"
       header-class="header-right"
-      class="text-right"
-      style="width: 10%"
+      class="!text-right"
     >
       <template #body="{ data }">
         {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}

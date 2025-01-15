@@ -12,8 +12,11 @@ import {
   IconField,
   InputIcon,
   InputText,
+  Tab,
+  Tabs,
+  TabList,
   TabPanel,
-  TabView,
+  TabPanels,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -150,6 +153,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     acceptLabel: 'Confirm',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: async () => {
       try {
         const omittedUser = omit(userAccessRequest.user, ['groups', 'status']);
@@ -313,7 +317,7 @@ onMounted(async () => {
 
 <template>
   <ProgressLoader v-if="loading" />
-  <h3>User Management</h3>
+  <h1>User Management</h1>
   <UserCreateModal
     v-if="createUserModalVisible"
     v-model:visible="createUserModalVisible"
@@ -331,67 +335,73 @@ onMounted(async () => {
     v-model:request-type="userProcessRequestType"
     @user-action:process="() => onProcessUserAccessRequest()"
   />
-  <TabView
+  <Tabs
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
-    v-model:active-index="activeTab"
+    :value="activeTab"
   >
-    <TabPanel header="Manage users">
-      <div class="flex justify-content-between">
-        <Button
-          label="Create new user"
-          type="submit"
-          icon="pi pi-plus"
-          @click="createUserModalVisible = true"
+    <TabList>
+      <Tab :value="0">Manage users</Tab>
+      <Tab :value="1">User access requests</Tab>
+    </TabList>
+    <TabPanels>
+      <TabPanel :value="0">
+        <div class="flex justify-between">
+          <Button
+            label="Create new user"
+            type="submit"
+            icon="pi pi-plus"
+            @click="createUserModalVisible = true"
+          />
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+              class="search-input"
+            />
+          </IconField>
+        </div>
+        <UserTable
+          v-model:filters="filters"
+          :users-and-access-requests="getApprovedUsers"
+          class="mt-6"
+          @user-table:manage="
+            (userAccessRequest: UserAccessRequest) => {
+              selectedUserAccessRequest = userAccessRequest;
+              manageUserModalVisible = true;
+            }
+          "
+          @user-table:revoke="onRevoke"
         />
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-requests="getApprovedUsers"
-        class="mt-4"
-        @user-table:manage="
-          (userAccessRequest: UserAccessRequest) => {
-            selectedUserAccessRequest = userAccessRequest;
-            manageUserModalVisible = true;
-          }
-        "
-        @user-table:revoke="onRevoke"
-      />
-    </TabPanel>
-    <TabPanel header="User access requests">
-      <div class="flex justify-content-end">
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-            class="width"
-          />
-        </IconField>
-      </div>
-      <UserTable
-        v-model:filters="filters"
-        :users-and-access-requests="getAccessRequests"
-        class="mt-4"
-        :request-table="true"
-        @user-table:approve-request="
-          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
-        "
-        @user-table:deny-request="
-          (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
-        "
-      />
-    </TabPanel>
-  </TabView>
+      </TabPanel>
+      <TabPanel :value="1">
+        <div class="flex justify-end">
+          <IconField icon-position="left">
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+              class="search-input"
+            />
+          </IconField>
+        </div>
+        <UserTable
+          v-model:filters="filters"
+          :users-and-access-requests="getAccessRequests"
+          class="mt-6"
+          :request-table="true"
+          @user-table:approve-request="
+            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
+          "
+          @user-table:deny-request="
+            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
+          "
+        />
+      </TabPanel>
+    </TabPanels>
+  </Tabs>
   <div v-else>
-    <div class="flex justify-content-between">
+    <div class="flex justify-between">
       <Button
         label="Create new user"
         type="submit"
@@ -403,14 +413,14 @@ onMounted(async () => {
         <InputText
           v-model="filters['global'].value"
           placeholder="Search all"
-          class="width"
+          class="search-input"
         />
       </IconField>
     </div>
     <UserTable
       v-model:filters="filters"
       :users-and-access-requests="usersAndAccessRequests"
-      class="mt-4"
+      class="mt-6"
       @user-table:manage="
         (userAccessRequest: UserAccessRequest) => {
           selectedUserAccessRequest = userAccessRequest;
@@ -423,7 +433,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.width {
+.search-input {
   width: 20em;
 }
 </style>

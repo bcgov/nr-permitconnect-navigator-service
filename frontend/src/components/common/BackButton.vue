@@ -28,6 +28,7 @@ function onConfirmLeave() {
     acceptLabel: 'Leave',
     acceptClass: 'p-button-danger',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => router.push({ name: routeName })
   });
 }
@@ -54,14 +55,8 @@ function onConfirmLeave() {
   >
     <font-awesome-icon
       icon="fa fa-arrow-circle-left"
-      class="mr-1 app-primary-color"
+      class="mr-1"
     />
-    <span class="app-primary-color">{{ text }}</span>
+    <span>{{ text }}</span>
   </Button>
 </template>
-
-<style scoped lang="scss">
-a {
-  text-decoration: none;
-}
-</style>

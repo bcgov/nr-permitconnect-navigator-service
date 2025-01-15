@@ -271,7 +271,7 @@ onBeforeMount(async () => {
     :model="breadcrumbItems"
   />
   <div class="permit-status-view">
-    <h1 class="permit-name mt-7">
+    <h1 class="permit-name">
       {{ permit?.name }}
     </h1>
     <div class="permit-info-block">
@@ -301,7 +301,7 @@ onBeforeMount(async () => {
           </span>
         </div>
       </div>
-      <div class="info-item mt-4">
+      <div class="info-item mt-6">
         <b>Agency:</b>
         <span>
           {{ permit?.agency }}
@@ -327,7 +327,7 @@ onBeforeMount(async () => {
     <Card>
       <template #header>
         <div
-          class="status-tracker-header py-3 px-4"
+          class="status-tracker-header py-4 px-6"
           :class="[getStatusBoxState(permit?.authStatus).boxClass]"
         >
           <StatusPill
@@ -340,7 +340,7 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4>Application progress</h4>
+            <h4 class="mt-8 mb-6">Application progress</h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"
@@ -375,8 +375,8 @@ onBeforeMount(async () => {
       </template>
     </Card>
     <div class="updates-section">
-      <h4 class="mb-4">Additional updates</h4>
-      <div class="ask-navigator mb-7">
+      <h4 class="mb-6">Additional updates</h4>
+      <div class="ask-navigator mb-16">
         <Button
           outlined
           label="Ask my Navigator"
@@ -388,7 +388,7 @@ onBeforeMount(async () => {
         <div
           v-for="note in permit.permitNote"
           :key="note.permitNoteId"
-          class="mb-4"
+          class="mb-6"
         >
           <p class="mb-2 mt-0 font-bold">{{ formatDateLong(note.createdAt) }}</p>
           <p class="mt-0">{{ note.note }}</p>
@@ -507,10 +507,6 @@ onBeforeMount(async () => {
 
 .permit-info p {
   margin: 0;
-}
-
-.permit-name {
-  margin-bottom: 3.5rem;
 }
 
 .p-card {

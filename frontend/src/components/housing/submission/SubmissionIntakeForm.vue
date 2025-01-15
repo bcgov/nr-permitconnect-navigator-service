@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
-import { EditableDropdown } from '@/components/form';
 import {
   AutoComplete,
-  Calendar,
+  DatePicker,
   Checkbox,
-  Dropdown,
+  EditableSelect,
   FormAutosave,
   FormNavigationGuard,
   InputMask,
   InputNumber,
-  RadioList,
   InputText,
+  RadioList,
+  Select,
   StepperHeader,
   StepperNavigation,
   TextArea
@@ -30,13 +30,18 @@ import SubmissionAssistance from '@/components/housing/submission/SubmissionAssi
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
-  AccordionTab,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
   Button,
   Card,
   Divider,
   Message,
+  Step,
+  StepList,
   Stepper,
-  StepperPanel,
+  StepPanel,
+  StepPanels,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -62,12 +67,12 @@ import {
 import { confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit } from '@/utils/utils';
 
-import type { Ref } from 'vue';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { DropdownChangeEvent } from 'primevue/dropdown';
-import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, SubmissionIntake } from '@/types';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
+import type { Ref } from 'vue';
+import type { IInputEvent } from '@/interfaces';
+import type { Document, Permit, PermitType, SubmissionIntake } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -145,6 +150,7 @@ function confirmSubmit(data: GenericObject) {
     header: 'Please confirm submission',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => onSubmit(submitData)
   });
 }
@@ -228,7 +234,7 @@ async function onAddressSearchInput(e: IInputEvent) {
     ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
 }
 
-async function onAddressSelect(e: DropdownChangeEvent) {
+async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
 
   if (e.value as GeocoderEntry) {
@@ -286,7 +292,7 @@ async function onInvalidSubmit() {
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-function onPermitsHasAppliedChange(e: BasicResponse, fieldsLength: number, push: Function, setFieldValue: Function) {
+function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
     if (fieldsLength === 0) {
       push({
@@ -539,6 +545,18 @@ onBeforeMount(async () => {
     router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
   }
 });
+
+watch(
+  () => activeStep.value,
+  () => {
+    // Trigger autosave on form step change, if it has activityId
+    if (activityId && formRef?.value) onSaveDraft(formRef?.value?.values, true, false);
+
+    // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+    if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+    if (activeStep.value === 3) isSubmittable.value = true;
+  }
+);
 </script>
 
 <template>
@@ -548,10 +566,9 @@ onBeforeMount(async () => {
       :text="getBackButtonConfig.text"
     />
 
-    <div class="flex justify-content-center app-primary-color mt-3">
-      <h3>Housing Project Intake Form</h3>
+    <div class="flex justify-center">
+      <h2>Housing Project Intake Form</h2>
     </div>
-
     <Form
       v-if="initialFormValues"
       id="form"
@@ -587,18 +604,18 @@ onBeforeMount(async () => {
       />
 
       <Stepper
-        v-model:active-step="activeStep"
+        :value="activeStep"
         @update:active-step="onStepChange"
       >
-        <!--
-      Basic info
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
+        <StepList class="!mb-6">
+          <Step
+            :value="0"
+            as-child
+          >
             <StepperHeader
-              :index="index"
+              :index="0"
               :active-step="activeStep"
-              :click-callback="clickCallback"
+              :click-callback="() => (activeStep = 0)"
               title="Basic info"
               icon="fa-user"
               :errors="
@@ -606,8 +623,55 @@ onBeforeMount(async () => {
                 validationErrors.includes(IntakeFormCategory.BASIC)
               "
             />
-          </template>
-          <template #content="{ nextCallback }">
+          </Step>
+          <Step
+            :value="1"
+            as-child
+          >
+            <StepperHeader
+              :index="1"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 1)"
+              title="Housing"
+              icon="fa-house"
+              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
+            />
+          </Step>
+          <Step
+            :value="2"
+            as-child
+          >
+            <StepperHeader
+              :index="2"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 2)"
+              title="Location"
+              icon="fa-location-dot"
+              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
+            />
+          </Step>
+          <Step
+            :value="3"
+            as-child
+          >
+            <StepperHeader
+              :index="3"
+              :active-step="activeStep"
+              :click-callback="() => (activeStep = 3)"
+              title="Permits & Reports"
+              icon="fa-file"
+              :errors="
+                validationErrors.includes(IntakeFormCategory.PERMITS) ||
+                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+              "
+              :divider="false"
+            />
+          </Step>
+        </StepList>
+
+        <!-- Basic info -->
+        <StepPanels>
+          <StepPanel :value="0">
             <CollectionDisclaimer />
 
             <Message
@@ -615,7 +679,7 @@ onBeforeMount(async () => {
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -626,23 +690,23 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactFirstName`"
                     label="First name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactLastName`"
                     label="Last name"
                     :bold="false"
                     :disabled="!editable"
                   />
                   <InputMask
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactPhoneNumber`"
                     mask="(999) 999-9999"
                     label="Phone number"
@@ -650,22 +714,22 @@ onBeforeMount(async () => {
                     :disabled="!editable"
                   />
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     :name="`contacts.contactEmail`"
                     label="Email"
                     :bold="false"
                     :disabled="!editable"
                   />
-                  <Dropdown
-                    class="col-6"
+                  <Select
+                    class="col-span-6"
                     :name="`contacts.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
                     :disabled="!editable"
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
-                  <Dropdown
-                    class="col-6"
+                  <Select
+                    class="col-span-6"
                     :name="`contacts.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
@@ -675,15 +739,16 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
+
             <Card>
               <template #title>
                 <span class="section-header">{{ t('submissionIntakeForm.projectApplicantTypeCard') }}</span>
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="basic.projectApplicantType"
                     :bold="false"
                     :disabled="!editable"
@@ -697,9 +762,9 @@ onBeforeMount(async () => {
 
                   <span
                     v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
-                    class="col-12"
+                    class="col-span-12"
                   >
-                    <div class="flex align-items-center">
+                    <div class="flex items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
                       <div
                         v-tooltip.right="t('submissionIntakeForm.isRegisteredTooltip')"
@@ -711,7 +776,7 @@ onBeforeMount(async () => {
                       </div>
                     </div>
                     <RadioList
-                      class="col-12 pl-0"
+                      class="col-span-12 mt-2 pl-0"
                       name="basic.isDevelopedInBC"
                       :bold="false"
                       :disabled="!editable"
@@ -720,7 +785,7 @@ onBeforeMount(async () => {
                     />
                     <AutoComplete
                       v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="col-span-6 mt-4 pl-0"
                       name="basic.registeredName"
                       :bold="false"
                       :disabled="!editable"
@@ -732,7 +797,7 @@ onBeforeMount(async () => {
                     />
                     <InputText
                       v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
-                      class="col-6 pl-0"
+                      class="col-span-6 mt-4 pl-0"
                       name="basic.registeredName"
                       :placeholder="'Type the business/company/organization name'"
                       :bold="false"
@@ -742,10 +807,9 @@ onBeforeMount(async () => {
                 </div>
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
+              :next-callback="() => activeStep++"
               :prev-disabled="true"
             >
               <template #content>
@@ -758,30 +822,16 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
 
-        <!--
-      Housing
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Housing"
-              icon="fa-house"
-              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          <!-- Housing -->
+          <StepPanel :value="1">
             <Message
               v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -792,15 +842,15 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <InputText
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.projectName"
                     label="Project name - your preferred name for your project"
                     :bold="false"
                     :disabled="!editable"
                   />
-                  <div class="col-6" />
+                  <div class="col-span-6" />
                 </div>
               </template>
             </Card>
@@ -811,8 +861,8 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
-                  <div class="col-12">
+                <div class="grid grid-cols-12 gap-4">
+                  <div class="col-span-12">
                     <Checkbox
                       name="housing.singleFamilySelected"
                       label="Single-family"
@@ -821,18 +871,18 @@ onBeforeMount(async () => {
                       :invalid="!!errors.housing && meta.touched"
                     />
                   </div>
-                  <Dropdown
+                  <Select
                     v-if="values.housing.singleFamilySelected"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.singleFamilyUnits"
                     :disabled="!editable || !values.housing.singleFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <div class="flex">
                       <Checkbox
-                        class="align-content-center"
+                        class="content-center"
                         name="housing.multiFamilySelected"
                         label="Multi-family"
                         :bold="false"
@@ -849,15 +899,15 @@ onBeforeMount(async () => {
                       </div>
                     </div>
                   </div>
-                  <Dropdown
+                  <Select
                     v-if="values.housing.multiFamilySelected"
-                    class="col-6 align-content-center"
+                    class="col-span-6 content-center"
                     name="housing.multiFamilyUnits"
                     :disabled="!editable || !values.housing.multiFamilySelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
+                  <div class="col-span-12">
                     <Checkbox
                       name="housing.otherSelected"
                       label="Other"
@@ -868,27 +918,25 @@ onBeforeMount(async () => {
                   </div>
                   <InputText
                     v-if="values.housing.otherSelected"
-                    class="col-6 mb-2"
+                    class="col-span-6"
                     name="housing.otherUnitsDescription"
                     :disabled="!editable || !values.housing.otherSelected"
                     placeholder="Type to describe what other type of housing"
                   />
-                  <div class="col-6" />
-
-                  <Dropdown
+                  <div class="col-span-6" />
+                  <Select
                     v-if="values.housing.otherSelected"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.otherUnits"
                     :disabled="!editable || !values.housing.otherSelected"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
                     placeholder="How many expected units?"
                   />
-                  <div class="col-12">
-                    <ErrorMessage
-                      v-show="meta.touched"
-                      name="housing"
-                    />
-                  </div>
+                  <ErrorMessage
+                    v-if="meta.touched"
+                    class="col-span-12"
+                    name="housing"
+                  />
                 </div>
               </template>
             </Card>
@@ -907,17 +955,17 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="housing.hasRentalUnits"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
                   />
-                  <Dropdown
+                  <Select
                     v-if="values.housing.hasRentalUnits === BasicResponse.YES"
-                    class="col-6"
+                    class="col-span-6"
                     name="housing.rentalUnits"
                     :disabled="!editable"
                     :options="NUM_RESIDENTIAL_UNITS_LIST"
@@ -928,14 +976,14 @@ onBeforeMount(async () => {
             </Card>
             <Card>
               <template #title>
-                <div class="flex align-items-center">
+                <div class="flex items-center justify-between">
                   <div class="flex flex-grow-1">
                     <span class="section-header">
                       {{ t('submissionIntakeForm.financiallySupportedCard') }}
                     </span>
                   </div>
                   <Button
-                    class="p-button-sm mr-3 p-button-danger"
+                    class="p-button-sm mr-4 p-button-danger"
                     outlined
                     :disabled="!editable"
                     @click="
@@ -953,9 +1001,9 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
-                  <div class="col mb-2">
-                    <div class="flex align-items-center">
+                <div>
+                  <div class="mb-6">
+                    <div class="flex items-center">
                       <label>
                         <a
                           href="https://www.bchousing.org/projects-partners/partner-with-us"
@@ -978,15 +1026,16 @@ onBeforeMount(async () => {
                       </div>
                       <!-- eslint-enable max-len -->
                     </div>
+
+                    <RadioList
+                      name="housing.financiallySupportedBC"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                   </div>
-                  <RadioList
-                    class="col-12"
-                    name="housing.financiallySupportedBC"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col mb-2">
+
+                  <div class="mb-6">
                     <label>
                       <a
                         href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
@@ -995,24 +1044,22 @@ onBeforeMount(async () => {
                         Indigenous Housing Provider
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-12"
-                    name="housing.financiallySupportedIndigenous"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-12">
+                    <RadioList
+                      name="housing.financiallySupportedIndigenous"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.indigenousDescription"
                       :disabled="!editable"
                       placeholder="Name of Indigenous Housing Provider"
                     />
                   </div>
-                  <div class="col mb-2">
+
+                  <div class="mb-6">
                     <label>
                       <a
                         href="https://bcnpha.ca/member-programs-list/"
@@ -1021,24 +1068,22 @@ onBeforeMount(async () => {
                         Non-profit housing society
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-12"
-                    name="housing.financiallySupportedNonProfit"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-12">
+                    <RadioList
+                      name="housing.financiallySupportedNonProfit"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.nonProfitDescription"
                       :disabled="!editable"
                       placeholder="Name of Non-profit housing society"
                     />
                   </div>
-                  <div class="col mb-2">
+
+                  <div>
                     <label>
                       <a
                         href="https://www.chf.bc.ca/find-co-op/"
@@ -1047,18 +1092,15 @@ onBeforeMount(async () => {
                         Housing co-operative
                       </a>
                     </label>
-                  </div>
-                  <RadioList
-                    class="col-12"
-                    name="housing.financiallySupportedHousingCoop"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <div class="col-12">
+                    <RadioList
+                      name="housing.financiallySupportedHousingCoop"
+                      :bold="false"
+                      :disabled="!editable"
+                      :options="YES_NO_UNSURE_LIST"
+                    />
                     <InputText
                       v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
-                      class="col-6 pl-0"
+                      class="w-1/2 pl-0"
                       name="housing.housingCoopDescription"
                       :disabled="!editable"
                       placeholder="Name of Housing co-operative"
@@ -1075,8 +1117,8 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="col-12 my-0 py-0">
-                  <div class="flex align-items-center">
+                <div class="col-span-12 my-0 py-0">
+                  <div class="flex items-center">
                     <label>Provide additional information</label>
                     <div
                       v-tooltip.right="t('submissionIntakeForm.additionalInfoTooltip')"
@@ -1091,12 +1133,12 @@ onBeforeMount(async () => {
 
                 <!-- eslint-disable max-len -->
                 <TextArea
-                  class="col-12 mb-0 pb-0"
+                  class="col-span-12 mb-0 pb-0"
                   name="housing.projectDescription"
                   placeholder="Provide us with additional information - short description about the project and/or project website link"
                   :disabled="!editable"
                 />
-                <label class="col-12 mt-0 pt-0">
+                <label class="col-span-12 mt-0 pt-0">
                   Upload documents about your housing project (pdfs, maps,
                   <a
                     href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
@@ -1114,11 +1156,10 @@ onBeforeMount(async () => {
                 />
               </template>
             </Card>
-
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1130,30 +1171,16 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
 
-        <!--
-      Location
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Location"
-              icon="fa-location-dot"
-              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
-            />
-          </template>
-          <template #content="{ prevCallback, nextCallback }">
+          <!-- Location -->
+          <StepPanel :value="2">
             <Message
               v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -1168,9 +1195,9 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="location.naturalDisaster"
                     :bold="false"
                     :disabled="!editable"
@@ -1198,9 +1225,9 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
+                <div class="grid grid-cols-12 gap-4">
                   <RadioList
-                    class="col-12"
+                    class="col-span-12"
                     name="location.projectLocation"
                     :bold="false"
                     :disabled="!editable"
@@ -1209,13 +1236,13 @@ onBeforeMount(async () => {
                   />
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-12"
+                    class="col-span-12"
                   >
                     <Card class="no-shadow">
                       <template #content>
-                        <div class="grid nested-grid">
-                          <EditableDropdown
-                            class="col-12"
+                        <div class="grid grid-cols-12 gap-4 nested-grid">
+                          <EditableSelect
+                            class="col-span-12"
                             name="addressSearch"
                             :get-option-label="getAddressSearchLabel"
                             :options="addressGeocoderOptions"
@@ -1226,25 +1253,25 @@ onBeforeMount(async () => {
                             @on-change="onAddressSelect"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.streetAddress"
                             disabled
                             placeholder="Street address"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.locality"
                             disabled
                             placeholder="Locality"
                           />
                           <InputText
-                            class="col-4"
+                            class="col-span-4"
                             name="location.province"
                             disabled
                             placeholder="Province"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.latitude"
                             disabled
                             :help-text="
@@ -1255,7 +1282,7 @@ onBeforeMount(async () => {
                             placeholder="Latitude"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.longitude"
                             disabled
                             :help-text="
@@ -1267,7 +1294,7 @@ onBeforeMount(async () => {
                           />
                           <div
                             v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-12 text-blue-500"
+                            class="col-span-12 text-blue-500"
                           >
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
@@ -1278,13 +1305,13 @@ onBeforeMount(async () => {
                   </div>
                   <div
                     v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-12"
+                    class="col-span-12"
                   >
                     <Card class="no-shadow">
                       <template #content>
-                        <div class="grid nested-grid">
+                        <div class="grid grid-cols-12 gap-4 nested-grid">
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.latitude"
                             :disabled="!editable"
                             help-text="Provide a coordinate between 48 and 60"
@@ -1292,22 +1319,24 @@ onBeforeMount(async () => {
                             @keyup.enter="onLatLongInputClick"
                           />
                           <InputNumber
-                            class="col-4"
+                            class="col-span-4"
                             name="location.longitude"
                             :disabled="!editable"
                             help-text="Provide a coordinate between -114 and -139"
                             placeholder="Longitude"
                             @keyup.enter="onLatLongInputClick"
                           />
-                          <Button
-                            class="lat-long-btn"
-                            label="Show on map"
-                            :disabled="!editable"
-                            @click="onLatLongInputClick"
-                          />
+                          <div class="col-span-4">
+                            <Button
+                              class="lat-long-btn"
+                              label="Show on map"
+                              :disabled="!editable"
+                              @click="onLatLongInputClick"
+                            />
+                          </div>
                         </div>
-                        <div class="grid nested-grid">
-                          <div class="col-12 text-blue-500">
+                        <div>
+                          <div class="text-blue-500">
                             The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
                             province.
                           </div>
@@ -1337,73 +1366,82 @@ onBeforeMount(async () => {
               </template>
               <template #content>
                 <Accordion
-                  v-model:active-index="parcelAccordionIndex"
-                  class="mb-3"
+                  collapse-icon="pi pi-chevron-up"
+                  expand-icon="pi pi-chevron-right"
+                  :value="parcelAccordionIndex"
                 >
-                  <AccordionTab header="Parcel ID (PID Number)">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                target="_blank"
-                              >
-                                LTSA PID Lookup
-                              </a>
-                            </label>
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                              <label>
+                                <a
+                                  href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                  target="_blank"
+                                >
+                                  LTSA PID Lookup
+                                </a>
+                              </label>
+                            </div>
+                            <!-- eslint-disable max-len -->
+                            <InputText
+                              class="col-span-12"
+                              name="location.ltsaPIDLookup"
+                              :bold="false"
+                              :disabled="!editable"
+                              help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                            />
+                            <!-- eslint-enable max-len -->
                           </div>
-                          <!-- eslint-disable max-len -->
-                          <InputText
-                            class="col-12"
-                            name="location.ltsaPIDLookup"
-                            :bold="false"
-                            :disabled="!editable"
-                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                          />
-                          <!-- eslint-enable max-len -->
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
                 <Accordion
-                  v-model:active-index="geomarkAccordionIndex"
-                  class="mb-3"
+                  collapse-icon="pi pi-chevron-up"
+                  expand-icon="pi pi-chevron-right"
+                  :value="geomarkAccordionIndex"
+                  class="mt-6 mb-2"
                 >
-                  <AccordionTab header="Geomark">
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="formgrid grid">
-                          <div class="col-12">
-                            <label>
-                              <a
-                                href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                target="_blank"
-                              >
-                                Open Geomark Web Service
-                              </a>
-                            </label>
+                  <AccordionPanel value="0">
+                    <AccordionHeader>Geomark</AccordionHeader>
+                    <AccordionContent>
+                      <Card class="no-shadow">
+                        <template #content>
+                          <div class="grid grid-cols-12 gap-4">
+                            <div class="col-span-12">
+                              <label>
+                                <a
+                                  href="https://apps.gov.bc.ca/pub/geomark/overview"
+                                  target="_blank"
+                                >
+                                  Open Geomark Web Service
+                                </a>
+                              </label>
+                            </div>
+                            <InputText
+                              class="col-span-12"
+                              name="location.geomarkUrl"
+                              :bold="false"
+                              :disabled="!editable"
+                              placeholder="Type in URL"
+                            />
                           </div>
-                          <InputText
-                            class="col-12"
-                            name="location.geomarkUrl"
-                            :bold="false"
-                            :disabled="!editable"
-                            placeholder="Type in URL"
-                          />
-                        </div>
-                      </template>
-                    </Card>
-                  </AccordionTab>
+                        </template>
+                      </Card>
+                    </AccordionContent>
+                  </AccordionPanel>
                 </Accordion>
               </template>
             </Card>
             <Card>
               <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
+                <div class="flex items-center">
+                  <div class="flex grow">
                     <span class="section-header">
                       {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
                     </span>
@@ -1413,7 +1451,7 @@ onBeforeMount(async () => {
               </template>
               <template #content>
                 <TextArea
-                  class="col-12"
+                  class="col-span-12"
                   name="location.projectLocationDescription"
                   :disabled="!editable"
                 />
@@ -1422,8 +1460,8 @@ onBeforeMount(async () => {
 
             <StepperNavigation
               :editable="editable"
-              :next-callback="nextCallback"
-              :prev-callback="prevCallback"
+              :next-callback="() => activeStep++"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1435,33 +1473,16 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
 
-        <!--
-      Permits & Reports
-      -->
-        <StepperPanel>
-          <template #header="{ index, clickCallback }">
-            <StepperHeader
-              :index="index"
-              :active-step="activeStep"
-              :click-callback="clickCallback"
-              title="Permits & Reports"
-              icon="fa-file"
-              :errors="
-                validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              "
-            />
-          </template>
-          <template #content="{ prevCallback }">
+          <!-- Permits & Reports -->
+          <StepPanel :value="3">
             <Message
               v-if="validationErrors.length"
               severity="error"
               icon="pi pi-exclamation-circle"
               :closable="false"
-              class="text-center mt-0"
+              class="message-banner text-center"
             >
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
@@ -1483,118 +1504,107 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
-                  <FieldArray
-                    v-slot="{ fields, push, remove }"
-                    name="appliedPermits"
+                <FieldArray
+                  v-slot="{ fields, push, remove }"
+                  name="appliedPermits"
+                >
+                  <RadioList
+                    name="permits.hasAppliedProvincialPermits"
+                    :bold="false"
+                    :disabled="!editable"
+                    :options="YES_NO_UNSURE_LIST"
+                    @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
+                  />
+                  <div
+                    v-if="
+                      values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+                      values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
+                    "
+                    ref="appliedPermitsContainer"
                   >
-                    <RadioList
-                      class="col-12"
-                      name="permits.hasAppliedProvincialPermits"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                      @on-change="(e) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
-                    />
-                    <div
-                      v-if="
-                        values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
-                        values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
-                      "
-                      ref="appliedPermitsContainer"
-                      class="col-12"
-                    >
-                      <div class="mb-2">
-                        <span class="app-primary-color">
-                          Sharing this information will authorize the navigators to seek additional information about
-                          this permit.
-                        </span>
-                      </div>
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div class="formgrid grid">
-                            <div
-                              v-for="(permit, idx) in fields"
-                              :key="idx"
-                              :index="idx"
-                              class="w-full flex align-items-top"
-                            >
-                              <input
-                                type="hidden"
-                                :name="`appliedPermits[${idx}].permitId`"
-                              />
-                              <Dropdown
-                                class="col-4"
-                                :disabled="!editable"
-                                :name="`appliedPermits[${idx}].permitTypeId`"
-                                placeholder="Select Permit type"
-                                :options="getPermitTypes"
-                                :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-                                option-value="permitTypeId"
-                                :loading="getPermitTypes === undefined"
-                              />
-                              <InputText
-                                class="col-4"
-                                :name="`appliedPermits[${idx}].trackingId`"
-                                :disabled="!editable"
-                                placeholder="Tracking #"
-                              />
-                              <div class="col-4">
-                                <div class="flex justify-content-center">
-                                  <Calendar
-                                    class="w-full"
-                                    :name="`appliedPermits[${idx}].submittedDate`"
-                                    :disabled="!editable"
-                                    placeholder="Date applied"
-                                    :max-date="new Date()"
-                                  />
-                                  <div class="flex align-items-center ml-2 mb-3">
-                                    <Button
-                                      v-if="editable"
-                                      class="p-button-lg p-button-text p-button-danger p-0"
-                                      aria-label="Delete"
-                                      @click="remove(idx)"
-                                    >
-                                      <font-awesome-icon icon="fa-solid fa-trash" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="col-12">
+                    <div class="mb-2">
+                      <span class="app-primary-color">
+                        {{ t('submissionIntakeForm.appliedPermitsShareNotification') }}
+                      </span>
+                    </div>
+                    <Card class="no-shadow">
+                      <template #content>
+                        <div
+                          v-for="(permit, idx) in fields"
+                          :key="idx"
+                          :index="idx"
+                          class="grid grid-cols-3 gap-3"
+                        >
+                          <div>
+                            <input
+                              type="hidden"
+                              :name="`appliedPermits[${idx}].permitId`"
+                            />
+                            <Select
+                              :disabled="!editable"
+                              :name="`appliedPermits[${idx}].permitTypeId`"
+                              placeholder="Select Permit type"
+                              :options="getPermitTypes"
+                              :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                              option-value="permitTypeId"
+                              :loading="getPermitTypes === undefined"
+                            />
+                          </div>
+                          <InputText
+                            :name="`appliedPermits[${idx}].trackingId`"
+                            :disabled="!editable"
+                            placeholder="Tracking #"
+                          />
+                          <div class="flex justify-center">
+                            <DatePicker
+                              class="w-full"
+                              :name="`appliedPermits[${idx}].submittedDate`"
+                              :disabled="!editable"
+                              placeholder="Date applied"
+                              :max-date="new Date()"
+                            />
+                            <div class="flex items-center ml-2 mb-4">
                               <Button
                                 v-if="editable"
-                                class="w-full flex justify-content-center font-bold"
-                                @click="
-                                  push({
-                                    permitTypeId: undefined,
-                                    trackingId: undefined,
-                                    submittedDate: undefined
-                                  });
-                                  nextTick(() => {
-                                    const addedPermit = getHTMLElement(
-                                      $refs.appliedPermitsContainer as HTMLElement,
-                                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
-                                    );
-                                    if (addedPermit) {
-                                      addedPermit.focus();
-                                    }
-                                  });
-                                "
+                                class="p-button-lg p-button-text p-button-danger p-0"
+                                aria-label="Delete"
+                                @click="remove(idx)"
                               >
-                                <font-awesome-icon
-                                  icon="fa-solid fa-plus"
-                                  fixed-width
-                                />
-                                Add permit
+                                <font-awesome-icon icon="fa-solid fa-trash" />
                               </Button>
                             </div>
                           </div>
-                        </template>
-                      </Card>
-                    </div>
-                  </FieldArray>
-                </div>
+                        </div>
+                        <Button
+                          v-if="editable"
+                          class="w-full flex justify-center font-bold h-10"
+                          @click="
+                            push({
+                              permitTypeId: undefined,
+                              trackingId: undefined,
+                              submittedDate: undefined
+                            });
+                            nextTick(() => {
+                              const addedPermit = getHTMLElement(
+                                $refs.appliedPermitsContainer as HTMLElement,
+                                'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                              );
+                              if (addedPermit) {
+                                addedPermit.focus();
+                              }
+                            });
+                          "
+                        >
+                          <font-awesome-icon
+                            icon="fa-solid fa-plus"
+                            fixed-width
+                          />
+                          Add permit
+                        </Button>
+                      </template>
+                    </Card>
+                  </div>
+                </FieldArray>
               </template>
             </Card>
             <Card>
@@ -1631,86 +1641,75 @@ onBeforeMount(async () => {
                 <Divider type="solid" />
               </template>
               <template #content>
-                <div class="formgrid grid">
-                  <FieldArray
-                    v-slot="{ fields, push, remove }"
-                    name="investigatePermits"
-                  >
-                    <div class="col-12">
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div
-                            ref="investigatePermitsContainer"
-                            class="formgrid grid"
-                          >
-                            <div
-                              v-for="(permit, idx) in fields"
-                              :key="idx"
-                              :index="idx"
-                              class="w-full flex align-items-center"
-                            >
-                              <div class="col-4">
-                                <div class="flex justify-content-center">
-                                  <Dropdown
-                                    class="w-full"
-                                    :disabled="!editable"
-                                    :name="`investigatePermits[${idx}].permitTypeId`"
-                                    placeholder="Select Permit type"
-                                    :options="getPermitTypes"
-                                    :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-                                    option-value="permitTypeId"
-                                    :loading="getPermitTypes === undefined"
-                                  />
-                                  <div class="flex align-items-center ml-2 mb-4">
-                                    <Button
-                                      v-if="editable"
-                                      class="p-button-lg p-button-text p-button-danger p-0"
-                                      aria-label="Delete"
-                                      @click="remove(idx)"
-                                    >
-                                      <font-awesome-icon icon="fa-solid fa-trash" />
-                                    </Button>
-                                  </div>
-                                </div>
+                <FieldArray
+                  v-slot="{ fields, push, remove }"
+                  name="investigatePermits"
+                >
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div ref="investigatePermitsContainer">
+                        <div
+                          v-for="(permit, idx) in fields"
+                          :key="idx"
+                          :index="idx"
+                          class="grid grid-cols-3"
+                        >
+                          <div class="col-span-1">
+                            <div class="flex">
+                              <Select
+                                class="w-full"
+                                :disabled="!editable"
+                                :name="`investigatePermits[${idx}].permitTypeId`"
+                                placeholder="Select Permit type"
+                                :options="getPermitTypes"
+                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                                option-value="permitTypeId"
+                                :loading="getPermitTypes === undefined"
+                              />
+                              <div class="flex items-center ml-2 mb-6">
+                                <Button
+                                  v-if="editable"
+                                  class="p-button-lg p-button-text p-button-danger p-0"
+                                  aria-label="Delete"
+                                  @click="remove(idx)"
+                                >
+                                  <font-awesome-icon icon="fa-solid fa-trash" />
+                                </Button>
                               </div>
-
-                              <div class="col" />
-                            </div>
-                            <div class="col-12">
-                              <Button
-                                v-if="editable"
-                                class="w-full flex justify-content-center font-bold"
-                                @click="
-                                  push({ permitTypeId: undefined });
-                                  nextTick(() => {
-                                    const newPermitDropdown = getHTMLElement(
-                                      $refs.investigatePermitsContainer as HTMLElement,
-                                      'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
-                                    );
-                                    if (newPermitDropdown) {
-                                      newPermitDropdown.focus();
-                                    }
-                                  });
-                                "
-                              >
-                                <font-awesome-icon
-                                  icon="fa-solid fa-plus"
-                                  fixed-width
-                                />
-                                Add permit
-                              </Button>
                             </div>
                           </div>
-                        </template>
-                      </Card>
-                    </div>
-                  </FieldArray>
-                </div>
+                        </div>
+                        <Button
+                          v-if="editable"
+                          class="w-full flex justify-center font-bold h-10"
+                          @click="
+                            push({ permitTypeId: undefined });
+                            nextTick(() => {
+                              const newPermitDropdown = getHTMLElement(
+                                $refs.investigatePermitsContainer as HTMLElement,
+                                'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
+                              );
+                              if (newPermitDropdown) {
+                                newPermitDropdown.focus();
+                              }
+                            });
+                          "
+                        >
+                          <font-awesome-icon
+                            icon="fa-solid fa-plus"
+                            fixed-width
+                          />
+                          Add permit
+                        </Button>
+                      </div>
+                    </template>
+                  </Card>
+                </FieldArray>
               </template>
             </Card>
             <Card>
               <template #content>
-                <div class="mb-2 flex align-items-center">
+                <div class="mb-2 flex items-center">
                   <Checkbox
                     class="m-0 inline-block"
                     name="basic.consentToFeedback"
@@ -1728,7 +1727,7 @@ onBeforeMount(async () => {
             <StepperNavigation
               :editable="editable"
               :next-disabled="true"
-              :prev-callback="prevCallback"
+              :prev-callback="() => activeStep--"
             >
               <template #content>
                 <Button
@@ -1740,10 +1739,10 @@ onBeforeMount(async () => {
                 />
               </template>
             </StepperNavigation>
-          </template>
-        </StepperPanel>
+          </StepPanel>
+        </StepPanels>
       </Stepper>
-      <div class="flex align-items-center justify-content-center mt-4">
+      <div class="flex items-center justify-center mt-6">
         <Button
           label="Submit"
           type="submit"
@@ -1753,6 +1752,7 @@ onBeforeMount(async () => {
       </div>
     </Form>
   </div>
+
   <IntakeAssistanceConfirmation
     v-else-if="assistanceAssignedActivityId && assistanceAssignedEnquiryId"
     :assigned-activity-id="assistanceAssignedActivityId"
@@ -1761,13 +1761,35 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
+.app-error-color {
+  color: var(--p-red-500) !important;
+}
+
+.message-banner {
+  border-left-color: var(--p-red-500);
+  border-left-width: 5px;
+  border-left-style: solid;
+  border-radius: 3px;
+  margin-bottom: 1rem;
+
+  :deep(.p-message-content) {
+    padding: 0.5rem;
+    background-color: var(--p-red-50) !important;
+  }
+}
+
 .no-shadow {
   box-shadow: none;
 }
 
-:deep(.p-invalid),
+:deep(.p-step) {
+  button {
+    padding: 0;
+  }
+}
+
 :deep(.p-card.p-component:has(.p-invalid)) {
-  border-color: $app-error !important;
+  border-color: var(--p-red-500) !important;
 }
 
 .p-card {
@@ -1778,6 +1800,7 @@ onBeforeMount(async () => {
   margin-bottom: 1rem;
 
   .section-header {
+    font-weight: bold;
     padding-left: 1rem;
     padding-right: 0.5rem;
   }
@@ -1800,43 +1823,5 @@ onBeforeMount(async () => {
     padding-left: 1rem;
     padding-right: 1rem;
   }
-}
-
-:deep(.p-message-wrapper) {
-  padding: 0.5rem;
-}
-
-:deep(.p-stepper-header:first-child) {
-  padding-left: 0;
-
-  .p-button {
-    padding-left: 0;
-  }
-}
-
-:deep(.p-stepper-header:last-child) {
-  padding-right: 0;
-
-  .p-button {
-    padding-right: 0;
-  }
-}
-
-:deep(.p-stepper-panels) {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-:deep(.p-stepper-separator) {
-  background-color: #f3f2f1; // TODO Grey 20
-  height: 0.25rem;
-}
-
-:deep(.p-stepper .p-stepper-header:has(~ .p-highlight) .p-stepper-separator) {
-  background-color: #d8eafd; // TODO Blue 20
-}
-
-.lat-long-btn {
-  height: 2.3rem;
 }
 </style>

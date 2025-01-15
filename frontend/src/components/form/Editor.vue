@@ -14,14 +14,15 @@ const {
   height?: string;
 }>();
 
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
-  <div class="field">
+  <div>
     <Editor
       v-model="value"
       :editor-style="`height: ${height}`"
+      @blur="handleBlur"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>

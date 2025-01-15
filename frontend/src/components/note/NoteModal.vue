@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { mixed, object, string } from 'yup';
 
-import { Calendar, Dropdown, InputText, TextArea } from '@/components/form';
+import { DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
@@ -11,6 +11,7 @@ import { BringForwardType, NoteType } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Props
 const { activityId, note = undefined } = defineProps<{
@@ -77,6 +78,7 @@ function onDelete() {
       acceptLabel: 'Confirm',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => {
         noteService
           .deleteNote(note?.noteId as string)
@@ -94,7 +96,7 @@ function onDelete() {
   }
 }
 
-const onNoteTypeChange = (e: { OriginalEvent: Event; value: string }) => {
+const onNoteTypeChange = (e: SelectChangeEvent) => {
   if (e.value === NoteType.BRING_FORWARD) {
     formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
     showBringForward.value = true;
@@ -132,7 +134,7 @@ async function onSubmit(data: any, { resetForm }) {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <font-awesome-icon
@@ -150,54 +152,58 @@ async function onSubmit(data: any, { resetForm }) {
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="formgrid grid">
-        <Calendar
-          class="col-6"
+      <div class="grid grid-cols-12 gap-4">
+        <DatePicker
+          class="col-span-6"
           name="createdAt"
           label="Date"
           :disabled="!note"
           :show-time="true"
         />
-        <div class="col-6" />
-        <Dropdown
-          class="col-6"
+        <div class="col-span-6" />
+        <Select
+          class="col-span-6"
           name="noteType"
           label="Note type"
           :options="NOTE_TYPE_LIST"
-          @on-change="(e) => onNoteTypeChange(e)"
+          @on-change="
+            (e: SelectChangeEvent) => {
+              onNoteTypeChange(e);
+            }
+          "
         />
-        <Calendar
+        <DatePicker
           v-if="showBringForward"
-          class="col-6"
+          class="col-span-6"
           name="bringForwardDate"
           label="Bring forward date"
         />
         <div
           v-else
-          class="col-6"
+          class="col-span-6"
         />
         <InputText
-          class="col-6"
+          class="col-span-6"
           name="title"
           label="Title"
         />
-        <Dropdown
+        <Select
           v-if="showBringForward"
-          class="col-6"
+          class="col-span-6"
           name="bringForwardState"
           label="Bring forward state"
           :options="BRING_FORWARD_TYPE_LIST"
         />
         <div
           v-else
-          class="col-6"
+          class="col-span-6"
         />
         <TextArea
-          class="col-12"
+          class="col-span-12"
           name="note"
           label="Note"
         />
-        <div class="field col-12 flex">
+        <div class="field col-span-12 flex">
           <div class="flex-auto">
             <Button
               class="mr-2"

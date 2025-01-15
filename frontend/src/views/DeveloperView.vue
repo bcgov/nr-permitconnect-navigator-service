@@ -3,10 +3,13 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 
 import { CopyToClipboard } from '@/components/form';
-import { Dropdown } from '@/lib/primevue';
+import { Select } from '@/lib/primevue';
 import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
 import { ButtonMode } from '@/utils/enums/application';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
+
+// Types
+type GroupList = { id: string; text: string };
 
 // Store
 const authnStore = useAuthNStore();
@@ -30,14 +33,14 @@ const { t } = useI18n();
     </div>
   </div>
   <div>
-    <div class="flex align-items-center">
+    <div class="flex items-center">
       <p class="m-0 mr-2">Begin viewing site as:</p>
-      <div class="w-2 mr-2">
-        <Dropdown
+      <div class="w-2/12 mr-2">
+        <Select
           class="w-full"
           :options="GROUP_NAME_LIST"
-          :option-label="(e) => t(`${e.text}`)"
-          :option-value="(e) => e.id"
+          :option-label="(e: GroupList) => t(`${e.text}`)"
+          :option-value="(e: GroupList) => e.id"
           @change="
             (e) => {
               authzStore.setGroupOverride(e.value);
@@ -47,7 +50,7 @@ const { t } = useI18n();
       </div>
     </div>
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Config</h3>
       <div>
         <CopyToClipboard
@@ -58,7 +61,7 @@ const { t } = useI18n();
     </div>
     {{ getConfig }}
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Token</h3>
       <div>
         <CopyToClipboard
@@ -72,7 +75,7 @@ const { t } = useI18n();
       {{ getAccessToken }}
     </div>
 
-    <div class="flex align-items-center mt-3">
+    <div class="flex items-center mt-4">
       <h3 class="mr-2">Profile</h3>
       <div>
         <CopyToClipboard

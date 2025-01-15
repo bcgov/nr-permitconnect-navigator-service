@@ -103,65 +103,63 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <div class="mb-3 border-dashed file-upload border-round-md w-100">
-    <div>
-      <div
-        v-if="uploading"
-        class="h-4rem align-content-center pl-2 pr-2"
+  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-full">
+    <div
+      v-if="uploading"
+      class="h-16 content-center pl-2 pr-2"
+    >
+      <ProgressBar
+        mode="indeterminate"
+        class="self-center progress-bar"
+      />
+    </div>
+    <div
+      v-if="!uploading"
+      class="hover-hand hover-shadow"
+    >
+      <FileUpload
+        name="fileUpload"
+        :multiple="true"
+        :custom-upload="true"
+        :auto="true"
+        :disabled="disabled"
+        @uploader="onFileUploadDragAndDrop"
       >
-        <ProgressBar
-          mode="indeterminate"
-          class="align-self-center progress-bar"
-        />
-      </div>
-      <div
-        v-if="!uploading"
-        class="hover-hand hover-shadow"
-      >
-        <FileUpload
-          name="fileUpload"
-          :multiple="true"
-          :custom-upload="true"
-          :auto="true"
-          :disabled="disabled"
-          @uploader="onFileUploadDragAndDrop"
-        >
-          <template #empty>
-            <div class="flex align-items-center justify-content-center flex-column">
-              <Button
-                aria-label="Upload"
-                class="justify-content-center w-full h-4rem border-none"
-                @click="onFileUploadClick"
-              >
-                <font-awesome-icon
-                  class="pr-2"
-                  icon="fa-solid fa-upload"
-                />
-                Click or drag-and-drop
-              </Button>
-            </div>
-          </template>
-        </FileUpload>
+        <template #empty>
+          <div class="flex items-center justify-center flex-col">
+            <Button
+              aria-label="Upload"
+              class="justify-center w-full h-16 border-0"
+              @click="onFileUploadClick"
+            >
+              <font-awesome-icon
+                class="pr-2"
+                icon="fa-solid fa-upload"
+              />
+              Click or drag-and-drop
+            </Button>
+          </div>
+        </template>
+      </FileUpload>
 
-        <input
-          ref="fileInput"
-          type="file"
-          class="hidden"
-          :accept="accept ? accept.join(',') : '*'"
-          multiple
-          @change="(event: any) => onUpload(Array.from(event.target.files))"
-          @click="(event: any) => (event.target.value = null)"
-        />
-      </div>
+      <input
+        ref="fileInput"
+        type="file"
+        class="hidden"
+        :accept="accept ? accept.join(',') : '*'"
+        multiple
+        @change="(event: any) => onUpload(Array.from(event.target.files))"
+        @click="(event: any) => (event.target.value = null)"
+      />
     </div>
   </div>
 
-  <div class="grid w-full">
+  <div class="grid grid-cols-12 gap-4 w-full">
     <div
       v-for="(document, index) in filteredDocuments"
       :key="document.documentId"
       :index="index"
-      class="col-4"
+      class="col-span-4"
     >
       <DocumentCardLite
         :document="document"
@@ -174,13 +172,18 @@ const filteredDocuments = computed(() => {
 </template>
 
 <style scoped lang="scss">
-:deep(.p-fileupload-buttonbar) {
+:deep(.p-fileupload-header) {
   display: none;
 }
 
 :deep(.p-fileupload-content) {
   padding: 0;
   border: none;
+
+  .p-button {
+    padding: 0;
+    border: none;
+  }
 }
 
 .file-input {
@@ -192,15 +195,19 @@ const filteredDocuments = computed(() => {
   color: var(--text-color);
 }
 
+.p-fileupload {
+  border-style: none;
+}
+
 .progress-bar {
   height: 0.3rem;
 }
 
 .file-upload {
   width: 100%;
-  color: $app-out-of-focus;
+  color: var(--p-greyscale-500);
   &:hover {
-    color: $app-hover;
+    color: var(--p-content-hover-background);
   }
 }
 </style>

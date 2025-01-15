@@ -8,8 +8,8 @@ const { title } = defineProps<{
 </script>
 
 <template>
-  <div class="col-12 mb-3 flex">
-    <h4 class="flex-none flex align-items-center m-0">{{ title }}</h4>
-    <Divider class="flex-grow-1 flex ml-4" />
+  <div class="col-span-12 mb-4 flex items-center">
+    <h4 class="flex-none m-0 pr-4">{{ title }}</h4>
+    <Divider />
   </div>
 </template>

@@ -22,7 +22,7 @@ const {
 const emit = defineEmits(['onChange', 'onClick']);
 
 // State
-const { errorMessage, value } = useField<string>(name);
+const { errorMessage, handleBlur, value } = useField<string>(name);
 </script>
 
 <template>
@@ -44,5 +44,6 @@ const { errorMessage, value } = useField<string>(name);
     :disabled="disabled"
     @change="(e) => emit('onChange', e)"
     @click="(e) => emit('onClick', e)"
+    @blur="handleBlur"
   />
 </template>

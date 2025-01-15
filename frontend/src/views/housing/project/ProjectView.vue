@@ -7,8 +7,16 @@ import { useRouter } from 'vue-router';
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
-import { Spinner } from '@/components/layout';
-import { Accordion, AccordionTab, Button, Card, Column, DataTable, Divider, useToast } from '@/lib/primevue';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  Button,
+  Card,
+  Divider,
+  useToast
+} from '@/lib/primevue';
 import { useAuthNStore, useConfigStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
@@ -21,6 +29,7 @@ import { useSubmissionStore, useTypeStore } from '@/store';
 import type { ComputedRef, Ref } from 'vue';
 import type { Permit, PermitType, User } from '@/types';
 import type { MenuItem } from 'primevue/menuitem';
+import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
 // Types
 type PermitFilterConfig = {
@@ -42,8 +51,6 @@ const { submissionId } = defineProps<{
 const { t } = useI18n();
 
 const BREADCRUMB_HOME: MenuItem = { label: t('projectView.crumbHousing'), route: RouteName.HOUSING };
-const DEFAULT_SORT_ORDER = -1;
-const DEFAULT_SORT_FIELD = 'submittedAt';
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -244,10 +251,10 @@ onMounted(async () => {
     v-if="!loading && getSubmission"
     class="app-primary-color"
   >
-    <div class="disclaimer-block p-5 mt-5">
+    <div class="disclaimer-block p-8 mt-8">
       {{ t('projectView.disclaimer') }}
     </div>
-    <div class="mt-8 mb-2 flex justify-content-between align-items-center">
+    <div class="mt-20 mb-2 flex justify-between items-center">
       <h1
         class="m-0 cursor-pointer hover:underline"
         tabindex="0"
@@ -285,11 +292,11 @@ onMounted(async () => {
       />
     </div>
     <div class="mb-2">
-      <span class="mr-3">
+      <span class="mr-4">
         Project ID:
         <span class="font-bold">{{ getSubmission.activityId }}</span>
       </span>
-      <span class="mr-3">
+      <span class="mr-4">
         {{ t('projectView.createdBy') }}:
         <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
       </span>
@@ -301,16 +308,16 @@ onMounted(async () => {
     </div>
     <div
       v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
-      class="inapplicable-block p-3 mt-6"
+      class="inapplicable-block p-4 mt-12"
     >
       {{ t('projectView.inapplicableSubmissionType') }}
     </div>
     <div>
-      <h3 class="mb-5 mt-7">{{ t('projectView.recommendedPermits') }}</h3>
+      <h3 class="mb-8 mt-16">{{ t('projectView.recommendedPermits') }}</h3>
     </div>
     <div
       v-if="!permitsNeeded?.length"
-      class="empty-block p-5 mb-2"
+      class="empty-block p-8 mb-2"
     >
       {{ t('projectView.recommendedPermitsDesc') }}
     </div>
@@ -326,26 +333,32 @@ onMounted(async () => {
     <Accordion
       v-if="permitsNotNeeded?.length"
       class="app-primary-color"
+      :value="undefined"
+      collapse-icon="pi pi-chevron-up"
+      expand-icon="pi pi-chevron-right"
     >
-      <AccordionTab :header="t('projectView.notNeeded')">
-        <div>
-          {{ t('projectView.notNeededDesc') }}
-        </div>
-        <ul class="mt-4 mb-0">
-          <li
-            v-for="permit in permitsNotNeeded"
-            :key="permit.permitId"
-            class="m-0"
-          >
-            {{ permit.name }}
-          </li>
-        </ul>
-      </AccordionTab>
+      <AccordionPanel value="0">
+        <AccordionHeader>{{ t('projectView.notNeeded') }}</AccordionHeader>
+        <AccordionContent>
+          <div>
+            {{ t('projectView.notNeededDesc') }}
+          </div>
+          <ul class="list-disc mt-4">
+            <li
+              v-for="permit in permitsNotNeeded"
+              :key="permit.permitId"
+              class="ml-12"
+            >
+              {{ permit.name }}
+            </li>
+          </ul>
+        </AccordionContent>
+      </AccordionPanel>
     </Accordion>
-    <h3 class="mt-8 mb-5">{{ t('projectView.submittedApplications') }}</h3>
+    <h3 class="mt-20 mb-8">{{ t('projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
-      class="empty-block p-5"
+      class="empty-block p-8"
     >
       {{ t('projectView.submittedApplicationsDesc') }}
     </div>
@@ -357,9 +370,9 @@ onMounted(async () => {
         params: { permitId: permit.permitId }
       }"
     >
-      <Card class="permit-card--hover mb-3">
+      <Card class="permit-card--hover mb-4">
         <template #title>
-          <div class="flex justify-content-between">
+          <div class="flex justify-between">
             <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
             <font-awesome-icon
               class="ellipsis-icon"
@@ -369,8 +382,8 @@ onMounted(async () => {
           <Divider />
         </template>
         <template #content>
-          <div class="grid">
-            <div class="col-12 flex mb-3">
+          <div class="grid grid-cols-12 gap-4">
+            <div class="col-span-12 flex mb-4">
               <StatusPill
                 class="mr-2"
                 :auth-status="permit.authStatus"
@@ -380,19 +393,19 @@ onMounted(async () => {
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
               </div>
             </div>
-            <div class="col-3">
+            <div class="col-span-3">
               <div class="label-field">{{ t('projectView.trackingId') }}</div>
               <div class="permit-data">
                 {{ permit?.trackingId }}
               </div>
             </div>
-            <div class="col-3">
+            <div class="col-span-3">
               <div class="label-field">{{ t('projectView.agency') }}</div>
               <div class="permit-data">
                 {{ permit?.agency }}
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-span-6">
               <div class="label-field">{{ t('projectView.latestUpdates') }}</div>
               <div class="permit-data">
                 {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('projectView.noUpdates') }}
@@ -412,75 +425,12 @@ onMounted(async () => {
     />
     <div>
       <div>
-        <h3 class="mb-5 mt-7">{{ t('projectView.relatedEnquiries') }}</h3>
+        <h3 class="mt-20 mb-8">{{ t('projectView.relatedEnquiries') }}</h3>
       </div>
-
-      <div
-        v-if="!getRelatedEnquiries?.length"
-        class="empty-block p-5 mb-2"
-      >
-        {{ t('projectView.listEmpty') }}
-      </div>
-
-      <DataTable
-        v-else
+      <EnquiryListProponent
         :loading="loading"
-        :value="getRelatedEnquiries"
-        :row-hover="true"
-        :rows="10"
-        :sort-field="DEFAULT_SORT_FIELD"
-        :sort-order="DEFAULT_SORT_ORDER"
-        scrollable
-        responsive-layout="scroll"
-        :paginator="true"
-        paginator-template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-        :current-page-report-template="`({currentPage} ${t('projectView.rangeSeparator')} {totalPages})`"
-        :rows-per-page-options="[10, 20, 50]"
-      >
-        <template #empty>
-          <div class="flex justify-content-center">
-            <p class="font-bold text-xl">{{ t('projectView.listEmpty') }}</p>
-          </div>
-        </template>
-        <template #loading>
-          <Spinner />
-        </template>
-
-        <Column
-          field="activityId"
-          :header="t('projectView.enquiryID')"
-          style="width: 45%"
-        >
-          <template #body="{ data }">
-            <div :data-activityId="data.activityId">
-              <router-link
-                :to="{
-                  name: RouteName.HOUSING_ENQUIRY_INTAKE,
-                  query: { activityId: data.activityId, enquiryId: data.enquiryId }
-                }"
-              >
-                {{ data.activityId }}
-              </router-link>
-            </div>
-          </template>
-        </Column>
-        <Column
-          field="enquiryStatus"
-          :header="t('projectView.status')"
-          :sortable="true"
-          style="width: 42%"
-        />
-        <Column
-          field="submittedAt"
-          :header="t('projectView.submittedDate')"
-          :sortable="true"
-          style="width: 15%"
-        >
-          <template #body="{ data }">
-            {{ formatDate(data?.submittedAt) }}
-          </template>
-        </Column>
-      </DataTable>
+        :enquiries="getRelatedEnquiries"
+      />
     </div>
   </div>
 </template>
@@ -528,7 +478,7 @@ a {
 }
 
 .permit-card {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 0.063rem;
   box-shadow: 0.25rem 0.25rem 0.25rem 0rem $app-proj-black;
@@ -565,6 +515,7 @@ a {
   font-style: italic;
   font-weight: 400;
 }
+
 :deep(.p-accordion-content) {
   padding: 4rem 4rem 4rem 4rem;
   border-style: none;
@@ -581,10 +532,10 @@ a {
 }
 
 :deep(.p-accordion-tab) {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 1px;
-  box-shadow: 4px 4px 4px 0px $app-proj-black;
+  box-shadow: 4px 4px 4px 0px rgba(0, 0, 0, 0.03);
 }
 
 :deep(:not(.p-accordion-tab-active) .p-accordion-header > a) {

@@ -4,14 +4,14 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { date, object, string } from 'yup';
 
-import { Calendar, Dropdown, InputText } from '@/components/form';
+import { DatePicker, InputText, Select } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
 import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
-import type { DropdownChangeEvent } from 'primevue/dropdown';
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { Permit, PermitForm, PermitType } from '@/types';
 
@@ -95,6 +95,7 @@ function onDelete() {
       acceptLabel: 'Confirm',
       acceptClass: 'p-button-danger',
       rejectLabel: 'Cancel',
+      rejectProps: { outlined: true },
       accept: () => {
         permitService
           .deletePermit(permit?.permitId as string)
@@ -109,7 +110,7 @@ function onDelete() {
   }
 }
 
-function onPermitTypeChanged(e: DropdownChangeEvent, setValues: Function) {
+function onPermitTypeChanged(e: SelectChangeEvent, setValues: Function) {
   permitType.value = e.value;
   setValues({
     agency: e.value.agency,
@@ -159,7 +160,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <font-awesome-icon
@@ -183,83 +184,83 @@ async function onSubmit(data: PermitForm, { resetForm }) {
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="formgrid grid">
-        <Dropdown
-          class="col-12"
+      <div class="grid grid-cols-12 gap-4">
+        <Select
+          class="col-span-12"
           name="permitType"
           label="Permit"
           :options="getPermitTypes"
           :option-label="(e) => `${e.businessDomain}: ${e.name}`"
           :loading="getPermitTypes === undefined"
           autofocus
-          @on-change="(e: DropdownChangeEvent) => onPermitTypeChanged(e, setValues)"
+          @on-change="(e: SelectChangeEvent) => onPermitTypeChanged(e, setValues)"
         />
         <InputText
-          class="col-12 lg:col-6"
+          class="col-span-12 lg:col-span-6"
           name="agency"
           label="Agency"
           :disabled="true"
         />
         <InputText
-          class="col-12 lg:col-6"
+          class="col-span-12 lg:col-span-6"
           name="businessDomain"
           label="Business domain"
           :disabled="true"
         />
         <InputText
-          class="col-12 lg:col-6"
+          class="col-span-12 lg:col-span-6"
           name="sourceSystem"
           label="Source system"
           :disabled="true"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
+        <Select
+          class="col-span-12 lg:col-span-6"
           name="status"
           label="Application stage"
           :options="PERMIT_STATUS_LIST"
         />
-        <Calendar
-          class="col-12 lg:col-6"
+        <DatePicker
+          class="col-span-12 lg:col-span-6"
           name="submittedDate"
           label="Submitted date"
           :max-date="new Date()"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
+        <Select
+          class="col-span-12 lg:col-span-6"
           name="needed"
           label="Needed"
           :options="PERMIT_NEEDED_LIST"
         />
-        <Dropdown
-          class="col-12 lg:col-6"
+        <Select
+          class="col-span-12 lg:col-span-6"
           name="authStatus"
           label="Authorization status"
           :options="PERMIT_AUTHORIZATION_STATUS_LIST"
         />
-        <Calendar
-          class="col-12 lg:col-6"
+        <DatePicker
+          class="col-span-12 lg:col-span-6"
           name="statusLastVerified"
           label="Status verified date"
           :max-date="new Date()"
         />
 
         <InputText
-          class="col-12 lg:col-6"
+          class="col-span-12 lg:col-span-6"
           name="trackingId"
           label="Tracking ID"
         />
-        <Calendar
-          class="col-12 lg:col-6"
+        <DatePicker
+          class="col-span-12 lg:col-span-6"
           name="adjudicationDate"
           label="Adjudication date"
           :max-date="new Date()"
         />
         <InputText
-          class="col-12 lg:col-6"
+          class="col-span-12 lg:col-span-6"
           name="issuedPermitId"
           label="Issued Permit ID"
         />
-        <div class="field col-12 flex">
+        <div class="field col-span-12 flex">
           <div class="flex-auto">
             <Button
               class="mr-2"
@@ -279,7 +280,9 @@ async function onSubmit(data: PermitForm, { resetForm }) {
             class="flex justify-content-right"
           >
             <Button
-              class="p-button-outlined p-button-danger mr-2"
+              outlined
+              class="mr-2"
+              severity="danger"
               label="Delete"
               icon="pi pi-trash"
               @click="onDelete"

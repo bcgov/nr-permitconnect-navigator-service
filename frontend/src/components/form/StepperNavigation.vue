@@ -35,11 +35,11 @@ function handlePrevClick() {
 </script>
 
 <template>
-  <div class="flex pt-4 justify-content-between">
+  <div class="flex pt-6 justify-between">
     <Button
       aria-label="Go to previous page"
       :class="prevDisabled ? 'button-hidden' : 'button-visible'"
-      class="px-4 py-1"
+      class="px-6 py-1"
       outlined
       icon="pi pi-arrow-left"
       icon-class="text-xl"
@@ -50,7 +50,7 @@ function handlePrevClick() {
     <Button
       aria-label="Go to next page"
       :class="nextDisabled ? 'button-hidden' : 'button-visible'"
-      class="px-4 py-1"
+      class="px-6 py-1"
       outlined
       icon="pi pi-arrow-right"
       icon-class="text-xl"

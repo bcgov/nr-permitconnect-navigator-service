@@ -46,18 +46,18 @@ watchEffect(() => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-6"
+    class="app-info-dialog w-6/12"
   >
     <template #header>
       <span class="p-dialog-title">Select files</span>
     </template>
-    <div class="col-12">
-      <div class="grid">
+    <div class="col-span-12">
+      <div class="grid grid-cols-12 gap-4">
         <div
           v-for="(document, index) in documents"
           :key="document.documentId"
           :index="index"
-          class="col-12 md:col-6 lg:col-4 xl:col-3"
+          class="col-span-12 md:col-span-6 lg:col-span-4 xl:col-span-3"
         >
           <DocumentCard
             :document="document"
@@ -69,7 +69,7 @@ watchEffect(() => {
           />
         </div>
       </div>
-      <div class="field col-12 flex">
+      <div class="field col-span-12 flex">
         <div class="flex-auto">
           <Button
             class="mr-2"

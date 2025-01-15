@@ -10,7 +10,7 @@ const { t } = useI18n();
 <template>
   <header>
     <nav id="header-branding">
-      <div class="flex flex-row flex-wrap align-items-center lg:pl-6">
+      <div class="flex flex-row flex-wrap items-center lg:pl-12">
         <div class="flex flex-none">
           <a href="https://www2.gov.bc.ca">
             <img
@@ -21,10 +21,10 @@ const { t } = useI18n();
           </a>
         </div>
         <div class="mx-2 bcds-header-line" />
-        <div class="flex flex-grow-1 ml-2">
-          <h2 class="m-0 app-primary-color">{{ t('header.name') }}</h2>
+        <div class="flex grow ml-2">
+          <h2 class="m-0 font-bold app-primary-color">{{ t('header.name') }}</h2>
         </div>
-        <div class="flex justify-content-end lg:mr-6">
+        <div class="flex justify-end lg:mr-12">
           <HeaderMenu />
         </div>
       </div>
