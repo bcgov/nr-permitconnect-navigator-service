@@ -429,12 +429,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
   }
 
   if (actId) {
-    formRef.value?.resetForm({
-      values: {
-        ...formRef.value?.values,
-        activityId: actId
-      }
-    });
+    formRef.value?.setFieldValue('activityId', actId);
   }
 }
 
