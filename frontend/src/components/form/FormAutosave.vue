@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useFormValues, useIsFormDirty } from 'vee-validate';
+import { useField, useFormValues, useIsFormDirty } from 'vee-validate';
 import { onBeforeUnmount, ref, watch } from 'vue';
 
 import type { Ref } from 'vue';
@@ -17,6 +17,7 @@ const { callback, delay = DEFAULT_DELAY } = defineProps<{
 const isDirty = useIsFormDirty();
 const timeoutId: Ref<ReturnType<typeof setTimeout> | null> = ref(null);
 const values = useFormValues();
+const { value: activityId } = useField('activityId');
 
 // Actions
 defineExpose({ stopAutoSave });
@@ -32,18 +33,32 @@ onBeforeUnmount(() => {
   stopAutoSave();
 });
 
-watch(values.value, () => {
-  if (timeoutId.value) {
-    clearTimeout(timeoutId.value);
-  }
+watch(
+  [() => values.value, activityId],
+  ([newVals, newActId], [oldVals, oldActId]) => {
+    if (!isDirty.value) {
+      return;
+    }
 
-  if (isDirty.value) {
+    // check to see if only activity id was changed, then skip autosave
+    if (
+      newActId !== oldActId &&
+      JSON.stringify({ ...newVals, activityId: undefined }) === JSON.stringify({ ...oldVals, activityId: undefined })
+    ) {
+      return;
+    }
+
+    if (timeoutId.value) {
+      clearTimeout(timeoutId.value);
+    }
+
     timeoutId.value = setTimeout(async () => {
       await callback();
       timeoutId.value = null;
     }, delay);
-  }
-});
+  },
+  { deep: true }
+);
 </script>
 
 <template><div /></template>

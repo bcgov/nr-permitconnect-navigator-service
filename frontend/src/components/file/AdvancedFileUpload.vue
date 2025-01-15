@@ -30,7 +30,6 @@ const { getConfig } = storeToRefs(useConfigStore());
 const submissionStore = useSubmissionStore();
 
 // State
-// const curActivityId: Ref<string | undefined> = ref(undefined);
 const fileInput: Ref<any> = ref(null);
 const uploading: Ref<Boolean> = ref(false);
 
