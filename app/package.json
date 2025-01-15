@@ -46,10 +46,11 @@
     "seed:make": "knex seed:make",
     "seed:dev": "knex seed:run --specific=dev_groups.ts",
     "seed": "knex seed:run",
-    "serve": "ts-node-dev --respawn --transpile-only --rs --watch bin,config,dist ./bin/www",
+    "serve": "ts-node-dev --respawn --transpile-only --rs --watch bin,config,dist ./bin/www.ts",
+    "serve:dev": "node --watch --experimental-strip-types --experimental-transform-types ./bin/www.ts",
     "start": "ts-node --transpile-only ./bin/www",
-    "start:dev": "node --experimental-strip-types ./bin/www.ts",
     "test": "jest --verbose --forceExit --detectOpenHandles",
+    "test:dev": "node --experimental-vm-modules node_modules/jest/bin/jest.js --verbose --forceExit --detectOpenHandles",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

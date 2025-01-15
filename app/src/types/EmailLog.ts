@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 
 export type EmailLog = {
   emailId: string; // Primary Key

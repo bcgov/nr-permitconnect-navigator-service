@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import { Contact } from './Contact.ts';
 import type { User } from './User.ts';
 

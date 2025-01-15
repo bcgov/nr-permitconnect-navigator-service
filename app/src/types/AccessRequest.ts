@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import { AccessRequestStatus, GroupName } from '../utils/enums/application.ts';
 
 export type AccessRequest = {

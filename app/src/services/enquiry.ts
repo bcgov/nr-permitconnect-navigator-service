@@ -1,7 +1,7 @@
 /* eslint-disable no-useless-catch */
 import prisma from '../db/dataConnection.ts';
 import { enquiry } from '../db/models/index.ts';
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 
 import type { Enquiry, EnquirySearchParameters } from '../types/index.ts';
 

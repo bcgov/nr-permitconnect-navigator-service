@@ -2,7 +2,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { activityService } from '../../services/index.ts';
 import { uuidToActivityId } from '../../utils/utils.ts';
-import { CurrentContext } from '../../types/index.ts';
+
+import type { CurrentContext } from '../../types/index.ts';
 
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {

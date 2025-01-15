@@ -1,12 +1,16 @@
 import config from 'config';
 import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import path, { join } from 'path';
+import { fileURLToPath } from 'url';
 
 import { getLogger } from '../components/log.ts';
 import type { JwtPayload } from 'jsonwebtoken';
 import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types/index.ts';
 
-const log = getLogger(module.filename);
+const log = getLogger('gaewgr');
+
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
 
 /**
  * @function camelCaseToTitleCase

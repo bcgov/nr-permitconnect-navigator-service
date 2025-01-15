@@ -1,12 +1,13 @@
+// @ts-expect-error api-problem lacks a defined interface; code still works fine
+import Problem from 'api-problem';
 import compression from 'compression';
 import config from 'config';
 import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
-import { join } from 'path';
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
+import path, { join } from 'path';
 import querystring from 'querystring';
+import { fileURLToPath } from 'url';
 
 import jsonPackage from './package.json' with { type: 'json' };
 import { getLogger, httpLogger } from './src/components/log.ts';
@@ -16,7 +17,9 @@ import v1Router from './src/routes/v1/index.ts';
 
 import type { Request, Response } from 'express';
 
-const log = getLogger(module.filename);
+const __filename = fileURLToPath(import.meta.url); // get the resolved path to the file
+const __dirname = path.dirname(__filename); // get the name of the directory
+const log = getLogger(__filename);
 
 const state = {
   gitRev: getGitRevision(),

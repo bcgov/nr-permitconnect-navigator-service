@@ -16,7 +16,7 @@ import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { getCurrentSubject } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import { CurrentAuthorization } from '../types/index.ts';
+import type { CurrentAuthorization } from '../types/index.ts';
 
 /**
  * @function hasAuthorization

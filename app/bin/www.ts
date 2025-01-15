@@ -3,10 +3,13 @@
 /** Module dependencies */
 import config from 'config';
 import http from 'http';
+import { fileURLToPath } from 'url';
 
 import app from '../app.ts';
 import getLogger from '../src/components/log.ts';
-const log = getLogger(module.filename);
+
+const __filename = fileURLToPath(import.meta.url);
+const log = getLogger(__filename);
 
 /** Normalize a port into a number, string, or false. */
 const normalizePort = (val: string) => {
@@ -36,7 +39,7 @@ const onError = (error: { syscall: string; code: string }) => {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      log.error(bind + ' requires elevated privileges');
+      // log.error(bind + ' requires elevated privileges');
       process.exit(1);
       break;
     case 'EADDRINUSE':

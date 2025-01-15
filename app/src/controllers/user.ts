@@ -1,9 +1,9 @@
 import { userService, yarsService } from '../services/index.ts';
-import { User, UserSearchParameters } from '../types/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { User, UserSearchParameters } from '../types/index.ts';
 
 const controller = {
   searchUsers: async (req: Request<never, never, never, UserSearchParameters>, res: Response, next: NextFunction) => {

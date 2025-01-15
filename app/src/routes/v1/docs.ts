@@ -1,11 +1,13 @@
-import { Router, Request, Response } from 'express';
+import express from 'express';
 import { readFileSync } from 'fs';
 import helmet from 'helmet';
 import yaml from 'js-yaml';
 import { join } from 'path';
 import docs from '../../docs/docs.ts';
 
-const router = Router();
+import type { Request, Response } from 'express';
+
+const router = express.Router();
 
 interface OpenAPISpec {
   servers: { url: string }[];

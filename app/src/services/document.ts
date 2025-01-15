@@ -1,6 +1,6 @@
 import prisma from '../db/dataConnection.ts';
 import { document } from '../db/models/index.ts';
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 
 const service = {
   /**

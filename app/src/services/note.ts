@@ -3,7 +3,7 @@ import { note } from '../db/models/index.ts';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Note } from '../types/index.ts';
-import { IStamps } from '../interfaces/IStamps.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 
 const service = {
   /**

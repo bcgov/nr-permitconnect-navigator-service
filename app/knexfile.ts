@@ -1,9 +1,12 @@
 import config from 'config';
 import { format, parseJSON } from 'date-fns';
 import { Knex } from 'knex';
+import { fileURLToPath } from 'url';
 
 import { getLogger } from './src/components/log.ts';
-const log = getLogger(module.filename);
+
+const __filename = fileURLToPath(import.meta.url);
+const log = getLogger(__filename);
 
 /**
  * Knex configuration
