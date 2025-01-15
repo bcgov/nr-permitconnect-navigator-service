@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { mixed, object, string } from 'yup';
 
-import { DatePicker, Select, InputText, TextArea } from '@/components/form';
+import { DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';

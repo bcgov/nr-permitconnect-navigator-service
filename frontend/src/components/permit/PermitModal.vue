@@ -4,7 +4,7 @@ import { Form } from 'vee-validate';
 import { ref } from 'vue';
 import { date, object, string } from 'yup';
 
-import { DatePicker, Select, InputText } from '@/components/form';
+import { DatePicker, InputText, Select } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';

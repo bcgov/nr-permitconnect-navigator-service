@@ -14,12 +14,12 @@ import {
   AccordionContent,
   AccordionHeader,
   AccordionPanel,
-  ToggleSwitch,
   Tab,
   Tabs,
   TabList,
   TabPanel,
   TabPanels,
+  ToggleSwitch,
   useToast
 } from '@/lib/primevue';
 import { enquiryService, noteService, permitService, submissionService } from '@/services';

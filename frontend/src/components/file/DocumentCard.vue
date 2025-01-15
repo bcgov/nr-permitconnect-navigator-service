@@ -121,9 +121,6 @@ function onClick() {
 <style scoped lang="scss">
 .document-image {
   max-height: 2.5rem;
-  // position: relative;
-  // top: 50%;
-  // transform: translateY(-50%);
 }
 
 .clicked {

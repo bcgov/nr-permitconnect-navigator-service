@@ -19,11 +19,11 @@
   },
   "coverage-gutters.showGutterCoverage": false,
   "coverage-gutters.showLineCoverage": true,
-  "scss.lint.unknownAtRules": "ignore",
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnSave": true,
   "eslint.format.enable": true,
   "files.insertFinalNewline": true,
+  "scss.lint.unknownAtRules": "ignore",
   "yaml.schemas": {
     "openapi:v3": "./app/src/docs/v1.api-spec.yaml"
   }

@@ -1524,8 +1524,7 @@ watch(
                   >
                     <div class="mb-2">
                       <span class="app-primary-color">
-                        Sharing this information will authorize the navigators to seek additional information about this
-                        permit.
+                        {{ t('submissionIntakeForm.appliedPermitsShareNotification') }}
                       </span>
                     </div>
                     <Card class="no-shadow">
