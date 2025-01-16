@@ -48,6 +48,7 @@ export enum Regex {
 export enum Resource {
   ACCESS_REQUEST = 'ACCESS_REQUEST',
   ATS = 'ATS',
+  CONTACT = 'CONTACT',
   DOCUMENT = 'DOCUMENT',
   ENQUIRY = 'ENQUIRY',
   NOTE = 'NOTE',

@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { appliedPermit } from './appliedPermit';
 import { basicIntake } from './basic';
 import { activityId, email, uuidv4 } from './common';
-import { contacts } from './contacts';
+import { contacts } from './contact';
 
 import { housing } from './housing';
 import { permits } from './permits';

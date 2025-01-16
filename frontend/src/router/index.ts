@@ -1,13 +1,13 @@
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory, useRouter } from 'vue-router';
 
-import { AuthService, yarsService } from '@/services';
-import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
+import { AuthService, contactService, yarsService } from '@/services';
+import { useAppStore, useAuthNStore, useAuthZStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
-
+import type { Contact } from '@/types';
 /**
  * @function accessHandler
  * Checks for user access to the requested route and redirect if necessary
@@ -33,12 +33,15 @@ function accessHandler(to: RouteLocationNormalizedGeneric) {
 async function bootstrap() {
   const authnStore = useAuthNStore();
   const authzStore = useAuthZStore();
+  const contactStore = useContactStore();
 
   const { getIsAuthenticated } = storeToRefs(authnStore);
 
   if (getIsAuthenticated.value && !authzStore.getGroups.length) {
     const permissions = await yarsService.getPermissions();
     authzStore.setPermissions(permissions.data);
+    const contact: Contact = (await contactService.getCurrentUserContact())?.data;
+    contactStore.setContact(contact);
   }
 }
 
@@ -62,6 +65,13 @@ const routes: Array<RouteRecordRaw> = [
         path: '/',
         name: RouteName.HOME,
         component: () => import('@/views/HomeView.vue')
+      },
+      {
+        path: '/contact/profile',
+        name: RouteName.CONTACT_PROFILE,
+        component: () => import('@/views/contact/ContactProfileView.vue'),
+        beforeEnter: accessHandler,
+        meta: { requiresAuth: true, access: [NavigationPermission.HOUSING_CONTACT_MANAGEMENT] }
       },
       {
         path: '/developer',

@@ -4,9 +4,10 @@ import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
+import { contactService } from '../services';
 import { parseIdentityKeyClaims } from '../utils/utils';
 
-import type { User, UserSearchParameters } from '../types';
+import type { Contact, CurrentContext, User, UserSearchParameters } from '../types';
 
 const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
@@ -170,12 +171,29 @@ const service = {
           idp: newUser.idp
         }
       });
-
+      let currentContext: CurrentContext;
       if (!oldUser) {
         response = await service.createUser(newUser, trx);
+        currentContext = { userId: response?.userId };
       } else {
         response = await service.updateUser(oldUser.user_id, newUser, trx);
+        currentContext = { userId: oldUser?.user_id };
       }
+
+      const oldContacts: Array<Contact> = await contactService.searchContacts({
+        userId: [currentContext.userId ?? NIL]
+      });
+      const newContact: Contact = {
+        contactId: oldContacts[0]?.contactId ?? undefined,
+        userId: currentContext.userId ?? NIL,
+        firstName: newUser.firstName,
+        lastName: newUser.lastName,
+        email: newUser.email,
+        phoneNumber: oldContacts[0]?.phoneNumber,
+        contactPreference: oldContacts[0]?.contactPreference,
+        contactApplicantRelationship: oldContacts[0]?.contactApplicantRelationship
+      };
+      contactService.upsertContacts([newContact], currentContext);
     });
 
     return response;

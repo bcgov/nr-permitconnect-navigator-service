@@ -3,12 +3,15 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { useAuthNStore, useAuthZStore } from '@/store';
+import { useAuthNStore, useAuthZStore, useContactStore } from '@/store';
 import { StorageKey } from '@/utils/enums/application';
 import { storeToRefs } from 'pinia';
-import { yarsService } from '@/services';
+import { contactService, yarsService } from '@/services';
+
+import type { Contact } from '@/types';
 
 const authnStore = useAuthNStore();
+const contactStore = useContactStore();
 const router = useRouter();
 
 const { getIsAuthenticated } = storeToRefs(useAuthNStore());
@@ -19,6 +22,8 @@ onMounted(async () => {
   if (getIsAuthenticated.value) {
     const permissions = await yarsService.getPermissions();
     useAuthZStore().setPermissions(permissions.data);
+    const contact: Contact = (await contactService.getCurrentUserContact())?.data;
+    contactStore.setContact(contact);
   }
 
   // Return user back to original login entrypoint if specified

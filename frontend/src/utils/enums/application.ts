@@ -55,6 +55,7 @@ export enum Regex {
 }
 
 export enum RouteName {
+  CONTACT_PROFILE = 'contact_profile',
   DEVELOPER = 'developer',
   FORBIDDEN = 'forbidden',
   HOME = 'home',

@@ -2,6 +2,22 @@
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact Housing Authorizations at"
   },
+  "contactProfileView": {
+    "cancel": "Cancel",
+    "contactProfile": "Contact profile",
+    "edit": "Edit",
+    "email": "Email",
+    "failedToSaveTheForm": "Failed to save the form",
+    "fillOutProfile": "Please fill out your contact profile",
+    "firstName": "First name",
+    "formSaved": "Form saved",
+    "getStarted": "Get started",
+    "lastName": "Last name",
+    "phone": "Phone",
+    "preferredContact": "Preferred contact method",
+    "relationshipToProject": "Relationship to project",
+    "save": "Save"
+  },
   "deleteDocument": {
     "deleteTooltip": "Delete document"
   },
@@ -71,6 +87,7 @@
     "name": "Permit Connect Services"
   },
   "headerMenu": {
+    "contactProfile": "Contact profile",
     "logout": "Log out"
   },
   "housing": {
@@ -84,7 +101,7 @@
     "onThisPage": "On this page",
     "of": "of",
     "projectState": "Project state",
-    "projectsEmpty": "Submit a new project to the Navigator Service to found out what permits are required",
+    "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
     "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
     "submitNewEnquiry": "Submit a new enquiry",
     "submitNewProject": "Submit a new project"
