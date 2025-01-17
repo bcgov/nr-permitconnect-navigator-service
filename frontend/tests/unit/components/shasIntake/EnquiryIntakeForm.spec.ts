@@ -7,11 +7,12 @@ import { nextTick } from 'vue';
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
-import { submissionService } from '@/services';
+import { contactService, submissionService } from '@/services';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, IntakeFormCategory, ProjectRelationship } from '@/utils/enums/housing';
 
 import type { AxiosResponse } from 'axios';
+import type { Contact } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -31,13 +32,28 @@ vi.mock('vue-router', () => ({
   onBeforeRouteUpdate: vi.fn(),
   onBeforeRouteLeave: vi.fn()
 }));
+const sampleContact: Contact = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant',
+  createdBy: 'testCreatedBy',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'testUpdatedAt',
+  updatedAt: new Date().toISOString()
+};
 
 const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');
 const getSubmissions = vi.spyOn(submissionService, 'getSubmissions');
+const getContactSpy = vi.spyOn(contactService, 'searchContacts');
 
 getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
 getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
-
+getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 interface FormValues {
   contactFirstName: string;
   contactLastName: string;
@@ -45,6 +61,7 @@ interface FormValues {
   contactPhoneNumber: string;
   contactApplicantRelationship: ProjectRelationship;
   contactPreference: ContactPreference;
+  contactId?: string;
   basic: {
     isRelated?: string;
     relatedActivityId?: string;
@@ -61,6 +78,7 @@ function basicValidFormValues(): FormValues {
     contactPhoneNumber: '1234567890',
     contactApplicantRelationship: ProjectRelationship.OWNER,
     contactPreference: ContactPreference.EMAIL,
+    contactId: 'someId',
     basic: {
       isRelated: 'Yes',
       enquiryDescription: 'test description',

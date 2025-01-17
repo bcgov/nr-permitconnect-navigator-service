@@ -222,13 +222,13 @@ onMounted(async () => {
   }
   initialFormValues.value = {
     ...enquiry,
-    contactId: enquiry?.contacts[0].contactId,
-    contactFirstName: enquiry?.contacts[0].firstName,
-    contactLastName: enquiry?.contacts[0].lastName,
-    contactPhoneNumber: enquiry?.contacts[0].phoneNumber,
-    contactEmail: enquiry?.contacts[0].email,
-    contactApplicantRelationship: enquiry?.contacts[0].contactApplicantRelationship,
-    contactPreference: enquiry?.contacts[0].contactPreference,
+    contactId: enquiry?.contacts[0]?.contactId,
+    contactFirstName: enquiry?.contacts[0]?.firstName,
+    contactLastName: enquiry?.contacts[0]?.lastName,
+    contactPhoneNumber: enquiry?.contacts[0]?.phoneNumber,
+    contactEmail: enquiry?.contacts[0]?.email,
+    contactApplicantRelationship: enquiry?.contacts[0]?.contactApplicantRelationship,
+    contactPreference: enquiry?.contacts[0]?.contactPreference,
     submittedAt: new Date(enquiry?.submittedAt),
     user: assigneeOptions.value[0] ?? null
   };

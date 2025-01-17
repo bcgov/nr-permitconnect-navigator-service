@@ -16,21 +16,15 @@ const service = {
     return await prisma.$transaction(async (trx) => {
       await Promise.all(
         data.map(async (x: Contact) => {
+          let response;
           if (!x.contactId) {
-            const response = await trx.contact.create({
+            response = await trx.contact.create({
               data: contact.toPrismaModel({
                 ...x,
                 contactId: uuidv4(),
                 ...generateCreateStamps(currentContext)
               })
             });
-            if (activityId)
-              await trx.activity_contact.create({
-                data: {
-                  activity_id: activityId,
-                  contact_id: response.contact_id
-                }
-              });
           } else {
             await trx.contact.update({
               data: contact.toPrismaModel({ ...x, ...generateCreateStamps(currentContext) }),
@@ -39,6 +33,14 @@ const service = {
               }
             });
           }
+
+          if (activityId)
+            await trx.activity_contact.create({
+              data: {
+                activity_id: activityId,
+                contact_id: response?.contact_id ?? x.contactId
+              }
+            });
         })
       );
     });
