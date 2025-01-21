@@ -27,12 +27,15 @@ const service = {
       .filter((claims) => claims) // Drop falsy values from array
       .concat(undefined)[0]; // Set undefined as last element of array
 
+    const firstName = token.given_name.split(' ')[0];
+    const lastName = token.family_name.trim().length > 0 ? token.family_name : token.given_name.split(' ')[1];
+
     return {
       identityId: identityId,
       sub: token.sub ? token.sub : token.preferred_username,
-      firstName: token.given_name,
+      firstName: firstName,
       fullName: token.name,
-      lastName: token.family_name,
+      lastName: lastName,
       email: token.email,
       idp: token.identity_provider,
       active: true
