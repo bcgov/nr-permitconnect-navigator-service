@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
+import { useI18n } from 'vue-i18n';
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -29,7 +30,7 @@ import {
 } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
 import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
-import { Action, Initiative, Resource } from '@/utils/enums/application';
+import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
 import { getFilenameAndExtension } from '@/utils/utils';
@@ -79,6 +80,7 @@ const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 const router = useRouter();
 
 // Actions
+const { t } = useI18n();
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
   tempDocuments = tempDocuments.filter((x) => {
@@ -164,23 +166,39 @@ onMounted(async () => {
     <span class="app-primary-color">Back to Submissions</span>
   </Button>
 
-  <h1>
-    <span v-if="getSubmission?.projectName">
-      <span class="ml-1">{{ getSubmission.projectName + ': ' }}</span>
-    </span>
-    <span
-      v-if="getSubmission?.activityId"
-      class="mr-1"
+  <div class="flex items-center justify-between">
+    <h1>
+      <span v-if="getSubmission?.projectName">
+        <span class="ml-1">{{ getSubmission.projectName + ': ' }}</span>
+      </span>
+      <span
+        v-if="getSubmission?.activityId"
+        class="mr-1"
+      >
+        {{ getSubmission.activityId }}
+      </span>
+      <span
+        v-if="isCompleted"
+        class="ml-0"
+      >
+        (Completed)
+      </span>
+    </h1>
+    <Button
+      outlined
+      @click="
+        router.push({
+          name: RouteName.HOUSING_PROJECT,
+          params: {
+            submissionId: submissionId
+          }
+        })
+      "
     >
-      {{ getSubmission.activityId }}
-    </span>
-    <span
-      v-if="isCompleted"
-      class="ml-0"
-    >
-      (Completed)
-    </span>
-  </h1>
+      <font-awesome-icon icon="fa-solid fa-eye" />
+      {{ t('submissionView.seePropViewButtonLabel') }}
+    </Button>
+  </div>
 
   <Tabs :value="activeTab">
     <TabList>

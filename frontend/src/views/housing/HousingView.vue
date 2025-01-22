@@ -140,11 +140,7 @@ onMounted(async () => {
           </div>
         </div>
       </h2>
-      <Button
-        @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
-        @keydown.enter.prevent="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
-        @keydown.space.prevent="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })"
-      >
+      <Button @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })">
         {{ t('housing.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
@@ -244,11 +240,7 @@ onMounted(async () => {
           <div />
         </div>
       </h2>
-      <Button
-        @click="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
-        @keydown.enter.prevent="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
-        @keydown.space.prevent="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })"
-      >
+      <Button @click="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })">
         {{ t('housing.submitNewEnquiry') }}
         <font-awesome-icon
           class="ml-2"
