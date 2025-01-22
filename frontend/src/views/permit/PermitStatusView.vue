@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 import { onBeforeMount, ref } from 'vue';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
@@ -63,7 +64,6 @@ const { getProfile } = storeToRefs(useAuthNStore());
 
 // State
 const breadcrumbItems: Ref<Array<MenuItem>> = ref([
-  { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
   { label: '...', route: undefined },
   { label: '...', class: 'font-bold' }
 ]);
@@ -150,6 +150,7 @@ const timelineStages = {
 };
 
 // Actions
+const { t } = useI18n();
 const toast = useToast();
 
 async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
@@ -243,7 +244,6 @@ onBeforeMount(async () => {
     submission.value = (await submissionService.searchSubmissions({ activityId: [permit.value?.activityId] })).data[0];
 
     breadcrumbItems.value = [
-      { label: 'Applications and Permits', route: RouteName.HOUSING_PROJECTS_LIST },
       {
         label: submission.value?.projectName,
         route: RouteName.HOUSING_PROJECT,
@@ -321,7 +321,7 @@ onBeforeMount(async () => {
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
       >
-        What does the status mean?
+        {{ t('permitStatusView.statusDescriptionMeaning') }}
       </span>
     </div>
     <Card>
@@ -340,7 +340,7 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4 class="mt-8 mb-6">Application progress</h4>
+            <h4 class="mt-8 mb-6">{{ t('permitStatusView.applicationProgress') }}</h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"
@@ -364,25 +364,26 @@ onBeforeMount(async () => {
           <div class="status-verified-message">
             <div v-if="updatedBy">
               <p class="verified-text my-0">
-                This status was last verified on {{ formatDate(permit?.statusLastVerified) }} by {{ updatedBy }}
+                {{ t('permitStatusView.statusLastVerified') }} {{ formatDate(permit?.statusLastVerified) }} by
+                {{ updatedBy }}
               </p>
             </div>
             <div v-else>
-              <p class="verified-text my-0">This status has not yet been verified.</p>
+              <p class="verified-text my-0">{{ t('permitStatusView.statusNotVerified') }}</p>
             </div>
           </div>
         </div>
       </template>
     </Card>
     <div class="updates-section">
-      <h4 class="mb-6">Additional updates</h4>
+      <h4 class="mb-6">{{ t('permitStatusView.additionalUpdates') }}</h4>
       <div class="ask-navigator mb-16">
         <Button
           outlined
-          label="Ask my Navigator"
+          :label="t('permitStatusView.askNav')"
           @click="() => (enquiryModalVisible = true)"
         />
-        <p>Contact your Navigator for this project for further updates on this application.</p>
+        <p>{{ t('permitStatusView.contactNav') }}</p>
       </div>
       <div v-if="permit?.permitNote && permit.permitNote.length > 0">
         <div
@@ -395,7 +396,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">There are no updates.</p>
+        <p class="text-gray-500">{{ t('permitStatusView.noUpdates') }}</p>
       </div>
     </div>
   </div>

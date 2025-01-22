@@ -7,6 +7,12 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     query: {}

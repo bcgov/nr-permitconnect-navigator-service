@@ -13,6 +13,12 @@ import type { AxiosResponse } from 'axios';
 const useUserService = vi.spyOn(userService, 'searchUsers');
 const usePermitService = vi.spyOn(permitService, 'getPermit');
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),

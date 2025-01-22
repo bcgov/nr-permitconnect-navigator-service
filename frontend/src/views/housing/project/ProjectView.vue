@@ -64,7 +64,6 @@ const { getPermitTypes } = storeToRefs(typeStore);
 // State
 const assignee: Ref<User | undefined> = ref(undefined);
 const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
-  { label: t('projectView.crumbAppsPermits'), route: RouteName.HOUSING_PROJECTS_LIST },
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
 const createdBy: Ref<User | undefined> = ref(undefined);
@@ -207,6 +206,13 @@ async function handleEnquirySubmit(enquiryDescription: string = '') {
   }
 }
 
+function navigateToSubmissionView() {
+  router.push({
+    name: RouteName.HOUSING_SUBMISSION,
+    query: { activityId: getSubmission.value?.activityId, submissionId: getSubmission.value?.submissionId }
+  });
+}
+
 onMounted(async () => {
   let enquiriesValue, permitTypesValue, submissionValue;
 
@@ -258,24 +264,9 @@ onMounted(async () => {
       <h1
         class="m-0 cursor-pointer hover:underline"
         tabindex="0"
-        @click="
-          router.push({
-            name: RouteName.HOUSING_SUBMISSION,
-            query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }
-          })
-        "
-        @keydown.enter.prevent="
-          router.push({
-            name: RouteName.HOUSING_SUBMISSION,
-            query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }
-          })
-        "
-        @keydown.space.prevent="
-          router.push({
-            name: RouteName.HOUSING_SUBMISSION,
-            query: { activityId: getSubmission?.activityId, submissionId: getSubmission?.submissionId }
-          })
-        "
+        @click="navigateToSubmissionView()"
+        @keydown.enter.prevent="navigateToSubmissionView()"
+        @keydown.space.prevent="navigateToSubmissionView()"
       >
         {{ getSubmission.projectName }}
         <font-awesome-icon
@@ -369,6 +360,12 @@ onMounted(async () => {
         name: RouteName.HOUSING_PROJECT_PERMIT,
         params: { permitId: permit.permitId }
       }"
+      @keydown.space.prevent="
+        router.push({
+          name: RouteName.HOUSING_PROJECT_PERMIT,
+          params: { permitId: permit.permitId }
+        })
+      "
     >
       <Card class="permit-card--hover mb-4">
         <template #title>
