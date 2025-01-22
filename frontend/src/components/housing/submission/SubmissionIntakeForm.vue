@@ -207,7 +207,19 @@ async function onAssistanceRequest(values: GenericObject) {
           enquiryType: SubmissionType.ASSISTANCE
         }
       },
-      { contacts: values?.[IntakeFormCategory.CONTACTS] }
+      {
+        contacts: [
+          {
+            contactId: values.contacts.contactId,
+            firstName: values.contacts.contactFirstName,
+            lastName: values.contacts.contactLastName,
+            phoneNumber: values.contacts.contactPhoneNumber,
+            email: values.contacts.contactEmail,
+            contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+            contactPreference: values.contacts.contactPreference
+          }
+        ]
+      }
     );
 
     const enquiryResponse = await enquiryService.createEnquiry(formattedData);
