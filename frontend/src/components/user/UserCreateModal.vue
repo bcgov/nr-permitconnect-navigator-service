@@ -196,7 +196,7 @@ onMounted(async () => {
         :disabled="!selectedUser || !selectedGroup"
         @click="
           () => {
-            emit('userCreate:request', { ...selectedUser }, selectedGroup);
+            emit('userCreate:request', { ...selectedUser }, selectableGroups.get(selectedGroup as string));
           }
         "
       />
