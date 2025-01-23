@@ -317,6 +317,7 @@ onMounted(async () => {
     locality: submission.locality,
     province: submission.province,
     locationPIDs: submission.locationPIDs,
+    locationPIDsAuto: submission.locationPIDsAuto,
     latitude: submission.latitude,
     longitude: submission.longitude,
     geomarkUrl: submission.geomarkUrl,
@@ -662,7 +663,13 @@ onMounted(async () => {
         :options="YES_NO_LIST"
       />
       <TextArea
-        class="col-span-12"
+        class="col-12"
+        name="locationPIDsAuto"
+        label="Auto Generated Location PID(s)"
+        :disabled="!editable"
+      />
+      <TextArea
+        class="col-12"
         name="projectLocationDescription"
         label="Additional information about location"
         :disabled="!editable"
