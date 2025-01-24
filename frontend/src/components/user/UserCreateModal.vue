@@ -185,7 +185,7 @@ onMounted(async () => {
       label="Assign role"
       :options="[...selectableGroups.keys()]"
       :disabled="!selectedUser"
-      @on-change="(e: SelectChangeEvent) => (selectedGroup = e.value)"
+      @on-change="(e: SelectChangeEvent) => (selectedGroup = selectableGroups.get(e.value))"
     />
     <div class="mt-6">
       <Button
@@ -196,7 +196,7 @@ onMounted(async () => {
         :disabled="!selectedUser || !selectedGroup"
         @click="
           () => {
-            emit('userCreate:request', { ...selectedUser }, selectableGroups.get(selectedGroup as string));
+            emit('userCreate:request', { ...selectedUser }, selectedGroup);
           }
         "
       />
