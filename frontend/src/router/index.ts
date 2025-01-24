@@ -273,7 +273,8 @@ export default function getRouter() {
   const router = createRouter({
     history: createWebHistory(),
     routes,
-    scrollBehavior(to) {
+    scrollBehavior(to, from) {
+      // Scroll to hash
       // Slight delay to account for asynchronous loading
       if (to.hash) {
         return new Promise((resolve) => {
@@ -284,8 +285,12 @@ export default function getRouter() {
             });
           }, 500);
         });
+      } else {
+        // Do not scroll if same page
+        if (to.name === from.name) return false;
       }
 
+      // default scroll to top
       return { top: 0 };
     }
   });
