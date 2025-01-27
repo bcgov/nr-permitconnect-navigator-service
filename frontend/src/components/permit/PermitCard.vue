@@ -25,7 +25,6 @@ const { editable, permit } = defineProps<{
 const { getPermitTypes } = storeToRefs(useTypeStore());
 
 // State
-const cardData = computed(() => permit);
 const cardUpdatedBy: Ref<string> = ref('');
 const permitModalVisible: Ref<boolean> = ref(false);
 const notesModalVisible: Ref<boolean> = ref(false);
@@ -36,9 +35,9 @@ const permitTypeName = computed(() => permitType.value?.name ?? '');
 
 // Actions
 watchEffect(() => {
-  if (cardData.value.updatedBy) {
+  if (permit.updatedBy) {
     userService
-      .searchUsers({ userId: [cardData.value.updatedBy] })
+      .searchUsers({ userId: [permit.updatedBy] })
       .then((res) => {
         cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
       })
@@ -66,7 +65,7 @@ function isCompleted(authStatus: string | undefined): boolean {
 </script>
 
 <template>
-  <Card :class="{ completed: isCompleted(cardData.authStatus), selected: notesModalVisible }">
+  <Card :class="{ completed: isCompleted(permit.authStatus), selected: notesModalVisible }">
     <template #title>
       <div class="flex">
         <div class="grow">
@@ -112,26 +111,26 @@ function isCompleted(authStatus: string | undefined): boolean {
         <div class="grid grid-cols-1 space-y-4">
           <p>
             <span class="key font-bold">Tracking ID:</span>
-            {{ cardData.trackingId }}
+            {{ permit.trackingId }}
           </p>
           <p>
             <span class="key font-bold">Status verified date:</span>
-            {{ cardData.statusLastVerified ? formatDate(cardData.statusLastVerified) : undefined }}
+            {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
           </p>
           <p>
             <span class="key font-bold">Submitted date:</span>
-            {{ cardData.submittedDate ? formatDate(cardData.submittedDate) : undefined }}
+            {{ permit.submittedDate ? formatDate(permit.submittedDate) : undefined }}
           </p>
           <p>
             <span class="key font-bold">Permit state:</span>
-            {{ cardData.status }}
+            {{ permit.status }}
           </p>
         </div>
         <!-- Middle column -->
         <div class="grid grid-cols-1 space-y-4">
           <p>
             <span class="key font-bold">Last updated:</span>
-            {{ cardData.updatedAt ? ` ${formatDateTime(cardData.updatedAt)}` : undefined }}
+            {{ permit.updatedAt ? ` ${formatDateTime(permit.updatedAt)}` : undefined }}
           </p>
           <p>
             <span class="key font-bold">Updated by:</span>
@@ -139,11 +138,11 @@ function isCompleted(authStatus: string | undefined): boolean {
           </p>
           <p>
             <span class="key font-bold">Adjudication date:</span>
-            {{ cardData.adjudicationDate ? formatDate(cardData.adjudicationDate) : undefined }}
+            {{ permit.adjudicationDate ? formatDate(permit.adjudicationDate) : undefined }}
           </p>
           <p>
             <span class="key font-bold">Issued Permit ID:</span>
-            {{ cardData.issuedPermitId }}
+            {{ permit.issuedPermitId }}
           </p>
         </div>
         <!-- Right column -->
@@ -162,18 +161,18 @@ function isCompleted(authStatus: string | undefined): boolean {
           </p>
           <p>
             <span class="key font-bold">Needed:</span>
-            {{ cardData.needed }}
+            {{ permit.needed }}
           </p>
         </div>
       </div>
       <div
-        v-if="cardData.permitNote?.length"
+        v-if="permit.permitNote?.length"
         class="pb-2 pt-3"
       >
         <span class="key font-bold">Latest update for the client:</span>
         <div class="pt-3">
-          <span class="font-bold">{{ ' ' + formatDateTime(cardData.permitNote[0].createdAt) }},</span>
-          {{ cardData.permitNote[0].note }}
+          <span class="font-bold">{{ ' ' + formatDateTime(permit.permitNote[0].createdAt) }},</span>
+          {{ permit.permitNote[0].note }}
         </div>
         <div>
           <Button
@@ -190,12 +189,12 @@ function isCompleted(authStatus: string | undefined): boolean {
 
   <PermitModal
     v-model:visible="permitModalVisible"
-    :activity-id="cardData.activityId"
-    :permit="cardData"
+    :activity-id="permit.activityId"
+    :permit="permit"
   />
   <NotesModal
     v-model:visible="notesModalVisible"
-    :permit="cardData"
+    :permit="permit"
     :permit-name="permitTypeName"
   />
 </template>

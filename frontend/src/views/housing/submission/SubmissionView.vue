@@ -204,7 +204,7 @@ onMounted(async () => {
     <TabList>
       <Tab :value="0">Information</Tab>
       <Tab :value="1">Files</Tab>
-      <Tab :value="2">Permit</Tab>
+      <Tab :value="2">Permits</Tab>
       <Tab :value="3">Notes</Tab>
       <Tab :value="4">Roadmap</Tab>
       <Tab :value="5">Related enquiries</Tab>
