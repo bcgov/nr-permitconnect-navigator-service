@@ -7,7 +7,7 @@ import { identity_provider, user } from '../db/models';
 import { contactService } from '../services';
 import { parseIdentityKeyClaims } from '../utils/utils';
 
-import type { Contact, CurrentContext, User, UserSearchParameters } from '../types';
+import type { Contact, User, UserSearchParameters } from '../types';
 
 const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
@@ -157,44 +157,44 @@ const service = {
   /**
    * @function login
    * Parse the user token and update the user table if necessary
+   * Create a contact entry, or update the existing contact entry
    * @param {object} token The decoded JWT token payload
    * @returns {Promise<object>} The result of running the login operation
    */
   login: async (token: jwt.JwtPayload) => {
     const newUser = service._tokenToUser(token);
 
-    let response: User | undefined | null;
-    await prisma.$transaction(async (trx) => {
+    const response: User | undefined | null = await prisma.$transaction(async (trx) => {
       const oldUser = await trx.user.findFirst({
         where: {
           identity_id: newUser.identityId,
           idp: newUser.idp
         }
       });
-      let currentContext: CurrentContext;
       if (!oldUser) {
-        response = await service.createUser(newUser, trx);
-        currentContext = { userId: response?.userId };
+        return await service.createUser(newUser, trx);
       } else {
-        response = await service.updateUser(oldUser.user_id, newUser, trx);
-        currentContext = { userId: oldUser?.user_id };
+        return await service.updateUser(oldUser.user_id, newUser, trx);
       }
+    });
 
-      const oldContacts: Array<Contact> = await contactService.searchContacts({
-        userId: [currentContext.userId ?? NIL]
+    // Update contact entry - keeping first/last/email from JWT
+    if (response) {
+      const oldContact: Array<Contact> = await contactService.searchContacts({
+        userId: [response.userId as string]
       });
       const newContact: Contact = {
-        contactId: oldContacts[0]?.contactId ?? undefined,
-        userId: currentContext.userId ?? NIL,
+        contactId: oldContact[0]?.contactId ?? undefined,
+        userId: response.userId as string,
         firstName: newUser.firstName,
         lastName: newUser.lastName,
         email: newUser.email,
-        phoneNumber: oldContacts[0]?.phoneNumber,
-        contactPreference: oldContacts[0]?.contactPreference,
-        contactApplicantRelationship: oldContacts[0]?.contactApplicantRelationship
+        phoneNumber: oldContact[0]?.phoneNumber,
+        contactPreference: oldContact[0]?.contactPreference,
+        contactApplicantRelationship: oldContact[0]?.contactApplicantRelationship
       };
-      contactService.upsertContacts([newContact], currentContext);
-    });
+      await contactService.upsertContacts([newContact], { userId: response.userId });
+    }
 
     return response;
   },
