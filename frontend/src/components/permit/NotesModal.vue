@@ -8,8 +8,9 @@ import { Button, Dialog, useToast } from '@/lib/primevue';
 import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitNote } from '@/types';
+import type { Permit } from '@/types';
 import permitNoteService from '@/services/permitNoteService';
+import { useSubmissionStore } from '@/store';
 
 // Props
 const { permit, permitName } = defineProps<{
@@ -17,9 +18,11 @@ const { permit, permitName } = defineProps<{
   permitName: string;
 }>();
 
+// Store
+const submissionStore = useSubmissionStore();
+
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const notes: Ref<Array<PermitNote>> = ref(permit.permitNote || []);
 const visible = defineModel<boolean>('visible');
 
 // Default form values
@@ -41,9 +44,17 @@ const toast = useToast();
 async function onSubmit(data: any, { resetForm }) {
   try {
     const response = await permitNoteService.createPermitNote({ note: data.note as string, permitId: permit.permitId });
-
     const newNote = response.data;
-    notes.value.unshift(newNote);
+    const permitForNote = submissionStore.getPermits.find((p) => p.permitId === newNote.permitId);
+
+    if (permitForNote) {
+      const updatedPermit = {
+        ...permitForNote,
+        permitNote: permitForNote.permitNote ? [newNote, ...permitForNote.permitNote] : [newNote]
+      };
+
+      submissionStore.updatePermit(updatedPermit);
+    }
 
     resetForm();
   } catch (e: any) {
@@ -109,9 +120,9 @@ async function onSubmit(data: any, { resetForm }) {
     </Form>
     <div class="updates-section mt-8">
       <h4 class="mb-6">Updates</h4>
-      <div v-if="notes.length > 0">
+      <div v-if="permit.permitNote && permit.permitNote.length > 0">
         <div
-          v-for="note in notes"
+          v-for="note in permit.permitNote"
           :key="note.permitNoteId"
           class="mb-6"
         >
