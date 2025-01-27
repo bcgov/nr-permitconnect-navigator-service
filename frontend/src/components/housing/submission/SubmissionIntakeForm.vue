@@ -389,8 +389,8 @@ async function onSubmit(data: any) {
       contactStore.setContact(submissionData.contacts[0]);
 
       router.push({
-        name: RouteName.HOUSING_SUBMISSION_CONFIRMATION,
-        query: {
+        name: RouteName.HOUSING_INTAKE_CONFIRMATION,
+        params: {
           activityId: response.data.activityId,
           submissionId: response.data.submissionId
         }
@@ -440,8 +440,8 @@ function syncFormAndRoute(actId: string, drftId: string) {
   if (drftId) {
     // Update route query for refreshing
     router.replace({
-      name: RouteName.HOUSING_SUBMISSION_INTAKE,
-      query: {
+      name: RouteName.HOUSING_INTAKE_DRAFT,
+      params: {
         draftId: drftId
       }
     });
@@ -561,7 +561,7 @@ onBeforeMount(async () => {
     // Move map pin
     onLatLongInput();
   } catch (e) {
-    router.replace({ name: RouteName.HOUSING_SUBMISSION_INTAKE });
+    router.replace({ name: RouteName.HOUSING_PROJECT_INTAKE });
   }
 });
 
