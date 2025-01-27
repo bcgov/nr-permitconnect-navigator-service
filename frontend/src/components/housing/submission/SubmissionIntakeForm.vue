@@ -195,19 +195,28 @@ function handleProjectLocationClick() {
 
 async function onAssistanceRequest(values: GenericObject) {
   try {
-    const draft = await onSaveDraft(values, false, false);
-
     const formattedData = Object.assign(
       {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
           isRelated: BasicResponse.YES,
-          relatedActivityId: draft.activityId,
           enquiryType: SubmissionType.ASSISTANCE
         }
       },
-      { contacts: values?.[IntakeFormCategory.CONTACTS] }
+      {
+        contacts: [
+          {
+            contactId: values.contacts.contactId,
+            firstName: values.contacts.contactFirstName,
+            lastName: values.contacts.contactLastName,
+            phoneNumber: values.contacts.contactPhoneNumber,
+            email: values.contacts.contactEmail,
+            contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+            contactPreference: values.contacts.contactPreference
+          }
+        ]
+      }
     );
 
     const enquiryResponse = await enquiryService.createEnquiry(formattedData);

@@ -34,13 +34,23 @@ const service = {
             });
           }
 
-          if (activityId)
-            await trx.activity_contact.create({
-              data: {
+          if (activityId) {
+            await trx.activity_contact.upsert({
+              where: {
+                activity_id_contact_id: {
+                  activity_id: activityId,
+                  contact_id: response?.contact_id ?? x.contactId
+                }
+              },
+              update: {
+                // Noop, required empty
+              },
+              create: {
                 activity_id: activityId,
                 contact_id: response?.contact_id ?? x.contactId
               }
             });
+          }
         })
       );
     });
