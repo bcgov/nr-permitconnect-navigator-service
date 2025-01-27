@@ -40,7 +40,4 @@ const getTitle = computed(() =>
     v-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
     @submissions-navigator:completed="showCompleted = !showCompleted"
   />
-
-  <!-- Proponent view -->
-  <SubmissionsProponent v-else-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
 </template>
