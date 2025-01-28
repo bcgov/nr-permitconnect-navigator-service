@@ -40,6 +40,7 @@ const { t } = useI18n();
     :current-page-report-template="`({currentPage} ${t('enquiryListProponent.of')} {totalPages})`"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
+    :alt="t('enquiryListProponent.tableAlt')"
   >
     <template #empty>
       <div class="flex justify-center">

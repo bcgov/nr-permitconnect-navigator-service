@@ -578,7 +578,12 @@ watch(
     />
 
     <div class="flex justify-center">
-      <h2>Housing Project Intake Form</h2>
+      <h2
+        role="heading"
+        aria-level="1"
+      >
+        Housing Project Intake Form
+      </h2>
     </div>
     <Form
       v-if="initialFormValues"
@@ -697,7 +702,13 @@ watch(
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
+                    {{ t('submissionIntakeForm.contactCard') }}
+                  </span>
                   <Tooltip
                     icon="fa-solid fa-circle-question"
                     right
@@ -759,8 +770,17 @@ watch(
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.projectApplicantTypeCard') }}</span>
-                <Divider type="solid" />
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
+                  {{ t('submissionIntakeForm.projectApplicantTypeCard') }}
+                </span>
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -853,8 +873,17 @@ watch(
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.projectNameCard') }}</span>
-                <Divider type="solid" />
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
+                  {{ t('submissionIntakeForm.projectNameCard') }}
+                </span>
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -872,8 +901,17 @@ watch(
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.singleFamilySelectedCard') }}</span>
-                <Divider type="solid" />
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
+                  {{ t('submissionIntakeForm.singleFamilySelectedCard') }}
+                </span>
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -956,14 +994,23 @@ watch(
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">{{ t('submissionIntakeForm.hasRentalUnitsCard') }}</span>
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
+                    {{ t('submissionIntakeForm.hasRentalUnitsCard') }}
+                  </span>
                   <Tooltip
                     right
                     icon="fa-solid fa-circle-question"
                     :text="t('submissionIntakeForm.rentalUnitsTooltip')"
                   />
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -989,7 +1036,11 @@ watch(
               <template #title>
                 <div class="flex items-center justify-between">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
+                    <span
+                      class="section-header"
+                      role="heading"
+                      aria-level="2"
+                    >
                       {{ t('submissionIntakeForm.financiallySupportedCard') }}
                     </span>
                   </div>
@@ -1009,7 +1060,10 @@ watch(
                     No to all
                   </Button>
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div>
@@ -1115,10 +1169,17 @@ watch(
             </Card>
             <Card>
               <template #title>
-                <span class="section-header">
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
                   {{ t('submissionIntakeForm.projectDescriptionCard') }}
                 </span>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="col-span-12 my-0 py-0">
@@ -1190,11 +1251,18 @@ watch(
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
                     {{ t('submissionIntakeForm.naturalDisasterCard') }}
                   </span>
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1212,7 +1280,11 @@ watch(
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
+                    <span
+                      class="section-header"
+                      role="heading"
+                      aria-level="2"
+                    >
                       {{ t('submissionIntakeForm.projectLocationCard') }}
                     </span>
                     <Tooltip
@@ -1223,7 +1295,10 @@ watch(
                     />
                   </div>
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1358,12 +1433,19 @@ watch(
               <template #title>
                 <div class="flex align-items-center">
                   <div class="flex flex-grow-1">
-                    <span class="section-header">
+                    <span
+                      class="section-header"
+                      role="heading"
+                      aria-level="2"
+                    >
                       {{ t('submissionIntakeForm.additionalLocationCard') }}
                     </span>
                   </div>
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <Accordion
@@ -1443,12 +1525,19 @@ watch(
               <template #title>
                 <div class="flex items-center">
                   <div class="flex grow">
-                    <span class="section-header">
+                    <span
+                      class="section-header"
+                      role="heading"
+                      aria-level="2"
+                    >
                       {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
                     </span>
                   </div>
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <TextArea
@@ -1491,7 +1580,11 @@ watch(
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
                     {{ t('submissionIntakeForm.provincialPermitsCard') }}
                   </span>
                   <Tooltip
@@ -1501,7 +1594,10 @@ watch(
                     :text="t('submissionIntakeForm.appliedPermitsTooltip')"
                   />
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <FieldArray
@@ -1627,7 +1723,11 @@ watch(
             <Card>
               <template #title>
                 <div class="flex">
-                  <span class="section-header">
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
                     {{ t('submissionIntakeForm.investigatePermitsCard') }}
                   </span>
                   <Tooltip
@@ -1636,7 +1736,10 @@ watch(
                     :text="t('submissionIntakeForm.potentialPermitsTooltip')"
                   />
                 </div>
-                <Divider type="solid" />
+                <Divider
+                  aria-hidden="true"
+                  type="solid"
+                />
               </template>
               <template #content>
                 <FieldArray

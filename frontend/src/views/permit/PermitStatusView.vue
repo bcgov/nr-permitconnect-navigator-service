@@ -243,11 +243,14 @@ onBeforeMount(async () => {
       <font-awesome-icon
         class="status-description-icon"
         icon="fa-circle-question"
+        aria-describedby="status-description"
         @click="descriptionModalVisible = true"
       />
       <span
+        id="status-descriptions"
         class="status-description"
         tabindex="0"
+        role="button"
         @click="descriptionModalVisible = true"
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
@@ -286,8 +289,31 @@ onBeforeMount(async () => {
                 <div
                   class="timeline-content"
                   :class="slotProps.item.class"
+                  role="note"
+                  :aria-hidden="slotProps?.item?.iconClass == 'crossed-circle'"
                 >
                   {{ slotProps.item.text }}
+                </div>
+                <div
+                  v-if="slotProps?.item?.iconClass == 'previous'"
+                  role="definition"
+                  class="screen-reader-only"
+                >
+                  Completed
+                </div>
+                <div
+                  v-else-if="slotProps?.item?.iconClass == 'empty'"
+                  role="definition"
+                  class="screen-reader-only"
+                >
+                  Not yet started
+                </div>
+                <div
+                  v-else-if="slotProps?.item?.iconClass == 'current'"
+                  role="definition"
+                  class="screen-reader-only"
+                >
+                  Current
                 </div>
               </template>
             </Timeline>

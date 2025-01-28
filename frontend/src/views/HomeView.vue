@@ -16,8 +16,11 @@ const toHousing = (): void => {
     <div class="poly" />
     <div class="flex items-center justify-start h-full">
       <div class="text-left text-white/90">
-        <h1 class="mb-0">Welcome to the</h1>
-        <h1 class="mt-0">Permit Connect Services</h1>
+        <h1 class="mb-0">
+          Welcome to the
+          <br />
+          Permit Connect Services
+        </h1>
         <h2>Choose your project type</h2>
         <Button @click="toHousing">
           <font-awesome-icon

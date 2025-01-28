@@ -237,7 +237,12 @@ onBeforeMount(async () => {
       />
     </div>
     <div class="flex justify-center items-center app-primary-color mb-2 mt-4">
-      <h3>Enquiry Form</h3>
+      <h3
+        role="heading"
+        aria-level="1"
+      >
+        Enquiry Form
+      </h3>
     </div>
 
     <CollectionDisclaimer />
@@ -291,7 +296,13 @@ onBeforeMount(async () => {
       <Card>
         <template #title>
           <div class="flex">
-            <span class="section-header">{{ t('enquiryIntakeForm.contactInformation') }}</span>
+            <span
+              class="section-header"
+              role="heading"
+              aria-level="2"
+            >
+              {{ t('enquiryIntakeForm.contactInformation') }}
+            </span>
             <Tooltip
               right
               :text="t('enquiryIntakeForm.contactTooltip')"
@@ -351,7 +362,13 @@ onBeforeMount(async () => {
       </Card>
       <Card>
         <template #title>
-          <span class="section-header">Tell us about your enquiry</span>
+          <span
+            class="section-header"
+            role="heading"
+            aria-level="2"
+          >
+            Tell us about your enquiry
+          </span>
           <Divider type="solid" />
         </template>
         <template #content>

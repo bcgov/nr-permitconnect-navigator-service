@@ -9,7 +9,10 @@ const { t } = useI18n();
 
 <template>
   <header>
-    <nav id="header-branding">
+    <nav
+      id="header-branding"
+      role="none"
+    >
       <div class="flex flex-row flex-wrap items-center lg:pl-12">
         <div class="flex flex-none">
           <a href="https://www2.gov.bc.ca">

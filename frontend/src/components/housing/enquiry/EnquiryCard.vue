@@ -45,7 +45,10 @@ onMounted(() => {
           </h3>
         </div>
       </div>
-      <Divider type="solid" />
+      <Divider
+        aria-hidden="true"
+        type="solid"
+      />
     </template>
     <template #content>
       <div class="grid grid-cols-12 gap-4 nested-grid">

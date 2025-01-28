@@ -25,11 +25,13 @@ const {
   <div class="flex flex-col items-center">
     <button
       type="button"
+      :aria-label="`Go to ${title} step`"
       class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
       @click="clickCallback()"
     >
       <span
+        aria-hidden="true"
         class="rounded-full border-2 w-12 h-12 inline-flex items-center justify-center"
         :class="[
           {
@@ -52,6 +54,7 @@ const {
       </span>
     </button>
     <span
+      aria-hidden="true"
       class="text-xl text-nowrap"
       :class="{ 'font-bold': index === activeStep, underline: index === activeStep, 'app-error-color': errors }"
     >
@@ -60,6 +63,7 @@ const {
   </div>
   <Divider
     v-if="divider"
+    aria-hidden="true"
     class="!mx-4"
   />
 </template>

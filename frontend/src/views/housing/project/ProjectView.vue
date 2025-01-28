@@ -309,7 +309,7 @@ onMounted(async () => {
               icon="fa fa-ellipsis"
             />
           </div>
-          <Divider />
+          <Divider aria-hidden="true" />
         </template>
         <template #content>
           <div class="grid grid-cols-12 gap-4">
