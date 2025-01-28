@@ -27,15 +27,12 @@ const service = {
       .filter((claims) => claims) // Drop falsy values from array
       .concat(undefined)[0]; // Set undefined as last element of array
 
-    const firstName = token.given_name.split(' ')[0];
-    const lastName = token.family_name.trim().length > 0 ? token.family_name : token.given_name.split(' ')[1];
-
     return {
       identityId: identityId,
       sub: token.sub ? token.sub : token.preferred_username,
-      firstName: firstName,
+      firstName: token.given_name,
       fullName: token.name,
-      lastName: lastName,
+      lastName: token.family_name,
       email: token.email,
       idp: token.identity_provider,
       active: true
@@ -160,7 +157,7 @@ const service = {
   /**
    * @function login
    * Parse the user token and update the user table if necessary
-   * Create a contact entry, or update the existing contact entry
+   * Create a contact entry if necessary
    * @param {object} token The decoded JWT token payload
    * @returns {Promise<object>} The result of running the login operation
    */
@@ -181,22 +178,24 @@ const service = {
       }
     });
 
-    // Update contact entry - keeping first/last/email from JWT
+    // Create initial contact entry
     if (response) {
       const oldContact: Array<Contact> = await contactService.searchContacts({
         userId: [response.userId as string]
       });
-      const newContact: Contact = {
-        contactId: oldContact[0]?.contactId ?? undefined,
-        userId: response.userId as string,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        phoneNumber: oldContact[0]?.phoneNumber,
-        contactPreference: oldContact[0]?.contactPreference,
-        contactApplicantRelationship: oldContact[0]?.contactApplicantRelationship
-      };
-      await contactService.upsertContacts([newContact], { userId: response.userId });
+      if (!oldContact.length) {
+        const newContact: Contact = {
+          contactId: uuidv4(),
+          userId: response.userId as string,
+          firstName: newUser.firstName,
+          lastName: newUser.lastName,
+          email: newUser.email,
+          phoneNumber: null,
+          contactApplicantRelationship: null,
+          contactPreference: null
+        };
+        await contactService.upsertContacts([newContact], { userId: response.userId });
+      }
     }
 
     return response;

@@ -16,6 +16,7 @@ const controller = {
       next(e);
     }
   },
+
   searchContacts: async (
     req: Request<never, never, never, ContactSearchParameters>,
     res: Response,
