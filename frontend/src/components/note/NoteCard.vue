@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
+import Divider from '@/components/common/Divider.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
-import { Button, Card, Divider } from '@/lib/primevue';
+import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
@@ -62,10 +63,7 @@ onMounted(() => {
           Edit
         </Button>
       </div>
-      <Divider
-        aria-hidden="true"
-        type="solid"
-      />
+      <Divider type="solid" />
     </template>
     <template #content>
       <div class="grid grid-cols-12 gap-4 nested-grid">

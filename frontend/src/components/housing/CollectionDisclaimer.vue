@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { Card, Divider } from '@/lib/primevue';
+import { Card } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
 
 const { t } = useI18n();
 </script>
@@ -10,10 +11,7 @@ const { t } = useI18n();
   <Card>
     <template #title>
       <span class="section-header">Notice for collection, use and disclosure of personal information</span>
-      <Divider
-        aria-hidden="true"
-        type="solid"
-      />
+      <Divider type="solid" />
     </template>
     <template #content>
       <p class="disclaimer">

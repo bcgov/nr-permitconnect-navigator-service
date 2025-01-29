@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
+import Divider from '@/components/common/Divider.vue';
 import Map from '@/components/housing/maps/Map.vue';
 import {
   AutoComplete,
@@ -36,7 +37,6 @@ import {
   AccordionPanel,
   Button,
   Card,
-  Divider,
   Message,
   Step,
   StepList,
@@ -777,10 +777,7 @@ watch(
                 >
                   {{ t('submissionIntakeForm.projectApplicantTypeCard') }}
                 </span>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -880,10 +877,7 @@ watch(
                 >
                   {{ t('submissionIntakeForm.projectNameCard') }}
                 </span>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -908,10 +902,7 @@ watch(
                 >
                   {{ t('submissionIntakeForm.singleFamilySelectedCard') }}
                 </span>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1007,10 +998,7 @@ watch(
                     :text="t('submissionIntakeForm.rentalUnitsTooltip')"
                   />
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1060,10 +1048,7 @@ watch(
                     No to all
                   </Button>
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div>
@@ -1176,10 +1161,7 @@ watch(
                 >
                   {{ t('submissionIntakeForm.projectDescriptionCard') }}
                 </span>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="col-span-12 my-0 py-0">
@@ -1259,10 +1241,7 @@ watch(
                     {{ t('submissionIntakeForm.naturalDisasterCard') }}
                   </span>
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1295,10 +1274,7 @@ watch(
                     />
                   </div>
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
@@ -1442,10 +1418,7 @@ watch(
                     </span>
                   </div>
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <Accordion
@@ -1534,10 +1507,7 @@ watch(
                     </span>
                   </div>
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <TextArea
@@ -1594,10 +1564,7 @@ watch(
                     :text="t('submissionIntakeForm.appliedPermitsTooltip')"
                   />
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <FieldArray
@@ -1736,10 +1703,7 @@ watch(
                     :text="t('submissionIntakeForm.potentialPermitsTooltip')"
                   />
                 </div>
-                <Divider
-                  aria-hidden="true"
-                  type="solid"
-                />
+                <Divider type="solid" />
               </template>
               <template #content>
                 <FieldArray

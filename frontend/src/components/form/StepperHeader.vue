@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Divider } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
 
 // Props
 const {
@@ -63,7 +63,6 @@ const {
   </div>
   <Divider
     v-if="divider"
-    aria-hidden="true"
     class="!mx-4"
   />
 </template>

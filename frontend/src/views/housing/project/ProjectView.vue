@@ -5,17 +5,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
+import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionPanel,
-  Button,
-  Card,
-  Divider,
-  useToast
-} from '@/lib/primevue';
+import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -309,7 +301,7 @@ onMounted(async () => {
               icon="fa fa-ellipsis"
             />
           </div>
-          <Divider aria-hidden="true" />
+          <Divider />
         </template>
         <template #content>
           <div class="grid grid-cols-12 gap-4">

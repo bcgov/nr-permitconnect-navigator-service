@@ -7,10 +7,11 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
+import Divider from '@/components/common/Divider.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import Tooltip from '@/components/common/Tooltip.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
