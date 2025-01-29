@@ -6,7 +6,6 @@ import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
-import CreateEnquiryDialog from '@/components/housing/projects/CreateEnquiryDialog.vue';
 import {
   Accordion,
   AccordionContent,
@@ -17,11 +16,9 @@ import {
   Divider,
   useToast
 } from '@/lib/primevue';
-import { useAuthNStore, useConfigStore } from '@/store';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
-import { confirmationTemplateEnquiry } from '@/utils/templates';
 
 import { enquiryService, permitService, submissionService, userService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
@@ -54,8 +51,6 @@ const BREADCRUMB_HOME: MenuItem = { label: t('projectView.crumbHousing'), route:
 
 // Store
 const submissionStore = useSubmissionStore();
-const { getConfig } = storeToRefs(useConfigStore());
-const { getProfile } = storeToRefs(useAuthNStore());
 const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
 const typeStore = useTypeStore();
@@ -67,8 +62,6 @@ const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
 const createdBy: Ref<User | undefined> = ref(undefined);
-const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
-const enquiryModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
 
 const permitsNeeded = computed(() => {
@@ -102,31 +95,6 @@ const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
 // Actions
 const router = useRouter();
 const toast = useToast();
-
-async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
-  const configCC = getConfig.value.ches?.submission?.cc;
-  const user = getProfile;
-
-  const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': user.value?.name,
-    '{{ activityId }}': activityId,
-    '{{ enquiryDescription }}': enquiryDescription,
-    '{{ enquiryId }}': enquiryId
-  });
-  let applicantEmail = user.value?.email;
-
-  if (applicantEmail) {
-    let emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: configCC,
-      subject: 'Confirmation of Submission', // eslint-disable-line quotes
-      bodyType: 'html',
-      body: body
-    };
-    await submissionService.emailConfirmation(emailData);
-  }
-}
 
 function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
   return a.businessDomain > b.businessDomain ? 1 : -1;
@@ -164,46 +132,6 @@ function permitFilter(config: PermitFilterConfig) {
   }
 
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
-}
-
-function handleDialogClose() {
-  enquiryConfirmationId.value = undefined;
-}
-
-async function handleEnquirySubmit(enquiryDescription: string = '') {
-  if (!getSubmission.value) return;
-
-  const enquiryData = {
-    contacts: [
-      {
-        contactPreference: getSubmission.value.contacts[0].contactPreference,
-        email: getSubmission.value.contacts[0].email,
-        firstName: getSubmission.value.contacts[0].firstName,
-        lastName: getSubmission.value.contacts[0].lastName,
-        phoneNumber: getSubmission.value.contacts[0].phoneNumber,
-        contactApplicantRelationship: getSubmission.value.contacts[0].contactApplicantRelationship
-      }
-    ],
-    basic: {
-      isRelated: BasicResponse.YES,
-      applyForPermitConnect: BasicResponse.NO,
-      enquiryDescription: enquiryDescription?.trim(),
-      relatedActivityId: getSubmission.value.activityId
-    }
-  };
-
-  try {
-    const response = await enquiryService.createEnquiry(enquiryData);
-    submissionStore.addRelatedEnquiry(response.data);
-    enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
-
-    // Send confirmation email
-    if (enquiryConfirmationId.value) {
-      emailConfirmation(response.data.activityId, response.data.enquiryId, enquiryDescription);
-    }
-  } catch (e: any) {
-    toast.error(t('projectView.toastEnquiryFailed'), e);
-  }
 }
 
 function navigateToSubmissionView() {
@@ -279,7 +207,12 @@ onMounted(async () => {
         class="p-button-sm header-btn"
         label="Ask my Navigator"
         outlined
-        @click="enquiryModalVisible = !enquiryModalVisible"
+        @click="
+          router.push({
+            name: RouteName.HOUSING_ENQUIRY_INTAKE,
+            query: { projectName: getSubmission.projectName, projectActivityId: getSubmission.activityId }
+          })
+        "
       />
     </div>
     <div class="mb-2">
@@ -358,7 +291,8 @@ onMounted(async () => {
       :key="permit.permitId"
       :to="{
         name: RouteName.HOUSING_PROJECT_PERMIT,
-        params: { permitId: permit.permitId }
+        params: { permitId: permit.permitId },
+        query: { projectActivityId: getSubmission.activityId }
       }"
       @keydown.space.prevent="
         router.push({
@@ -412,14 +346,6 @@ onMounted(async () => {
         </template>
       </Card>
     </router-link>
-    <CreateEnquiryDialog
-      v-model:visible="enquiryModalVisible"
-      dismissable-mask
-      :navigator="assignee"
-      :confirmation-id="enquiryConfirmationId"
-      @on-hide="handleDialogClose"
-      @on-sumbit-enquiry="handleEnquirySubmit"
-    />
     <div>
       <div>
         <h3 class="mt-20 mb-8">{{ t('projectView.relatedEnquiries') }}</h3>

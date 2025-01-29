@@ -100,7 +100,6 @@ model enquiry {
   enquiry_type             String?
   submitted_at             DateTime  @db.Timestamptz(6)
   submitted_by             String
-  is_related               String?
   related_activity_id      String?
   enquiry_description      String?
   apply_for_permit_connect String?

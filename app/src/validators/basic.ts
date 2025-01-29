@@ -24,10 +24,6 @@ export const basicIntake = Joi.object({
 });
 
 export const basicEnquiry = Joi.object({
-  isRelated: Joi.string()
-    .valid(...YES_NO_LIST)
-    .required(),
-  applyForPermitConnect: Joi.string().valid(...YES_NO_LIST),
   enquiryDescription: Joi.string().required(),
   relatedActivityId: Joi.string().max(255).allow(null),
   enquiryType: Joi.string()

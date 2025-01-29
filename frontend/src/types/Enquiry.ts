@@ -10,7 +10,6 @@ export type Enquiry = {
   enquiryType: string;
   submittedAt: string;
   submittedBy: string;
-  isRelated?: string;
   relatedActivityId?: string;
   enquiryDescription?: string;
   applyForPermitConnect?: string;

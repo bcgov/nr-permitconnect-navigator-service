@@ -18,7 +18,6 @@ const testEnquiry = {
   assignedUserId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
   submittedAt: '2024-06-12T07:00:00.000Z',
   submittedBy: 'WILSWONG',
-  isRelated: 'Yes',
   relatedActivityId: 'D95F1DE6',
   enquiryDescription: 'D95F1DE6 Test enquiry info',
   applyForPermitConnect: null,
