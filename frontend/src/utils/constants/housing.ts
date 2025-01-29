@@ -53,7 +53,7 @@ export const ENQUIRY_TYPE_LIST = [
 ];
 
 export const HOUSING_CONTACT = {
-  email: 'Housing.Authorizations@gov.bc.ca',
+  email: 'Navigator.Service@gov.bc.ca',
   subject: 'Assistance with Permit Connect Navigator Service'
 };
 
