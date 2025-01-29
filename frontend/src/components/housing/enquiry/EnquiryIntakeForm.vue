@@ -7,22 +7,13 @@ import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
-import {
-  EditableSelect,
-  FormNavigationGuard,
-  InputMask,
-  InputText,
-  RadioList,
-  Select,
-  TextArea
-} from '@/components/form';
+import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
 import { useConfigStore, useContactStore } from '@/store';
-import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
 import { omit } from '@/utils/utils';
@@ -30,12 +21,16 @@ import { contactValidator } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
 import type { Submission } from '@/types';
 
 // Props
-const { enquiryId = undefined } = defineProps<{
+const { enquiryId, projectActivityId, projectName, permitName, permitTrackingId, permitAuthStatus } = defineProps<{
   enquiryId?: string;
+  projectActivityId?: string;
+  projectName?: string;
+  permitName?: string;
+  permitTrackingId?: string;
+  permitAuthStatus?: string;
 }>();
 
 // Store
@@ -55,20 +50,7 @@ const validationErrors: Ref<string[]> = ref([]);
 const formSchema = object({
   ...contactValidator,
   [IntakeFormCategory.BASIC]: object({
-    isRelated: string().required().oneOf(YES_NO_LIST).label('Related to existing application'),
-    relatedActivityId: string().when('isRelated', {
-      is: (isRelated: string) => isRelated === BasicResponse.YES,
-      then: (schema) => schema.required().max(255).label('Project ID'),
-      otherwise: (schema) => schema.notRequired().label('Project ID')
-    }),
-    enquiryDescription: string().required().label('Enquiry'),
-    applyForPermitConnect: string()
-      .label('Service application')
-      .when('isRelated', {
-        is: (isRelated: string) => isRelated === BasicResponse.NO,
-        then: (schema) => schema.required().oneOf(YES_NO_LIST),
-        otherwise: (schema) => schema.notRequired()
-      })
+    enquiryDescription: string().required().label('Enquiry')
   })
 });
 
@@ -147,10 +129,8 @@ async function loadEnquiry() {
       contactPreference: response?.contacts[0]?.contactPreference,
       contactId: response?.contacts[0]?.contactId,
       basic: {
-        isRelated: response?.isRelated,
         relatedActivityId: response?.relatedActivityId,
-        enquiryDescription: response?.enquiryDescription,
-        applyForPermitConnect: response?.applyForPermitConnect
+        enquiryDescription: response?.enquiryDescription
       }
     };
   } catch (e: any) {
@@ -163,26 +143,15 @@ function onInvalidSubmit(e: any) {
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-function onRelatedActivityInput(e: IInputEvent) {
-  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
-    id.toUpperCase().includes(e.target.value.toUpperCase())
-  );
-}
-
 async function onSubmit(data: any) {
   editable.value = false;
 
-  let enquiryResponse, submissionResponse;
+  let enquiryResponse;
 
   try {
-    // Need to first create the submission to relate to if asking to apply
-    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
-      submissionResponse = await submissionService.submitDraft({ applicant: data.applicant });
-      if (submissionResponse.data.activityId) {
-        formRef.value?.setFieldValue('basic.relatedActivityId', submissionResponse.data.activityId);
-      } else {
-        throw new Error('Failed to retrieve correct submission draft data');
-      }
+    // Set related activity id if project activity id is passed in as a prop
+    if (projectActivityId) {
+      data.basic.relatedActivityId = projectActivityId;
     }
 
     // Convert contact fields into contacts array object then remove form keys from data
@@ -212,6 +181,15 @@ async function onSubmit(data: any) {
       ]
     );
 
+    if (permitName && permitAuthStatus) {
+      let permitDescription =
+        t('enquiryIntakeForm.re') + ': ' + permitName + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
+      const trackingId = permitTrackingId ? permitTrackingId : t('enquiryIntakeForm.notApplicable');
+      const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permitAuthStatus;
+      permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
+      enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
+    }
+
     enquiryResponse = await enquiryService.createEnquiry(enquiryData);
 
     if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
@@ -228,7 +206,8 @@ async function onSubmit(data: any) {
         name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
         query: {
           activityId: enquiryResponse.data.activityId,
-          enquiryId: enquiryResponse.data.enquiryId
+          enquiryId: enquiryResponse.data.enquiryId,
+          showEnquiryLink: projectName || permitName ? '' : 'true'
         }
       });
     } else {
@@ -238,16 +217,6 @@ async function onSubmit(data: any) {
     toast.error('Failed to save intake', e);
   } finally {
     editable.value = true;
-
-    if (data.basic.applyForPermitConnect === BasicResponse.YES) {
-      router.push({
-        name: RouteName.HOUSING_SUBMISSION_INTAKE,
-        query: {
-          activityId: submissionResponse?.data.activityId,
-          submissionId: submissionResponse?.data.submissionId
-        }
-      });
-    }
   }
 }
 
@@ -274,7 +243,6 @@ onBeforeMount(async () => {
 
     <Form
       v-if="initialFormValues"
-      v-slot="{ values }"
       ref="formRef"
       keep-values
       :initial-values="initialFormValues"
@@ -293,10 +261,35 @@ onBeforeMount(async () => {
         type="hidden"
         name="enquiryId"
       />
+      <Card v-if="projectName && projectActivityId">
+        <template #title>
+          <span class="section-header">
+            {{ t('enquiryIntakeForm.about') }}
+            <span class="text-primary">
+              {{ projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
+              {{ projectActivityId }}
+            </span>
+          </span>
+        </template>
+      </Card>
+
+      <Card v-if="permitName && permitAuthStatus">
+        <template #title>
+          <span class="section-header">
+            {{ t('enquiryIntakeForm.about') }}
+            <span class="text-primary">
+              {{ t('enquiryIntakeForm.permit') }}: {{ permitName }}| {{ t('enquiryIntakeForm.trackingId') }}:
+              {{ permitTrackingId ? permitTrackingId : t('enquiryIntakeForm.notApplicable') }}|
+              {{ t('enquiryIntakeForm.authStatus') }}:
+              {{ permitAuthStatus }}
+            </span>
+          </span>
+        </template>
+      </Card>
 
       <Card>
         <template #title>
-          <span class="section-header">Who is the primary contact regarding this project?</span>
+          <span class="section-header">{{ t('enquiryIntakeForm.contactInformation') }}</span>
           <span
             v-tooltip.right="t('enquiryIntakeForm.contactTooltip')"
             v-tooltip.focus.right="t('enquiryIntakeForm.contactTooltip')"
@@ -358,67 +351,6 @@ onBeforeMount(async () => {
       </Card>
       <Card>
         <template #title>
-          <span class="section-header">
-            Is this enquiry related to an existing project that you are working on with a Navigator?
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <div class="grid grid-cols-12 gap-4">
-            <RadioList
-              class="col-span-12"
-              name="basic.isRelated"
-              :bold="false"
-              :disabled="!editable"
-              :options="YES_NO_LIST"
-              @on-click="
-                (e: string) => {
-                  if (e === BasicResponse.YES) formRef?.setFieldValue('basic.relatedActivityId', null);
-                  else if (e === BasicResponse.NO) formRef?.setFieldValue('basic.applyForPermitConnect', null);
-                }
-              "
-            />
-          </div>
-        </template>
-      </Card>
-      <Card v-if="values.basic?.isRelated === BasicResponse.YES">
-        <template #title>
-          <div class="flex">
-            <span class="section-header">
-              Enter the project ID given to you when you registered your project with a Navigator
-            </span>
-            <div
-              v-tooltip.right="t('enquiryIntakeForm.projectIdTooltip')"
-              v-tooltip.focus.right="t('enquiryIntakeForm.projectIdTooltip')"
-              tabindex="0"
-            >
-              <font-awesome-icon icon="fa-solid fa-circle-question" />
-            </div>
-          </div>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <div class="grid grid-cols-12 gap-4">
-            <EditableSelect
-              class="col-span-3"
-              name="basic.relatedActivityId"
-              label="Project ID"
-              :disabled="!editable"
-              :options="filteredProjectActivityIds"
-              :get-option-label="
-                (e: string) => {
-                  const name = submissions.find((x) => x.activityId === e)?.projectName;
-                  if (name) return `${e} - ${name}`;
-                  else return e;
-                }
-              "
-              @on-input="onRelatedActivityInput"
-            />
-          </div>
-        </template>
-      </Card>
-      <Card v-if="values.basic?.isRelated !== undefined">
-        <template #title>
           <span class="section-header">Tell us about your enquiry</span>
           <Divider type="solid" />
         </template>
@@ -433,44 +365,12 @@ onBeforeMount(async () => {
           </div>
         </template>
       </Card>
-      <Card v-if="values.basic?.isRelated === BasicResponse.NO">
-        <template #title>
-          <div class="flex">
-            <span class="section-header">Would you like to register your project with a Navigator?</span>
-            <div
-              v-tooltip.right="t('enquiryIntakeForm.registerEnquiryTooltip')"
-              v-tooltip.focus.right="t('enquiryIntakeForm.registerEnquiryTooltip')"
-              tabindex="0"
-            >
-              <font-awesome-icon icon="fa-solid fa-circle-question" />
-            </div>
-          </div>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <div class="grid grid-cols-12 gap-4">
-            <RadioList
-              class="col-span-12"
-              name="basic.applyForPermitConnect"
-              :bold="false"
-              :disabled="!editable"
-              :options="YES_NO_LIST"
-            />
-            <div
-              v-if="values.basic?.applyForPermitConnect === BasicResponse.YES && editable"
-              class="col-span-12 text-blue-500"
-            >
-              Please proceed to the next page to register your project with a Navigator.
-            </div>
-          </div>
-        </template>
-      </Card>
-      <div class="flex items-center justify-center mt-6">
+      <div class="flex align-center justify-center mt-4">
         <Button
           label="Submit"
           type="submit"
           icon="pi pi-upload"
-          :disabled="!editable || values.basic?.applyForPermitConnect === BasicResponse.YES"
+          :disabled="!editable"
         />
       </div>
     </Form>

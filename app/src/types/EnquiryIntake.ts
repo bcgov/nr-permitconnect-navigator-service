@@ -11,10 +11,8 @@ export type EnquiryIntake = {
 
   basic?: {
     enquiryType?: string;
-    isRelated?: string;
     relatedActivityId?: string;
     enquiryDescription?: string;
-    applyForPermitConnect: string;
   };
 
   contacts: Array<Contact>;

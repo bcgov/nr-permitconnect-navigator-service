@@ -1236,10 +1236,6 @@ components:
           type: string
           description: User who submitted enquiry
           example: JSMITH
-        isRelated:
-          type: string
-          description: Is this related to a project
-          example: 'yes'
         relatedActivityId:
           type: string
           description: Activity ID of related project
@@ -1802,10 +1798,6 @@ components:
           type: string
           description: The type of enquiry
           example: General enquiry
-        isRelated:
-          type: string
-          description: Is this related to a project
-          example: 'yes'
         relatedActivityId:
           type: string
           description: Activity id of related project

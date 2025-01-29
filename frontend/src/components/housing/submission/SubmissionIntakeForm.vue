@@ -200,7 +200,6 @@ async function onAssistanceRequest(values: GenericObject) {
         basic: {
           applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
-          isRelated: BasicResponse.YES,
           enquiryType: SubmissionType.ASSISTANCE
         }
       },

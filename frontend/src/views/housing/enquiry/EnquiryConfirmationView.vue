@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { Message } from '@/lib/primevue';
 
 import { RouteName } from '@/utils/enums/application';
@@ -7,14 +9,19 @@ import { RouteName } from '@/utils/enums/application';
 const {
   activityId,
   enquiryId,
+  showEnquiryLink = undefined,
   showHeader = true,
   showHomeLink = true
 } = defineProps<{
   activityId: string;
   enquiryId: string;
+  showEnquiryLink: string;
   showHeader?: boolean;
   showHomeLink?: boolean;
 }>();
+
+// Store
+const { t } = useI18n();
 </script>
 
 <template>
@@ -26,18 +33,19 @@ const {
     >
       Your enquiry has been successfully submitted.
     </Message>
-    <h3 class="inline-block my-7 mr-2">Enquiry ID:</h3>
-    <router-link
-      :to="{
-        name: RouteName.HOUSING_ENQUIRY_INTAKE,
-        query: { activityId: activityId, enquiryId: enquiryId }
-      }"
-    >
-      <span class="text-2xl">{{ activityId }}</span>
-    </router-link>
-    <div>
-      A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for
-      the confirmation email and keep the enquiry ID for future reference.
+    <div v-if="showEnquiryLink">
+      <h3 class="inline-block my-7 mr-2">Enquiry ID:</h3>
+      <router-link
+        :to="{
+          name: RouteName.HOUSING_ENQUIRY_INTAKE,
+          query: { activityId: activityId, enquiryId: enquiryId }
+        }"
+      >
+        <span class="text-2xl">{{ activityId }}</span>
+      </router-link>
+    </div>
+    <div class="mt-2">
+      {{ t('enquiryConfirmationView.confirmationMsg') }}
     </div>
     <div
       v-if="showHomeLink"

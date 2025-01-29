@@ -17,7 +17,7 @@ import {
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { BasicResponse, Regex } from '@/utils/enums/application';
+import { Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
@@ -190,7 +190,6 @@ const onSubmit = async (values: any) => {
     // Generate final enquiry object
     const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
-    submitData.isRelated = submitData.relatedActivityId ? BasicResponse.YES : BasicResponse.NO;
 
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);

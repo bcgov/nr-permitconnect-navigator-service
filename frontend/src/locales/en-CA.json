@@ -23,8 +23,19 @@
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
+    "about": "This enquiry is about",
+    "authStatus": "Authorization status",
+    "contactInformation": "Contact information",
+    "notApplicable": "N/A",
+    "permit": "Permit",
+    "projectId": "Project ID",
     "projectIdTooltip": "Project ID can be found in the confirmation email you received at the time of submission.",
-    "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project."
+    "re": "Re",
+    "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project.",
+    "trackingId": "Tracking ID"
+  },
+  "enquiryConfirmationView": {
+    "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
   },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",
@@ -77,7 +88,7 @@
     "projectState": "Project state",
     "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
     "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
-    "submitNewEnquiry": "Submit a new enquiry",
+    "submitNewEnquiry": "Submit a general enquiry",
     "submitNewProject": "Submit a new project"
   },
   "loginButton": {

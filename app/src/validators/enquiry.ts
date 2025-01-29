@@ -36,9 +36,6 @@ const schema = {
       enquiryType: Joi.string().allow(null),
       submittedAt: Joi.date(),
       submittedBy: Joi.string().max(255).required(),
-      isRelated: Joi.string()
-        .valid(...Object.values(YES_NO_LIST))
-        .allow(null),
       relatedActivityId: Joi.string().max(255).allow(null),
       enquiryDescription: Joi.string().min(0).allow(null),
       applyForPermitConnect: Joi.string()

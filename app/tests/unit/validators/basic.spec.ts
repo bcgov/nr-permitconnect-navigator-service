@@ -58,10 +58,8 @@ describe('basicIntakeSchema', () => {
 
 function validEnquiryData() {
   return {
-    isRelated: 'No',
     enquiryDescription: 'testString',
-    relatedActivityId: '226C0661',
-    applyForPermitConnect: 'No'
+    relatedActivityId: '226C0661'
   };
 }
 
@@ -73,10 +71,8 @@ describe('basicEnquirySchema', () => {
 
   it('should reject non-string values', () => {
     const testData = {
-      isRelated: 123,
       enquiryDescription: 123,
-      relatedActivityId: 123,
-      applyForPermitConnect: 123
+      relatedActivityId: 123
     };
 
     const result = basicEnquiry.validate(testData);

@@ -44,10 +44,8 @@ const controller = {
     if (data.basic) {
       basic = {
         enquiryType: data.basic.enquiryType,
-        isRelated: data.basic.isRelated,
         relatedActivityId: data.basic.relatedActivityId,
-        enquiryDescription: data.basic.enquiryDescription,
-        applyForPermitConnect: data.basic.applyForPermitConnect
+        enquiryDescription: data.basic.enquiryDescription
       };
     }
 

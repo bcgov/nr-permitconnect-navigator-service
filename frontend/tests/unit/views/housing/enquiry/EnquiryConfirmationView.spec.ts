@@ -14,10 +14,17 @@ useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosR
 const testEnquiryId = 'enquiry123';
 const testActivityId = 'activity123';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp = testActivityId) => ({
   props: {
     enquiryId: testEnquiryIdProp,
-    activityId: testActivityIdProp
+    activityId: testActivityIdProp,
+    showEnquiryLink: ''
   },
   global: {
     plugins: [

@@ -1,19 +1,16 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { onBeforeMount, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
-import PermitEnquiryModal from '@/components/permit/PermitEnquiryModal.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
-import { useAuthNStore, useConfigStore } from '@/store';
-import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
-import { confirmationTemplateEnquiry } from '@/utils/templates';
 
-import { enquiryService, permitService, submissionService, userService } from '@/services';
+import { permitService, submissionService, userService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitType, Submission, User } from '@/types';
@@ -23,7 +20,7 @@ import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescri
 type CombinedPermit = Permit & PermitType;
 
 // Props
-const { permitId } = defineProps<{ permitId: string }>();
+const { permitId, projectActivityId } = defineProps<{ permitId: string; projectActivityId?: string }>();
 
 // Constants
 const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
@@ -58,18 +55,12 @@ const previous = (trackerStatus: string) => ({
   text: trackerStatus
 });
 
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
-const { getProfile } = storeToRefs(useAuthNStore());
-
 // State
 const breadcrumbItems: Ref<Array<MenuItem>> = ref([
   { label: '...', route: undefined },
   { label: '...', class: 'font-bold' }
 ]);
 const descriptionModalVisible: Ref<boolean> = ref(false);
-const enquiryConfirmationId: Ref<string | undefined> = ref(undefined);
-const enquiryModalVisible: Ref<boolean> = ref(false);
 const permit: Ref<CombinedPermit | undefined> = ref(undefined);
 const submission: Ref<Submission | undefined> = ref(undefined);
 const updatedBy: Ref<string | undefined> = ref(undefined);
@@ -151,32 +142,8 @@ const timelineStages = {
 
 // Actions
 const { t } = useI18n();
+const router = useRouter();
 const toast = useToast();
-
-async function emailConfirmation(activityId: string, enquiryId: string, enquiryDescription: string) {
-  const configCC = getConfig.value.ches?.submission?.cc;
-  const user = getProfile;
-
-  const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': user.value?.name,
-    '{{ activityId }}': activityId,
-    '{{ enquiryDescription }}': enquiryDescription,
-    '{{ enquiryId }}': enquiryId
-  });
-  let applicantEmail = user.value?.email;
-
-  if (applicantEmail) {
-    let emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: configCC,
-      subject: 'Confirmation of Submission', // eslint-disable-line quotes
-      bodyType: 'html',
-      body: body
-    };
-    await submissionService.emailConfirmation(emailData);
-  }
-}
 
 function getStatusBoxState(authStatus: string | undefined) {
   return authStatus && authStatus in statusBoxStates
@@ -195,44 +162,6 @@ function getTimelineStage(authStatus: string | undefined, status: string | undef
   return status && status in timelineStages
     ? timelineStages[status as keyof typeof timelineStages]
     : timelineStages.terminatedStatus;
-}
-
-async function handleEnquirySubmit(enquiryDescription: string = '') {
-  if (!submission.value) return;
-
-  const enquiryData = {
-    contacts: [
-      {
-        contactPreference: submission.value.contacts[0].contactPreference,
-        email: submission.value.contacts[0].email,
-        firstName: submission.value.contacts[0].firstName,
-        lastName: submission.value.contacts[0].lastName,
-        phoneNumber: submission.value.contacts[0].phoneNumber,
-        contactApplicantRelationship: submission.value.contacts[0].contactApplicantRelationship
-      }
-    ],
-    basic: {
-      isRelated: BasicResponse.YES,
-      applyForPermitConnect: BasicResponse.NO,
-      enquiryDescription: enquiryDescription?.trim(),
-      relatedActivityId: submission.value.activityId
-    }
-  };
-
-  try {
-    const response = await enquiryService.createEnquiry(enquiryData);
-    enquiryConfirmationId.value = response?.data?.activityId ? response.data.activityId : '';
-
-    if (enquiryConfirmationId.value) {
-      emailConfirmation(response.data.activityId, response.data.enquiryId, enquiryDescription);
-    }
-  } catch (e: any) {
-    toast.error('Failed to submit enquiry', e);
-  }
-}
-
-function handleModalClose() {
-  enquiryConfirmationId.value = undefined;
 }
 
 onBeforeMount(async () => {
@@ -381,7 +310,17 @@ onBeforeMount(async () => {
         <Button
           outlined
           :label="t('permitStatusView.askNav')"
-          @click="() => (enquiryModalVisible = true)"
+          @click="
+            router.push({
+              name: RouteName.HOUSING_ENQUIRY_INTAKE,
+              query: {
+                permitName: permit?.name,
+                permitTrackingId: permit?.trackingId,
+                permitAuthStatus: permit?.authStatus,
+                projectActivityId: projectActivityId
+              }
+            })
+          "
         />
         <p>{{ t('permitStatusView.contactNav') }}</p>
       </div>
@@ -400,15 +339,6 @@ onBeforeMount(async () => {
       </div>
     </div>
   </div>
-  <PermitEnquiryModal
-    v-model:visible="enquiryModalVisible"
-    :permit="permit"
-    :confirmation-id="enquiryConfirmationId"
-    :navigator="assignedNavigator"
-    :updated-by="updatedBy"
-    @on-sumbit-enquiry="handleEnquirySubmit"
-    @on-hide="handleModalClose"
-  />
   <PermitStatusDescriptionModal
     v-model:visible="descriptionModalVisible"
     dismissable-mask

@@ -64,6 +64,9 @@ onMounted(async () => {
 
   drafts.value = drafts.value.map((x, index) => ({ ...x, index: index + 1 }));
 
+  // Filter enquiries to only include enquiries with no relatedActivityId
+  enquiries.value = enquiries.value.filter((enquiry) => !enquiry.relatedActivityId);
+
   loading.value = false;
 });
 </script>
