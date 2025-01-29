@@ -17,7 +17,7 @@ const { t } = useI18n();
         {{ t('collectionDisclaimer.disclaimer') }}
         <!-- prettier-ignore -->
         <span>
-          <a href="mailto:Housing.Authorizations@gov.bc.ca">Housing.Authorizations@gov.bc.ca</a>.
+          <a href="mailto:Navigator.Service@gov.bc.ca">Navigator.Service@gov.bc.ca</a>.
         </span>
       </p>
     </template>
