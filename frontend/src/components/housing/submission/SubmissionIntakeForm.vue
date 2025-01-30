@@ -715,14 +715,14 @@ watch(
                     :name="`contacts.contactFirstName`"
                     label="First name"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactFirstName || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
                   />
                   <InputText
                     class="col-span-6"
                     :name="`contacts.contactLastName`"
                     label="Last name"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactLastName || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
                   />
                   <InputMask
                     class="col-span-6"
@@ -730,21 +730,21 @@ watch(
                     mask="(999) 999-9999"
                     label="Phone number"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactPhoneNumber || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
                   />
                   <InputText
                     class="col-span-6"
                     :name="`contacts.contactEmail`"
                     label="Email"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactEmail || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
                   />
                   <Select
                     class="col-span-6"
                     :name="`contacts.contactApplicantRelationship`"
                     label="Relationship to project"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactApplicantRelationship || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactApplicantRelationship || !editable"
                     :options="PROJECT_RELATIONSHIP_LIST"
                   />
                   <Select
@@ -752,7 +752,7 @@ watch(
                     :name="`contacts.contactPreference`"
                     label="Preferred contact method"
                     :bold="false"
-                    :disabled="initialFormValues?.contacts?.contactPreference || !editable"
+                    :disabled="!!initialFormValues?.contacts?.contactPreference || !editable"
                     :options="CONTACT_PREFERENCE_LIST"
                   />
                 </div>

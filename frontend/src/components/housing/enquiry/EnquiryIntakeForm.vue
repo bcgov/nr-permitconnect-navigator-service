@@ -306,14 +306,14 @@ onBeforeMount(async () => {
               name="contactFirstName"
               label="First name"
               :bold="false"
-              :disabled="initialFormValues?.contactFirstName || !editable"
+              :disabled="!!initialFormValues?.contactFirstName || !editable"
             />
             <InputText
               class="col-span-6"
               name="contactLastName"
               label="Last name"
               :bold="false"
-              :disabled="initialFormValues?.contactLastName || !editable"
+              :disabled="!!initialFormValues?.contactLastName || !editable"
             />
             <InputMask
               class="col-span-6"
@@ -321,21 +321,21 @@ onBeforeMount(async () => {
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
-              :disabled="initialFormValues?.contactPhoneNumber || !editable"
+              :disabled="!!initialFormValues?.contactPhoneNumber || !editable"
             />
             <InputText
               class="col-span-6"
               name="contactEmail"
               label="Email"
               :bold="false"
-              :disabled="initialFormValues?.contactEmail || !editable"
+              :disabled="!!initialFormValues?.contactEmail || !editable"
             />
             <Select
               class="col-span-6"
               name="contactApplicantRelationship"
               label="Relationship to project"
               :bold="false"
-              :disabled="initialFormValues?.contactApplicantRelationship || !editable"
+              :disabled="!!initialFormValues?.contactApplicantRelationship || !editable"
               :options="PROJECT_RELATIONSHIP_LIST"
             />
             <Select
@@ -343,7 +343,7 @@ onBeforeMount(async () => {
               :name="`contactPreference`"
               label="Preferred contact method"
               :bold="false"
-              :disabled="initialFormValues?.contactPreference || !editable"
+              :disabled="!!initialFormValues?.contactPreference || !editable"
               :options="CONTACT_PREFERENCE_LIST"
             />
           </div>

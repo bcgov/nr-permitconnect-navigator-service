@@ -10,6 +10,7 @@ import { contactService } from '@/services';
 import { useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { setEmptyStringsToNull } from '@/utils/utils';
+import { emailValidator } from '@/validators/common';
 
 import type { Contact } from '@/types';
 import type { Ref } from 'vue';
@@ -19,7 +20,11 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 
 // Form validation schema
+// TODO: Sync contact key naming so common validator can be used
 const contactSchema = object({
+  firstName: string().required().max(255).label('First name'),
+  lastName: string().max(255).label('Last name').nullable(),
+  email: emailValidator('Email must be valid').required().label('Email'),
   phoneNumber: string().required().label('Phone'),
   contactApplicantRelationship: string().required().label('Relationship to project'),
   contactPreference: string().required().label('Preferred contact method')
@@ -66,12 +71,12 @@ onMounted(async () => {
     <Card>
       <template #title>
         <div class="flex justify-between">
-          <div class="display-inline">
+          <div class="inline">
             <font-awesome-icon
               icon="fa-solid fa-user"
               class="mr-3 app-primary-color"
             />
-            <h3 class="display-inline">{{ t('contactProfileView.contactProfile') }}</h3>
+            <h3 class="inline">{{ t('contactProfileView.contactProfile') }}</h3>
           </div>
         </div>
       </template>
@@ -88,12 +93,10 @@ onMounted(async () => {
           <InputText
             name="firstName"
             :label="t('contactProfileView.firstName')"
-            :disabled="true"
           />
           <InputText
             name="lastName"
             :label="t('contactProfileView.lastName')"
-            :disabled="true"
           />
           <InputText
             name="email"
@@ -135,17 +138,9 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-h3 {
-  margin-top: 1em;
-}
-
 :deep(.p-card-body) {
   width: 35rem;
   box-shadow: 0 0 0.2rem #036;
   padding-bottom: 0;
-}
-
-.display-inline {
-  display: inline;
 }
 </style>

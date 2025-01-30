@@ -174,7 +174,7 @@ describe('EnquiryIntakeForm', () => {
       expect(result.errors['contactEmail']).toBeTruthy();
     });
 
-    it('generates missing first and last name missing error', async () => {
+    it('generates missing first name error', async () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
@@ -185,14 +185,12 @@ describe('EnquiryIntakeForm', () => {
       };
 
       modifiedFormValues.contactFirstName = '';
-      modifiedFormValues.contactLastName = '';
 
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
-      expect(Object.keys(result.errors).length).toBe(2);
+      expect(Object.keys(result.errors).length).toBe(1);
       expect(result.errors['contactFirstName']).toBeTruthy();
-      expect(result.errors['contactLastName']).toBeTruthy();
     });
   });
 });

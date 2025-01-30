@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import prisma from '../db/dataConnection';
 import { contact } from '../db/models';
 import { generateCreateStamps } from '../db/utils/utils';
@@ -21,7 +19,6 @@ const service = {
             response = await trx.contact.create({
               data: contact.toPrismaModel({
                 ...x,
-                contactId: uuidv4(),
                 ...generateCreateStamps(currentContext)
               })
             });

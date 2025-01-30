@@ -12,7 +12,7 @@ export const contacts = Joi.array()
       contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
       email: email.required(),
       firstName: Joi.string().required().max(255),
-      lastName: Joi.string().required().max(255),
+      lastName: Joi.string().max(255).allow(null),
       phoneNumber: phoneNumber.required(),
       contactApplicantRelationship: Joi.string()
         .required()
@@ -45,7 +45,7 @@ const schema = {
       contactId: uuidv4.required(),
       email: Joi.string().max(255).required(),
       firstName: Joi.string().max(255).required(),
-      lastName: Joi.string().max(255).required(),
+      lastName: Joi.string().max(255).allow(null),
       phoneNumber: phoneNumber.required(),
       contactApplicantRelationship: Joi.string()
         .required()
