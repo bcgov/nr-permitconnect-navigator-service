@@ -3,6 +3,7 @@ import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import Tooltip from '@/components/common/Tooltip.vue';
 import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
@@ -135,6 +136,10 @@ onMounted(async () => {
             <font-awesome-icon icon="fa-solid fa-circle-info" />
           </div>
         </div>
+        <Tooltip
+          class="flex items-center pl-2 text-xl"
+          text="testing tool top text"
+        />
       </h2>
       <Button @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })">
         {{ t('housing.submitNewProject') }}
