@@ -65,14 +65,14 @@ import {
   SubmissionType
 } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
-import { getHTMLElement, omit } from '@/utils/utils';
+import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Document, Permit, PermitType, SubmissionIntake } from '@/types';
+import type { Contact, Document, Permit, PermitType, SubmissionIntake } from '@/types';
 
 // Types
 type GeocoderEntry = {
@@ -370,6 +370,7 @@ async function onSubmit(data: any) {
     );
 
     submissionData.investigatePermits = filteredInvestigatePermits;
+    submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
 
     const response = await submissionService.submitDraft({ ...submissionData, draftId });
 
