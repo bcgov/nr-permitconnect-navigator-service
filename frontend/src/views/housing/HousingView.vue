@@ -29,13 +29,6 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-function onProjectClick(project: Submission) {
-  router.push({
-    name: RouteName.HOUSING_SUBMISSION_INTAKE,
-    query: { activityId: project.activityId, submissionId: project.submissionId }
-  });
-}
-
 function onSubmissionDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
@@ -166,15 +159,14 @@ onMounted(async () => {
         :index="index"
         class="rounded-sm shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
         :class="{ 'mb-2': index != displayedProjects.length - 1 }"
-        @click="onProjectClick(project)"
       >
         <div class="grid grid-cols-12 gap-4">
           <div class="col-span-3 flex items-center">
             <router-link
               class="no-underline"
               :to="{
-                name: RouteName.HOUSING_SUBMISSION_INTAKE,
-                query: { activityId: project.activityId, submissionId: project.submissionId }
+                name: RouteName.HOUSING_PROJECT,
+                params: { submissionId: project.submissionId }
               }"
             >
               <h4 class="font-bold mb-0">{{ project.projectName }}</h4>

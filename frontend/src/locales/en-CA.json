@@ -96,7 +96,7 @@
     "logout": "Log out"
   },
   "permitStatusView": {
-    "additionalUpdates": "Additional updates.",
+    "additionalUpdates": "Additional updates",
     "applicationProgress": "Application progress",
     "askNav": "Ask my Navigator",
     "contactNav": "Contact your Navigator for this project for further updates on this application.",

@@ -10,7 +10,7 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
 
-import { permitService, submissionService, userService } from '@/services';
+import { contactService, permitService, submissionService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitType, Submission, User } from '@/types';
@@ -181,11 +181,13 @@ onBeforeMount(async () => {
       { label: permit?.value?.name, class: 'font-bold' }
     ];
     if (submission.value?.assignedUserId) {
-      assignedNavigator.value = (await userService.searchUsers({ userId: [submission.value.assignedUserId] })).data[0];
+      assignedNavigator.value = (
+        await contactService.searchContacts({ userId: [submission.value.assignedUserId] })
+      ).data[0];
     }
 
     if (permit.value?.updatedBy) {
-      const updatedByUser = (await userService.searchUsers({ userId: [permitResponse.data.updatedBy] })).data[0];
+      const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
       updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
     }
   } catch {
