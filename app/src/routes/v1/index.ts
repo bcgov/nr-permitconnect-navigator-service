@@ -8,6 +8,7 @@ import contact from './contact';
 import docs from './docs';
 import document from './document';
 import enquiry from './enquiry';
+import map from './map';
 import note from './note';
 import permit from './permit';
 import reporting from './reporting';
@@ -32,6 +33,7 @@ router.get('/', (_req, res) => {
       '/docs',
       '/document',
       '/enquiry',
+      '/map',
       '/note',
       '/permit',
       '/reporting',
@@ -50,6 +52,7 @@ router.use('/ats', ats);
 router.use('/contact', contact);
 router.use('/document', document);
 router.use('/enquiry', enquiry);
+router.use('/map', map);
 router.use('/note', note);
 router.use('/permit', permit);
 router.use('/reporting', reporting);
