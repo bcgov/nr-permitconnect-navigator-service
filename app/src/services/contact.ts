@@ -1,6 +1,6 @@
 import prisma from '../db/dataConnection';
 import { contact } from '../db/models';
-import { generateCreateStamps } from '../db/utils/utils';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { Contact, ContactSearchParameters, CurrentContext } from '../types';
 
 const service = {
@@ -14,22 +14,20 @@ const service = {
     return await prisma.$transaction(async (trx) => {
       await Promise.all(
         data.map(async (x: Contact) => {
-          let response;
-          if (!x.contactId) {
-            response = await trx.contact.create({
-              data: contact.toPrismaModel({
+          const response = await trx.contact.upsert({
+            where: {
+              contact_id: x.contactId
+            },
+            update: {
+              ...contact.toPrismaModel({ ...x, ...generateUpdateStamps(currentContext) })
+            },
+            create: {
+              ...contact.toPrismaModel({
                 ...x,
                 ...generateCreateStamps(currentContext)
               })
-            });
-          } else {
-            await trx.contact.update({
-              data: contact.toPrismaModel({ ...x, ...generateCreateStamps(currentContext) }),
-              where: {
-                contact_id: x.contactId
-              }
-            });
-          }
+            }
+          });
 
           if (activityId) {
             await trx.activity_contact.upsert({
