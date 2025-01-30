@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, useConfirm } from '@/lib/primevue';
-import { object } from 'yup';
 import { ref } from 'vue';
+import { object } from 'yup';
 
 import { contactValidator } from '@/validators';
 import { IntakeFormCategory } from '@/utils/enums/housing';
@@ -12,7 +12,6 @@ import type { Ref } from 'vue';
 const { formValues } = defineProps<{
   formValues: { [key: string]: string };
 }>();
-
 // Emits
 const emit = defineEmits(['onSubmitAssistance']);
 
@@ -23,59 +22,10 @@ const showTab: Ref<boolean> = ref(true);
 const confirm = useConfirm();
 const contactSchema = object(contactValidator);
 
-// const checkApplicantValuesValid = async (values: { [key: string]: string }) => {
-//   // Check applicant section is filled
-//   let applicant = values?.[IntakeFormCategory.CONTACTS];
-
-//   // if (
-//   //   Object.values(applicant).some((x) => {
-//   //     console.log(x);
-//   //     return !x;
-//   //   })
-//   // ) {
-//   //   return false;
-//   // }
-
-//   // Check applicant section is valid
-//   console.log('validate contacts', await contactSchema.isValid(applicant));
-//   return false; //await contactSchema.isValid(applicant);
-
-//   // let isValid = true;
-//   // const errorList = Object.keys(errors);
-
-//   // for (const error of errorList) {
-//   //   if (error.includes(IntakeFormCategory.CONTACTS)) {
-//   //     isValid = false;
-//   //     break;
-//   //   }
-//   // }
-//   // return isValid;
-// };
-
-const checkApplicantValuesValid = (
-  values: { [key: string]: string },
-  errors: Record<string, string | undefined>
-): boolean => {
+const checkApplicantValuesValid = (values: { [key: string]: string }): boolean => {
   // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.CONTACTS] || {};
-  // filter out last name from applicant
-  applicant = Object.fromEntries(Object.entries(applicant).filter(([key]) => key !== 'contactLastName'));
-  if (Object.values(applicant).some((x) => !x)) {
-    return false;
-  }
-  return true;
-
-  // // Check applicant section is valid
-  // let isValid = true;
-  // const errorList = Object.keys(errors);
-
-  // for (const error of errorList) {
-  //   if (error.includes(IntakeFormCategory.CONTACTS)) {
-  //     isValid = false;
-  //     break;
-  //   }
-  // }
-  // return isValid;
+  let applicant = values?.[IntakeFormCategory.CONTACTS];
+  return contactSchema.isValidSync(applicant);
 };
 
 const confirmSubmit = () => {

@@ -195,7 +195,7 @@ function handleProjectLocationClick() {
 
 async function onAssistanceRequest(values: GenericObject) {
   try {
-    const formattedData = Object.assign(
+    const submissionData = Object.assign(
       {
         basic: {
           enquiryDescription: 'Assistance requested',
@@ -217,7 +217,9 @@ async function onAssistanceRequest(values: GenericObject) {
       }
     );
 
-    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
+    submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
+
+    const enquiryResponse = await enquiryService.createEnquiry(submissionData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
