@@ -165,12 +165,11 @@ onMounted(async () => {
   typeStore.setPermitTypes(permitTypesValue);
 
   // Fetch contacts for createdBy and assignedUserId
-  const userIds = [];
   // Push only thruthy values into the array
-  userIds.push(...[submissionValue?.assignedUserId, submissionValue?.createdBy].filter(Boolean));
+  const userIds = [submissionValue?.assignedUserId, submissionValue?.createdBy].filter(Boolean);
   const contacts = (await contactService.searchContacts({ userId: userIds })).data;
-  assignee.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.assignedUserId) || undefined;
-  createdBy.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.createdBy) || undefined;
+  assignee.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.assignedUserId);
+  createdBy.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.createdBy);
 
   loading.value = false;
 });

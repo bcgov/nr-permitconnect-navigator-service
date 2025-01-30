@@ -13,7 +13,7 @@ import {
   yarsService
 } from '../services';
 import { Initiative, GroupName } from '../utils/enums/application';
-import { getCurrentSubject } from '../utils/utils';
+import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import { CurrentAuthorization } from '../types';
@@ -139,6 +139,33 @@ export const hasAccess = (param: string) => {
 
         if (!data || data?.createdBy !== userId) {
           throw new Error('No access');
+        }
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    }
+
+    // Continue middleware
+    next();
+  };
+};
+
+export const hasAccessPermit = (param: string) => {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        const id = req.params[param];
+        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
+
+        let data;
+        const func = paramMap.get(param);
+        if (func) data = await func(id);
+
+        if (!data || data?.createdBy !== userId) {
+          const submission = (await submissionService.searchSubmissions({ activityId: [data.activityId] }))[0];
+          if (!submission || submission?.submittedBy !== getCurrentUsername(req.currentContext))
+            throw new Error('No access');
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
