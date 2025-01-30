@@ -198,7 +198,6 @@ async function onAssistanceRequest(values: GenericObject) {
     const formattedData = Object.assign(
       {
         basic: {
-          applyForPermitConnect: BasicResponse.NO,
           enquiryDescription: 'Assistance requested',
           enquiryType: SubmissionType.ASSISTANCE
         }
@@ -343,6 +342,8 @@ function onStepChange(stepNumber: number) {
 }
 
 async function onSubmit(data: any) {
+  // If there is a change to field of the submission object to backend,
+  // please update onAssistanceRequest() as well.
   editable.value = false;
 
   try {
@@ -601,7 +602,6 @@ watch(
 
       <SubmissionAssistance
         v-if="editable && values?.contacts"
-        :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onAssistanceRequest(values)"
       />

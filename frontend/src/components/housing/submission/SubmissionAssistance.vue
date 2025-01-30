@@ -1,14 +1,15 @@
 <script setup lang="ts">
 import { Button, useConfirm } from '@/lib/primevue';
+import { object } from 'yup';
 import { ref } from 'vue';
 
+import { contactValidator } from '@/validators';
 import { IntakeFormCategory } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 
 // Props
-const { formErrors, formValues } = defineProps<{
-  formErrors: Record<string, string | undefined>;
+const { formValues } = defineProps<{
   formValues: { [key: string]: string };
 }>();
 
@@ -20,28 +21,35 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
+const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = (
-  values: { [key: string]: string },
-  errors: Record<string, string | undefined>
-): boolean => {
+const checkApplicantValuesValid = async (values: { [key: string]: string }) => {
   // Check applicant section is filled
   let applicant = values?.[IntakeFormCategory.CONTACTS];
-  if (Object.values(applicant).some((x) => !x)) {
-    return false;
-  }
+
+  // if (
+  //   Object.values(applicant).some((x) => {
+  //     console.log(x);
+  //     return !x;
+  //   })
+  // ) {
+  //   return false;
+  // }
 
   // Check applicant section is valid
-  let isValid = true;
-  const errorList = Object.keys(errors);
+  console.log('validate contacts', await contactSchema.isValid(applicant));
+  return false; //await contactSchema.isValid(applicant);
 
-  for (const error of errorList) {
-    if (error.includes(IntakeFormCategory.CONTACTS)) {
-      isValid = false;
-      break;
-    }
-  }
-  return isValid;
+  // let isValid = true;
+  // const errorList = Object.keys(errors);
+
+  // for (const error of errorList) {
+  //   if (error.includes(IntakeFormCategory.CONTACTS)) {
+  //     isValid = false;
+  //     break;
+  //   }
+  // }
+  // return isValid;
 };
 
 const confirmSubmit = () => {
@@ -94,7 +102,7 @@ const confirmSubmit = () => {
         <div class="flex justify-center">
           <Button
             label="Get assistance"
-            :disabled="!checkApplicantValuesValid(formValues, formErrors)"
+            :disabled="!checkApplicantValuesValid(formValues)"
             @click="() => confirmSubmit()"
           />
         </div>
