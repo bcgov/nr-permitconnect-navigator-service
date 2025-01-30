@@ -20,11 +20,11 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
-import { enquiryService, permitService, submissionService, userService } from '@/services';
+import { contactService, enquiryService, permitService, submissionService } from '@/services';
 import { useSubmissionStore, useTypeStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
-import type { Permit, PermitType, User } from '@/types';
+import type { Contact, Permit, PermitType } from '@/types';
 import type { MenuItem } from 'primevue/menuitem';
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
@@ -57,11 +57,11 @@ const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
-const assignee: Ref<User | undefined> = ref(undefined);
+const assignee: Ref<Contact | undefined> = ref(undefined);
 const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
   { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
 ]);
-const createdBy: Ref<User | undefined> = ref(undefined);
+const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 
 const permitsNeeded = computed(() => {
@@ -134,15 +134,14 @@ function permitFilter(config: PermitFilterConfig) {
   return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
 }
 
-function navigateToSubmissionView() {
+function navigateToSubmissionIntakeView() {
   router.push({
-    name: RouteName.HOUSING_SUBMISSION,
+    name: RouteName.HOUSING_SUBMISSION_INTAKE,
     query: { activityId: getSubmission.value?.activityId, submissionId: getSubmission.value?.submissionId }
   });
 }
-
 onMounted(async () => {
-  let enquiriesValue, permitTypesValue, submissionValue;
+  let enquiriesValue, permitTypesValue, submissionValue: any;
 
   try {
     [submissionValue, permitTypesValue] = (
@@ -165,13 +164,14 @@ onMounted(async () => {
   submissionStore.setRelatedEnquiries(enquiriesValue);
   typeStore.setPermitTypes(permitTypesValue);
 
-  if (submissionValue?.assignedUserId) {
-    assignee.value = (await userService.searchUsers({ userId: [submissionValue.assignedUserId] })).data[0];
-  }
+  // Fetch contacts for createdBy and assignedUserId
+  const userIds = [];
+  // Push only thruthy values into the array
+  userIds.push(...[submissionValue?.assignedUserId, submissionValue?.createdBy].filter(Boolean));
+  const contacts = (await contactService.searchContacts({ userId: userIds })).data;
+  assignee.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.assignedUserId) || undefined;
+  createdBy.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.createdBy) || undefined;
 
-  if (submissionValue?.createdBy) {
-    createdBy.value = (await userService.searchUsers({ userId: [submissionValue.createdBy] })).data[0];
-  }
   loading.value = false;
 });
 </script>
@@ -192,9 +192,9 @@ onMounted(async () => {
       <h1
         class="m-0 cursor-pointer hover:underline"
         tabindex="0"
-        @click="navigateToSubmissionView()"
-        @keydown.enter.prevent="navigateToSubmissionView()"
-        @keydown.space.prevent="navigateToSubmissionView()"
+        @click="navigateToSubmissionIntakeView()"
+        @keydown.enter.prevent="navigateToSubmissionIntakeView()"
+        @keydown.space.prevent="navigateToSubmissionIntakeView()"
       >
         {{ getSubmission.projectName }}
         <font-awesome-icon

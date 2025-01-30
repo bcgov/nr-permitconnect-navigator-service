@@ -2,7 +2,7 @@ import express from 'express';
 
 import permitNote from './permitNote';
 import { permitController } from '../../controllers';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAccessPermit, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
@@ -71,7 +71,7 @@ router.get(
 router.get(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.READ),
-  hasAccess('permitId'),
+  hasAccessPermit('permitId'),
   permitValidator.getPermit,
   (req: Request<{ permitId: string }>, res: Response, next: NextFunction): void => {
     permitController.getPermit(req, res, next);

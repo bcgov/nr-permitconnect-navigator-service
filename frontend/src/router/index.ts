@@ -180,15 +180,6 @@ const routes: Array<RouteRecordRaw> = [
             },
             children: [
               {
-                path: '',
-                component: () => import('@/views/housing/project/ProjectListView.vue'),
-                beforeEnter: accessHandler,
-                meta: {
-                  access: [NavigationPermission.HOUSING_STATUS_TRACKER]
-                },
-                name: RouteName.HOUSING_PROJECTS_LIST
-              },
-              {
                 path: ':submissionId',
                 component: () => import('@/views/housing/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
