@@ -23,23 +23,49 @@ const showTab: Ref<boolean> = ref(true);
 const confirm = useConfirm();
 const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = async (values: { [key: string]: string }) => {
+// const checkApplicantValuesValid = async (values: { [key: string]: string }) => {
+//   // Check applicant section is filled
+//   let applicant = values?.[IntakeFormCategory.CONTACTS];
+
+//   // if (
+//   //   Object.values(applicant).some((x) => {
+//   //     console.log(x);
+//   //     return !x;
+//   //   })
+//   // ) {
+//   //   return false;
+//   // }
+
+//   // Check applicant section is valid
+//   console.log('validate contacts', await contactSchema.isValid(applicant));
+//   return false; //await contactSchema.isValid(applicant);
+
+//   // let isValid = true;
+//   // const errorList = Object.keys(errors);
+
+//   // for (const error of errorList) {
+//   //   if (error.includes(IntakeFormCategory.CONTACTS)) {
+//   //     isValid = false;
+//   //     break;
+//   //   }
+//   // }
+//   // return isValid;
+// };
+
+const checkApplicantValuesValid = (
+  values: { [key: string]: string },
+  errors: Record<string, string | undefined>
+): boolean => {
   // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.CONTACTS];
+  let applicant = values?.[IntakeFormCategory.CONTACTS] || {};
+  // filter out last name from applicant
+  applicant = Object.fromEntries(Object.entries(applicant).filter(([key]) => key !== 'contactLastName'));
+  if (Object.values(applicant).some((x) => !x)) {
+    return false;
+  }
+  return true;
 
-  // if (
-  //   Object.values(applicant).some((x) => {
-  //     console.log(x);
-  //     return !x;
-  //   })
-  // ) {
-  //   return false;
-  // }
-
-  // Check applicant section is valid
-  console.log('validate contacts', await contactSchema.isValid(applicant));
-  return false; //await contactSchema.isValid(applicant);
-
+  // // Check applicant section is valid
   // let isValid = true;
   // const errorList = Object.keys(errors);
 

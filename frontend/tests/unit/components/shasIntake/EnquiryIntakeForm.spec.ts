@@ -64,7 +64,6 @@ interface FormValues {
   basic: {
     relatedActivityId?: string;
     enquiryDescription?: string;
-    applyForPermitConnect?: string;
   };
 }
 
