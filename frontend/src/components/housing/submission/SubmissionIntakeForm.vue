@@ -699,7 +699,6 @@ watch(
                 <div class="flex">
                   <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
                   <Tooltip
-                    class="text-base flex align-items"
                     icon="fa-solid fa-circle-question"
                     right
                     :text="t('submissionIntakeForm.contactTooltip')"
@@ -785,7 +784,7 @@ watch(
                     <div class="flex items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
                       <Tooltip
-                        class="pl-2 text-base flex align-items"
+                        class="pl-2"
                         right
                         icon="fa-solid fa-circle-question"
                         :text="t('submissionIntakeForm.isRegisteredTooltip')"
@@ -906,7 +905,7 @@ watch(
                         :invalid="!!errors.housing && meta.touched"
                       />
                       <Tooltip
-                        class="pl-2 text-base flex align-items"
+                        class="pl-2"
                         right
                         icon="fa-solid fa-circle-question"
                         :text="t('submissionIntakeForm.multiFamilyTooltip')"
@@ -959,7 +958,6 @@ watch(
                 <div class="flex">
                   <span class="section-header">{{ t('submissionIntakeForm.hasRentalUnitsCard') }}</span>
                   <Tooltip
-                    class="text-base flex align-items"
                     right
                     icon="fa-solid fa-circle-question"
                     :text="t('submissionIntakeForm.rentalUnitsTooltip')"
@@ -1026,7 +1024,7 @@ watch(
                         </a>
                       </label>
                       <Tooltip
-                        class="pl-2 mb-2 text-base flex align-items"
+                        class="pl-2 mb-2"
                         right
                         icon="fa-solid fa-circle-question"
                         :text="t('submissionIntakeForm.bcHousingTooltip')"
@@ -1127,7 +1125,7 @@ watch(
                   <div class="flex items-center">
                     <label>Provide additional information</label>
                     <Tooltip
-                      class="pl-2 mb-2 text-base flex align-items"
+                      class="pl-2 mb-2"
                       right
                       icon="fa-solid fa-circle-question"
                       :text="t('submissionIntakeForm.additionalInfoTooltip')"
@@ -1218,7 +1216,7 @@ watch(
                       {{ t('submissionIntakeForm.projectLocationCard') }}
                     </span>
                     <Tooltip
-                      class="mb-2 text-base flex align-items"
+                      class="mb-2"
                       right
                       icon="fa-solid fa-circle-question"
                       :text="t('submissionIntakeForm.addressTooltip')"
@@ -1497,7 +1495,7 @@ watch(
                     {{ t('submissionIntakeForm.provincialPermitsCard') }}
                   </span>
                   <Tooltip
-                    class="mb-2 text-base flex align-items"
+                    class="mb-2"
                     right
                     icon="fa-solid fa-circle-question"
                     :text="t('submissionIntakeForm.appliedPermitsTooltip')"
@@ -1633,7 +1631,6 @@ watch(
                     {{ t('submissionIntakeForm.investigatePermitsCard') }}
                   </span>
                   <Tooltip
-                    class="text-base flex align-items"
                     right
                     icon="fa-solid fa-circle-question"
                     :text="t('submissionIntakeForm.potentialPermitsTooltip')"

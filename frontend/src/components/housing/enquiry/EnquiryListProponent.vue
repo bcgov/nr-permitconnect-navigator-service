@@ -43,7 +43,7 @@ const { t } = useI18n();
   >
     <template #empty>
       <div class="flex justify-center">
-        <p class="font-bold text-xl">
+        <p class="font-bold">
           {{ t('enquiryListProponent.listEmpty') }}
         </p>
       </div>

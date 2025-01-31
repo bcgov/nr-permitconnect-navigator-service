@@ -1,8 +1,10 @@
 <script setup lang="ts">
+// Defaults tooltip to right if not stated.
 const {
   bottom,
   left,
   icon = 'fa-solid fa-circle-info',
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   right,
   text,
   top
@@ -17,58 +19,34 @@ const {
 </script>
 
 <template>
-  <span class="tooltip-root">
-    <div class="screen-reader-only inline-block">{{ text }}</div>
-
-    <div
+  <span
+    class="app-primary-color"
+    role="tooltip"
+    :aria-label="text"
+  >
+    <span
       v-if="bottom"
       v-tooltip.bottom="text"
     >
-      <div
-        v-tooltip.focus.bottom="text"
-        tabindex="0"
-      >
-        <font-awesome-icon :icon />
-      </div>
-    </div>
-    <div
+      <font-awesome-icon :icon />
+    </span>
+    <span
       v-else-if="left"
       v-tooltip.left="text"
     >
-      <div
-        v-tooltip.focus.left="text"
-        tabindex="0"
-      >
-        <font-awesome-icon :icon />
-      </div>
-    </div>
-    <div
-      v-else-if="right"
-      v-tooltip.right="text"
-    >
-      <div
-        v-tooltip.focus.right="text"
-        tabindex="0"
-      >
-        <font-awesome-icon :icon />
-      </div>
-    </div>
-    <div
+      <font-awesome-icon :icon />
+    </span>
+    <span
       v-else-if="top"
       v-tooltip.top="text"
     >
-      <div
-        v-tooltip.focus.top="text"
-        tabindex="0"
-      >
-        <font-awesome-icon :icon />
-      </div>
-    </div>
+      <font-awesome-icon :icon />
+    </span>
+    <span
+      v-else
+      v-tooltip.right="text"
+    >
+      <font-awesome-icon :icon />
+    </span>
   </span>
 </template>
-
-<style lang="scss" scoped>
-.tooltip-root {
-  color: var(--p-primary-color);
-}
-</style>

@@ -293,7 +293,6 @@ onBeforeMount(async () => {
           <div class="flex">
             <span class="section-header">{{ t('enquiryIntakeForm.contactInformation') }}</span>
             <Tooltip
-              class="text-base flex align-items"
               right
               :text="t('enquiryIntakeForm.contactTooltip')"
             />

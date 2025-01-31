@@ -128,7 +128,7 @@ onMounted(async () => {
           {{ t('housing.myProjects') }}
         </h2>
         <Tooltip
-          class="pl-2 text-xl inline-block flex align-items"
+          class="pl-2 text-xl"
           right
           :text="t('housing.projectsTooltip')"
         />
@@ -225,7 +225,7 @@ onMounted(async () => {
           {{ t('housing.generalEnquiries') }}
         </h2>
         <Tooltip
-          class="pl-2 text-xl inline-block flex align-items"
+          class="pl-2 text-xl"
           right
           :text="t('housing.enquiriesTooltip')"
         />

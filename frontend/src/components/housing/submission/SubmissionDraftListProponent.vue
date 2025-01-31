@@ -67,7 +67,7 @@ function onDelete(draftId: string) {
   >
     <template #empty>
       <div class="flex justify-center">
-        <p class="font-bold text-xl">{{ t('submissionDraftListProponent.listEmpty') }}</p>
+        <p class="font-bold">{{ t('submissionDraftListProponent.listEmpty') }}</p>
       </div>
     </template>
     <template #loading>
