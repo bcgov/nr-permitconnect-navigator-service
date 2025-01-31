@@ -10,11 +10,9 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return Promise.resolve()
-
-    .then(() =>
-      knex.schema.alterTable('enquiry', (table) => {
-        table.text('apply_for_permit_connect');
-      })
-    );
+  return Promise.resolve().then(() =>
+    knex.schema.alterTable('enquiry', (table) => {
+      table.text('apply_for_permit_connect');
+    })
+  );
 }

@@ -195,28 +195,23 @@ function handleProjectLocationClick() {
 
 async function onAssistanceRequest(values: GenericObject) {
   try {
-    const submissionData = Object.assign(
-      {
-        basic: {
-          enquiryDescription: 'Assistance requested',
-          enquiryType: SubmissionType.ASSISTANCE
-        }
+    const submissionData = {
+      basic: {
+        enquiryDescription: 'Assistance requested',
+        enquiryType: SubmissionType.ASSISTANCE
       },
-      {
-        contacts: [
-          {
-            contactId: values.contacts.contactId,
-            firstName: values.contacts.contactFirstName,
-            lastName: values.contacts.contactLastName,
-            phoneNumber: values.contacts.contactPhoneNumber,
-            email: values.contacts.contactEmail,
-            contactApplicantRelationship: values.contacts.contactApplicantRelationship,
-            contactPreference: values.contacts.contactPreference
-          }
-        ]
-      }
-    );
-
+      contacts: [
+        {
+          contactId: values.contacts.contactId,
+          firstName: values.contacts.contactFirstName,
+          lastName: values.contacts.contactLastName,
+          phoneNumber: values.contacts.contactPhoneNumber,
+          email: values.contacts.contactEmail,
+          contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+          contactPreference: values.contacts.contactPreference
+        }
+      ]
+    };
     submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
 
     const enquiryResponse = await enquiryService.createEnquiry(submissionData);
@@ -344,7 +339,7 @@ function onStepChange(stepNumber: number) {
 }
 
 async function onSubmit(data: any) {
-  // If there is a change to field of the submission object to backend,
+  // If there is a change to contact fields,
   // please update onAssistanceRequest() as well.
   editable.value = false;
 
