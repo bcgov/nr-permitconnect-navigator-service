@@ -201,7 +201,7 @@ async function onAssistanceRequest(values: GenericObject) {
         enquiryType: SubmissionType.ASSISTANCE
       },
       contacts: [
-        {
+        setEmptyStringsToNull({
           contactId: values.contacts.contactId,
           firstName: values.contacts.contactFirstName,
           lastName: values.contacts.contactLastName,
@@ -209,10 +209,9 @@ async function onAssistanceRequest(values: GenericObject) {
           email: values.contacts.contactEmail,
           contactApplicantRelationship: values.contacts.contactApplicantRelationship,
           contactPreference: values.contacts.contactPreference
-        }
+        })
       ]
     };
-    submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
 
     const enquiryResponse = await enquiryService.createEnquiry(submissionData);
 
