@@ -119,28 +119,20 @@ onMounted(async () => {
       Projects
     -->
     <div class="flex flex-row items-center w-full justify-between">
-      <h2
-        id="projects"
-        class="flex"
-        tabindex="-1"
-      >
-        {{ t('housing.myProjects') }}
-        <div
-          v-tooltip.right="t('housing.projectsTooltip')"
-          class="flex items-center pl-2 text-xl"
+      <div class="flex items-center flex-row">
+        <h2
+          id="projects"
+          class="flex"
+          tabindex="-1"
         >
-          <div
-            v-tooltip.focus.right="t('housing.projectsTooltip')"
-            tabindex="0"
-          >
-            <font-awesome-icon icon="fa-solid fa-circle-info" />
-          </div>
-        </div>
+          {{ t('housing.myProjects') }}
+        </h2>
         <Tooltip
-          class="flex items-center pl-2 text-xl"
-          text="testing tool top text"
+          class="pl-2 text-xl inline-block flex align-items"
+          right
+          :text="t('housing.projectsTooltip')"
         />
-      </h2>
+      </div>
       <Button @click="router.push({ name: RouteName.HOUSING_SUBMISSION_INTAKE })">
         {{ t('housing.submitNewProject') }}
         <font-awesome-icon
@@ -224,22 +216,21 @@ onMounted(async () => {
       Enquiries
     -->
     <div class="flex flex-row items-center w-full justify-between">
-      <h2
-        id="enquiries"
-        class="flex font-bold"
-        tabindex="-1"
-      >
-        {{ t('housing.generalEnquiries') }}
-        <div
-          v-tooltip.right="t('housing.enquiriesTooltip')"
-          v-tooltip.focus.right="t('housing.enquiriesTooltip')"
-          class="flex items-center pl-2 text-xl"
-          tabindex="0"
+      <div class="flex items-center flex-row">
+        <h2
+          id="enquiries"
+          class="flex font-bold"
+          tabindex="-1"
         >
-          <font-awesome-icon icon="fa-solid fa-circle-info" />
-          <div />
-        </div>
-      </h2>
+          {{ t('housing.generalEnquiries') }}
+        </h2>
+        <Tooltip
+          class="pl-2 text-xl inline-block flex align-items"
+          right
+          :text="t('housing.enquiriesTooltip')"
+        />
+      </div>
+
       <Button @click="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })">
         {{ t('housing.submitNewEnquiry') }}
         <font-awesome-icon
