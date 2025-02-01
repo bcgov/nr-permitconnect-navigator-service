@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
@@ -164,6 +164,28 @@ function getTimelineStage(authStatus: string | undefined, status: string | undef
     : timelineStages.terminatedStatus;
 }
 
+const timelineDescription = computed(() => (iconClass: string) => {
+  switch (iconClass) {
+    case previous('').iconClass:
+      return 'Completed';
+    case empty('').iconClass:
+      return 'Not yet started';
+    case current('').iconClass:
+      return 'Current';
+    default:
+      return '';
+  }
+});
+
+const hideTimelineFromScreenReader = computed(() => {
+  return (
+    permit?.value &&
+    (permit.value.authStatus === PermitAuthorizationStatus.ABANDONED ||
+      permit.value.authStatus === PermitAuthorizationStatus.CANCELLED ||
+      permit.value.authStatus === PermitAuthorizationStatus.WITHDRAWN)
+  );
+});
+
 onBeforeMount(async () => {
   try {
     const permitResponse = await permitService.getPermit(permitId);
@@ -274,7 +296,12 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4 class="mt-8 mb-6">{{ t('permitStatusView.applicationProgress') }}</h4>
+            <h4
+              class="mt-8 mb-6"
+              :aria-hidden="hideTimelineFromScreenReader"
+            >
+              {{ t('permitStatusView.applicationProgress') }}
+            </h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"
@@ -294,26 +321,12 @@ onBeforeMount(async () => {
                 >
                   {{ slotProps.item.text }}
                 </div>
+                <!-- This component is to display status for screenreaders -->
                 <div
-                  v-if="slotProps?.item?.iconClass == 'previous'"
                   role="definition"
                   class="screen-reader-only"
                 >
-                  Completed
-                </div>
-                <div
-                  v-else-if="slotProps?.item?.iconClass == 'empty'"
-                  role="definition"
-                  class="screen-reader-only"
-                >
-                  Not yet started
-                </div>
-                <div
-                  v-else-if="slotProps?.item?.iconClass == 'current'"
-                  role="definition"
-                  class="screen-reader-only"
-                >
-                  Current
+                  {{ timelineDescription(slotProps?.item?.iconClass) }}
                 </div>
               </template>
             </Timeline>
