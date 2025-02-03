@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
@@ -164,6 +164,28 @@ function getTimelineStage(authStatus: string | undefined, status: string | undef
     : timelineStages.terminatedStatus;
 }
 
+const timelineDescription = computed(() => (iconClass: string) => {
+  switch (iconClass) {
+    case previous('').iconClass:
+      return 'Completed';
+    case empty('').iconClass:
+      return 'Not yet started';
+    case current('').iconClass:
+      return 'Current';
+    default:
+      return '';
+  }
+});
+
+const hideTimelineFromScreenReader = computed(() => {
+  return (
+    permit?.value &&
+    (permit.value.authStatus === PermitAuthorizationStatus.ABANDONED ||
+      permit.value.authStatus === PermitAuthorizationStatus.CANCELLED ||
+      permit.value.authStatus === PermitAuthorizationStatus.WITHDRAWN)
+  );
+});
+
 onBeforeMount(async () => {
   try {
     const permitResponse = await permitService.getPermit(permitId);
@@ -243,11 +265,14 @@ onBeforeMount(async () => {
       <font-awesome-icon
         class="status-description-icon"
         icon="fa-circle-question"
+        aria-describedby="status-description"
         @click="descriptionModalVisible = true"
       />
       <span
+        id="status-descriptions"
         class="status-description"
         tabindex="0"
+        role="button"
         @click="descriptionModalVisible = true"
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
@@ -271,7 +296,12 @@ onBeforeMount(async () => {
       <template #content>
         <div class="application-progress-block">
           <div class="status-timeline">
-            <h4 class="mt-8 mb-6">{{ t('permitStatusView.applicationProgress') }}</h4>
+            <h4
+              class="mt-8 mb-6"
+              :aria-hidden="hideTimelineFromScreenReader"
+            >
+              {{ t('permitStatusView.applicationProgress') }}
+            </h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
               layout="horizontal"
@@ -286,8 +316,17 @@ onBeforeMount(async () => {
                 <div
                   class="timeline-content"
                   :class="slotProps.item.class"
+                  role="note"
+                  :aria-hidden="slotProps?.item?.iconClass == 'crossed-circle'"
                 >
                   {{ slotProps.item.text }}
+                </div>
+                <!-- This component is to display status for screenreaders -->
+                <div
+                  role="definition"
+                  class="screen-reader-only"
+                >
+                  {{ timelineDescription(slotProps?.item?.iconClass) }}
                 </div>
               </template>
             </Timeline>

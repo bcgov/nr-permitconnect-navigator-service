@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 
-import { Card, Divider } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
+import { Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { formatDateShort } from '@/utils/formatters';
 import { RouteName } from '@/utils/enums/application';

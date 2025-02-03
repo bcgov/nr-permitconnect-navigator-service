@@ -42,7 +42,8 @@
     "listEmpty": "Your project related enquiries will be displayed here.",
     "of": "of",
     "state": "State",
-    "submittedDate": "Submitted date"
+    "submittedDate": "Submitted date",
+    "tableAlt": "A table containing a list of enquiries"
   },
   "footer": {
     "about": "About gov.bc.ca",
@@ -144,7 +145,8 @@
     "draftId": "Draft ID",
     "lastEdited": "Last edited",
     "listEmpty": "Your project submission drafts will be displayed here",
-    "of": "of"
+    "of": "of",
+    "tableAlt": "A table containing a list of draft submissions"
   },
   "submissionIntakeForm": {
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",

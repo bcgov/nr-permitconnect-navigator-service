@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Divider } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
 
 // Props
 const { title } = defineProps<{

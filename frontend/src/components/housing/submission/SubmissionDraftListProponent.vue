@@ -64,6 +64,7 @@ function onDelete(draftId: string) {
     :current-page-report-template="`({currentPage} ${t('submissionDraftListProponent.of')} {totalPages})`"
     :rows-per-page-options="[10, 20, 50]"
     selection-mode="single"
+    :alt="t('submissionDraftListProponent.tableAlt')"
   >
     <template #empty>
       <div class="flex justify-center">

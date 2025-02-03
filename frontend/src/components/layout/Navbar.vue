@@ -90,67 +90,65 @@ onMounted(() => {
 </script>
 
 <template>
-  <nav>
-    <Menubar
-      :model="items"
-      class="!pl-12"
-    >
-      <template #item="{ item, props, hasSubmenu }">
-        <span
-          v-if="item.public || authzStore.canNavigate(item.access)"
-          class="menu-item"
+  <Menubar
+    :model="items"
+    class="!pl-12"
+    role="navigation"
+  >
+    <template #item="{ item, props, hasSubmenu }">
+      <span
+        v-if="item.public || authzStore.canNavigate(item.access)"
+        class="menu-item"
+      >
+        <router-link
+          v-if="item.route"
+          v-slot="{ href, navigate }"
+          :to="{ name: item.route }"
+          custom
         >
-          <router-link
-            v-if="item.route"
-            v-slot="{ href, navigate }"
-            :to="{ name: item.route }"
-            custom
-          >
-            <a
-              :aria-labelledby="item.label"
-              :href="href"
-              v-bind="props.action"
-              @click="navigate"
-            >
-              <span
-                :id="item.label"
-                class="flex"
-              >
-                {{ item.label }}
-              </span>
-            </a>
-          </router-link>
           <a
-            v-else-if="item.mailTo"
-            :aria-labelledby="item.label"
-            :href="item.mailTo"
-            :target="item.target"
+            :href="href"
             v-bind="props.action"
+            @click="navigate"
           >
-            <span :id="item.label">
-              {{ item.label }}
-            </span>
-          </a>
-          <a
-            v-else
-            :aria-labelledby="item.label"
-            :href="item.url"
-            :target="item.target"
-            v-bind="props.action"
-          >
-            <span class="flex">
-              {{ item.label }}
-            </span>
             <span
-              v-if="hasSubmenu"
               :id="item.label"
-              class="pi pi-angle-down mt-1 ml-1"
-            />
+              class="flex"
+            >
+              {{ item.label }}
+            </span>
           </a>
-        </span>
-      </template>
-    </Menubar>
-  </nav>
+        </router-link>
+        <a
+          v-else-if="item.mailTo"
+          z
+          :href="item.mailTo"
+          :target="item.target"
+          v-bind="props.action"
+        >
+          <span :id="item.label">
+            {{ item.label }}
+          </span>
+        </a>
+        <a
+          v-else
+          :aria-labelledby="item.label"
+          :href="item.url"
+          :target="item.target"
+          v-bind="props.action"
+        >
+          <span class="flex">
+            {{ item.label }}
+          </span>
+          <span
+            v-if="hasSubmenu"
+            :id="item.label"
+            class="pi pi-angle-down mt-1 ml-1"
+          />
+        </a>
+      </span>
+    </template>
+  </Menubar>
 </template>
 
 <style lang="scss" scoped>

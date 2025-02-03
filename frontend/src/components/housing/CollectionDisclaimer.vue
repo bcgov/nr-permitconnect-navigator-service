@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { Card, Divider } from '@/lib/primevue';
+import { Card } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
 
 const { t } = useI18n();
 </script>

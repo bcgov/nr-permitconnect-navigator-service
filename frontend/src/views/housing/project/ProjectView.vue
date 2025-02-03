@@ -5,17 +5,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
+import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionHeader,
-  AccordionPanel,
-  Button,
-  Card,
-  Divider,
-  useToast
-} from '@/lib/primevue';
+import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -187,23 +179,40 @@ onMounted(async () => {
     <div class="disclaimer-block p-8 mt-8">
       {{ t('projectView.disclaimer') }}
     </div>
-    <div class="mt-20 mb-2 flex justify-between items-center">
-      <h1
-        class="m-0 cursor-pointer hover:underline"
-        tabindex="0"
-        @click="navigateToSubmissionIntakeView()"
-        @keydown.enter.prevent="navigateToSubmissionIntakeView()"
-        @keydown.space.prevent="navigateToSubmissionIntakeView()"
-      >
-        {{ getSubmission.projectName }}
-        <font-awesome-icon
-          class="text-sm"
-          icon="fa fa-external-link"
-        />
-      </h1>
+    <div class="mt-20 flex justify-between">
+      <div>
+        <h1
+          class="mt-0 mb-2 cursor-pointer hover:underline"
+          tabindex="0"
+          @click="navigateToSubmissionIntakeView()"
+          @keydown.enter.prevent="navigateToSubmissionIntakeView()"
+          @keydown.space.prevent="navigateToSubmissionIntakeView()"
+        >
+          {{ getSubmission.projectName }}
+          <font-awesome-icon
+            class="text-sm"
+            icon="fa fa-external-link"
+          />
+        </h1>
+        <div>
+          <span class="mr-4">
+            Project ID:
+            <span class="font-bold">{{ getSubmission.activityId }}</span>
+          </span>
+          <span class="mr-4">
+            {{ t('projectView.createdBy') }}:
+            <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
+          </span>
+          <span v-if="assignee">
+            Navigator:
+            <span class="font-bold">{{ assignee?.firstName }} {{ assignee?.lastName }}</span>
+          </span>
+          <span v-else>Navigator: -</span>
+        </div>
+      </div>
       <Button
         v-if="getSubmission?.submissionType !== SubmissionType.INAPPLICABLE"
-        class="p-button-sm header-btn"
+        class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
         outlined
         @click="
@@ -214,21 +223,7 @@ onMounted(async () => {
         "
       />
     </div>
-    <div class="mb-2">
-      <span class="mr-4">
-        Project ID:
-        <span class="font-bold">{{ getSubmission.activityId }}</span>
-      </span>
-      <span class="mr-4">
-        {{ t('projectView.createdBy') }}:
-        <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
-      </span>
-      <span v-if="assignee">
-        Navigator:
-        <span class="font-bold">{{ assignee?.firstName }} {{ assignee?.lastName }}</span>
-      </span>
-      <span v-else>Navigator: -</span>
-    </div>
+
     <div
       v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
