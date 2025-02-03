@@ -4,7 +4,6 @@ import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
-import { YES_NO_LIST } from '../utils/constants/application';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
@@ -38,9 +37,6 @@ const schema = {
       submittedBy: Joi.string().max(255).required(),
       relatedActivityId: Joi.string().max(255).allow(null),
       enquiryDescription: Joi.string().min(0).allow(null),
-      applyForPermitConnect: Joi.string()
-        .valid(...Object.values(YES_NO_LIST))
-        .allow(null),
       intakeStatus: Joi.string()
         .valid(...Object.values(INTAKE_STATUS_LIST))
         .allow(null),

@@ -94,24 +94,23 @@ model document {
 }
 
 model enquiry {
-  enquiry_id               String    @id @db.Uuid
-  activity_id              String
-  assigned_user_id         String?   @db.Uuid
-  enquiry_type             String?
-  submitted_at             DateTime  @db.Timestamptz(6)
-  submitted_by             String
-  related_activity_id      String?
-  enquiry_description      String?
-  apply_for_permit_connect String?
-  intake_status            String?
-  enquiry_status           String?
-  waiting_on               String?
-  created_by               String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at               DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by               String?
-  updated_at               DateTime? @db.Timestamptz(6)
-  activity                 activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
-  user                     user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
+  enquiry_id          String    @id @db.Uuid
+  activity_id         String
+  assigned_user_id    String?   @db.Uuid
+  enquiry_type        String?
+  submitted_at        DateTime  @db.Timestamptz(6)
+  submitted_by        String
+  related_activity_id String?
+  enquiry_description String?
+  intake_status       String?
+  enquiry_status      String?
+  waiting_on          String?
+  created_by          String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at          DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by          String?
+  updated_at          DateTime? @db.Timestamptz(6)
+  activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
+  user                user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
 
   @@schema("public")
 }

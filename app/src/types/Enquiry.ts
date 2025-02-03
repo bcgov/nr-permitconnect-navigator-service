@@ -11,7 +11,6 @@ export type Enquiry = {
   submittedBy: string;
   relatedActivityId: string | null;
   enquiryDescription: string | null;
-  applyForPermitConnect: string | null;
   intakeStatus: string | null;
   enquiryStatus: string | null;
   waitingOn: string | null;

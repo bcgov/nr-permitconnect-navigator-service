@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { Button, useConfirm } from '@/lib/primevue';
 import { ref } from 'vue';
+import { object } from 'yup';
 
+import { contactValidator } from '@/validators';
 import { IntakeFormCategory } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 
 // Props
-const { formErrors, formValues } = defineProps<{
-  formErrors: Record<string, string | undefined>;
+const { formValues } = defineProps<{
   formValues: { [key: string]: string };
 }>();
-
 // Emits
 const emit = defineEmits(['onSubmitAssistance']);
 
@@ -20,28 +20,12 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
+const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = (
-  values: { [key: string]: string },
-  errors: Record<string, string | undefined>
-): boolean => {
+const checkApplicantValuesValid = (values: { [key: string]: string }): boolean => {
   // Check applicant section is filled
   let applicant = values?.[IntakeFormCategory.CONTACTS];
-  if (Object.values(applicant).some((x) => !x)) {
-    return false;
-  }
-
-  // Check applicant section is valid
-  let isValid = true;
-  const errorList = Object.keys(errors);
-
-  for (const error of errorList) {
-    if (error.includes(IntakeFormCategory.CONTACTS)) {
-      isValid = false;
-      break;
-    }
-  }
-  return isValid;
+  return contactSchema.isValidSync(applicant);
 };
 
 const confirmSubmit = () => {
@@ -94,7 +78,7 @@ const confirmSubmit = () => {
         <div class="flex justify-center">
           <Button
             label="Get assistance"
-            :disabled="!checkApplicantValuesValid(formValues, formErrors)"
+            :disabled="!checkApplicantValuesValid(formValues)"
             @click="() => confirmSubmit()"
           />
         </div>

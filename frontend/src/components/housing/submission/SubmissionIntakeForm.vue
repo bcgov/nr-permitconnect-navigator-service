@@ -195,30 +195,25 @@ function handleProjectLocationClick() {
 
 async function onAssistanceRequest(values: GenericObject) {
   try {
-    const formattedData = Object.assign(
-      {
-        basic: {
-          applyForPermitConnect: BasicResponse.NO,
-          enquiryDescription: 'Assistance requested',
-          enquiryType: SubmissionType.ASSISTANCE
-        }
+    const submissionData = {
+      basic: {
+        enquiryDescription: 'Assistance requested',
+        enquiryType: SubmissionType.ASSISTANCE
       },
-      {
-        contacts: [
-          {
-            contactId: values.contacts.contactId,
-            firstName: values.contacts.contactFirstName,
-            lastName: values.contacts.contactLastName,
-            phoneNumber: values.contacts.contactPhoneNumber,
-            email: values.contacts.contactEmail,
-            contactApplicantRelationship: values.contacts.contactApplicantRelationship,
-            contactPreference: values.contacts.contactPreference
-          }
-        ]
-      }
-    );
+      contacts: [
+        setEmptyStringsToNull({
+          contactId: values.contacts.contactId,
+          firstName: values.contacts.contactFirstName,
+          lastName: values.contacts.contactLastName,
+          phoneNumber: values.contacts.contactPhoneNumber,
+          email: values.contacts.contactEmail,
+          contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+          contactPreference: values.contacts.contactPreference
+        })
+      ]
+    };
 
-    const enquiryResponse = await enquiryService.createEnquiry(formattedData);
+    const enquiryResponse = await enquiryService.createEnquiry(submissionData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
@@ -343,6 +338,8 @@ function onStepChange(stepNumber: number) {
 }
 
 async function onSubmit(data: any) {
+  // If there is a change to contact fields,
+  // please update onAssistanceRequest() as well.
   editable.value = false;
 
   try {
@@ -601,7 +598,6 @@ watch(
 
       <SubmissionAssistance
         v-if="editable && values?.contacts"
-        :form-errors="errors"
         :form-values="values"
         @on-submit-assistance="onAssistanceRequest(values)"
       />

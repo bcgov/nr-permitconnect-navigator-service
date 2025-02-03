@@ -1,8 +1,10 @@
 import { shallowMount } from '@vue/test-utils';
 
+import { enquiryService, submissionService } from '@/services';
 import HousingView from '@/views/housing/HousingView.vue';
 import PrimeVue from 'primevue/config';
-import { enquiryService, submissionService } from '@/services';
+import Tooltip from 'primevue/tooltip';
+
 import type { AxiosResponse } from 'axios';
 
 // Mock dependencies
@@ -42,7 +44,10 @@ getDrafts.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as Axio
 const wrapperSettings = () => ({
   global: {
     plugins: [() => PrimeVue],
-    stubs: ['font-awesome-icon', 'router-link']
+    stubs: ['font-awesome-icon', 'router-link'],
+    directives: {
+      Tooltip: Tooltip
+    }
   }
 });
 
