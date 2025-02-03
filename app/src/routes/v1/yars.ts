@@ -33,4 +33,16 @@ router.delete(
   }
 );
 
+router.get('/permissions', (req: Request, res: Response, next: NextFunction): void => {
+  yarsController.getPermissions(req, res, next);
+});
+
+router.get(
+  '/group_role_policy_vw',
+  hasAuthorization(resource, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    yarsController.getGroupRolePolicyVw(req, res, next);
+  }
+);
+
 export default router;
