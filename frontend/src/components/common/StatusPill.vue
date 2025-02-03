@@ -4,13 +4,8 @@ import { computed } from 'vue';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/housing';
 
 // Props
-const {
-  authStatus,
-  toolTipDirection = 'right',
-  enlarge = false
-} = defineProps<{
+const { authStatus, enlarge = false } = defineProps<{
   authStatus?: string;
-  toolTipDirection?: string;
   enlarge?: boolean;
 }>();
 
@@ -87,8 +82,7 @@ const getState = computed(() => {
 <template>
   <div class="flex">
     <div
-      v-tooltip="{ value: getState?.toolTip, modifier: toolTipDirection }"
-      v-tooltip.focus="{ value: getState?.toolTip, modifier: toolTipDirection }"
+      v-tooltip.right="getState?.toolTip"
       class="flex justify-center items-center auth-indicator"
       :class="[getState?.badgeClass]"
       :style="{
@@ -97,15 +91,23 @@ const getState = computed(() => {
         '--height': dimensions.height,
         '--line-height': dimensions.lineHeight
       }"
-      tabindex="0"
+      role="tooltip"
+      :aria-label="getState?.toolTip"
     >
-      <font-awesome-icon
-        v-if="getState?.iconString"
-        class="icon-detail"
-        :class="[getState?.iconClass]"
-        :icon="getState?.iconString"
-      />
-      <span class="text-color">{{ authStatus }}</span>
+      <div
+        v-tooltip.focus.right="getState?.toolTip"
+        aria-hidden="true"
+        tabindex="0"
+      >
+        <font-awesome-icon
+          v-if="getState?.iconString"
+          class="icon-detail"
+          aria-hidden="true"
+          :class="[getState?.iconClass]"
+          :icon="getState?.iconString"
+        />
+        <span class="text-color">{{ authStatus }}</span>
+      </div>
     </div>
   </div>
 </template>
