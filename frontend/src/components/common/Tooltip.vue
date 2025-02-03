@@ -4,8 +4,7 @@ const {
   bottom,
   left,
   icon = 'fa-solid fa-circle-info',
-  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-  right,
+  right = true,
   text,
   top
 } = defineProps<{
@@ -28,25 +27,45 @@ const {
       v-if="bottom"
       v-tooltip.bottom="text"
     >
-      <font-awesome-icon :icon />
+      <span
+        v-tooltip.focus.bottom="text"
+        tabindex="0"
+      >
+        <font-awesome-icon :icon />
+      </span>
     </span>
     <span
       v-else-if="left"
       v-tooltip.left="text"
     >
-      <font-awesome-icon :icon />
+      <span
+        v-tooltip.focus.left="text"
+        tabindex="0"
+      >
+        <font-awesome-icon :icon />
+      </span>
     </span>
     <span
       v-else-if="top"
       v-tooltip.top="text"
     >
-      <font-awesome-icon :icon />
+      <span
+        v-tooltip.focus.top="text"
+        tabindex="0"
+      >
+        <font-awesome-icon :icon />
+      </span>
     </span>
     <span
-      v-else
+      v-else-if="right"
       v-tooltip.right="text"
     >
-      <font-awesome-icon :icon />
+      <span
+        v-tooltip.focus.right="text"
+        tabindex="0"
+      >
+        <font-awesome-icon :icon />
+      </span>
     </span>
   </span>
 </template>

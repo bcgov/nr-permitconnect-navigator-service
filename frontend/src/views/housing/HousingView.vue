@@ -122,7 +122,6 @@ onMounted(async () => {
       <div class="flex items-center flex-row">
         <h2
           id="projects"
-          class="flex"
           tabindex="-1"
         >
           {{ t('housing.myProjects') }}
@@ -219,7 +218,7 @@ onMounted(async () => {
       <div class="flex items-center flex-row">
         <h2
           id="enquiries"
-          class="flex font-bold"
+          class="font-bold"
           tabindex="-1"
         >
           {{ t('housing.generalEnquiries') }}
