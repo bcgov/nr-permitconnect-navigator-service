@@ -5,6 +5,7 @@ import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
+import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Map from '@/components/housing/maps/Map.vue';
@@ -695,14 +696,14 @@ watch(
 
             <Card>
               <template #title>
-                <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
-                <span
-                  v-tooltip.right="t('submissionIntakeForm.contactTooltip')"
-                  v-tooltip.focus.right="t('submissionIntakeForm.contactTooltip')"
-                  tabindex="0"
-                >
-                  <font-awesome-icon icon="fa-solid fa-circle-question" />
-                </span>
+                <div class="flex">
+                  <span class="section-header">{{ t('submissionIntakeForm.contactCard') }}</span>
+                  <Tooltip
+                    icon="fa-solid fa-circle-question"
+                    right
+                    :text="t('submissionIntakeForm.contactTooltip')"
+                  />
+                </div>
                 <Divider type="solid" />
               </template>
               <template #content>
@@ -782,14 +783,12 @@ watch(
                   >
                     <div class="flex items-center">
                       <p class="font-bold">Is it registered in B.C?</p>
-                      <div
-                        v-tooltip.right="t('submissionIntakeForm.isRegisteredTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.isRegisteredTooltip')"
+                      <Tooltip
                         class="pl-2"
-                        tabindex="0"
-                      >
-                        <font-awesome-icon icon="fa-solid fa-circle-question" />
-                      </div>
+                        right
+                        icon="fa-solid fa-circle-question"
+                        :text="t('submissionIntakeForm.isRegisteredTooltip')"
+                      />
                     </div>
                     <RadioList
                       class="col-span-12 mt-2 pl-0"
@@ -905,14 +904,12 @@ watch(
                         :disabled="!editable"
                         :invalid="!!errors.housing && meta.touched"
                       />
-                      <div
-                        v-tooltip.right="t('submissionIntakeForm.multiFamilyTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.multiFamilyTooltip')"
+                      <Tooltip
                         class="pl-2"
-                        tabindex="0"
-                      >
-                        <font-awesome-icon icon="fa-solid fa-circle-question" />
-                      </div>
+                        right
+                        icon="fa-solid fa-circle-question"
+                        :text="t('submissionIntakeForm.multiFamilyTooltip')"
+                      />
                     </div>
                   </div>
                   <Select
@@ -960,13 +957,11 @@ watch(
               <template #title>
                 <div class="flex">
                   <span class="section-header">{{ t('submissionIntakeForm.hasRentalUnitsCard') }}</span>
-                  <div
-                    v-tooltip.right="t('submissionIntakeForm.rentalUnitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.rentalUnitsTooltip')"
-                    tabindex="0"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-circle-question" />
-                  </div>
+                  <Tooltip
+                    right
+                    icon="fa-solid fa-circle-question"
+                    :text="t('submissionIntakeForm.rentalUnitsTooltip')"
+                  />
                 </div>
                 <Divider type="solid" />
               </template>
@@ -1028,19 +1023,12 @@ watch(
                           BC Housing
                         </a>
                       </label>
-                      <!-- eslint-disable max-len -->
-                      <div
-                        v-tooltip.right="t('submissionIntakeForm.bcHousingTooltip')"
-                        v-tooltip.focus.right="t('submissionIntakeForm.bcHousingTooltip')"
-                        class="mb-2"
-                        tabindex="0"
-                      >
-                        <font-awesome-icon
-                          class="pl-2"
-                          icon="fa-solid fa-circle-question"
-                        />
-                      </div>
-                      <!-- eslint-enable max-len -->
+                      <Tooltip
+                        class="pl-2 mb-2"
+                        right
+                        icon="fa-solid fa-circle-question"
+                        :text="t('submissionIntakeForm.bcHousingTooltip')"
+                      />
                     </div>
 
                     <RadioList
@@ -1136,14 +1124,12 @@ watch(
                 <div class="col-span-12 my-0 py-0">
                   <div class="flex items-center">
                     <label>Provide additional information</label>
-                    <div
-                      v-tooltip.right="t('submissionIntakeForm.additionalInfoTooltip')"
-                      v-tooltip.focus.right="t('submissionIntakeForm.additionalInfoTooltip')"
+                    <Tooltip
                       class="pl-2 mb-2"
-                      tabindex="0"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
+                      right
+                      icon="fa-solid fa-circle-question"
+                      :text="t('submissionIntakeForm.additionalInfoTooltip')"
+                    />
                   </div>
                 </div>
 
@@ -1229,13 +1215,12 @@ watch(
                     <span class="section-header">
                       {{ t('submissionIntakeForm.projectLocationCard') }}
                     </span>
-                    <div
-                      v-tooltip.right="t('submissionIntakeForm.addressTooltip')"
-                      v-tooltip.focus.right="t('submissionIntakeForm.addressTooltip')"
-                      tabindex="0"
-                    >
-                      <font-awesome-icon icon="fa-solid fa-circle-question" />
-                    </div>
+                    <Tooltip
+                      class="mb-2"
+                      right
+                      icon="fa-solid fa-circle-question"
+                      :text="t('submissionIntakeForm.addressTooltip')"
+                    />
                   </div>
                 </div>
                 <Divider type="solid" />
@@ -1509,13 +1494,12 @@ watch(
                   <span class="section-header">
                     {{ t('submissionIntakeForm.provincialPermitsCard') }}
                   </span>
-                  <div
-                    v-tooltip.right="t('submissionIntakeForm.appliedPermitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.appliedPermitsTooltip')"
-                    tabindex="0"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-circle-question" />
-                  </div>
+                  <Tooltip
+                    class="mb-2"
+                    right
+                    icon="fa-solid fa-circle-question"
+                    :text="t('submissionIntakeForm.appliedPermitsTooltip')"
+                  />
                 </div>
                 <Divider type="solid" />
               </template>
@@ -1646,13 +1630,11 @@ watch(
                   <span class="section-header">
                     {{ t('submissionIntakeForm.investigatePermitsCard') }}
                   </span>
-                  <div
-                    v-tooltip.right="t('submissionIntakeForm.potentialPermitsTooltip')"
-                    v-tooltip.focus.right="t('submissionIntakeForm.potentialPermitsTooltip')"
-                    tabindex="0"
-                  >
-                    <font-awesome-icon icon="fa-solid fa-circle-question" />
-                  </div>
+                  <Tooltip
+                    right
+                    icon="fa-solid fa-circle-question"
+                    :text="t('submissionIntakeForm.potentialPermitsTooltip')"
+                  />
                 </div>
                 <Divider type="solid" />
               </template>

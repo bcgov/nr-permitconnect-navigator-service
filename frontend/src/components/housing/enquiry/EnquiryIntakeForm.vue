@@ -8,6 +8,7 @@ import { object, string } from 'yup';
 
 import BackButton from '@/components/common/BackButton.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
+import Tooltip from '@/components/common/Tooltip.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, Divider, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService } from '@/services';
@@ -289,14 +290,13 @@ onBeforeMount(async () => {
 
       <Card>
         <template #title>
-          <span class="section-header">{{ t('enquiryIntakeForm.contactInformation') }}</span>
-          <span
-            v-tooltip.right="t('enquiryIntakeForm.contactTooltip')"
-            v-tooltip.focus.right="t('enquiryIntakeForm.contactTooltip')"
-            tabindex="0"
-          >
-            <font-awesome-icon icon="fa-solid fa-circle-info" />
-          </span>
+          <div class="flex">
+            <span class="section-header">{{ t('enquiryIntakeForm.contactInformation') }}</span>
+            <Tooltip
+              right
+              :text="t('enquiryIntakeForm.contactTooltip')"
+            />
+          </div>
           <Divider type="solid" />
         </template>
         <template #content>
