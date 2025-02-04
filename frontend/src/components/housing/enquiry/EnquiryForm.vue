@@ -463,7 +463,7 @@ onMounted(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :submission="enquiry"
+      :submission-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;

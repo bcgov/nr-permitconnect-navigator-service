@@ -8,7 +8,8 @@ import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Submission } from '@/types';
+import type { ATSClientResource, Enquiry, Submission } from '@/types';
+import type { AddressResource } from '@/types/ATSClientResource';
 
 // Types
 type ATSUser = {
@@ -20,8 +21,8 @@ type ATSUser = {
 };
 
 // Props
-const { submission } = defineProps<{
-  submission: Submission;
+const { submissionOrEnquiry } = defineProps<{
+  submissionOrEnquiry: Enquiry | Submission;
 }>();
 
 // Emits
@@ -40,18 +41,22 @@ const toast = useToast();
 async function createATSClient() {
   try {
     loading.value = true;
+
+    const address: Partial<AddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: submissionOrEnquiry.contacts[0]?.phoneNumber ?? '',
+      email: submissionOrEnquiry.contacts[0]?.email ?? ''
+    };
+
+    if ('streetAddress' in submissionOrEnquiry) address.addressLine1 = submissionOrEnquiry.streetAddress;
+    if ('locality' in submissionOrEnquiry) address.city = submissionOrEnquiry.streetAddress;
+    if ('province' in submissionOrEnquiry) address.provinceCode = submissionOrEnquiry.streetAddress;
+
     const data = {
       '@type': 'ClientResource',
-      address: {
-        '@type': 'AddressResource',
-        addressLine1: submission.streetAddress,
-        city: submission.locality,
-        provinceCode: submission.province,
-        primaryPhone: submission.contacts[0]?.phoneNumber,
-        email: submission.contacts[0]?.email
-      },
-      firstName: submission.contacts[0]?.firstName,
-      surName: submission.contacts[0]?.lastName,
+      address: address,
+      firstName: submissionOrEnquiry.contacts[0]?.firstName,
+      surName: submissionOrEnquiry?.contacts[0]?.lastName,
       regionName: Initiative.HOUSING,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
@@ -75,16 +80,20 @@ async function createATSClient() {
 }
 
 onMounted(() => {
-  const locationAddressStr = [submission.streetAddress, submission.locality, submission.province]
+  const locationAddressStr = [
+    'streetAddress' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',
+    'locality' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',
+    'province' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : ''
+  ]
     .filter((str) => str?.trim())
     .join(', ');
 
   atsUser.value = {
-    firstName: submission.contacts[0]?.firstName ?? '',
-    lastName: submission.contacts[0]?.lastName ?? '',
-    email: submission.contacts[0]?.email ?? '',
+    firstName: submissionOrEnquiry.contacts[0]?.firstName ?? '',
+    lastName: submissionOrEnquiry.contacts[0]?.lastName ?? '',
+    email: submissionOrEnquiry.contacts[0]?.email ?? '',
     address: locationAddressStr,
-    phone: submission.contacts[0]?.phoneNumber ?? ''
+    phone: submissionOrEnquiry.contacts[0]?.phoneNumber ?? ''
   };
 });
 </script>
