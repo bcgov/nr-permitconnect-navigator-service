@@ -801,7 +801,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :submission="submission"
+      :submission-or-enquiry="submission"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
