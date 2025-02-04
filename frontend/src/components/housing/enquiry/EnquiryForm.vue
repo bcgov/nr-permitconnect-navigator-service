@@ -5,6 +5,7 @@ import { date, mixed, object, string } from 'yup';
 
 import {
   CancelButton,
+  Checkbox,
   DatePicker,
   EditableSelect,
   FormNavigationGuard,
@@ -14,6 +15,9 @@ import {
   SectionHeader,
   TextArea
 } from '@/components/form';
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
+import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
@@ -31,7 +35,7 @@ import { contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Enquiry, User } from '@/types';
+import type { ATSClientResource, Enquiry, User } from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -49,6 +53,9 @@ const emit = defineEmits(['enquiryForm:saved']);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
+const atsUserCreateModalVisible: Ref<boolean> = ref(false);
+const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
@@ -229,6 +236,7 @@ onMounted(async () => {
     contactApplicantRelationship: enquiry?.contacts[0]?.contactApplicantRelationship,
     contactPreference: enquiry?.contacts[0]?.contactPreference,
     submittedAt: new Date(enquiry?.submittedAt),
+    addedToATS: '',
     user: assigneeOptions.value[0] ?? null
   };
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
@@ -247,6 +255,7 @@ onMounted(async () => {
   </Message>
   <Form
     v-if="initialFormValues"
+    v-slot="{ setFieldValue, values }"
     ref="formRef"
     :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
@@ -331,6 +340,53 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
+      <SectionHeader title="ATS" />
+      <div class="grid grid-cols-subgrid gap-4 col-span-12">
+        <div
+          v-if="true || values.atsClientNumber"
+          class="col-start-1 col-span-12"
+        >
+          <div class="flex items-center">
+            <h5 class="mr-2">Client #</h5>
+            <a
+              class="hover-hand"
+              @click="atsUserDetailsModalVisible = true"
+            >
+              {{ values?.atsClientNumber }}
+            </a>
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="atsClientNumber"
+        />
+        <Button
+          v-if="true || !values.atsClientNumber"
+          class="col-start-1 col-span-2"
+          aria-label="Link to ATS"
+          :disabled="!editable"
+          @click="atsUserLinkModalVisible = true"
+        >
+          Search ATS
+        </Button>
+        <Button
+          v-if="true || !values.atsClientNumber"
+          class="grid-col-start-3 col-span-2"
+          aria-label="New ATS client"
+          :disabled="!editable"
+          @click="atsUserCreateModalVisible = true"
+        >
+          New ATS Client
+        </Button>
+      </div>
+      <Checkbox
+        class="col-span-12 mt-2"
+        name="addedToATS"
+        label="Authorized Tracking System (ATS) updated"
+        :disabled="!editable"
+        :bold="true"
+      />
+
       <SectionHeader title="Submission state" />
 
       <Select
@@ -384,5 +440,35 @@ onMounted(async () => {
         />
       </div>
     </div>
+    <ATSUserLinkModal
+      v-model:visible="atsUserLinkModalVisible"
+      :submission="enquiry"
+      @ats-user-link:link="
+        (atsClientResource: ATSClientResource) => {
+          atsUserLinkModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientResource.clientId?.toString());
+        }
+      "
+    />
+    <ATSUserDetailsModal
+      v-model:visible="atsUserDetailsModalVisible"
+      :ats-client-number="values.atsClientNumber"
+      @ats-user-details:un-link="
+        () => {
+          atsUserDetailsModalVisible = false;
+          setFieldValue('atsClientNumber', null);
+        }
+      "
+    />
+    <ATSUserCreateModal
+      v-model:visible="atsUserCreateModalVisible"
+      :submission="enquiry"
+      @ats-user-link:link="
+        (atsClientId: string) => {
+          atsUserCreateModalVisible = false;
+          setFieldValue('atsClientNumber', atsClientId.toString());
+        }
+      "
+    />
   </Form>
 </template>

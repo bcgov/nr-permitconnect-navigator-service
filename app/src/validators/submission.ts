@@ -1,6 +1,7 @@
 import Joi from 'joi';
 
 import { appliedPermit } from './appliedPermit';
+import atsValidator from './ats';
 import { basicIntake } from './basic';
 import { activityId, email, uuidv4 } from './common';
 import { contacts } from './contact';
@@ -169,8 +170,9 @@ const schema = {
         .valid(...YES_NO_LIST)
         .required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
-      addedToATS: Joi.boolean().required(),
-      atsClientNumber: Joi.string().allow(null).max(255),
+      // addedToATS: Joi.boolean().required(),
+      // atsClientNumber: Joi.string().allow(null).max(255),
+      ...atsValidator.atsEnquirySubmissionFields,
       ltsaCompleted: Joi.boolean().required(),
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),

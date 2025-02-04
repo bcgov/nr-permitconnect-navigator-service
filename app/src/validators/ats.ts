@@ -22,6 +22,11 @@ const clientBody = {
   address: Joi.object(addressBody).allow(null)
 };
 
+const atsEnquirySubmissionFields = {
+  addedToATS: Joi.boolean().required(),
+  atsClientNumber: Joi.string().allow(null).max(255)
+};
+
 const schema = {
   createATSClient: {
     body: Joi.object(clientBody)
@@ -29,5 +34,6 @@ const schema = {
 };
 
 export default {
-  createATSClient: validate(schema.createATSClient)
+  createATSClient: validate(schema.createATSClient),
+  atsEnquirySubmissionFields
 };
