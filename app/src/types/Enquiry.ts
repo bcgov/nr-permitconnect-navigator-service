@@ -5,7 +5,9 @@ import type { User } from './User';
 export type Enquiry = {
   enquiryId: string; // Primary key
   activityId: string;
+  addedToAts: boolean;
   assignedUserId: string | null;
+  atsClientNumber: string | null;
   enquiryType: string | null;
   submittedAt: string;
   submittedBy: string;
