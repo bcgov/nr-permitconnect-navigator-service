@@ -114,7 +114,7 @@ const testSubmission: Submission = {
 
 const wrapperSettings = (testSubmissionProp = testSubmission) => ({
   props: {
-    submission: testSubmissionProp
+    submissionOrEnquiry: testSubmissionProp
   },
   global: {
     plugins: [

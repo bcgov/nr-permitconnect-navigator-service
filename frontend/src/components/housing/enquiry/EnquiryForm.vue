@@ -236,7 +236,8 @@ onMounted(async () => {
     contactApplicantRelationship: enquiry?.contacts[0]?.contactApplicantRelationship,
     contactPreference: enquiry?.contacts[0]?.contactPreference,
     submittedAt: new Date(enquiry?.submittedAt),
-    addedToATS: '',
+    addedToATS: enquiry?.addedToATS,
+    atsClientNumber: enquiry?.atsClientNumber,
     user: assigneeOptions.value[0] ?? null
   };
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
@@ -343,7 +344,7 @@ onMounted(async () => {
       <SectionHeader title="ATS" />
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
-          v-if="true || values.atsClientNumber"
+          v-if="values.atsClientNumber"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
@@ -361,7 +362,7 @@ onMounted(async () => {
           name="atsClientNumber"
         />
         <Button
-          v-if="true || !values.atsClientNumber"
+          v-if="!values.atsClientNumber"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
           :disabled="!editable"
@@ -370,7 +371,7 @@ onMounted(async () => {
           Search ATS
         </Button>
         <Button
-          v-if="true || !values.atsClientNumber"
+          v-if="!values.atsClientNumber"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
@@ -442,7 +443,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :submission="enquiry"
+      :submission-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;

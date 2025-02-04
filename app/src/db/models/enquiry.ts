@@ -45,7 +45,7 @@ export default {
     return {
       enquiry_id: input.enquiryId,
       activity_id: input.activityId,
-      added_to_ats: input.addedToAts,
+      added_to_ats: input.addedToATS,
       assigned_user_id: input.assignedUserId,
       ats_client_number: input.atsClientNumber,
       enquiry_type: input.enquiryType,
@@ -67,7 +67,7 @@ export default {
     return {
       enquiryId: input.enquiry_id,
       activityId: input.activity_id,
-      addedToAts: input.added_to_ats,
+      addedToATS: input.added_to_ats,
       assignedUserId: input.assigned_user_id,
       atsClientNumber: input.ats_client_number,
       enquiryType: input.enquiry_type,

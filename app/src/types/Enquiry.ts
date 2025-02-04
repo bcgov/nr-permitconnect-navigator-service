@@ -5,7 +5,7 @@ import type { User } from './User';
 export type Enquiry = {
   enquiryId: string; // Primary key
   activityId: string;
-  addedToAts: boolean;
+  addedToATS: boolean;
   assignedUserId: string | null;
   atsClientNumber: string | null;
   enquiryType: string | null;
