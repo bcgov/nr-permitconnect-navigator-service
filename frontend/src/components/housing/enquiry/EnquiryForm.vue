@@ -100,6 +100,16 @@ const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
 
+const handleDetailsModalClick = computed(() => (values: Enquiry) => {
+  if (values.relatedActivityId && !relatedAtsNumber && !values.atsClientNumber) return;
+  atsUserDetailsModalVisible.value = true;
+});
+
+const displayAtsNumber = computed(() => (values: Enquiry) => {
+  if (values.relatedActivityId) return relatedAtsNumber || 'Unavailable';
+  else return values.atsClientNumber;
+});
+
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
@@ -199,6 +209,12 @@ const onSubmit = async (values: any) => {
       ]
     );
 
+    // Remove ats client number from enquiry if submitted
+    // with linked activity
+    if (valuesWithContact.relatedActivityId) {
+      valuesWithContact.atsClientNumber = '';
+      formRef?.value?.setFieldValue('atsClientNumber', '');
+    }
     // Generate final enquiry object
     const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
@@ -269,7 +285,6 @@ onMounted(async () => {
     @submit="onSubmit"
   >
     <FormNavigationGuard v-if="!isCompleted" />
-
     <div class="grid grid-cols-12 gap-4">
       <Select
         class="col-span-3"
@@ -352,22 +367,10 @@ onMounted(async () => {
           <div class="flex items-center">
             <h5 class="mr-2">Client #</h5>
             <a
-              v-if="values.relatedActivityId"
-              :class="{ 'hover-hand': relatedAtsNumber }"
-              @click="
-                {
-                  if (relatedAtsNumber) atsUserDetailsModalVisible = true;
-                }
-              "
-            >
-              {{ relatedAtsNumber || 'Unavailable' }}
-            </a>
-            <a
-              v-else
               class="hover-hand"
-              @click="atsUserDetailsModalVisible = true"
+              @click="handleDetailsModalClick(values as Enquiry)"
             >
-              {{ relatedAtsNumber || values?.atsClientNumber }}
+              {{ displayAtsNumber(values as Enquiry) }}
             </a>
           </div>
         </div>
@@ -401,7 +404,6 @@ onMounted(async () => {
         :disabled="!editable"
         :bold="true"
       />
-      {{ relatedAtsNumber }}
       <SectionHeader title="Submission state" />
 
       <Select
@@ -468,6 +470,7 @@ onMounted(async () => {
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
       :ats-client-number="relatedAtsNumber || values.atsClientNumber"
+      :disabled="values.relatedActivityId || !!relatedAtsNumber"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;

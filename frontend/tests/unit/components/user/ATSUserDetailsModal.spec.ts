@@ -9,7 +9,8 @@ const testATSClientNumber = '123456';
 
 const wrapperSettings = (testATSClientNumberProp = testATSClientNumber) => ({
   props: {
-    atsClientNumber: testATSClientNumberProp
+    atsClientNumber: testATSClientNumberProp,
+    disabled: false
   },
   global: {
     plugins: [

@@ -9,8 +9,9 @@ import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
 
 // Props
-const { atsClientNumber } = defineProps<{
+const { atsClientNumber, disabled = false } = defineProps<{
   atsClientNumber: string | null;
+  disabled?: boolean;
 }>();
 
 // Emits
@@ -113,6 +114,7 @@ watch(visible, () => {
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
             aria-label="Delete user"
+            :disabled="disabled"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >
             <font-awesome-icon icon="fa-solid fa-trash" />
@@ -124,6 +126,7 @@ watch(visible, () => {
       <Button
         class="p-button-solid mr-4"
         label="Save"
+        :disabled="disabled"
         @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
       />
       <Button
