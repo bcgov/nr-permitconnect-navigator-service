@@ -43,7 +43,12 @@ interface EnquiryForm extends Enquiry {
 }
 
 // Props
-const { editable = true, enquiry } = defineProps<{
+const {
+  relatedAtsNumber,
+  editable = true,
+  enquiry
+} = defineProps<{
+  relatedAtsNumber?: string | null;
   editable?: boolean;
   enquiry: any;
 }>();
@@ -343,17 +348,26 @@ onMounted(async () => {
 
       <SectionHeader title="ATS" />
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
-        <div
-          v-if="values.atsClientNumber"
-          class="col-start-1 col-span-12"
-        >
+        <div class="col-start-1 col-span-12">
           <div class="flex items-center">
             <h5 class="mr-2">Client #</h5>
             <a
+              v-if="values.relatedActivityId"
+              :class="{ 'hover-hand': relatedAtsNumber }"
+              @click="
+                {
+                  if (relatedAtsNumber) atsUserDetailsModalVisible = true;
+                }
+              "
+            >
+              {{ relatedAtsNumber || 'Unavailable' }}
+            </a>
+            <a
+              v-else
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
             >
-              {{ values?.atsClientNumber }}
+              {{ relatedAtsNumber || values?.atsClientNumber }}
             </a>
           </div>
         </div>
@@ -362,7 +376,7 @@ onMounted(async () => {
           name="atsClientNumber"
         />
         <Button
-          v-if="!values.atsClientNumber"
+          v-if="!values.atsClientNumber && !values.relatedActivityId"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
           :disabled="!editable"
@@ -371,7 +385,7 @@ onMounted(async () => {
           Search ATS
         </Button>
         <Button
-          v-if="!values.atsClientNumber"
+          v-if="!values.atsClientNumber && !values.relatedActivityId"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
@@ -387,7 +401,7 @@ onMounted(async () => {
         :disabled="!editable"
         :bold="true"
       />
-
+      {{ relatedAtsNumber }}
       <SectionHeader title="Submission state" />
 
       <Select
@@ -453,7 +467,7 @@ onMounted(async () => {
     />
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
-      :ats-client-number="values.atsClientNumber"
+      :ats-client-number="relatedAtsNumber || values.atsClientNumber"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
