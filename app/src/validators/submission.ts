@@ -170,8 +170,6 @@ const schema = {
         .valid(...YES_NO_LIST)
         .required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
-      // addedToATS: Joi.boolean().required(),
-      // atsClientNumber: Joi.string().allow(null).max(255),
       ...atsValidator.atsEnquirySubmissionFields,
       ltsaCompleted: Joi.boolean().required(),
       bcOnlineCompleted: Joi.boolean().required(),

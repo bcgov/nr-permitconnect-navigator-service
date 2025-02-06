@@ -69,12 +69,12 @@ onMounted(() => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-max"
+    class="app-info-dialog w-1/2"
   >
     <template #header>
       <span class="p-dialog-title app-primary-color">Search ATS</span>
     </template>
-    <div class="pt-1 mb-6 mr-1 grid grid-cols-12 gap-4">
+    <div class="pt-1 mb-6 mr-1 grid grid-cols-6 gap-4">
       <div class="col pr-0">
         <InputText
           v-model="firstName"
@@ -110,13 +110,11 @@ onMounted(() => {
           class="w-full"
         />
       </div>
-      <div class="col-fixed w-1/12">
-        <Button
-          class="p-button-solid"
-          label="Search"
-          @click="searchATSUsers"
-        />
-      </div>
+      <Button
+        class="col p-button-solid"
+        label="Search"
+        @click="searchATSUsers"
+      />
     </div>
     <DataTable
       v-model:selection="selectedUser"

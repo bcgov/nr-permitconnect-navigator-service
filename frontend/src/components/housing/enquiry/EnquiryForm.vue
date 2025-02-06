@@ -100,11 +100,6 @@ const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
 
-const handleDetailsModalClick = computed(() => (values: Enquiry) => {
-  if (values.relatedActivityId && !relatedAtsNumber && !values.atsClientNumber) return;
-  atsUserDetailsModalVisible.value = true;
-});
-
 const displayAtsNumber = computed(() => (values: Enquiry) => {
   if (values.relatedActivityId) return relatedAtsNumber || 'Unavailable';
   else return values.atsClientNumber;
@@ -129,6 +124,15 @@ const onAssigneeInput = async (e: IInputEvent) => {
     assigneeOptions.value = [];
   }
 };
+
+const showUserLinkModelCheck = (values: Enquiry) => {
+  if (values.relatedActivityId && !relatedAtsNumber && !values.atsClientNumber) return false;
+  else true;
+};
+
+const handleDetailsModalClick = computed(() => (values: Enquiry) => {
+  if (showUserLinkModelCheck(values)) atsUserDetailsModalVisible.value = true;
+});
 
 function onCancel() {
   formRef.value?.resetForm();
@@ -285,6 +289,10 @@ onMounted(async () => {
     @submit="onSubmit"
   >
     <FormNavigationGuard v-if="!isCompleted" />
+    <div>relatedAtsNumber {{ relatedAtsNumber }}</div>
+    <div>values?.relatedActivityId {{ values?.relatedActivityId }}</div>
+    <div>values?.atsClientNumber {{ values?.atsClientNumber }}</div>
+
     <div class="grid grid-cols-12 gap-4">
       <Select
         class="col-span-3"
@@ -367,7 +375,10 @@ onMounted(async () => {
           <div class="flex items-center">
             <h5 class="mr-2">Client #</h5>
             <a
-              class="hover-hand"
+              :class="{
+                'hover-hand': showUserLinkModelCheck(values as Enquiry),
+                'no-underline': !showUserLinkModelCheck(values as Enquiry)
+              }"
               @click="handleDetailsModalClick(values as Enquiry)"
             >
               {{ displayAtsNumber(values as Enquiry) }}
