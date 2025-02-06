@@ -26,7 +26,12 @@ const { t } = useI18n();
 
 <template>
   <div>
-    <h2 v-if="showHeader">Confirmation of Submission</h2>
+    <h2
+      v-if="showHeader"
+      class="mb-9"
+    >
+      Confirmation of Submission
+    </h2>
     <Message
       severity="success"
       :closable="false"

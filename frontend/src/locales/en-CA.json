@@ -92,6 +92,15 @@
     "submitNewEnquiry": "Submit a general enquiry",
     "submitNewProject": "Submit a new project"
   },
+  "intakeAssistance": {
+    "confirmationHeader": "Confirmation of Assistance Request",
+    "confirmationIdLabel": "Confirmation ID",
+    "confirmationMessage": "Your assistance request has been successfully submitted.",
+    "messagePart1": "A Housing Navigator will review your submission and contact you in 2 business days. Your form has also been saved as draft, you can find it in",
+    "messagePart2": "Please check your email for the confirmatin email and keep the confirmation ID for future reference",
+    "linkHousingSubmissions": "My drafts and previous entries.",
+    "linkSubmissions": "Back to Housing"
+  },
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"
