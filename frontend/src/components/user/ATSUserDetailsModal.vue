@@ -125,6 +125,7 @@ watch(visible, () => {
     <div class="flex justify-start mt-8">
       <Button
         class="p-button-solid mr-4"
+        :class="{ 'no-underline': disabled }"
         label="Save"
         :disabled="disabled"
         @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"

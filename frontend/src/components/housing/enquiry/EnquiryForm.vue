@@ -126,8 +126,8 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 const showUserLinkModelCheck = (values: Enquiry) => {
-  if (values.relatedActivityId && !relatedAtsNumber && !values.atsClientNumber) return false;
-  else true;
+  if (relatedAtsNumber || values.atsClientNumber) return true;
+  else false;
 };
 
 const handleDetailsModalClick = computed(() => (values: Enquiry) => {
@@ -289,9 +289,6 @@ onMounted(async () => {
     @submit="onSubmit"
   >
     <FormNavigationGuard v-if="!isCompleted" />
-    <div>relatedAtsNumber {{ relatedAtsNumber }}</div>
-    <div>values?.relatedActivityId {{ values?.relatedActivityId }}</div>
-    <div>values?.atsClientNumber {{ values?.atsClientNumber }}</div>
 
     <div class="grid grid-cols-12 gap-4">
       <Select
