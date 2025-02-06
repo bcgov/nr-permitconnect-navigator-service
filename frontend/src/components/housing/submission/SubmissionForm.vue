@@ -131,7 +131,7 @@ const formSchema = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: string().notRequired().max(255).label('ATS Client #'),
+  atsClientNumber: number().notRequired().max(999999).label('ATS Client #'),
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -216,6 +216,7 @@ const onSubmit = async (values: any) => {
     const valuesWithContact = omit(
       {
         ...values,
+        atsClientNumber: parseInt(values.atsClientNumber) || '',
         contacts: [
           {
             contactId: values.contactId,

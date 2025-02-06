@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { date, mixed, object, string } from 'yup';
+import { date, mixed, number, object, string } from 'yup';
 
 import {
   CancelButton,
@@ -93,7 +93,8 @@ const intakeSchema = object({
     })
     .label('Assigned to'),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
-  waitingOn: string().notRequired().max(255).label('waiting on')
+  waitingOn: string().notRequired().max(255).label('waiting on'),
+  atsClientNumber: number().max(999999).notRequired()
 });
 
 // Actions
@@ -191,6 +192,7 @@ const onSubmit = async (values: any) => {
     const valuesWithContact = omit(
       {
         ...values,
+        atsClientNumber: parseInt(values.atsClientNumber) || '',
         contacts: [
           {
             contactId: values.contactId,
