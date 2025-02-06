@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { date, mixed, object, string } from 'yup';
 
 import {
@@ -96,6 +97,7 @@ const intakeSchema = object({
 });
 
 // Actions
+const { t } = useI18n();
 const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
@@ -126,13 +128,12 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 const showUserLinkModelCheck = (values: Enquiry) => {
-  if (relatedAtsNumber || values.atsClientNumber) return true;
-  else false;
+  return relatedAtsNumber || values.atsClientNumber;
 };
 
-const handleDetailsModalClick = computed(() => (values: Enquiry) => {
+const handleDetailsModalClick = (values: Enquiry) => {
   if (showUserLinkModelCheck(values)) atsUserDetailsModalVisible.value = true;
-});
+};
 
 function onCancel() {
   formRef.value?.resetForm();
@@ -315,7 +316,7 @@ onMounted(async () => {
       />
       <div class="col-span-3" />
 
-      <SectionHeader title="Basic information" />
+      <SectionHeader :title="t('enquiryForm.basicInfoHeader')" />
 
       <InputText
         class="col-span-3"
@@ -357,7 +358,7 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <SectionHeader title="Enquiry detail" />
+      <SectionHeader :title="t('enquiryForm.enquiryDetailHeader')" />
 
       <TextArea
         class="col-span-12"
@@ -366,7 +367,8 @@ onMounted(async () => {
         :disabled="!editable"
       />
 
-      <SectionHeader title="ATS" />
+      <SectionHeader :title="t('enquiryForm.atsHeader')" />
+
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div class="col-start-1 col-span-12">
           <div class="flex items-center">
@@ -393,7 +395,7 @@ onMounted(async () => {
           :disabled="!editable"
           @click="atsUserLinkModalVisible = true"
         >
-          Search ATS
+          {{ t('enquiryForm.atsSearchBtn') }}
         </Button>
         <Button
           v-if="!values.atsClientNumber && !values.relatedActivityId"
@@ -402,7 +404,7 @@ onMounted(async () => {
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
-          New ATS Client
+          {{ t('enquiryForm.atsNewClientBtn') }}
         </Button>
       </div>
       <Checkbox
@@ -447,10 +449,10 @@ onMounted(async () => {
       <div class="field col-span-12 mt-8">
         <Button
           v-if="!isCompleted"
-          label="Save"
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
+          :label="t('enquiryForm.formSaveBtn')"
         />
         <CancelButton
           v-if="!isCompleted"
@@ -459,8 +461,8 @@ onMounted(async () => {
         />
         <Button
           v-if="isCompleted"
-          label="Re-open enquiry"
           icon="pi pi-check"
+          :label="t('enquiryForm.formReopenBtn')"
           @click="onReOpen()"
         />
       </div>

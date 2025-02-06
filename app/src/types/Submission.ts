@@ -24,7 +24,7 @@ export type Submission = {
   astNotes: string | null;
   astUpdated: boolean;
   addedToATS: boolean;
-  atsClientNumber: string | null;
+  atsClientNumber: number | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   naturalDisaster: string;

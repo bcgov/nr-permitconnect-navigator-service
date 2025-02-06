@@ -24,7 +24,7 @@ const clientBody = {
 
 const atsEnquirySubmissionFields = {
   addedToATS: Joi.boolean().required(),
-  atsClientNumber: Joi.string().allow(null).max(255)
+  atsClientNumber: Joi.number().allow(null).max(999999)
 };
 
 const schema = {

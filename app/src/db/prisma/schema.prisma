@@ -109,7 +109,7 @@ model enquiry {
   created_at          DateTime? @default(now()) @db.Timestamptz(6)
   updated_by          String?
   updated_at          DateTime? @db.Timestamptz(6)
-  ats_client_number   String?
+  ats_client_number   Int?
   added_to_ats        Boolean   @default(false)
   activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "enquiry_activity_id_foreign")
   user                user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
@@ -257,7 +257,7 @@ model submission {
   ast_notes                          String?
   ast_updated                        Boolean   @default(false)
   added_to_ats                       Boolean   @default(false)
-  ats_client_number                  String?
+  ats_client_number                  Int?
   ltsa_completed                     Boolean   @default(false)
   bc_online_completed                Boolean   @default(false)
   natural_disaster                   Boolean   @default(false)
