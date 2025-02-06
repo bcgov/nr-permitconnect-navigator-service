@@ -401,7 +401,7 @@ onMounted(async () => {
       </TabPanel>
       <TabPanel :value="2">
         <span v-if="getPermitTypes.length">
-          <div class="flex items-center pb-2">
+          <div class="flex items-center pb-5">
             <div class="grow">
               <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
             </div>
@@ -436,7 +436,7 @@ onMounted(async () => {
         </span>
       </TabPanel>
       <TabPanel :value="3">
-        <div class="flex items-center pb-2">
+        <div class="flex items-center pb-5">
           <div class="grow">
             <p class="font-bold">Notes ({{ getNotes.length }})</p>
           </div>
@@ -490,7 +490,7 @@ onMounted(async () => {
           v-for="(enquiry, index) in getRelatedEnquiries"
           :key="enquiry.enquiryId"
           :index="index"
-          class="col-span-12"
+          class="col-span-12 mb-6"
         >
           <EnquiryCard :enquiry="enquiry" />
         </div>

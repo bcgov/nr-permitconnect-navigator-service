@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
 import { Message } from '@/lib/primevue';
 
 import { RouteName } from '@/utils/enums/application';
@@ -8,19 +10,22 @@ const { assignedActivityId, assignedEnquiryId } = defineProps<{
   assignedActivityId: string;
   assignedEnquiryId: string;
 }>();
+
+// State
+const { t } = useI18n();
 </script>
 
 <template>
   <div>
-    <h2>Confirmation of Assistance Request</h2>
+    <h2>{{ t('intakeAssistance.confirmationHeader') }}</h2>
     <Message
-      class="border-0"
+      class="border-0 mb-6"
       severity="success"
       :closable="false"
     >
-      Your assistance request has been successfully submitted.
+      {{ t('intakeAssistance.confirmationMessage') }}
     </Message>
-    <h3 class="inline-block mr-2">Confirmation ID:</h3>
+    <h3 class="inline-block mr-2 mb-6">{{ t('intakeAssistance.confirmationIdLabel') }}:</h3>
     <router-link
       :to="{
         name: RouteName.HOUSING_ENQUIRY_INTAKE,
@@ -30,12 +35,15 @@ const { assignedActivityId, assignedEnquiryId } = defineProps<{
       <span class="text-2xl">{{ assignedActivityId }}</span>
     </router-link>
     <div>
-      A Housing Navigator will review your submission and contact you in 2 business days. Your form has also been saved
-      as draft, you can find it in
-      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">My drafts and previous entries.</router-link>
-      Please check your email for the confirmation email and keep the confirmation ID for future reference
+      {{ t('intakeAssistance.messagePart1') }}
+      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">
+        {{ t('intakeAssistance.linkHousingSubmissions') }}
+      </router-link>
+      {{ t('intakeAssistance.messagePart2') }}
     </div>
-    <div class="mt-6"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
+    <div class="mt-6">
+      <router-link :to="{ name: RouteName.HOUSING }">{{ t('intakeAssistance.linkSubmissions') }}</router-link>
+    </div>
   </div>
 </template>
 

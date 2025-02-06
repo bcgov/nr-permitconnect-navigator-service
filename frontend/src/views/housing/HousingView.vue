@@ -144,7 +144,7 @@ onMounted(async () => {
     <div class="w-full">
       <div
         v-if="!projects.length"
-        class="flex flex-col items-center justify-center rounded-sm shadow-md px-4 py-1 bg"
+        class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
       >
         <p class="font-bold">{{ t('housing.projectsEmpty') }}</p>
       </div>
