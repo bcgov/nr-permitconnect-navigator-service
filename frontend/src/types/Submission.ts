@@ -15,6 +15,7 @@ export type Submission = {
   companyNameRegistered: string;
   consentToFeedback?: boolean;
   isDevelopedInBC: string;
+  geoJSON?: any;
   projectName: string;
   projectDescription: string;
   projectLocationDescription: string;

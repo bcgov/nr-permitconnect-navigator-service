@@ -85,6 +85,12 @@ type SubmissionForm = {
   addressSearch?: string;
 } & SubmissionIntake;
 
+type PinUpdateEvent = {
+  longitude: number;
+  latitude: number;
+  address: string;
+};
+
 // Props
 const {
   activityId = undefined,
@@ -568,6 +574,33 @@ watch(
     if (activeStep.value === 3) isSubmittable.value = true;
   }
 );
+
+function onPolygonUpdate(data: any) {
+  formRef.value?.setFieldValue('location.geoJSON', data.geoJSON);
+  clearAddress();
+}
+
+function onPinUpdate(pinUpdateEvent: PinUpdateEvent) {
+  const addressSplit = pinUpdateEvent.address.split(',');
+  formRef.value?.setFieldValue('location.streetAddress', addressSplit[0]);
+  formRef.value?.setFieldValue('location.locality', addressSplit[1]);
+  formRef.value?.setFieldValue('location.province', addressSplit[2]);
+  formRef.value?.setFieldValue('location.latitude', pinUpdateEvent.latitude);
+  formRef.value?.setFieldValue('location.longitude', pinUpdateEvent.longitude);
+  clearGeoJSON();
+}
+
+function clearAddress() {
+  formRef.value?.resetField('location.streetAddress');
+  formRef.value?.resetField('location.locality');
+  formRef.value?.resetField('location.province');
+  formRef.value?.resetField('location.latitude');
+  formRef.value?.resetField('location.longitude');
+}
+
+function clearGeoJSON() {
+  formRef.value?.resetField('location.geoJSON');
+}
 </script>
 
 <template>
@@ -1398,11 +1431,73 @@ watch(
                   </div>
                 </div>
                 <Map
+                  v-if="values.location?.projectLocation !== ProjectLocation.PIN_OR_DRAW"
                   ref="mapRef"
                   :disabled="!editable"
                   :latitude="mapLatitude"
                   :longitude="mapLongitude"
                 />
+                <div v-if="values.location?.projectLocation === ProjectLocation.PIN_OR_DRAW">
+                  <Map
+                    ref="mapRef"
+                    :pin-or-draw="true"
+                    :disabled="!editable"
+                    :latitude="mapLatitude"
+                    :longitude="mapLongitude"
+                    @map:erased="
+                      clearGeoJSON();
+                      clearAddress();
+                    "
+                    @map:polygon-updated="onPolygonUpdate"
+                    @map:pin-updated="onPinUpdate"
+                  />
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div class="grid grid-cols-12 gap-4 nested-grid">
+                        <InputText
+                          class="col-span-4"
+                          name="location.streetAddress"
+                          disabled
+                          placeholder="Street address"
+                        />
+                        <InputText
+                          class="col-span-4"
+                          name="location.locality"
+                          disabled
+                          placeholder="Locality"
+                        />
+                        <InputText
+                          class="col-span-4"
+                          name="location.province"
+                          disabled
+                          placeholder="Province"
+                        />
+                        <InputNumber
+                          class="col-span-4"
+                          name="location.latitude"
+                          disabled
+                          :help-text="
+                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                              ? 'Provide a coordinate between 48 and 60'
+                              : ''
+                          "
+                          placeholder="Latitude"
+                        />
+                        <InputNumber
+                          class="col-span-4"
+                          name="location.longitude"
+                          disabled
+                          :help-text="
+                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
+                              ? 'Provide a coordinate between -114 and -139'
+                              : ''
+                          "
+                          placeholder="Longitude"
+                        />
+                      </div>
+                    </template>
+                  </Card>
+                </div>
               </template>
             </Card>
             <Card>
