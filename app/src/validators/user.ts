@@ -7,7 +7,6 @@ const schema = {
   searchUsers: {
     query: Joi.object({
       userId: Joi.array().items(uuidv4),
-      identityId: Joi.array().items(uuidv4),
       idp: Joi.array().items(Joi.string().max(255)),
       sub: Joi.string().max(255),
       email: Joi.string().max(255),

@@ -24,7 +24,6 @@ export const contacts = Joi.array()
 const schema = {
   searchContacts: {
     query: Joi.object({
-      identityId: uuidv4.allow(null),
       userId: Joi.array().items(uuidv4).allow(null),
       contactId: Joi.array().items(uuidv4).allow(null),
       email: Joi.string().max(255).allow(null),

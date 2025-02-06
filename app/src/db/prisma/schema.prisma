@@ -299,9 +299,8 @@ model submission {
 
 model user {
   user_id           String             @id @db.Uuid
-  identity_id       String?            @db.Uuid
   idp               String?
-  sub               String
+  sub               String             @unique(map: "user_sub_unique")
   email             String?
   first_name        String?
   full_name         String?
@@ -317,10 +316,9 @@ model user {
   submission        submission[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
-  @@unique([identity_id, idp], map: "user_identity_id_idp_unique")
   @@index([email], map: "user_email_index")
-  @@index([identity_id], map: "user_identity_id_index")
   @@index([sub], map: "user_username_index")
+  @@index([sub], map: "user_sub_index")
   @@schema("public")
 }
 

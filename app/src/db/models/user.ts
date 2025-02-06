@@ -12,7 +12,6 @@ export default {
   toPrismaModel(input: User): PrismaRelationUser {
     return {
       user_id: input.userId as string,
-      identity_id: input.identityId,
       idp: input.idp,
       sub: input.sub,
       email: input.email,
@@ -26,7 +25,6 @@ export default {
   fromPrismaModel(input: PrismaRelationUser): User {
     return {
       userId: input.user_id,
-      identityId: input.identity_id as string,
       idp: input.idp,
       sub: input.sub,
       email: input.email,

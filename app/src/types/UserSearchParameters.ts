@@ -1,6 +1,5 @@
 export type UserSearchParameters = {
   userId?: string[];
-  identityId?: string[];
   idp?: string[];
   group?: string[];
   sub?: string;

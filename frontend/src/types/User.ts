@@ -7,7 +7,6 @@ export type User = {
   email: string;
   firstName: string;
   fullName: string;
-  identityId: string | null;
   idp: string;
   lastName: string;
   groups: Array<GroupName>;

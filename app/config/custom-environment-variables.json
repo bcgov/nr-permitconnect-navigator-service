@@ -79,7 +79,6 @@
       "authority": "SERVER_OIDC_AUTHORITY",
       "clientId": "SERVER_OIDC_CLIENTID",
       "clientSecret": "SERVER_OIDC_CLIENTSECRET",
-      "identityKey": "SERVER_OIDC_IDENTITYKEY",
       "publicKey": "SERVER_OIDC_PUBLICKEY"
     },
     "port": "SERVER_PORT",

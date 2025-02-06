@@ -5,7 +5,6 @@ import { v4 as uuidv4, NIL } from 'uuid';
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
 import { contactService } from '../services';
-import { parseIdentityKeyClaims } from '../utils/utils';
 
 import type { Contact, User, UserSearchParameters } from '../types';
 
@@ -18,20 +17,15 @@ const service = {
   /**
    * @function _tokenToUser
    * Transforms JWT payload contents into a User Model object
+   * Checks IDIR/BCeID keys first, fallbacks are for BCSC
    * @param {object} token The decoded JWT payload
    * @returns {object} An equivalent User model object
    */
   _tokenToUser: (token: jwt.JwtPayload) => {
-    const identityId = parseIdentityKeyClaims()
-      .map((idKey) => token[idKey])
-      .filter((claims) => claims) // Drop falsy values from array
-      .concat(undefined)[0]; // Set undefined as last element of array
-
     return {
-      identityId: identityId,
       sub: token.sub ? token.sub : token.preferred_username,
-      firstName: token.given_name,
-      fullName: token.name,
+      firstName: token.given_name ?? token.given_names,
+      fullName: token.name ?? token.display_name,
       lastName: token.family_name,
       email: token.email,
       idp: token.identity_provider,
@@ -74,8 +68,7 @@ const service = {
     const _createUser = async (data: User, trx: Prisma.TransactionClient) => {
       const exists = await trx.user.findFirst({
         where: {
-          identity_id: data.identityId,
-          idp: data.idp
+          sub: data.sub
         }
       });
 
@@ -89,7 +82,6 @@ const service = {
 
         const newUser = {
           userId: uuidv4(),
-          identityId: data.identityId,
           sub: data.sub,
           fullName: data.fullName,
           email: data.email,
@@ -130,7 +122,6 @@ const service = {
    * @returns {string} The current userId if applicable, or `defaultValue`
    */
   getCurrentUserId: async (sub: string, defaultValue: string | undefined = undefined) => {
-    // TODO: Consider conditionally skipping when identityId is undefined?
     const user = await prisma.user.findFirst({
       where: {
         sub: sub
@@ -167,8 +158,7 @@ const service = {
     const response: User | undefined | null = await prisma.$transaction(async (trx) => {
       const oldUser = await trx.user.findFirst({
         where: {
-          identity_id: newUser.identityId,
-          idp: newUser.idp
+          sub: newUser.sub
         }
       });
       if (!oldUser) {
@@ -240,7 +230,6 @@ const service = {
    * @function searchUsers
    * Search and filter for specific users
    * @param {string[]} [params.userId] Optional array of uuids representing the user subject
-   * @param {string[]} [params.identityId] Optionalarray of uuids representing the user identity
    * @param {string[]} [params.idp] Optional array of identity providers
    * @param {string} [params.sub] Optional sub string to match on
    * @param {string} [params.email] Optional email string to match on
@@ -256,9 +245,6 @@ const service = {
         AND: [
           {
             user_id: { in: params.userId }
-          },
-          {
-            identity_id: { in: params.identityId }
           },
           {
             idp: { in: params.idp, mode: 'insensitive' }
@@ -313,7 +299,6 @@ const service = {
         }
 
         const obj = {
-          identityId: data.identityId,
           sub: data.sub,
           fullName: data.fullName,
           email: data.email,

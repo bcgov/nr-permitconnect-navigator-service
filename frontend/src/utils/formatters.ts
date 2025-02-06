@@ -56,6 +56,7 @@ export function formatDateTime(value: string | undefined | null) {
 }
 
 /**
+ * @deprecated Function not used anywhere
  * @function formatJwtUsername
  * Formats a JWT username to a presentable value
  * @param {String} value A string representation of a JWT username

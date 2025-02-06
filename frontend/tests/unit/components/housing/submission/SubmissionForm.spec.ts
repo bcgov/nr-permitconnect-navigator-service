@@ -41,7 +41,6 @@ const testUser = {
   email: 'john.doe@example.com',
   firstName: 'John',
   fullName: 'John Doe',
-  identityId: 'identity-123',
   idp: 'idir',
   lastName: 'Doe',
   groups: [GroupName.DEVELOPER],

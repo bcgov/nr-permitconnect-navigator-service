@@ -10,6 +10,9 @@ import type { NextFunction, Request, Response } from 'express';
 import type { Enquiry, EnquiryIntake } from '../types';
 
 const controller = {
+  /**
+   * @deprecated Not used anywhere
+   */
   createRelatedNote: async (req: Request, data: Enquiry) => {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);

@@ -2,7 +2,6 @@ import type { GroupName } from '@/utils/enums/application';
 
 export type UserSearchParameters = {
   userId?: string[];
-  identityId?: string[];
   idp?: string[];
   sub?: string;
   email?: string;

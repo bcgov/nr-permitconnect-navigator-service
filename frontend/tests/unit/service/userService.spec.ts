@@ -26,7 +26,6 @@ describe('userService test', () => {
   it('searches for user with valid object with all values', async () => {
     const testSearchParam: UserSearchParameters = {
       userId: ['testUserId1', 'testUserId2'],
-      identityId: ['testIdentityId1'],
       idp: ['idp1', 'idp2'],
       sub: 'testSub',
       email: 'testEmail@test.com',

@@ -2,7 +2,6 @@ import { IStamps } from '../interfaces/IStamps';
 
 export type User = {
   userId?: string; // Primary Key
-  identityId: string;
   idp: string | null;
   sub: string;
   email: string | null;
