@@ -7,6 +7,12 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
 const testAssignedActivityId = 'activity123';

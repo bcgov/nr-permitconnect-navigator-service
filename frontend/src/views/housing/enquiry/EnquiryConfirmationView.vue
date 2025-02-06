@@ -30,16 +30,16 @@ const { t } = useI18n();
       v-if="showHeader"
       class="mb-9"
     >
-      Confirmation of Submission
+      {{ t('enquiryConfirmationView.confirmationHeader') }}
     </h2>
     <Message
       severity="success"
       :closable="false"
     >
-      Your enquiry has been successfully submitted.
+      {{ t('enquiryConfirmationView.confirmationBanner') }}
     </Message>
     <div v-if="showEnquiryLink">
-      <h3 class="inline-block my-7 mr-2">Enquiry ID:</h3>
+      <h3 class="inline-block my-7 mr-2">{{ t('enquiryConfirmationView.confirmationIdLabel') }}:</h3>
       <router-link
         :to="{
           name: RouteName.HOUSING_ENQUIRY_INTAKE,
@@ -49,14 +49,14 @@ const { t } = useI18n();
         <span class="text-2xl">{{ activityId }}</span>
       </router-link>
     </div>
-    <div class="mt-2">
+    <div class="mt-9">
       {{ t('enquiryConfirmationView.confirmationMsg') }}
     </div>
     <div
       v-if="showHomeLink"
       class="mt-7"
     >
-      <router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link>
+      <router-link :to="{ name: RouteName.HOUSING }">{{ t('enquiryConfirmationView.linkSubmissions') }}</router-link>
     </div>
   </div>
 </template>
