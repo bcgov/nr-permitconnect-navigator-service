@@ -7,6 +7,7 @@ import { join } from 'path';
 // @ts-expect-error api-problem lacks a defined interface; code still works fine
 import Problem from 'api-problem';
 import querystring from 'querystring';
+import { randomBytes } from 'crypto';
 
 import { name as appName, version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
@@ -30,6 +31,12 @@ app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
+
+app.use((_req, res, next) => {
+  res.locals.cspNonce = randomBytes(32).toString('hex');
+  next();
+});
+
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -41,7 +48,9 @@ app.use(
           new URL(config.get('frontend.geocoder.apiPath')).origin,
           new URL(config.get('frontend.orgbook.apiPath')).origin
         ],
-        'img-src': ["'self'", 'data:', new URL(config.get('frontend.openStreetMap.apiPath')).origin] // eslint-disable-line
+        'img-src': ["'self'", 'data:', new URL(config.get('frontend.openStreetMap.apiPath')).origin], // eslint-disable-line
+        'media-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`], // eslint-disable-line
+        'script-src': ["'self'", (_req, res: any) => `'nonce-${res.locals.cspNonce}'`] // eslint-disable-line
       }
     }
   })
@@ -61,6 +70,12 @@ app.use((_req: Request, res: Response, next: () => void): void => {
   } else {
     next();
   }
+});
+
+// Disallow all scraping
+app.get('/robots.txt', (_req: Request, res: Response): void => {
+  res.type('text/plain');
+  res.send('User-agent: *\nDisallow: /');
 });
 
 // Base API Directory

@@ -30,7 +30,8 @@ router.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
-        'img-src': ['data:', 'https://cdn.redoc.ly'],
+        'img-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`, 'https://cdn.redoc.ly'], // eslint-disable-line
+        'media-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`], // eslint-disable-line
         'script-src': ['blob:', 'https://cdn.redoc.ly']
       }
     }
