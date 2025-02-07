@@ -2,7 +2,7 @@
 import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { date, mixed, number, object, string } from 'yup';
+import { boolean, date, mixed, number, object, string } from 'yup';
 
 import {
   CancelButton,
@@ -94,7 +94,8 @@ const intakeSchema = object({
     .label('Assigned to'),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   waitingOn: string().notRequired().max(255).label('waiting on'),
-  atsClientNumber: number().max(999999).notRequired()
+  addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
+  atsClientNumber: number().min(0).max(999999).notRequired().label('ATS Client #')
 });
 
 // Actions
