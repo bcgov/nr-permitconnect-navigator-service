@@ -134,7 +134,7 @@ const service = {
   /**
    * @function listIdps
    * Lists all known identity providers
-   * @param {boolean} [active] Optional boolean on user active status
+   * @param {boolean} [active] Boolean on identity_provider active status
    * @returns {Promise<object>} The result of running the find operation
    */
   listIdps: (active: boolean) => {
