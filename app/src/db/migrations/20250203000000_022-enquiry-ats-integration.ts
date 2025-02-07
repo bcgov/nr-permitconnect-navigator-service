@@ -5,13 +5,13 @@ export async function up(knex: Knex): Promise<void> {
   return Promise.resolve()
     .then(() =>
       knex.schema.alterTable('enquiry', (table) => {
-        table.integer('ats_client_number');
+        table.integer('ats_client_number').comment('May be an integer number containing up to 38 digits');
         table.boolean('added_to_ats').notNullable().defaultTo(false);
       })
     )
     .then(() =>
       knex.schema.alterTable('submission', (table) => {
-        table.integer('ats_client_number').alter();
+        table.integer('ats_client_number').comment('May be an integer number containing up to 38 digits').alter();
       })
     );
 }

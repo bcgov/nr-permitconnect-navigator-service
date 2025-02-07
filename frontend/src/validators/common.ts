@@ -24,6 +24,8 @@ export const assignedToValidator = (when: string, is: any) =>
     })
     .label('Assigned to');
 
+export const atsClientNumberValidator = number().notRequired().min(0).integer().label('ATS Client #');
+
 export const emailValidator = (message: string) => string().matches(new RegExp(Regex.EMAIL), message);
 
 export const latitudeValidator = number().notRequired().min(48).max(60).label('Latitude');

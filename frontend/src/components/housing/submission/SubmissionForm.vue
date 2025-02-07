@@ -34,7 +34,13 @@ import {
 } from '@/utils/constants/housing';
 import { BasicResponse, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
-import { assignedToValidator, contactValidator, latitudeValidator, longitudeValidator } from '@/validators';
+import {
+  assignedToValidator,
+  atsClientNumberValidator,
+  contactValidator,
+  latitudeValidator,
+  longitudeValidator
+} from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -131,7 +137,7 @@ const formSchema = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: number().notRequired().min(0).max(999999).label('ATS Client #'),
+  atsClientNumber: atsClientNumberValidator,
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),

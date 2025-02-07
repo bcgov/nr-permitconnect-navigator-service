@@ -32,7 +32,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
-import { contactValidator } from '@/validators';
+import { atsClientNumberValidator, contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -95,7 +95,8 @@ const intakeSchema = object({
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   waitingOn: string().notRequired().max(255).label('waiting on'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: number().min(0).max(999999).notRequired().label('ATS Client #')
+  // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
+  atsClientNumber: atsClientNumberValidator
 });
 
 // Actions
