@@ -25,7 +25,7 @@ const clientBody = {
 const atsEnquirySubmissionFields = {
   addedToATS: Joi.boolean().required(),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientNumber: Joi.number().integer().min(0).allow(null)
+  atsClientId: Joi.number().integer().min(0).allow(null)
 };
 
 const schema = {

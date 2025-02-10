@@ -1592,8 +1592,8 @@ components:
           type: boolean
           description: Whether added to AST
           example: false
-        atsClientNumber:
-          type: string
+        atsClientId:
+          type: number
           description: Client number from ATS
         ltsaCompleted:
           type: boolean
@@ -1601,7 +1601,7 @@ components:
           example: false
         bcOnlineCompleted:
           type: boolean
-          description: Comlpeted
+          description: Completed
           example: false
         naturalDisaster:
           type: string
@@ -2354,8 +2354,8 @@ components:
           type: boolean
           description: Whether added to ATS
           example: false
-        atsClientNumber:
-          type: string
+        atsClientId:
+          type: number
           description: Client number from ATS
           example: ATS-001
           maxLength: 255
