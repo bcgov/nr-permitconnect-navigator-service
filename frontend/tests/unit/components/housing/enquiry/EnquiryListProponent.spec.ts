@@ -52,7 +52,7 @@ const testEnquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientNumber: 'atsClientNumber123'
+  atsClientId: '123456'
 };
 
 const testEnquiries = [testEnquiry];

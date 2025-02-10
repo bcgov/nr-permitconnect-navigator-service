@@ -34,7 +34,7 @@ const testEnquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientNumber: 'atsClientNumber123'
+  atsClientId: '123456'
 };
 
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);

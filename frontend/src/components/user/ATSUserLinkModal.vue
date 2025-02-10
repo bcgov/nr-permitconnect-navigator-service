@@ -17,7 +17,7 @@ const { submissionOrEnquiry } = defineProps<{
 const emit = defineEmits(['atsUserLink:link']);
 
 // State
-const atsClientNumber: Ref<string> = ref('');
+const atsClientId: Ref<string> = ref('');
 const email: Ref<string> = ref('');
 const firstName: Ref<string> = ref('');
 const lastName: Ref<string> = ref('');
@@ -38,7 +38,7 @@ async function searchATSUsers() {
     const response = await atsService.searchATSUsers({
       firstName: firstName.value,
       lastName: lastName.value,
-      clientId: atsClientNumber.value,
+      clientId: atsClientId.value,
       phone: phone.value,
       email: email.value
     });
@@ -91,7 +91,7 @@ onMounted(() => {
       </div>
       <div class="col pr-0">
         <InputText
-          v-model="atsClientNumber"
+          v-model="atsClientId"
           placeholder="ATS client # (optional)"
           class="w-full"
         />

@@ -1,5 +1,5 @@
 import ProjectView from '@/views/housing/project/ProjectView.vue';
-import { contactService, submissionService } from '@/services';
+import { contactService, enquiryService, permitService, submissionService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -43,6 +43,8 @@ afterEach(() => {
 });
 
 const useContactService = vi.spyOn(contactService, 'searchContacts');
+const useEnquiryService = vi.spyOn(enquiryService, 'listRelatedEnquiries');
+const usePermitService = vi.spyOn(permitService, 'listPermits');
 const useSubmissionService = vi.spyOn(submissionService, 'searchSubmissions');
 
 const testSubmissionId = 'submission123';
@@ -57,8 +59,16 @@ useSubmissionService.mockResolvedValue({
   data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 
-useContactService.mockResolvedValue({
-  data: [exampleContact]
+useEnquiryService.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+usePermitService.mockResolvedValue({
+  data: 'notTest'
+} as AxiosResponse);
+
+useSubmissionService.mockResolvedValue({
+  data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({

@@ -36,7 +36,7 @@ import { BasicResponse, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   assignedToValidator,
-  atsClientNumberValidator,
+  atsClientIdValidator,
   contactValidator,
   latitudeValidator,
   longitudeValidator
@@ -137,7 +137,7 @@ const formSchema = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  atsClientNumber: atsClientNumberValidator,
+  atsClientId: atsClientIdValidator,
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
   aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -222,7 +222,7 @@ const onSubmit = async (values: any) => {
     const valuesWithContact = omit(
       {
         ...values,
-        atsClientNumber: parseInt(values.atsClientNumber) || '',
+        atsClientId: parseInt(values.atsClientId) || '',
         contacts: [
           {
             contactId: values.contactId,
@@ -329,7 +329,7 @@ onMounted(async () => {
     geomarkUrl: submission.geomarkUrl,
     naturalDisaster: submission.naturalDisaster,
     addedToATS: submission.addedToATS,
-    atsClientNumber: submission.atsClientNumber,
+    atsClientId: submission.atsClientId,
     ltsaCompleted: submission.ltsaCompleted,
     bcOnlineCompleted: submission.bcOnlineCompleted,
     aaiUpdated: submission.aaiUpdated,
@@ -679,7 +679,7 @@ onMounted(async () => {
       <SectionHeader title="ATS" />
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
-          v-if="values.atsClientNumber"
+          v-if="values.atsClientId"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
@@ -688,16 +688,16 @@ onMounted(async () => {
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
             >
-              {{ values.atsClientNumber }}
+              {{ values.atsClientId }}
             </a>
           </div>
         </div>
         <input
           type="hidden"
-          name="atsClientNumber"
+          name="atsClientId"
         />
         <Button
-          v-if="!values.atsClientNumber"
+          v-if="!values.atsClientId"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
           :disabled="!editable"
@@ -706,7 +706,7 @@ onMounted(async () => {
           Search ATS
         </Button>
         <Button
-          v-if="!values.atsClientNumber"
+          v-if="!values.atsClientId"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
@@ -812,17 +812,17 @@ onMounted(async () => {
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
-          setFieldValue('atsClientNumber', atsClientResource.clientId?.toString());
+          setFieldValue('atsClientId', atsClientResource.clientId?.toString());
         }
       "
     />
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
-      :ats-client-number="values.atsClientNumber"
+      :ats-client-id="values.atsClientId"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
-          setFieldValue('atsClientNumber', null);
+          setFieldValue('atsClientId', null);
         }
       "
     />
@@ -832,7 +832,7 @@ onMounted(async () => {
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientNumber', atsClientId.toString());
+          setFieldValue('atsClientId', atsClientId.toString());
         }
       "
     />

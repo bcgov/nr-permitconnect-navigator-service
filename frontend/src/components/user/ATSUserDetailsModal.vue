@@ -9,8 +9,8 @@ import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
 
 // Props
-const { atsClientNumber, disabled = false } = defineProps<{
-  atsClientNumber: string | null;
+const { atsClientId, disabled = false } = defineProps<{
+  atsClientId: string | null;
   disabled?: boolean;
 }>();
 
@@ -31,7 +31,7 @@ async function getATSClientInformation() {
     loading.value = true;
 
     const response = await atsService.searchATSUsers({
-      clientId: atsClientNumber
+      clientId: atsClientId
     });
 
     users.value = response.data.clients;
@@ -49,7 +49,7 @@ async function getATSClientInformation() {
 }
 
 watch(visible, () => {
-  if (atsClientNumber) getATSClientInformation();
+  if (atsClientId) getATSClientInformation();
 });
 </script>
 
@@ -69,7 +69,7 @@ watch(visible, () => {
       class="datatable mt-4 mb-2"
       :value="users"
       selection-mode="single"
-      data-key="atsClientNumber"
+      data-key="atsClientId"
       :rows="1"
     >
       <template #empty>

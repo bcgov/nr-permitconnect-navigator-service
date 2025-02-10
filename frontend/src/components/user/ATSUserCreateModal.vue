@@ -29,7 +29,7 @@ const { submissionOrEnquiry } = defineProps<{
 const emit = defineEmits(['atsUserLink:link']);
 
 // State
-const atsClientNumber: Ref<string> = ref('');
+const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
 const atsUser: Ref<ATSUser | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
@@ -65,8 +65,8 @@ async function createATSClient() {
 
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
-      atsClientNumber.value = response.data.clientId;
-      emit('atsUserLink:link', atsClientNumber.value);
+      atsClientId.value = response.data.clientId;
+      emit('atsUserLink:link', atsClientId.value);
       visible.value = false;
       toast.success('New client pushed to ATS');
     } else {

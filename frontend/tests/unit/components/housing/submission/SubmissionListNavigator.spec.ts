@@ -105,7 +105,7 @@ const testSubmission: Submission = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientNumber: 'ATS123',
+  atsClientId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,

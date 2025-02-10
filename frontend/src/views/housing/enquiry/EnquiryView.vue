@@ -146,7 +146,7 @@ function onEnquiryFormSaved() {
           <EnquiryForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedSubmission?.atsClientNumber"
+            :related-ats-number="relatedSubmission?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>

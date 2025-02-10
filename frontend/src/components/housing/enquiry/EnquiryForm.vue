@@ -32,7 +32,7 @@ import {
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
-import { atsClientNumberValidator, contactValidator } from '@/validators';
+import { atsClientIdValidator, contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -96,7 +96,7 @@ const intakeSchema = object({
   waitingOn: string().notRequired().max(255).label('waiting on'),
   addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientNumber: atsClientNumberValidator
+  atsClientId: atsClientIdValidator
 });
 
 // Actions
@@ -107,7 +107,7 @@ const toast = useToast();
 
 const displayAtsNumber = computed(() => (values: Enquiry) => {
   if (values.relatedActivityId) return relatedAtsNumber || 'Unavailable';
-  else return values.atsClientNumber;
+  else return values.atsClientId;
 });
 
 const getAssigneeOptionLabel = (e: User) => {
@@ -131,7 +131,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 const showUserLinkModelCheck = (values: Enquiry) => {
-  return relatedAtsNumber || values.atsClientNumber;
+  return relatedAtsNumber || values.atsClientId;
 };
 
 const handleDetailsModalClick = (values: Enquiry) => {
@@ -194,7 +194,7 @@ const onSubmit = async (values: any) => {
     const valuesWithContact = omit(
       {
         ...values,
-        atsClientNumber: parseInt(values.atsClientNumber) || '',
+        atsClientId: parseInt(values.atsClientId) || '',
         contacts: [
           {
             contactId: values.contactId,
@@ -221,8 +221,8 @@ const onSubmit = async (values: any) => {
     // Remove ats client number from enquiry if submitted
     // with linked activity
     if (valuesWithContact.relatedActivityId) {
-      valuesWithContact.atsClientNumber = '';
-      formRef?.value?.setFieldValue('atsClientNumber', '');
+      valuesWithContact.atsClientId = '';
+      formRef?.value?.setFieldValue('atsClientId', '');
     }
     // Generate final enquiry object
     const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
@@ -267,7 +267,7 @@ onMounted(async () => {
     contactPreference: enquiry?.contacts[0]?.contactPreference,
     submittedAt: new Date(enquiry?.submittedAt),
     addedToATS: enquiry?.addedToATS,
-    atsClientNumber: enquiry?.atsClientNumber,
+    atsClientId: enquiry?.atsClientId,
     user: assigneeOptions.value[0] ?? null
   };
   projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
@@ -390,10 +390,10 @@ onMounted(async () => {
         </div>
         <input
           type="hidden"
-          name="atsClientNumber"
+          name="atsClientId"
         />
         <Button
-          v-if="!values.atsClientNumber && !values.relatedActivityId"
+          v-if="!values.atsClientId && !values.relatedActivityId"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
           :disabled="!editable"
@@ -402,7 +402,7 @@ onMounted(async () => {
           {{ t('enquiryForm.atsSearchBtn') }}
         </Button>
         <Button
-          v-if="!values.atsClientNumber && !values.relatedActivityId"
+          v-if="!values.atsClientId && !values.relatedActivityId"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
@@ -477,18 +477,18 @@ onMounted(async () => {
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
-          setFieldValue('atsClientNumber', atsClientResource.clientId?.toString());
+          setFieldValue('atsClientId', atsClientResource.clientId?.toString());
         }
       "
     />
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
-      :ats-client-number="relatedAtsNumber || values.atsClientNumber"
+      :ats-client-id="relatedAtsNumber || values.atsClientId"
       :disabled="values.relatedActivityId || !!relatedAtsNumber"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
-          setFieldValue('atsClientNumber', null);
+          setFieldValue('atsClientId', null);
         }
       "
     />
@@ -498,7 +498,7 @@ onMounted(async () => {
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientNumber', atsClientId.toString());
+          setFieldValue('atsClientId', atsClientId.toString());
         }
       "
     />
