@@ -42,12 +42,12 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const useContactService = vi.spyOn(contactService, 'searchContacts');
-const useEnquiryService = vi.spyOn(enquiryService, 'listRelatedEnquiries');
-const usePermitServiceList = vi.spyOn(permitService, 'listPermits');
-const usePermitServiceTypes = vi.spyOn(permitService, 'getPermitTypes');
-const useSubmissionServiceGet = vi.spyOn(submissionService, 'getSubmission');
-const useSubmissionServiceSearch = vi.spyOn(submissionService, 'searchSubmissions');
+const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
+const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
+const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
+const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
 
 const testSubmissionId = 'submission123';
 const exampleContact = {
@@ -57,27 +57,27 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-useContactService.mockResolvedValue({
+listRelatedEnquiriesSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+listPermitsSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+getPermitTypesSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+getSubmissionSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+searchContactSpy.mockResolvedValue({
   data: [exampleContact]
 } as AxiosResponse);
 
-useEnquiryService.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-usePermitServiceList.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-usePermitServiceTypes.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-useSubmissionServiceGet.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-useSubmissionServiceSearch.mockResolvedValue({
+searchSubmissionsSpy.mockResolvedValue({
   data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 

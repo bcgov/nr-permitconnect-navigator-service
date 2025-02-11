@@ -10,9 +10,9 @@ import ToastService from 'primevue/toastservice';
 
 import type { AxiosResponse } from 'axios';
 
-const useContactService = vi.spyOn(contactService, 'searchContacts');
-const usePermitService = vi.spyOn(permitService, 'getPermit');
-const useSubmissionService = vi.spyOn(submissionService, 'searchSubmissions');
+const getPermitSpy = vi.spyOn(permitService, 'getPermit');
+const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -64,9 +64,9 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useContactService.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
-  usePermitService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-  useSubmissionService.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
+  searchContactsSpy.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
+  getPermitSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  searchSubmissionsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
 });
 
 afterEach(() => {
