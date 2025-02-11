@@ -1,12 +1,10 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
-import { AuthService, ConfigService } from '@/services';
+import { AuthService } from '@/services';
 
 import type { IdTokenClaims, User } from 'oidc-client-ts';
 import type { Ref } from 'vue';
-
-import type { IdentityProvider } from '@/types';
 
 export type AuthNStoreState = {
   accessToken: Ref<string | undefined>;
@@ -22,7 +20,6 @@ export type AuthNStoreState = {
 };
 
 export const useAuthNStore = defineStore('authn', () => {
-  const configService = new ConfigService();
   const authService = new AuthService();
   const userManager = authService.getUserManager();
 
@@ -70,10 +67,7 @@ export const useAuthNStore = defineStore('authn', () => {
     const user = await authService.getUser();
     const profile = user?.profile;
     const isAuthenticated = !!user && !user.expired;
-    const identityId = configService
-      .getConfig()
-      .idpList.map((provider: IdentityProvider) => (profile ? profile[provider.identityKey] : undefined))
-      .filter((item?: string) => item)[0];
+    const identityId = profile?.sub;
 
     state.accessToken.value = user?.access_token;
     state.expiresAt.value = user?.expires_at;

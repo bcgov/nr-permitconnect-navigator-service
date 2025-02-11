@@ -71,8 +71,7 @@ async function searchIdirUsers() {
         .map(({ attributes, username, ...rest }: any) => ({
           ...rest,
           sub: username,
-          fullName: attributes?.display_name?.[0] as string,
-          identityId: attributes?.idir_user_guid?.[0] as string
+          fullName: attributes?.display_name?.[0] as string
         }))
         .filter((user: any) => !!user.email);
     } catch (error) {

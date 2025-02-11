@@ -1705,11 +1705,6 @@ components:
           description: UUID for the user
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb4464231
-        identityId:
-          type: string
-          description: UUID for the user
-          format: uuid
-          example: 333c6b2f-3845-4628-b638-ca4ac52ea123
         idp:
           type: string
           description: Account/ Identity source

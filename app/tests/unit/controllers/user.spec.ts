@@ -38,7 +38,6 @@ describe('searchUsers', () => {
     const users = [
       {
         userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-        identityId: 'cd90c6bf-4407-4872-a711-6f4dd4f3a45b',
         idp: 'IDIR',
         sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
         email: 'first.last@gov.bc.ca',
@@ -71,7 +70,6 @@ describe('searchUsers', () => {
     const users = [
       {
         userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-        identityId: 'cd90c6bf-4407-4872-a711-6f4dd4f3a45b',
         idp: 'IDIR',
         sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
         email: 'first.last@gov.bc.ca',

@@ -16,6 +16,7 @@ charts/**/charts
 Chart.lock
 
 # local env files
+idplist-local.*
 local.*
 local-*.*
 .env.local

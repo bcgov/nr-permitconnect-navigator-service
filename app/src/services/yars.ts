@@ -10,10 +10,10 @@ const service = {
    * Assigns an identity to the given group
    * Assigns permissions to COMS based on the given group
    * @param {string | undefined} bearerToken The bearer token of the authorized user
-   * @param {string} identityId Identity ID of the authorized user
+   * @param {string} sub Subject of the authorized user
    * @param {Initiative} initiative The initiative to associate with the group
    * @param {GroupName} group The group to add the user to
-   * @returns {Promise<{identityId: string;roleId: number;}>} The result of running the create operation
+   * @returns {Promise<{sub: string; roleId: number;}>} The result of running the create operation
    */
   assignGroup: async (bearerToken: string | undefined, sub: string, initiative: Initiative, group: GroupName) => {
     try {
@@ -50,7 +50,7 @@ const service = {
         await comsService.createBucket(bearerToken, comsPerms);
       }
 
-      return { identityId: result.sub, roleId: result.group_id };
+      return { sub: result.sub, roleId: result.group_id };
     } catch (e: unknown) {
       throw e;
     }

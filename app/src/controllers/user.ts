@@ -13,7 +13,6 @@ const controller = {
 
       const response = await userService.searchUsers({
         userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
-        identityId: mixedQueryToArray(req.query.identityId),
         idp: mixedQueryToArray(req.query.idp),
         sub: req.query.sub,
         email: req.query.email,

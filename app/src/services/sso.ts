@@ -87,6 +87,26 @@ const service = {
         };
       }
     }
+  },
+
+  searchBusinessBceidUsers: async (params?: BceidSearchParameters) => {
+    try {
+      const env = config.get('server.env');
+      const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
+      return { data: data.data, status };
+    } catch (e: unknown) {
+      if (axios.isAxiosError(e)) {
+        return {
+          data: e.response?.data.message,
+          status: e.response ? e.response.status : 500
+        };
+      } else {
+        return {
+          data: 'Error',
+          status: 500
+        };
+      }
+    }
   }
 };
 

@@ -10,6 +10,9 @@ import type { NextFunction, Request, Response } from 'express';
 import type { Enquiry, EnquiryIntake } from '../types';
 
 const controller = {
+  /**
+   * @deprecated Not used anywhere
+   */
   createRelatedNote: async (req: Request, data: Enquiry) => {
     if (data.relatedActivityId) {
       const activity = await activityService.getActivity(data.relatedActivityId);
@@ -103,7 +106,9 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter(
+          (x) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
       }
 
       res.status(200).json(response);

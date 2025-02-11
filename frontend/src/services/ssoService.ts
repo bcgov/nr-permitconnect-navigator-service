@@ -9,5 +9,9 @@ export default {
 
   searchBasicBceidUsers(params?: any) {
     return appAxios().get('sso/basic-bceid/users', { params: params });
+  },
+
+  searchBusinessBceidUsers(params?: any) {
+    return appAxios().get('sso/business-bceid/users', { params: params });
   }
 };

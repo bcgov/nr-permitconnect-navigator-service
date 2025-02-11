@@ -8,7 +8,6 @@ const schema = {
     body: Joi.object({
       user: Joi.object({
         userId: uuidv4.allow(null),
-        identityId: uuidv4.required(),
         idp: Joi.string().max(255).required(),
         sub: Joi.string().max(255).required(),
         email: Joi.string().max(255).required(),
