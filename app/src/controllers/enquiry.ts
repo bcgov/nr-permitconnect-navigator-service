@@ -106,7 +106,9 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        response = response.filter((x) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter(
+          (x) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
       }
 
       res.status(200).json(response);

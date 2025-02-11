@@ -202,7 +202,9 @@ const controller = {
     try {
       let response = await submissionService.getSubmissions();
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter(
+          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
       }
       res.status(200).json(response.map((x) => x.activityId));
     } catch (e: unknown) {
@@ -308,7 +310,7 @@ const controller = {
       }
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        if (response?.submittedBy !== getCurrentUsername(req.currentContext)) {
+        if (response?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()) {
           res.status(403).send();
         }
       }
@@ -329,7 +331,9 @@ const controller = {
       let response = await submissionService.getSubmissions();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter(
+          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
       }
 
       res.status(200).json(response);
@@ -351,7 +355,9 @@ const controller = {
       });
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter((x: Submission) => x?.submittedBy === getCurrentUsername(req.currentContext));
+        response = response.filter(
+          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
       }
 
       res.status(200).json(response);

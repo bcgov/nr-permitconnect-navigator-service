@@ -164,7 +164,10 @@ export const hasAccessPermit = (param: string) => {
 
         if (!data || data?.createdBy !== userId) {
           const submission = (await submissionService.searchSubmissions({ activityId: [data.activityId] }))[0];
-          if (!submission || submission?.submittedBy !== getCurrentUsername(req.currentContext))
+          if (
+            !submission ||
+            submission?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
+          )
             throw new Error('No access');
         }
       }
