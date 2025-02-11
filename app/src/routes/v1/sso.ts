@@ -29,4 +29,12 @@ router.get(
   }
 );
 
+router.get(
+  '/business-bceid/users',
+  hasAuthorization(Resource.SSO, Action.READ),
+  (req: Request<never, never, never, BceidSearchParameters>, res: Response, next: NextFunction): void => {
+    ssoController.searchBusinessBceidUsers(req, res, next);
+  }
+);
+
 export default router;

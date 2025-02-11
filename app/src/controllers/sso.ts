@@ -28,6 +28,19 @@ const controller = {
     } catch (e: unknown) {
       next(e);
     }
+  },
+
+  searchBusinessBceidUsers: async (
+    req: Request<never, never, never, BceidSearchParameters>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await ssoService.searchBusinessBceidUsers(req.query);
+      res.status(response.status).json(response.data);
+    } catch (e: unknown) {
+      next(e);
+    }
   }
 };
 
