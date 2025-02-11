@@ -44,8 +44,10 @@ afterEach(() => {
 
 const useContactService = vi.spyOn(contactService, 'searchContacts');
 const useEnquiryService = vi.spyOn(enquiryService, 'listRelatedEnquiries');
-const usePermitService = vi.spyOn(permitService, 'listPermits');
-const useSubmissionService = vi.spyOn(submissionService, 'searchSubmissions');
+const usePermitServiceList = vi.spyOn(permitService, 'listPermits');
+const usePermitServiceTypes = vi.spyOn(permitService, 'getPermitTypes');
+const useSubmissionServiceGet = vi.spyOn(submissionService, 'getSubmission');
+const useSubmissionServiceSearch = vi.spyOn(submissionService, 'searchSubmissions');
 
 const testSubmissionId = 'submission123';
 const exampleContact = {
@@ -55,19 +57,27 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-useSubmissionService.mockResolvedValue({
-  data: [{ activityId: 'activity456' }]
+useContactService.mockResolvedValue({
+  data: [exampleContact]
 } as AxiosResponse);
 
 useEnquiryService.mockResolvedValue({
   data: 'notTested'
 } as AxiosResponse);
 
-usePermitService.mockResolvedValue({
-  data: 'notTest'
+usePermitServiceList.mockResolvedValue({
+  data: 'notTested'
 } as AxiosResponse);
 
-useSubmissionService.mockResolvedValue({
+usePermitServiceTypes.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+useSubmissionServiceGet.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+useSubmissionServiceSearch.mockResolvedValue({
   data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 
