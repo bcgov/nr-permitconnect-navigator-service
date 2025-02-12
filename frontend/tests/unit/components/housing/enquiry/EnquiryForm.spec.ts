@@ -7,19 +7,19 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { flushPromises, mount, shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 
 import type { AxiosResponse } from 'axios';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: vi.fn()
+    t: vi.fn().mockReturnValue('i18n string')
   })
 }));
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
-const useEnquiryService = vi.spyOn(enquiryService, 'updateEnquiry');
-const useSubmissionService = vi.spyOn(submissionService, 'getActivityIds');
+const searchContactSpy = vi.spyOn(userService, 'searchUsers');
+const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
+const getActivityIdsSpy = vi.spyOn(submissionService, 'getActivityIds');
 
 const currentDate = new Date().toISOString();
 
@@ -40,15 +40,14 @@ const testEnquiry = {
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
   contacts: [exampleContact],
+  atsClientId: null,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate
 };
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
-useSubmissionService.mockResolvedValue({ data: ['activity1', 'activity2'] } as AxiosResponse);
+const activityIdMockData = ['activity1', 'activity2'];
 
 vi.mock(import('vue-router'), async (importOriginal) => {
   const actual = await importOriginal();
@@ -59,9 +58,11 @@ vi.mock(import('vue-router'), async (importOriginal) => {
   };
 });
 
-const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
+const wrapperSettings = (testEnquiryProp = testEnquiry, editableProp?: boolean, relatedAtsNumberProp?: string) => ({
   props: {
-    enquiry: testEnquiryProp
+    editable: editableProp,
+    enquiry: testEnquiryProp,
+    relatedAtsNumber: relatedAtsNumberProp
   },
   global: {
     plugins: [
@@ -77,13 +78,26 @@ const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon', 'router-link', 'form-navigation-guard']
+    stubs: [
+      'font-awesome-icon',
+      'router-link',
+      'form-navigation-guard',
+      'section-header',
+      'ats-user-details-modal',
+      'ats-user-create-modal',
+      'ats-user-link-modal'
+    ]
   }
 });
 
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    searchContactSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+    updateEnquirySpy.mockResolvedValue({
+      data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+    } as AxiosResponse);
+    getActivityIdsSpy.mockResolvedValue({ data: activityIdMockData } as AxiosResponse);
   });
 
   it('renders the component with the provided props', () => {
@@ -130,5 +144,53 @@ describe('EnquiryForm.vue', () => {
 
     const elements = wrapper.findAll('textarea');
     expect(elements.length).toBe(1);
+  });
+
+  it('searches for users onMount', async () => {
+    const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(searchContactSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
+  });
+
+  it('gets activity Ids onMount', async () => {
+    const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(getActivityIdsSpy).toHaveBeenCalledTimes(1);
+    expect(getActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
+  });
+
+  it('there are correct numbers of disabled components when editable prop is false', async () => {
+    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false, 'test'));
+    await nextTick();
+
+    const elements = wrapper.findAll('.p-disabled');
+    expect(wrapper.vm.$props?.editable).toBe(false);
+    expect(elements.length).toBe(8);
+  });
+
+  it('displays ATS number as "Unavailable" when relatedActivityId in enquiry, no relatedAtsNumber prop', async () => {
+    const mountEnquiry = { ...testEnquiry, relatedActivityId: 'testRAId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined));
+    await nextTick();
+
+    const element = wrapper.find('a.no-underline');
+    expect(element.text()).toBe('Unavailable');
+  });
+
+  it('displays correct ATS # when relatedActivityId in enquiry and relatedAtsNumber in prop', async () => {
+    const testAtsNumber = 'testRAId';
+    const mountEnquiry = { ...testEnquiry, relatedActivityId: 'testRAId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, testAtsNumber));
+    await nextTick();
+
+    const element = wrapper.find('a.hover-hand');
+    expect(element.text()).toBe(testAtsNumber);
   });
 });

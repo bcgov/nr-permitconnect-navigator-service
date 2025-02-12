@@ -484,7 +484,7 @@ onMounted(async () => {
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
       :ats-client-id="relatedAtsNumber || values.atsClientId"
-      :disabled="values.relatedActivityId || !!relatedAtsNumber"
+      :disabled="!!values.relatedActivityId || !!relatedAtsNumber"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
