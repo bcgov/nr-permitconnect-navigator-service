@@ -6,7 +6,9 @@ import { ApplicationStatus } from '@/utils/enums/housing';
 export type Enquiry = {
   enquiryId: string;
   activityId: string;
+  addedToATS: boolean;
   assignedUserId?: string;
+  atsClientId: string | null;
   enquiryType: string;
   submittedAt: string;
   submittedBy: string;

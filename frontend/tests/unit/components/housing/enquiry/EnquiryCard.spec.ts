@@ -32,7 +32,9 @@ const testEnquiry = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  addedToATS: false,
+  atsClientId: '123456'
 };
 
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);

@@ -2,7 +2,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { shallowMount } from '@vue/test-utils';
 
 import PermitStatusView from '@/views/permit/PermitStatusView.vue';
-import { userService, permitService } from '@/services';
+import { contactService, permitService, submissionService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -10,8 +10,9 @@ import ToastService from 'primevue/toastservice';
 
 import type { AxiosResponse } from 'axios';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
-const usePermitService = vi.spyOn(permitService, 'getPermit');
+const getPermitSpy = vi.spyOn(permitService, 'getPermit');
+const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -63,8 +64,9 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-  usePermitService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  searchContactsSpy.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
+  getPermitSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  searchSubmissionsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
 });
 
 afterEach(() => {

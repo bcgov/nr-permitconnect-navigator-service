@@ -8,6 +8,12 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 const useUserService = vi.spyOn(userService, 'searchUsers');
 const useEnquiryService = vi.spyOn(enquiryService, 'updateEnquiry');
 const useSubmissionService = vi.spyOn(submissionService, 'getActivityIds');

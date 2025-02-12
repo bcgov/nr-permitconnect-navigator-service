@@ -6,7 +6,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
-import type { Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
+import type { Enquiry, Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
 
 const currentDate = new Date().toISOString();
 
@@ -97,7 +97,7 @@ const testSubmission: Submission = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientNumber: 'ATS123',
+  atsClientId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
@@ -112,9 +112,38 @@ const testSubmission: Submission = {
   updatedAt: currentDate
 };
 
-const wrapperSettings = (testSubmissionProp = testSubmission) => ({
+// Example Enquiry object
+const testEnquiryProp: Enquiry = {
+  enquiryId: 'c2a0677e-5598-48a7-a867-59bd2b94af52',
+  activityId: '85C6700B',
+  addedToATS: true,
+  assignedUserId: 'someId',
+  atsClientId: '654321',
+  enquiryType: 'General enquiry',
+  submittedAt: '2025-02-04T18:38:39.497Z',
+  submittedBy: 'testUser',
+  relatedActivityId: '',
+  enquiryDescription: 'gshsrthsftfgjdfjdyjyj',
+  intakeStatus: 'Pending',
+  enquiryStatus: ApplicationStatus.COMPLETED,
+  waitingOn: '',
+  contacts: [
+    {
+      contactId: '49a61520-110e-48ad-a7be-c951fbd3ea9c',
+      userId: '40ba3d41-871a-4939-a177-605face624bc',
+      firstName: 'testFirst',
+      lastName: 'testFirst',
+      phoneNumber: '(123) 456-7890',
+      email: 'test.1.test@gov.bc.ca',
+      contactPreference: 'Phone call',
+      contactApplicantRelationship: 'Property owner'
+    }
+  ]
+};
+
+const wrapperSettings = (testSubmissionProp: Enquiry | Submission = testSubmission) => ({
   props: {
-    submission: testSubmissionProp
+    submissionOrEnquiry: testSubmissionProp
   },
   global: {
     plugins: [
@@ -139,8 +168,13 @@ describe('ATSUserCreateModal.vue', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the component with the provided props', () => {
+  it('renders the component with the provided props, a submission', () => {
     const wrapper = mount(ATSUserCreateModal, wrapperSettings());
+    expect(wrapper).toBeTruthy();
+  });
+
+  it('renders the component with the provided props, an enquiry', () => {
+    const wrapper = mount(ATSUserCreateModal, wrapperSettings(testEnquiryProp));
     expect(wrapper).toBeTruthy();
   });
 });

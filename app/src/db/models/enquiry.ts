@@ -45,7 +45,9 @@ export default {
     return {
       enquiry_id: input.enquiryId,
       activity_id: input.activityId,
+      added_to_ats: input.addedToATS,
       assigned_user_id: input.assignedUserId,
+      ats_client_id: input.atsClientId,
       enquiry_type: input.enquiryType,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
@@ -65,7 +67,9 @@ export default {
     return {
       enquiryId: input.enquiry_id,
       activityId: input.activity_id,
+      addedToATS: input.added_to_ats,
       assignedUserId: input.assigned_user_id,
+      atsClientId: input.ats_client_id,
       enquiryType: input.enquiry_type,
       submittedAt: input.submitted_at?.toISOString() as string,
       submittedBy: input.submitted_by,

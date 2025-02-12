@@ -3,6 +3,12 @@ import { shallowMount } from '@vue/test-utils';
 import CancelButton from '@/components/form/CancelButton.vue';
 import PrimeVue from 'primevue/config';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
 });

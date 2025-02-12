@@ -1,5 +1,5 @@
 import ProjectView from '@/views/housing/project/ProjectView.vue';
-import { contactService, submissionService } from '@/services';
+import { contactService, enquiryService, permitService, submissionService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -42,8 +42,12 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const useContactService = vi.spyOn(contactService, 'searchContacts');
-const useSubmissionService = vi.spyOn(submissionService, 'searchSubmissions');
+const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
+const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
+const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
+const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
 
 const testSubmissionId = 'submission123';
 const exampleContact = {
@@ -53,12 +57,28 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-useSubmissionService.mockResolvedValue({
-  data: [{ activityId: 'activity456' }]
+listRelatedEnquiriesSpy.mockResolvedValue({
+  data: 'notTested'
 } as AxiosResponse);
 
-useContactService.mockResolvedValue({
+listPermitsSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+getPermitTypesSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+getSubmissionSpy.mockResolvedValue({
+  data: 'notTested'
+} as AxiosResponse);
+
+searchContactSpy.mockResolvedValue({
   data: [exampleContact]
+} as AxiosResponse);
+
+searchSubmissionsSpy.mockResolvedValue({
+  data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({

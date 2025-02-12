@@ -147,6 +147,10 @@ label {
   .p-button-label:hover {
     text-decoration: underline;
   }
+
+  &:disabled .p-button-label:hover {
+    text-decoration: none;
+  }
 }
 
 .p-card {

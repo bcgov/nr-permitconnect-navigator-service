@@ -9,8 +9,9 @@ import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
 
 // Props
-const { atsClientNumber } = defineProps<{
-  atsClientNumber: string | null;
+const { atsClientId, disabled = false } = defineProps<{
+  atsClientId: string | null;
+  disabled?: boolean;
 }>();
 
 // Emits
@@ -30,7 +31,7 @@ async function getATSClientInformation() {
     loading.value = true;
 
     const response = await atsService.searchATSUsers({
-      clientId: atsClientNumber
+      clientId: atsClientId
     });
 
     users.value = response.data.clients;
@@ -48,7 +49,7 @@ async function getATSClientInformation() {
 }
 
 watch(visible, () => {
-  if (atsClientNumber) getATSClientInformation();
+  if (atsClientId) getATSClientInformation();
 });
 </script>
 
@@ -68,7 +69,7 @@ watch(visible, () => {
       class="datatable mt-4 mb-2"
       :value="users"
       selection-mode="single"
-      data-key="atsClientNumber"
+      data-key="atsClientId"
       :rows="1"
     >
       <template #empty>
@@ -113,6 +114,7 @@ watch(visible, () => {
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
             aria-label="Delete user"
+            :disabled="disabled"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >
             <font-awesome-icon icon="fa-solid fa-trash" />
@@ -123,7 +125,9 @@ watch(visible, () => {
     <div class="flex justify-start mt-8">
       <Button
         class="p-button-solid mr-4"
+        :class="{ 'no-underline': disabled }"
         label="Save"
+        :disabled="disabled"
         @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
       />
       <Button

@@ -41,7 +41,7 @@ export type Submission = {
   geomarkUrl: string;
   naturalDisaster: string;
   addedToATS: boolean;
-  atsClientNumber: string | null;
+  atsClientId: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   aaiUpdated: boolean;

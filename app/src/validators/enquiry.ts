@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+import atsValidator from './ats';
 import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
 import { contacts } from './contact';
@@ -42,6 +43,7 @@ const schema = {
         .allow(null),
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      ...atsValidator.atsEnquirySubmissionFields,
       waitingOn: Joi.string().allow(null).max(255),
       contacts: contacts,
       createdAt: Joi.date().allow(null),

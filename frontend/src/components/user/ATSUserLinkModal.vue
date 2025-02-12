@@ -6,18 +6,18 @@ import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/pr
 import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Submission } from '@/types';
+import type { ATSClientResource, Enquiry, Submission } from '@/types';
 
 // Props
-const { submission } = defineProps<{
-  submission: Submission;
+const { submissionOrEnquiry } = defineProps<{
+  submissionOrEnquiry: Enquiry | Submission;
 }>();
 
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
 
 // State
-const atsClientNumber: Ref<string> = ref('');
+const atsClientId: Ref<string> = ref('');
 const email: Ref<string> = ref('');
 const firstName: Ref<string> = ref('');
 const lastName: Ref<string> = ref('');
@@ -38,7 +38,7 @@ async function searchATSUsers() {
     const response = await atsService.searchATSUsers({
       firstName: firstName.value,
       lastName: lastName.value,
-      clientId: atsClientNumber.value,
+      clientId: atsClientId.value,
       phone: phone.value,
       email: email.value
     });
@@ -57,9 +57,9 @@ async function searchATSUsers() {
 }
 
 onMounted(() => {
-  if (submission.contacts[0]?.firstName && submission.contacts[0]?.lastName) {
-    firstName.value = submission.contacts[0]?.firstName;
-    lastName.value = submission.contacts[0]?.lastName;
+  if (submissionOrEnquiry.contacts[0]?.firstName && submissionOrEnquiry.contacts[0]?.lastName) {
+    firstName.value = submissionOrEnquiry.contacts[0]?.firstName;
+    lastName.value = submissionOrEnquiry.contacts[0]?.lastName;
   }
 });
 </script>
@@ -69,12 +69,12 @@ onMounted(() => {
     v-model:visible="visible"
     :draggable="false"
     :modal="true"
-    class="app-info-dialog w-max"
+    class="app-info-dialog w-1/2"
   >
     <template #header>
       <span class="p-dialog-title app-primary-color">Search ATS</span>
     </template>
-    <div class="pt-1 mb-6 mr-1 grid grid-cols-12 gap-4">
+    <div class="pt-1 mb-6 mr-1 grid grid-cols-6 gap-4">
       <div class="col pr-0">
         <InputText
           v-model="firstName"
@@ -91,7 +91,7 @@ onMounted(() => {
       </div>
       <div class="col pr-0">
         <InputText
-          v-model="atsClientNumber"
+          v-model="atsClientId"
           placeholder="ATS client # (optional)"
           class="w-full"
         />
@@ -110,13 +110,11 @@ onMounted(() => {
           class="w-full"
         />
       </div>
-      <div class="col-fixed w-1/12">
-        <Button
-          class="p-button-solid"
-          label="Search"
-          @click="searchATSUsers"
-        />
-      </div>
+      <Button
+        class="col p-button-solid"
+        label="Search"
+        @click="searchATSUsers"
+      />
     </div>
     <DataTable
       v-model:selection="selectedUser"
