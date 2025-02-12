@@ -2,13 +2,14 @@
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
 import { ref, watch } from 'vue';
 
-import { DatePicker, Select } from '@/lib/primevue';
+import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
 import { submissionService, userService } from '@/services';
 import { Regex } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Statistics, User } from '@/types';
+import { formatDateFilename } from '@/utils/formatters';
 
 // Types
 type StatisticFilters = {
@@ -25,6 +26,7 @@ const statisticFilters: Ref<StatisticFilters> = ref({});
 
 // Actions
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
+const toast = useToast();
 
 const getPercentage = (input: number) =>
   statistics.value && statistics.value.total_submissions > 0
@@ -44,6 +46,54 @@ async function onAssigneeInput(e: IInputEvent) {
   } else {
     assigneeOptions.value = [];
   }
+}
+
+async function onDownloadSubmissionPermitData() {
+  const response = await submissionService.getSubmissionPermitData();
+  const data = response.data;
+
+  if (!data || data.length === 0) {
+    toast.info('No Data', 'Data not available for downloaded.');
+    return;
+  }
+
+  const headers = Object.keys(data[0]);
+  const csvRows = [];
+
+  csvRows.push(headers.join(','));
+
+  for (const row of data) {
+    const values = headers.map((header) => {
+      let val = row[header];
+
+      if (val === null || val === undefined) return '';
+
+      val = val.toString();
+
+      if (val.search(/("|,|\n)/g) >= 0) {
+        val = `"${val.replace(/"/g, '""')}"`;
+      }
+
+      return val;
+    });
+    csvRows.push(values.join(','));
+  }
+
+  const csvString = csvRows.join('\n');
+
+  const timestamp = formatDateFilename(new Date().toISOString());
+  const filename = `PCNS-EXPORT-${timestamp}.csv`;
+
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.style.display = 'none';
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  window.URL.revokeObjectURL(url);
+  a.remove();
 }
 
 watch(
@@ -67,6 +117,18 @@ watch(
 
 <template>
   <div v-if="statistics">
+    <div class="flex justify-end mb-4">
+      <Button
+        class="download-production-btn"
+        @click="onDownloadSubmissionPermitData"
+      >
+        <font-awesome-icon
+          class="pr-2"
+          icon="fa-solid fa-download"
+        />
+        Download Production Data
+      </Button>
+    </div>
     <table class="w-full text-left">
       <thead>
         <tr>
@@ -296,6 +358,17 @@ watch(
 </template>
 
 <style scoped lang="scss">
+.download-production-btn {
+  background-color: #f3f2f1;
+  color: #000;
+  border: 1px solid #d9d9d9;
+  &:hover {
+    background-color: #eceae8;
+    color: #000;
+    border: 1px solid #d9d9d9;
+  }
+}
+
 table {
   border-collapse: collapse;
   border-spacing: 0;
