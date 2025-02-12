@@ -37,6 +37,14 @@ export default {
   },
 
   /**
+   * @function getSubmissionPermitData
+   * @returns {Promise} An axios response
+   */
+  getSubmissionPermitData() {
+    return appAxios().get('submission/permit');
+  },
+
+  /**
    * @function getSubmissions
    * @returns {Promise} An axios response
    */

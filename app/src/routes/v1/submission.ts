@@ -39,6 +39,15 @@ router.get(
   }
 );
 
+/** Get all submission and permit data for csv download */
+router.get(
+  '/permit',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    submissionController.getSubmissionPermitData(req, res, next);
+  }
+);
+
 /** Search submissions */
 router.get(
   '/search',

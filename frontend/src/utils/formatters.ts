@@ -56,6 +56,16 @@ export function formatDateTime(value: string | undefined | null) {
 }
 
 /**
+ * @function formatDateFilename
+ * Converts a date to a filename-friendly formatted string: 'YYYY-MM-DD_HHMMSS'
+ * @param {String} value A string representation of a date
+ * @returns {String} A string representation of `value`
+ */
+export function formatDateFilename(value: string | undefined | null) {
+  return _dateFnsFormat(value, 'yyyy-MM-dd_HHmm');
+}
+
+/**
  * @deprecated Function not used anywhere
  * @function formatJwtUsername
  * Formats a JWT username to a presentable value

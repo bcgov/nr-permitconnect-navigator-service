@@ -212,6 +212,15 @@ const controller = {
     }
   },
 
+  getSubmissionPermitData: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const response = await submissionService.getSubmissionPermitData();
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(

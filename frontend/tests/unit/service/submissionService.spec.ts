@@ -142,6 +142,15 @@ describe('submissionService', () => {
     });
   });
 
+  describe('getSubmissionPermitData', () => {
+    it('calls correct endpoint', () => {
+      submissionService.getSubmissionPermitData();
+
+      expect(getSpy).toHaveBeenCalledTimes(1);
+      expect(getSpy).toHaveBeenCalledWith('submission/permit');
+    });
+  });
+
   describe('getSubmission', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
