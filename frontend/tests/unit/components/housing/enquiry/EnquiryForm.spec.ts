@@ -7,13 +7,13 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { flushPromises, mount, shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 
 import type { AxiosResponse } from 'axios';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
-const useEnquiryService = vi.spyOn(enquiryService, 'updateEnquiry');
-const useSubmissionService = vi.spyOn(submissionService, 'getActivityIds');
+const searchContactSpy = vi.spyOn(userService, 'searchUsers');
+const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
+const getActivityIdsSpy = vi.spyOn(submissionService, 'getActivityIds');
 
 const currentDate = new Date().toISOString();
 
@@ -40,9 +40,7 @@ const testEnquiry = {
   updatedAt: currentDate
 };
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
-useSubmissionService.mockResolvedValue({ data: ['activity1', 'activity2'] } as AxiosResponse);
+const activityIdMockData = ['activity1', 'activity2'];
 
 vi.mock(import('vue-router'), async (importOriginal) => {
   const actual = await importOriginal();
@@ -78,6 +76,11 @@ const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    searchContactSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+    updateEnquirySpy.mockResolvedValue({
+      data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+    } as AxiosResponse);
+    getActivityIdsSpy.mockResolvedValue({ data: activityIdMockData } as AxiosResponse);
   });
 
   it('renders the component with the provided props', () => {
@@ -124,5 +127,25 @@ describe('EnquiryForm.vue', () => {
 
     const elements = wrapper.findAll('textarea');
     expect(elements.length).toBe(1);
+  });
+
+  it('searches for users onMount', async () => {
+    const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(searchContactSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
+  });
+
+  it('gets activity Ids onMount', async () => {
+    const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(getActivityIdsSpy).toHaveBeenCalledTimes(1);
+    expect(getActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
   });
 });
