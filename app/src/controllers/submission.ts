@@ -134,11 +134,11 @@ const controller = {
         permitTypeId: x.permitTypeId,
         activityId: activityId as string,
         trackingId: x.trackingId,
-        status: x.status ?? PermitStatus.APPLIED,
-        needed: x.needed ?? PermitNeeded.YES,
+        status: PermitStatus.APPLIED,
+        needed: PermitNeeded.YES,
         statusLastVerified: null,
         issuedPermitId: null,
-        authStatus: x.authStatus ?? PermitAuthorizationStatus.IN_REVIEW,
+        authStatus: PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: x.submittedDate,
         adjudicationDate: null
       }));
@@ -150,11 +150,11 @@ const controller = {
         permitTypeId: x.permitTypeId as number,
         activityId: activityId as string,
         trackingId: null,
-        status: x.status ?? PermitStatus.NEW,
-        needed: x.needed ?? PermitNeeded.UNDER_INVESTIGATION,
+        status: PermitStatus.NEW,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
         statusLastVerified: null,
         issuedPermitId: null,
-        authStatus: x.authStatus ?? PermitAuthorizationStatus.NONE,
+        authStatus: PermitAuthorizationStatus.NONE,
         submittedDate: null,
         adjudicationDate: null
       }));
