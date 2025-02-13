@@ -1,4 +1,4 @@
-import { formatDate, formatDateLong, toKebabCase } from '@/utils/formatters';
+import { formatDate, formatDateFilename, formatDateLong, toKebabCase } from '@/utils/formatters';
 
 describe('formatters.ts', () => {
   describe('formatDate', () => {
@@ -18,6 +18,14 @@ describe('formatters.ts', () => {
   describe('formatDateLong', () => {
     it('returns the expected date format', () => {
       expect(formatDateLong(new Date(2023, 10, 1, 0, 0, 0).toISOString())).toEqual('November 1 2023, 12:00:00 AM');
+    });
+  });
+
+  describe('formatDateFilename', () => {
+    it('returns the expected filename-friendly format if given a valid date', () => {
+      const dateStr = new Date(2023, 10, 1, 0, 0, 0).toISOString();
+
+      expect(formatDateFilename(dateStr)).toEqual('2023-11-01_0000');
     });
   });
 

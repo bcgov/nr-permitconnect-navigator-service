@@ -26,6 +26,8 @@ tags:
     description: Operations for managing Permits
   - name: Permit Note
     description: Operations for Permit Notes
+  - name: Reporting
+    description: Operations for performings actions related to reporting
   - name: Roadmap
     description: Operations for validating Roadmaps
   - name: Submission
@@ -626,6 +628,27 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '422':
           $ref: '#/components/responses/UnprocessableEntity'
+        default:
+          $ref: '#/components/responses/Error'
+  /reporting/submission/permit:
+    get:
+      summary: Query and retrieve all submission data related to permits
+      operationId: getSubmissionPermitData
+      tags:
+        - Reporting
+      responses:
+        '200':
+          description: A list of submissions joined with permits and permit type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-SubmissionPermitData'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
   /roadmap:
@@ -1697,6 +1720,9 @@ components:
         housingCoopDescription:
           type: string
           description: Description for COOP Housing
+        consentToFeedback:
+          type: boolean
+          description: Whether or not user wants feedback on submission
     DB-User:
       type: object
       properties:
@@ -2611,6 +2637,133 @@ components:
           description: UUID for the submission
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
+    Response-SubmissionPermitData:
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        consentToFeedback:
+          type: boolean
+          description: Whether or not user wants feedback on submission
+        firstName:
+          type: string
+          description: First name of the contact person related to submission
+          example: John
+        lastName:
+          type: string
+          description: Last name of the contact person related to submission
+          example: Smith
+        phoneNumber:
+          type: string
+          description: Phone number for contact related to submission
+          example: (123) 456-7890
+        email:
+          type: string
+          format: email
+          description: Email address for contact related to submission
+          example: john.smith@example.com
+        contactPreference:
+          type: string
+          enum: [Phone call, Email, Either]
+          description: Preferred method of contact related to submission
+          example: Email
+        activityId:
+          type: string
+          description: Activity ID related to submission and permit
+          example: D95F1DE6
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Maple Ridge
+        streetAddress:
+          type: string
+          description: Street address of project 
+          example: 2975 Jutland Rd
+        latitude:
+          type: number
+          description: Latitude Cordinate for project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude Cordinate for project
+          example: -123.377677
+        locationPIDs:
+          type: string
+          description: Location PIDs for the project
+          example: 006-209-521, 007-209-522
+        issuedPermitId:
+          type: string
+          description: ID of the issued permit
+          example: '123'
+        trackingId:
+          type: string
+          description: ID for tracking permit
+          example: H7kidnhd948594
+        authStatus:
+          type: string
+          description: Status of authentication for the permit
+          example: Pending
+        needed:
+          type: string
+          description: Whether permit is needed, or still uner investigation
+          example: Under Investigation
+        status:
+          type: string
+          description: Status of the permit
+          example: New
+        submittedDate:
+          type: string
+          description: Date the permit was submitted
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
+        adjudicationDate:
+          type: string
+          description: Date of the permit's adjudication
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
+        acronym:
+          type: string
+          description: Acronym for permit type name
+          example: SAP
+        agency:
+          type: string
+          description: Government agency
+          example: Water, Land and Resource Stewardship
+        branch:
+          type: string
+          description: Government branch
+          example: Archaeology
+        division:
+          type: string
+          description: Government division
+          example: Forest Resiliency and Archaeology
+        name:
+          type: string
+          description: Name of permit type
+          example: Site Alteration Permit
+        sourceSystem:
+          type: string
+          description: Source of the system used for this permit type
+          example: Archaeology Permit Tracking System
+        sourceSystemAcronym:
+          type: string
+          description: Acronym for source system
+          example: APTS
+        trackedInATS:
+          type: boolean
+          description: Whether this permit type is tracked in ATS or not
+          example: false
+        type:
+          type: string
+          description: Type of permit type
+          example: Alteration
     Response-SubmissionStatistics:
       type: object
       properties:
