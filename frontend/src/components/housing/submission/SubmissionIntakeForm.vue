@@ -74,6 +74,7 @@ import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Contact, Document, Permit, PermitType, SubmissionIntake } from '@/types';
+import { geoJson } from 'leaflet';
 
 // Types
 type GeocoderEntry = {
@@ -539,7 +540,8 @@ onBeforeMount(async () => {
           longitude: response?.longitude,
           ltsaPIDLookup: response?.locationPIDs,
           geomarkUrl: response?.geomarkUrl,
-          projectLocationDescription: response?.projectLocationDescription
+          projectLocationDescription: response?.projectLocationDescription,
+          geoJSON: response?.geoJSON
         },
         appliedPermits: permits
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)
@@ -1442,6 +1444,7 @@ function clearGeoJSON() {
                     ref="mapRef"
                     :pin-or-draw="true"
                     :disabled="!editable"
+                    :geo-json-data="values.location.geoJSON"
                     :latitude="mapLatitude"
                     :longitude="mapLongitude"
                     @map:erased="
