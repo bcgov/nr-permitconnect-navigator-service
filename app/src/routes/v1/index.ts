@@ -10,6 +10,7 @@ import document from './document';
 import enquiry from './enquiry';
 import note from './note';
 import permit from './permit';
+import reporting from './reporting';
 import roadmap from './roadmap';
 import sso from './sso';
 import submission from './submission';
@@ -33,6 +34,7 @@ router.get('/', (_req, res) => {
       '/enquiry',
       '/note',
       '/permit',
+      '/reporting',
       '/roadmap',
       '/sso',
       '/submission',
@@ -50,6 +52,7 @@ router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/note', note);
 router.use('/permit', permit);
+router.use('/reporting', reporting);
 router.use('/roadmap', roadmap);
 router.use('/sso', sso);
 router.use('/submission', submission);

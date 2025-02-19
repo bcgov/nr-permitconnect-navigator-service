@@ -53,6 +53,7 @@ export enum Resource {
   ENQUIRY = 'ENQUIRY',
   NOTE = 'NOTE',
   PERMIT = 'PERMIT',
+  REPORTING = 'REPORTING',
   ROADMAP = 'ROADMAP',
   SSO = 'SSO',
   SUBMISSION = 'SUBMISSION',
