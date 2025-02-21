@@ -3,7 +3,7 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import '@geoman-io/leaflet-geoman-free';
 import '@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css';
-import { onMounted, onUpdated, ref, watch } from 'vue';
+import { onMounted, ref, toRaw, watch } from 'vue';
 
 import { useToast } from '@/lib/primevue';
 import { externalApiService } from '@/services';
@@ -23,14 +23,10 @@ import type { Ref } from 'vue';
 const {
   disabled = false,
   geoJsonData = undefined,
-  latitude = undefined,
-  longitude = undefined,
   pinOrDraw = false
 } = defineProps<{
   disabled?: boolean;
   geoJsonData?: GeoJSON;
-  latitude?: number;
-  longitude?: number;
   pinOrDraw?: boolean;
 }>();
 
@@ -86,7 +82,7 @@ async function initMap() {
 
         if (oldLayer.value) {
           //@ts-ignore - insufficient type definitions
-          map.removeLayer(oldLayer.value);
+          map.removeLayer(toRaw(oldLayer.value));
           oldLayer.value = undefined;
         }
         oldLayer.value = e.layer;
@@ -102,7 +98,7 @@ async function initMap() {
         } else {
           geoJSON.value = geo.toGeoJSON();
 
-          emit('map:polygonUpdated', { geoJSON: geoJSON.value });
+          emit('map:polygonUpdated', { geoJSON: toRaw(geoJSON.value) });
         }
         // Zoom in
         zoomToGeometry(geo);
@@ -114,6 +110,7 @@ async function initMap() {
     map.on('pm:remove', () => {
       emit('map:erased');
     });
+    enableDrawControls();
   }
 }
 
@@ -141,8 +138,7 @@ async function getNearestOccupant(longitude: string, latitude: string) {
 }
 
 function disableInteraction() {
-  map.pm.removeControls();
-
+  if (pinOrDraw) disableDrawControls();
   map.dragging.disable();
   map.touchZoom.disable();
   map.doubleClickZoom.disable();
@@ -152,9 +148,12 @@ function disableInteraction() {
   if (map.tapHold) map.tapHold.disable();
 }
 
-function enableInteraction() {
-  map.pm.addControls(drawControlOptions);
+function disableDrawControls() {
+  map.pm.removeControls();
+}
 
+function enableInteraction() {
+  if (pinOrDraw) enableDrawControls();
   map.dragging.enable();
   map.touchZoom.enable();
   map.doubleClickZoom.enable();
@@ -162,6 +161,10 @@ function enableInteraction() {
   map.boxZoom.enable();
   map.keyboard.enable();
   if (map.tapHold) map.tapHold.enable();
+}
+
+function enableDrawControls() {
+  map.pm.addControls(drawControlOptions);
 }
 
 // Map component will be misaligned if mounted while not visible. Trigger resize to fix on show
@@ -183,6 +186,7 @@ function setAddressMarker(coords: any) {
   const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);
   marker = L.marker(coords, { icon: redIcon });
   map.addLayer(marker);
+  oldLayer.value = marker;
 }
 
 function zoomToGeometry(geo: L.GeoJSON) {
@@ -196,14 +200,13 @@ function zoomToGeometry(geo: L.GeoJSON) {
 function drawGeoJson() {
   const geo = L.geoJSON(geoJsonData) as L.GeoJSON;
   geo.addTo(map);
-  return geo;
+  oldLayer.value = geo;
 }
 
-defineExpose({ resizeMap });
+defineExpose({ resizeMap, pinToMap });
 
 onMounted(async () => {
   await initMap();
-
   if (geoJsonData) drawGeoJson();
   if (disabled) disableInteraction();
   else enableInteraction();
@@ -212,13 +215,12 @@ onMounted(async () => {
   removeAllMarkers();
 });
 
-onUpdated(async () => {
-  if (latitude && longitude) {
-    const addressLocation = { lat: latitude, lng: longitude };
-    map.flyTo(addressLocation, 17);
-    setAddressMarker(addressLocation);
-  }
-});
+function pinToMap(lat: number, lng: number) {
+  if (!(lat && lng)) return;
+  const addressLocation = { lat: lat, lng: lng };
+  map.flyTo(addressLocation, 17);
+  setAddressMarker(addressLocation);
+}
 
 watch(
   () => disabled,
