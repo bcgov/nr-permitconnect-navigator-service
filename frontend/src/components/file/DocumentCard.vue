@@ -89,13 +89,15 @@ function onClick() {
     <template #content>
       <div class="grid grid-cols-1">
         <div
-          v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
-          v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           class="text-left font-semibold text-ellipsis whitespace-nowrap"
           style="overflow: hidden"
           tabindex="0"
         >
-          <a href="#">{{ document.filename }}</a>
+          <span v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`">
+            <span v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`">
+              <a href="#">{{ document.filename }}</a>
+            </span>
+          </span>
         </div>
         <h6 class="text-left">{{ formatDateLong(document.createdAt as string).split(',')[0] }},</h6>
         <h6 class="text-left mt-1">
