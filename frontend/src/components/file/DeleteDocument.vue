@@ -45,21 +45,23 @@ const confirmDelete = (document: Document) => {
 </script>
 
 <template>
-  <Button
-    v-tooltip.bottom="t('deleteDocument.deleteTooltip')"
-    v-tooltip.focus.bottom="t('deleteDocument.deleteTooltip')"
-    :disabled="disabled"
-    class="p-button-lg p-button-text p-button-danger p-0 self-center"
-    aria-label="Delete object"
-    style="position: relative; top: 5; right: 0"
-    tabindex="0"
-    @click="
-      (e) => {
-        confirmDelete(document);
-        e.stopPropagation();
-      }
-    "
-  >
-    <font-awesome-icon icon="fa-solid fa-trash" />
-  </Button>
+  <span v-tooltip.bottom="t('deleteDocument.deleteTooltip')">
+    <span v-tooltip.focus.bottom="t('deleteDocument.deleteTooltip')">
+      <Button
+        :disabled="disabled"
+        class="p-button-lg p-button-text p-button-danger p-0 self-center"
+        aria-label="Delete object"
+        style="position: relative; top: 5; right: 0"
+        tabindex="0"
+        @click="
+          (e) => {
+            confirmDelete(document);
+            e.stopPropagation();
+          }
+        "
+      >
+        <font-awesome-icon icon="fa-solid fa-trash" />
+      </Button>
+    </span>
+  </span>
 </template>
