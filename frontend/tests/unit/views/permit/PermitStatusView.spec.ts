@@ -28,10 +28,12 @@ vi.mock('vue-router', () => ({
 }));
 
 const testPermitId = 'permit123';
+const testSubmissionId = 'submission123';
 
-const wrapperSettings = (testPermitIdProp = testPermitId) => ({
+const wrapperSettings = (testPermitIdProp = testPermitId, testSubmissionIdProp = testSubmissionId) => ({
   props: {
-    permitId: testPermitIdProp
+    permitId: testPermitIdProp,
+    submissionId: testSubmissionIdProp
   },
   global: {
     plugins: [

@@ -89,9 +89,7 @@ function filterForMyBringForwards(bf: BringForward): boolean {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: data.submissionId
-                    ? RouteName.HOUSING_SUBMISSIONS_PROJECT
-                    : RouteName.HOUSING_SUBMISSIONS_ENQUIRY,
+                  name: data.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
                   query: getQueryObject(data),
                   hash: `#${data.noteId}`
                 }"

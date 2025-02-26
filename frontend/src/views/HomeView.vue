@@ -8,9 +8,8 @@ import { NavigationPermission } from '@/store/authzStore';
 // Store
 const router = useRouter();
 const toHousing = (): void => {
-  if (useAuthZStore().canNavigate(NavigationPermission.HOUSING_SUBMISSIONS))
-    router.push({ name: RouteName.HOUSING_SUBMISSIONS });
-  else router.push({ name: RouteName.HOUSING });
+  if (useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
+  else router.push({ name: RouteName.EXT_HOUSING });
 };
 </script>
 

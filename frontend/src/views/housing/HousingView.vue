@@ -84,31 +84,31 @@ onMounted(async () => {
       <div>
         <router-link
           :to="{
-            name: RouteName.HOUSING,
+            name: RouteName.EXT_HOUSING,
             hash: '#projects'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#projects' })"
+          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#projects' })"
         >
         {{ t('housing.myProjects') }}</router-link>
         |
         <router-link
           :to="{
-            name: RouteName.HOUSING,
+            name: RouteName.EXT_HOUSING,
             hash: '#drafts'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#drafts' })"
+          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#drafts' })"
         >
         {{ t('housing.drafts') }}</router-link>
         |
         <router-link
           :to="{
-            name: RouteName.HOUSING,
+            name: RouteName.EXT_HOUSING,
             hash: '#enquiries'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.HOUSING, hash: '#enquiries' })"
+          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#enquiries' })"
         >
         {{ t('housing.generalEnquiries') }}</router-link>
       </div>
@@ -132,7 +132,7 @@ onMounted(async () => {
           :text="t('housing.projectsTooltip')"
         />
       </div>
-      <Button @click="router.push({ name: RouteName.HOUSING_INTAKE })">
+      <Button @click="router.push({ name: RouteName.EXT_HOUSING_INTAKE })">
         {{ t('housing.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
@@ -161,7 +161,7 @@ onMounted(async () => {
             <router-link
               class="no-underline"
               :to="{
-                name: RouteName.HOUSING_PROJECT,
+                name: RouteName.EXT_HOUSING_PROJECT,
                 params: { submissionId: project.submissionId }
               }"
             >
@@ -230,7 +230,7 @@ onMounted(async () => {
         />
       </div>
 
-      <Button @click="router.push({ name: RouteName.HOUSING_ENQUIRY_INTAKE })">
+      <Button @click="router.push({ name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE })">
         {{ t('housing.submitNewEnquiry') }}
         <font-awesome-icon
           class="ml-2"

@@ -175,7 +175,7 @@ function updateQueryParams() {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_SUBMISSIONS_ENQUIRY,
+              name: RouteName.INT_HOUSING_ENQUIRY,
               params: { enquiryId: data.enquiryId },
               query: { activityId: data.activityId }
             }"

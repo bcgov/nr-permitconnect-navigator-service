@@ -84,7 +84,7 @@ function onDelete(draftId: string) {
         <div :data-draftId="data.draftId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_INTAKE_DRAFT,
+              name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
               params: { draftId: data.draftId }
             }"
           >

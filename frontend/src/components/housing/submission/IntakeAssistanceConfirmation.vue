@@ -28,7 +28,7 @@ const { t } = useI18n();
     <h3 class="inline-block mr-2 mb-6">{{ t('intakeAssistance.confirmationIdLabel') }}:</h3>
     <router-link
       :to="{
-        name: RouteName.HOUSING_ENQUIRY_INTAKE,
+        name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
         params: { enquiryId: assignedEnquiryId },
         query: { activityId: assignedActivityId }
       }"
@@ -37,13 +37,13 @@ const { t } = useI18n();
     </router-link>
     <div>
       {{ t('intakeAssistance.messagePart1') }}
-      <router-link :to="{ name: RouteName.HOUSING_SUBMISSIONS }">
+      <router-link :to="{ name: RouteName.EXT_HOUSING }">
         {{ t('intakeAssistance.linkHousingSubmissions') }}
       </router-link>
       {{ t('intakeAssistance.messagePart2') }}
     </div>
     <div class="mt-6">
-      <router-link :to="{ name: RouteName.HOUSING }">{{ t('intakeAssistance.linkSubmissions') }}</router-link>
+      <router-link :to="{ name: RouteName.EXT_HOUSING }">{{ t('intakeAssistance.linkSubmissions') }}</router-link>
     </div>
   </div>
 </template>

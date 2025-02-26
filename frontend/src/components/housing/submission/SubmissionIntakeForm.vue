@@ -146,7 +146,7 @@ const toast = useToast();
 const getBackButtonConfig = computed(() => {
   return {
     text: 'Back to Housing',
-    routeName: RouteName.HOUSING
+    routeName: RouteName.EXT_HOUSING
   };
 });
 
@@ -168,10 +168,16 @@ async function generateActivityId() {
     const response = await submissionService.updateDraft({
       draftId: undefined,
       activityId: undefined,
-      data: {}
+      data: formRef?.value?.values
     });
+
     if (response.data?.activityId && response.data?.draftId) {
+      // Disable the navigation guard temporarily to allow a route change
+      editable.value = false;
+      await nextTick();
       syncFormAndRoute(response.data.activityId, response.data.draftId);
+      editable.value = true;
+
       return response.data.activityId;
     } else {
       return undefined;
@@ -329,7 +335,11 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
       data: draftData
     });
 
+    // Disable the navigation guard temporarily to allow a route change
+    editable.value = false;
+    await nextTick();
     syncFormAndRoute(response?.data.activityId, response?.data.draftId);
+    editable.value = true;
 
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
@@ -389,11 +399,11 @@ async function onSubmit(data: any) {
       contactStore.setContact(submissionData.contacts[0]);
 
       router.push({
-        name: RouteName.HOUSING_INTAKE_CONFIRMATION,
+        name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
         params: {
-          activityId: response.data.activityId,
           submissionId: response.data.submissionId
-        }
+        },
+        query: { activityId: response.data.activityId }
       });
     } else {
       throw new Error('Failed to retrieve correct draft data');
@@ -440,7 +450,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
   if (drftId) {
     // Update route query for refreshing
     router.replace({
-      name: RouteName.HOUSING_INTAKE_DRAFT,
+      name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
       params: {
         draftId: drftId
       }
@@ -561,7 +571,7 @@ onBeforeMount(async () => {
     // Move map pin
     onLatLongInput();
   } catch (e) {
-    router.replace({ name: RouteName.HOUSING_PROJECT_INTAKE });
+    router.replace({ name: RouteName.EXT_HOUSING_PROJECT_INTAKE });
   }
 });
 

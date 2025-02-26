@@ -14,7 +14,7 @@ const routes: Array<RouteRecordRaw> = [
         name: RouteName.USER,
         component: () => import('@/views/contact/ContactProfileView.vue'),
         beforeEnter: accessHandler,
-        meta: { requiresAuth: true, access: [NavigationPermission.USER] }
+        meta: { requiresAuth: true, access: [NavigationPermission.GLO_USER] }
       }
     ]
   }

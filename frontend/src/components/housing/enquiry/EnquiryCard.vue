@@ -37,7 +37,7 @@ onMounted(() => {
             <!-- Enquiry: -->
             <router-link
               :to="{
-                name: RouteName.HOUSING_SUBMISSIONS_PROJECT_ENQUIRY,
+                name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
                 params: { enquiryId: enquiry.enquiryId },
                 query: { activityId: enquiry.activityId }
               }"

@@ -7,53 +7,57 @@ import type { Ref } from 'vue';
 import type { Permission } from '@/types';
 
 export enum NavigationPermission {
+  /*
+   * Developer only navigation permissions
+   */
   DEVELOPER = 'developer',
 
-  HOUSING = 'housing',
-  HOUSING_ENQUIRY_INTAKE = 'housing_enquiry_intake',
-  HOUSING_INTAKE = 'housing_intake',
-  HOUSING_PROJECT = 'housing_project',
-  HOUSING_SUBMISSIONS = 'housing_submissions',
-  HOUSING_USER_MANAGEMENT = 'housing_user_management',
-  HOUSING_USER_MANAGEMENT_ADMIN = 'housing_user_management_admin',
+  /*
+   * Global navigation permissions
+   */
+  GLO_USER = 'user',
 
-  USER = 'user'
+  /*
+   * External navigation permissions
+   */
+  EXT_HOUSING = 'ext_housing',
+
+  /*
+   * Internal navigation permissions
+   */
+  INT_HOUSING = 'int_housing',
+  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management'
 }
+
+const GlobalNavigations = [NavigationPermission.GLO_USER];
 
 const NavigationAuthorizationMap = [
   {
     group: GroupName.ADMIN,
     permissions: [
-      NavigationPermission.HOUSING_SUBMISSIONS,
-      NavigationPermission.HOUSING_USER_MANAGEMENT,
-      NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN,
-      NavigationPermission.USER
+      NavigationPermission.INT_HOUSING,
+      NavigationPermission.INT_HOUSING_USER_MANAGEMENT,
+      ...GlobalNavigations
     ]
   },
   {
     group: GroupName.NAVIGATOR,
-    permissions: [NavigationPermission.HOUSING_SUBMISSIONS, NavigationPermission.USER]
+    permissions: [NavigationPermission.INT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [NavigationPermission.HOUSING_SUBMISSIONS, NavigationPermission.USER]
+    permissions: [NavigationPermission.INT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.PROPONENT,
-    permissions: [
-      NavigationPermission.HOUSING,
-      NavigationPermission.HOUSING_ENQUIRY_INTAKE,
-      NavigationPermission.HOUSING_INTAKE,
-      NavigationPermission.HOUSING_PROJECT,
-      NavigationPermission.USER
-    ]
+    permissions: [NavigationPermission.EXT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.SUPERVISOR,
     permissions: [
-      NavigationPermission.HOUSING_SUBMISSIONS,
-      NavigationPermission.HOUSING_USER_MANAGEMENT,
-      NavigationPermission.USER
+      NavigationPermission.INT_HOUSING,
+      NavigationPermission.INT_HOUSING_USER_MANAGEMENT,
+      ...GlobalNavigations
     ]
   }
 ];

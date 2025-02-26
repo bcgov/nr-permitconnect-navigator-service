@@ -235,14 +235,14 @@ watch(activeTabIndex, (newIndex) => {
   // wipe out the query when switching tabs otherwise append the tab index to the query
   if (route.query.tab != newIndex.toString()) {
     router.replace({
-      name: RouteName.HOUSING_SUBMISSIONS,
+      name: RouteName.EXT_HOUSING,
       query: {
         tab: newIndex.toString()
       }
     });
   } else {
     router.replace({
-      name: RouteName.HOUSING_SUBMISSIONS,
+      name: RouteName.EXT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()
@@ -310,9 +310,7 @@ watch(showCompleted, () => {
                     Bring forward {{ getBringForwardDate(bf) }}:
                     <router-link
                       :to="{
-                        name: bf.submissionId
-                          ? RouteName.HOUSING_SUBMISSIONS_PROJECT
-                          : RouteName.HOUSING_SUBMISSIONS_ENQUIRY,
+                        name: bf.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
                         params: getQueryObject(bf),
                         hash: `#${bf.noteId}`
                       }"

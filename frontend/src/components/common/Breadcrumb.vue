@@ -1,21 +1,14 @@
 <script setup lang="ts">
 import { Breadcrumb } from '@/lib/primevue';
 
-import type { MenuItem } from 'primevue/menuitem';
-import { ref, watch, type Ref } from 'vue';
-import { useRoute, useRouter, type RouteLocationMatched, type RouteLocationNormalizedLoadedGeneric } from 'vue-router';
-
-// Props
-// const { home, model } = defineProps<{
-//   home: MenuItem;
-//   model: Array<MenuItem>;
-// }>();
+import { ref, toRaw, watch, type Ref } from 'vue';
+import { useRoute, type RouteLocationNormalizedLoadedGeneric } from 'vue-router';
 
 const route = useRoute();
-const router = useRouter();
 
 const routes: Ref<Array<RouteLocationNormalizedLoadedGeneric>> = ref([]);
-const crumbs: Ref<Array<RouteLocationMatched>> = ref([]);
+
+const oldWatch: Ref<RouteLocationNormalizedLoadedGeneric | undefined> = ref(undefined);
 
 // Maps a param key to a callback function
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,36 +26,61 @@ const crumbs: Ref<Array<RouteLocationMatched>> = ref([]);
 //   }
 // }
 
-// watch( submissionStore.getSubmission, () => {
+watch(
+  route,
+  async () => {
+    const value = toRaw({ ...route });
+    const oldValue = toRaw({ ...oldWatch.value });
 
-// });
+    const matched = value.matched.filter((x) => x.meta.breadcrumb);
+    const oldMatched = oldValue.matched?.filter((x) => x.meta.breadcrumb).map((x) => toRaw(x));
 
-// watch(route.matched, () => {
-//   console.log('route.matched');
-// });
+    // const fullPath = route.fullPath;
+    // const path = route.path;
+    // const name = route.name;
+    // const params = route.params;
+    // const query = route.query;
+    // const hash = route.hash;
+    // const matched = route.matched;
 
-watch(route, () => {
-  console.log(router.currentRoute);
-  console.log(router.getRoutes());
-  console.log(route);
+    // Fresh entry, just add
+    if (!oldMatched) {
+      routes.value.push(value);
+    }
+    // Check for path divergence
+    else {
+      if (matched.length > oldMatched.length) {
+        for (let i = 0; i < oldMatched.length; ++i) {
+          if (matched[i].path !== oldMatched[i].path) {
+            routes.value = routes.value.slice(0, i);
+            break;
+          }
+        }
+        routes.value.push(value);
+      } else if (matched.length === oldMatched.length) {
+        routes.value[routes.value.length - 1] = value;
+      } else if (matched.length < oldMatched.length) {
+        for (let i = 0; i < matched.length; ++i) {
+          if (matched[i].path !== oldMatched[i].path || i === matched.length - 1) {
+            routes.value = routes.value.slice(0, Math.min(0, i - 1));
+            break;
+          }
+        }
+        routes.value.push(value);
+      }
+    }
 
-  routes.value.push({ ...route });
-  let temp = route.matched;
-  // compute bunch of shit
-  // check each match if dynamic
-  // if dynamic get info from some store and modify meta
-  crumbs.value = temp;
-});
-
-// watch( submissionStore.getSubmission, () => {
-// });
-
-// watch( submissionStore.getPermit, () => {
-// });
+    oldWatch.value = value;
+  },
+  { deep: true }
+);
 </script>
 
 <template>
-  <Breadcrumb :model="routes">
+  <Breadcrumb
+    v-if="!route.meta.hideBreadcrumb"
+    :model="routes"
+  >
     <template #separator>/</template>
     <template #item="{ item }">
       <!-- TODO: Dont link last item, just plain text -->

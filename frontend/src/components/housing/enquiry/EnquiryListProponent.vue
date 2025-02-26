@@ -62,7 +62,7 @@ const { t } = useI18n();
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_ENQUIRY_SUBMITTED,
+              name: RouteName.EXT_HOUSING_ENQUIRY,
               params: { enquiryId: data.enquiryId },
               query: { activityId: data.activityId }
             }"

@@ -1,7 +1,8 @@
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { default as housingRoutes } from '@/router/housing';
+import { default as extHousingRoutes } from '@/router/extHousing';
+import { default as intHousingRoutes } from '@/router/intHousing';
 import { default as oidcRoutes } from '@/router/oidc';
 import { default as userRoutes } from '@/router/user';
 import { AuthService, contactService, yarsService } from '@/services';
@@ -21,7 +22,6 @@ import type { Contact } from '@/types';
 export function accessHandler(to: RouteLocationNormalizedGeneric) {
   const access = to.meta.access as NavigationPermission[];
 
-  console.log('Access: ', access);
   if (access && access.length) {
     const authzStore = useAuthZStore();
     if (!authzStore.canNavigate(access)) {
@@ -35,7 +35,7 @@ export function accessHandler(to: RouteLocationNormalizedGeneric) {
  * Obtains user permissions if authenticated before hard navigation
  * @returns {object} a Vue route
  */
-async function bootstrap() {
+export async function bootstrap() {
   const authnStore = useAuthNStore();
   const authzStore = useAuthZStore();
   const contactStore = useContactStore();
@@ -60,11 +60,28 @@ export function createProps(route: { query: any; params: any }): object {
   return { ...route.query, ...route.params };
 }
 
+/**
+ * @function entryRedirect
+ * Checks for proper navigation on entry based on role
+ * @param {object} to The route to navigate to
+ * @returns {object} a Vue route
+ */
+export function entryRedirect(to: RouteLocationNormalizedGeneric) {
+  const authzStore = useAuthZStore();
+
+  if (to.name === RouteName.INT_HOUSING && !authzStore.canNavigate(NavigationPermission.INT_HOUSING)) {
+    return { name: RouteName.EXT_HOUSING };
+  }
+  if (to.name === RouteName.EXT_HOUSING && !authzStore.canNavigate(NavigationPermission.EXT_HOUSING)) {
+    return { name: RouteName.INT_HOUSING };
+  }
+}
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: [bootstrap, accessHandler],
+    beforeEnter: [bootstrap, entryRedirect, accessHandler],
     children: [
       {
         path: '/',
@@ -85,7 +102,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Forbidden.vue')
       },
 
-      ...housingRoutes,
+      ...extHousingRoutes,
+      ...intHousingRoutes,
       ...oidcRoutes,
       ...userRoutes,
 

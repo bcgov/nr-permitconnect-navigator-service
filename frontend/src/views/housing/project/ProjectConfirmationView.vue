@@ -22,9 +22,8 @@ const { activityId, submissionId } = defineProps<{
     <h3 class="inline-block my-7 mr-2">Project ID:</h3>
     <router-link
       :to="{
-        name: RouteName.HOUSING_PROJECT,
-        params: { submissionId: submissionId },
-        query: { activityId: activityId }
+        name: RouteName.EXT_HOUSING_PROJECT,
+        params: { submissionId: submissionId }
       }"
     >
       <span class="text-2xl">{{ activityId }}</span>
@@ -33,7 +32,7 @@ const { activityId, submissionId } = defineProps<{
       Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check
       your email for the confirmation email and keep the project ID for future reference.
     </div>
-    <div class="mt-6"><router-link :to="{ name: RouteName.HOUSING }">Back to Housing</router-link></div>
+    <div class="mt-6"><router-link :to="{ name: RouteName.EXT_HOUSING }">Back to Housing</router-link></div>
   </div>
 </template>
 

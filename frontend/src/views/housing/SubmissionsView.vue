@@ -17,7 +17,7 @@ const showCompleted: Ref<boolean> = ref(false);
 
 // Actions
 const getTitle = computed(() =>
-  authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)
+  authzStore.canNavigate(NavigationPermission.INT_HOUSING)
     ? showCompleted.value
       ? 'Completed Submissions'
       : 'Active Submissions'
@@ -27,8 +27,8 @@ const getTitle = computed(() =>
 
 <template>
   <BackButton
-    v-if="!authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
-    :route-name="RouteName.HOUSING"
+    v-if="!authzStore.canNavigate(NavigationPermission.INT_HOUSING)"
+    :route-name="RouteName.EXT_HOUSING"
     text="Back to Housing"
   />
 
@@ -36,7 +36,7 @@ const getTitle = computed(() =>
 
   <!-- Navigator view -->
   <SubmissionsNavigator
-    v-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
+    v-if="authzStore.canNavigate(NavigationPermission.INT_HOUSING)"
     @submissions-navigator:completed="showCompleted = !showCompleted"
   />
 </template>

@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, onErrorCaptured, ref } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 
-import Breadcrumb from './components/common/Breadcrumb.vue';
+//import Breadcrumb from './components/common/Breadcrumb.vue';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useConfigStore } from '@/store';
@@ -53,7 +53,7 @@ onErrorCaptured((e: Error) => {
       >
         {{ getConfig?.notificationBanner }}
       </Message>
-      <Breadcrumb v-if="!route.meta.hideBreadcrumb" />
+      <!-- <Breadcrumb /> -->
       <RouterView v-if="ready" />
     </template>
   </AppLayout>
