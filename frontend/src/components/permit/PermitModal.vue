@@ -144,7 +144,10 @@ async function onSubmit(data: PermitForm, { resetForm }) {
       submissionStore.addPermit(result);
     } else {
       const result = (await permitService.updatePermit({ ...permitData, activityId: permit.activityId })).data;
-      submissionStore.updatePermit(result);
+      submissionStore.updatePermit({
+        ...result,
+        permitNote: permit?.permitNote
+      });
     }
     toast.success('Permit saved');
   } catch (e: any) {
