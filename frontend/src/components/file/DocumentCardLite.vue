@@ -46,13 +46,17 @@ function onClick() {
     <template #content>
       <div class="grid grid-cols-12 gap-4">
         <div
-          v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
-          v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`"
           class="col-span-12 mb-0 text-left font-semibold text-ellipsis whitespace-nowrap mt-2"
           style="overflow: hidden"
           tabindex="0"
         >
-          <a href="#">{{ document.filename }}</a>
+          <span v-tooltip.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`">
+            <span v-tooltip.focus.bottom="`${document.filename} Uploaded by ${document.createdByFullName}`">
+              <a href="#">
+                {{ document.filename }}
+              </a>
+            </span>
+          </span>
         </div>
         <h6 class="col-span-8 text-left mt-0 mb-0 pt-0 pb-0">
           {{ formatDateLong(document.createdAt as string).split(',')[0] }},
