@@ -3,6 +3,8 @@ import { Form } from 'vee-validate';
 import { computed, onMounted, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
+import { formatDateFilename } from '@/utils/formatters';
+
 import {
   CancelButton,
   Checkbox,
@@ -20,7 +22,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { submissionService, userService } from '@/services';
+import { mapService, submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
@@ -68,6 +70,7 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
+const geoJson = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -216,6 +219,26 @@ function onReOpen() {
   });
 }
 
+const onSaveGeoJson = () => {
+  if (!geoJson.value) return;
+
+  const file = new Blob([JSON.stringify(geoJson.value, null, 2)], {
+    type: 'application/geo+json'
+  });
+
+  const downloadLink = URL.createObjectURL(file);
+  const downloadElement = document.createElement('a');
+  downloadElement.href = downloadLink;
+
+  const currentDateTime = formatDateFilename(new Date().toISOString());
+  const projectName = submissionStore?.getSubmission?.projectName ?? '';
+  const projectActivityId = submissionStore?.getSubmission?.activityId ?? '';
+
+  downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
+  downloadElement.click();
+  URL.revokeObjectURL(downloadLink);
+};
+
 const onSubmit = async (values: any) => {
   try {
     // Convert contact fields into contacts array object then remove form keys from data
@@ -242,7 +265,8 @@ const onSubmit = async (values: any) => {
         'contactPhoneNumber',
         'contactEmail',
         'contactApplicantRelationship',
-        'contactPreference'
+        'contactPreference',
+        'locationPIDsAuto'
       ]
     );
 
@@ -292,6 +316,10 @@ onMounted(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
   }
 
+  const locationPIDsAuto = (await mapService.getPIDs(submission.submissionId)).data;
+
+  if (submission.geoJSON) geoJson.value = submission.geoJSON;
+
   // Default form values
   initialFormValues.value = {
     activityId: submission.activityId,
@@ -324,6 +352,7 @@ onMounted(async () => {
     locality: submission.locality,
     province: submission.province,
     locationPIDs: submission.locationPIDs,
+    locationPIDsAuto: locationPIDsAuto,
     latitude: submission.latitude,
     longitude: submission.longitude,
     geomarkUrl: submission.geomarkUrl,
@@ -668,6 +697,21 @@ onMounted(async () => {
         :disabled="!editable"
         :options="YES_NO_LIST"
       />
+      <TextArea
+        class="col-span-12"
+        name="locationPIDsAuto"
+        label="Auto generated location PID(s)"
+        :disabled="true"
+      />
+      <Button
+        v-if="geoJson"
+        id="download-geojson"
+        class="col-start-1 col-span-2 mb-2"
+        aria-label="Download GeoJSON"
+        @click="onSaveGeoJson"
+      >
+        Download GeoJSON
+      </Button>
       <TextArea
         class="col-span-12"
         name="projectLocationDescription"

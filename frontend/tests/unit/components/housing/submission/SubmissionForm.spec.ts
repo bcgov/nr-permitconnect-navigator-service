@@ -1,7 +1,9 @@
+import { nextTick } from 'vue';
+
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { GroupName } from '@/utils/enums/application';
-import { userService } from '@/services';
+import { mapService, userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -10,10 +12,13 @@ import { mount } from '@vue/test-utils';
 import type { Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
 
 import type { AxiosResponse } from 'axios';
+// import { geoJSON } from 'leaflet';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+searchUsersSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+getPIDsSpy.mockResolvedValue({ data: { pids: ['123456789'] } } as AxiosResponse);
 
 const currentDate = new Date().toISOString();
 
@@ -118,9 +123,10 @@ const testSubmission: Submission = {
   updatedAt: currentDate
 };
 
-const wrapperSettings = (testSubmissionProp = testSubmission) => ({
+const wrapperSettings = (testSubmissionProp = testSubmission, editableProp = true) => ({
   props: {
-    submission: testSubmissionProp
+    submission: testSubmissionProp,
+    editable: editableProp
   },
   global: {
     plugins: [
@@ -145,8 +151,123 @@ describe('SubmissionForm.vue', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the component with the provided props', () => {
+  it('renders the component with the provided props', async () => {
     const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+
     expect(wrapper).toBeTruthy();
+  });
+
+  it('renders the correct amount of dropdowns', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    // Note: <Form> component's v-if does not settle until after two nextTick() calls.
+    // Both will be required if the DOM querying is required.
+    await nextTick();
+    await nextTick();
+
+    const elements = wrapper.findAll('.p-select-dropdown');
+    expect(elements.length).toBe(19);
+  });
+
+  it('renders the correct amount of input components', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+    await nextTick();
+
+    // includes datepicker and input mask components, but not dropdowns
+    const elements = wrapper.findAll('.p-inputtext');
+    expect(elements.length).toBe(21);
+  });
+
+  it('renders the correct amount of datepickers components', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+    await nextTick();
+
+    const elements = wrapper.findAll('.p-datepicker-input');
+    expect(elements.length).toBe(1);
+  });
+
+  it('renders the correct amount of input mask components (phone number)', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+    await nextTick();
+
+    const elements = wrapper.findAll('.p-inputmask');
+    expect(elements.length).toBe(1);
+  });
+
+  it('renders the correct amount of text area components', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+    await nextTick();
+
+    const elements = wrapper.findAll('textarea');
+    expect(elements.length).toBe(4);
+  });
+
+  it('searches for users onMount', async () => {
+    const mountSubmission = { ...testSubmission, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(SubmissionForm, wrapperSettings(mountSubmission));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(searchUsersSpy).toHaveBeenCalledTimes(1);
+    expect(searchUsersSpy).toHaveBeenCalledWith({ userId: [mountSubmission.assignedUserId] });
+  });
+
+  it('gets PIDs onMount', async () => {
+    // const mountSubmission = { ...testSubmission, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(SubmissionForm, wrapperSettings());
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(getPIDsSpy).toHaveBeenCalledTimes(1);
+    expect(getPIDsSpy).toHaveBeenCalledWith(testSubmission.submissionId);
+  });
+
+  it('there are correct numbers of disabled components when editable prop is false', async () => {
+    const wrapper = mount(SubmissionForm, wrapperSettings(undefined, false));
+    await nextTick();
+    await nextTick();
+
+    const elements = wrapper.findAll('.p-disabled');
+    expect(wrapper.vm.$props?.editable).toBe(false);
+    expect(elements.length).toBe(23);
+  });
+
+  it('geojson download btn not visible when no geojson', async () => {
+    const modifiedSubmission = { ...testSubmission, geoJSON: undefined };
+
+    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    await nextTick();
+    await nextTick();
+
+    expect(wrapper.find('#download-geojson').exists()).toBe(false);
+  });
+
+  it('geojson download btn visible when geojson is in submission', async () => {
+    const modifiedSubmission = { ...testSubmission, geoJSON: {} };
+
+    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    await nextTick();
+    await nextTick();
+
+    const downloadBtn = wrapper.find('#download-geojson');
+    expect(downloadBtn.exists()).toBe(true);
+    expect(downloadBtn.isVisible()).toBe(true);
+  });
+
+  it('geojson download btn visible when geojson is in submission', async () => {
+    const testGeoJson = { feature: 'POINT', data: 'test' };
+    const modifiedSubmission = { ...testSubmission, geoJSON: testGeoJson };
+
+    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    await nextTick();
+    await nextTick();
+
+    const downloadBtn = wrapper.find('#download-geojson');
+    expect(downloadBtn.exists()).toBe(true);
+    expect(downloadBtn.isVisible()).toBe(true);
   });
 });
