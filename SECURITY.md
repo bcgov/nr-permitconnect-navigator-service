@@ -14,8 +14,8 @@ At this time, only the latest version of NR PermitConnect Navigator Service is s
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.5.0   | :white_check_mark: |
-| < 0.5.x | :x:                |
+| 0.6.0   | :white_check_mark: |
+| < 0.6.x | :x:                |
 
 ## Reporting a Bug
 
