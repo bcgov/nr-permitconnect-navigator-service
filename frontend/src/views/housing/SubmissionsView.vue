@@ -16,13 +16,7 @@ const authzStore = useAuthZStore();
 const showCompleted: Ref<boolean> = ref(false);
 
 // Actions
-const getTitle = computed(() =>
-  authzStore.canNavigate(NavigationPermission.INT_HOUSING)
-    ? showCompleted.value
-      ? 'Completed Submissions'
-      : 'Active Submissions'
-    : 'My drafts and previous entries'
-);
+const getTitle = computed(() => (showCompleted.value ? 'Completed Submissions' : 'Active Submissions'));
 </script>
 
 <template>

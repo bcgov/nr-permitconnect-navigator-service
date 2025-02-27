@@ -133,19 +133,28 @@ function getBringForwardStyling(bf: BringForward) {
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
 
+function getParamObject(bf: BringForward) {
+  if (bf.submissionId) {
+    return {
+      submissionId: bf.submissionId
+    };
+  }
+  return {
+    enquiryId: bf.enquiryId
+  };
+}
+
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
       activityId: bf.activityId,
-      initialTab: NOTES_TAB_INDEX.SUBMISSION,
-      submissionId: bf.submissionId
+      initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
     activityId: bf.activityId,
-    initialTab: NOTES_TAB_INDEX.ENQUIRY,
-    enquiryId: bf.enquiryId
+    initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
 
@@ -311,7 +320,8 @@ watch(showCompleted, () => {
                     <router-link
                       :to="{
                         name: bf.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
-                        params: getQueryObject(bf),
+                        params: getParamObject(bf),
+                        query: getQueryObject(bf),
                         hash: `#${bf.noteId}`
                       }"
                     >
