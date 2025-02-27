@@ -5,6 +5,14 @@ import { mount } from '@vue/test-utils';
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 
 vi.mock('vue-router', () => ({
+  useRoute: () => ({
+    hash: {},
+    query: {},
+    params: {},
+    matched: [],
+    meta: { breadcrumb: 'bc' },
+    name: 'some-url'
+  }),
   useRouter: () => ({
     push: vi.fn()
   })

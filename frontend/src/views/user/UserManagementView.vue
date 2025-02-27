@@ -22,7 +22,6 @@ import {
 } from '@/lib/primevue';
 import { accessRequestService, userService, yarsService } from '@/services';
 import { useAuthZStore } from '@/store';
-import { NavigationPermission } from '@/store/authzStore';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
 import { IdentityProvider, AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import { omit } from '@/utils/utils';
@@ -336,7 +335,7 @@ onMounted(async () => {
     @user-action:process="() => onProcessUserAccessRequest()"
   />
   <Tabs
-    v-if="authzStore.canNavigate(NavigationPermission.HOUSING_USER_MANAGEMENT_ADMIN)"
+    v-if="authzStore.isInGroup([GroupName.ADMIN])"
     :value="activeTab"
   >
     <TabList>

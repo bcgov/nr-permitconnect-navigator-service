@@ -455,6 +455,11 @@ const controller = {
 
   updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
     try {
+      // If Navigator created empty submission we need to assign contactIds on save
+      req.body.contacts = req.body.contacts.map((x) => {
+        if (!x.contactId) x.contactId = uuidv4();
+        return x;
+      });
       await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
       const response = await submissionService.updateSubmission({

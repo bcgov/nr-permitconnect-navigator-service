@@ -188,7 +188,7 @@ onMounted(async () => {
       outlined
       @click="
         router.push({
-          name: RouteName.HOUSING_PROJECT,
+          name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
           params: {
             submissionId: submissionId
           }

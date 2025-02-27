@@ -433,13 +433,13 @@ onMounted(async () => {
         class="col-span-3"
         name="contactFirstName"
         label="First name"
-        :disabled="true"
+        :disabled="!editable || !!initialFormValues.contactFirstName"
       />
       <InputText
         class="col-span-3"
         name="contactLastName"
         label="Last name"
-        :disabled="true"
+        :disabled="!editable || !!initialFormValues.contactLastName"
       />
       <InputText
         class="col-span-3"
@@ -481,13 +481,13 @@ onMounted(async () => {
         name="contactPhoneNumber"
         mask="(999) 999-9999"
         label="Contact phone"
-        :disabled="true"
+        :disabled="!editable || !!initialFormValues.contactPhoneNumber"
       />
       <InputText
         class="col-span-3"
         name="contactEmail"
         label="Contact email"
-        :disabled="true"
+        :disabled="!editable || !!initialFormValues.contactEmail"
       />
       <Select
         class="col-span-3"

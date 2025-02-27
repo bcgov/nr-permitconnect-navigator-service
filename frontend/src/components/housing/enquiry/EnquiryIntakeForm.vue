@@ -65,7 +65,7 @@ const toast = useToast();
 const getBackButtonConfig = computed(() => {
   return {
     text: 'Back to Housing',
-    routeName: RouteName.HOUSING
+    routeName: RouteName.EXT_HOUSING
   };
 });
 
@@ -136,7 +136,7 @@ async function loadEnquiry() {
       }
     };
   } catch (e: any) {
-    router.replace({ name: RouteName.HOUSING_ENQUIRY_INTAKE });
+    router.replace({ name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE });
   }
 }
 
@@ -205,10 +205,12 @@ async function onSubmit(data: any) {
       contactStore.setContact(enquiryData.contacts[0]);
 
       router.push({
-        name: RouteName.HOUSING_ENQUIRY_CONFIRMATION,
+        name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+        params: {
+          enquiryId: enquiryResponse.data.enquiryId
+        },
         query: {
           activityId: enquiryResponse.data.activityId,
-          enquiryId: enquiryResponse.data.enquiryId,
           showEnquiryLink: projectName || permitName ? '' : 'true'
         }
       });

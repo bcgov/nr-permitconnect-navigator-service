@@ -1,4 +1,4 @@
-import EnquiryIntakeConfirmation from '@/components/housing/enquiry/EnquiryIntakeConfirmation.vue';
+import ProjectConfirmationView from '@/views/housing/project/ProjectConfirmationView.vue';
 import { userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
@@ -9,15 +9,15 @@ import type { AxiosResponse } from 'axios';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
-const testAssignedActivityId = 'activity123';
-
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 
-const wrapperSettings = (testAssignedActivityIdProp = testAssignedActivityId) => ({
+const testSubmissionId = 'submission123';
+const testActivityId = 'activity123';
+
+const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
   props: {
-    assignedActivityId: testAssignedActivityIdProp,
-    showHeader: true,
-    showHomeLink: true
+    submissionId: testSubmissionIdProp,
+    activityId: testActivityIdProp
   },
   global: {
     plugins: [
@@ -37,13 +37,13 @@ const wrapperSettings = (testAssignedActivityIdProp = testAssignedActivityId) =>
   }
 });
 
-describe('EnquiryIntakeConfirmation.vue', () => {
+describe('ProjectConfirmationView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(EnquiryIntakeConfirmation, wrapperSettings());
+    const wrapper = mount(ProjectConfirmationView, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

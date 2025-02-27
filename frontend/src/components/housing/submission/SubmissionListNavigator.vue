@@ -77,8 +77,9 @@ function handleCreateNewActivity() {
         const response = (await submissionService.createSubmission()).data;
         if (response?.activityId) {
           router.push({
-            name: RouteName.HOUSING_SUBMISSION,
-            query: { activityId: response.activityId, submissionId: response.submissionId }
+            name: RouteName.INT_HOUSING_PROJECT,
+            params: { submissionId: response.submissionId },
+            query: { activityId: response.activityId }
           });
         }
       } catch (e: any) {
@@ -132,7 +133,7 @@ function isFinanciallySupported(data: Submission) {
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.HOUSING_SUBMISSIONS,
+    name: RouteName.EXT_HOUSING,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
@@ -228,8 +229,9 @@ onMounted(() => {
         <div :data-projectName="data.projectName">
           <router-link
             :to="{
-              name: RouteName.HOUSING_SUBMISSION,
-              query: { activityId: data.activityId, submissionId: data.submissionId }
+              name: RouteName.INT_HOUSING_PROJECT,
+              params: { submissionId: data.submissionId },
+              query: { activityId: data.activityId }
             }"
           >
             {{ data.projectName }}
@@ -252,8 +254,9 @@ onMounted(() => {
           <div v-else>
             <router-link
               :to="{
-                name: RouteName.HOUSING_SUBMISSION,
-                query: { activityId: data.activityId, submissionId: data.submissionId }
+                name: RouteName.INT_HOUSING_PROJECT,
+                params: { submissionId: data.submissionId },
+                query: { activityId: data.activityId }
               }"
             >
               {{ data.activityId }}

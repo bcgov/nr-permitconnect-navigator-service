@@ -3,7 +3,6 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
@@ -20,10 +19,13 @@ import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescri
 type CombinedPermit = Permit & PermitType;
 
 // Props
-const { permitId, projectActivityId } = defineProps<{ permitId: string; projectActivityId?: string }>();
+const { permitId, projectActivityId, submissionId } = defineProps<{
+  permitId: string;
+  projectActivityId?: string;
+  submissionId: string;
+}>();
 
 // Constants
-const breadcrumbHome: MenuItem = { label: 'Housing', route: RouteName.HOUSING };
 const complete = (trackerStatus: string) => ({
   class: 'stage-blue',
   iconClass: 'complete',
@@ -197,7 +199,7 @@ onBeforeMount(async () => {
     breadcrumbItems.value = [
       {
         label: submission.value?.projectName,
-        route: RouteName.HOUSING_PROJECT,
+        route: RouteName.EXT_HOUSING_PROJECT,
         params: { submissionId: submission.value?.submissionId }
       },
       { label: permit?.value?.name, class: 'font-bold' }
@@ -219,10 +221,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <Breadcrumb
-    :home="breadcrumbHome"
-    :model="breadcrumbItems"
-  />
   <div class="permit-status-view">
     <h1 class="permit-name">
       {{ permit?.name }}
@@ -353,7 +351,8 @@ onBeforeMount(async () => {
           :label="t('permitStatusView.askNav')"
           @click="
             router.push({
-              name: RouteName.HOUSING_ENQUIRY_INTAKE,
+              name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
+              params: { permitId, submissionId },
               query: {
                 permitName: permit?.name,
                 permitTrackingId: permit?.trackingId,

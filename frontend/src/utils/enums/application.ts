@@ -55,23 +55,45 @@ export enum Regex {
 }
 
 export enum RouteName {
-  CONTACT_PROFILE = 'contact_profile',
   DEVELOPER = 'developer',
   FORBIDDEN = 'forbidden',
   HOME = 'home',
 
-  HOUSING = 'housing',
-  HOUSING_ENQUIRY = 'housing_enquiry',
-  HOUSING_ENQUIRY_CONFIRMATION = 'housing_enquiry_confirmation',
-  HOUSING_ENQUIRY_INTAKE = 'housing_enquiry_intake',
-  HOUSING_GUIDE = 'housing_guide',
-  HOUSING_PROJECT = 'housing_project',
-  HOUSING_PROJECT_PERMIT = 'housing_project_permit',
-  HOUSING_PROJECTS_LIST = 'housing_project_list',
-  HOUSING_SUBMISSION = 'housing_submission',
-  HOUSING_SUBMISSION_CONFIRMATION = 'housing_submission_confirmation',
-  HOUSING_SUBMISSION_INTAKE = 'housing_submission_intake',
-  HOUSING_SUBMISSIONS = 'housing_submissions',
+  /*
+   * External route names
+   */
+  EXT_HOUSING = 'ext_housing',
+  EXT_HOUSING_ENQUIRY_CONFIRMATION = 'ext_housing_enquiry_confirmation',
+  EXT_HOUSING_ENQUIRY = 'ext_housing_enquiry',
+  EXT_HOUSING_ENQUIRY_INTAKE = 'ext_housing_enquiry_intake',
+  EXT_HOUSING_INTAKE = 'ext_housing_intake',
+  EXT_HOUSING_INTAKE_DRAFT = 'ext_housing_intake_draft',
+  EXT_HOUSING_INTAKE_CONFIRMATION = 'ext_housing_intake_confirmation',
+  EXT_HOUSING_GUIDE = 'ext_housing_guide',
+  EXT_HOUSING_PROJECT = 'ext_housing_project',
+  EXT_HOUSING_PROJECT_ENQUIRY = 'ext_housing_project_enquiry',
+  EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION = 'ext_housing_project_enquiry_confirmation',
+  EXT_HOUSING_PROJECT_INTAKE = 'ext_housing_project_intake',
+  EXT_HOUSING_PROJECT_PERMIT = 'ext_housing_project_permit',
+  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY = 'ext_housing_project_permit_enquiry',
+  EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_housing_project_permit_enquiry_confirmation',
+  /*
+   * End External route names
+   */
+
+  /*
+   * Internal route names
+   */
+  INT_HOUSING = 'int_housing',
+  INT_HOUSING_ENQUIRY = 'int_INT_HOUSING_enquiry',
+  INT_HOUSING_PROJECT = 'int_housing_submissions',
+  INT_HOUSING_PROJECT_ENQUIRY = 'int_INT_HOUSING_project_enquiry',
+  INT_HOUSING_PROJECT_PROPONENT = 'int_INT_HOUSING_project_proponent',
+  INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_INT_HOUSING_project_proponent_permit',
+  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management',
+  /*
+   * End Internal route names
+   */
 
   NOT_FOUND = 'not_found',
 
@@ -79,7 +101,7 @@ export enum RouteName {
   OIDC_LOGIN = 'oidc_login',
   OIDC_LOGOUT = 'oidc_logout',
 
-  USER_MANAGEMENT = 'user_management'
+  USER = 'user'
 }
 
 export enum IdentityProvider {

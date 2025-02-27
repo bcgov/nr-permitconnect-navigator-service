@@ -1,7 +1,15 @@
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import HomeView from '@/views/HomeView.vue';
-import PrimeVue from 'primevue/config';
+
+// Mock dependencies
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -19,7 +27,7 @@ afterEach(() => {
 
 const wrapperSettings = () => ({
   global: {
-    plugins: [() => PrimeVue],
+    plugins: [() => PrimeVue, ToastService],
     stubs: ['font-awesome-icon']
   }
 });

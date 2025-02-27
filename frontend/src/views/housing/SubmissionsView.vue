@@ -3,7 +3,6 @@ import { computed, ref } from 'vue';
 
 import BackButton from '@/components/common/BackButton.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
-import SubmissionsProponent from '@/components/housing/submission/SubmissionsProponent.vue';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
@@ -17,19 +16,13 @@ const authzStore = useAuthZStore();
 const showCompleted: Ref<boolean> = ref(false);
 
 // Actions
-const getTitle = computed(() =>
-  authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)
-    ? showCompleted.value
-      ? 'Completed Submissions'
-      : 'Active Submissions'
-    : 'My drafts and previous entries'
-);
+const getTitle = computed(() => (showCompleted.value ? 'Completed Submissions' : 'Active Submissions'));
 </script>
 
 <template>
   <BackButton
-    v-if="!authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
-    :route-name="RouteName.HOUSING"
+    v-if="!authzStore.canNavigate(NavigationPermission.INT_HOUSING)"
+    :route-name="RouteName.EXT_HOUSING"
     text="Back to Housing"
   />
 
@@ -37,10 +30,7 @@ const getTitle = computed(() =>
 
   <!-- Navigator view -->
   <SubmissionsNavigator
-    v-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS)"
+    v-if="authzStore.canNavigate(NavigationPermission.INT_HOUSING)"
     @submissions-navigator:completed="showCompleted = !showCompleted"
   />
-
-  <!-- Proponent view -->
-  <SubmissionsProponent v-else-if="authzStore.canNavigate(NavigationPermission.HOUSING_SUBMISSIONS_SUB)" />
 </template>
