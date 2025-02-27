@@ -92,6 +92,9 @@
     "contactProfile": "Contact profile",
     "logout": "Log out"
   },
+  "homeView": {
+    "cantNavigate": "Please contact and administrator to verify your permissions"
+  },
   "housing": {
     "confirmationId": "Project ID",
     "drafts": "Drafts",

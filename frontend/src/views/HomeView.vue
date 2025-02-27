@@ -1,15 +1,31 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { Button } from '@/lib/primevue';
+
+import { Button, useToast } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
-import { useAuthZStore } from '@/store';
+import { useAuthNStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 
 // Store
 const router = useRouter();
+
+// State
+const { t } = useI18n();
+const toast = useToast();
+
+// Actions
 const toHousing = (): void => {
-  if (useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
-  else router.push({ name: RouteName.EXT_HOUSING });
+  if (useAuthNStore().getIsAuthenticated) {
+    if (useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
+    else if (useAuthZStore().canNavigate(NavigationPermission.EXT_HOUSING))
+      router.push({ name: RouteName.EXT_HOUSING });
+    else {
+      toast.warn(t('homeView.cantNavigate'));
+    }
+  } else {
+    router.push({ name: RouteName.EXT_HOUSING });
+  }
 };
 </script>
 
