@@ -11,6 +11,7 @@ import {
   IconField,
   InputIcon,
   InputText,
+  Select,
   useConfirm,
   useToast
 } from '@/lib/primevue';
@@ -142,6 +143,13 @@ function updateQueryParams() {
     }
   });
 }
+const selectOptions = [
+  { label: 'Active projects', value: 'activeProjects' },
+  { label: 'Completed projects', value: 'completedProjects' },
+  { label: 'All', value: 'all' }
+];
+
+const selectedFilter = ref(selectOptions[0]);
 
 onMounted(() => {
   if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
@@ -201,6 +209,23 @@ onMounted(() => {
     </template>
     <template #header>
       <div class="flex justify-between">
+        <div class="flex">
+          <Select
+            v-model="selectedFilter"
+            :options="selectOptions"
+            option-label="label"
+          />
+          <IconField
+            class="ml-3"
+            icon-position="left"
+          >
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              placeholder="Search all"
+            />
+          </IconField>
+        </div>
         <Button
           v-if="authzStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
           label="Create submission"
@@ -208,13 +233,6 @@ onMounted(() => {
           icon="pi pi-plus"
           @click="handleCreateNewActivity"
         />
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-          />
-        </IconField>
       </div>
     </template>
     <Column
