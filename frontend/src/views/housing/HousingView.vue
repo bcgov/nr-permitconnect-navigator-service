@@ -34,6 +34,16 @@ function onSubmissionDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
 
+function sortByLastUpdated(a: Submission, b: Submission) {
+  if (a.updatedAt && b.updatedAt) {
+    return a.updatedAt > b.updatedAt ? -1 : 1;
+  } else {
+    if (!a.updatedAt) return 1;
+    if (!b.updatedAt) return -1;
+    return 0;
+  }
+}
+
 watch(
   () => route.hash,
   async (newHash) => {
@@ -55,6 +65,9 @@ onMounted(async () => {
       submissionService.getDrafts()
     ])
   ).map((r) => r.data);
+
+  // Sort by last updated, push non-updated projects to bottom
+  projects.value.sort(sortByLastUpdated);
 
   drafts.value = drafts.value.map((x, index) => ({ ...x, index: index + 1 }));
 
