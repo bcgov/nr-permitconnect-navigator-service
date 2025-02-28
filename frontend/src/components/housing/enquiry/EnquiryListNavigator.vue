@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -11,13 +11,15 @@ import {
   IconField,
   InputIcon,
   InputText,
+  Select,
   useConfirm,
   useToast
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { useAuthZStore } from '@/store';
+import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
@@ -25,6 +27,8 @@ import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
 
 // Types
+type FilterOption = { label: string; statuses: string[] };
+
 type Pagination = {
   rows?: number;
   order?: number;
@@ -38,18 +42,34 @@ const { loading, enquiries } = defineProps<{
   enquiries: Array<Enquiry> | undefined;
 }>();
 
+// Constants
+const selectedOptions: Array<FilterOption> = [
+  {
+    label: 'Active enquiries',
+    statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
+  },
+  { label: 'Completed enquiries', statuses: [ApplicationStatus.COMPLETED] },
+  { label: 'All enquiries', statuses: APPLICATION_STATUS_LIST }
+];
+
 // Emit
 const emit = defineEmits(['enquiry:delete']);
 
 // State
-const route = useRoute();
-const selection: Ref<Enquiry | undefined> = ref(undefined);
+const filteredEnquiries = computed(() => {
+  return enquiries?.filter((element) => {
+    return selectedFilter.value.statuses.includes(element.enquiryStatus);
+  });
+});
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
   field: 'submittedAt',
   page: 0
 });
+const route = useRoute();
+const selectedFilter: Ref<FilterOption> = ref(selectedOptions[0]);
+const selection: Ref<Enquiry | undefined> = ref(undefined);
 
 // read from query params if tab is set to enquiry otherwise use default values
 if (route.query.tab === '1') {
@@ -110,7 +130,7 @@ function updateQueryParams() {
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
-    :value="enquiries"
+    :value="filteredEnquiries"
     data-key="enquiryId"
     scrollable
     responsive-layout="scroll"
@@ -154,18 +174,28 @@ function updateQueryParams() {
       <Spinner />
     </template>
     <template #header>
-      <div class="flex justify-end">
-        <IconField icon-position="left">
+      <div class="grid grid-cols-5 gap-3 mb-4">
+        <Select
+          v-model="selectedFilter"
+          class="col-span-1"
+          :options="selectedOptions"
+          option-label="label"
+        />
+        <IconField
+          class="col-span-1"
+          icon-position="left"
+        >
           <InputIcon class="pi pi-search" />
           <InputText
             v-model="filters['global'].value"
-            placeholder="Search all"
+            class="h-full"
+            placeholder="Search"
           />
         </IconField>
       </div>
     </template>
     <Column
-      field="activity.activityId"
+      field="activityId"
       header="Enquiry ID"
       :sortable="true"
       style="min-width: 136px"
@@ -260,5 +290,10 @@ function updateQueryParams() {
 <style scoped lang="scss">
 :deep(.header-center .p-column-header-content) {
   justify-content: center;
+}
+
+:deep(.p-datatable-header) {
+  padding-right: 0;
+  padding-left: 0;
 }
 </style>
