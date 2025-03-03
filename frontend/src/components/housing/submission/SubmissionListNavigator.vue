@@ -37,7 +37,7 @@ type Pagination = {
 };
 
 // Constants
-const selectedOptions: Array<FilterOption> = [
+const FILTER_OPTIONS: Array<FilterOption> = [
   {
     label: 'Active projects',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -73,7 +73,7 @@ const pagination: Ref<Pagination> = ref({
 });
 const route = useRoute();
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selectedFilter: Ref<FilterOption> = ref(selectedOptions[0]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 const selection: Ref<Submission | undefined> = ref(undefined);
 
 // read from query params if tab is set to enquiry otherwise use default values
@@ -227,7 +227,7 @@ onMounted(() => {
           <Select
             v-model="selectedFilter"
             class="col-span-1"
-            :options="selectedOptions"
+            :options="FILTER_OPTIONS"
             option-label="label"
           />
           <IconField

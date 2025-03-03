@@ -43,7 +43,7 @@ const { loading, enquiries } = defineProps<{
 }>();
 
 // Constants
-const selectedOptions: Array<FilterOption> = [
+const FILTER_OPTIONS: Array<FilterOption> = [
   {
     label: 'Active enquiries',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -68,7 +68,7 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const route = useRoute();
-const selectedFilter: Ref<FilterOption> = ref(selectedOptions[0]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 const selection: Ref<Enquiry | undefined> = ref(undefined);
 
 // read from query params if tab is set to enquiry otherwise use default values
@@ -178,7 +178,7 @@ function updateQueryParams() {
         <Select
           v-model="selectedFilter"
           class="col-span-1"
-          :options="selectedOptions"
+          :options="FILTER_OPTIONS"
           option-label="label"
         />
         <IconField
