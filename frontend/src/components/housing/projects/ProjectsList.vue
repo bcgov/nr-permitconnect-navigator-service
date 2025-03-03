@@ -47,7 +47,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.HOUSING_PROJECT,
+              name: RouteName.EXT_HOUSING_PROJECT,
               params: { submissionId: data.submissionId }
             }"
           >

@@ -49,10 +49,17 @@ const SUBMISSION_1 = {
   submittedBy: '100-100',
   locationPIDs: null,
   companyNameRegistered: null,
-  contactPhoneNumber: null,
-  contactEmail: null,
-  contactPreference: null,
-  contactApplicantRelationship: 'Property owner',
+  contacts: [
+    {
+      contactId: undefined,
+      firstName: 'Test',
+      lastName: 'Person',
+      phoneNumber: null,
+      email: null,
+      contactPreference: null,
+      contactApplicantRelationship: 'Property owner'
+    }
+  ],
   projectName: null,
   projectDescription: null,
   singleFamilyUnits: null,

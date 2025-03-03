@@ -133,19 +133,28 @@ function getBringForwardStyling(bf: BringForward) {
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
 
+function getParamObject(bf: BringForward) {
+  if (bf.submissionId) {
+    return {
+      submissionId: bf.submissionId
+    };
+  }
+  return {
+    enquiryId: bf.enquiryId
+  };
+}
+
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
       activityId: bf.activityId,
-      initialTab: NOTES_TAB_INDEX.SUBMISSION,
-      submissionId: bf.submissionId
+      initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
     activityId: bf.activityId,
-    initialTab: NOTES_TAB_INDEX.ENQUIRY,
-    enquiryId: bf.enquiryId
+    initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
 
@@ -235,14 +244,14 @@ watch(activeTabIndex, (newIndex) => {
   // wipe out the query when switching tabs otherwise append the tab index to the query
   if (route.query.tab != newIndex.toString()) {
     router.replace({
-      name: RouteName.HOUSING_SUBMISSIONS,
+      name: RouteName.EXT_HOUSING,
       query: {
         tab: newIndex.toString()
       }
     });
   } else {
     router.replace({
-      name: RouteName.HOUSING_SUBMISSIONS,
+      name: RouteName.EXT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()
@@ -310,7 +319,8 @@ watch(showCompleted, () => {
                     Bring forward {{ getBringForwardDate(bf) }}:
                     <router-link
                       :to="{
-                        name: bf.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                        name: bf.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
+                        params: getParamObject(bf),
                         query: getQueryObject(bf),
                         hash: `#${bf.noteId}`
                       }"

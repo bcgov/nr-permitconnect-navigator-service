@@ -38,26 +38,26 @@ onMounted(() => {
       items: [
         {
           label: 'Submit a housing project to the Navigator Service',
-          route: RouteName.HOUSING_SUBMISSION_INTAKE,
-          access: NavigationPermission.HOUSING_SUBMISSION_INTAKE
+          route: RouteName.EXT_HOUSING_INTAKE,
+          access: NavigationPermission.EXT_HOUSING
         },
         {
           label: 'Submit general enquiries',
-          route: RouteName.HOUSING_ENQUIRY_INTAKE,
-          access: NavigationPermission.HOUSING_ENQUIRY_INTAKE
+          route: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
+          access: NavigationPermission.EXT_HOUSING
         }
       ],
-      access: NavigationPermission.HOUSING_DROPDOWN
+      access: [NavigationPermission.EXT_HOUSING]
     },
     {
       label: 'Submissions',
-      route: RouteName.HOUSING_SUBMISSIONS,
-      access: NavigationPermission.HOUSING_SUBMISSIONS
+      route: RouteName.INT_HOUSING,
+      access: NavigationPermission.INT_HOUSING
     },
     {
       label: 'User Management',
-      route: RouteName.USER_MANAGEMENT,
-      access: NavigationPermission.HOUSING_USER_MANAGEMENT
+      route: RouteName.INT_HOUSING_USER_MANAGEMENT,
+      access: NavigationPermission.INT_HOUSING_USER_MANAGEMENT
     },
     {
       label: 'Developer',
@@ -69,8 +69,7 @@ onMounted(() => {
       items: [
         {
           label: 'User Guide',
-          route: RouteName.HOUSING_GUIDE,
-          access: NavigationPermission.HOUSING_USER_GUIDE
+          route: RouteName.EXT_HOUSING_GUIDE
         },
         {
           label: 'Report a problem',
@@ -80,7 +79,7 @@ onMounted(() => {
         {
           label: 'Contact a Navigator',
           mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
-          access: [NavigationPermission.HOUSING_SUBMISSION_INTAKE, NavigationPermission.HOUSING_ENQUIRY_INTAKE]
+          access: [NavigationPermission.EXT_HOUSING]
         }
       ],
       public: true

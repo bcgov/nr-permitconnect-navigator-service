@@ -4,21 +4,20 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
-import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
+import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
+import { NavigationPermission } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import { contactService, enquiryService, permitService, submissionService } from '@/services';
-import { useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit, PermitType } from '@/types';
-import type { MenuItem } from 'primevue/menuitem';
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
 // Types
 type PermitFilterConfig = {
@@ -39,8 +38,6 @@ const { submissionId } = defineProps<{
 // Constants
 const { t } = useI18n();
 
-const BREADCRUMB_HOME: MenuItem = { label: t('projectView.crumbHousing'), route: RouteName.HOUSING };
-
 // Store
 const submissionStore = useSubmissionStore();
 const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
@@ -50,9 +47,6 @@ const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
-const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => [
-  { label: getSubmission?.value?.projectName ?? '', class: 'font-bold' }
-]);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 
@@ -128,8 +122,9 @@ function permitFilter(config: PermitFilterConfig) {
 
 function navigateToSubmissionIntakeView() {
   router.push({
-    name: RouteName.HOUSING_SUBMISSION_INTAKE,
-    query: { activityId: getSubmission.value?.activityId, submissionId: getSubmission.value?.submissionId }
+    name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
+    params: { submissionId: getSubmission.value?.submissionId },
+    query: { activityId: getSubmission.value?.activityId }
   });
 }
 onMounted(async () => {
@@ -142,7 +137,7 @@ onMounted(async () => {
     if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
   } catch {
     toast.error(t('projectView.toastProjectLoadFailed'));
-    router.replace({ name: RouteName.HOUSING_PROJECTS_LIST });
+    router.replace({ name: RouteName.EXT_HOUSING });
   }
 
   try {
@@ -168,10 +163,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Breadcrumb
-    :home="BREADCRUMB_HOME"
-    :model="breadcrumbItems"
-  />
+  <RouterView />
   <div
     v-if="!loading && getSubmission"
     class="app-primary-color"
@@ -217,7 +209,7 @@ onMounted(async () => {
         outlined
         @click="
           router.push({
-            name: RouteName.HOUSING_ENQUIRY_INTAKE,
+            name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
             query: { projectName: getSubmission.projectName, projectActivityId: getSubmission.activityId }
           })
         "
@@ -284,14 +276,19 @@ onMounted(async () => {
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
       :to="{
-        name: RouteName.HOUSING_PROJECT_PERMIT,
+        name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+          ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
+          : RouteName.EXT_HOUSING_PROJECT_PERMIT,
         params: { permitId: permit.permitId },
         query: { projectActivityId: getSubmission.activityId }
       }"
       @keydown.space.prevent="
         router.push({
-          name: RouteName.HOUSING_PROJECT_PERMIT,
-          params: { permitId: permit.permitId }
+          name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+            ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
+            : RouteName.EXT_HOUSING_PROJECT_PERMIT,
+          params: { permitId: permit.permitId },
+          query: { projectActivityId: getSubmission.activityId }
         })
       "
     >

@@ -42,8 +42,9 @@ const { t } = useI18n();
       <h3 class="inline-block my-7 mr-2">{{ t('enquiryConfirmationView.confirmationIdLabel') }}:</h3>
       <router-link
         :to="{
-          name: RouteName.HOUSING_ENQUIRY_INTAKE,
-          query: { activityId: activityId, enquiryId: enquiryId }
+          name: RouteName.EXT_HOUSING_ENQUIRY,
+          params: { enquiryId: enquiryId },
+          query: { activityId: activityId }
         }"
       >
         <span class="text-2xl">{{ activityId }}</span>
@@ -56,7 +57,9 @@ const { t } = useI18n();
       v-if="showHomeLink"
       class="mt-7"
     >
-      <router-link :to="{ name: RouteName.HOUSING }">{{ t('enquiryConfirmationView.linkSubmissions') }}</router-link>
+      <router-link :to="{ name: RouteName.EXT_HOUSING }">
+        {{ t('enquiryConfirmationView.linkSubmissions') }}
+      </router-link>
     </div>
   </div>
 </template>

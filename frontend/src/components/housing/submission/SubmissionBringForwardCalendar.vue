@@ -35,19 +35,28 @@ watchEffect(() => {
   bringForwards.value = bringForward;
 });
 
+function getParamObject(bf: BringForward) {
+  if (bf.submissionId) {
+    return {
+      submissionId: bf.submissionId
+    };
+  }
+  return {
+    enquiryId: bf.enquiryId
+  };
+}
+
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
       activityId: bf.activityId,
-      initialTab: NOTES_TAB_INDEX.SUBMISSION,
-      submissionId: bf.submissionId
+      initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
     activityId: bf.activityId,
-    initialTab: NOTES_TAB_INDEX.ENQUIRY,
-    enquiryId: bf.enquiryId
+    initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
 
@@ -89,7 +98,8 @@ function filterForMyBringForwards(bf: BringForward): boolean {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: data.submissionId ? RouteName.HOUSING_SUBMISSION : RouteName.HOUSING_ENQUIRY,
+                  name: data.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
+                  params: getParamObject(data),
                   query: getQueryObject(data),
                   hash: `#${data.noteId}`
                 }"
