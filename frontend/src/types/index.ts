@@ -14,6 +14,7 @@ export type { IdentityProvider } from './IdentityProvider';
 export type { IDIRAttribute } from './IDIRAttribute';
 export type { ListPermitsOptions } from './ListPermitsOptions';
 export type { Note } from './Note';
+export type { Pagination } from './Pagination';
 export type { Permission } from './Permission';
 export type { Permit } from './Permit';
 export type { PermitNote } from './PermitNote';

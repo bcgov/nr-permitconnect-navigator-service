@@ -24,23 +24,22 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Enquiry } from '@/types';
+import type { Enquiry, Pagination } from '@/types';
 
 // Types
 type FilterOption = { label: string; statuses: string[] };
-
-type Pagination = {
-  rows?: number;
-  order?: number;
-  field?: string;
-  page?: number;
-};
 
 // Props
 const { loading, enquiries } = defineProps<{
   loading: boolean;
   enquiries: Array<Enquiry> | undefined;
 }>();
+
+// Composables
+const confirm = useConfirm();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 // Constants
 const FILTER_OPTIONS: Array<FilterOption> = [
@@ -56,20 +55,20 @@ const FILTER_OPTIONS: Array<FilterOption> = [
 const emit = defineEmits(['enquiry:delete']);
 
 // State
-const filteredEnquiries = computed(() => {
-  return enquiries?.filter((element) => {
-    return selectedFilter.value.statuses.includes(element.enquiryStatus);
-  });
-});
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
   field: 'submittedAt',
   page: 0
 });
-const route = useRoute();
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 const selection: Ref<Enquiry | undefined> = ref(undefined);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+
+const filteredEnquiries = computed(() => {
+  return enquiries?.filter((element) => {
+    return selectedFilter.value.statuses.includes(element.enquiryStatus);
+  });
+});
 
 // read from query params if tab is set to enquiry otherwise use default values
 if (route.query.tab === '1') {
@@ -80,10 +79,6 @@ if (route.query.tab === '1') {
 }
 
 // Actions
-const confirm = useConfirm();
-const toast = useToast();
-const router = useRouter();
-
 function onDelete(enquiryId: string, activityId: string) {
   confirm.require({
     message: 'Please confirm that you want to delete this enquiry',
