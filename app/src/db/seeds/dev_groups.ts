@@ -14,7 +14,6 @@ export async function seed(knex: Knex): Promise<void> {
 
   const identities = [
     { sub: '8895e3992ee9455b8eef3ab435dd5486@idir', group_id: developer_group_id[0].group_id },
-    { sub: '17222a61118846b08bdda2769a585278@idir', group_id: developer_group_id[0].group_id },
     { sub: 'a64c23b15d964d9b979188f356e083ea@idir', group_id: developer_group_id[0].group_id },
     { sub: '333c6b2f38454628b638ca4ac52eab68@idir', group_id: developer_group_id[0].group_id },
     { sub: 'e268cd73d4b544d4bc2c978fb98f342a@idir', group_id: developer_group_id[0].group_id },
