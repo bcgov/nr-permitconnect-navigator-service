@@ -22,6 +22,11 @@ export const contacts = Joi.array()
   .allow(null);
 
 const schema = {
+  getContact: {
+    params: Joi.object({
+      contactId: uuidv4.required()
+    })
+  },
   searchContacts: {
     query: Joi.object({
       userId: Joi.array().items(uuidv4).allow(null),
@@ -60,6 +65,7 @@ const schema = {
 };
 
 export default {
+  getContact: validate(schema.getContact),
   searchContacts: validate(schema.searchContacts),
   updateContact: validate(schema.updateContact)
 };

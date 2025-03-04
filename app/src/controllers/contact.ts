@@ -5,6 +5,20 @@ import type { NextFunction, Request, Response } from 'express';
 import type { Contact, ContactSearchParameters } from '../types';
 
 const controller = {
+  getContact: async (req: Request<{ contactId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const response = await contactService.getContact(req.params.contactId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   // Get current user's contact information
   getCurrentUserContact: async (req: Request<never, never, never, never>, res: Response, next: NextFunction) => {
     try {

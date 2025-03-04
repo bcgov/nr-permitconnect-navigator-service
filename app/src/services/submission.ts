@@ -268,6 +268,7 @@ const service = {
    * @function searchSubmissions
    * Search and filter for specific submission
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
+   * @param {string[]} [params.createdBy] Optional array of uuids representing users who created submissions
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted submissions should be included
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
@@ -293,6 +294,9 @@ const service = {
         AND: [
           {
             activity_id: { in: params.activityId }
+          },
+          {
+            created_by: { in: params.createdBy }
           },
           {
             intake_status: { in: params.intakeStatus }

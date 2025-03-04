@@ -8,7 +8,7 @@ import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake } from '../../types';
+import type { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -20,6 +20,16 @@ router.get(
   hasAuthorization(Resource.ENQUIRY, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
     enquiryController.getEnquiries(req, res, next);
+  }
+);
+
+/** Search all enquiries */
+router.get(
+  '/search',
+  hasAuthorization(Resource.ENQUIRY, Action.READ),
+  enquiryValidator.searchEnquiries,
+  (req: Request<never, never, never, EnquirySearchParameters>, res: Response, next: NextFunction): void => {
+    enquiryController.searchEnquiries(req, res, next);
   }
 );
 
