@@ -88,6 +88,13 @@ describe('enquiryService', () => {
     expect(putSpy).toHaveBeenCalledWith('enquiry', testEnquiry);
   });
 
+  it('calls searchEnquiries with correct data', () => {
+    enquiryService.searchEnquiries({ activityId: [testActivityId] });
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith('enquiry/search', { params: { activityId: [testActivityId] } });
+  });
+
   it('calls updateIsDeletedFlag with correct data', () => {
     enquiryService.updateIsDeletedFlag(testEnquiry.enquiryId, isDeleted);
 

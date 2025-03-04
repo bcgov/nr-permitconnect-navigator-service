@@ -1,5 +1,7 @@
 import { appAxios } from './interceptors';
 
+import type { EnquirySearchParameters } from '@/types';
+
 export default {
   /**
    * @function createEnquiry
@@ -41,6 +43,14 @@ export default {
    */
   async listRelatedEnquiries(activityId: string) {
     return appAxios().get(`enquiry/list/${activityId}`);
+  },
+
+  /**
+   * @function searchEnquiries
+   * @returns {Promise} An axios response
+   */
+  searchEnquiries(filters?: EnquirySearchParameters) {
+    return appAxios().get('enquiry/search', { params: { ...filters } });
   },
 
   /**

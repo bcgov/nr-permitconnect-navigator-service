@@ -154,31 +154,31 @@ describe('submissionService', () => {
 
   describe('searchSubmissions', () => {
     it('calls correct endpoint', () => {
-      submissionService.searchSubmissions({ activityId: testID });
+      submissionService.searchSubmissions({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: testID } });
+      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
     });
 
-    it('calls endpoint with isDeleted=false if specified', () => {
-      submissionService.searchSubmissions({ activityId: testID, isDeleted: false });
+    it('calls endpoint with includeDeleted=false if specified', () => {
+      submissionService.searchSubmissions({ activityId: [testID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
         params: {
-          activityId: testID,
-          isDeleted: false
+          activityId: [testID],
+          includeDeleted: false
         }
       });
     });
 
-    it('calls endpoint with isDeleted=true if specified', () => {
-      submissionService.searchSubmissions({ isDeleted: true });
+    it('calls endpoint with includeDeleted=true if specified', () => {
+      submissionService.searchSubmissions({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
         params: {
-          isDeleted: true
+          includeDeleted: true
         }
       });
     });

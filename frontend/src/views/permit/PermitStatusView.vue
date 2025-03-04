@@ -25,6 +25,11 @@ const { permitId, projectActivityId, submissionId } = defineProps<{
   submissionId: string;
 }>();
 
+// Composables
+const { t } = useI18n();
+const router = useRouter();
+const toast = useToast();
+
 // Constants
 const complete = (trackerStatus: string) => ({
   class: 'stage-blue',
@@ -143,10 +148,6 @@ const timelineStages = {
 };
 
 // Actions
-const { t } = useI18n();
-const router = useRouter();
-const toast = useToast();
-
 function getStatusBoxState(authStatus: string | undefined) {
   return authStatus && authStatus in statusBoxStates
     ? statusBoxStates[authStatus as keyof typeof statusBoxStates]
@@ -194,7 +195,12 @@ onBeforeMount(async () => {
     const { permitType, ...restOfPermit } = permitResponse.data;
     permit.value = { ...restOfPermit, ...permitType };
 
-    submission.value = (await submissionService.searchSubmissions({ activityId: [permit.value?.activityId] })).data[0];
+    if (permit.value) {
+      submission.value = (await submissionService.searchSubmissions({ activityId: [permit.value.activityId] })).data[0];
+
+      const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
+      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+    }
 
     breadcrumbItems.value = [
       {
@@ -204,15 +210,11 @@ onBeforeMount(async () => {
       },
       { label: permit?.value?.name, class: 'font-bold' }
     ];
+
     if (submission.value?.assignedUserId) {
       assignedNavigator.value = (
         await contactService.searchContacts({ userId: [submission.value.assignedUserId] })
       ).data[0];
-    }
-
-    if (permit.value?.updatedBy) {
-      const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
-      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
     }
   } catch {
     toast.error('Unable to load permit or project, please try again later');
