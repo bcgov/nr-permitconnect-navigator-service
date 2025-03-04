@@ -6,12 +6,12 @@ import { NavigationPermission } from '@/store/authzStore';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/user',
+    path: '/contact',
     meta: { hideBreadcrumb: true },
     children: [
       {
         path: '',
-        name: RouteName.USER,
+        name: RouteName.CONTACT,
         component: () => import('@/views/contact/ContactProfileView.vue'),
         beforeEnter: accessHandler,
         meta: { requiresAuth: true, access: [NavigationPermission.GLO_USER] }

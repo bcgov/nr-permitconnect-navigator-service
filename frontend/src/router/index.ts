@@ -1,10 +1,10 @@
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { default as extHousingRoutes } from '@/router/extHousing';
-import { default as intHousingRoutes } from '@/router/intHousing';
+import { default as externalRoutes } from '@/router/external';
+import { default as internalRoutes } from '@/router/internal';
 import { default as oidcRoutes } from '@/router/oidc';
-import { default as userRoutes } from '@/router/user';
+import { default as contactRoutes } from '@/router/contact';
 import { AuthService, contactService, yarsService } from '@/services';
 import { useAppStore, useAuthNStore, useAuthZStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
@@ -102,10 +102,10 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/Forbidden.vue')
       },
 
-      ...extHousingRoutes,
-      ...intHousingRoutes,
+      ...externalRoutes,
+      ...internalRoutes,
       ...oidcRoutes,
-      ...userRoutes,
+      ...contactRoutes,
 
       {
         path: '/:pathMatch(.*)*',
