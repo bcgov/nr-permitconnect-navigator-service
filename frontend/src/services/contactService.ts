@@ -7,6 +7,15 @@ const PATH = 'contact';
 
 export default {
   /**
+   * @function getContact
+   * Returns a specific contact details
+   * @returns {Promise<AxiosResponse>} An axios response or empty object
+   */
+  getContact(contactId: string): Promise<AxiosResponse> {
+    return appAxios().get(`${PATH}/${contactId}`);
+  },
+
+  /**
    * @function getCurrentUserContact
    * Returns current user's contact details
    * @returns {Promise<AxiosResponse>} An axios response or empty object
@@ -14,6 +23,7 @@ export default {
   getCurrentUserContact(): Promise<AxiosResponse> {
     return appAxios().get(`${PATH}/`);
   },
+
   /**
    * @function searchContacts
    * Returns a list of users based on the provided filtering parameters
@@ -23,6 +33,7 @@ export default {
   searchContacts(params: ContactSearchParameters): Promise<AxiosResponse> {
     return appAxios().get(`${PATH}/search`, { params: params });
   },
+
   /**
    * @function updateEnquiry
    * @returns {Promise} An axios response
