@@ -6,7 +6,7 @@ import { type RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/e/housing',
+    path: 'housing',
     meta: { access: [NavigationPermission.EXT_HOUSING], breadcrumb: 'Housing', requiresAuth: true },
     beforeEnter: entryRedirect,
     children: [

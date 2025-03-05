@@ -16,6 +16,8 @@ security:
   - BearerAuth: []
     OpenID: []
 tags:
+  - name: Contact
+    description: Operations for managing Contacts
   - name: Document
     description: Operations for managing Documents
   - name: Enquiry
@@ -35,6 +37,165 @@ tags:
   - name: User
     description: Operations for managing users
 paths:
+  /contact:
+    get:
+      summary: Get current user contact
+      description: >-
+        Gets contact information based on the request's current user context.
+      operationId: getCurrentUserContact
+      tags:
+        - Contact
+      responses:
+        '201':
+          description: Document created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /contact/{contactId}:
+    get:
+      summary: Get a specific contact
+      operationId: getContact
+      tags:
+        - Contact
+      parameters:
+        - $ref: '#/components/parameters/Path-ContactId'
+      responses:
+        '200':
+          description: Details of the specific contact
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Contact'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update an contact
+      operationId: updateContact
+      tags:
+        - Contact
+      parameters:
+        - $ref: '#/components/parameters/Path-ContactId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Contact'
+      responses:
+        '200':
+          description: Contact updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Contact'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /contact/search:
+    get:
+      summary: Search contacts
+      description: Returns a list of contacts based on the given queries
+      operationId: searchContacts
+      tags:
+        - Contact
+      parameters:
+        - in: query
+          name: contactApplicantRelationship
+          required: false
+          schema:
+            type: string
+            description: The contact applicant relationship type to filter on
+            example: Property owner
+        - in: query
+          name: contactPreference
+          required: false
+          schema:
+            type: string
+            description: The Contact's contact preference
+            example: Email
+        - in: query
+          name: contactId
+          required: false
+          schema:
+            type: array
+            description: The Contact IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ContactId'
+        - in: query
+          name: email
+          required: false
+          schema:
+            type: string
+            description: The Contact's email to filter on
+            example: JaneDoe@email.com
+        - in: query
+          name: firstName
+          required: false
+          schema:
+            type: string
+            description: The Contact's firstName to filter on
+            example: Jane
+        - in: query
+          name: lastName
+          required: false
+          schema:
+            type: string
+            description: The Contact's lastName to filter on
+            example: Doe
+        - in: query
+          name: phoneNumber
+          required: false
+          schema:
+            type: string
+            description: The Contact's phoneNumber to filter on
+            example: (123) 456-7890
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: array
+            description: The Contact User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-UserId'
+      responses:
+        '200':
+          description: A list of submissions matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Submission'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /document:
     put:
       summary: Create a document
@@ -290,6 +451,65 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /enquiry/search:
+    get:
+      summary: Search enquiries
+      description: Returns a list of enquiries based on the given queries
+      operationId: searchEnquiries
+      tags:
+        - Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeDeleted'
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: enquiryId
+          required: false
+          schema:
+            type: array
+            description: The Enquiry IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-EnquiryId'
+        - in: query
+          name: intakeStatus
+          required: false
+          schema:
+            type: array
+            description: The intake statuses to filter on
+            items:
+              $ref: '#/components/parameters/IntakeStatus'
+      responses:
+        '200':
+          description: A list of submissions matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Submission'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         default:
@@ -928,6 +1148,7 @@ paths:
       tags:
         - Submission
       parameters:
+        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -938,14 +1159,13 @@ paths:
             items:
               $ref: '#/components/parameters/Path-ActivityId'
         - in: query
-          name: includeDeleted
+          name: createdBy
           required: false
           schema:
-            type: boolean
-          description: >-
-            Whether to include records where the related activity is flagged as deleted.
-            When true, both deleted and non-deleted submissions are returned.
-            When false (default), only non-deleted submissions are returned.
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
         - in: query
           name: submissionId
           required: false
@@ -1070,6 +1290,15 @@ components:
       schema:
         type: string
         example: 2DE67F13
+    Path-ContactId:
+      in: path
+      name: contactId
+      description: UUID of a Contact
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db6f701
     Path-DocumentId:
       in: path
       name: documentId
@@ -1131,14 +1360,35 @@ components:
       schema:
         type: string
         example: true
+    Query-CreatedBy:
+      in: query
+      name: createdBy
+      description: UUID of user who created data
+      required: false
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db6f701
     Query-IncludeUser:
       in: query
       name: includeUser
-      description: Used to retrieve submissions connected to a specific user
+      description: >-
+        Whether to include User data with each entity being returned by the results.
       required: false
       schema:
         type: boolean
         example: true
+    Query-IncludeDeleted:
+      in: query
+      name: includeDeleted
+      description: >-
+        Whether to include records where the related activity is flagged as deleted.
+        When true, both deleted and non-deleted entities are returned.
+        When false (default), only non-deleted entities are returned.
+      required: false
+      schema:
+        type: boolean
+        example: false
     Query-SubmissionType:
       in: query
       name: submissionType
@@ -1148,6 +1398,15 @@ components:
         type: string
         example: Guidance
         enum: [Guidance, Inapplicable]
+    Query-UserId:
+      in: query
+      name: userId
+      description: ID of an User
+      required: false
+      schema:
+        type: string
+        format: uuid
+        example: b76469a3-896c-4435-aa83-b8b87db6f701
   schemas:
     DB-Contact:
       title: DB Contact

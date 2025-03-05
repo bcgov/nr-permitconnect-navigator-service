@@ -5,6 +5,17 @@ import { Request, Response } from 'express';
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
 
+const CONTACT_DATA = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant'
+};
+
 const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -27,6 +38,61 @@ const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 describe('contactController', () => {
   const next = jest.fn();
 
+  describe('getContact', () => {
+    const getContactSpy = jest.spyOn(contactService, 'getContact');
+
+    it('should return 200 and the contact if found', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      getContactSpy.mockResolvedValue(CONTACT_DATA);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.getContact(req as any, res as unknown as Response, next);
+
+      expect(getContactSpy).toHaveBeenCalledTimes(1);
+      expect(getContactSpy).toHaveBeenCalledWith('contact123');
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(CONTACT_DATA);
+    });
+
+    it('should return 404 if the contact is not found', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      getContactSpy.mockResolvedValue(null);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.getContact(req as any, res as unknown as Response, next);
+
+      expect(getContactSpy).toHaveBeenCalledTimes(1);
+      expect(getContactSpy).toHaveBeenCalledWith('contact123');
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Contact not found' });
+    });
+
+    it('calls next if the contact service fails', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      getContactSpy.mockImplementationOnce(() => {
+        throw new Error('Service failure');
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.getContact(req as any, res as unknown as Response, next);
+
+      expect(getContactSpy).toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('searchContacts', () => {
     const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
 
@@ -36,18 +102,7 @@ describe('contactController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request;
 
-      const contacts = [
-        {
-          contactId: 'contact123',
-          userId: 'user123',
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '123-456-7890',
-          email: 'john.doe@example.com',
-          contactPreference: 'email',
-          contactApplicantRelationship: 'applicant'
-        }
-      ];
+      const contacts = [CONTACT_DATA];
 
       searchContactsSpy.mockResolvedValue(contacts);
 

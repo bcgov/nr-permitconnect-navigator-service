@@ -24,17 +24,22 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Submission } from '@/types';
+import type { Pagination, Submission } from '@/types';
 
 // Types
 type FilterOption = { label: string; statuses: string[] };
 
-type Pagination = {
-  rows?: number;
-  order?: number;
-  field?: string;
-  page?: number;
-};
+// Props
+const { loading, submissions } = defineProps<{
+  loading: boolean;
+  submissions: Array<Submission> | undefined;
+}>();
+
+// Composables
+const confirmDialog = useConfirm();
+const route = useRoute();
+const router = useRouter();
+const toast = useToast();
 
 // Constants
 const FILTER_OPTIONS: Array<FilterOption> = [
@@ -46,12 +51,6 @@ const FILTER_OPTIONS: Array<FilterOption> = [
   { label: 'All projects', statuses: APPLICATION_STATUS_LIST }
 ];
 
-// Props
-const { loading, submissions } = defineProps<{
-  loading: boolean;
-  submissions: Array<Submission> | undefined;
-}>();
-
 // Emits
 const emit = defineEmits(['submission:delete']);
 
@@ -60,21 +59,21 @@ const authzStore = useAuthZStore();
 
 // State
 const dataTable = ref(null);
-const filteredSubmissions = computed(() => {
-  return submissions?.filter((element) => {
-    return selectedFilter.value.statuses.includes(element.applicationStatus);
-  });
-});
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
   field: 'submittedAt',
   page: 0
 });
-const route = useRoute();
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 const selection: Ref<Submission | undefined> = ref(undefined);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+
+const filteredSubmissions = computed(() => {
+  return submissions?.filter((element) => {
+    return selectedFilter.value.statuses.includes(element.applicationStatus);
+  });
+});
 
 // read from query params if tab is set to enquiry otherwise use default values
 if (!route.query.tab || route.query.tab === '0') {
@@ -85,10 +84,6 @@ if (!route.query.tab || route.query.tab === '0') {
 }
 
 // Actions
-const confirmDialog = useConfirm();
-const router = useRouter();
-const toast = useToast();
-
 function handleCreateNewActivity() {
   confirmDialog.require({
     header: 'Confirm create submission',

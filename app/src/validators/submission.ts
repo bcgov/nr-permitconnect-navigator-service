@@ -72,6 +72,7 @@ const schema = {
   searchSubmissions: {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
+      createdBy: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),

@@ -4,10 +4,10 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityService, contactService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/housing';
-import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
+import { getCurrentSubject, getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake } from '../types';
+import type { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
 
 const controller = {
   /**
@@ -134,6 +134,29 @@ const controller = {
   listRelatedEnquiries: async (req: Request<{ activityId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await enquiryService.getRelatedEnquiries(req.params.activityId);
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
+  searchEnquiries: async (
+    req: Request<never, never, never, EnquirySearchParameters>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      let response = await enquiryService.searchEnquiries({
+        ...req.query,
+        includeUser: isTruthy(req.query.includeUser)
+      });
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter(
+          (x: Enquiry) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+        );
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);

@@ -5,6 +5,22 @@ import { Contact, ContactSearchParameters, CurrentContext } from '../types';
 
 const service = {
   /**
+   * @function getContact
+   * Gets a specific contact from the PCNS database
+   * @param {string} contactId Contact ID
+   * @returns {Promise<Contact | null>} The result of running the findFirst operation
+   */
+  getContact: async (contactId: string) => {
+    const result = await prisma.contact.findFirst({
+      where: {
+        contact_id: contactId
+      }
+    });
+
+    return result ? contact.fromPrismaModel(result) : null;
+  },
+
+  /**
    * @function upsertContacts
    * Creates or updates the given contacts
    * Generates IDs and timestamps automatically

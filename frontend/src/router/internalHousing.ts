@@ -6,7 +6,7 @@ import { type RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/i/housing',
+    path: 'housing',
     meta: { access: [NavigationPermission.INT_HOUSING], breadcrumb: 'Housing', requiresAuth: true },
     beforeEnter: entryRedirect,
     children: [
@@ -93,17 +93,6 @@ const routes: Array<RouteRecordRaw> = [
             }
           }
         ]
-      },
-      {
-        path: 'user',
-        name: RouteName.INT_HOUSING_USER_MANAGEMENT,
-        component: () => import('@/views/user/UserManagementView.vue'),
-        beforeEnter: accessHandler,
-        meta: {
-          access: [NavigationPermission.INT_HOUSING_USER_MANAGEMENT],
-          breadcrumb: 'User management',
-          requiresAuth: true
-        }
       }
     ]
   }

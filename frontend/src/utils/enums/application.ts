@@ -55,6 +55,7 @@ export enum Regex {
 }
 
 export enum RouteName {
+  CONTACT = 'contact',
   DEVELOPER = 'developer',
   FORBIDDEN = 'forbidden',
   HOME = 'home',
@@ -84,13 +85,15 @@ export enum RouteName {
   /*
    * Internal route names
    */
+  INT_CONTACT = 'int_contact',
+  INT_CONTACT_PAGE = 'int_contact_page',
   INT_HOUSING = 'int_housing',
   INT_HOUSING_ENQUIRY = 'int_INT_HOUSING_enquiry',
   INT_HOUSING_PROJECT = 'int_housing_submissions',
   INT_HOUSING_PROJECT_ENQUIRY = 'int_INT_HOUSING_project_enquiry',
   INT_HOUSING_PROJECT_PROPONENT = 'int_INT_HOUSING_project_proponent',
   INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_INT_HOUSING_project_proponent_permit',
-  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management',
+  INT_USER_MANAGEMENT = 'int_user_management',
   /*
    * End Internal route names
    */
@@ -99,9 +102,7 @@ export enum RouteName {
 
   OIDC_CALLBACK = 'oidc_callback',
   OIDC_LOGIN = 'oidc_login',
-  OIDC_LOGOUT = 'oidc_logout',
-
-  USER = 'user'
+  OIDC_LOGOUT = 'oidc_logout'
 }
 
 export enum IdentityProvider {

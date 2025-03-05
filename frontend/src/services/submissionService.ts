@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email, Draft } from '@/types';
+import type { Email, Draft, SubmissionSearchParameters } from '@/types';
 
 export default {
   /**
@@ -80,7 +80,7 @@ export default {
    * @function searchSubmissions
    * @returns {Promise} An axios response
    */
-  searchSubmissions(filters?: any) {
+  searchSubmissions(filters?: SubmissionSearchParameters) {
     return appAxios().get('submission/search', { params: { ...filters } });
   },
 

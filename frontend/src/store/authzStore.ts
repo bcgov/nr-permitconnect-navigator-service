@@ -25,8 +25,9 @@ export enum NavigationPermission {
   /*
    * Internal navigation permissions
    */
+  INT_CONTACT = 'int_contact',
   INT_HOUSING = 'int_housing',
-  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management'
+  INT_USER_MANAGEMENT = 'int_user_management'
 }
 
 const GlobalNavigations = [NavigationPermission.GLO_USER];
@@ -35,18 +36,19 @@ const NavigationAuthorizationMap = [
   {
     group: GroupName.ADMIN,
     permissions: [
+      NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_HOUSING,
-      NavigationPermission.INT_HOUSING_USER_MANAGEMENT,
+      NavigationPermission.INT_USER_MANAGEMENT,
       ...GlobalNavigations
     ]
   },
   {
     group: GroupName.NAVIGATOR,
-    permissions: [NavigationPermission.INT_HOUSING, ...GlobalNavigations]
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [NavigationPermission.INT_HOUSING, ...GlobalNavigations]
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.PROPONENT,
@@ -55,8 +57,9 @@ const NavigationAuthorizationMap = [
   {
     group: GroupName.SUPERVISOR,
     permissions: [
+      NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_HOUSING,
-      NavigationPermission.INT_HOUSING_USER_MANAGEMENT,
+      NavigationPermission.INT_USER_MANAGEMENT,
       ...GlobalNavigations
     ]
   }

@@ -5,7 +5,7 @@ import { Menubar } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
-import { HOUSING_CONTACT } from '@/utils/constants/housing';
+import { HOUSING_ASSISTANCE } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -55,9 +55,14 @@ onMounted(() => {
       access: NavigationPermission.INT_HOUSING
     },
     {
+      label: 'Contacts',
+      route: RouteName.INT_CONTACT,
+      access: NavigationPermission.INT_CONTACT
+    },
+    {
       label: 'User Management',
-      route: RouteName.INT_HOUSING_USER_MANAGEMENT,
-      access: NavigationPermission.INT_HOUSING_USER_MANAGEMENT
+      route: RouteName.INT_USER_MANAGEMENT,
+      access: NavigationPermission.INT_USER_MANAGEMENT
     },
     {
       label: 'Developer',
@@ -78,7 +83,7 @@ onMounted(() => {
         },
         {
           label: 'Contact a Navigator',
-          mailTo: `mailto:${HOUSING_CONTACT.email}?subject=${HOUSING_CONTACT.subject}`,
+          mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
           access: [NavigationPermission.EXT_HOUSING]
         }
       ],

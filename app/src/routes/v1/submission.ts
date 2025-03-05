@@ -142,6 +142,7 @@ router.delete(
 /** Search all submissions */
 router.get(
   '/search',
+  hasAuthorization(Resource.SUBMISSION, Action.READ),
   (req: Request<never, never, never, SubmissionSearchParameters>, res: Response, next: NextFunction): void => {
     submissionController.searchSubmissions(req, res, next);
   }

@@ -52,7 +52,7 @@ export const ENQUIRY_TYPE_LIST = [
   SubmissionType.INAPPLICABLE
 ];
 
-export const HOUSING_CONTACT = {
+export const HOUSING_ASSISTANCE = {
   email: 'Navigator.Service@gov.bc.ca',
   subject: 'Assistance with Permit Connect Navigator Service'
 };
