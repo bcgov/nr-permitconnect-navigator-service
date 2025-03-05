@@ -1,10 +1,12 @@
-import EnquiryView from '@/views/housing/enquiry/EnquiryView.vue';
-import { enquiryService, noteService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
+
+import { enquiryService, noteService } from '@/services';
+import EnquiryView from '@/views/internal/housing/enquiry/EnquiryView.vue';
+
 import type { AxiosResponse } from 'axios';
 
 vi.mock('vue-router', () => ({

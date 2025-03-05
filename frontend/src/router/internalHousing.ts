@@ -55,7 +55,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: '',
                 name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
-                // TODO: Do we want to make an internal view that uses the same components?
+                // TODO: Consider creating reuse component from view so we can create a separate internal view for this
                 component: () => import('@/views/external/housing/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
@@ -66,7 +66,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: ':permitId',
                 name: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
-                // TODO: Do we want to make an internal view that uses the same components?
+                // TODO: Consider creating reuse component from view so we can create a separate internal view for this
                 component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,

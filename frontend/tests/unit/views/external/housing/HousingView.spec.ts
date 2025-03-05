@@ -1,9 +1,9 @@
+import PrimeVue from 'primevue/config';
+import Tooltip from 'primevue/tooltip';
 import { shallowMount } from '@vue/test-utils';
 
 import { enquiryService, submissionService } from '@/services';
-import HousingView from '@/views/housing/HousingView.vue';
-import PrimeVue from 'primevue/config';
-import Tooltip from 'primevue/tooltip';
+import HousingView from '@/views/external/housing/HousingView.vue';
 
 import type { AxiosResponse } from 'axios';
 

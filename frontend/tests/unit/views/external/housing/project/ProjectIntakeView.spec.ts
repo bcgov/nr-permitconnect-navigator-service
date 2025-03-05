@@ -1,22 +1,24 @@
-import EnquiryIntakeView from '@/views/housing/enquiry/EnquiryIntakeView.vue';
-import { userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
+
+import { permitService } from '@/services';
+import ProjectIntakeView from '@/views/external/housing/project/ProjectIntakeView.vue';
+
 import type { AxiosResponse } from 'axios';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const usePermitService = vi.spyOn(permitService, 'getPermitTypes');
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+usePermitService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 
-const testEnquiryId = 'enquiry123';
+const testSubmissionId = 'enquiry123';
 const testActivityId = 'activity123';
 
-const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
   props: {
-    enquiryId: testEnquiryIdProp,
+    submissionId: testSubmissionIdProp,
     activityId: testActivityIdProp
   },
   global: {
@@ -37,13 +39,13 @@ const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp =
   }
 });
 
-describe('EnquiryIntakeView.vue', () => {
+describe('ProjectIntakeView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = shallowMount(EnquiryIntakeView, wrapperSettings());
+    const wrapper = shallowMount(ProjectIntakeView, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });
