@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -19,21 +19,17 @@ import {
   TabList,
   TabPanel,
   TabPanels,
-  ToggleSwitch,
   useToast
 } from '@/lib/primevue';
 import { enquiryService, noteService, permitService, submissionService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
-import { ApplicationStatus, SubmissionType } from '@/utils/enums/housing';
+import { SubmissionType } from '@/utils/enums/housing';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/types';
-
-// Emits
-const emit = defineEmits(['submissionsNavigator:completed']);
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -62,7 +58,6 @@ const myBringForward: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const permits: Ref<Array<Permit>> = ref([]);
 const loading: Ref<boolean> = ref(true);
-const showCompleted: Ref<boolean> = ref(false);
 const showToggle: Ref<boolean> = ref(true);
 const submissions: Ref<Array<Submission>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
@@ -158,18 +153,6 @@ function getQueryObject(bf: BringForward) {
   };
 }
 
-const getSubmissions = computed(() => {
-  return showCompleted.value
-    ? submissions.value.filter((x) => x.applicationStatus === ApplicationStatus.COMPLETED)
-    : submissions.value.filter((x) => x.applicationStatus !== ApplicationStatus.COMPLETED);
-});
-
-const getEnquiries = computed(() => {
-  return showCompleted.value
-    ? enquiries.value.filter((x) => x.enquiryStatus === ApplicationStatus.COMPLETED)
-    : enquiries.value.filter((x) => x.enquiryStatus !== ApplicationStatus.COMPLETED);
-});
-
 function onEnquiryDelete(enquiryId: string, activityId: string) {
   enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
   bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
@@ -262,23 +245,9 @@ watch(activeTabIndex, (newIndex) => {
   // Show toggle only for submissions and enquiries tab
   showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY;
 });
-
-watch(showCompleted, () => {
-  emit('submissionsNavigator:completed', showCompleted.value);
-});
 </script>
 
 <template>
-  <div
-    v-if="showToggle"
-    class="flex justify-end mr-4"
-  >
-    <span class="app-primary-color">Show completed submissions</span>
-    <ToggleSwitch
-      v-model="showCompleted"
-      class="ml-2"
-    />
-  </div>
   <Tabs
     v-if="!loading"
     :value="activeTabIndex"
@@ -335,14 +304,14 @@ watch(showCompleted, () => {
         </Accordion>
         <SubmissionListNavigator
           :loading="loading"
-          :submissions="getSubmissions"
+          :submissions="submissions"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>
       <TabPanel :value="1">
         <EnquiryListNavigator
           :loading="loading"
-          :enquiries="getEnquiries"
+          :enquiries="enquiries"
           @enquiry:delete="onEnquiryDelete"
         />
       </TabPanel>

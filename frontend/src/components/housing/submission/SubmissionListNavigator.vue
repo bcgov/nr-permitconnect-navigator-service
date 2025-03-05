@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -11,12 +11,15 @@ import {
   IconField,
   InputIcon,
   InputText,
+  Select,
   useConfirm,
   useToast
 } from '@/lib/primevue';
 import { submissionService } from '@/services';
 import { useAuthZStore } from '@/store';
+import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
 import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
@@ -24,12 +27,24 @@ import type { Ref } from 'vue';
 import type { Submission } from '@/types';
 
 // Types
+type FilterOption = { label: string; statuses: string[] };
+
 type Pagination = {
   rows?: number;
   order?: number;
   field?: string;
   page?: number;
 };
+
+// Constants
+const FILTER_OPTIONS: Array<FilterOption> = [
+  {
+    label: 'Active projects',
+    statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
+  },
+  { label: 'Completed projects', statuses: [ApplicationStatus.COMPLETED] },
+  { label: 'All projects', statuses: APPLICATION_STATUS_LIST }
+];
 
 // Props
 const { loading, submissions } = defineProps<{
@@ -44,16 +59,22 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
-const route = useRoute();
-const selection: Ref<Submission | undefined> = ref(undefined);
 const dataTable = ref(null);
+const filteredSubmissions = computed(() => {
+  return submissions?.filter((element) => {
+    return selectedFilter.value.statuses.includes(element.applicationStatus);
+  });
+});
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
   field: 'submittedAt',
   page: 0
 });
+const route = useRoute();
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+const selection: Ref<Submission | undefined> = ref(undefined);
 
 // read from query params if tab is set to enquiry otherwise use default values
 if (!route.query.tab || route.query.tab === '0') {
@@ -157,7 +178,7 @@ onMounted(() => {
     v-model:filters="filters"
     v-model:selection="selection"
     :loading="loading"
-    :value="submissions"
+    :value="filteredSubmissions"
     data-key="submissionId"
     scrollable
     responsive-layout="scroll"
@@ -201,7 +222,26 @@ onMounted(() => {
       <Spinner />
     </template>
     <template #header>
-      <div class="flex justify-between">
+      <div class="flex justify-between mb-3">
+        <div class="grid grid-cols-2 gap-3">
+          <Select
+            v-model="selectedFilter"
+            class="col-span-1"
+            :options="FILTER_OPTIONS"
+            option-label="label"
+          />
+          <IconField
+            class="col-span-1"
+            icon-position="left"
+          >
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              class="h-full"
+              placeholder="Search"
+            />
+          </IconField>
+        </div>
         <Button
           v-if="authzStore.can(Initiative.HOUSING, Resource.SUBMISSION, Action.CREATE)"
           label="Create submission"
@@ -209,13 +249,6 @@ onMounted(() => {
           icon="pi pi-plus"
           @click="handleCreateNewActivity"
         />
-        <IconField icon-position="left">
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            placeholder="Search all"
-          />
-        </IconField>
       </div>
     </template>
     <Column
@@ -416,5 +449,10 @@ onMounted(() => {
 <style scoped lang="scss">
 :deep(.header-center .p-column-header-content) {
   justify-content: center;
+}
+
+:deep(.p-datatable-header) {
+  padding-right: 0;
+  padding-left: 0;
 }
 </style>
