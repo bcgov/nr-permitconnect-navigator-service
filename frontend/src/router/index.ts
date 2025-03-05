@@ -99,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/forbidden',
         name: RouteName.FORBIDDEN,
-        component: () => import('@/views/Forbidden.vue')
+        component: () => import('@/views/ForbiddenView.vue')
       },
 
       ...externalRoutes,
@@ -110,7 +110,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '/:pathMatch(.*)*',
         name: RouteName.NOT_FOUND,
-        component: () => import('@/views/NotFound.vue'),
+        component: () => import('@/views/NotFoundView.vue'),
         meta: { hideBreadcrumb: true }
       }
     ]

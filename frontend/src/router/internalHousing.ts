@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: RouteName.INT_HOUSING,
-        component: () => import('@/views/housing/SubmissionsView.vue'),
+        component: () => import('@/views/internal/housing/HousingView.vue'),
         beforeEnter: accessHandler
       },
       {
@@ -27,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: '',
             name: RouteName.INT_HOUSING_PROJECT,
-            component: () => import('@/views/housing/submission/SubmissionView.vue'),
+            component: () => import('@/views/internal/housing/project/ProjectView.vue'),
             beforeEnter: accessHandler,
             props: createProps
           },
@@ -38,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: ':enquiryId',
                 name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
-                component: () => import('@/views/housing/enquiry/EnquiryView.vue'),
+                component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
@@ -55,7 +55,8 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: '',
                 name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
-                component: () => import('@/views/housing/project/ProjectView.vue'),
+                // TODO: Do we want to make an internal view that uses the same components?
+                component: () => import('@/views/external/housing/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
@@ -65,7 +66,8 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: ':permitId',
                 name: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
-                component: () => import('@/views/permit/PermitStatusView.vue'),
+                // TODO: Do we want to make an internal view that uses the same components?
+                component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
@@ -84,7 +86,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ':enquiryId',
             name: RouteName.INT_HOUSING_ENQUIRY,
-            component: () => import('@/views/housing/enquiry/EnquiryView.vue'),
+            component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
