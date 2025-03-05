@@ -278,8 +278,10 @@ async function onLatLongInput() {
 
   if (validLat && validLong) {
     const location = formRef?.value?.values?.location;
-    if (mapRef.value?.pinToMap) mapRef.value.pinToMap(location.latitude, location.longitude);
-    clearGeoJSON();
+    if (mapRef.value?.pinToMap && (location.latitude || location.longitude)) {
+      mapRef.value.pinToMap(location.latitude, location.longitude);
+      clearGeoJSON();
+    }
   }
 }
 
@@ -578,8 +580,11 @@ onBeforeMount(async () => {
 watch(
   () => activeStep.value,
   () => {
+    const isIntake = [RouteName.EXT_HOUSING_INTAKE, RouteName.EXT_HOUSING_INTAKE_DRAFT].includes(
+      router.currentRoute.value.name as RouteName
+    );
     // Trigger autosave on form step change, if it has activityId
-    if (activityId && formRef?.value) onSaveDraft(formRef?.value?.values, true, false);
+    if (activityId && formRef?.value && isIntake) onSaveDraft(formRef?.value?.values, true, false);
 
     // Map component misaligned if mounted while not visible. Trigger resize to fix on show
     if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
