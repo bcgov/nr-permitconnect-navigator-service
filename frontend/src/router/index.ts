@@ -90,6 +90,12 @@ const routes: Array<RouteRecordRaw> = [
         meta: { hideBreadcrumb: true, hideNavbar: true }
       },
       {
+        path: '/login',
+        name: RouteName.LOGIN,
+        component: () => import('@/views/LoginView.vue'),
+        meta: { hideBreadcrumb: true, hideNavbar: true }
+      },
+      {
         path: '/developer',
         name: RouteName.DEVELOPER,
         component: () => import('@/views/DeveloperView.vue'),

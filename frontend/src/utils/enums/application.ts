@@ -59,6 +59,7 @@ export enum RouteName {
   DEVELOPER = 'developer',
   FORBIDDEN = 'forbidden',
   HOME = 'home',
+  LOGIN = 'login',
 
   /*
    * External route names
