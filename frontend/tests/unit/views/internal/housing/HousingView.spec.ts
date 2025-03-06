@@ -1,8 +1,8 @@
 import { createTestingPinia } from '@pinia/testing';
+import PrimeVue from 'primevue/config';
 import { shallowMount } from '@vue/test-utils';
 
-import SubmissionsView from '@/views/housing/SubmissionsView.vue';
-import PrimeVue from 'primevue/config';
+import HousingView from '@/views/internal/housing/HousingView.vue';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -35,9 +35,9 @@ const wrapperSettings = () => ({
   }
 });
 
-describe('SubmissionsView.vue', () => {
+describe('HousingView.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(SubmissionsView, wrapperSettings());
+    const wrapper = shallowMount(HousingView, wrapperSettings());
 
     expect(wrapper).toBeTruthy();
   });

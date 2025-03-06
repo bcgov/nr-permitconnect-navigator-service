@@ -4,7 +4,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
 
-import ContactPageView from '@/views/contact/ContactPageView.vue';
+import ContactPageView from '@/views/internal/contact/ContactPageView.vue';
 import { contactService, submissionService, enquiryService, userService } from '@/services';
 
 import type { AxiosRequestHeaders } from 'axios';

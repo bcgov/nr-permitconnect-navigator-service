@@ -1,8 +1,9 @@
 import { RouteName } from '@/utils/enums/application';
 
-import type { RouteRecordRaw } from 'vue-router';
 import { accessHandler } from '@/router';
 import { NavigationPermission } from '@/store/authzStore';
+
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -12,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: RouteName.CONTACT,
-        component: () => import('@/views/contact/ContactProfileView.vue'),
+        component: () => import('@/views/contact/ContactView.vue'),
         beforeEnter: accessHandler,
         meta: { requiresAuth: true, access: [NavigationPermission.GLO_USER] }
       }

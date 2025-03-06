@@ -1,12 +1,12 @@
 import { createTestingPinia } from '@pinia/testing';
-import { shallowMount } from '@vue/test-utils';
-
-import PermitStatusView from '@/views/permit/PermitStatusView.vue';
-import { contactService, permitService, submissionService } from '@/services';
-import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import { shallowMount } from '@vue/test-utils';
+
+import { contactService, permitService, submissionService } from '@/services';
+import { StorageKey } from '@/utils/enums/application';
+import PermitStatusView from '@/views/external/housing/permit/PermitStatusView.vue';
 
 import type { AxiosResponse } from 'axios';
 

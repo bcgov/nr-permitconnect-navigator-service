@@ -1,11 +1,13 @@
-import ProjectView from '@/views/housing/project/ProjectView.vue';
-import { contactService, enquiryService, permitService, submissionService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { StorageKey } from '@/utils/enums/application';
 import { shallowMount } from '@vue/test-utils';
+
+import { contactService, enquiryService, permitService, submissionService } from '@/services';
+import ProjectView from '@/views/external/housing/project/ProjectView.vue';
+
 import type { AxiosResponse } from 'axios';
 
 vi.mock('vue-i18n', () => ({

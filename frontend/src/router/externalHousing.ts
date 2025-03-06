@@ -13,7 +13,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: '',
         name: RouteName.EXT_HOUSING,
-        component: () => import('../views/housing/HousingView.vue'),
+        component: () => import('../views/external/housing/HousingView.vue'),
         beforeEnter: accessHandler
       },
       {
@@ -23,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: '',
             name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+            component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -33,7 +33,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ':enquiryId',
             name: RouteName.EXT_HOUSING_ENQUIRY,
-            component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+            component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ':enquiryId/confirmation',
             name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
-            component: () => import('@/views/housing/enquiry/EnquiryConfirmationView.vue'),
+            component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -59,7 +59,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: '',
             name: RouteName.EXT_HOUSING_INTAKE,
-            component: () => import('@/views/housing/project/ProjectIntakeView.vue'),
+            component: () => import('@/views/external/housing/project/ProjectIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -69,7 +69,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ':draftId',
             name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
-            component: () => import('@/views/housing/project/ProjectIntakeView.vue'),
+            component: () => import('@/views/external/housing/project/ProjectIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -79,7 +79,7 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: ':submissionId/confirmation',
             name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
-            component: () => import('@/views/housing/project/ProjectConfirmationView.vue'),
+            component: () => import('@/views/external/housing/project/ProjectConfirmationView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -99,7 +99,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: '',
                 name: RouteName.EXT_HOUSING_PROJECT,
-                component: () => import('@/views/housing/project/ProjectView.vue'),
+                component: () => import('@/views/external/housing/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
@@ -114,7 +114,7 @@ const routes: Array<RouteRecordRaw> = [
                   {
                     path: '',
                     name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY,
-                    component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+                    component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: {
@@ -124,7 +124,7 @@ const routes: Array<RouteRecordRaw> = [
                   {
                     path: ':enquiryId/confirmation',
                     name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
-                    component: () => import('@/views/housing/enquiry/EnquiryConfirmationView.vue'),
+                    component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: {
@@ -136,7 +136,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: 'intake',
                 name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-                component: () => import('@/views/housing/project/ProjectIntakeView.vue'),
+                component: () => import('@/views/external/housing/project/ProjectIntakeView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: {
@@ -150,7 +150,7 @@ const routes: Array<RouteRecordRaw> = [
                   {
                     path: '',
                     name: RouteName.EXT_HOUSING_PROJECT_PERMIT,
-                    component: () => import('@/views/permit/PermitStatusView.vue'),
+                    component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: {
@@ -165,7 +165,7 @@ const routes: Array<RouteRecordRaw> = [
                       {
                         path: '',
                         name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-                        component: () => import('@/views/housing/enquiry/EnquiryIntakeView.vue'),
+                        component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
                         beforeEnter: accessHandler,
                         props: createProps,
                         meta: {
@@ -175,7 +175,7 @@ const routes: Array<RouteRecordRaw> = [
                       {
                         path: ':enquiryId/confirmation',
                         name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
-                        component: () => import('@/views/housing/enquiry/EnquiryConfirmationView.vue'),
+                        component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
                         beforeEnter: accessHandler,
                         props: createProps,
                         meta: {
@@ -193,7 +193,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'guide',
         name: RouteName.EXT_HOUSING_GUIDE,
-        component: () => import('@/views/ComingSoon.vue'),
+        component: () => import('@/views/ComingSoonView.vue'),
         meta: { access: [NavigationPermission.EXT_HOUSING] }
       }
     ]

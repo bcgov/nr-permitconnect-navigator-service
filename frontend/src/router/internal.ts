@@ -17,13 +17,13 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: '',
             name: RouteName.INT_CONTACT,
-            component: () => import('@/views/contact/ContactsView.vue'),
+            component: () => import('@/views/internal/contact/ContactsView.vue'),
             beforeEnter: accessHandler
           },
           {
             path: ':contactId',
             name: RouteName.INT_CONTACT_PAGE,
-            component: () => import('@/views/contact/ContactPageView.vue'),
+            component: () => import('@/views/internal/contact/ContactPageView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: {
@@ -35,7 +35,7 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'user',
         name: RouteName.INT_USER_MANAGEMENT,
-        component: () => import('@/views/user/UserManagementView.vue'),
+        component: () => import('@/views/internal/user/UserManagementView.vue'),
         beforeEnter: accessHandler,
         meta: {
           access: [NavigationPermission.INT_USER_MANAGEMENT],

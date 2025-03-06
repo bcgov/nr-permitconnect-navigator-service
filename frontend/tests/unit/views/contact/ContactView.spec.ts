@@ -1,7 +1,7 @@
 import type { AxiosResponse } from 'axios';
 import { shallowMount } from '@vue/test-utils';
 
-import ContactProfileView from '@/views/contact/ContactProfileView.vue';
+import ContactProfileView from '@/views/contact/ContactView.vue';
 import { contactService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';

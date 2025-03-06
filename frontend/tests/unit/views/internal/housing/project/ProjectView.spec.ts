@@ -1,10 +1,12 @@
-import SubmissionView from '@/views/housing/submission/SubmissionView.vue';
-import { documentService, enquiryService, noteService, permitService, submissionService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
+
+import { documentService, enquiryService, noteService, permitService, submissionService } from '@/services';
+import ProjectView from '@/views/internal/housing/project/ProjectView.vue';
+
 import type { AxiosResponse } from 'axios';
 
 vi.mock('vue-i18n', () => ({
@@ -66,13 +68,13 @@ const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityId
   }
 });
 
-describe('SubmissionView.vue', () => {
+describe('ProjectView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = shallowMount(SubmissionView, wrapperSettings());
+    const wrapper = shallowMount(ProjectView, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

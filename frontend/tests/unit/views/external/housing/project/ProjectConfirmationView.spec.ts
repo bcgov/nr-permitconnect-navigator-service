@@ -1,10 +1,12 @@
-import ProjectConfirmationView from '@/views/housing/project/ProjectConfirmationView.vue';
-import { userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+
+import { userService } from '@/services';
+import ProjectConfirmationView from '@/views/external/housing/project/ProjectConfirmationView.vue';
+
 import type { AxiosResponse } from 'axios';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
