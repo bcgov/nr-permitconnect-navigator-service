@@ -30,7 +30,8 @@ const testContact = {
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
   contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
+  contactApplicantRelationship: 'applicant',
+  activityContact: []
 };
 
 vi.spyOn(contactService, 'getContact').mockResolvedValue({

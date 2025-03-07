@@ -165,7 +165,7 @@ onMounted(() => {
     />
     <Column
       field="phoneNumber"
-      header="phone"
+      header="Phone"
       :sortable="true"
       style="min-width: 150px"
     />
