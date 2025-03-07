@@ -142,6 +142,21 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "loginView": {
+    "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",
+    "BCServicesCardRequirement": "If you do not have a BC Services Card, you must live in Canada and provide 2 pieces of government-issued ID.",
+    "BusinessBCeIDRequirement": "Use when representing a legal entity. You must have documentation to prove the business or organization's identity.",
+    "getBasicBCeID": "Get a Basic BCeID.",
+    "getBusinessBCeID": "Get a Business BCeID.",
+    "internalGovUsers": "Internal Government Users",
+    "login": "Login",
+    "loginBasicBCeID": "Login with Basic BCeID",
+    "loginBCServicesCard": "Login with BC Services Card",
+    "loginBusinessBCeID": "Login with Business BCeID",
+    "loginIDIR": "Login with IDIR",
+    "register": "Need an account?",
+    "setupBCServicesCard": "Set up a BC Services Card account."
+  },
   "permitStatusView": {
     "additionalUpdates": "Additional updates",
     "applicationProgress": "Application progress",
