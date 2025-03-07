@@ -5,7 +5,7 @@ import { ref } from 'vue';
 import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
 import { useConfigStore, useSubmissionStore } from '@/store';
-import { getFilenameAndExtension } from '@/utils/utils';
+import { getFilenameAndExtension, sanitizeFilename } from '@/utils/utils';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
@@ -48,9 +48,12 @@ const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
 const onUpload = async (files: Array<File>) => {
   await Promise.allSettled(
     files.map(async (file: File) => {
+      const sanitizedFile = new File([file], sanitizeFilename(file.name), { type: file.type });
       try {
         uploading.value = true;
-        const response = (await documentService.createDocument(file, activityId, getConfig.value.coms.bucketId))?.data;
+        const response = (
+          await documentService.createDocument(sanitizedFile, activityId, getConfig.value.coms.bucketId)
+        )?.data;
 
         if (response) {
           response.extension = getFilenameAndExtension(response.filename).extension;
