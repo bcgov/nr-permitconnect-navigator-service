@@ -6,6 +6,7 @@ import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import DocumentCardLite from '@/components/file/DocumentCardLite.vue';
 import { documentService } from '@/services';
 import { useConfigStore, useSubmissionStore } from '@/store';
+import { sanitizeFilename } from '@/utils/utils';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
@@ -62,10 +63,11 @@ const onUpload = async (files: Array<File>) => {
 
   await Promise.allSettled(
     files.map((file: File) => {
+      const sanitizedFile = new File([file], sanitizeFilename(file.name), { type: file.type });
       return new Promise((resolve, reject) => {
         if (currentActivityId) {
           documentService
-            .createDocument(file, currentActivityId, getConfig.value.coms.bucketId)
+            .createDocument(sanitizedFile, currentActivityId, getConfig.value.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 submissionStore.addDocument(response.data);

@@ -289,3 +289,19 @@ export function toNumber(input: string): number | undefined {
   const i = parseInt(input);
   return Number.isNaN(i) ? undefined : i;
 }
+
+/**
+ * @function sanitizeFilename
+ * Sanitizes a filename by normalizing Unicode characters to ASCII and removing
+ * non-alphanumeric characters except for dots, underscores, and dashes.
+ * @param filename - The filename to sanitize.
+ * @returns The sanitized filename.
+ */
+export function sanitizeFilename(filename: string): string {
+  const NORMALIZATION_FORM_KD = 'NFKD';
+  // Normalize Unicode characters to ASCII (removes accents, etc.)
+  filename = filename.normalize(NORMALIZATION_FORM_KD).replace(/[\u0300-\u036f]/g, '');
+  // Replace non-alphanumeric characters (except dot, underscore, and dash) with replaceWith
+  filename = filename.replace(/[^a-zA-Z0-9._-]/g, '');
+  return filename;
+}
