@@ -8,16 +8,24 @@ const service = {
    * @function getContact
    * Gets a specific contact from the PCNS database
    * @param {string} contactId Contact ID
+   * @param {boolean} includeActivities Whether to include associated activities
    * @returns {Promise<Contact | null>} The result of running the findFirst operation
    */
-  getContact: async (contactId: string) => {
+  getContact: async (contactId: string, includeActivities: boolean) => {
     const result = await prisma.contact.findFirst({
       where: {
         contact_id: contactId
+      },
+      include: {
+        activity_contact: includeActivities
       }
     });
 
-    return result ? contact.fromPrismaModel(result) : null;
+    if (includeActivities) {
+      return result ? contact.fromPrismaModelWithActivities(result) : null;
+    } else {
+      return result ? contact.fromPrismaModel(result) : null;
+    }
   },
 
   /**

@@ -11,8 +11,9 @@ export default {
    * Returns a specific contact details
    * @returns {Promise<AxiosResponse>} An axios response or empty object
    */
-  getContact(contactId: string): Promise<AxiosResponse> {
-    return appAxios().get(`${PATH}/${contactId}`);
+  getContact(contactId: string, includeActivities?: boolean): Promise<AxiosResponse> {
+    const params = includeActivities === undefined ? {} : { includeActivities };
+    return appAxios().get(`${PATH}/${contactId}`, { params });
   },
 
   /**

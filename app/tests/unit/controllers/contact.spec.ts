@@ -16,6 +16,23 @@ const CONTACT_DATA = {
   contactApplicantRelationship: 'applicant'
 };
 
+const ACTIVITY_CONTACT_DATA = {
+  activityId: 'ACTI1234',
+  contactId: 'contact123'
+};
+
+const CONTACT_DATA_WITH_ACTIVITY = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant',
+  contactActivity: [ACTIVITY_CONTACT_DATA]
+};
+
 const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
@@ -53,9 +70,27 @@ describe('contactController', () => {
       await contactController.getContact(req as any, res as unknown as Response, next);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(getContactSpy).toHaveBeenCalledWith('contact123');
+      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(CONTACT_DATA);
+    });
+
+    it('should return 200 and the contact with activity contact if found', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        query: { includeActivities: true },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      getContactSpy.mockResolvedValue(CONTACT_DATA_WITH_ACTIVITY);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.getContact(req as any, res as unknown as Response, next);
+
+      expect(getContactSpy).toHaveBeenCalledTimes(1);
+      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, true);
+      expect(res.status).toHaveBeenCalledWith(200);
+      expect(res.json).toHaveBeenCalledWith(CONTACT_DATA_WITH_ACTIVITY);
     });
 
     it('should return 404 if the contact is not found', async () => {
@@ -70,7 +105,7 @@ describe('contactController', () => {
       await contactController.getContact(req as any, res as unknown as Response, next);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(getContactSpy).toHaveBeenCalledWith('contact123');
+      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Contact not found' });
     });

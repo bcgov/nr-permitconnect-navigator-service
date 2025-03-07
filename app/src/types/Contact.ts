@@ -1,4 +1,5 @@
 import { IStamps } from '../interfaces/IStamps';
+import { ActivityContact } from './ActivityContact';
 
 export type Contact = {
   contactId: string; // Primary Key
@@ -9,4 +10,5 @@ export type Contact = {
   email: string | null;
   contactPreference: string | null;
   contactApplicantRelationship: string | null;
+  activityContact?: Array<ActivityContact>;
 } & Partial<IStamps>;
