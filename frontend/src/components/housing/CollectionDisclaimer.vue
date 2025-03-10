@@ -29,35 +29,4 @@ const { t } = useI18n();
 .disclaimer {
   font-weight: 500;
 }
-
-.p-card {
-  border-color: rgb(242, 241, 241);
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 1px;
-  margin-bottom: 1rem;
-
-  .section-header {
-    font-weight: bold;
-    padding-left: 1rem;
-    padding-right: 0.5rem;
-  }
-
-  :deep(.p-card-title) {
-    font-size: 1rem;
-  }
-
-  :deep(.p-card-body) {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-    padding-top: 0;
-
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
 </style>

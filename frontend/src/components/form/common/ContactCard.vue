@@ -1,0 +1,89 @@
+<script setup lang="ts">
+import { useI18n } from 'vue-i18n';
+
+import Divider from '@/components/common/Divider.vue';
+import Tooltip from '@/components/common/Tooltip.vue';
+import { InputMask, InputText, Select } from '@/components/form';
+import { Card } from '@/lib/primevue';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+
+// Props
+const { editable = true } = defineProps<{
+  editable?: boolean;
+  initialFormValues: any;
+}>();
+
+// Composables
+const { t } = useI18n();
+</script>
+
+<template>
+  <Card>
+    <template #title>
+      <div class="flex">
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('contactCard.header') }}
+        </span>
+        <Tooltip
+          icon="fa-solid fa-circle-question"
+          right
+          :text="t('contactCard.contactTooltip')"
+        />
+      </div>
+      <Divider type="solid" />
+    </template>
+    <template #content>
+      <div class="grid grid-cols-12 gap-4">
+        <InputText
+          class="col-span-6"
+          :name="`contacts.contactFirstName`"
+          label="First name"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
+        />
+        <InputText
+          class="col-span-6"
+          :name="`contacts.contactLastName`"
+          label="Last name"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
+        />
+        <InputMask
+          class="col-span-6"
+          :name="`contacts.contactPhoneNumber`"
+          mask="(999) 999-9999"
+          label="Phone number"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
+        />
+        <InputText
+          class="col-span-6"
+          :name="`contacts.contactEmail`"
+          label="Email"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
+        />
+        <Select
+          class="col-span-6"
+          :name="`contacts.contactApplicantRelationship`"
+          label="Relationship to project"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactApplicantRelationship || !editable"
+          :options="PROJECT_RELATIONSHIP_LIST"
+        />
+        <Select
+          class="col-span-6"
+          :name="`contacts.contactPreference`"
+          label="Preferred contact method"
+          :bold="false"
+          :disabled="!!initialFormValues?.contacts?.contactPreference || !editable"
+          :options="CONTACT_PREFERENCE_LIST"
+        />
+      </div>
+    </template>
+  </Card>
+</template>

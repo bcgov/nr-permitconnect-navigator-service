@@ -185,7 +185,15 @@ export const ThemeOverride = definePreset(Material, {
     },
     card: {
       body: {
-        padding: '1rem'
+        padding: '0'
+      },
+      border: {
+        radius: '0.5rem'
+      },
+      title: {
+        font: {
+          size: '1rem'
+        }
       }
     },
     datatable: {

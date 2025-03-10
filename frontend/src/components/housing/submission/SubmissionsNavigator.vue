@@ -50,7 +50,7 @@ const { getProfile } = storeToRefs(authnStore);
 
 // State
 const route = useRoute();
-const accordionIndex: Ref<number | null> = ref(null);
+const accordionIndex: Ref<string | null> = ref(null);
 const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
 const bringForward: Ref<Array<BringForward>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
@@ -211,12 +211,12 @@ onMounted(async () => {
   loading.value = false;
 
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
-  if (accordionKey !== null) accordionIndex.value = Number(accordionKey);
+  if (accordionKey) accordionIndex.value = accordionKey;
 });
 
 watch(accordionIndex, () => {
-  if (accordionIndex.value !== null) {
-    window.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value.toString());
+  if (accordionIndex.value) {
+    window.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value);
   } else {
     window.sessionStorage.removeItem(StorageKey.BF_ACCORDION_IDX);
   }
@@ -267,12 +267,12 @@ watch(activeTabIndex, (newIndex) => {
       <TabPanel :value="0">
         <Accordion
           v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
-          v-model:active-index="accordionIndex"
+          v-model:value="accordionIndex"
           collapse-icon="pi pi-chevron-up"
           expand-icon="pi pi-chevron-right"
           class="mb-4"
         >
-          <AccordionPanel>
+          <AccordionPanel value="0">
             <AccordionHeader>My bring forward notifications</AccordionHeader>
             <AccordionContent>
               <div class="flex flex-col">

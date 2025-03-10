@@ -482,6 +482,7 @@ onBeforeMount(async () => {
   margin: 0;
 }
 
+// TODO: Can this share style with main.scss?
 .p-card {
   background: #fff;
   border: 0.063rem solid #efefef;

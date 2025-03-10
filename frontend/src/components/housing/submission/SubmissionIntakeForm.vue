@@ -9,16 +9,12 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import BackButton from '@/components/common/BackButton.vue';
 import Divider from '@/components/common/Divider.vue';
-import Map from '@/components/housing/maps/Map.vue';
 import {
   AutoComplete,
   DatePicker,
   Checkbox,
-  EditableSelect,
   FormAutosave,
   FormNavigationGuard,
-  InputMask,
-  InputNumber,
   InputText,
   RadioList,
   Select,
@@ -49,47 +45,32 @@ import {
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
 import { useConfigStore, useContactStore, useSubmissionStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import {
-  CONTACT_PREFERENCE_LIST,
-  NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_APPLICANT_LIST,
-  PROJECT_LOCATION_LIST,
-  PROJECT_RELATIONSHIP_LIST
-} from '@/utils/constants/housing';
+import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import {
   IntakeFormCategory,
   PermitNeeded,
   PermitStatus,
   ProjectApplicant,
-  ProjectLocation,
   SubmissionType
 } from '@/utils/enums/housing';
 import { confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { SelectChangeEvent } from 'primevue/select';
+
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
+
 import type { Contact, Document, Permit, PermitType, SubmissionIntake } from '@/types';
+import ContactCard from '@/components/form/common/ContactCard.vue';
+import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
+import LocationCard from '@/components/form/common/LocationCard.vue';
 
 // Types
-type GeocoderEntry = {
-  geometry: { coordinates: Array<number>; [key: string]: any };
-  properties: { [key: string]: string };
-};
-
 type SubmissionForm = {
   addressSearch?: string;
 } & SubmissionIntake;
-
-type PinUpdateEvent = {
-  longitude: number;
-  latitude: number;
-  address: string;
-};
 
 // Props
 const {
@@ -102,10 +83,14 @@ const {
   draftId?: string;
 }>();
 
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const router = useRouter();
+const toast = useToast();
+
 // Constants
-const VALIDATION_BANNER_TEXT =
-  // eslint-disable-next-line max-len
-  'One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red.';
+const VALIDATION_BANNER_TEXT = t('submissionIntakeForm.validationBanner');
 
 // Store
 const contactStore = useContactStore();
@@ -116,7 +101,6 @@ const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const activeStep: Ref<number> = ref(0);
-const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedActivityId: Ref<string | undefined> = ref(undefined);
 const assistanceAssignedEnquiryId: Ref<string | undefined> = ref(undefined);
@@ -126,9 +110,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
-const mapLatitude: Ref<number | undefined> = ref(undefined);
-const mapLongitude: Ref<number | undefined> = ref(undefined);
-const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
+const locationRef: Ref<InstanceType<typeof LocationCard> | null> = ref(null);
 const orgBookOptions: Ref<Array<any>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
@@ -138,11 +120,6 @@ const validationErrors = computed(() => {
 });
 
 // Actions
-const { t } = useI18n();
-const confirm = useConfirm();
-const router = useRouter();
-const toast = useToast();
-
 const getBackButtonConfig = computed(() => {
   return {
     text: 'Back to Housing',
@@ -188,24 +165,6 @@ async function generateActivityId() {
   }
 }
 
-const getAddressSearchLabel = (e: GeocoderEntry) => {
-  return e?.properties?.fullAddress;
-};
-
-function handleProjectLocationClick() {
-  let location = formRef?.value?.values?.location;
-  if (location?.latitude || location?.longitude) {
-    const resetFields = [
-      'location.latitude',
-      'location.longitude',
-      'location.streetAddress',
-      'location.locality',
-      'location.province'
-    ];
-    resetFields.forEach((x) => formRef?.value?.setFieldValue(x, null));
-  }
-}
-
 async function onAssistanceRequest(values: GenericObject) {
   try {
     const submissionData = {
@@ -242,46 +201,6 @@ async function onAssistanceRequest(values: GenericObject) {
     toast.error('Failed to save enquiry', e);
   } finally {
     editable.value = true;
-  }
-}
-
-async function onAddressSearchInput(e: IInputEvent) {
-  const input = e.target.value;
-  addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
-}
-
-async function onAddressSelect(e: SelectChangeEvent) {
-  if (e.originalEvent instanceof InputEvent) return;
-
-  if (e.value as GeocoderEntry) {
-    const properties = e.value?.properties;
-    const geometry = e.value?.geometry;
-
-    mapRef?.value?.pinToMap(geometry.coordinates[1], geometry.coordinates[0]);
-
-    formRef.value?.setFieldValue(
-      'location.streetAddress',
-      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
-    );
-    formRef.value?.setFieldValue('location.locality', properties?.localityName);
-    formRef.value?.setFieldValue('location.latitude', geometry?.coordinates[1]);
-    formRef.value?.setFieldValue('location.longitude', geometry?.coordinates[0]);
-    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
-    clearGeoJSON();
-  }
-}
-
-async function onLatLongInput() {
-  const validLat = (await formRef?.value?.validateField('location.latitude'))?.valid;
-  const validLong = (await formRef?.value?.validateField('location.longitude'))?.valid;
-
-  if (validLat && validLong) {
-    const location = formRef?.value?.values?.location;
-    if (mapRef.value?.pinToMap && (location.latitude || location.longitude)) {
-      mapRef.value.pinToMap(location.latitude, location.longitude);
-      clearGeoJSON();
-    }
   }
 }
 
@@ -349,12 +268,6 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
   }
 
   return { activityId: response?.data.activityId, draftId: response?.data.draftId };
-}
-
-function onStepChange(stepNumber: number) {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (stepNumber === 2) nextTick().then(() => mapRef?.value?.resizeMap());
-  if (stepNumber === 3) isSubmittable.value = true;
 }
 
 async function onSubmit(data: any) {
@@ -568,10 +481,7 @@ onBeforeMount(async () => {
       };
     }
 
-    await nextTick();
-
-    // Move map pin
-    onLatLongInput();
+    locationRef.value?.onLatLongInput();
   } catch (e) {
     router.replace({ name: RouteName.EXT_HOUSING_PROJECT_INTAKE });
   }
@@ -583,42 +493,15 @@ watch(
     const isIntake = [RouteName.EXT_HOUSING_INTAKE, RouteName.EXT_HOUSING_INTAKE_DRAFT].includes(
       router.currentRoute.value.name as RouteName
     );
+
     // Trigger autosave on form step change, if it has activityId
     if (activityId && formRef?.value && isIntake) onSaveDraft(formRef?.value?.values, true, false);
 
     // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-    if (activeStep.value === 2) nextTick().then(() => mapRef?.value?.resizeMap());
+    if (activeStep.value === 2) nextTick().then(() => locationRef?.value?.resizeMap());
     if (activeStep.value === 3) isSubmittable.value = true;
   }
 );
-
-function onPolygonUpdate(data: any) {
-  clearAddress();
-  formRef.value?.setFieldValue('location.geoJSON', data.geoJSON);
-}
-
-function onPinUpdate(pinUpdateEvent: PinUpdateEvent) {
-  const addressSplit = pinUpdateEvent.address.split(',');
-  clearAddress();
-  clearGeoJSON();
-  formRef.value?.setFieldValue('location.streetAddress', addressSplit[0]);
-  formRef.value?.setFieldValue('location.locality', addressSplit[1]);
-  formRef.value?.setFieldValue('location.province', addressSplit[2]);
-  formRef.value?.setFieldValue('location.latitude', pinUpdateEvent.latitude);
-  formRef.value?.setFieldValue('location.longitude', pinUpdateEvent.longitude);
-}
-
-function clearAddress() {
-  formRef.value?.setFieldValue('location.streetAddress', null);
-  formRef.value?.setFieldValue('location.locality', null);
-  formRef.value?.setFieldValue('location.province', null);
-  formRef.value?.setFieldValue('location.latitude', null);
-  formRef.value?.setFieldValue('location.longitude', null);
-}
-
-function clearGeoJSON() {
-  formRef.value?.setFieldValue('location.geoJSON', null);
-}
 </script>
 
 <template>
@@ -669,10 +552,7 @@ function clearGeoJSON() {
         name="activityId"
       />
 
-      <Stepper
-        :value="activeStep"
-        @update:active-step="onStepChange"
-      >
+      <Stepper :value="activeStep">
         <StepList class="!mb-6">
           <Step
             :value="0"
@@ -750,74 +630,10 @@ function clearGeoJSON() {
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
 
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span
-                    class="section-header"
-                    role="heading"
-                    aria-level="2"
-                  >
-                    {{ t('submissionIntakeForm.contactCard') }}
-                  </span>
-                  <Tooltip
-                    icon="fa-solid fa-circle-question"
-                    right
-                    :text="t('submissionIntakeForm.contactTooltip')"
-                  />
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <InputText
-                    class="col-span-6"
-                    :name="`contacts.contactFirstName`"
-                    label="First name"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
-                  />
-                  <InputText
-                    class="col-span-6"
-                    :name="`contacts.contactLastName`"
-                    label="Last name"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
-                  />
-                  <InputMask
-                    class="col-span-6"
-                    :name="`contacts.contactPhoneNumber`"
-                    mask="(999) 999-9999"
-                    label="Phone number"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
-                  />
-                  <InputText
-                    class="col-span-6"
-                    :name="`contacts.contactEmail`"
-                    label="Email"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
-                  />
-                  <Select
-                    class="col-span-6"
-                    :name="`contacts.contactApplicantRelationship`"
-                    label="Relationship to project"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactApplicantRelationship || !editable"
-                    :options="PROJECT_RELATIONSHIP_LIST"
-                  />
-                  <Select
-                    class="col-span-6"
-                    :name="`contacts.contactPreference`"
-                    label="Preferred contact method"
-                    :bold="false"
-                    :disabled="!!initialFormValues?.contacts?.contactPreference || !editable"
-                    :options="CONTACT_PREFERENCE_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
+            <ContactCard
+              :editable="editable"
+              :initial-form-values="initialFormValues"
+            />
 
             <Card>
               <template #title>
@@ -1281,244 +1097,13 @@ function clearGeoJSON() {
               {{ VALIDATION_BANNER_TEXT }}
             </Message>
 
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span
-                    class="section-header"
-                    role="heading"
-                    aria-level="2"
-                  >
-                    {{ t('submissionIntakeForm.naturalDisasterCard') }}
-                  </span>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <RadioList
-                    class="col-span-12"
-                    name="location.naturalDisaster"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="YES_NO_LIST"
-                  />
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span
-                      class="section-header"
-                      role="heading"
-                      aria-level="2"
-                    >
-                      {{ t('submissionIntakeForm.projectLocationCard') }}
-                    </span>
-                    <Tooltip
-                      class="mb-2"
-                      right
-                      icon="fa-solid fa-circle-question"
-                      :text="t('submissionIntakeForm.addressTooltip')"
-                    />
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <RadioList
-                    class="col-span-12"
-                    name="location.projectLocation"
-                    :bold="false"
-                    :disabled="!editable"
-                    :options="PROJECT_LOCATION_LIST"
-                    @on-click="handleProjectLocationClick"
-                  />
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.STREET_ADDRESS"
-                    class="col-span-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid grid-cols-12 gap-4 nested-grid">
-                          <EditableSelect
-                            class="col-span-12"
-                            name="addressSearch"
-                            :get-option-label="getAddressSearchLabel"
-                            :options="addressGeocoderOptions"
-                            :placeholder="'Type to search the address of your housing project'"
-                            :bold="false"
-                            :disabled="!editable"
-                            @on-input="onAddressSearchInput"
-                            @on-change="onAddressSelect"
-                          />
-                          <InputText
-                            class="col-span-4"
-                            name="location.streetAddress"
-                            disabled
-                            placeholder="Street address"
-                          />
-                          <InputText
-                            class="col-span-4"
-                            name="location.locality"
-                            disabled
-                            placeholder="Locality"
-                          />
-                          <InputText
-                            class="col-span-4"
-                            name="location.province"
-                            disabled
-                            placeholder="Province"
-                          />
-                          <InputNumber
-                            class="col-span-4"
-                            name="location.latitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between 48 and 60'
-                                : ''
-                            "
-                            placeholder="Latitude"
-                          />
-                          <InputNumber
-                            class="col-span-4"
-                            name="location.longitude"
-                            disabled
-                            :help-text="
-                              values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                                ? 'Provide a coordinate between -114 and -139'
-                                : ''
-                            "
-                            placeholder="Longitude"
-                          />
-                          <div
-                            v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                            class="col-span-12 text-blue-500"
-                          >
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                  <div
-                    v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
-                    class="col-span-12"
-                  >
-                    <Card class="no-shadow">
-                      <template #content>
-                        <div class="grid grid-cols-12 gap-4 nested-grid">
-                          <InputNumber
-                            class="col-span-4"
-                            name="location.latitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between 48 and 60"
-                            placeholder="Latitude"
-                            @keyup.enter="onLatLongInput"
-                          />
-                          <InputNumber
-                            class="col-span-4"
-                            name="location.longitude"
-                            :disabled="!editable"
-                            help-text="Provide a coordinate between -114 and -139"
-                            placeholder="Longitude"
-                            @keyup.enter="onLatLongInput"
-                          />
-                          <div class="col-span-4">
-                            <Button
-                              class="lat-long-btn"
-                              label="Show on map"
-                              :disabled="!editable"
-                              @click="onLatLongInput"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <div class="text-blue-500">
-                            The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the
-                            province.
-                          </div>
-                        </div>
-                      </template>
-                    </Card>
-                  </div>
-                </div>
-                <Map
-                  v-if="values.location?.projectLocation !== ProjectLocation.PIN_OR_DRAW"
-                  ref="mapRef"
-                  :disabled="!editable"
-                  :latitude="mapLatitude"
-                  :longitude="mapLongitude"
-                />
-                <div v-if="values.location?.projectLocation === ProjectLocation.PIN_OR_DRAW">
-                  <Map
-                    ref="mapRef"
-                    :pin-or-draw="true"
-                    :disabled="!editable"
-                    :geo-json-data="values.location.geoJSON"
-                    :latitude="mapLatitude"
-                    :longitude="mapLongitude"
-                    @map:erased="
-                      clearGeoJSON();
-                      clearAddress();
-                    "
-                    @map:polygon-updated="onPolygonUpdate"
-                    @map:pin-updated="onPinUpdate"
-                  />
-                  <Card class="no-shadow">
-                    <template #content>
-                      <div class="grid grid-cols-12 gap-4 nested-grid">
-                        <InputText
-                          class="col-span-4"
-                          name="location.streetAddress"
-                          disabled
-                          placeholder="Street address"
-                        />
-                        <InputText
-                          class="col-span-4"
-                          name="location.locality"
-                          disabled
-                          placeholder="Locality"
-                        />
-                        <InputText
-                          class="col-span-4"
-                          name="location.province"
-                          disabled
-                          placeholder="Province"
-                        />
-                        <InputNumber
-                          class="col-span-4"
-                          name="location.latitude"
-                          disabled
-                          :help-text="
-                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                              ? 'Provide a coordinate between 48 and 60'
-                              : ''
-                          "
-                          placeholder="Latitude"
-                        />
-                        <InputNumber
-                          class="col-span-4"
-                          name="location.longitude"
-                          disabled
-                          :help-text="
-                            values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES
-                              ? 'Provide a coordinate between -114 and -139'
-                              : ''
-                          "
-                          placeholder="Longitude"
-                        />
-                      </div>
-                    </template>
-                  </Card>
-                </div>
-              </template>
-            </Card>
+            <NaturalDisasterCard :editable="editable" />
+
+            <LocationCard
+              ref="locationRef"
+              :editable="editable"
+            />
+
             <Card>
               <template #title>
                 <div class="flex align-items-center">
@@ -1969,38 +1554,5 @@ function clearGeoJSON() {
 
 :deep(.p-card.p-component:has(.p-invalid)) {
   border-color: var(--p-red-500) !important;
-}
-
-.p-card {
-  border-color: rgb(242, 241, 241);
-  border-radius: 8px;
-  border-style: solid;
-  border-width: 1px;
-  margin-bottom: 1rem;
-
-  .section-header {
-    font-weight: bold;
-    padding-left: 1rem;
-    padding-right: 0.5rem;
-  }
-
-  :deep(.p-card-title) {
-    font-size: 1rem;
-  }
-
-  :deep(.p-card-body) {
-    padding-bottom: 0.5rem;
-
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-    padding-top: 0;
-
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
 }
 </style>

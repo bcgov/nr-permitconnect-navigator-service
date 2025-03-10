@@ -154,8 +154,32 @@ label {
 }
 
 .p-card {
+  border-color: rgb(242, 241, 241);
+  border-style: solid;
+  border-width: 1px;
+  margin-bottom: 1rem;
+
   .p-divider {
     margin-bottom: 0;
+  }
+
+  .section-header {
+    font-weight: bold;
+    padding-right: 0.5rem;
+  }
+
+  .p-card-title {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .p-card-body {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+
+ .p-card-content {
+    padding: 0 1rem 0 1rem;
   }
 }
 
