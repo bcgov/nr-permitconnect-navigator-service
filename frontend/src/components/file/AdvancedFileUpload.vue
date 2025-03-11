@@ -62,12 +62,14 @@ const onUpload = async (files: Array<File>) => {
 
   await Promise.allSettled(
     files.map((file: File) => {
+      const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
       return new Promise((resolve, reject) => {
         if (currentActivityId) {
           documentService
-            .createDocument(file, currentActivityId, getConfig.value.coms.bucketId)
+            .createDocument(sanitizedFile, currentActivityId, getConfig.value.coms.bucketId)
             .then((response) => {
               if (response?.data) {
+                response.data.filename = decodeURI(response.data.filename);
                 submissionStore.addDocument(response.data);
                 toast.success('Document uploaded');
               }
