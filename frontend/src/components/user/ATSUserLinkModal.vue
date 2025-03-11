@@ -122,6 +122,7 @@ onMounted(() => {
       :loading="loading"
       class="datatable mt-4 mb-2"
       :value="users"
+      removable-sort
       selection-mode="single"
       data-key="clientId"
       :rows="5"

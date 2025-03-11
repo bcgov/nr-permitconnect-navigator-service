@@ -267,6 +267,7 @@ onMounted(async () => {
           <DataTable
             v-if="gridView"
             class="remove-padding col-span-12"
+            removable-sort
             :sort-field="SORT_TYPES.CREATED_AT"
             :sort-order="SORT_ORDER.DESCENDING"
             @update:sort-order="
@@ -331,6 +332,7 @@ onMounted(async () => {
         <DataTable
           v-if="!gridView"
           :value="filteredDocuments"
+          removable-sort
           :sort-field="SORT_TYPES.CREATED_AT"
           :sort-order="SORT_ORDER.DESCENDING"
           :row-hover="true"

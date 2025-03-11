@@ -1,3 +1,4 @@
+export type { ActivityContact } from './ActivityContact';
 export type { AccessRequest } from './AccessRequest';
 export type { ATSClientResource } from './ATSClientResource';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';

@@ -26,6 +26,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
     :loading="loading"
     :value="submissions"
     data-key="submissionId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"

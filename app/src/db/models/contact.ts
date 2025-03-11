@@ -1,12 +1,18 @@
 import { Prisma } from '@prisma/client';
 
+import activity_contact from './activty_contact';
+
 import type { Stamps } from '../stamps';
-import type { Contact } from '../../types/Contact';
+import type { Contact } from '../../types/';
 
 // Define types
 const _contact = Prisma.validator<Prisma.contactDefaultArgs>()({});
+const _contactWithActivitiesGraph = Prisma.validator<Prisma.contactDefaultArgs>()({
+  include: { activity_contact: true }
+});
 
 type PrismaRelationContact = Omit<Prisma.contactGetPayload<typeof _contact>, keyof Stamps>;
+type PrismaGraphContactActivities = Prisma.contactGetPayload<typeof _contactWithActivitiesGraph>;
 
 export default {
   toPrismaModel(input: Contact): PrismaRelationContact {
@@ -33,5 +39,14 @@ export default {
       contactPreference: input.contact_preference,
       contactApplicantRelationship: input.contact_applicant_relationship
     };
+  },
+
+  fromPrismaModelWithActivities(input: PrismaGraphContactActivities): Contact {
+    const contact = this.fromPrismaModel(input);
+    if (contact && input.activity_contact) {
+      contact.activityContact = input.activity_contact.map((activity) => activity_contact.fromPrismaModel(activity));
+    }
+
+    return contact;
   }
 };

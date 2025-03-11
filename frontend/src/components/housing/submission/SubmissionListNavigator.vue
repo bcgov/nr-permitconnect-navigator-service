@@ -175,6 +175,7 @@ onMounted(() => {
     :loading="loading"
     :value="filteredSubmissions"
     data-key="submissionId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"

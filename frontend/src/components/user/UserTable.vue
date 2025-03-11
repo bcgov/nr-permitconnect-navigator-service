@@ -38,6 +38,7 @@ function getStatusClass(data: UserAccessRequest) {
     :row-hover="true"
     class="datatable"
     :value="usersAndAccessRequests"
+    removable-sort
     selection-mode="single"
     :sort-field="DEFAULT_SORT_FIELD"
     :sort-order="DEFAULT_SORT_ORDER"
