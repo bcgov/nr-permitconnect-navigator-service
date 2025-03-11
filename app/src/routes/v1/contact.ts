@@ -38,7 +38,11 @@ router.get(
   '/:contactId',
   hasAuthorization(Resource.CONTACT, Action.READ),
   contactValidator.getContact,
-  (req: Request<{ contactId: string }>, res: Response, next: NextFunction): void => {
+  (
+    req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
+    res: Response,
+    next: NextFunction
+  ): void => {
     contactController.getContact(req, res, next);
   }
 );

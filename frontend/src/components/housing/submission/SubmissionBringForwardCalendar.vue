@@ -84,6 +84,7 @@ function filterForMyBringForwards(bf: BringForward): boolean {
           })
         "
         data-key="noteId"
+        removable-sort
         scrollable
         responsive-layout="scroll"
         sort-field="bringForwardDate"

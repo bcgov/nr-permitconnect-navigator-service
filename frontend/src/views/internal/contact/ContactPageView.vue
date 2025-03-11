@@ -9,7 +9,7 @@ import { submissionService, enquiryService, contactService, userService } from '
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { Contact, Enquiry, Submission, User } from '@/types';
+import type { ActivityContact, Contact, Enquiry, Submission, User } from '@/types';
 
 // Props
 const { contactId } = defineProps<{
@@ -62,16 +62,22 @@ watch(
 );
 
 onMounted(async () => {
-  const contactData = (await contactService.getContact(contactId)).data;
-  const [submissions, enquiries] = (
-    await Promise.all([
-      submissionService.searchSubmissions({ createdBy: [contactData.userId] }),
-      enquiryService.searchEnquiries({ createdBy: [contactData.userId] })
-    ])
-  ).map((r) => r.data);
+  const includeActivities = true;
+  const contactData = (await contactService.getContact(contactId, includeActivities)).data;
+  const activityIds = contactData.activityContact.map((ac: ActivityContact) => ac.activityId);
+
+  if (activityIds.length) {
+    const [submissions, enquiries] = (
+      await Promise.all([
+        submissionService.searchSubmissions({ activityId: activityIds }),
+        enquiryService.searchEnquiries({ activityId: activityIds })
+      ])
+    ).map((r) => r.data);
+
+    submissionsEnquiries.value = submissionsEnquiries.value.concat(submissions).concat(enquiries);
+  }
 
   contact.value = contactData;
-  submissionsEnquiries.value = submissions.concat(enquiries);
 
   // Map users ids to full names for history data table
   let userIds: Array<string> = [];
@@ -79,10 +85,12 @@ onMounted(async () => {
     if (se.assignedUserId) userIds.push(se.assignedUserId);
   });
 
-  const users = (await userService.searchUsers({ userId: userIds })).data;
-  users.forEach((u: User) => {
-    assignedUsers.value[u.userId] = u.fullName;
-  });
+  if (userIds) {
+    const users = (await userService.searchUsers({ userId: userIds })).data;
+    users.forEach((u: User) => {
+      assignedUsers.value[u.userId] = u.fullName;
+    });
+  }
 
   loading.value = false;
 });

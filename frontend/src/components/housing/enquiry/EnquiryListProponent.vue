@@ -30,6 +30,7 @@ const { t } = useI18n();
     :loading="loading"
     :value="enquiries"
     data-key="enquiryId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"

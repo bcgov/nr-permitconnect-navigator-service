@@ -6,7 +6,6 @@ import { useRoute, useRouter } from 'vue-router';
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
@@ -58,6 +57,15 @@ function getRouteToObject(data: Enquiry | Submission) {
   return toObject;
 }
 
+function normalizeContactHistory() {
+  return contactsHistory.map((se) => ({
+    ...se,
+    state: 'submissionId' in se ? se.applicationStatus : se.enquiryStatus,
+    assignedUser: se.assignedUserId ? getUsersName(se.assignedUserId) : 'Unassigned',
+    historyType: 'submissionId' in se ? 'Submission' : 'Enquiry'
+  }));
+}
+
 function updateQueryParams() {
   router.replace({
     name: RouteName.INT_CONTACT_PAGE,
@@ -92,8 +100,9 @@ onMounted(() => {
   <DataTable
     v-model:selection="selection"
     :loading="loading"
-    :value="contactsHistory"
+    :value="normalizeContactHistory()"
     data-key="activityId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"
@@ -143,7 +152,7 @@ onMounted(() => {
     </template>
     <Column
       field="activityId"
-      header="Activity ID"
+      header="Project ID"
       :sortable="true"
       style="min-width: 150px"
       frozen
@@ -157,17 +166,11 @@ onMounted(() => {
       </template>
     </Column>
     <Column
-      field="type"
+      field="historyType"
       header="Type"
       :sortable="true"
       style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <span>
-          {{ 'submissionId' in data ? 'Submission' : 'Enquiry' }}
-        </span>
-      </template>
-    </Column>
+    />
     <Column
       field="submittedAt"
       header="Submitted date"
@@ -175,22 +178,18 @@ onMounted(() => {
       style="min-width: 150px"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
     <Column
-      field="assignedUserId"
+      field="assignedUser"
       header="Assigned to"
       :sortable="true"
       style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        {{ data.assignedUserId ? getUsersName(data.assignedUserId) : 'Unassigned' }}
-      </template>
-    </Column>
+    />
     <Column
-      field="intakeStatus"
-      header="Activity status"
+      field="state"
+      header="State"
       :sortable="true"
       style="min-width: 150px"
     />

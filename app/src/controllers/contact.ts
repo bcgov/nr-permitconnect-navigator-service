@@ -1,13 +1,19 @@
 import { contactService } from '../services';
-import { addDashesToUuid, mixedQueryToArray } from '../utils/utils';
+import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Contact, ContactSearchParameters } from '../types';
 
 const controller = {
-  getContact: async (req: Request<{ contactId: string }>, res: Response, next: NextFunction) => {
+  getContact: async (
+    req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const response = await contactService.getContact(req.params.contactId);
+      const contactId = req.params.contactId;
+      const includeActivities = isTruthy(req.query.includeActivities) ?? false;
+      const response = await contactService.getContact(contactId, includeActivities);
 
       if (!response) {
         return res.status(404).json({ message: 'Contact not found' });

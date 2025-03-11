@@ -25,6 +25,9 @@ const schema = {
   getContact: {
     params: Joi.object({
       contactId: uuidv4.required()
+    }),
+    query: Joi.object({
+      includeActivities: Joi.boolean()
     })
   },
   searchContacts: {
@@ -66,6 +69,7 @@ const schema = {
 
 export default {
   getContact: validate(schema.getContact),
+  getContactActivities: validate(schema.getContact),
   searchContacts: validate(schema.searchContacts),
   updateContact: validate(schema.updateContact)
 };

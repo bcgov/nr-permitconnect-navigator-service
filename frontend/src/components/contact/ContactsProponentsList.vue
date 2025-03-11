@@ -71,6 +71,7 @@ onMounted(() => {
     :loading="loading"
     :value="contacts"
     data-key="contactId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"
@@ -165,7 +166,7 @@ onMounted(() => {
     />
     <Column
       field="phoneNumber"
-      header="phone"
+      header="Phone"
       :sortable="true"
       style="min-width: 150px"
     />

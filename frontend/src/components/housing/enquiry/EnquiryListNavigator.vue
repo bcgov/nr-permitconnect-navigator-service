@@ -127,6 +127,7 @@ function updateQueryParams() {
     :loading="loading"
     :value="filteredEnquiries"
     data-key="enquiryId"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"

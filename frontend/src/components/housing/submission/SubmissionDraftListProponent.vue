@@ -54,6 +54,7 @@ function onDelete(draftId: string) {
     :loading="loading"
     :value="drafts"
     data-key="index"
+    removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"
