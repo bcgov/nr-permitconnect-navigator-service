@@ -140,6 +140,7 @@ onMounted(async () => {
 
   documents.forEach((d: Document) => {
     d.extension = getFilenameAndExtension(d.filename).extension;
+    d.filename = decodeURI(d.filename);
   });
 
   submissionStore.setSubmission(submission);

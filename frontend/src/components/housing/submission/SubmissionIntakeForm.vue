@@ -401,6 +401,9 @@ onBeforeMount(async () => {
 
       if (response.activityId) {
         documents = (await documentService.listDocuments(response.activityId)).data;
+        documents.forEach((d: Document) => {
+          d.filename = decodeURI(d.filename);
+        });
         submissionStore.setDocuments(documents);
       }
     } else {
@@ -408,10 +411,13 @@ onBeforeMount(async () => {
         response = (await submissionService.getSubmission(submissionId)).data;
         permits = (await permitService.listPermits({ activityId: activityId })).data;
         documents = (await documentService.listDocuments(activityId)).data;
-        submissionStore.setDocuments(documents);
 
         // Set form to read-only on non draft form reopening
         editable.value = false;
+        documents.forEach((d: Document) => {
+          d.filename = decodeURI(d.filename);
+        });
+        submissionStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
         response = { contacts: [contactStore.getContact] };
