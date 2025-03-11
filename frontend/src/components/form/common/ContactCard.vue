@@ -37,23 +37,20 @@ const { t } = useI18n();
       <Divider type="solid" />
     </template>
     <template #content>
-      <div class="grid grid-cols-12 gap-4">
+      <div class="grid grid-cols-2 gap-4">
         <InputText
-          class="col-span-6"
           :name="`contacts.contactFirstName`"
           label="First name"
           :bold="false"
           :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
         />
         <InputText
-          class="col-span-6"
           :name="`contacts.contactLastName`"
           label="Last name"
           :bold="false"
           :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
         />
         <InputMask
-          class="col-span-6"
           :name="`contacts.contactPhoneNumber`"
           mask="(999) 999-9999"
           label="Phone number"
@@ -61,14 +58,12 @@ const { t } = useI18n();
           :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
         />
         <InputText
-          class="col-span-6"
           :name="`contacts.contactEmail`"
           label="Email"
           :bold="false"
           :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
         />
         <Select
-          class="col-span-6"
           :name="`contacts.contactApplicantRelationship`"
           label="Relationship to project"
           :bold="false"
@@ -76,7 +71,6 @@ const { t } = useI18n();
           :options="PROJECT_RELATIONSHIP_LIST"
         />
         <Select
-          class="col-span-6"
           :name="`contacts.contactPreference`"
           label="Preferred contact method"
           :bold="false"
