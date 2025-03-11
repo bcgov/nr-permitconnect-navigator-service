@@ -205,24 +205,6 @@ function isCompleted(authStatus: string | undefined): boolean {
 }
 
 .p-card {
-  border-radius: 1em;
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-    padding-top: 0.75rem;
-  }
-
-  :deep(.p-card-title) {
-    margin-bottom: 0rem;
-  }
-
-  :deep(.p-card-body) {
-    border-style: solid;
-    border-width: 0.06em;
-    border-radius: 1em;
-    border-color: #05366260;
-    box-shadow: 0em 0.1em 0.1em 0.1em #0000001a;
-  }
-
   &.completed {
     :deep(.p-card-body) {
       background-color: #05366210;

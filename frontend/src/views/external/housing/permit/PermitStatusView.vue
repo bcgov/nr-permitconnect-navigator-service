@@ -280,7 +280,7 @@ onBeforeMount(async () => {
         {{ t('permitStatusView.statusDescriptionMeaning') }}
       </span>
     </div>
-    <Card>
+    <Card class="permit-tracker-card">
       <template #header>
         <div
           class="status-tracker-header py-4 px-6"
@@ -482,7 +482,7 @@ onBeforeMount(async () => {
   margin: 0;
 }
 
-.p-card {
+.permit-tracker-card {
   background: #fff;
   border: 0.063rem solid #efefef;
   border-radius: 0.25rem;

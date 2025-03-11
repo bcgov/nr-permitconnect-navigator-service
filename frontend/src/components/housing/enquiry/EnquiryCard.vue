@@ -94,15 +94,6 @@ p {
   color: #38598a;
 }
 
-.p-card {
-  border-style: solid;
-  border-width: 1px;
-
-  :deep(.p-card-content) {
-    padding-bottom: 0;
-  }
-}
-
 .enquiry-content {
   white-space: pre;
   text-wrap: balance;
