@@ -8,7 +8,7 @@ import { BasicResponse } from '@/utils/enums/application';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Enquiry, Submission } from '@/types';
+import type { ATSClientResource, Enquiry, HousingProject } from '@/types';
 import type { AddressResource } from '@/types/ATSClientResource';
 
 // Types
@@ -21,8 +21,8 @@ type ATSUser = {
 };
 
 // Props
-const { submissionOrEnquiry } = defineProps<{
-  submissionOrEnquiry: Enquiry | Submission;
+const { housingProjectOrEnquiry } = defineProps<{
+  housingProjectOrEnquiry: Enquiry | HousingProject;
 }>();
 
 // Constants
@@ -47,19 +47,19 @@ async function createATSClient() {
 
     const address: Partial<AddressResource> = {
       '@type': 'AddressResource',
-      primaryPhone: submissionOrEnquiry.contacts[0]?.phoneNumber ?? '',
-      email: submissionOrEnquiry.contacts[0]?.email ?? ''
+      primaryPhone: housingProjectOrEnquiry.contacts[0]?.phoneNumber ?? '',
+      email: housingProjectOrEnquiry.contacts[0]?.email ?? ''
     };
 
-    if ('streetAddress' in submissionOrEnquiry) address.addressLine1 = submissionOrEnquiry.streetAddress;
-    if ('locality' in submissionOrEnquiry) address.city = submissionOrEnquiry.streetAddress;
-    if ('province' in submissionOrEnquiry) address.provinceCode = submissionOrEnquiry.streetAddress;
+    if ('streetAddress' in housingProjectOrEnquiry) address.addressLine1 = housingProjectOrEnquiry.streetAddress;
+    if ('locality' in housingProjectOrEnquiry) address.city = housingProjectOrEnquiry.streetAddress;
+    if ('province' in housingProjectOrEnquiry) address.provinceCode = housingProjectOrEnquiry.streetAddress;
 
     const data = {
       '@type': 'ClientResource',
       address: address,
-      firstName: submissionOrEnquiry.contacts[0]?.firstName,
-      surName: submissionOrEnquiry?.contacts[0]?.lastName,
+      firstName: housingProjectOrEnquiry.contacts[0]?.firstName,
+      surName: housingProjectOrEnquiry?.contacts[0]?.lastName,
       regionName: ATS_REGION_NAME,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
@@ -84,19 +84,19 @@ async function createATSClient() {
 
 onBeforeMount(() => {
   const locationAddressStr = [
-    'streetAddress' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',
-    'locality' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',
-    'province' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : ''
+    'streetAddress' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : '',
+    'locality' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : '',
+    'province' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : ''
   ]
     .filter((str) => str?.trim())
     .join(', ');
 
   atsUser.value = {
-    firstName: submissionOrEnquiry.contacts[0]?.firstName ?? '',
-    lastName: submissionOrEnquiry.contacts[0]?.lastName ?? '',
-    email: submissionOrEnquiry.contacts[0]?.email ?? '',
+    firstName: housingProjectOrEnquiry.contacts[0]?.firstName ?? '',
+    lastName: housingProjectOrEnquiry.contacts[0]?.lastName ?? '',
+    email: housingProjectOrEnquiry.contacts[0]?.email ?? '',
     address: locationAddressStr,
-    phone: submissionOrEnquiry.contacts[0]?.phoneNumber ?? ''
+    phone: housingProjectOrEnquiry.contacts[0]?.phoneNumber ?? ''
   };
 });
 </script>

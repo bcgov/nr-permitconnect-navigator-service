@@ -13,9 +13,9 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 router.get(
-  '/pids/:submissionId',
-  hasAuthorization(Resource.SUBMISSION, Action.READ),
-  (req: Request<{ submissionId: string }>, res: Response, next: NextFunction): void => {
+  '/pids/:housingProjectId',
+  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
+  (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction): void => {
     mapController.getPIDs(req, res, next);
   }
 );

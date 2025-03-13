@@ -7,12 +7,12 @@ import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, noteService, submissionService } from '@/services';
+import { enquiryService, housingProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 
-import type { Note, Submission } from '@/types';
+import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
@@ -37,7 +37,7 @@ const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
-const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
+const relatedHousingProjects: Ref<HousingProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 
@@ -64,12 +64,12 @@ function onEnquiryFormSaved() {
 
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
-    relatedSubmission.value = (
-      await submissionService.searchSubmissions({
+    relatedHousingProjects.value = (
+      await housingProjectService.searchHousingProjects({
         activityId: [getEnquiry?.value?.relatedActivityId]
       })
     ).data[0];
-  } else relatedSubmission.value = undefined;
+  } else relatedHousingProjects.value = undefined;
 }
 
 onBeforeMount(async () => {
@@ -118,7 +118,7 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <Message
-          v-if="relatedSubmission"
+          v-if="relatedHousingProjects"
           severity="info"
           class="text-center"
           :closable="false"
@@ -127,7 +127,7 @@ onBeforeMount(async () => {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { submissionId: relatedSubmission.submissionId }
+              params: { housingProjectId: relatedHousingProjects.housingProjectId },
             }"
           >
             {{ getEnquiry?.relatedActivityId }}
@@ -135,7 +135,7 @@ onBeforeMount(async () => {
         </Message>
 
         <Message
-          v-if="getEnquiry?.relatedActivityId && !relatedSubmission"
+          v-if="getEnquiry?.relatedActivityId && !relatedHousingProjects"
           severity="error"
           class="text-center"
           :closable="false"
@@ -146,7 +146,7 @@ onBeforeMount(async () => {
           <EnquiryForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedSubmission?.atsClientId"
+            :related-ats-number="relatedHousingProjects?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>

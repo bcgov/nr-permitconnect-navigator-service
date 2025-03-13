@@ -28,7 +28,7 @@ import {
   TabPanel,
   TabPanels
 } from '@/lib/primevue';
-import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
+import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
@@ -39,9 +39,12 @@ import type { Ref } from 'vue';
 import type { Document, Note } from '@/types';
 
 // Props
-const { initialTab = '0', submissionId } = defineProps<{
+const {
+  initialTab = '0',
+  housingProjectId
+} = defineProps<{
   initialTab?: string;
-  submissionId: string;
+  housingProjectId: string;
 }>();
 
 // Constants
@@ -63,7 +66,7 @@ const router = useRouter();
 
 // Store
 const permitStore = usePermitStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
 const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
@@ -111,14 +114,14 @@ const filteredDocuments = computed(() => {
 });
 
 const isCompleted = computed(() => {
-  return getSubmission.value?.applicationStatus === ApplicationStatus.COMPLETED;
+  return getHousingProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: Note) => submissionStore.addNote(note, true);
+const onAddNote = (note: Note) => housingProjectStore.addNote(note, true);
 
-const onDeleteNote = (note: Note) => submissionStore.removeNote(note);
+const onDeleteNote = (note: Note) => housingProjectStore.removeNote(note);
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => submissionStore.updateNote(oldNote, newNote);
+const onUpdateNote = (oldNote: Note, newNote: Note) => housingProjectStore.updateNote(oldNote, newNote);
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
@@ -159,14 +162,14 @@ onBeforeMount(async () => {
 <template>
   <div class="flex items-center justify-between">
     <h1>
-      <span v-if="getSubmission?.projectName">
-        <span class="ml-1">{{ getSubmission.projectName + ': ' }}</span>
+      <span v-if="getHousingProject?.projectName">
+        <span class="ml-1">{{ getHousingProject.projectName + ': ' }}</span>
       </span>
       <span
-        v-if="getSubmission?.activityId"
+        v-if="getHousingProject?.activityId"
         class="mr-1"
       >
-        {{ getSubmission.activityId }}
+        {{ getHousingProject.activityId }}
       </span>
       <span
         v-if="isCompleted"
@@ -181,7 +184,7 @@ onBeforeMount(async () => {
         router.push({
           name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
           params: {
-            submissionId: submissionId
+            housingProjectId: housingProjectId
           }
         })
       "
@@ -202,10 +205,10 @@ onBeforeMount(async () => {
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
-        <span v-if="!loading && getSubmission">
+        <span v-if="!loading && getHousingProject">
           <SubmissionForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
-            :submission="getSubmission"
+            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
+            :housing-project="getHousingProject"
           />
         </span>
       </TabPanel>

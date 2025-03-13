@@ -31,7 +31,7 @@ onBeforeMount(async () => {
   <SubmissionIntakeForm
     v-if="!loading"
     :key="route.fullPath"
-    :submission-id="submissionId"
+    :submission-id="housingProjectId"
     :draft-id="draftId"
   />
 </template>

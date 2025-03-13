@@ -10,12 +10,12 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Enquiry, Pagination, Submission } from '@/types';
+import type { Enquiry, Pagination, HousingProject } from '@/types';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
   assignedUsers: Record<string, string>;
-  contactsHistory: Array<Submission | Enquiry>;
+  contactsHistory: Array<HousingProject | Enquiry>;
   loading: boolean;
 }>();
 
@@ -32,16 +32,16 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selection: Ref<Enquiry | Submission | undefined> = ref(undefined);
+const selection: Ref<Enquiry | HousingProject | undefined> = ref(undefined);
 
 // Actions
 function getUsersName(userId: string) {
   return assignedUsers[userId];
 }
 
-function getRouteToObject(data: Enquiry | Submission) {
+function getRouteToObject(data: Enquiry | HousingProject) {
   let toObject = {};
-  if ('submissionId' in data) {
+  if ('housingProjectId' in data) {
     toObject = {
       name: RouteName.INT_HOUSING_PROJECT,
       params: { submissionId: data.submissionId }
@@ -58,9 +58,9 @@ function getRouteToObject(data: Enquiry | Submission) {
 function normalizeContactHistory() {
   return contactsHistory.map((se) => ({
     ...se,
-    state: 'submissionId' in se ? se.applicationStatus : se.enquiryStatus,
+    state: 'housingProjectId' in se ? se.applicationStatus : se.enquiryStatus,
     assignedUser: se.assignedUserId ? getUsersName(se.assignedUserId) : 'Unassigned',
-    historyType: 'submissionId' in se ? 'Submission' : 'Enquiry'
+    historyType: 'housingProjectId' in se ? 'Submission' : 'Enquiry'
   }));
 }
 

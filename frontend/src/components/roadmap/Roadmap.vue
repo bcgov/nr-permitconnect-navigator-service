@@ -103,7 +103,7 @@ watchEffect(async () => {
   // Dumb, but need to do something with the ref for it to be watched properly
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const permits = getPermits.value.concat();
-  const submission = getSubmission.value;
+  const submission = getHousingProject.value;
 
   // Get navigator details
   const configBCC = getConfig.value.ches?.roadmap?.bcc;

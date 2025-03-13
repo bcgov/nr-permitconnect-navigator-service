@@ -17,7 +17,7 @@ const routes: Array<RouteRecordRaw> = [
         beforeEnter: accessHandler
       },
       {
-        path: 'project/:submissionId',
+        path: 'project/:housingProjectId',
         component: () => import('@/views/GenericView.vue'),
         meta: { dynamicBreadcrumb: 'project' },
         children: [

@@ -12,15 +12,15 @@ import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
+  HOUSING_PROJECT_TYPE_LIST,
   INTAKE_STATUS_LIST,
-  NUM_RESIDENTIAL_UNITS_LIST,
-  SUBMISSION_TYPE_LIST
+  NUM_RESIDENTIAL_UNITS_LIST
 } from '../utils/constants/housing';
 import { BasicResponse } from '../utils/enums/application';
 import { IntakeStatus } from '../utils/enums/housing';
 
 const schema = {
-  createSubmission: {
+  createHousingProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
@@ -46,9 +46,9 @@ const schema = {
       to: Joi.array().items(email).required()
     })
   },
-  deleteSubmission: {
+  deleteHousingProject: {
     params: Joi.object({
-      submissionId: uuidv4.required()
+      housingProjectId: uuidv4.required()
     })
   },
   deleteDraft: {
@@ -64,39 +64,39 @@ const schema = {
       userId: uuidv4.allow(null)
     })
   },
-  getSubmission: {
+  getHousingProject: {
     params: Joi.object({
-      submissionId: uuidv4.required()
+      housingProjectId: uuidv4.required()
     })
   },
-  searchSubmissions: {
+  searchHousingProjects: {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),
-      submissionId: Joi.array().items(uuidv4),
-      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
+      housingProjectId: Joi.array().items(uuidv4),
+      housingProjectType: Joi.array().items(...HOUSING_PROJECT_TYPE_LIST)
     })
   },
   updateIsDeletedFlag: {
     params: Joi.object({
-      submissionId: uuidv4.required()
+      housingProjectId: uuidv4.required()
     }),
     body: Joi.object({
       isDeleted: Joi.boolean().required()
     })
   },
-  updateSubmission: {
+  updateHousingProject: {
     body: Joi.object({
-      submissionId: uuidv4.required(),
+      housingProjectId: uuidv4.required(),
       activityId: activityId,
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
-      submissionType: Joi.string()
+      housingProjectType: Joi.string()
         .required()
-        .valid(...SUBMISSION_TYPE_LIST),
+        .valid(...HOUSING_PROJECT_TYPE_LIST),
       submittedAt: Joi.string().required(),
       relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),
@@ -187,19 +187,19 @@ const schema = {
       contacts: contacts
     }),
     params: Joi.object({
-      submissionId: uuidv4.required()
+      housingProjectId: uuidv4.required()
     })
   }
 };
 
 export default {
-  createSubmission: validate(schema.createSubmission),
+  createHousingProject: validate(schema.createHousingProject),
   emailConfirmation: validate(schema.emailConfirmation),
-  deleteSubmission: validate(schema.deleteSubmission),
+  deleteHousingProject: validate(schema.deleteHousingProject),
   deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
-  getSubmission: validate(schema.getSubmission),
-  searchSubmissions: validate(schema.searchSubmissions),
+  getHousingProject: validate(schema.getHousingProject),
+  searcHousingProjects: validate(schema.searchHousingProjects),
   updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
-  updateSubmission: validate(schema.updateSubmission)
+  updateHousingProject: validate(schema.updateHousingProject)
 };
