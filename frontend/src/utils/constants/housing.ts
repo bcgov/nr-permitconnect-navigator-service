@@ -5,6 +5,7 @@ import {
   ApplicationStatus,
   BringForwardType,
   ContactPreference,
+  EnquirySubmittedMethod,
   IntakeStatus,
   NoteType,
   NumResidentialUnits,
@@ -42,6 +43,12 @@ export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,
   ContactPreference.EMAIL,
   ContactPreference.EITHER
+];
+
+export const ENQUIRY_SUBMITTED_METHOD = [
+  EnquirySubmittedMethod.EMAIL,
+  EnquirySubmittedMethod.PCNS,
+  EnquirySubmittedMethod.PHONE
 ];
 
 export const ENQUIRY_TYPE_LIST = [

@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 
 import contact from './contact';
 import user from './user';
+import { EnquirySubmittedMethod } from '../../utils/enums/housing';
 
 import type { Enquiry } from '../../types';
 
@@ -56,6 +57,7 @@ export default {
       intake_status: input.intakeStatus,
       waiting_on: input.waitingOn,
       enquiry_status: input.enquiryStatus,
+      submitted_method: input.submittedMethod as EnquirySubmittedMethod,
       created_at: input.createdAt ? new Date(input.createdAt) : null,
       created_by: input.createdBy as string,
       updated_at: input.updatedAt ? new Date(input.updatedAt) : null,
@@ -77,6 +79,7 @@ export default {
       enquiryDescription: input.enquiry_description,
       intakeStatus: input.intake_status,
       enquiryStatus: input.enquiry_status,
+      submittedMethod: input.submitted_method as EnquirySubmittedMethod,
       waitingOn: input.waiting_on,
       contacts: [],
       user: null,

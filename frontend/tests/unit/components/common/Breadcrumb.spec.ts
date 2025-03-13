@@ -7,7 +7,7 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
 import { usePermitStore } from '@/store/permitStore';
 import { useSubmissionStore } from '@/store/submissionStore';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
 import type { Enquiry, Permit, PermitType, Submission } from '@/types';
 import { RouteName } from '@/utils/enums/application';
@@ -30,6 +30,7 @@ const testEnquiry: Enquiry = {
   submittedBy: 'user123',
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.PCNS,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

@@ -23,10 +23,11 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
-import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
+  ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST,
   INTAKE_STATUS_LIST,
   PROJECT_RELATIONSHIP_LIST
@@ -73,6 +74,7 @@ const intakeSchema = object({
   enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
+  submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
   ...contactValidator,
   enquiryDescription: string().required().label('Enquiry detail'),
   intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
@@ -323,6 +325,15 @@ onBeforeMount(async () => {
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"
         @on-input="onRelatedActivityInput"
+      />
+
+      <EditableSelect
+        class="col-span-3"
+        name="submittedMethod"
+        :label="t('enquiryForm.submittedMethod')"
+        :disabled="!editable"
+        :options="Object.values(EnquirySubmittedMethod)"
+        :get-option-label="(e: string) => e"
       />
       <div class="col-span-3" />
 

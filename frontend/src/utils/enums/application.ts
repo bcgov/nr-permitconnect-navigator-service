@@ -90,11 +90,11 @@ export enum RouteName {
   INT_CONTACT = 'int_contact',
   INT_CONTACT_PAGE = 'int_contact_page',
   INT_HOUSING = 'int_housing',
-  INT_HOUSING_ENQUIRY = 'int_INT_HOUSING_enquiry',
+  INT_HOUSING_ENQUIRY = 'int_housing_enquiry',
   INT_HOUSING_PROJECT = 'int_housing_submissions',
-  INT_HOUSING_PROJECT_ENQUIRY = 'int_INT_HOUSING_project_enquiry',
-  INT_HOUSING_PROJECT_PROPONENT = 'int_INT_HOUSING_project_proponent',
-  INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_INT_HOUSING_project_proponent_permit',
+  INT_HOUSING_PROJECT_ENQUIRY = 'int_housing_project_enquiry',
+  INT_HOUSING_PROJECT_PROPONENT = 'int_housing_project_proponent',
+  INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_housing_project_proponent_permit',
   INT_USER_MANAGEMENT = 'int_user_management',
   /*
    * End Internal route names
