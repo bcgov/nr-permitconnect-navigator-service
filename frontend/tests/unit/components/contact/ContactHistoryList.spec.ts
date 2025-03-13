@@ -34,9 +34,9 @@ const testEnquiry = {
 
 const testSubmission = {
   activityId: 'activity789',
-  submissionId: 'submission123',
+  housingProjectId: 'submission123',
   queuePriority: 1,
-  submissionType: 'TypeA',
+  housingProjectType: 'TypeA',
   submittedAt: '2023-02-01T12:00:00Z',
   relatedEnquiries: 'none',
   hasRelatedEnquiry: false,

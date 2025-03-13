@@ -6,11 +6,11 @@ import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/pr
 import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Enquiry, Submission } from '@/types';
+import type { ATSClientResource, Enquiry, HousingProject } from '@/types';
 
 // Props
-const { submissionOrEnquiry } = defineProps<{
-  submissionOrEnquiry: Enquiry | Submission;
+const { housingProjectOrEnquiry } = defineProps<{
+  housingProjectOrEnquiry: Enquiry | HousingProject;
 }>();
 
 // Emits
@@ -57,9 +57,9 @@ async function searchATSUsers() {
 }
 
 onBeforeMount(() => {
-  if (submissionOrEnquiry.contacts[0]?.firstName && submissionOrEnquiry.contacts[0]?.lastName) {
-    firstName.value = submissionOrEnquiry.contacts[0]?.firstName;
-    lastName.value = submissionOrEnquiry.contacts[0]?.lastName;
+  if (housingProjectOrEnquiry.contacts[0]?.firstName && housingProjectOrEnquiry.contacts[0]?.lastName) {
+    firstName.value = housingProjectOrEnquiry.contacts[0]?.firstName;
+    lastName.value = housingProjectOrEnquiry.contacts[0]?.lastName;
   }
 });
 </script>

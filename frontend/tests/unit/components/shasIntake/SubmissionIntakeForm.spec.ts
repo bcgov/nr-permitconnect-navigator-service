@@ -8,7 +8,7 @@ import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-ut
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
-import { contactService, documentService, permitService, submissionService } from '@/services';
+import { contactService, documentService, permitService, housingProjectService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
@@ -157,7 +157,7 @@ describe('SubmissionIntakeForm', () => {
 
   describe('onBeforeMount', () => {
     it('keeps editable true in draft mode', async () => {
-      const getDraftSpy = vi.spyOn(submissionService, 'getDraft');
+      const getDraftSpy = vi.spyOn(housingProjectService, 'getDraft');
 
       getDraftSpy.mockResolvedValue({ draftId: '123' } as any);
 

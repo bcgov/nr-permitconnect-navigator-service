@@ -10,10 +10,12 @@ import { usePermitStore, useSubmissionStore } from '@/store';
 import type { Ref } from 'vue';
 
 // Props
-const { enquiryId, permitId, submissionId } = defineProps<{
+const {
+  enquiryId,
+  housingProjectId
+} = defineProps<{
   enquiryId?: string;
   permitId?: string;
-  submissionId?: string;
 }>();
 
 // Composables

@@ -12,7 +12,7 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
 
-import { contactService, permitService, submissionService } from '@/services';
+import { contactService, housingProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { User } from '@/types';

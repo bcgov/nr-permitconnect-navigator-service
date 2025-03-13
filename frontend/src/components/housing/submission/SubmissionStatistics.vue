@@ -3,14 +3,14 @@ import { version as uuidVersion, validate as uuidValidate } from 'uuid';
 import { ref, watch } from 'vue';
 
 import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
-import { submissionService, reportingService, userService } from '@/services';
+import { housingProjectService, reportingService, userService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { Action, Initiative, Regex, Resource } from '@/utils/enums/application';
+import { formatDate, formatDateFilename } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { Statistics, User } from '@/types';
-import { formatDate, formatDateFilename } from '@/utils/formatters';
 
 // Types
 type StatisticFilters = {
@@ -49,8 +49,8 @@ async function onAssigneeInput(e: IInputEvent) {
   }
 }
 
-async function onDownloadSubmissionPermitData() {
-  const response = await reportingService.getSubmissionPermitData();
+async function onDownloadHousingProjectPermitData() {
+  const response = await reportingService.getHousingProjectPermitData();
   const data = response.data;
 
   if (!data || data.length === 0) {
@@ -115,7 +115,7 @@ watch(
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
     if (validUser) {
-      statistics.value = (await submissionService.getStatistics(statisticFilters.value)).data;
+      statistics.value = (await housingProjectService.getStatistics(statisticFilters.value)).data;
     }
   },
   { deep: true }
@@ -128,7 +128,7 @@ watch(
       <Button
         class="download-production-btn"
         :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.REPORTING, Action.READ)"
-        @click="onDownloadSubmissionPermitData"
+        @click="onDownloadHousingProjectPermitData"
       >
         <font-awesome-icon
           class="pr-2"

@@ -6,12 +6,12 @@ import { useRoute, useRouter } from 'vue-router';
 import Tooltip from '@/components/common/Tooltip.vue';
 import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { enquiryService, submissionService } from '@/services';
+import { enquiryService, housingProjectService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Enquiry, Submission } from '@/types';
+import type { Enquiry, HousingProject } from '@/types';
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
 // Constants
@@ -20,7 +20,7 @@ const PAGE_ROWS = 5;
 // State
 const drafts: Ref<Array<any>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
-const projects: Ref<Array<Submission>> = ref([]);
+const projects: Ref<Array<HousingProject>> = ref([]);
 const first: Ref<number> = ref(0);
 const displayedProjects = computed(() => projects.value.slice(first.value, first.value + PAGE_ROWS));
 const loading: Ref<boolean> = ref(true);
@@ -30,11 +30,11 @@ const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
-function onSubmissionDraftDelete(draftId: string) {
+function onHousingProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
 
-function sortByLastUpdated(a: Submission, b: Submission) {
+function sortByLastUpdated(a: HousingProject, b: HousingProject) {
   if (a.updatedAt && b.updatedAt) {
     return a.updatedAt > b.updatedAt ? -1 : 1;
   } else {
@@ -61,8 +61,8 @@ onBeforeMount(async () => {
   [enquiries.value, projects.value, drafts.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
-      submissionService.searchSubmissions({ includeDeleted: false }),
-      submissionService.getDrafts()
+      housingProjectService.searchHousingProjects({ includeDeleted: false }),
+      housingProjectService.getDrafts()
     ])
   ).map((r) => r.data);
 
@@ -175,7 +175,7 @@ onBeforeMount(async () => {
               class="no-underline"
               :to="{
                 name: RouteName.EXT_HOUSING_PROJECT,
-                params: { submissionId: project.submissionId }
+                params: { housingProjectId: project.housingProjectId }
               }"
             >
               <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
@@ -220,7 +220,7 @@ onBeforeMount(async () => {
       <SubmissionDraftListProponent
         :loading="loading"
         :drafts="drafts"
-        @submission-draft:delete="onSubmissionDraftDelete"
+        @submission-draft:delete="onHousingProjectDraftDelete"
       />
     </div>
 

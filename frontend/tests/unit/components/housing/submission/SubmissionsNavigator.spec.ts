@@ -3,7 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { enquiryService, permitService, noteService, submissionService } from '@/services';
+import { enquiryService, permitService, noteService, housingProjectService } from '@/services';
 import { StorageKey, Resource } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
@@ -22,18 +22,18 @@ vi.mock('vue-router', () => ({
   }))
 }));
 
-const getSubmissions = vi.spyOn(submissionService, 'getSubmissions');
+const getHousingProjects = vi.spyOn(housingProjectService, 'getHousingProjects');
 const getEnquiries = vi.spyOn(enquiryService, 'getEnquiries');
 const listPermits = vi.spyOn(permitService, 'listPermits');
 const listBringForward = vi.spyOn(noteService, 'listBringForward');
-const searchSubmissions = vi.spyOn(submissionService, 'searchSubmissions');
-const getStatistics = vi.spyOn(submissionService, 'getStatistics');
+const searchHousingProjects = vi.spyOn(housingProjectService, 'searchHousingProjects');
+const getStatistics = vi.spyOn(housingProjectService, 'getStatistics');
 
-getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getHousingProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getEnquiries.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 listPermits.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 listBringForward.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
-searchSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+searchHousingProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getStatistics.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 
 const wrapperSettings = () => ({

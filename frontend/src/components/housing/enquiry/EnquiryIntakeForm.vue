@@ -11,7 +11,7 @@ import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/c
 import Tooltip from '@/components/common/Tooltip.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, submissionService } from '@/services';
+import { enquiryService, housingProjectService } from '@/services';
 import { useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import { RouteName } from '@/utils/enums/application';
@@ -107,7 +107,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     bodyType: 'html',
     body: body
   };
-  await submissionService.emailConfirmation(emailData);
+  await housingProjectService.emailConfirmation(emailData);
 }
 
 function getEnquiryConfirmationRoute(enquiry: Enquiry) {

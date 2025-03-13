@@ -12,12 +12,12 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Get all submission and permit data for csv download */
+/** Get all housing project and permit data for csv download */
 router.get(
-  '/submission/permit',
+  '/housingProject/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
   (req: Request, res: Response, next: NextFunction): void => {
-    reportingController.getSubmissionPermitData(req, res, next);
+    reportingController.getHousingProjectPermitData(req, res, next);
   }
 );
 
