@@ -23,7 +23,7 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { Regex } from '@/utils/enums/application';
-import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
@@ -317,6 +317,15 @@ onMounted(async () => {
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"
         @on-input="onRelatedActivityInput"
+      />
+
+      <EditableSelect
+        class="col-span-3"
+        name="submittedMethod"
+        :label="t('enquiryForm.submittedMethod')"
+        :disabled="!editable"
+        :options="Object.values(EnquirySubmittedMethod)"
+        :get-option-label="(e: string) => e"
       />
       <div class="col-span-3" />
 

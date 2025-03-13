@@ -20,6 +20,12 @@ export enum ContactPreference {
   EITHER = 'Either'
 }
 
+export enum EnquirySubmittedMethod {
+  PHONE = 'Phone',
+  EMAIL = 'Email',
+  PCNS = 'PCNS'
+}
+
 export enum IntakeFormCategory {
   BASIC = 'basic',
   CONTACTS = 'contacts',

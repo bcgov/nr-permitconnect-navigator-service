@@ -2,7 +2,7 @@ import { enquiryService, contactService } from '../../../src/services';
 import enquiryController from '../../../src/controllers/enquiry';
 import { Request, Response } from 'express';
 import { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
-import { ApplicationStatus } from '../../../src/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '../../../src/utils/enums/housing';
 
 jest.mock('config');
 
@@ -28,6 +28,7 @@ const ENQUIRY_DATA: Enquiry = {
   submittedBy: 'testuser',
   relatedActivityId: 'activity123',
   enquiryDescription: 'Test enquiry description',
+  submittedMethod: EnquirySubmittedMethod.PHONE,
   intakeStatus: 'submitted',
   enquiryStatus: 'new',
   waitingOn: null,

@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -24,6 +24,7 @@ const testEnquiry = {
   assignedUserId: 'user123',
   atsClientId: null,
   enquiryType: 'General Inquiry',
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   intakeStatus: 'Pending',
