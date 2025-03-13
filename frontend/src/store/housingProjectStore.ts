@@ -2,24 +2,24 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Document, Enquiry, Note, Permit, Submission } from '@/types';
+import type { Document, Enquiry, HousingProject, Note, Permit } from '@/types';
 
-export type SubmissionStoreState = {
+export type HousingProjectStoreState = {
   documents: Ref<Array<Document>>;
   relatedEnquiries: Ref<Array<Enquiry>>;
   notes: Ref<Array<Note>>;
   permits: Ref<Array<Permit>>;
-  submission: Ref<Submission | undefined>;
+  housingProject: Ref<HousingProject | undefined>;
 };
 
-export const useSubmissionStore = defineStore('submission', () => {
+export const useHousingProjectStore = defineStore('housingProject', () => {
   // State
-  const state: SubmissionStoreState = {
+  const state: HousingProjectStoreState = {
     documents: ref([]),
     relatedEnquiries: ref([]),
     notes: ref([]),
     permits: ref([]),
-    submission: ref(undefined)
+    housingProject: ref(undefined)
   };
 
   // Getters
@@ -28,7 +28,7 @@ export const useSubmissionStore = defineStore('submission', () => {
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
-    getSubmission: computed(() => state.submission.value)
+    getHousingProject: computed(() => state.housingProject.value)
   };
 
   // Actions
@@ -91,8 +91,8 @@ export const useSubmissionStore = defineStore('submission', () => {
     if (idx >= 0) state.permits.value[idx] = data;
   }
 
-  function setSubmission(data: Submission | undefined) {
-    state.submission.value = data;
+  function setHousingProject(data: HousingProject | undefined) {
+    state.housingProject.value = data;
   }
 
   return {
@@ -117,8 +117,8 @@ export const useSubmissionStore = defineStore('submission', () => {
     addRelatedEnquiry,
     removeRelatedEnquiry,
     setRelatedEnquiries,
-    setSubmission
+    setHousingProject
   };
 });
 
-export default useSubmissionStore;
+export default useHousingProjectStore;

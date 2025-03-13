@@ -77,7 +77,7 @@ const routes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: ':submissionId/confirmation',
+            path: ':housingProjectId/confirmation',
             name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
             component: () => import('@/views/external/housing/project/ProjectConfirmationView.vue'),
             beforeEnter: accessHandler,
@@ -93,7 +93,7 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/GenericView.vue'),
         children: [
           {
-            path: ':submissionId',
+            path: ':housingProjectId',
             component: () => import('@/views/GenericView.vue'),
             children: [
               {

@@ -18,7 +18,7 @@ const testActivityId = 'activity123';
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
   props: {
-    submissionId: testSubmissionIdProp,
+    housingProjectId: testSubmissionIdProp,
     activityId: testActivityIdProp
   },
   global: {

@@ -8,9 +8,9 @@ import { useTypeStore } from '@/store';
 import type { Ref } from 'vue';
 
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
+const { activityId = undefined, housingProjectId = undefined } = defineProps<{
   activityId?: string;
-  submissionId?: string;
+  housingProjectId?: string;
 }>();
 
 // State
@@ -28,6 +28,6 @@ onMounted(async () => {
   <SubmissionIntakeForm
     v-if="!loading"
     :activity-id="activityId"
-    :submission-id="submissionId"
+    :submission-id="housingProjectId"
   />
 </template>

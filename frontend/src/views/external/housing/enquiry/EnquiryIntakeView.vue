@@ -14,12 +14,12 @@ const {
   permitName,
   permitTrackingId,
   permitAuthStatus,
-  submissionId
+  housingProjectId
 } = defineProps<{
   activityId?: string;
   confirmationId?: string;
   enquiryId?: string;
-  submissionId?: string;
+  housingProjectId?: string;
   projectName?: string;
   projectActivityId?: string;
   permitName?: string;
@@ -42,7 +42,7 @@ onMounted(async () => {
     v-if="!loading"
     :activity-id="activityId"
     :enquiry-id="enquiryId"
-    :submission-id="submissionId"
+    :submission-id="housingProjectId"
     :project-name="projectName"
     :project-activity-id="projectActivityId"
     :permit-name="permitName"

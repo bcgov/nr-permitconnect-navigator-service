@@ -9,20 +9,20 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
 
-import { contactService, permitService, submissionService } from '@/services';
+import { contactService, housingProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType, Submission, User } from '@/types';
+import type { Permit, PermitType, HousingProject, User } from '@/types';
 import type { MenuItem } from 'primevue/menuitem';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 
 type CombinedPermit = Permit & PermitType;
 
 // Props
-const { permitId, projectActivityId, submissionId } = defineProps<{
+const { permitId, projectActivityId, housingProjectId } = defineProps<{
   permitId: string;
   projectActivityId?: string;
-  submissionId: string;
+  housingProjectId: string;
 }>();
 
 // Composables
@@ -69,7 +69,7 @@ const breadcrumbItems: Ref<Array<MenuItem>> = ref([
 ]);
 const descriptionModalVisible: Ref<boolean> = ref(false);
 const permit: Ref<CombinedPermit | undefined> = ref(undefined);
-const submission: Ref<Submission | undefined> = ref(undefined);
+const housingProject: Ref<HousingProject | undefined> = ref(undefined);
 const updatedBy: Ref<string | undefined> = ref(undefined);
 const assignedNavigator: Ref<User | undefined> = ref(undefined);
 
@@ -196,7 +196,9 @@ onBeforeMount(async () => {
     permit.value = { ...restOfPermit, ...permitType };
 
     if (permit.value) {
-      submission.value = (await submissionService.searchSubmissions({ activityId: [permit.value.activityId] })).data[0];
+      housingProject.value = (
+        await housingProjectService.searchHousingProjects({ activityId: [permit.value.activityId] })
+      ).data[0];
 
       const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
       updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
@@ -204,16 +206,16 @@ onBeforeMount(async () => {
 
     breadcrumbItems.value = [
       {
-        label: submission.value?.projectName,
+        label: housingProject.value?.projectName,
         route: RouteName.EXT_HOUSING_PROJECT,
-        params: { submissionId: submission.value?.submissionId }
+        params: { housingProjectId: housingProject.value?.housingProjectId }
       },
       { label: permit?.value?.name, class: 'font-bold' }
     ];
 
-    if (submission.value?.assignedUserId) {
+    if (housingProject.value?.assignedUserId) {
       assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [submission.value.assignedUserId] })
+        await contactService.searchContacts({ userId: [housingProject.value.assignedUserId] })
       ).data[0];
     }
   } catch {
@@ -354,7 +356,7 @@ onBeforeMount(async () => {
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, submissionId },
+              params: { permitId, housingProjectId },
               query: {
                 permitName: permit?.name,
                 permitTrackingId: permit?.trackingId,

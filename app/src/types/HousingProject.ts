@@ -5,8 +5,8 @@ import { IStamps } from '../interfaces/IStamps';
 import type { Contact } from './Contact';
 import type { User } from './User';
 
-export type Submission = {
-  submissionId: string; // Primary key
+export type HousingProject = {
+  housingProjectId: string; // Primary key
   activityId: string;
   assignedUserId: string | null;
   submittedAt: string;
@@ -54,7 +54,7 @@ export type Submission = {
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;
-  submissionType: string | null;
+  housingProjectType: string | null;
   relatedEnquiries: string | null;
   contacts: Array<Contact>;
   user: User | null;

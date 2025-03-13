@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { documentService, enquiryService, noteService, permitService, submissionService } from '@/services';
+import { documentService, enquiryService, noteService, permitService, housingProjectService } from '@/services';
 import ProjectView from '@/views/internal/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -24,30 +24,32 @@ vi.mock('vue-router', () => ({
   }))
 }));
 
-const useSubmissionService = vi.spyOn(submissionService, 'getSubmission');
-const useDocumentService = vi.spyOn(documentService, 'listDocuments');
-const useNoteService = vi.spyOn(noteService, 'listNotes');
-const usePermitService = vi.spyOn(permitService, 'listPermits');
-const usePermitServicePermitTypes = vi.spyOn(permitService, 'getPermitTypes');
-const useEnquiryService = vi.spyOn(enquiryService, 'listRelatedEnquiries');
+const getHousingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
+const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
+const listNotesSpy = vi.spyOn(noteService, 'listNotes');
+const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
+const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 
-useSubmissionService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-useDocumentService.mockResolvedValue({
+getHousingProjectsSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+listDocumentsSpy.mockResolvedValue({
   data: [{ filename: 'foo', activityId: 'activity456' }]
 } as AxiosResponse);
-useNoteService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
-usePermitService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
-usePermitServicePermitTypes.mockResolvedValue({
+listNotesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+listPermitsSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+getPermitTypesSpy.mockResolvedValue({
   data: { enquiryId: 'enquiry123', activityId: 'activity456' }
 } as AxiosResponse);
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+listRelatedEnquiriesSpy.mockResolvedValue({
+  data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+} as AxiosResponse);
 
-const testSubmissionId = 'submission123';
+const testHousingProjectId = 'submission123';
 const testActivityId = 'activity123';
 
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId, testActivityIdProp = testActivityId) => ({
   props: {
-    submissionId: testSubmissionIdProp,
+    housingProjectId: testHousingProjectIdProp,
     activityId: testActivityIdProp
   },
   global: {
