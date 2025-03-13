@@ -63,6 +63,11 @@ import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { Contact, Document, HousingProjectIntake, Permit, PermitType } from '@/types';
 
+import type { Contact, Document, HousingProjectIntake, Permit, PermitType } from '@/types';
+import ContactCard from '@/components/form/common/ContactCard.vue';
+import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
+import LocationCard from '@/components/form/common/LocationCard.vue';
+
 // Types
 type HousingProjectForm = {
   addressSearch?: string;
