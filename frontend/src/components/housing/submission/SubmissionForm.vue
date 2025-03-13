@@ -49,6 +49,8 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, HousingProject, User } from '@/types';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
 interface HousingProjectForm extends HousingProject {
@@ -84,7 +86,7 @@ const formSchema = object({
     .max(3)
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
+  housingProjectType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...contactValidator,
@@ -415,7 +417,7 @@ onBeforeMount(async () => {
       />
       <Select
         class="col-span-3"
-        name="submissionType"
+        name="housingProjectType"
         label="Submission type"
         :disabled="!editable"
         :options="SUBMISSION_TYPE_LIST"

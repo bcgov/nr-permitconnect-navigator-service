@@ -20,7 +20,7 @@ const service = {
       latitude,
       longitude,
       location_pids,
-      submission_type,
+      housing_project_type,
       intake_status,
       application_status,
       p.issued_permit_id,

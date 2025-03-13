@@ -90,7 +90,7 @@ const schema = {
       activityId: activityId,
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
-      submissionType: Joi.string()
+      housingProjectType: Joi.string()
         .required()
         .valid(...HOUSING_PROJECT_TYPE_LIST),
       submittedAt: Joi.string().required(),

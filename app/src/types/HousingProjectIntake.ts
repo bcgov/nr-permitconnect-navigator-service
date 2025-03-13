@@ -7,7 +7,7 @@ export type HousingProjectIntake = {
   draftId?: string;
   submittedAt?: string;
   applicationStatus?: ApplicationStatus;
-  submissionType?: SubmissionType;
+  housingProjectType?: SubmissionType;
 
   basic?: {
     consentToFeedback?: boolean;

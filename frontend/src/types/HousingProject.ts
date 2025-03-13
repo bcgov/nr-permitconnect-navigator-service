@@ -8,7 +8,7 @@ export type HousingProject = {
   activityId: string;
   housingProjectId: string;
   queuePriority: number;
-  submissionType: string;
+  housingProjectType: string;
   submittedAt: string;
   relatedEnquiries: string;
   hasRelatedEnquiry: boolean;
