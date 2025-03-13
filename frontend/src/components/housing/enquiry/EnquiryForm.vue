@@ -20,7 +20,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, submissionService, userService } from '@/services';
+import { enquiryService, housingProjectService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
@@ -278,7 +278,7 @@ onBeforeMount(async () => {
     atsClientId: enquiry?.atsClientId,
     user: assigneeOptions.value[0] ?? null
   };
-  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
+  projectActivityIds.value = filteredProjectActivityIds.value = (await housingProjectService.getActivityIds()).data;
 });
 </script>
 
@@ -490,7 +490,7 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :submission-or-enquiry="enquiry"
+      :housing-project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -511,7 +511,7 @@ onBeforeMount(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :submission-or-enquiry="enquiry"
+      :housing-project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;

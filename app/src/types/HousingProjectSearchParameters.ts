@@ -1,9 +1,9 @@
-export type SubmissionSearchParameters = {
+export type HousingProjectSearchParameters = {
   activityId?: Array<string>;
   createdBy?: Array<string>;
+  housingProjectId?: Array<string>;
+  housingProjectType?: Array<string>;
   intakeStatus?: Array<string>;
   includeUser?: boolean;
-  submissionId?: Array<string>;
-  submissionType?: Array<string>;
   includeDeleted?: boolean;
 };

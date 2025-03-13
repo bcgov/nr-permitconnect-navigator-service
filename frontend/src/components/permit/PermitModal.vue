@@ -6,7 +6,7 @@ import { date, object, string } from 'yup';
 import { DatePicker, InputText, Select } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { useSubmissionStore, usePermitStore } from '@/store';
+import { useHousingProjectStore, useTypeStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
 import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
@@ -20,7 +20,7 @@ const { activityId, permit = undefined } = defineProps<{
 }>();
 
 // Store
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const permitStore = usePermitStore();
 const { getPermitTypes } = storeToRefs(permitStore);
 
@@ -95,7 +95,7 @@ function onDelete() {
         permitService
           .deletePermit(permit?.permitId as string)
           .then(() => {
-            submissionStore.removePermit(permit as Permit);
+            housingProjectStore.removePermit(permit as Permit);
             toast.success('Permit deleted');
           })
           .catch((e: any) => toast.error('Failed to delete permit', e.message))
@@ -136,10 +136,10 @@ async function onSubmit(data: PermitForm, { resetForm }) {
   try {
     if (!permit) {
       const result = (await permitService.createPermit({ ...permitData, activityId: activityId })).data;
-      submissionStore.addPermit(result);
+      housingProjectStore.addPermit(result);
     } else {
       const result = (await permitService.updatePermit({ ...permitData, activityId: permit.activityId })).data;
-      submissionStore.updatePermit({
+      housingProjectStore.updatePermit({
         ...result,
         permitNote: permit?.permitNote
       });

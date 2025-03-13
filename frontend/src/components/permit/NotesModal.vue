@@ -5,12 +5,12 @@ import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
+import permitNoteService from '@/services/permitNoteService';
+import { useHousingProjectStore } from '@/store';
 import { formatDateLong } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
-import permitNoteService from '@/services/permitNoteService';
-import { useSubmissionStore } from '@/store';
 
 // Props
 const { permit, permitName } = defineProps<{
@@ -19,7 +19,7 @@ const { permit, permitName } = defineProps<{
 }>();
 
 // Store
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -45,7 +45,7 @@ async function onSubmit(data: any, { resetForm }) {
   try {
     const response = await permitNoteService.createPermitNote({ note: data.note as string, permitId: permit.permitId });
     const newNote = response.data;
-    const permitForNote = submissionStore.getPermits.find((p) => p.permitId === newNote.permitId);
+    const permitForNote = housingProjectStore.getPermits.find((p) => p.permitId === newNote.permitId);
 
     if (permitForNote) {
       const updatedPermit = {
@@ -53,7 +53,7 @@ async function onSubmit(data: any, { resetForm }) {
         permitNote: permitForNote.permitNote ? [newNote, ...permitForNote.permitNote] : [newNote]
       };
 
-      submissionStore.updatePermit(updatedPermit);
+      housingProjectStore.updatePermit(updatedPermit);
     }
 
     resetForm();

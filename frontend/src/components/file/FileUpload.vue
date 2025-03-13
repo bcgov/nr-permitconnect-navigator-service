@@ -4,7 +4,7 @@ import { ref } from 'vue';
 
 import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
-import { useConfigStore, useSubmissionStore } from '@/store';
+import { useConfigStore, useHousingProjectStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
@@ -18,7 +18,7 @@ const { activityId, disabled = false } = defineProps<{
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 
 // State
 const fileInput: Ref<any> = ref(null);
@@ -58,7 +58,7 @@ const onUpload = async (files: Array<File>) => {
         if (response) {
           response.extension = getFilenameAndExtension(response.filename).extension;
           response.filename = decodeURI(response.filename);
-          submissionStore.addDocument(response);
+          housingProjectStore.addDocument(response);
           toast.success('Document uploaded');
         }
       } catch (e: any) {

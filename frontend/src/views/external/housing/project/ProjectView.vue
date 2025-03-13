@@ -27,8 +27,8 @@ type PermitFilterConfig = {
 };
 
 // Props
-const { submissionId } = defineProps<{
-  submissionId: string;
+const { housingProjectId } = defineProps<{
+  housingProjectId: string;
 }>();
 
 // Composables
@@ -122,7 +122,7 @@ onBeforeMount(async () => {
   try {
     const activityId = submissionValue.activityId;
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    submissionStore.setPermits(permitsValue);
+    housingProjectStore.setPermits(permitsValue);
   } catch {
     toast.error(t('projectView.toastPermitLoadFailed'));
   }
@@ -142,7 +142,7 @@ onBeforeMount(async () => {
 
 <template>
   <div
-    v-if="!loading && getSubmission"
+    v-if="!loading && getHousingProject"
     class="app-primary-color"
   >
     <div class="disclaimer-block p-8 mt-8">
@@ -158,7 +158,7 @@ onBeforeMount(async () => {
           @keydown.enter.prevent="navigateToSubmissionIntakeView()"
           @keydown.space.prevent="navigateToSubmissionIntakeView()"
         >
-          {{ getSubmission.projectName }}
+          {{ getHousingProject.projectName }}
           <font-awesome-icon
             class="text-sm"
             icon="fa fa-external-link"
@@ -173,7 +173,7 @@ onBeforeMount(async () => {
         <div>
           <span class="mr-4">
             Project ID:
-            <span class="font-bold">{{ getSubmission.activityId }}</span>
+            <span class="font-bold">{{ getHousingProject.activityId }}</span>
           </span>
           <span class="mr-4">
             {{ t('projectView.createdBy') }}:
@@ -202,7 +202,7 @@ onBeforeMount(async () => {
     </div>
 
     <div
-      v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
+      v-if="getHousingProject?.housingProjectType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
     >
       {{ t('projectView.inapplicableSubmissionType') }}

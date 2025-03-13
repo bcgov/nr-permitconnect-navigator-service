@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { StorageKey } from '@/utils/enums/application';
 import { shallowMount } from '@vue/test-utils';
 
-import { contactService, enquiryService, permitService, submissionService } from '@/services';
+import { contactService, enquiryService, permitService, housingProjectService } from '@/services';
 import ProjectView from '@/views/external/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -44,14 +44,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
-const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
-const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
-const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
-const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
-
-const testSubmissionId = 'submission123';
+const testHousingProjectId = 'submission123';
 const exampleContact = {
   contactId: 'contact123',
   name: 'John Doe',
@@ -59,33 +52,9 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-listRelatedEnquiriesSpy.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-listPermitsSpy.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-getPermitTypesSpy.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-getSubmissionSpy.mockResolvedValue({
-  data: 'notTested'
-} as AxiosResponse);
-
-searchContactSpy.mockResolvedValue({
-  data: [exampleContact]
-} as AxiosResponse);
-
-searchSubmissionsSpy.mockResolvedValue({
-  data: [{ activityId: 'activity456' }]
-} as AxiosResponse);
-
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
+const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
-    submissionId: testSubmissionIdProp
+    housingProjectId: testHousingProjectIdProp
   },
   global: {
     plugins: [
@@ -111,6 +80,37 @@ describe('ProjectView.vue', () => {
   });
 
   it('renders the component with the provided props', () => {
+    const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
+    const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
+    const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+    const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+    const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
+    const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+
+    listRelatedEnquiriesSpy.mockResolvedValue({
+      data: 'notTested'
+    } as AxiosResponse);
+
+    listPermitsSpy.mockResolvedValue({
+      data: 'notTested'
+    } as AxiosResponse);
+
+    getPermitTypesSpy.mockResolvedValue({
+      data: 'notTested'
+    } as AxiosResponse);
+
+    getHousingProjectSpy.mockResolvedValue({
+      data: 'notTested'
+    } as AxiosResponse);
+
+    searchContactSpy.mockResolvedValue({
+      data: [exampleContact]
+    } as AxiosResponse);
+
+    searchHousingProjectsSpy.mockResolvedValue({
+      data: [{ activityId: 'activity456' }]
+    } as AxiosResponse);
+
     const wrapper = shallowMount(ProjectView, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });

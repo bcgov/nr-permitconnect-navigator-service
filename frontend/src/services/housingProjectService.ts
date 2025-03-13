@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email, Draft, SubmissionSearchParameters } from '@/types';
+import type { Email, Draft, HousingProjectSearchParameters } from '@/types';
 
 export default {
   /**
@@ -9,23 +9,23 @@ export default {
    * @returns {Promise} An axios response
    */
   getActivityIds() {
-    return appAxios().get('submission/activityIds');
+    return appAxios().get('housingProject/activityIds');
   },
 
   /**
-   * @function createSubmission
+   * @function createHousingProject
    * @returns {Promise} An axios response
    */
-  createSubmission(data?: any) {
-    return appAxios().put('submission', data);
+  createHousingProject(data?: any) {
+    return appAxios().put('housingProject', data);
   },
 
   /**
-   * @function deleteSubmission
+   * @function deleteHousingProject
    * @returns {Promise} An axios response
    */
-  deleteSubmission(submissionId: string) {
-    return appAxios().delete(`submission/${submissionId}`);
+  deleteHousingProject(housingProjectId: string) {
+    return appAxios().delete(`housingProject/${housingProjectId}`);
   },
 
   /**
@@ -33,15 +33,15 @@ export default {
    * @returns {Promise} An axios response
    */
   deleteDraft(draftId: string) {
-    return appAxios().delete(`submission/draft/${draftId}`);
+    return appAxios().delete(`housingProject/draft/${draftId}`);
   },
 
   /**
-   * @function getSubmissions
+   * @function getHousingProjects
    * @returns {Promise} An axios response
    */
-  getSubmissions() {
-    return appAxios().get('submission');
+  getHousingProjects() {
+    return appAxios().get('housingProject');
   },
 
   /**
@@ -49,7 +49,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getDraft(draftId: string) {
-    return appAxios().get(`submission/draft/${draftId}`);
+    return appAxios().get(`housingProject/draft/${draftId}`);
   },
 
   /**
@@ -57,7 +57,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getDrafts() {
-    return appAxios().get('submission/draft');
+    return appAxios().get('housingProject/draft');
   },
 
   /**
@@ -65,23 +65,23 @@ export default {
    * @returns {Promise} An axios response
    */
   getStatistics(filters?: any) {
-    return appAxios().get('submission/statistics', { params: { ...filters } });
+    return appAxios().get('housingProject/statistics', { params: { ...filters } });
   },
 
   /**
-   * @function getSubmission
+   * @function getHousingProject
    * @returns {Promise} An axios response
    */
-  getSubmission(submissionId: string) {
-    return appAxios().get(`submission/${submissionId}`);
+  getHousingProject(housingProjectId: string) {
+    return appAxios().get(`housingProject/${housingProjectId}`);
   },
 
   /**
-   * @function searchSubmissions
+   * @function searchHousingProjects
    * @returns {Promise} An axios response
    */
-  searchSubmissions(filters?: SubmissionSearchParameters) {
-    return appAxios().get('submission/search', { params: { ...filters } });
+  searchHousingProjects(filters?: HousingProjectSearchParameters) {
+    return appAxios().get('housingProject/search', { params: { ...filters } });
   },
 
   /**
@@ -89,7 +89,7 @@ export default {
    * @returns {Promise} An axios response
    */
   submitDraft(data?: any) {
-    return appAxios().put('submission/draft/submit', data);
+    return appAxios().put('housingProject/draft/submit', data);
   },
 
   /**
@@ -97,28 +97,28 @@ export default {
    * @returns {Promise} An axios response
    */
   updateDraft(data?: Partial<Draft>) {
-    return appAxios().put('submission/draft', data);
+    return appAxios().put('housingProject/draft', data);
   },
 
   /**
    * @function updateIsDeletedFlag
    * @returns {Promise} An axios response
    */
-  updateIsDeletedFlag(submissionId: string, isDeleted: boolean) {
-    return appAxios().patch(`submission/${submissionId}/delete`, { isDeleted: isDeleted });
+  updateIsDeletedFlag(housingProjectId: string, isDeleted: boolean) {
+    return appAxios().patch(`housingProject/${housingProjectId}/delete`, { isDeleted: isDeleted });
   },
 
   /**
-   * @function updateSubmission
+   * @function updateHousingProject
    * @returns {Promise} An axios response
    */
-  updateSubmission(submissionId: string, data: any) {
-    return appAxios().put(`submission/${submissionId}`, data);
+  updateHousingProject(housingProjectId: string, data: any) {
+    return appAxios().put(`housingProject/${housingProjectId}`, data);
   },
 
   /**
    * @function send
-   * Send an email with the submission confirmation data
+   * Send an email with the housing project confirmation data
    * @returns {Promise} An axios response
    */
   emailConfirmation(emailData: Email) {
@@ -128,6 +128,6 @@ export default {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('submission/email', emailData);
+    return appAxios().put('housingProject/email', emailData);
   }
 };
