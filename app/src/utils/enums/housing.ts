@@ -21,7 +21,7 @@ export enum ContactPreference {
 }
 
 export enum DraftCode {
-  SUBMISSION = 'SUBMISSION'
+  HOUSING_PROJECT = 'HOUSING_PROJECT'
 }
 
 export enum IntakeFormCategory {

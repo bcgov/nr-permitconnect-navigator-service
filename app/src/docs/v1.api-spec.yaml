@@ -856,10 +856,10 @@ paths:
           $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
-  /reporting/submission/permit:
+  /reporting/housingProject/permit:
     get:
-      summary: Query and retrieve all submission data related to permits
-      operationId: getSubmissionPermitData
+      summary: Query and retrieve all housing project data related to permits
+      operationId: getHousingProjectPermitData
       tags:
         - Reporting
       responses:
@@ -2944,7 +2944,7 @@ components:
           example: Maple Ridge
         streetAddress:
           type: string
-          description: Street address of project 
+          description: Street address of project
           example: 2975 Jutland Rd
         latitude:
           type: number

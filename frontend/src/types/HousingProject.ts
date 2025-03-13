@@ -4,11 +4,11 @@ import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
 import type { User } from './User';
 
-export type Submission = {
+export type HousingProject = {
   activityId: string;
-  submissionId: string;
+  housingProjectId: string;
   queuePriority: number;
-  submissionType: string;
+  housingProjectType: string;
   submittedAt: string;
   relatedEnquiries: string;
   hasRelatedEnquiry: boolean;

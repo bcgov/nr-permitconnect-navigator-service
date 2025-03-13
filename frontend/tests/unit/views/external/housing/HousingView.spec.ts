@@ -2,7 +2,7 @@ import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
 import { shallowMount } from '@vue/test-utils';
 
-import { enquiryService, submissionService } from '@/services';
+import { enquiryService, housingProjectService } from '@/services';
 import HousingView from '@/views/external/housing/HousingView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -33,13 +33,13 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const getEnquiries = vi.spyOn(enquiryService, 'getEnquiries');
-const getDrafts = vi.spyOn(submissionService, 'getDrafts');
-const searchSubmissions = vi.spyOn(submissionService, 'searchSubmissions');
+const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
+const getDraftsSpy = vi.spyOn(housingProjectService, 'getDrafts');
+const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
 
-searchSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
-getEnquiries.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
-getDrafts.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+searchHousingProjectsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getEnquiriesSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getDraftsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 
 const wrapperSettings = () => ({
   global: {

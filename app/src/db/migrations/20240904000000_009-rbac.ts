@@ -29,7 +29,7 @@ const resources = [
     name: Resource.SSO
   },
   {
-    name: Resource.SUBMISSION
+    name: Resource.HOUSING_PROJECT
   },
   {
     name: Resource.USER
@@ -614,7 +614,7 @@ export async function up(knex: Knex): Promise<void> {
         await addRolePolicies(Resource.PERMIT);
         await addRolePolicies(Resource.ROADMAP);
         await addRolePolicies(Resource.SSO);
-        await addRolePolicies(Resource.SUBMISSION);
+        await addRolePolicies(Resource.HOUSING_PROJECT);
         await addRolePolicies(Resource.USER);
 
         return knex('yars.role_policy').insert(items);
@@ -698,7 +698,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(navigator_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.SSO, [Action.READ]);
-          await addResourceRoles(navigator_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(navigator_group_id[0].group_id, Resource.HOUSING_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(navigator_group_id[0].group_id, Resource.USER, [Action.READ]);
 
           // Add all navigator read only role mappings
@@ -708,7 +708,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(navigator_read_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
           await addResourceRoles(navigator_read_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
           await addResourceRoles(navigator_read_group_id[0].group_id, Resource.SSO, [Action.READ]);
-          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.SUBMISSION, [Action.READ]);
+          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.HOUSING_PROJECT, [Action.READ]);
           await addResourceRoles(navigator_read_group_id[0].group_id, Resource.USER, [Action.READ]);
 
           // Add all supervisor role mappings
@@ -719,7 +719,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(superviser_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(superviser_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(superviser_group_id[0].group_id, Resource.SSO, [Action.READ]);
-          await addResourceRoles(superviser_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(superviser_group_id[0].group_id, Resource.HOUSING_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(superviser_group_id[0].group_id, Resource.USER, [Action.READ]);
 
           // Add all admin role mappings
@@ -730,7 +730,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(admin_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
           await addResourceRoles(admin_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
           await addResourceRoles(admin_group_id[0].group_id, Resource.SSO, [Action.READ]);
-          await addResourceRoles(admin_group_id[0].group_id, Resource.SUBMISSION, [Action.READ]);
+          await addResourceRoles(admin_group_id[0].group_id, Resource.HOUSING_PROJECT, [Action.READ]);
           await addResourceRoles(admin_group_id[0].group_id, Resource.USER, [Action.CREATE, Action.READ, Action.UPDATE]);
 
           // Add all proponent role mappings
@@ -738,7 +738,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(proponent_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(proponent_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
           await addResourceRoles(proponent_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
-          await addResourceRoles(proponent_group_id[0].group_id, Resource.SUBMISSION, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(proponent_group_id[0].group_id, Resource.HOUSING_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
         }
         return knex('yars.group_role').insert(items);
       })

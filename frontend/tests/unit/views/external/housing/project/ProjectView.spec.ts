@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { StorageKey } from '@/utils/enums/application';
 import { shallowMount } from '@vue/test-utils';
 
-import { contactService, enquiryService, permitService, submissionService } from '@/services';
+import { contactService, enquiryService, permitService, housingProjectService } from '@/services';
 import ProjectView from '@/views/external/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -47,11 +47,11 @@ afterEach(() => {
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
 const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
-const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
+const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
 
-const testSubmissionId = 'submission123';
+const testHousingProjectId = 'submission123';
 const exampleContact = {
   contactId: 'contact123',
   name: 'John Doe',
@@ -71,7 +71,7 @@ getPermitTypesSpy.mockResolvedValue({
   data: 'notTested'
 } as AxiosResponse);
 
-getSubmissionSpy.mockResolvedValue({
+getHousingProjectSpy.mockResolvedValue({
   data: 'notTested'
 } as AxiosResponse);
 
@@ -79,13 +79,13 @@ searchContactSpy.mockResolvedValue({
   data: [exampleContact]
 } as AxiosResponse);
 
-searchSubmissionsSpy.mockResolvedValue({
+searchHousingProjectsSpy.mockResolvedValue({
   data: [{ activityId: 'activity456' }]
 } as AxiosResponse);
 
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
+const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
-    submissionId: testSubmissionIdProp
+    housingProjectId: testHousingProjectIdProp
   },
   global: {
     plugins: [

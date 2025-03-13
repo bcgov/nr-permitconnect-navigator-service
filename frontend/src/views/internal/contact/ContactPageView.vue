@@ -5,11 +5,11 @@ import { useRoute, useRouter } from 'vue-router';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { InputText, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { submissionService, enquiryService, contactService, userService } from '@/services';
+import { contactService, housingProjectService, enquiryService, userService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Contact, Enquiry, Submission, User } from '@/types';
+import type { ActivityContact, Contact, Enquiry, HousingProject, User } from '@/types';
 
 // Props
 const { contactId } = defineProps<{
@@ -26,7 +26,7 @@ const activeTabIndex: Ref<number> = ref(0);
 const assignedUsers: Ref<Record<string, string>> = ref({});
 const contact: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const submissionsEnquiries: Ref<Array<Submission | Enquiry>> = ref([]);
+const housingProjectsEnquiries: Ref<Array<HousingProject | Enquiry>> = ref([]);
 
 const fullName = computed(() => {
   const firstName = contact.value?.firstName ?? '';
@@ -69,19 +69,19 @@ onMounted(async () => {
   if (activityIds.length) {
     const [submissions, enquiries] = (
       await Promise.all([
-        submissionService.searchSubmissions({ activityId: activityIds }),
+        housingProjectService.searchHousingProjects({ activityId: activityIds }),
         enquiryService.searchEnquiries({ activityId: activityIds })
       ])
     ).map((r) => r.data);
 
-    submissionsEnquiries.value = submissionsEnquiries.value.concat(submissions).concat(enquiries);
+    housingProjectsEnquiries.value = housingProjectsEnquiries.value.concat(submissions).concat(enquiries);
   }
 
   contact.value = contactData;
 
   // Map users ids to full names for history data table
   let userIds: Array<string> = [];
-  submissionsEnquiries.value.forEach((se) => {
+  housingProjectsEnquiries.value.forEach((se) => {
     if (se.assignedUserId) userIds.push(se.assignedUserId);
   });
 
@@ -172,7 +172,7 @@ onMounted(async () => {
         <span v-if="!loading">
           <ContactHistoryList
             :loading="loading"
-            :contacts-history="submissionsEnquiries"
+            :contacts-history="housingProjectsEnquiries"
             :assigned-users="assignedUsers"
           />
         </span>

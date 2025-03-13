@@ -2,12 +2,12 @@ import { Contact } from './Contact';
 import { Permit } from './Permit';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
 
-export type SubmissionIntake = {
+export type HousingProjectIntake = {
   activityId?: string;
   draftId?: string;
   submittedAt?: string;
   applicationStatus?: ApplicationStatus;
-  submissionType?: SubmissionType;
+  housingProjectType?: SubmissionType;
 
   basic?: {
     consentToFeedback?: boolean;

@@ -21,7 +21,7 @@ import {
   TabPanels,
   useToast
 } from '@/lib/primevue';
-import { enquiryService, noteService, permitService, submissionService } from '@/services';
+import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
@@ -29,7 +29,7 @@ import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Permit, Statistics, Submission } from '@/types';
+import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -59,7 +59,7 @@ const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const permits: Ref<Array<Permit>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 const showToggle: Ref<boolean> = ref(true);
-const submissions: Ref<Array<Submission>> = ref([]);
+const housingProjects: Ref<Array<HousingProject>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
@@ -71,7 +71,7 @@ function assignEnquiriesAndFullName() {
 
   enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
 
-  submissions.value.forEach((sub) => {
+  housingProjects.value.forEach((sub) => {
     if (relatedActivityIds.has(sub.activityId)) {
       sub.hasRelatedEnquiry = true;
     } else {
@@ -79,7 +79,7 @@ function assignEnquiriesAndFullName() {
     }
   });
 
-  submissions.value.forEach((sub) => {
+  housingProjects.value.forEach((sub) => {
     if (sub.user) {
       sub.user.fullName =
         sub.user.firstName && sub.user.lastName
@@ -92,7 +92,7 @@ function assignEnquiriesAndFullName() {
 // Set multiPermitsNeeded property of each submission to Yes/No (count)
 // if the submission have more than one permit with needed Yes
 function assignMultiPermitsNeeded() {
-  submissions.value.forEach((sub) => {
+  housingProjects.value.forEach((sub) => {
     const multiPermitsNeededCount = permits.value.filter(
       (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
     ).length;
@@ -159,14 +159,14 @@ function onEnquiryDelete(enquiryId: string, activityId: string) {
   refreshStatistics();
 }
 
-function onSubmissionDelete(submissionId: string, activityId: string) {
-  submissions.value = submissions.value.filter((x) => x.submissionId !== submissionId);
+function onSubmissionDelete(housingProjectId: string, activityId: string) {
+  housingProjects.value = housingProjects.value.filter((x) => x.housingProjectId !== housingProjectId);
   bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
   refreshStatistics();
 }
 
 function refreshStatistics() {
-  submissionService
+  housingProjectService
     .getStatistics()
     .then((response) => {
       statistics.value = response.data;
@@ -177,15 +177,15 @@ function refreshStatistics() {
 }
 
 onMounted(async () => {
-  [enquiries.value, permits.value, submissions.value, statistics.value, bringForward.value] = (
+  [enquiries.value, permits.value, housingProjects.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
       permitService.listPermits(),
-      submissionService.searchSubmissions({
+      housingProjectService.searchHousingProjects({
         includeUser: true,
         intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
       }),
-      submissionService.getStatistics(),
+      housingProjectService.getStatistics(),
       noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
   ).map((r) => r.data);
@@ -195,9 +195,9 @@ onMounted(async () => {
 
   const profile = getProfile.value;
 
-  submissions.value.forEach((sub) => {
+  housingProjects.value.forEach((sub) => {
     if (sub.user?.sub === profile?.sub) {
-      myAssignedTo.value.add(sub.submissionId);
+      myAssignedTo.value.add(sub.housingProjectId);
     }
   });
 
@@ -304,7 +304,7 @@ watch(activeTabIndex, (newIndex) => {
         </Accordion>
         <SubmissionListNavigator
           :loading="loading"
-          :submissions="submissions"
+          :submissions="housingProjects"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>

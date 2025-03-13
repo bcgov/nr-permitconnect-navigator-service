@@ -8,7 +8,7 @@ import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-ut
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
-import { contactService, documentService, permitService, submissionService } from '@/services';
+import { contactService, documentService, permitService, housingProjectService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 
@@ -157,7 +157,7 @@ describe('SubmissionIntakeForm', () => {
 
   describe('onBeforeMount', () => {
     it('keeps editable true in draft mode', async () => {
-      const getDraftSpy = vi.spyOn(submissionService, 'getDraft');
+      const getDraftSpy = vi.spyOn(housingProjectService, 'getDraft');
 
       getDraftSpy.mockResolvedValue({ activityId: '123' } as any);
 
@@ -171,17 +171,17 @@ describe('SubmissionIntakeForm', () => {
     });
 
     it('sets editable to false when activity and submission ID given', async () => {
-      const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+      const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 
-      getSubmissionSpy.mockResolvedValue({ activityId: '123', submissionId: '456' } as any);
+      getHousingProjectSpy.mockResolvedValue({ activityId: '123', housingProjectId: '456' } as any);
       listPermitsSpy.mockResolvedValue({ permitId: '123' } as any);
       listDocumentsSpy.mockResolvedValue({ documentId: '123' } as any);
 
       const wrapper = shallowMount(SubmissionIntakeForm, {
         ...wrapperSettings(),
-        props: { activityId: '123', submissionId: '456' }
+        props: { activityId: '123', housingProjectId: '456' }
       });
 
       await nextTick();
