@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -53,6 +54,8 @@ const FILTER_OPTIONS: Array<FilterOption> = [
 
 // Emit
 const emit = defineEmits(['enquiry:delete']);
+// Store
+const authzStore = useAuthZStore();
 
 // State
 const pagination: Ref<Pagination> = ref({
@@ -79,6 +82,33 @@ if (route.query.tab === '1') {
 }
 
 // Actions
+
+const { t } = useI18n();
+
+function handleCreateNewActivity() {
+  confirm.require({
+    header: t('enquiryListNavigator.confirmCreateHeader'),
+    message: t('enquiryListNavigator.confirmCreateMsg'),
+    accept: async () => {
+      try {
+        const response = (await enquiryService.createEnquiry()).data;
+        if (response?.activityId) {
+          router.push({
+            name: RouteName.INT_HOUSING_ENQUIRY,
+            params: { enquiryId: response.enquiryId },
+            query: { activityId: response.activityId }
+          });
+        }
+      } catch (e: any) {
+        toast.error(t('enquiryListNavigator.failedSubmission'), e.message);
+      }
+    },
+    acceptLabel: t('enquiryListNavigator.confirm'),
+    rejectProps: { outlined: true },
+    rejectLabel: t('enquiryListNavigator.cancel')
+  });
+}
+
 function onDelete(enquiryId: string, activityId: string) {
   confirm.require({
     message: 'Please confirm that you want to delete this enquiry',
@@ -170,24 +200,33 @@ function updateQueryParams() {
       <Spinner />
     </template>
     <template #header>
-      <div class="grid grid-cols-5 gap-3 mb-4">
-        <Select
-          v-model="selectedFilter"
-          class="col-span-1"
-          :options="FILTER_OPTIONS"
-          option-label="label"
-        />
-        <IconField
-          class="col-span-1"
-          icon-position="left"
-        >
-          <InputIcon class="pi pi-search" />
-          <InputText
-            v-model="filters['global'].value"
-            class="h-full"
-            placeholder="Search"
+      <div class="flex justify-between mb-3">
+        <div class="grid grid-cols-2 gap-3">
+          <Select
+            v-model="selectedFilter"
+            class="col-span-1"
+            :options="FILTER_OPTIONS"
+            option-label="label"
           />
-        </IconField>
+          <IconField
+            class="col-span-1"
+            icon-position="left"
+          >
+            <InputIcon class="pi pi-search" />
+            <InputText
+              v-model="filters['global'].value"
+              class="h-full"
+              placeholder="Search"
+            />
+          </IconField>
+        </div>
+        <Button
+          v-if="authzStore.can(Initiative.HOUSING, Resource.ENQUIRY, Action.CREATE)"
+          label="Create submission"
+          type="submit"
+          icon="pi pi-plus"
+          @click="handleCreateNewActivity"
+        />
       </div>
     </template>
     <Column

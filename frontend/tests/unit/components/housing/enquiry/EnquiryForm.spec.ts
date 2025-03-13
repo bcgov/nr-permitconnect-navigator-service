@@ -110,7 +110,7 @@ describe('EnquiryForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(7);
+    expect(elements.length).toBe(8);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -172,7 +172,7 @@ describe('EnquiryForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(8);
+    expect(elements.length).toBe(9);
   });
 
   it('displays ATS number as "Unavailable" when relatedActivityId in enquiry, no relatedAtsNumber prop', async () => {

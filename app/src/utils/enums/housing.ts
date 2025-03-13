@@ -24,6 +24,12 @@ export enum DraftCode {
   SUBMISSION = 'SUBMISSION'
 }
 
+export enum EnquirySubmittedMethod {
+  PHONE = 'Phone',
+  EMAIL = 'Email',
+  PCNS = 'PCNS'
+}
+
 export enum IntakeFormCategory {
   APPLICANT = 'applicant',
   BASIC = 'basic',

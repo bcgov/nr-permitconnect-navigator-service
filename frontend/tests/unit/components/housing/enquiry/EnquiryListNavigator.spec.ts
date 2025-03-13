@@ -3,13 +3,18 @@ import { enquiryService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import type { AxiosResponse } from 'axios';
 
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     query: {}
@@ -39,6 +44,7 @@ const testEnquiry = {
   submittedBy: 'user123',
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
