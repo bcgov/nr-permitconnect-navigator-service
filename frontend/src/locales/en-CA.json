@@ -53,7 +53,8 @@
     "atsSearchBtn": "Search ATS",
     "atsNewClientBtn": "New ATS Client",
     "formSaveBtn": "Save",
-    "formReopenBtn": "Re-open enquiry"
+    "formReopenBtn": "Re-open enquiry",
+    "submittedMethod": "Submitted method"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",

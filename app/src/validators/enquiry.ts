@@ -52,6 +52,7 @@ const schema = {
         .allow(null),
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      submittedMethod: Joi.string().allow(null),
       ...atsValidator.atsEnquirySubmissionFields,
       waitingOn: Joi.string().allow(null).max(255),
       contacts: contacts,

@@ -1,6 +1,6 @@
 import EnquiryCard from '@/components/housing/enquiry/EnquiryCard.vue';
 import { userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -28,6 +28,7 @@ const testEnquiry = {
   submittedBy: 'user123',
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
