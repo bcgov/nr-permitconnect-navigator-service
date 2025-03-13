@@ -6,11 +6,11 @@ import user from './user';
 import { BasicResponse } from '../../utils/enums/application';
 
 import type { Stamps } from '../stamps';
-import type { Submission } from '../../types';
+import type { HousingProject } from '../../types';
 
 // Define types
-const _submission = Prisma.validator<Prisma.submissionDefaultArgs>()({});
-const _submissionWithContactGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
+const _housingProject = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
+const _housingProjectWithContactGraph = Prisma.validator<Prisma.housing_projectDefaultArgs>()({
   include: {
     activity: {
       include: {
@@ -23,7 +23,7 @@ const _submissionWithContactGraph = Prisma.validator<Prisma.submissionDefaultArg
     }
   }
 });
-const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>()({
+const _housingProjectWithUserGraph = Prisma.validator<Prisma.housing_projectDefaultArgs>()({
   include: {
     activity: {
       include: {
@@ -38,15 +38,15 @@ const _submissionWithUserGraph = Prisma.validator<Prisma.submissionDefaultArgs>(
   }
 });
 
-type PrismaRelationSubmission = Omit<Prisma.submissionGetPayload<typeof _submission>, keyof Stamps>;
-type PrismaGraphSubmission = Prisma.submissionGetPayload<typeof _submission>;
-type PrismaGraphSubmissionWithContact = Prisma.submissionGetPayload<typeof _submissionWithContactGraph>;
-type PrismaGraphSubmissionWithUser = Prisma.submissionGetPayload<typeof _submissionWithUserGraph>;
+type PrismaRelationHousingProject = Omit<Prisma.housing_projectGetPayload<typeof _housingProject>, keyof Stamps>;
+type PrismaGraphHousingProject = Prisma.housing_projectGetPayload<typeof _housingProject>;
+type PrismaGraphHousingProjectWithContact = Prisma.housing_projectGetPayload<typeof _housingProjectWithContactGraph>;
+type PrismaGraphHousingProjectWithUser = Prisma.housing_projectGetPayload<typeof _housingProjectWithUserGraph>;
 
 export default {
-  toPrismaModel(input: Submission): PrismaRelationSubmission {
+  toPrismaModel(input: HousingProject): PrismaRelationHousingProject {
     return {
-      submission_id: input.submissionId,
+      housing_project_id: input.housingProjectId,
       activity_id: input.activityId,
       assigned_user_id: input.assignedUserId,
       project_name: input.projectName,
@@ -96,13 +96,13 @@ export default {
       indigenous_description: input.indigenousDescription,
       non_profit_description: input.nonProfitDescription,
       housing_coop_description: input.housingCoopDescription,
-      submission_type: input.submissionType
+      housing_project_type: input.housingProjectType
     };
   },
 
-  fromPrismaModel(input: PrismaGraphSubmission): Submission {
+  fromPrismaModel(input: PrismaGraphHousingProject): HousingProject {
     return {
-      submissionId: input.submission_id,
+      housingProjectId: input.housing_project_id,
       activityId: input.activity_id,
       assignedUserId: input.assigned_user_id,
       submittedAt: input.submitted_at?.toISOString() as string,
@@ -151,7 +151,7 @@ export default {
       indigenousDescription: input.indigenous_description,
       nonProfitDescription: input.non_profit_description,
       housingCoopDescription: input.housing_coop_description,
-      submissionType: input.submission_type,
+      housingProjectType: input.housing_project_type,
       relatedEnquiries: null,
       createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,
@@ -160,21 +160,21 @@ export default {
     };
   },
 
-  fromPrismaModelWithContact(input: PrismaGraphSubmissionWithContact): Submission {
-    const submission = this.fromPrismaModel(input);
-    if (submission && input.activity.activity_contact) {
-      submission.contacts = input.activity.activity_contact.map((x) => contact.fromPrismaModel(x.contact));
+  fromPrismaModelWithContact(input: PrismaGraphHousingProjectWithContact): HousingProject {
+    const housingProject = this.fromPrismaModel(input);
+    if (housingProject && input.activity.activity_contact) {
+      housingProject.contacts = input.activity.activity_contact.map((x) => contact.fromPrismaModel(x.contact));
     }
 
-    return submission;
+    return housingProject;
   },
 
-  fromPrismaModelWithUser(input: PrismaGraphSubmissionWithUser): Submission {
-    const submission = this.fromPrismaModelWithContact(input);
-    if (submission && input.user) {
-      submission.user = user.fromPrismaModel(input.user);
+  fromPrismaModelWithUser(input: PrismaGraphHousingProjectWithUser): HousingProject {
+    const housingProject = this.fromPrismaModelWithContact(input);
+    if (housingProject && input.user) {
+      housingProject.user = user.fromPrismaModel(input.user);
     }
 
-    return submission;
+    return housingProject;
   }
 };

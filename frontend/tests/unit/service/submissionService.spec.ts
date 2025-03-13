@@ -1,4 +1,4 @@
-import { submissionService } from '@/services';
+import { housingProjectService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
 vi.mock('vue-router', () => ({
@@ -7,7 +7,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const PATH = 'submission';
+const PATH = 'housingProject';
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
 const patchSpy = vi.fn();
@@ -56,35 +56,35 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('submissionService', () => {
+describe('housingProjectService', () => {
   describe('getActivityIds', () => {
     it('calls correct endpoint', () => {
-      submissionService.getActivityIds();
+      housingProjectService.getActivityIds();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/activityIds`);
     });
   });
 
-  describe('createSubmission', () => {
+  describe('createHousingProject', () => {
     it('calls correct endpoint', () => {
-      submissionService.createSubmission();
+      housingProjectService.createHousingProject();
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
     });
 
     it('passes parameters', () => {
-      submissionService.createSubmission({ foo: 'bar' });
+      housingProjectService.createHousingProject({ foo: 'bar' });
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
     });
   });
 
-  describe('deleteSubmission', () => {
+  describe('deleteHousingProject', () => {
     it('calls correct endpoint', () => {
-      submissionService.deleteSubmission(testID);
+      housingProjectService.deleteHousingProject(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testID}`);
@@ -93,7 +93,7 @@ describe('submissionService', () => {
 
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
-      submissionService.deleteDraft(testID);
+      housingProjectService.deleteDraft(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
@@ -102,7 +102,7 @@ describe('submissionService', () => {
 
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
-      submissionService.getDraft(testID);
+      housingProjectService.getDraft(testID);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
@@ -111,16 +111,16 @@ describe('submissionService', () => {
 
   describe('getDrafts', () => {
     it('calls correct endpoint', () => {
-      submissionService.getDrafts();
+      housingProjectService.getDrafts();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft`);
     });
   });
 
-  describe('getSubmissions', () => {
+  describe('getHousingProjects', () => {
     it('calls correct endpoint', () => {
-      submissionService.getSubmissions();
+      housingProjectService.getHousingProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(PATH);
@@ -135,33 +135,33 @@ describe('submissionService', () => {
         monthYear: '04/2022',
         userId: 'testUserId'
       };
-      submissionService.getStatistics(testFilter);
+      housingProjectService.getStatistics(testFilter);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/statistics`, { params: testFilter });
     });
   });
 
-  describe('getSubmission', () => {
+  describe('getHousingProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      submissionService.getSubmission(testActivityId);
+      housingProjectService.getHousingProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
     });
   });
 
-  describe('searchSubmissions', () => {
+  describe('searchHousingProjects', () => {
     it('calls correct endpoint', () => {
-      submissionService.searchSubmissions({ activityId: [testID] });
+      housingProjectService.searchHousingProjects({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      submissionService.searchSubmissions({ activityId: [testID], includeDeleted: false });
+      housingProjectService.searchHousingProjects({ activityId: [testID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -173,7 +173,7 @@ describe('submissionService', () => {
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      submissionService.searchSubmissions({ includeDeleted: true });
+      housingProjectService.searchHousingProjects({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -186,7 +186,7 @@ describe('submissionService', () => {
 
   describe('submitDraft', () => {
     it('calls correct endpoint', () => {
-      submissionService.submitDraft(testObj);
+      housingProjectService.submitDraft(testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft/submit`, testObj);
@@ -195,7 +195,7 @@ describe('submissionService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      submissionService.updateDraft(testDraft);
+      housingProjectService.updateDraft(testDraft);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft`, testDraft);
@@ -204,14 +204,14 @@ describe('submissionService', () => {
 
   describe('updateIsDeletedFlag', () => {
     it('calls correct endpoint', () => {
-      submissionService.updateIsDeletedFlag(testID, true);
+      housingProjectService.updateIsDeletedFlag(testID, true);
 
       expect(patchSpy).toHaveBeenCalledTimes(1);
       expect(patchSpy).toHaveBeenCalledWith(`${PATH}/${testID}/delete`, { isDeleted: true });
     });
   });
 
-  describe('updateSubmission', () => {
+  describe('updateHousingProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
       const testObj = {
@@ -219,7 +219,7 @@ describe('submissionService', () => {
         date1: new Date().toISOString(),
         field2: 'testField2'
       };
-      submissionService.updateSubmission(testActivityId, testObj);
+      housingProjectService.updateHousingProject(testActivityId, testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);
@@ -228,7 +228,7 @@ describe('submissionService', () => {
 
   describe('emailConfirmation', () => {
     it('calls correct endpoint', () => {
-      submissionService.emailConfirmation(testEmail);
+      housingProjectService.emailConfirmation(testEmail);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/email`, testEmail);

@@ -60,6 +60,8 @@ export const ENQUIRY_TYPE_LIST = [
   SubmissionType.INAPPLICABLE
 ];
 
+export const HOUSING_PROJECT_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
+
 export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
@@ -112,5 +114,3 @@ export const PERMIT_STATUS_LIST = [
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
 
 export const QUEUE_PRIORITY = [1, 2, 3];
-
-export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];

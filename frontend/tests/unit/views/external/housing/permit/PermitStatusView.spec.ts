@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { contactService, permitService, submissionService } from '@/services';
+import { contactService, permitService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PermitStatusView from '@/views/external/housing/permit/PermitStatusView.vue';
 
@@ -12,7 +12,7 @@ import type { AxiosResponse } from 'axios';
 
 const getPermitSpy = vi.spyOn(permitService, 'getPermit');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-const searchSubmissionsSpy = vi.spyOn(submissionService, 'searchSubmissions');
+const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -28,12 +28,12 @@ vi.mock('vue-router', () => ({
 }));
 
 const testPermitId = 'permit123';
-const testSubmissionId = 'submission123';
+const testHousingProjectId = 'submission123';
 
-const wrapperSettings = (testPermitIdProp = testPermitId, testSubmissionIdProp = testSubmissionId) => ({
+const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
     permitId: testPermitIdProp,
-    submissionId: testSubmissionIdProp
+    housingProjectId: testHousingProjectIdProp
   },
   global: {
     plugins: [
@@ -68,7 +68,7 @@ beforeEach(() => {
 
   searchContactsSpy.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
   getPermitSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-  searchSubmissionsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
+  searchHousingProjectsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
 });
 
 afterEach(() => {

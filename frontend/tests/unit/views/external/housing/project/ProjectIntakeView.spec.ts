@@ -22,7 +22,7 @@ vi.mock('vue-router', () => ({
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
   props: {
-    submissionId: testSubmissionIdProp,
+    housingProjectId: testSubmissionIdProp,
     activityId: testActivityIdProp
   },
   global: {

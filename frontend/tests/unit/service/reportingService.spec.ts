@@ -21,11 +21,11 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('getSubmissionPermitData', () => {
+describe('getHousingProjectPermitData', () => {
   it('calls correct endpoint', () => {
-    reportingService.getSubmissionPermitData();
+    reportingService.getHousingProjectPermitData();
 
     expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/submission/permit`);
+    expect(getSpy).toHaveBeenCalledWith(`${PATH}/housingProject/permit`);
   });
 });

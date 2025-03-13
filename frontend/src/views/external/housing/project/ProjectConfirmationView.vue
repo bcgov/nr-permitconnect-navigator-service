@@ -10,7 +10,7 @@ import type { Ref } from 'vue';
 
 // Props
 const { submissionId } = defineProps<{
-  submissionId: string;
+  housingProjectId: string;
 }>();
 
 // Composables
@@ -37,7 +37,7 @@ onBeforeMount(async () => {
     <router-link
       :to="{
         name: RouteName.EXT_HOUSING_PROJECT,
-        params: { submissionId: submissionId }
+        params: { housingProjectId: housingProjectId }
       }"
     >
       <span class="text-2xl">{{ activityId }}</span>
