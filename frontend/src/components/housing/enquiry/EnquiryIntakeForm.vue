@@ -82,13 +82,24 @@ function confirmSubmit(data: any) {
 
 async function emailConfirmation(activityId: string, enquiryId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
+  let permitDescription: string = '';
+  let enquiryDescription: string = formRef.value?.values.basic.enquiryDescription || '';
+  let firstTwoSentences: string;
+
+  // If has permit description convert \n to <br>
+  if (enquiryDescription.includes('Tracking ID:')) {
+    const descriptionSplit = enquiryDescription.split('\n\n');
+    permitDescription = descriptionSplit[0].replace(/\n/g, '<br>') + '<br><br>';
+    enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
+  }
 
   // Get the first two sentences of the enquiry description
   // If there are more than two sentences in enquiryDescription, add '..' to the end
-  const enquiryDescription = formRef.value?.values.basic.enquiryDescription || '';
-  let firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
+  firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
   const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
   firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
+
+  if (permitDescription) firstTwoSentences = permitDescription + firstTwoSentences;
 
   const body = confirmationTemplateEnquiry({
     '{{ contactName }}': formRef.value?.values.contactFirstName,
@@ -101,7 +112,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: 'Confirmation of Submission', // eslint-disable-line quotes
+    subject: 'Confirmation of Enquiry Submission',
     bodyType: 'html',
     body: body
   };
@@ -190,6 +201,7 @@ async function onSubmit(data: any) {
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permitAuthStatus;
       permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
       enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
+      formRef.value?.setFieldValue('basic.enquiryDescription', enquiryData.basic.enquiryDescription);
     }
 
     enquiryResponse = await enquiryService.createEnquiry(enquiryData);
