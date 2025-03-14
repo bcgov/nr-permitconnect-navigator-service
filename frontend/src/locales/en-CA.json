@@ -228,6 +228,7 @@
     "tableAlt": "A table containing a list of draft submissions"
   },
   "submissionIntakeForm": {
+    "assistanceMessage": "Assistance requested",
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
     "additionalLocationCard": "Provide additional location details (optional)",
     "appliedPermitsShareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",

@@ -54,7 +54,7 @@ import {
   ProjectApplicant,
   SubmissionType
 } from '@/utils/enums/housing';
-import { confirmationTemplateSubmission } from '@/utils/templates';
+import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -167,9 +167,9 @@ async function generateActivityId() {
 
 async function onAssistanceRequest(values: GenericObject) {
   try {
-    const submissionData = {
+    const enquiryData = {
       basic: {
-        enquiryDescription: 'Assistance requested',
+        enquiryDescription: t('submissionIntakeForm.assistanceMessage'),
         enquiryType: SubmissionType.ASSISTANCE
       },
       contacts: [
@@ -185,7 +185,7 @@ async function onAssistanceRequest(values: GenericObject) {
       ]
     };
 
-    const enquiryResponse = await enquiryService.createEnquiry(submissionData);
+    const enquiryResponse = await enquiryService.createEnquiry(enquiryData);
 
     if (enquiryResponse.data.activityId) {
       toast.success('Form saved');
@@ -193,7 +193,7 @@ async function onAssistanceRequest(values: GenericObject) {
       assistanceAssignedEnquiryId.value = enquiryResponse.data.enquiryId;
 
       // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.submissionId);
+      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId, false);
     } else {
       toast.error('Failed to submit enquiry');
     }
@@ -308,7 +308,7 @@ async function onSubmit(data: any) {
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
-      emailConfirmation(response.data.activityId, response.data.submissionId);
+      emailConfirmation(response.data.activityId, response.data.submissionId, true);
 
       // Save contact data to store
       contactStore.setContact(submissionData.contacts[0]);
@@ -329,20 +329,33 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailConfirmation(actId: string, subId: string) {
+async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
   try {
     const configCC = getConfig.value.ches?.submission?.cc;
-    const body = confirmationTemplateSubmission({
-      '{{ contactName }}': formRef.value?.values.contacts.contactFirstName,
-      '{{ activityId }}': actId,
-      '{{ submissionId }}': subId
-    });
-    let applicantEmail = formRef.value?.values.contacts.contactEmail;
-    let emailData = {
+    const applicantName = formRef.value?.values.contacts.contactFirstName;
+    const applicantEmail = formRef.value?.values.contacts.contactEmail;
+    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
+    let body: string;
+
+    if (forProjectSubmission) {
+      body = confirmationTemplateSubmission({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ submissionId }}': subId
+      });
+    } else {
+      body = confirmationTemplateEnquiry({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ enquiryDescription }}': t('submissionIntakeForm.assistanceMessage'),
+        '{{ enquiryId }}': subId
+      });
+    }
+    const emailData = {
       from: configCC,
       to: [applicantEmail],
       cc: configCC,
-      subject: 'Confirmation of Submission',
+      subject: subject,
       bodyType: 'html',
       body: body
     };
