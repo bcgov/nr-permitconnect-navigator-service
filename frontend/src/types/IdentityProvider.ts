@@ -1,5 +1,7 @@
+import type { IdentityProviderKind } from '@/utils/enums/application';
+
 export type IdentityProvider = {
-  name: string;
-  identityKey: string;
   idp: string;
+  kind: IdentityProviderKind;
+  username: string;
 };

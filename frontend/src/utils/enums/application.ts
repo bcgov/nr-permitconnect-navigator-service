@@ -107,10 +107,11 @@ export enum RouteName {
   OIDC_LOGOUT = 'oidc_logout'
 }
 
-export enum IdentityProvider {
+export enum IdentityProviderKind {
   IDIR = 'idir',
   BCEID = 'bceidbasic',
-  BCEIDBUSINESS = 'bceidbusiness'
+  BCEIDBUSINESS = 'bceidbusiness',
+  BCSC = 'bcsc'
 }
 
 export enum Resource {
