@@ -20,14 +20,14 @@ const { getIsAuthenticated, getProfile } = storeToRefs(useAuthNStore());
 const { t } = useI18n();
 const items = ref([
   {
-    label: t('headerMenu.contactProfile'),
+    label: t('common.headerMenu.contactProfile'),
     icon: 'pi pi-user',
     command: () => {
       router.push({ name: RouteName.CONTACT });
     }
   },
   {
-    label: t('headerMenu.logout'),
+    label: t('common.headerMenu.logout'),
     icon: 'pi pi-sign-out',
     command: () => {
       router.push({ name: RouteName.OIDC_LOGOUT });

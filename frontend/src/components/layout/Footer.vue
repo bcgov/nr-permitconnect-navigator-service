@@ -8,7 +8,7 @@ const { t } = useI18n();
 <template>
   <div class="gov-footer flex flex-col pt-8">
     <div class="acknowledgement px-20 py-8">
-      {{ t('footer.acknowledgement') }}
+      {{ t('common.footer.acknowledgement') }}
     </div>
     <div class="content-container px-20 py-8">
       <div class="pb-8">
@@ -24,43 +24,43 @@ const { t } = useI18n();
             <div class="contact">
               <!-- prettier-ignore -->
               <p>
-                {{ t('footer.contact1') }}
-                <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">{{ t('footer.contact2') }}</a>{{ t('footer.contact3') }}
-                <a href="https://www2.gov.bc.ca/gov/content?id=FBC4210F6BC047A5884198F543C97D53">{{ t('footer.contact4') }}</a>
+                {{ t('common.footer.contact1') }}
+                <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">{{ t('common.footer.contact2') }}</a>{{ t('common.footer.contact3') }}
+                <a href="https://www2.gov.bc.ca/gov/content?id=FBC4210F6BC047A5884198F543C97D53">{{ t('common.footer.contact4') }}</a>
               </p>
             </div>
           </div>
           <div class="links pr-20">
-            <p class="font-bold">{{ t('footer.moreInfo') }}</p>
+            <p class="font-bold">{{ t('common.footer.moreInfo') }}</p>
             <div class="flex">
               <div class="flex flex-col pr-20">
-                <a href="https://www2.gov.bc.ca/gov/content/home">{{ t('footer.home') }}</a>
+                <a href="https://www2.gov.bc.ca/gov/content/home">{{ t('common.footer.home') }}</a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=3C4F47288DFB454987435AB5EFEFBB7F">
-                  {{ t('footer.about') }}
+                  {{ t('common.footer.about') }}
                 </a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=79F93E018712422FBC8E674A67A70535">
-                  {{ t('footer.disclaimer') }}
+                  {{ t('common.footer.disclaimer') }}
                 </a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=9E890E16955E4FF4BF3B0E07B4722932">
-                  {{ t('footer.privacy') }}
+                  {{ t('common.footer.privacy') }}
                 </a>
               </div>
               <div class="flex flex-col">
                 <a href="https://www2.gov.bc.ca/gov/content?id=E08E79740F9C41B9B0C484685CC5E412">
-                  {{ t('footer.accessibility') }}
+                  {{ t('common.footer.accessibility') }}
                 </a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=1AAACC9C65754E4D89A118B875E0FBDA">
-                  {{ t('footer.copyright') }}
+                  {{ t('common.footer.copyright') }}
                 </a>
                 <a href="https://www2.gov.bc.ca/gov/content?id=6A77C17D0CCB48F897F8598CCC019111">
-                  {{ t('footer.contactUs') }}
+                  {{ t('common.footer.contactUs') }}
                 </a>
               </div>
             </div>
           </div>
         </div>
       </div>
-      <div class="copyright pt-8">© {{ new Date().getUTCFullYear() }} {{ t('footer.gov') }}.</div>
+      <div class="copyright pt-8">© {{ new Date().getUTCFullYear() }} {{ t('common.footer.gov') }}.</div>
     </div>
   </div>
 </template>
