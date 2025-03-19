@@ -271,7 +271,7 @@ onBeforeMount(async () => {
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
       >
-        {{ t('permitStatusView.statusDescriptionMeaning') }}
+        {{ t('e.housing.permitStatusView.statusDescriptionMeaning') }}
       </span>
     </div>
     <Card class="permit-tracker-card">
@@ -294,7 +294,7 @@ onBeforeMount(async () => {
               class="mt-8 mb-6"
               :aria-hidden="hideTimelineFromScreenReader"
             >
-              {{ t('permitStatusView.applicationProgress') }}
+              {{ t('e.housing.permitStatusView.applicationProgress') }}
             </h4>
             <Timeline
               :value="getTimelineStage(getPermit?.authStatus, getPermit?.status)"
@@ -333,7 +333,7 @@ onBeforeMount(async () => {
               </p>
             </div>
             <div v-else>
-              <p class="verified-text my-0">{{ t('permitStatusView.statusNotVerified') }}</p>
+              <p class="verified-text my-0">{{ t('e.housing.permitStatusView.statusNotVerified') }}</p>
             </div>
           </div>
         </div>
@@ -347,7 +347,7 @@ onBeforeMount(async () => {
       >
         <Button
           outlined
-          :label="t('permitStatusView.askNav')"
+          :label="t('e.housing.permitStatusView.askNav')"
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
@@ -355,7 +355,7 @@ onBeforeMount(async () => {
             })
           "
         />
-        <p>{{ t('permitStatusView.contactNav') }}</p>
+        <p>{{ t('e.housing.permitStatusView.contactNav') }}</p>
       </div>
       <div v-if="getPermit?.permitNote && getPermit.permitNote.length > 0">
         <div
@@ -368,7 +368,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">{{ t('permitStatusView.noUpdates') }}</p>
+        <p class="text-gray-500">{{ t('e.housing.permitStatusView.noUpdates') }}</p>
       </div>
     </div>
   </div>

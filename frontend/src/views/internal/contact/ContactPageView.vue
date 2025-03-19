@@ -112,7 +112,7 @@ onBeforeMount(async () => {
         class="block font-bold mb-1"
         for="phoneNumber"
       >
-        {{ t('contactPageView.contactPhoneLabel') }}
+        {{ t('i.housing.contactPageView.contactPhoneLabel') }}
       </label>
       <InputText
         id="phoneNumber"
@@ -126,7 +126,7 @@ onBeforeMount(async () => {
         class="block font-bold mb-1"
         for="email"
       >
-        {{ t('contactPageView.contactEmailLabel') }}
+        {{ t('i.housing.contactPageView.contactEmailLabel') }}
       </label>
       <InputText
         id="email"
@@ -140,7 +140,7 @@ onBeforeMount(async () => {
         class="block font-bold mb-1"
         for="contactPreference"
       >
-        {{ t('contactPageView.contactPreferredLabel') }}
+        {{ t('i.housing.contactPageView.contactPreferredLabel') }}
       </label>
       <InputText
         id="contactPreference"
@@ -154,7 +154,7 @@ onBeforeMount(async () => {
         class="block font-bold mb-1"
         for="contactApplicantRelationship"
       >
-        {{ t('contactPageView.contactRelationshipLabel') }}
+        {{ t('i.housing.contactPageView.contactRelationshipLabel') }}
       </label>
       <InputText
         id="contactApplicantRelationship"
@@ -169,7 +169,7 @@ onBeforeMount(async () => {
     :value="activeTabIndex"
   >
     <TabList>
-      <Tab :value="0">{{ t('contactPageView.historyTab') }}</Tab>
+      <Tab :value="0">{{ t('i.housing.contactPageView.historyTab') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">

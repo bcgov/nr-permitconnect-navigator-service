@@ -10,7 +10,7 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Enquiry, Pagination, HousingProject } from '@/types';
+import type { Enquiry, HousingProject, Pagination } from '@/types';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
@@ -60,7 +60,7 @@ function normalizeContactHistory() {
     ...se,
     state: 'housingProjectId' in se ? se.applicationStatus : se.enquiryStatus,
     assignedUser: se.assignedUserId ? getUsersName(se.assignedUserId) : 'Unassigned',
-    historyType: 'housingProjectId' in se ? 'Submission' : 'Enquiry'
+    historyType: 'housingProjectId' in se ? 'Project' : 'Enquiry'
   }));
 }
 
