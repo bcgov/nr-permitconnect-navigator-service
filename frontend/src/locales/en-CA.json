@@ -158,7 +158,7 @@
     "login": "Log in",
     "logout": "Log out"
   },
-  "loginView": {
+  "oidcLoginView": {
     "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",
     "BCServicesCardRequirement": "If you do not have a BC Services Card, you must live in Canada and provide 2 pieces of government-issued ID.",
     "BusinessBCeIDRequirement": "Use when representing a legal entity. You must have documentation to prove the business or organization's identity.",
