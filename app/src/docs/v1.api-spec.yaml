@@ -22,6 +22,8 @@ tags:
     description: Operations for managing Documents
   - name: Enquiry
     description: Operations for managing Enquiries
+  - name: Housing Project
+    description: Operations for managing Housing Projects, Drafts, and Statistics
   - name: Note
     description: Operations for managing Notes
   - name: Permit
@@ -32,8 +34,6 @@ tags:
     description: Operations for performings actions related to reporting
   - name: Roadmap
     description: Operations for validating Roadmaps
-  - name: Submission
-    description: Operations for managing Submissions, Drafts, and Statistics
   - name: User
     description: Operations for managing users
 paths:
@@ -870,7 +870,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Response-SubmissionPermitData'
+                  $ref: '#/components/schemas/Response-HousingProjectPermitData'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -936,7 +936,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response-SubmissionCreate'
+                $ref: '#/components/schemas/Response-HousingProjectCreate'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -952,7 +952,7 @@ paths:
       tags:
         - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
+        - $ref: '#/components/parameters/Path-HousingProjectId'
       responses:
         '200':
           description: Details of the specific housing project
@@ -976,13 +976,13 @@ paths:
       tags:
         - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
+        - $ref: '#/components/parameters/Path-HousingProjectId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-SubmissionUpdate'
+              $ref: '#/components/schemas/Request-HousingProjectUpdate'
       responses:
         '200':
           description: Housing Project updated successfully
@@ -1006,7 +1006,7 @@ paths:
       tags:
         - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
+        - $ref: '#/components/parameters/Path-HousingProjectId'
       responses:
         '200':
           description: Housing Project deleted successfully
@@ -1030,9 +1030,9 @@ paths:
       description: A soft delete of a housing project using a is_deleted flag
       operationId: housingProject-updateIsDeletedFlag
       tags:
-        - Submission
+        - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
+        - $ref: '#/components/parameters/Path-HousingProjectId'
       requestBody:
         required: true
         content:
@@ -1077,14 +1077,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
+              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
       responses:
         '201':
           description: Draft housing project created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response-DraftSubmission'
+                $ref: '#/components/schemas/Response-DraftHousingProject'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1097,13 +1097,13 @@ paths:
       description: Creates or updates an intake and set status to Submitted
       operationId: housingProject-updateDraft
       tags:
-        - Submission
+        - Housing Project
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
+              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
       responses:
         '200':
           description: Draft housing project updated successfully
@@ -1124,7 +1124,7 @@ paths:
       summary: Send confirmation Email
       operationId: emailConfirmation
       tags:
-        - Submission
+        - Housing Project
       requestBody:
         required: true
         content:
@@ -1150,9 +1150,9 @@ paths:
     get:
       summary: Search housing projects
       description: Returns a list of housing projects based on the given queries
-      operationId: searchSubmissions
+      operationId: searchHousingProjects
       tags:
-        - Submission
+        - Housing Project
       parameters:
         - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
@@ -1177,9 +1177,9 @@ paths:
           required: false
           schema:
             type: array
-            description: The Submission IDs to filter on
+            description: The Housing Project IDs to filter on
             items:
-              $ref: '#/components/parameters/Path-SubmissionId'
+              $ref: '#/components/parameters/Path-HousingProjectId'
         - in: query
           name: intakeStatus
           required: false
@@ -1189,13 +1189,13 @@ paths:
             items:
               $ref: '#/components/parameters/IntakeStatus'
         - in: query
-          name: submissionType
+          name: housingProjectType
           required: false
           schema:
             type: array
             description: The housing project types to filter on
             items:
-              $ref: '#/components/parameters/Query-SubmissionType'
+              $ref: '#/components/parameters/Query-HousingProjectType'
       responses:
         '200':
           description: A list of housing projects matching the search criteria
@@ -1219,7 +1219,7 @@ paths:
       description: Gets a set of housing project and enquiry related statistics
       operationId: getStatistics
       tags:
-        - Submission
+        - Housing Project
       parameters:
         - in: query
           name: dateFrom
@@ -1249,11 +1249,11 @@ paths:
             description: User ID to filter statistics
       responses:
         '200':
-          description: Submission statistics
+          description: Housing submission statistics
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Response-SubmissionStatistics'
+                $ref: '#/components/schemas/Response-HousingSubmissionStatistics'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1341,10 +1341,10 @@ components:
         type: string
         format: uuid
         example: da5c5031-0e84-4234-8559-1ba846997482
-    Path-SubmissionId:
+    Path-HousingProjectId:
       in: path
       name: housingProjectId
-      description: UUID of a Submission
+      description: UUID of a Housing Project
       required: true
       schema:
         type: string
@@ -1395,10 +1395,10 @@ components:
       schema:
         type: boolean
         example: false
-    Query-SubmissionType:
+    Query-HousingProjectType:
       in: query
-      name: submissionType
-      description: The type of submission
+      name: housingProjectType
+      description: The submission type of the housing project
       required: false
       schema:
         type: string
@@ -2256,8 +2256,8 @@ components:
           description: Array of selected file IDs
         emailData:
           $ref: '#/components/schemas/EmailData'
-    Request-SaveSubmissionDraft:
-      title: Save draft of Submission
+    Request-SaveHousingProjectDraft:
+      title: Save draft of Housing Project
       type: object
       required:
         - contacts
@@ -2441,19 +2441,19 @@ components:
           type: string
           description: Status of the application
           example: New
-        submissionType:
+        housingProjectType:
           type: string
-          description: The type of submission
+          description: The submission type of the housing project
           example: Guidance
-    Request-SubmissionSearch:
-      title: Request Submission Search
+    Request-HousingProjectSearch:
+      title: Request Housing Project Search
       type: object
       required:
         - activityId
         - intakeStatus
         - includeUser
         - housingProjectId
-        - submissionType
+        - housingProjectType
       properties:
         activityId:
           type: string
@@ -2472,18 +2472,18 @@ components:
           description: UUID of housing project
           format: Uuid
           example: ac246e31-c807-496c-bc93-cd8bc2f1b2b4
-        submissionType:
+        housingProjectType:
           type: string
-          description: Type of the submission
+          description: The submission type of the housing project
           example: Guidance
-    Request-SubmissionUpdate:
-      title: Request to Update Submission
+    Request-HousingProjectUpdate:
+      title: Request to Update Housing Project
       type: object
       required:
         - housingProjectId
         - activityId
         - queuePriority
-        - submissionType
+        - housingProjectType
         - submittedAt
         - projectName
         - hasRentalUnits
@@ -2512,9 +2512,9 @@ components:
           format: integer
           example: 2
           default: 3
-        submissionType:
+        housingProjectType:
           type: string
-          description: The type of submission
+          description: The submission type of the housing project
           example: Guidance
         submittedAt:
           type: string
@@ -2765,8 +2765,8 @@ components:
           type: string
         enquiryId:
           type: string
-    Response-DraftSubmission:
-      title: Response Draft Submission
+    Response-DraftHousingProject:
+      title: Response Draft Housing Project
       type: object
       required:
         - activityId
@@ -2886,8 +2886,8 @@ components:
                   type: string
                 example:
                   - NAVIGATOR
-    Response-SubmissionCreate:
-      title: Response for Create Submission
+    Response-HousingProjectCreate:
+      title: Response for Create Housing Project
       type: object
       required:
         - activityId
@@ -2902,7 +2902,7 @@ components:
           description: UUID for the housing project
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
-    Response-SubmissionPermitData:
+    Response-HousingProjectPermitData:
       type: object
       properties:
         projectName:
@@ -3029,7 +3029,7 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
-    Response-SubmissionStatistics:
+    Response-HousingSubmissionStatistics:
       type: object
       properties:
         total_submissions:
