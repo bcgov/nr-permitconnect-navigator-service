@@ -163,11 +163,8 @@ export const hasAccessPermit = (param: string) => {
         if (func) data = await func(id);
 
         if (!data || data?.createdBy !== userId) {
-          const submission = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
-          if (
-            !submission ||
-            submission?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
-          )
+          const project = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
+          if (!project || project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase())
             throw new Error('No access');
         }
       }

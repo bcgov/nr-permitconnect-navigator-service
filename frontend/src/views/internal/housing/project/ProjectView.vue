@@ -190,7 +190,7 @@ onBeforeMount(async () => {
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('submissionView.seePropViewButtonLabel') }}
+      {{ t('i.housing.projectView.seePropViewButtonLabel') }}
     </Button>
   </div>
 

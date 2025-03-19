@@ -1,10 +1,119 @@
 {
+  "common": {
+    "contactCard": {
+      "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
+      "header": "Who is the primary contact regarding this project?"
+    },
+    "footer": {
+      "about": "About gov.bc.ca",
+      "accessibility": "Accessibility",
+      "acknowledgement": "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples — First Nations, Métis, and Inuit — respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
+      "contactUs": "Contact us",
+      "contact1": "We can help in over 220 languages and through other accessible options.",
+      "contact2": "Call, email or text us",
+      "contact3": ", or",
+      "contact4": "find a service centre",
+      "copyright": "Copyright",
+      "disclaimer": "Disclaimer",
+      "gov": "Government of British Columbia",
+      "home": "Home",
+      "moreInfo": "MORE INFO",
+      "privacy": "Privacy"
+    },
+    "header": {
+      "name": "Permit Connect Services"
+    },
+    "headerMenu": {
+      "contactProfile": "Contact profile",
+      "logout": "Log out"
+    }
+  },
+  "e": {
+    "housing": {
+      "enquiryConfirmationView": {
+        "confirmationHeader": "Confirmation of Submission",
+        "confirmationIdLabel": "Enquiry ID",
+        "confirmationBanner": "Your enquiry has been successfully submitted.",
+        "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
+        "linkSubmissions": "Back to Housing"
+      },
+      "housingView": {
+        "confirmationId": "Project ID",
+        "drafts": "Drafts",
+        "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
+        "generalEnquiries": "General enquiries",
+        "housing": "Housing",
+        "lastUpdated": "Last updated",
+        "myProjects": "My projects",
+        "onThisPage": "On this page",
+        "of": "of",
+        "projectState": "Project state",
+        "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
+        "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
+        "submitNewEnquiry": "Submit a general enquiry",
+        "submitNewProject": "Submit a new project"
+      },
+      "permitStatusView": {
+        "additionalUpdates": "Additional updates",
+        "applicationProgress": "Application progress",
+        "askNav": "Ask my Navigator",
+        "contactNav": "Contact your Navigator for this project for further updates on this application.",
+        "noUpdates": "There are no updates.",
+        "statusDescriptionMeaning": "What does the status mean?",
+        "statusLastVerified": "This status was last verified on",
+        "statusNotVerified": "This status has not yet been verified."
+      },
+      "projectView": {
+        "agency": "Agency",
+        "createdBy": "Created by",
+        "crumbHousing": "Housing",
+        "crumbAppsPermits": "Applications and Permits",
+        "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
+        "enquiryID": "Enquiry ID",
+        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
+        "latestUpdates": "Latest updates",
+        "listEmpty": "Your project related enquiries will be displayed here.",
+        "noUpdates": "No updates at the moment.",
+        "notNeeded": "Not needed",
+        "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
+        "rangeSeparator": "of",
+        "recommendedPermits": "Recommended permits",
+        "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
+        "relatedEnquiries": "Related enquiries",
+        "status": "Status",
+        "statusVerified": "Status last verified on",
+        "submittedApplications": "Submitted applications",
+        "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
+        "submittedDate": "Submitted date",
+        "toastEnquiryFailed": "Failed to submit enquiry",
+        "toastProjectLoadFailed": "Unable to load project, please try again later",
+        "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
+        "trackingId": "Tracking ID"
+      }
+    }
+  },
+  "i": {
+    "contact": {
+      "contactsView": {
+        "contactsHeader": "Contacts list",
+        "proponentsTab": "Proponents"
+      }
+    },
+    "housing": {
+      "contactPageView": {
+        "historyTab": "History",
+        "contactEmailLabel": "Email",
+        "contactPhoneLabel": "Phone",
+        "contactPreferredLabel": "Preferred contact method",
+        "contactRelationshipLabel": "Relationship to project"
+      },
+      "projectView": {
+        "seePropViewButtonLabel": "See Proponent's View"
+      }
+    }
+  },
   "cancelButton": {
     "btnText": "Cancel"
-  },
-  "contactCard": {
-    "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
-    "header": "Who is the primary contact regarding this project?"
   },
   "contactHistoryList": {
     "noItems": "No items found."
@@ -12,17 +121,6 @@
   "contactsProponentsList": {
     "noItems": "No items found.",
     "contactView": "View"
-  },
-  "contactPageView": {
-    "historyTab": "History",
-    "contactEmailLabel": "Email",
-    "contactPhoneLabel": "Phone",
-    "contactPreferredLabel": "Preferred contact method",
-    "contactRelationshipLabel": "Relationship to project"
-  },
-  "contactsView": {
-    "contactsHeader": "Contacts list",
-    "proponentsTab": "Proponents"
   },
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact the Navigator Service at"
@@ -98,22 +196,6 @@
     "linkedActivity": "This activity is linked to Activity",
     "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
-  "footer": {
-    "about": "About gov.bc.ca",
-    "accessibility": "Accessibility",
-    "acknowledgement": "The B.C. Public Service acknowledges the territories of First Nations around B.C. and is grateful to carry out our work on these lands. We acknowledge the rights, interests, priorities, and concerns of all Indigenous Peoples — First Nations, Métis, and Inuit — respecting and acknowledging their distinct cultures, histories, rights, laws, and governments.",
-    "contactUs": "Contact us",
-    "contact1": "We can help in over 220 languages and through other accessible options.",
-    "contact2": "Call, email or text us",
-    "contact3": ", or",
-    "contact4": "find a service centre",
-    "copyright": "Copyright",
-    "disclaimer": "Disclaimer",
-    "gov": "Government of British Columbia",
-    "home": "Home",
-    "moreInfo": "MORE INFO",
-    "privacy": "Privacy"
-  },
   "groupName": {
     "developer": "DEVELOPER",
     "proponent": "PROPONENT",
@@ -122,31 +204,17 @@
     "supervisor": "SUPERVISOR",
     "admin": "ADMIN"
   },
-  "header": {
-    "name": "Permit Connect Services"
-  },
-  "headerMenu": {
-    "contactProfile": "Contact profile",
-    "logout": "Log out"
-  },
   "homeView": {
     "cantNavigate": "Please contact and administrator to verify your permissions"
   },
-  "housing": {
-    "confirmationId": "Project ID",
-    "drafts": "Drafts",
-    "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
-    "generalEnquiries": "General enquiries",
-    "housing": "Housing",
-    "lastUpdated": "Last updated",
-    "myProjects": "My projects",
-    "onThisPage": "On this page",
-    "of": "of",
-    "projectState": "Project state",
-    "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
-    "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
-    "submitNewEnquiry": "Submit a general enquiry",
-    "submitNewProject": "Submit a new project"
+  "intakeAssistance": {
+    "confirmationHeader": "Confirmation of Assistance Request",
+    "confirmationIdLabel": "Confirmation ID",
+    "confirmationMessage": "Your assistance request has been successfully submitted.",
+    "messagePart1": "A Housing Navigator will review your submission and contact you in 2 business days. Your form has also been saved as draft, you can find it in",
+    "messagePart2": "Please check your email for the confirmatin email and keep the confirmation ID for future reference",
+    "linkHousingSubmissions": "My drafts and previous entries.",
+    "linkSubmissions": "Back to Housing"
   },
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",
@@ -207,50 +275,12 @@
     "register": "Need an account?",
     "setupBCServicesCard": "Set up a BC Services Card account."
   },
-  "permitStatusView": {
-    "additionalUpdates": "Additional updates",
-    "applicationProgress": "Application progress",
-    "askNav": "Ask my Navigator",
-    "contactNav": "Contact your Navigator for this project for further updates on this application.",
-    "noUpdates": "There are no updates.",
-    "statusDescriptionMeaning": "What does the status mean?",
-    "statusLastVerified": "This status was last verified on",
-    "statusNotVerified": "This status has not yet been verified."
-  },
   "projectConfirmationView": {
     "backToHousing": "Back to Housing",
     "header": "Confirmation of Submission",
     "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
     "projectId": "Project ID:",
     "success": "Your application has been successfully submitted."
-  },
-  "projectView": {
-    "agency": "Agency",
-    "createdBy": "Created by",
-    "crumbHousing": "Housing",
-    "crumbAppsPermits": "Applications and Permits",
-    "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
-    "enquiryID": "Enquiry ID",
-    "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
-    "latestUpdates": "Latest updates",
-    "listEmpty": "Your project related enquiries will be displayed here.",
-    "noUpdates": "No updates at the moment.",
-    "notNeeded": "Not needed",
-    "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
-    "rangeSeparator": "of",
-    "recommendedPermits": "Recommended permits",
-    "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
-    "relatedEnquiries": "Related enquiries",
-    "status": "Status",
-    "statusVerified": "Status last verified on",
-    "statusNotVerified": "This status has not yet been verified by Navigators",
-    "submittedApplications": "Submitted applications",
-    "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
-    "submittedDate": "Submitted date",
-    "toastEnquiryFailed": "Failed to submit enquiry",
-    "toastProjectLoadFailed": "Unable to load project, please try again later",
-    "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
-    "trackingId": "Tracking ID"
   },
   "submissionDraftListProponent": {
     "action": "Action",
@@ -289,8 +319,5 @@
     "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
-  },
-  "submissionView": {
-    "seePropViewButtonLabel": "See Proponent's View"
   }
 }
