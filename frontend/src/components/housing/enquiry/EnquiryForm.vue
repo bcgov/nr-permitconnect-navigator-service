@@ -312,7 +312,7 @@ onMounted(async () => {
       <EditableSelect
         class="col-span-3"
         name="relatedActivityId"
-        label="Related submission"
+        label="Related project"
         :disabled="!editable"
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"

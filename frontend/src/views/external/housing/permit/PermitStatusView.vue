@@ -279,7 +279,7 @@ onBeforeMount(async () => {
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
       >
-        {{ t('permitStatusView.statusDescriptionMeaning') }}
+        {{ t('e.housing.permitStatusView.statusDescriptionMeaning') }}
       </span>
     </div>
     <Card class="permit-tracker-card">
@@ -302,7 +302,7 @@ onBeforeMount(async () => {
               class="mt-8 mb-6"
               :aria-hidden="hideTimelineFromScreenReader"
             >
-              {{ t('permitStatusView.applicationProgress') }}
+              {{ t('e.housing.permitStatusView.applicationProgress') }}
             </h4>
             <Timeline
               :value="getTimelineStage(permit?.authStatus, permit?.status)"
@@ -336,27 +336,27 @@ onBeforeMount(async () => {
           <div class="status-verified-message">
             <div v-if="updatedBy">
               <p class="verified-text my-0">
-                {{ t('permitStatusView.statusLastVerified') }} {{ formatDate(permit?.statusLastVerified) }} by
+                {{ t('e.housing.permitStatusView.statusLastVerified') }} {{ formatDate(permit?.statusLastVerified) }} by
                 {{ updatedBy }}
               </p>
             </div>
             <div v-else>
-              <p class="verified-text my-0">{{ t('permitStatusView.statusNotVerified') }}</p>
+              <p class="verified-text my-0">{{ t('e.housing.permitStatusView.statusNotVerified') }}</p>
             </div>
           </div>
         </div>
       </template>
     </Card>
     <div class="updates-section">
-      <h4 class="mb-6">{{ t('permitStatusView.additionalUpdates') }}</h4>
+      <h4 class="mb-6">{{ t('e.housing.permitStatusView.additionalUpdates') }}</h4>
       <div class="ask-navigator mb-16">
         <Button
           outlined
-          :label="t('permitStatusView.askNav')"
+          :label="t('e.housing.permitStatusView.askNav')"
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, housingProjectId },
+              params: { permitId: permitId, housingProjectId: housingProjectId },
               query: {
                 permitName: permit?.name,
                 permitTrackingId: permit?.trackingId,
@@ -366,7 +366,7 @@ onBeforeMount(async () => {
             })
           "
         />
-        <p>{{ t('permitStatusView.contactNav') }}</p>
+        <p>{{ t('e.housing.permitStatusView.contactNav') }}</p>
       </div>
       <div v-if="permit?.permitNote && permit.permitNote.length > 0">
         <div
@@ -379,7 +379,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">{{ t('permitStatusView.noUpdates') }}</p>
+        <p class="text-gray-500">{{ t('e.housing.permitStatusView.noUpdates') }}</p>
       </div>
     </div>
   </div>

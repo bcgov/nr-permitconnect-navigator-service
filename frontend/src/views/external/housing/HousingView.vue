@@ -81,7 +81,7 @@ onMounted(async () => {
 <template>
   <div class="flex flex-col items-center justify-start h-full">
     <div class="flex flex-row items-center w-full justify-between shadow px-4">
-      <h1>{{ t('housing.housing') }}</h1>
+      <h1>{{ t('e.housing.housingView.housing') }}</h1>
       <img
         class="mr-4"
         src="@/assets/images/housing_2.png"
@@ -91,7 +91,7 @@ onMounted(async () => {
     </div>
 
     <div class="flex flex-row items-center w-full mt-4 mb-9">
-      <div class="font-bold mr-2">{{ t('housing.onThisPage') }}</div>
+      <div class="font-bold mr-2">{{ t('e.housing.housingView.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
       <div>
@@ -103,7 +103,7 @@ onMounted(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#projects' })"
         >
-        {{ t('housing.myProjects') }}</router-link>
+        {{ t('e.housing.housingView.myProjects') }}</router-link>
         |
         <router-link
           :to="{
@@ -113,7 +113,7 @@ onMounted(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#drafts' })"
         >
-        {{ t('housing.drafts') }}</router-link>
+        {{ t('e.housing.housingView.drafts') }}</router-link>
         |
         <router-link
           :to="{
@@ -123,7 +123,7 @@ onMounted(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#enquiries' })"
         >
-        {{ t('housing.generalEnquiries') }}</router-link>
+        {{ t('e.housing.housingView.generalEnquiries') }}</router-link>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
     </div>
@@ -137,16 +137,16 @@ onMounted(async () => {
           id="projects"
           tabindex="-1"
         >
-          {{ t('housing.myProjects') }}
+          {{ t('e.housing.housingView.myProjects') }}
         </h2>
         <Tooltip
           class="pl-2 text-xl"
           right
-          :text="t('housing.projectsTooltip')"
+          :text="t('e.housing.housingView.projectsTooltip')"
         />
       </div>
       <Button @click="router.push({ name: RouteName.EXT_HOUSING_INTAKE })">
-        {{ t('housing.submitNewProject') }}
+        {{ t('e.housing.housingView.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
           icon="fa-solid fa-arrow-right"
@@ -159,7 +159,7 @@ onMounted(async () => {
         v-if="!projects.length"
         class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
       >
-        <p class="font-bold">{{ t('housing.projectsEmpty') }}</p>
+        <p class="font-bold">{{ t('e.housing.housingView.projectsEmpty') }}</p>
       </div>
       <div
         v-for="(project, index) in displayedProjects"
@@ -182,13 +182,16 @@ onMounted(async () => {
             </router-link>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('housing.projectState') }}: {{ project.applicationStatus }}</p>
+            <p>{{ t('e.housing.housingView.projectState') }}: {{ project.applicationStatus }}</p>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('housing.confirmationId') }}: {{ project.activityId }}</p>
+            <p>{{ t('e.housing.housingView.confirmationId') }}: {{ project.activityId }}</p>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('housing.lastUpdated') }}: {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}</p>
+            <p>
+              {{ t('e.housing.housingView.lastUpdated') }}:
+              {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}
+            </p>
           </div>
         </div>
       </div>
@@ -198,7 +201,7 @@ onMounted(async () => {
           :rows="PAGE_ROWS"
           :total-records="projects.length"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          :current-page-report-template="`({currentPage} ${t('housing.of')} {totalPages})`"
+          :current-page-report-template="`({currentPage} ${t('e.housing.housingView.of')} {totalPages})`"
         />
       </div>
     </div>
@@ -212,7 +215,7 @@ onMounted(async () => {
         class="flex font-bold"
         tabindex="-1"
       >
-        {{ t('housing.drafts') }}
+        {{ t('e.housing.housingView.drafts') }}
       </h2>
     </div>
 
@@ -234,17 +237,17 @@ onMounted(async () => {
           class="font-bold"
           tabindex="-1"
         >
-          {{ t('housing.generalEnquiries') }}
+          {{ t('e.housing.housingView.generalEnquiries') }}
         </h2>
         <Tooltip
           class="pl-2 text-xl"
           right
-          :text="t('housing.enquiriesTooltip')"
+          :text="t('e.housing.housingView.enquiriesTooltip')"
         />
       </div>
 
       <Button @click="router.push({ name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE })">
-        {{ t('housing.submitNewEnquiry') }}
+        {{ t('e.housing.housingView.submitNewEnquiry') }}
         <font-awesome-icon
           class="ml-2"
           icon="fa-solid fa-arrow-right"
