@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 
@@ -31,7 +31,7 @@ const {
 const loading: Ref<boolean> = ref(true);
 
 // Actions
-onMounted(async () => {
+onBeforeMount(async () => {
   loading.value = false;
 });
 </script>

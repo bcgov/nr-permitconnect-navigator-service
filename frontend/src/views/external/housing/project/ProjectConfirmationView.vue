@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Message } from '@/lib/primevue';
+import { onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { RouteName } from '@/utils/enums/application';
 

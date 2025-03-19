@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { permitService } from '@/services';
@@ -17,7 +17,7 @@ const { activityId = undefined, submissionId = undefined } = defineProps<{
 const loading: Ref<boolean> = ref(true);
 
 // Actions
-onMounted(async () => {
+onBeforeMount(async () => {
   useTypeStore().setPermitTypes((await permitService.getPermitTypes()).data);
   loading.value = false;
 });

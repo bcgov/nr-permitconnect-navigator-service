@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -48,7 +48,7 @@ watch(
   }
 );
 
-onMounted(async () => {
+onBeforeMount(async () => {
   contacts.value = (await contactService.searchContacts({})).data;
 
   loading.value = false;

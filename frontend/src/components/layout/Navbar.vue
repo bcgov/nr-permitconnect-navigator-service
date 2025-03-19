@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
@@ -26,7 +26,7 @@ const authzStore = useAuthZStore();
 // State
 const items: Ref<Array<NavItem>> = ref([]);
 
-onMounted(() => {
+onBeforeMount(() => {
   items.value = [
     {
       label: 'Home',

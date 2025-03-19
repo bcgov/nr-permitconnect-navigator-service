@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { useI18n } from 'vue-i18n';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
@@ -126,7 +126,7 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
     await Promise.all([
       submissionService.getSubmission(submissionId),

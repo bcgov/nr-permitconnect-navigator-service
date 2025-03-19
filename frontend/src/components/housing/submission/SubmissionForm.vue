@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
 import { formatDateFilename } from '@/utils/formatters';
@@ -311,7 +311,7 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
   return locationAddressStr;
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (submission.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
   }

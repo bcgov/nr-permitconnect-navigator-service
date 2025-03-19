@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
@@ -43,7 +43,7 @@ const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
 });
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (enquiryId && activityId) {
     const [enquiry, notes] = (
       await Promise.all([enquiryService.getEnquiry(enquiryId), noteService.listNotes(activityId)])

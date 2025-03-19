@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -160,7 +160,7 @@ function updateQueryParams() {
   });
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
     rowsPerPageOptions.value.push(submissions.length);
   }

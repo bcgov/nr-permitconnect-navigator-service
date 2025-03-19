@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -176,7 +176,7 @@ function refreshStatistics() {
     });
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   [enquiries.value, permits.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
