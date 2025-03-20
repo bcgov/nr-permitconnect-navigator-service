@@ -7,7 +7,6 @@ import { useRouter } from 'vue-router';
 
 import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
-import BackButton from '@/components/common/BackButton.vue';
 import Divider from '@/components/common/Divider.vue';
 import {
   AutoComplete,
@@ -117,13 +116,6 @@ const validationErrors = computed(() => {
 });
 
 // Actions
-const getBackButtonConfig = computed(() => {
-  return {
-    text: 'Back to Housing',
-    routeName: RouteName.EXT_HOUSING
-  };
-});
-
 function confirmSubmit(data: GenericObject) {
   const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
 
@@ -519,11 +511,6 @@ watch(
 </script>
 
 <template>
-  <BackButton
-    :route-name="getBackButtonConfig.routeName"
-    :text="getBackButtonConfig.text"
-  />
-
   <div class="flex justify-center">
     <h2
       role="heading"

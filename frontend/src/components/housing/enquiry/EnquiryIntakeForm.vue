@@ -6,7 +6,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
-import BackButton from '@/components/common/BackButton.vue';
 import Divider from '@/components/common/Divider.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import Tooltip from '@/components/common/Tooltip.vue';
@@ -61,13 +60,6 @@ const { t } = useI18n();
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
-
-const getBackButtonConfig = computed(() => {
-  return {
-    text: 'Back to Housing',
-    routeName: RouteName.EXT_HOUSING
-  };
-});
 
 function confirmSubmit(data: any) {
   confirm.require({
@@ -245,12 +237,6 @@ onBeforeMount(async () => {
 
 <template>
   <div>
-    <div class="mb-2 p-0">
-      <BackButton
-        :route-name="getBackButtonConfig.routeName"
-        :text="getBackButtonConfig.text"
-      />
-    </div>
     <div class="flex justify-center items-center app-primary-color mb-2 mt-4">
       <h3
         role="heading"

@@ -155,18 +155,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <Button
-    class="p-0"
-    text
-    @click="router.back()"
-  >
-    <font-awesome-icon
-      icon="fa fa-arrow-circle-left"
-      class="mr-1 app-primary-color"
-    />
-    <span class="app-primary-color">Back to Submissions</span>
-  </Button>
-
   <div class="flex items-center justify-between">
     <h1>
       <span v-if="getSubmission?.projectName">
