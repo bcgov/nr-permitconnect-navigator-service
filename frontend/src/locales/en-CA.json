@@ -53,7 +53,8 @@
     "atsSearchBtn": "Search ATS",
     "atsNewClientBtn": "New ATS Client",
     "formSaveBtn": "Save",
-    "formReopenBtn": "Re-open enquiry"
+    "formReopenBtn": "Re-open enquiry",
+    "submittedMethod": "Submitted method"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
@@ -74,6 +75,13 @@
     "confirmationBanner": "Your enquiry has been successfully submitted.",
     "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
     "linkSubmissions": "Back to Housing"
+  },
+  "enquiryListNavigator": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "confirmCreateHeader": "Confirm create submission",
+    "confirmCreateMsg": "Please confirm that you want to create a new submission.",
+    "failedSubmission": "Failed to create new submission"
   },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",

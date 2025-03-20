@@ -3,7 +3,7 @@ import { enquiryService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import type { AxiosResponse } from 'axios';
 
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -46,6 +46,7 @@ const testEnquiry = {
   submittedBy: 'user123',
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

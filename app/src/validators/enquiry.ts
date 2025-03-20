@@ -5,7 +5,7 @@ import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, ENQUIRY_SUBMITTED_METHOD, INTAKE_STATUS_LIST } from '../utils/constants/housing';
 
 const schema = {
   createEnquiry: {
@@ -52,6 +52,7 @@ const schema = {
         .allow(null),
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      submittedMethod: Joi.string().valid(...ENQUIRY_SUBMITTED_METHOD),
       ...atsValidator.atsEnquirySubmissionFields,
       waitingOn: Joi.string().allow(null).max(255),
       contacts: contacts,
