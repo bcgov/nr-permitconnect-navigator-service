@@ -10,14 +10,10 @@ import { housing } from './housing';
 import { permits } from './permits';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import {
-  APPLICATION_STATUS_LIST,
-  HOUSING_PROJECT_TYPE_LIST,
-  INTAKE_STATUS_LIST,
-  NUM_RESIDENTIAL_UNITS_LIST
-} from '../utils/constants/housing';
+import { HOUSING_PROJECT_TYPE_LIST, NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 import { BasicResponse } from '../utils/enums/application';
-import { IntakeStatus } from '../utils/enums/housing';
+import { IntakeStatus } from '../utils/enums/projectCommon';
 
 const schema = {
   createHousingProject: {

@@ -1,5 +1,5 @@
 import { Contact } from './Contact';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/housing';
+import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 
 export type EnquiryIntake = {
   activityId?: string;
