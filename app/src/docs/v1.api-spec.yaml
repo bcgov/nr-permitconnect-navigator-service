@@ -20,6 +20,8 @@ tags:
     description: Operations for managing Contacts
   - name: Document
     description: Operations for managing Documents
+  - name: Electrification Project
+    description: Operations for managing Electrification Projects, Drafts, and Statistics
   - name: Enquiry
     description: Operations for managing Enquiries
   - name: Housing Project
@@ -286,6 +288,348 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+  /electrificationProject:
+    get:
+      summary: Get a list of electrification projects
+      operationId: getElectrificationProjects
+      tags:
+        - Electrification Project
+      responses:
+        '200':
+          description: A list of electrification projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create a electrification project
+      operationId: createElectrificationProject
+      tags:
+        - Electrification Project
+      responses:
+        '201':
+          description: Electrification Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-ElectrificationProjectCreate'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/{electrificationProjectId}:
+    get:
+      summary: Get a specific electrification project
+      operationId: getElectrificationProject
+      tags:
+        - Electrification Project
+      parameters:
+        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      responses:
+        '200':
+          description: Details of the specific electrification project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a electrification project
+      operationId: updateElectrificationProject
+      tags:
+        - Electrification Project
+      parameters:
+        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-ElectrificationProjectUpdate'
+      responses:
+        '200':
+          description: Electrification Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a electrification project
+      operationId: deleteElectrificationProject
+      tags:
+        - Electrification Project
+      parameters:
+        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      responses:
+        '200':
+          description: Electrification Project deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/{electrificationProjectId}/delete:
+    patch:
+      summary: Soft delete
+      description: A soft delete of a electrification project using a is_deleted flag
+      operationId: electrificationProject-updateIsDeletedFlag
+      tags:
+        - Electrification Project
+      parameters:
+        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isDeleted
+              properties:
+                isDeleted:
+                  type: boolean
+                  description: Set to true to change is deleted tag
+                  example: true
+      responses:
+        '200':
+          description: The is_deleted flag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/draft:
+    put:
+      summary: Create or update a draft electrification project
+      description: >-
+        Creates or updates an intake and set status to Draft
+        so unfinished/unvalidatd electrification projects can be saved
+      operationId: electrificationProject-createDraft
+      tags:
+        - Electrification Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveElectrificationProjectDraft'
+      responses:
+        '201':
+          description: Draft electrification project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-DraftElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/draft/submit:
+    put:
+      summary: Submit a draft electrification project
+      description: Creates or updates an intake and set status to Submitted
+      operationId: electrificationProject-updateDraft
+      tags:
+        - Electrification Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveElectrificationProjectDraft'
+      responses:
+        '200':
+          description: Draft electrification project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/email:
+    put:
+      summary: Send confirmation Email
+      operationId: electrificationEmailConfirmation
+      tags:
+        - Electrification Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailData'
+      responses:
+        '201':
+          description: Email Confirmation was set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Email'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/search:
+    get:
+      summary: Search electrification projects
+      description: Returns a list of electrification projects based on the given queries
+      operationId: searchElectrificationProjects
+      tags:
+        - Electrification Project
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeDeleted'
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: electrificationProjectId
+          required: false
+          schema:
+            type: array
+            description: The Electrification Project IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      responses:
+        '200':
+          description: A list of electrification projects matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-ElectrificationProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrificationProject/statistics:
+    get:
+      summary: Get electrification project and enquiry statistics
+      description: Gets a set of electrification project and enquiry related statistics
+      operationId: getElectrificationStatistics
+      tags:
+        - Electrification Project
+      parameters:
+        - in: query
+          name: dateFrom
+          required: false
+          schema:
+            type: string
+            format: date
+            description: Start date for the statistics
+        - in: query
+          name: dateTo
+          required: false
+          schema:
+            type: string
+            format: date
+            description: End date for the statistics
+        - in: query
+          name: monthYear
+          required: false
+          schema:
+            type: string
+            description: Month and year for the statistics
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+            description: User ID to filter statistics
+      responses:
+        '200':
+          description: Electrification submission statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-ElectrificationSubmissionStatistics'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /enquiry:
     get:
       summary: Gets a list of enquiries
@@ -512,6 +856,364 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject:
+    get:
+      summary: Get a list of housing projects
+      operationId: getHousingProjects
+      tags:
+        - Housing Project
+      responses:
+        '200':
+          description: A list of housing projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create a housing project
+      operationId: createHousingProject
+      tags:
+        - Housing Project
+      responses:
+        '201':
+          description: Housing Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-HousingProjectCreate'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/{housingProjectId}:
+    get:
+      summary: Get a specific housing project
+      operationId: getHousingProject
+      tags:
+        - Housing Project
+      parameters:
+        - $ref: '#/components/parameters/Path-HousingProjectId'
+      responses:
+        '200':
+          description: Details of the specific housing project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a housing project
+      operationId: updateHousingProject
+      tags:
+        - Housing Project
+      parameters:
+        - $ref: '#/components/parameters/Path-HousingProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-HousingProjectUpdate'
+      responses:
+        '200':
+          description: Housing Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a housing project
+      operationId: deleteHousingProject
+      tags:
+        - Housing Project
+      parameters:
+        - $ref: '#/components/parameters/Path-HousingProjectId'
+      responses:
+        '200':
+          description: Housing Project deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/{housingProjectId}/delete:
+    patch:
+      summary: Soft delete
+      description: A soft delete of a housing project using a is_deleted flag
+      operationId: housingProject-updateIsDeletedFlag
+      tags:
+        - Housing Project
+      parameters:
+        - $ref: '#/components/parameters/Path-HousingProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isDeleted
+              properties:
+                isDeleted:
+                  type: boolean
+                  description: Set to true to change is deleted tag
+                  example: true
+      responses:
+        '200':
+          description: The is_deleted flag updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/draft:
+    put:
+      summary: Create or update a draft housing project
+      description: >-
+        Creates or updates an intake and set status to Draft
+        so unfinished/unvalidatd housing projects can be saved
+      operationId: housingProject-createDraft
+      tags:
+        - Housing Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
+      responses:
+        '201':
+          description: Draft housing project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-DraftHousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/draft/submit:
+    put:
+      summary: Submit a draft housing project
+      description: Creates or updates an intake and set status to Submitted
+      operationId: housingProject-updateDraft
+      tags:
+        - Housing Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
+      responses:
+        '200':
+          description: Draft housing project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/email:
+    put:
+      summary: Send confirmation Email
+      operationId: housingEmailConfirmation
+      tags:
+        - Housing Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailData'
+      responses:
+        '201':
+          description: Email Confirmation was set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Email'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/search:
+    get:
+      summary: Search housing projects
+      description: Returns a list of housing projects based on the given queries
+      operationId: searchHousingProjects
+      tags:
+        - Housing Project
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeDeleted'
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: housingProjectId
+          required: false
+          schema:
+            type: array
+            description: The Housing Project IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-HousingProjectId'
+        - in: query
+          name: intakeStatus
+          required: false
+          schema:
+            type: array
+            description: The intake statuses to filter on
+            items:
+              $ref: '#/components/parameters/IntakeStatus'
+        - in: query
+          name: housingProjectType
+          required: false
+          schema:
+            type: array
+            description: The housing project types to filter on
+            items:
+              $ref: '#/components/parameters/Query-HousingProjectType'
+      responses:
+        '200':
+          description: A list of housing projects matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-HousingProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housingProject/statistics:
+    get:
+      summary: Get housing project and enquiry statistics
+      description: Gets a set of housing project and enquiry related statistics
+      operationId: getHousingStatistics
+      tags:
+        - Housing Project
+      parameters:
+        - in: query
+          name: dateFrom
+          required: false
+          schema:
+            type: string
+            format: date
+            description: Start date for the statistics
+        - in: query
+          name: dateTo
+          required: false
+          schema:
+            type: string
+            format: date
+            description: End date for the statistics
+        - in: query
+          name: monthYear
+          required: false
+          schema:
+            type: string
+            description: Month and year for the statistics
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+            description: User ID to filter statistics
+      responses:
+        '200':
+          description: Housing submission statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-HousingSubmissionStatistics'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -904,364 +1606,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject:
-    get:
-      summary: Get a list of housing projects
-      operationId: getHousingProjects
-      tags:
-        - Housing Project
-      responses:
-        '200':
-          description: A list of housing projects
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Create a housing project
-      operationId: createHousingProject
-      tags:
-        - Housing Project
-      responses:
-        '201':
-          description: Housing Project created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-HousingProjectCreate'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}:
-    get:
-      summary: Get a specific housing project
-      operationId: getHousingProject
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      responses:
-        '200':
-          description: Details of the specific housing project
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Update a housing project
-      operationId: updateHousingProject
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-HousingProjectUpdate'
-      responses:
-        '200':
-          description: Housing Project updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    delete:
-      summary: Delete a housing project
-      operationId: deleteHousingProject
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      responses:
-        '200':
-          description: Housing Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a housing project using a is_deleted flag
-      operationId: housingProject-updateIsDeletedFlag
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/draft:
-    put:
-      summary: Create or update a draft housing project
-      description: >-
-        Creates or updates an intake and set status to Draft
-        so unfinished/unvalidatd housing projects can be saved
-      operationId: housingProject-createDraft
-      tags:
-        - Housing Project
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
-      responses:
-        '201':
-          description: Draft housing project created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-DraftHousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/draft/submit:
-    put:
-      summary: Submit a draft housing project
-      description: Creates or updates an intake and set status to Submitted
-      operationId: housingProject-updateDraft
-      tags:
-        - Housing Project
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-SaveHousingProjectDraft'
-      responses:
-        '200':
-          description: Draft housing project updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/email:
-    put:
-      summary: Send confirmation Email
-      operationId: emailConfirmation
-      tags:
-        - Housing Project
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmailData'
-      responses:
-        '201':
-          description: Email Confirmation was set
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/search:
-    get:
-      summary: Search housing projects
-      description: Returns a list of housing projects based on the given queries
-      operationId: searchHousingProjects
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: housingProjectId
-          required: false
-          schema:
-            type: array
-            description: The Housing Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-HousingProjectId'
-        - in: query
-          name: intakeStatus
-          required: false
-          schema:
-            type: array
-            description: The intake statuses to filter on
-            items:
-              $ref: '#/components/parameters/IntakeStatus'
-        - in: query
-          name: housingProjectType
-          required: false
-          schema:
-            type: array
-            description: The housing project types to filter on
-            items:
-              $ref: '#/components/parameters/Query-HousingProjectType'
-      responses:
-        '200':
-          description: A list of housing projects matching the search criteria
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/statistics:
-    get:
-      summary: Get housing project and enquiry statistics
-      description: Gets a set of housing project and enquiry related statistics
-      operationId: getStatistics
-      tags:
-        - Housing Project
-      parameters:
-        - in: query
-          name: dateFrom
-          required: false
-          schema:
-            type: string
-            format: date
-            description: Start date for the statistics
-        - in: query
-          name: dateTo
-          required: false
-          schema:
-            type: string
-            format: date
-            description: End date for the statistics
-        - in: query
-          name: monthYear
-          required: false
-          schema:
-            type: string
-            description: Month and year for the statistics
-        - in: query
-          name: userId
-          required: false
-          schema:
-            type: string
-            description: User ID to filter statistics
-      responses:
-        '200':
-          description: Housing submission statistics
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-HousingSubmissionStatistics'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
   /user:
     get:
       summary: Search users
@@ -1314,6 +1658,15 @@ components:
         type: string
         format: uuid
         example: b76469a3-896c-4435-aa83-b8b87db6f701
+    Path-ElectrificationProjectId:
+      in: path
+      name: electrificationProjectId
+      description: UUID of a Electrification Project
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: da5c5031-0e84-4234-7766-1ba846997482
     Path-EnquiryId:
       in: path
       name: enquiryId
@@ -1323,6 +1676,15 @@ components:
         type: string
         format: uuid
         example: b76469a3-896c-4435-aa83-b8b87db60921
+    Path-HousingProjectId:
+      in: path
+      name: housingProjectId
+      description: UUID of a Housing Project
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: da5c5031-0e84-4234-7766-1ba846997482
     Path-NoteId:
       in: path
       name: noteId
@@ -1341,15 +1703,6 @@ components:
         type: string
         format: uuid
         example: da5c5031-0e84-4234-8559-1ba846997482
-    Path-HousingProjectId:
-      in: path
-      name: housingProjectId
-      description: UUID of a Housing Project
-      required: true
-      schema:
-        type: string
-        format: uuid
-        example: da5c5031-0e84-4234-7766-1ba846997482
     Query-ActivityId:
       in: query
       name: activityId
@@ -1491,6 +1844,31 @@ components:
           type: string
           description: The full name of the user who created the document
           example: Smith, John
+    DB-ElectrificationProject:
+      type: object
+      required:
+        - electrificationProjectId
+        - activityId
+        - submittedAt
+      properties:
+        housingProjectId:
+          type: string
+          description: UUID for the electrification project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        assignedUserId:
+          type: string
+          description: User assigned to the electrification project
+          example: Smith, John
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: '2024-04-03T00:57:09.070Z'
     DB-Enquiry:
       title: DB Enquiry
       type: object
@@ -1544,6 +1922,203 @@ components:
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
         user:
           $ref: '#/components/schemas/DB-User'
+    DB-HousingProject:
+      type: object
+      required:
+        - housingProjectId
+        - activityId
+        - submittedAt
+        - submittedBy
+        - addedToATS
+        - ltsaCompleted
+        - bcOnlineCompleted
+        - naturalDisaster
+        - aaiUpdated
+      properties:
+        housingProjectId:
+          type: string
+          description: UUID for the housing project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        assignedUserId:
+          type: string
+          description: User assigned to the housing project
+          example: Smith, John
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: '2024-04-03T00:57:09.070Z'
+        submittedBy:
+          type: string
+          description: Who made the housing project
+          example: JSMITH
+        locationPIDs:
+          type: string
+          description: Location PIDs
+          example: 006-209-521, 007-209-522
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription:
+          type: string
+          description: A description of the project
+          example: Project description example.
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        singleFamilyUnits:
+          type: string
+          description: Range of units to be for single family
+          example: 10-49
+        hasRentalUnits:
+          type: string
+          description: Whether or not the project will have rental units
+          example: 'Yes'
+        streetAddress:
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+        latitude:
+          type: number
+          description: Latitude Cordinate for project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude Cordinate for project
+          example: -123.377677
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          example: 3
+        relatedPermits:
+          type: string
+          description: Permits related to the project
+        astNotes:
+          type: string
+          description: Notes from AST
+        astUpdated:
+          type: boolean
+          description: Whether updated by AST
+          example: false
+        addedToATS:
+          type: boolean
+          description: Whether added to AST
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+        ltsaCompleted:
+          type: boolean
+          description: Ltsa completed
+          example: false
+        bcOnlineCompleted:
+          type: boolean
+          description: Completed
+          example: false
+        naturalDisaster:
+          type: string
+          description: Is it affected by Natural disaster?
+          example: 'No'
+        financiallySupported:
+          type: boolean
+          description: Is it financially supported?
+          example: false
+        financiallySupportedBC:
+          type: string
+          description: Is is financially supported by BC Housing?
+          example: 'No'
+        financiallySupportedIndigenous:
+          type: string
+          description: Is it an Indigenous led project?
+          example: 'No'
+        financiallySupportedNonProfit:
+          type: string
+          description: Is is financially supported by a Non-Profit
+          example: 'No'
+        financiallySupportedHousingCoop:
+          type: string
+          description: Is is financially supported by a House Cooperative
+          example: 'No'
+        aaiUpdated:
+          type: boolean
+          description: Updated by aai
+          example: false
+        intakeStatus:
+          type: string
+          description: Intake status type
+          example: Submitted
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        projectApplicantType:
+          type: string
+          enum: [Business, Individual]
+          description: Are you applying as an individual or as a business?
+          example: 'Business'
+        isDevelopedInBC:
+          type: string
+          description: Is the project developed in BC?
+          example: 'Yes'
+        multiFamilyUnits:
+          type: string
+          description: Range of multi-family units in the project
+          example: 10-49
+        otherUnits:
+          type: string
+          description: Range of "other" units in the project
+          example: 10-49
+        otherUnitsDescription:
+          type: string
+          description: Description of the "other" units
+          example: detached garages
+        rentalUnits:
+          type: string
+          description: Range of rental units
+          example: 1-9
+        projectLocation:
+          type: string
+          description: Project's location
+          example: Street address
+        projectLocationDescription:
+          type: string
+          description: Description of the location of the project
+          example: 'no'
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Maple Ridge
+        province:
+          type: string
+          description: Province (Location) of project
+          example: BC
+        hasAppliedProvincialPermits:
+          type: string
+          description: Has applied for provincial permits
+          example: 'Yes'
+        checkProvincialPermits:
+          type: string
+          description: Needs to check for provincial permits
+          example: 'Yes'
+        indigenousDescription:
+          type: string
+          description: Description for the Indigenous Led
+        nonProfitDescription:
+          type: string
+          description: Description for  Non-Profit
+        housingCoopDescription:
+          type: string
+          description: Description for COOP Housing
+        consentToFeedback:
+          type: boolean
+          description: Whether or not user consents to feedback requests
     DB-Note:
       title: DB Note
       type: object
@@ -1791,203 +2366,6 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
-    DB-HousingProject:
-      type: object
-      required:
-        - housingProjectId
-        - activityId
-        - submittedAt
-        - submittedBy
-        - addedToATS
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - naturalDisaster
-        - aaiUpdated
-      properties:
-        housingProjectId:
-          type: string
-          description: UUID for the housing project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
-        assignedUserId:
-          type: string
-          description: User assigned to the housing project
-          example: Smith, John
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
-        submittedBy:
-          type: string
-          description: Who made the housing project
-          example: JSMITH
-        locationPIDs:
-          type: string
-          description: Location PIDs
-          example: 006-209-521, 007-209-522
-        projectName:
-          type: string
-          description: Name of the Project
-          example: New Project
-        projectDescription:
-          type: string
-          description: A description of the project
-          example: Project description example.
-        companyNameRegistered:
-          type: string
-          description: Name of the company connected to the project
-          example: QW URBAN FOOD LTD.
-        singleFamilyUnits:
-          type: string
-          description: Range of units to be for single family
-          example: 10-49
-        hasRentalUnits:
-          type: string
-          description: Whether or not the project will have rental units
-          example: 'Yes'
-        streetAddress:
-          type: string
-          description: Street address of project
-          example: 2975 Jutland Rd
-        latitude:
-          type: number
-          description: Latitude Cordinate for project
-          example: 48.440531
-        longitude:
-          type: number
-          description: Longitude Cordinate for project
-          example: -123.377677
-        queuePriority:
-          type: number
-          description: Navigator assigned priority rank
-          example: 3
-        relatedPermits:
-          type: string
-          description: Permits related to the project
-        astNotes:
-          type: string
-          description: Notes from AST
-        astUpdated:
-          type: boolean
-          description: Whether updated by AST
-          example: false
-        addedToATS:
-          type: boolean
-          description: Whether added to AST
-          example: false
-        atsClientId:
-          type: number
-          description: Client number from ATS
-        ltsaCompleted:
-          type: boolean
-          description: Ltsa completed
-          example: false
-        bcOnlineCompleted:
-          type: boolean
-          description: Completed
-          example: false
-        naturalDisaster:
-          type: string
-          description: Is it affected by Natural disaster?
-          example: 'No'
-        financiallySupported:
-          type: boolean
-          description: Is it financially supported?
-          example: false
-        financiallySupportedBC:
-          type: string
-          description: Is is financially supported by BC Housing?
-          example: 'No'
-        financiallySupportedIndigenous:
-          type: string
-          description: Is it an Indigenous led project?
-          example: 'No'
-        financiallySupportedNonProfit:
-          type: string
-          description: Is is financially supported by a Non-Profit
-          example: 'No'
-        financiallySupportedHousingCoop:
-          type: string
-          description: Is is financially supported by a House Cooperative
-          example: 'No'
-        aaiUpdated:
-          type: boolean
-          description: Updated by aai
-          example: false
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
-        applicationStatus:
-          type: string
-          description: Status of the application
-          example: New
-        projectApplicantType:
-          type: string
-          enum: [Business, Individual]
-          description: Are you applying as an individual or as a business?
-          example: 'Business'
-        isDevelopedInBC:
-          type: string
-          description: Is the project developed in BC?
-          example: 'Yes'
-        multiFamilyUnits:
-          type: string
-          description: Range of multi-family units in the project
-          example: 10-49
-        otherUnits:
-          type: string
-          description: Range of "other" units in the project
-          example: 10-49
-        otherUnitsDescription:
-          type: string
-          description: Description of the "other" units
-          example: detached garages
-        rentalUnits:
-          type: string
-          description: Range of rental units
-          example: 1-9
-        projectLocation:
-          type: string
-          description: Project's location
-          example: Street address
-        projectLocationDescription:
-          type: string
-          description: Description of the location of the project
-          example: 'no'
-        locality:
-          type: string
-          description: City, town, etc. (Location) of project
-          example: Maple Ridge
-        province:
-          type: string
-          description: Province (Location) of project
-          example: BC
-        hasAppliedProvincialPermits:
-          type: string
-          description: Has applied for provincial permits
-          example: 'Yes'
-        checkProvincialPermits:
-          type: string
-          description: Needs to check for provincial permits
-          example: 'Yes'
-        indigenousDescription:
-          type: string
-          description: Description for the Indigenous Led
-        nonProfitDescription:
-          type: string
-          description: Description for  Non-Profit
-        housingCoopDescription:
-          type: string
-          description: Description for COOP Housing
-        consentToFeedback:
-          type: boolean
-          description: Whether or not user consents to feedback requests
     DB-User:
       type: object
       properties:
@@ -2256,6 +2634,28 @@ components:
           description: Array of selected file IDs
         emailData:
           $ref: '#/components/schemas/EmailData'
+    Request-SaveElectrificationProjectDraft:
+      title: Save draft of Electrification Project
+      type: object
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Contact'
+        electrificationProjectId:
+          type: string
+          description: UUID for the electrification project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        submittedAt:
+          type: string
+          format: date-time
+          description: Date it was submitted
+          example: '2024-04-03T00:57:09.070Z'
     Request-SaveHousingProjectDraft:
       title: Save draft of Housing Project
       type: object
@@ -2476,6 +2876,28 @@ components:
           type: string
           description: The submission type of the housing project
           example: Guidance
+    Request-ElectrificationProjectUpdate:
+      title: Request to Update Electrification Project
+      type: object
+      required:
+        - housingProjectId
+        - activityId
+        - submittedAt
+      properties:
+        electrificationProjectId:
+          type: string
+          description: UUID for the electrification project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: '2024-04-03T00:57:09.070Z'
     Request-HousingProjectUpdate:
       title: Request to Update Housing Project
       type: object
@@ -2765,6 +3187,22 @@ components:
           type: string
         enquiryId:
           type: string
+    Response-DraftElectrificationProject:
+      title: Response Draft Electrification Project
+      type: object
+      required:
+        - activityId
+        - electrificationProjectId
+      properties:
+        electrificationProjectId:
+          type: string
+          description: UUID for the electrification project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity Id
+          example: D95F1DE6
     Response-DraftHousingProject:
       title: Response Draft Housing Project
       type: object
@@ -2886,6 +3324,22 @@ components:
                   type: string
                 example:
                   - NAVIGATOR
+    Response-ElectrificationProjectCreate:
+      title: Response for Create Electrification Project
+      type: object
+      required:
+        - activityId
+        - electrificationProjectId
+      properties:
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        electrificationProjectId:
+          type: string
+          description: UUID for the electrification project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
     Response-HousingProjectCreate:
       title: Response for Create Housing Project
       type: object
@@ -3029,6 +3483,12 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
+    Response-ElectrificationSubmissionStatistics:
+      type: object
+      properties:
+        total_submissions:
+          type: number
+          example: 112
     Response-HousingSubmissionStatistics:
       type: object
       properties:
