@@ -1,5 +1,6 @@
 import type { IStamps } from '@/interfaces';
 import type { PermitNote } from './PermitNote';
+import type { PermitType } from './PermitType';
 
 export type Permit = {
   permitId: string; // Primary Key
@@ -14,4 +15,5 @@ export type Permit = {
   adjudicationDate?: string;
   statusLastVerified?: string;
   permitNote?: Array<PermitNote>;
+  permitType: PermitType;
 } & Partial<IStamps>;

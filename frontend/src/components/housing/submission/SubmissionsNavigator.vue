@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { onMounted, ref, watch } from 'vue';
+import { onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -143,12 +143,10 @@ function getParamObject(bf: BringForward) {
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
-      activityId: bf.activityId,
       initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
-    activityId: bf.activityId,
     initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
@@ -176,7 +174,7 @@ function refreshStatistics() {
     });
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   [enquiries.value, permits.value, submissions.value, statistics.value, bringForward.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
@@ -227,14 +225,14 @@ watch(activeTabIndex, (newIndex) => {
   // wipe out the query when switching tabs otherwise append the tab index to the query
   if (route.query.tab != newIndex.toString()) {
     router.replace({
-      name: RouteName.EXT_HOUSING,
+      name: RouteName.INT_HOUSING,
       query: {
         tab: newIndex.toString()
       }
     });
   } else {
     router.replace({
-      name: RouteName.EXT_HOUSING,
+      name: RouteName.INT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()

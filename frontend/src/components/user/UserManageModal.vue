@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { RadioList } from '@/components/form';
 import { yarsService } from '@/services';
@@ -22,7 +22,7 @@ const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
 const group: Ref<GroupName | undefined> = ref(undefined);
 
 // Actions
-onMounted(async () => {
+onBeforeMount(async () => {
   const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];

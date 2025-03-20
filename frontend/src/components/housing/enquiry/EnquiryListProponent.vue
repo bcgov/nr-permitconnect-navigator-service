@@ -1,9 +1,11 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
+import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -12,16 +14,38 @@ import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
 
 // Props
-const { loading, enquiries } = defineProps<{
+const { loading, enquiries, submissionId } = defineProps<{
   loading: boolean;
   enquiries: Array<Enquiry> | undefined;
+  submissionId?: string | undefined;
 }>();
+
+// Store
+const authZStore = useAuthZStore();
+const { canNavigate } = storeToRefs(authZStore);
 
 // State
 const selection: Ref<Enquiry | undefined> = ref(undefined);
 
 // Actions
 const { t } = useI18n();
+
+function getRouteToObject(data: Enquiry) {
+  let toObject = {};
+  if (enquiries && enquiries[0].relatedActivityId) {
+    toObject = {
+      name: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY,
+      params: { enquiryId: data.enquiryId, submissionId }
+    };
+  } else {
+    toObject = {
+      name: RouteName.EXT_HOUSING_ENQUIRY,
+      params: { enquiryId: data.enquiryId }
+    };
+  }
+
+  return toObject;
+}
 </script>
 
 <template>
@@ -60,16 +84,19 @@ const { t } = useI18n();
       style="width: 45%"
     >
       <template #body="{ data }">
-        <div :data-activityId="data.activityId">
-          <router-link
-            :to="{
-              name: RouteName.EXT_HOUSING_ENQUIRY,
-              params: { enquiryId: data.enquiryId },
-              query: { activityId: data.activityId }
-            }"
-          >
+        <div
+          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+          :data-activityId="data.activityId"
+        >
+          <router-link :to="getRouteToObject(data)">
             {{ data.activityId }}
           </router-link>
+        </div>
+        <div
+          v-else
+          :data-activityId="data.activityId"
+        >
+          {{ data.activityId }}
         </div>
       </template>
     </Column>

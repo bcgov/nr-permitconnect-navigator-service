@@ -9,6 +9,12 @@ import EnquiryView from '@/views/internal/housing/enquiry/EnquiryView.vue';
 
 import type { AxiosResponse } from 'axios';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     query: {}
@@ -21,16 +27,14 @@ vi.mock('vue-router', () => ({
 const useEnquiryService = vi.spyOn(enquiryService, 'getEnquiry');
 const useNoteService = vi.spyOn(noteService, 'listNotes');
 
-useNoteService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+useNoteService.mockResolvedValue({ data: { activityId: 'activity456' } } as AxiosResponse);
+useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123' } } as AxiosResponse);
 
 const testEnquiryId = 'enquiry123';
-const testActivityId = 'activity123';
 
-const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testEnquiryIdProp = testEnquiryId) => ({
   props: {
-    enquiryId: testEnquiryIdProp,
-    activityId: testActivityIdProp
+    enquiryId: testEnquiryIdProp
   },
   global: {
     plugins: [

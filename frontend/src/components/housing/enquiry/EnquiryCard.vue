@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
 import { Card } from '@/lib/primevue';
@@ -19,7 +19,7 @@ const { enquiry } = defineProps<{
 const userName: Ref<string> = ref('');
 
 // Actions
-onMounted(() => {
+onBeforeMount(() => {
   if (enquiry.createdBy) {
     userService.searchUsers({ userId: [enquiry.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';
@@ -34,12 +34,10 @@ onMounted(() => {
       <div class="flex items-center">
         <div class="grow">
           <h3 class="mb-0">
-            <!-- Enquiry: -->
             <router-link
               :to="{
                 name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
-                params: { enquiryId: enquiry.enquiryId },
-                query: { activityId: enquiry.activityId }
+                params: { enquiryId: enquiry.enquiryId }
               }"
             >
               {{ enquiry.activityId }}

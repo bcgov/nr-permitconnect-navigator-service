@@ -1,7 +1,7 @@
 import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
-import type { Permit } from '@/types';
+import type { Permit, PermitType } from '@/types';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -9,6 +9,22 @@ vi.mock('vue-router', () => ({
     replace: vi.fn()
   })
 }));
+
+const testPermitType: PermitType = {
+  permitTypeId: 1,
+  agency: 'Water, Land and Resource Stewardship',
+  division: 'Forest Resiliency and Archaeology',
+  branch: 'Archaeology',
+  businessDomain: 'Archaeology',
+  type: 'Alteration',
+  family: undefined,
+  name: 'Archaeology Alteration Permit',
+  nameSubtype: undefined,
+  acronym: 'SAP',
+  trackedInATS: false,
+  sourceSystem: 'Archaeology Permit Tracking System',
+  sourceSystemAcronym: 'APTS'
+};
 
 const testPermit1: Permit = {
   permitId: 'permitId',
@@ -20,7 +36,8 @@ const testPermit1: Permit = {
   needed: 'needed',
   status: 'status',
   submittedDate: new Date().toISOString(),
-  adjudicationDate: new Date().toISOString()
+  adjudicationDate: new Date().toISOString(),
+  permitType: testPermitType
 };
 
 const PATH = 'permit';
@@ -93,5 +110,17 @@ describe('permitService test', () => {
     await permitService.updatePermit(modifiedPermit);
     expect(updatePermitSpy).toHaveBeenCalledTimes(1);
     expect(updatePermitSpy).toThrow();
+  });
+
+  it('calls get permit', async () => {
+    await permitService.listPermits({ activityId: TEST_ID });
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(`${PATH}`, { params: { activityId: TEST_ID } });
+  });
+
+  it('calls get permit with wrong ID', async () => {
+    await permitService.listPermits({ activityId: 'wrongId' });
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).not.toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
   });
 });

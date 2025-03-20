@@ -55,11 +55,19 @@
     "formSaveBtn": "Save",
     "formReopenBtn": "Re-open enquiry"
   },
+  "enquiryConfirmationView": {
+    "confirmationHeader": "Confirmation of Submission",
+    "confirmationIdLabel": "Enquiry ID",
+    "confirmationBanner": "Your enquiry has been successfully submitted.",
+    "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
+    "linkSubmissions": "Back to Housing"
+  },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
     "about": "This enquiry is about",
     "authStatus": "Authorization status",
     "contactInformation": "Contact information",
+    "header": "Enquiry Form",
     "notApplicable": "N/A",
     "permit": "Permit",
     "projectId": "Project ID",
@@ -68,13 +76,6 @@
     "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project.",
     "trackingId": "Tracking ID"
   },
-  "enquiryConfirmationView": {
-    "confirmationHeader": "Confirmation of Submission",
-    "confirmationIdLabel": "Enquiry ID",
-    "confirmationBanner": "Your enquiry has been successfully submitted.",
-    "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
-    "linkSubmissions": "Back to Housing"
-  },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",
     "listEmpty": "Your project related enquiries will be displayed here.",
@@ -82,6 +83,12 @@
     "state": "State",
     "submittedDate": "Submitted date",
     "tableAlt": "A table containing a list of enquiries"
+  },
+  "enquiryView": {
+    "completed": "(Completed)",
+    "header": "Enquiry submission:",
+    "linkedActivity": "This activity is linked to Activity",
+    "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
   "footer": {
     "about": "About gov.bc.ca",
@@ -133,15 +140,6 @@
     "submitNewEnquiry": "Submit a general enquiry",
     "submitNewProject": "Submit a new project"
   },
-  "intakeAssistance": {
-    "confirmationHeader": "Confirmation of Assistance Request",
-    "confirmationIdLabel": "Confirmation ID",
-    "confirmationMessage": "Your assistance request has been successfully submitted.",
-    "messagePart1": "A Housing Navigator will review your submission and contact you in 2 business days. Your form has also been saved as draft, you can find it in",
-    "messagePart2": "Please check your email for the confirmatin email and keep the confirmation ID for future reference",
-    "linkHousingSubmissions": "My drafts and previous entries.",
-    "linkSubmissions": "Back to Housing"
-  },
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",
     "addressSearchPlaceholder": "Type to search the address of your housing project",
@@ -184,6 +182,13 @@
     "statusDescriptionMeaning": "What does the status mean?",
     "statusLastVerified": "This status was last verified on",
     "statusNotVerified": "This status has not yet been verified."
+  },
+  "projectConfirmationView": {
+    "backToHousing": "Back to Housing",
+    "header": "Confirmation of Submission",
+    "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
+    "projectId": "Project ID:",
+    "success": "Your application has been successfully submitted."
   },
   "projectView": {
     "agency": "Agency",

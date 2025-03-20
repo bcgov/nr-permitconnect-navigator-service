@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { boolean, date, mixed, object, string } from 'yup';
 
@@ -252,7 +252,7 @@ const onSubmit = async (values: any) => {
   }
 };
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (enquiry?.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }

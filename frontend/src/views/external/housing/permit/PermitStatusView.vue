@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
+import { usePermitStore, useSubmissionStore } from '@/store';
+import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
@@ -12,16 +15,12 @@ import { formatDate, formatDateLong } from '@/utils/formatters';
 import { contactService, permitService, submissionService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType, Submission, User } from '@/types';
-import type { MenuItem } from 'primevue/menuitem';
+import type { User } from '@/types';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 
-type CombinedPermit = Permit & PermitType;
-
 // Props
-const { permitId, projectActivityId, submissionId } = defineProps<{
+const { permitId, submissionId } = defineProps<{
   permitId: string;
-  projectActivityId?: string;
   submissionId: string;
 }>();
 
@@ -62,16 +61,18 @@ const previous = (trackerStatus: string) => ({
   text: trackerStatus
 });
 
+// Store
+const authZStore = useAuthZStore();
+const permitStore = usePermitStore();
+const submissionStore = useSubmissionStore();
+const { canNavigate } = storeToRefs(authZStore);
+const { getPermit } = storeToRefs(permitStore);
+const { getSubmission } = storeToRefs(submissionStore);
+
 // State
-const breadcrumbItems: Ref<Array<MenuItem>> = ref([
-  { label: '...', route: undefined },
-  { label: '...', class: 'font-bold' }
-]);
-const descriptionModalVisible: Ref<boolean> = ref(false);
-const permit: Ref<CombinedPermit | undefined> = ref(undefined);
-const submission: Ref<Submission | undefined> = ref(undefined);
-const updatedBy: Ref<string | undefined> = ref(undefined);
 const assignedNavigator: Ref<User | undefined> = ref(undefined);
+const descriptionModalVisible: Ref<boolean> = ref(false);
+const updatedBy: Ref<string | undefined> = ref(undefined);
 
 const statusBoxStates = {
   [PermitAuthorizationStatus.ABANDONED]: {
@@ -182,39 +183,32 @@ const timelineDescription = computed(() => (iconClass: string) => {
 
 const hideTimelineFromScreenReader = computed(() => {
   return (
-    permit?.value &&
-    (permit.value.authStatus === PermitAuthorizationStatus.ABANDONED ||
-      permit.value.authStatus === PermitAuthorizationStatus.CANCELLED ||
-      permit.value.authStatus === PermitAuthorizationStatus.WITHDRAWN)
+    getPermit?.value &&
+    (getPermit.value.authStatus === PermitAuthorizationStatus.ABANDONED ||
+      getPermit.value.authStatus === PermitAuthorizationStatus.CANCELLED ||
+      getPermit.value.authStatus === PermitAuthorizationStatus.WITHDRAWN)
   );
 });
 
 onBeforeMount(async () => {
   try {
-    const permitResponse = await permitService.getPermit(permitId);
-    const { permitType, ...restOfPermit } = permitResponse.data;
-    permit.value = { ...restOfPermit, ...permitType };
+    const permitData = (await permitService.getPermit(permitId)).data;
+    permitStore.setPermit(permitData);
 
-    if (permit.value) {
-      submission.value = (await submissionService.searchSubmissions({ activityId: [permit.value.activityId] })).data[0];
-
-      const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
-      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+    if (!getSubmission.value) {
+      const submission = (await submissionService.getSubmission(submissionId)).data;
+      submissionStore.setSubmission(submission);
     }
 
-    breadcrumbItems.value = [
-      {
-        label: submission.value?.projectName,
-        route: RouteName.EXT_HOUSING_PROJECT,
-        params: { submissionId: submission.value?.submissionId }
-      },
-      { label: permit?.value?.name, class: 'font-bold' }
-    ];
-
-    if (submission.value?.assignedUserId) {
+    if (getSubmission.value?.assignedUserId) {
       assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [submission.value.assignedUserId] })
+        await contactService.searchContacts({ userId: [getSubmission.value.assignedUserId] })
       ).data[0];
+    }
+
+    if (getPermit.value?.updatedBy) {
+      const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
+      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
     }
   } catch {
     toast.error('Unable to load permit or project, please try again later');
@@ -225,39 +219,39 @@ onBeforeMount(async () => {
 <template>
   <div class="permit-status-view">
     <h1 class="permit-name">
-      {{ permit?.name }}
+      {{ getPermit?.permitType.name }}
     </h1>
     <div class="permit-info-block">
       <div class="permit-info">
         <div class="info-item">
           <b>Tracking ID:</b>
           <span>
-            {{ permit?.trackingId }}
+            {{ getPermit?.trackingId }}
           </span>
         </div>
         <div class="info-item">
           <b>Submitted date:</b>
           <span>
-            {{ formatDate(permit?.submittedDate) }}
+            {{ formatDate(getPermit?.submittedDate) }}
           </span>
         </div>
         <div class="info-item">
           <b>Permit ID:</b>
           <span>
-            {{ permit?.issuedPermitId }}
+            {{ getPermit?.issuedPermitId }}
           </span>
         </div>
         <div class="info-item">
           <b>Adjudication date:</b>
           <span>
-            {{ formatDate(permit?.adjudicationDate) }}
+            {{ formatDate(getPermit?.adjudicationDate) }}
           </span>
         </div>
       </div>
       <div class="info-item mt-6">
         <b>Agency:</b>
         <span>
-          {{ permit?.agency }}
+          {{ getPermit?.permitType.agency }}
         </span>
       </div>
     </div>
@@ -284,13 +278,13 @@ onBeforeMount(async () => {
       <template #header>
         <div
           class="status-tracker-header py-4 px-6"
-          :class="[getStatusBoxState(permit?.authStatus).boxClass]"
+          :class="[getStatusBoxState(getPermit?.authStatus).boxClass]"
         >
           <StatusPill
-            :auth-status="permit?.authStatus"
+            :auth-status="getPermit?.authStatus"
             :enlarge="true"
           />
-          {{ getStatusBoxState(permit?.authStatus).message }}
+          {{ getStatusBoxState(getPermit?.authStatus).message }}
         </div>
       </template>
       <template #content>
@@ -303,7 +297,7 @@ onBeforeMount(async () => {
               {{ t('permitStatusView.applicationProgress') }}
             </h4>
             <Timeline
-              :value="getTimelineStage(permit?.authStatus, permit?.status)"
+              :value="getTimelineStage(getPermit?.authStatus, getPermit?.status)"
               layout="horizontal"
             >
               <template #marker="slotProps">
@@ -334,7 +328,7 @@ onBeforeMount(async () => {
           <div class="status-verified-message">
             <div v-if="updatedBy">
               <p class="verified-text my-0">
-                {{ t('permitStatusView.statusLastVerified') }} {{ formatDate(permit?.statusLastVerified) }} by
+                {{ t('permitStatusView.statusLastVerified') }} {{ formatDate(getPermit?.statusLastVerified) }} by
                 {{ updatedBy }}
               </p>
             </div>
@@ -347,28 +341,25 @@ onBeforeMount(async () => {
     </Card>
     <div class="updates-section">
       <h4 class="mb-6">{{ t('permitStatusView.additionalUpdates') }}</h4>
-      <div class="ask-navigator mb-16">
+      <div
+        v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+        class="ask-navigator mb-16"
+      >
         <Button
           outlined
           :label="t('permitStatusView.askNav')"
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, submissionId },
-              query: {
-                permitName: permit?.name,
-                permitTrackingId: permit?.trackingId,
-                permitAuthStatus: permit?.authStatus,
-                projectActivityId: projectActivityId
-              }
+              params: { permitId, submissionId }
             })
           "
         />
         <p>{{ t('permitStatusView.contactNav') }}</p>
       </div>
-      <div v-if="permit?.permitNote && permit.permitNote.length > 0">
+      <div v-if="getPermit?.permitNote && getPermit.permitNote.length > 0">
         <div
-          v-for="note in permit.permitNote"
+          v-for="note in getPermit.permitNote"
           :key="note.permitNoteId"
           class="mb-6"
         >

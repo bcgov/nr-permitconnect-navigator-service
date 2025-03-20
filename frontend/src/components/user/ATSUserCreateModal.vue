@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
@@ -79,7 +79,7 @@ async function createATSClient() {
   }
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   const locationAddressStr = [
     'streetAddress' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',
     'locality' in submissionOrEnquiry ? submissionOrEnquiry.streetAddress : '',

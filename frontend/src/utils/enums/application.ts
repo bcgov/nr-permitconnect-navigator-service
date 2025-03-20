@@ -79,6 +79,7 @@ export enum RouteName {
   EXT_HOUSING_PROJECT_PERMIT = 'ext_housing_project_permit',
   EXT_HOUSING_PROJECT_PERMIT_ENQUIRY = 'ext_housing_project_permit_enquiry',
   EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_housing_project_permit_enquiry_confirmation',
+  EXT_HOUSING_PROJECT_RELATED_ENQUIRY = 'ext_housing_project_related_enquiry',
   /*
    * End External route names
    */

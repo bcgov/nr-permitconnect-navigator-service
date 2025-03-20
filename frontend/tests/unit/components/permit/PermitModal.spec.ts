@@ -9,7 +9,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 
 import type { AxiosResponse } from 'axios';
-import type { Permit } from '@/types';
+import type { Permit, PermitType } from '@/types';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
@@ -22,6 +22,23 @@ vi.mock('vue-router', () => ({
 
 const currentDate = new Date().toISOString();
 const activityId = 'activityUUID';
+
+const testPermitType: PermitType = {
+  permitTypeId: 1,
+  agency: 'Water, Land and Resource Stewardship',
+  division: 'Forest Resiliency and Archaeology',
+  branch: 'Archaeology',
+  businessDomain: 'Archaeology',
+  type: 'Alteration',
+  family: undefined,
+  name: 'Archaeology Alteration Permit',
+  nameSubtype: undefined,
+  acronym: 'SAP',
+  trackedInATS: false,
+  sourceSystem: 'Archaeology Permit Tracking System',
+  sourceSystemAcronym: 'APTS'
+};
+
 const testPermit: Permit = {
   permitId: 'permitUUID',
   permitTypeId: 123,
@@ -36,7 +53,8 @@ const testPermit: Permit = {
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  permitType: testPermitType
 };
 
 const wrapperSettings = (testPermitProp = testPermit) => ({

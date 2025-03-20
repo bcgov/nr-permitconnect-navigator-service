@@ -123,7 +123,7 @@ const wrapperSettings = (defaultProps: Props = defaultTestProps) => ({
   }
 });
 
-describe('ProjectsList.vue', () => {
+describe('Map.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });

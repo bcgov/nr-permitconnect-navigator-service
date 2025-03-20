@@ -1,19 +1,18 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { computed, ref, watchEffect } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import NotesModal from '@/components/permit/NotesModal.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAuthZStore, useTypeStore } from '@/store';
+import { useAuthZStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { PermitAuthorizationStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType } from '@/types';
+import type { Permit } from '@/types';
 
 // Props
 const { editable, permit } = defineProps<{
@@ -21,17 +20,10 @@ const { editable, permit } = defineProps<{
   permit: Permit;
 }>();
 
-// Store
-const { getPermitTypes } = storeToRefs(useTypeStore());
-
 // State
 const cardUpdatedBy: Ref<string> = ref('');
-const permitModalVisible: Ref<boolean> = ref(false);
 const notesModalVisible: Ref<boolean> = ref(false);
-const permitType: Ref<PermitType | undefined> = ref(
-  getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId)
-);
-const permitTypeName = computed(() => permitType.value?.name ?? '');
+const permitModalVisible: Ref<boolean> = ref(false);
 
 // Actions
 watchEffect(() => {
@@ -43,10 +35,6 @@ watchEffect(() => {
       })
       .catch(() => {});
   }
-});
-
-watchEffect(() => {
-  permitType.value = getPermitTypes.value.find((x) => x.permitTypeId === permit.permitTypeId);
 });
 
 function isCompleted(authStatus: string | undefined): boolean {
@@ -69,7 +57,7 @@ function isCompleted(authStatus: string | undefined): boolean {
     <template #title>
       <div class="flex">
         <div class="grow">
-          <h3 class="mb-0">{{ permitTypeName }}</h3>
+          <h3 class="mb-0">{{ permit.permitType.name }}</h3>
         </div>
         <div class="flex justify-center flex-wrap gap-2 align-items-center">
           <Button
@@ -149,15 +137,15 @@ function isCompleted(authStatus: string | undefined): boolean {
         <div class="grid grid-cols-1 space-y-4">
           <p>
             <span class="key font-bold">Agency:</span>
-            {{ permitType?.agency }}
+            {{ permit.permitType.agency }}
           </p>
           <p>
             <span class="key font-bold">Business domain:</span>
-            {{ permitType?.businessDomain }}
+            {{ permit.permitType.businessDomain }}
           </p>
           <p>
             <span class="key font-bold">Source system:</span>
-            {{ permitType?.sourceSystem }}
+            {{ permit.permitType.sourceSystem }}
           </p>
           <p>
             <span class="key font-bold">Needed:</span>
@@ -195,7 +183,7 @@ function isCompleted(authStatus: string | undefined): boolean {
   <NotesModal
     v-model:visible="notesModalVisible"
     :permit="permit"
-    :permit-name="permitTypeName"
+    :permit-name="permit.permitType.name"
   />
 </template>
 

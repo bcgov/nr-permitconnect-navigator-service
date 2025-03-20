@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Select } from '@/lib/primevue';
@@ -32,7 +32,7 @@ function setGroup(e: any) {
   group.value = e.value;
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   group.value = getGroupOverride.value;
 });
 </script>

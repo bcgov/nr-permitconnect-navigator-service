@@ -159,7 +159,7 @@ describe('SubmissionIntakeForm', () => {
     it('keeps editable true in draft mode', async () => {
       const getDraftSpy = vi.spyOn(submissionService, 'getDraft');
 
-      getDraftSpy.mockResolvedValue({ activityId: '123' } as any);
+      getDraftSpy.mockResolvedValue({ draftId: '123' } as any);
 
       const wrapper = shallowMount(SubmissionIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
 
@@ -170,18 +170,18 @@ describe('SubmissionIntakeForm', () => {
       expect(editable).toBeTruthy();
     });
 
-    it('sets editable to false when activity and submission ID given', async () => {
+    it('sets editable to false when submission ID given', async () => {
       const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 
-      getSubmissionSpy.mockResolvedValue({ activityId: '123', submissionId: '456' } as any);
-      listPermitsSpy.mockResolvedValue({ permitId: '123' } as any);
-      listDocumentsSpy.mockResolvedValue({ documentId: '123' } as any);
+      getSubmissionSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as any);
+      listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as any);
+      listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as any);
 
       const wrapper = shallowMount(SubmissionIntakeForm, {
         ...wrapperSettings(),
-        props: { activityId: '123', submissionId: '456' }
+        props: { submissionId: '456' }
       });
 
       await nextTick();

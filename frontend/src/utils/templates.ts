@@ -76,8 +76,7 @@ export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: s
     'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
     'View your project submission <a href="' +
     PCNS_URL +
-    // TODO Breadcrumb ticket: remove query
-    '/e/housing/project/{{ submissionId }}/intake?activityId={{ activityId }}">here<a>.<br><br>' +
+    '/e/housing/project/{{ submissionId }}/intake">here<a>.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +
@@ -91,6 +90,9 @@ export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: s
 };
 
 export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+  const ENQUIRY_URL = replaceConfig.projectId
+    ? `/e/housing/project/${replaceConfig.projectId}/enquiry/${replaceConfig.enquiryId}`
+    : `/e/housing/enquiry/${replaceConfig.enquiryId}`;
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -105,8 +107,8 @@ export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: stri
     '{{ enquiryDescription }}<br><br>' +
     'View your enquiry <a href="' +
     PCNS_URL +
-    // TODO Breadcrumb ticket: remove query and make URL reflect related projects if necessary
-    '/e/housing/enquiry/{{ enquiryId }}?activityId={{ activityId }}">here<a>.<br><br>' +
+    ENQUIRY_URL +
+    '">here<a>.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +

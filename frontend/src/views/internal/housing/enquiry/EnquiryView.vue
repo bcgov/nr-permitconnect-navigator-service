@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, noteService, submissionService } from '@/services';
-import { useAuthZStore, useEnquiryStore } from '@/store';
+import { useAuthZStore, useEnquiryStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 
@@ -17,55 +17,50 @@ import type { Ref } from 'vue';
 
 // Props
 const {
-  activityId,
+  enquiryId,
   initialTab = '0',
-  enquiryId
+  submissionId
 } = defineProps<{
-  activityId: string;
   initialTab?: string;
   enquiryId: string;
+  submissionId?: string;
 }>();
 
-// State
-const activeTab: Ref<number> = ref(Number(initialTab));
-const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
-const loading: Ref<boolean> = ref(true);
-const noteModalVisible: Ref<boolean> = ref(false);
-const router = useRouter();
+// Composables
+const { t } = useI18n();
 
 // Store
 const enquiryStore = useEnquiryStore();
+const submissionStore = useSubmissionStore();
 const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
-// Actions
+// State
+const activeTab: Ref<number> = ref(Number(initialTab));
+const activityId: Ref<string | undefined> = ref(undefined);
+const relatedSubmission: Ref<Submission | undefined> = ref(undefined);
+const loading: Ref<boolean> = ref(true);
+const noteModalVisible: Ref<boolean> = ref(false);
 
 const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
 });
 
-onMounted(async () => {
-  if (enquiryId && activityId) {
-    const [enquiry, notes] = (
-      await Promise.all([enquiryService.getEnquiry(enquiryId), noteService.listNotes(activityId)])
-    ).map((r) => r.data);
-    enquiryStore.setEnquiry(enquiry);
-    enquiryStore.setNotes(notes);
-
-    updateRelatedEnquiry();
-  }
-
-  loading.value = false;
-});
-
+// Actions
 function onAddNote(note: Note) {
   enquiryStore.addNote(note, true);
 }
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  enquiryStore.updateNote(oldNote, newNote);
-};
+
 const onDeleteNote = (note: Note) => {
   enquiryStore.removeNote(note);
 };
+
+const onUpdateNote = (oldNote: Note, newNote: Note) => {
+  enquiryStore.updateNote(oldNote, newNote);
+};
+
+function onEnquiryFormSaved() {
+  updateRelatedEnquiry();
+}
 
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
@@ -77,26 +72,31 @@ async function updateRelatedEnquiry() {
   } else relatedSubmission.value = undefined;
 }
 
-function onEnquiryFormSaved() {
-  updateRelatedEnquiry();
-}
+onBeforeMount(async () => {
+  if (enquiryId) {
+    const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
+    const notes = (await noteService.listNotes(enquiry.activityId)).data;
+
+    activityId.value = enquiry.activityId;
+
+    enquiryStore.setEnquiry(enquiry);
+    enquiryStore.setNotes(notes);
+
+    updateRelatedEnquiry();
+  }
+
+  if (submissionId) {
+    const submission = (await submissionService.getSubmission(submissionId)).data;
+    submissionStore.setSubmission(submission);
+  }
+
+  loading.value = false;
+});
 </script>
 
 <template>
-  <Button
-    class="p-0"
-    text
-    @click="router.back()"
-  >
-    <font-awesome-icon
-      icon="fa fa-arrow-circle-left"
-      class="mr-1 app-primary-color"
-    />
-    <span class="app-primary-color">Back to Submissions</span>
-  </Button>
-
   <h1>
-    Enquiry submission:
+    {{ t('enquiryView.header') }}
     <span
       v-if="getEnquiry?.activityId"
       class="mr-1"
@@ -107,7 +107,7 @@ function onEnquiryFormSaved() {
       v-if="isCompleted"
       class="ml-0"
     >
-      (Completed)
+      {{ t('enquiryView.completed') }}
     </span>
   </h1>
   <Tabs :value="activeTab">
@@ -123,12 +123,11 @@ function onEnquiryFormSaved() {
           class="text-center"
           :closable="false"
         >
-          This activity is linked to Activity
+          {{ t('enquiryView.linkedActivity') }}
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { submissionId: relatedSubmission.submissionId },
-              query: { activityId: getEnquiry?.relatedActivityId }
+              params: { submissionId: relatedSubmission.submissionId }
             }"
           >
             {{ getEnquiry?.relatedActivityId }}
@@ -141,7 +140,7 @@ function onEnquiryFormSaved() {
           class="text-center"
           :closable="false"
         >
-          This activity is linked to an invalid Activity
+          {{ t('enquiryView.invalidLinkedActivity') }}
         </Message>
         <span v-if="!loading && getEnquiry">
           <EnquiryForm
@@ -183,7 +182,7 @@ function onEnquiryFormSaved() {
           />
         </div>
         <NoteModal
-          v-if="noteModalVisible"
+          v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
           @add-note="onAddNote"

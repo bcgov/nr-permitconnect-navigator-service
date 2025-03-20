@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { Select } from '@/components/form';
 import { Spinner } from '@/components/layout';
@@ -85,7 +85,7 @@ async function searchIdirUsers() {
   }
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];

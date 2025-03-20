@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { useI18n } from 'vue-i18n';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -39,12 +39,7 @@ import type { Ref } from 'vue';
 import type { Document, Note } from '@/types';
 
 // Props
-const {
-  activityId,
-  initialTab = '0',
-  submissionId
-} = defineProps<{
-  activityId: string;
+const { initialTab = '0', submissionId } = defineProps<{
   initialTab?: string;
   submissionId: string;
 }>();
@@ -62,14 +57,17 @@ const SORT_TYPES = {
   CREATED_BY: 'createdByFullName'
 };
 
+// Composables
+const { t } = useI18n();
+const router = useRouter();
+
 // Store
 const submissionStore = useSubmissionStore();
-const typeStore = useTypeStore();
 const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
-const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
+const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
@@ -77,10 +75,8 @@ const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
-const router = useRouter();
 
 // Actions
-const { t } = useI18n();
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
   tempDocuments = tempDocuments.filter((x) => {
@@ -126,15 +122,15 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
-onMounted(async () => {
-  const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
+onBeforeMount(async () => {
+  const submission = (await submissionService.getSubmission(submissionId)).data;
+  activityId.value = submission.activityId;
+  const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
-      submissionService.getSubmission(submissionId),
-      documentService.listDocuments(activityId),
-      noteService.listNotes(activityId),
-      permitService.listPermits({ activityId, includeNotes: true }),
-      permitService.getPermitTypes(),
-      enquiryService.listRelatedEnquiries(activityId)
+      documentService.listDocuments(submission.activityId),
+      noteService.listNotes(submission.activityId),
+      permitService.listPermits({ activityId: submission.activityId, includeNotes: true }),
+      enquiryService.listRelatedEnquiries(submission.activityId)
     ])
   ).map((r) => r.data);
 
@@ -147,7 +143,6 @@ onMounted(async () => {
   submissionStore.setDocuments(documents);
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
-  typeStore.setPermitTypes(permitTypes);
   submissionStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
@@ -155,18 +150,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Button
-    class="p-0"
-    text
-    @click="router.back()"
-  >
-    <font-awesome-icon
-      icon="fa fa-arrow-circle-left"
-      class="mr-1 app-primary-color"
-    />
-    <span class="app-primary-color">Back to Submissions</span>
-  </Button>
-
   <div class="flex items-center justify-between">
     <h1>
       <span v-if="getSubmission?.projectName">
@@ -222,6 +205,7 @@ onMounted(async () => {
       <TabPanel :value="1">
         <div class="mb-4 border-dashed file-upload rounded-md">
           <FileUpload
+            v-if="activityId"
             :activity-id="activityId"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
           />
@@ -403,7 +387,7 @@ onMounted(async () => {
         </DataTable>
       </TabPanel>
       <TabPanel :value="2">
-        <span v-if="getPermitTypes.length">
+        <span v-if="getPermits.length">
           <div class="flex items-center pb-5">
             <div class="grow">
               <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
@@ -433,6 +417,7 @@ onMounted(async () => {
           </div>
 
           <PermitModal
+            v-if="activityId"
             v-model:visible="permitModalVisible"
             :activity-id="activityId"
           />
@@ -470,7 +455,7 @@ onMounted(async () => {
         </div>
 
         <NoteModal
-          v-if="noteModalVisible"
+          v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
           @add-note="onAddNote"
@@ -478,7 +463,7 @@ onMounted(async () => {
       </TabPanel>
       <TabPanel :value="4">
         <Roadmap
-          v-if="!loading"
+          v-if="!loading && activityId"
           :activity-id="activityId"
           :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
         />

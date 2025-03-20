@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -61,7 +61,7 @@ watch(
   }
 );
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const includeActivities = true;
   const contactData = (await contactService.getContact(contactId, includeActivities)).data;
   const activityIds = contactData.activityContact.map((ac: ActivityContact) => ac.activityId);

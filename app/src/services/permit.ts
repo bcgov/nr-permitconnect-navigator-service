@@ -76,7 +76,7 @@ const service = {
         permit_id: permitId
       },
       include: {
-        permit_type: true,
+        permit_type: true, // If changed reflect in type and model
         permit_note: { orderBy: { created_at: 'desc' } }
       }
     });
