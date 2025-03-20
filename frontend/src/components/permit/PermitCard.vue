@@ -7,7 +7,7 @@ import PermitModal from '@/components/permit/PermitModal.vue';
 import NotesModal from '@/components/permit/NotesModal.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAuthZStore, usePermitStore } from '@/store';
+import { useAuthZStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
 import { PermitAuthorizationStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateTime } from '@/utils/formatters';
@@ -22,7 +22,7 @@ const { editable, permit } = defineProps<{
 }>();
 
 // Store
-const { getPermitTypes } = storeToRefs(usePermitStore());
+const { getPermitTypes } = storeToRefs(useTypeStore());
 
 // State
 const cardUpdatedBy: Ref<string> = ref('');
