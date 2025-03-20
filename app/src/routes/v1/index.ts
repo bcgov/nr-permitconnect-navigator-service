@@ -7,6 +7,7 @@ import ats from './ats';
 import contact from './contact';
 import docs from './docs';
 import document from './document';
+import electrificationProject from './electrificationProject';
 import enquiry from './enquiry';
 import housingProject from './housingProject';
 import map from './map';
@@ -32,14 +33,15 @@ router.get('/', (_req, res) => {
       '/contact',
       '/docs',
       '/document',
+      '/electrificationProject',
       '/enquiry',
+      '/housingProject',
       '/map',
       '/note',
       '/permit',
       '/reporting',
       '/roadmap',
       '/sso',
-      '/housingProject',
       '/user',
       '/yars'
     ]
@@ -51,14 +53,15 @@ router.use('/docs', docs);
 router.use('/ats', ats);
 router.use('/contact', contact);
 router.use('/document', document);
+router.use('/electrificationProject', electrificationProject);
 router.use('/enquiry', enquiry);
+router.use('/housingProject', housingProject);
 router.use('/map', map);
 router.use('/note', note);
 router.use('/permit', permit);
 router.use('/reporting', reporting);
 router.use('/roadmap', roadmap);
 router.use('/sso', sso);
-router.use('/housingProject', housingProject);
 router.use('/user', user);
 router.use('/yars', yars);
 

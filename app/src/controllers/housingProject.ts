@@ -11,16 +11,9 @@ import {
   permitService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
-import {
-  ApplicationStatus,
-  DraftCode,
-  IntakeStatus,
-  NumResidentialUnits,
-  PermitAuthorizationStatus,
-  PermitNeeded,
-  PermitStatus,
-  SubmissionType
-} from '../utils/enums/housing';
+import { NumResidentialUnits } from '../utils/enums/housing';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
+import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';

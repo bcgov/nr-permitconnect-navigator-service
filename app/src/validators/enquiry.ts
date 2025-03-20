@@ -6,6 +6,7 @@ import { uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { APPLICATION_STATUS_LIST, ENQUIRY_SUBMITTED_METHOD, INTAKE_STATUS_LIST } from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 
 const schema = {
   createEnquiry: {
