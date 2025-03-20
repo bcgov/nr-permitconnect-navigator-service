@@ -2,6 +2,7 @@ export { default as accessRequestController } from './accessRequest';
 export { default as atsController } from './ats';
 export { default as contactController } from './contact';
 export { default as documentController } from './document';
+export { default as electrificationProjectController } from './electrificationProject';
 export { default as enquiryController } from './enquiry';
 export { default as housingProjectController } from './housingProject';
 export { default as mapController } from './map';

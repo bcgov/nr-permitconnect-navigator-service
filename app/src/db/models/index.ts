@@ -3,6 +3,7 @@ export { default as access_request } from './access_request';
 export { default as contact } from './contact';
 export { default as document } from './document';
 export { default as draft } from './draft';
+export { default as electrification_project } from './electrification_project';
 export { default as email_log } from './email_log';
 export { default as enquiry } from './enquiry';
 export { default as housing_project } from './housing_project';
