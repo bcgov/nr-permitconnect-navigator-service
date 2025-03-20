@@ -1,7 +1,8 @@
 import Joi from 'joi';
 
 import { YES_NO_LIST } from '../utils/constants/application';
-import { ENQUIRY_TYPE_LIST, PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
+import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
+import { ENQUIRY_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectApplicant } from '../utils/enums/housing';
 
 export const basicIntake = Joi.object({

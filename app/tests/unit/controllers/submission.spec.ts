@@ -7,7 +7,8 @@ import {
   housingProjectService,
   permitService
 } from '../../../src/services';
-import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
+import { PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
+import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/projectCommon';
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
 
 import type { Draft, HousingProject, Permit } from '../../../src/types';

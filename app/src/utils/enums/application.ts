@@ -27,6 +27,7 @@ export enum IdentityProvider {
 
 export enum Initiative {
   PCNS = 'PCNS',
+  ELECTRIFICATION = 'ELECTRIFICATION',
   HOUSING = 'HOUSING'
 }
 
@@ -50,6 +51,7 @@ export enum Resource {
   ATS = 'ATS',
   CONTACT = 'CONTACT',
   DOCUMENT = 'DOCUMENT',
+  ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
   ENQUIRY = 'ENQUIRY',
   HOUSING_PROJECT = 'HOUSING_PROJECT',
   NOTE = 'NOTE',
