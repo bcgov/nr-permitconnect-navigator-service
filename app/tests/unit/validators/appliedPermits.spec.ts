@@ -1,4 +1,4 @@
-import { PermitStatus } from '../../../src/utils/enums/housing';
+import { PermitStatus } from '../../../src/utils/enums/permit';
 import { appliedPermit } from '../../../src/validators/appliedPermit';
 
 describe('appliedPermitsSchema', () => {

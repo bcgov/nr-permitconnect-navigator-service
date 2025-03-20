@@ -2,13 +2,6 @@
  * Housing initiative enums
  */
 
-export enum ApplicationStatus {
-  NEW = 'New',
-  IN_PROGRESS = 'In Progress',
-  DELAYED = 'Delayed',
-  COMPLETED = 'Completed'
-}
-
 export enum BringForwardType {
   UNRESOLVED = 'Unresolved',
   RESOLVED = 'Resolved'
@@ -18,10 +11,6 @@ export enum ContactPreference {
   PHONE_CALL = 'Phone call',
   EMAIL = 'Email',
   EITHER = 'Either'
-}
-
-export enum DraftCode {
-  HOUSING_PROJECT = 'HOUSING_PROJECT'
 }
 
 export enum EnquirySubmittedMethod {
@@ -39,13 +28,6 @@ export enum IntakeFormCategory {
   APPLIED_PERMITS = 'appliedPermits'
 }
 
-export enum IntakeStatus {
-  SUBMITTED = 'Submitted',
-  ASSIGNED = 'Assigned',
-  COMPLETED = 'Completed',
-  DRAFT = 'Draft'
-}
-
 export enum NoteType {
   GENERAL = 'General',
   BRING_FORWARD = 'Bring forward',
@@ -59,31 +41,6 @@ export enum NumResidentialUnits {
   FIFTY_TO_FIVE_HUNDRED = '50-500',
   GREATER_THAN_FIVE_HUNDRED = '>500',
   UNSURE = 'Unsure'
-}
-
-export enum PermitAuthorizationStatus {
-  ISSUED = 'Approved',
-  PENDING = 'Pending client action',
-  IN_REVIEW = 'In progress',
-  DENIED = 'Denied',
-  CANCELLED = 'Cancelled',
-  WITHDRAWN = 'Withdrawn',
-  ABANDONED = 'Abandoned',
-  NONE = 'None'
-}
-
-export enum PermitNeeded {
-  YES = 'Yes',
-  UNDER_INVESTIGATION = 'Under investigation',
-  NO = 'No'
-}
-
-export enum PermitStatus {
-  NEW = 'Pre-submission',
-  APPLIED = 'Application submission',
-  COMPLETED = 'Post-decision',
-  TECHNICAL_REVIEW = 'Technical review',
-  PENDING = 'Pending decision'
 }
 
 export enum ProjectApplicant {
@@ -100,13 +57,4 @@ export enum ProjectRelationship {
 export enum ProjectLocation {
   STREET_ADDRESS = 'Street address',
   LOCATION_COORDINATES = 'Location coordinates'
-}
-
-export enum SubmissionType {
-  ASSISTANCE = 'Assistance',
-  ESCALATION = 'Escalation',
-  GENERAL_ENQUIRY = 'General enquiry',
-  GUIDANCE = 'Guidance',
-  INAPPLICABLE = 'Inapplicable',
-  STATUS_REQUEST = 'Status request'
 }
