@@ -11,8 +11,8 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: 'contact',
-        meta: { access: [NavigationPermission.INT_CONTACT], breadcrumb: 'Contacts', requiresAuth: true },
         beforeEnter: entryRedirect,
+        meta: { access: [NavigationPermission.INT_CONTACT], breadcrumb: 'Contacts', requiresAuth: true },
         children: [
           {
             path: '',
@@ -26,9 +26,7 @@ const routes: Array<RouteRecordRaw> = [
             component: () => import('@/views/internal/contact/ContactPageView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
-            meta: {
-              breadcrumb_dynamic: true
-            }
+            meta: { breadcrumb: 'Contact Details' }
           }
         ]
       },

@@ -1,119 +1,174 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
 import { Breadcrumb } from '@/lib/primevue';
+import { useEnquiryStore, usePermitStore, useSubmissionStore } from '@/store';
+import { RouteName } from '@/utils/enums/application';
 
-import { ref, toRaw, watch, type Ref } from 'vue';
-import { useRoute, type RouteLocationNormalizedLoadedGeneric } from 'vue-router';
+import type { MenuItem } from 'primevue/menuitem';
+import type { ComputedRef } from 'vue';
+import type { RouteLocationMatched, RouteRecordNameGeneric, RouteRecordRaw } from 'vue-router';
 
+// Composables
 const route = useRoute();
 
-const routes: Ref<Array<RouteLocationNormalizedLoadedGeneric>> = ref([]);
+// Store
+const enquiryStore = useEnquiryStore();
+const permitStore = usePermitStore();
+const submissionStore = useSubmissionStore();
+const { getEnquiry } = storeToRefs(enquiryStore);
+const { getPermit } = storeToRefs(permitStore);
+const { getSubmission } = storeToRefs(submissionStore);
 
-const oldWatch: Ref<RouteLocationNormalizedLoadedGeneric | undefined> = ref(undefined);
+// State
+const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => {
+  if (route.meta.hideBreadcrumb) return [];
+  const matchedCrumbs = route.matched.filter((m) => m.meta?.breadcrumb !== undefined || m.meta?.dynamicBreadcrumb);
 
-// Maps a param key to a callback function
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// const paramMap = new Map<string, (id: string) => any>([
-//   ['bc_submission', submissionStore.getSubmission],
-//   ['bc_permit', submissionStore.getPermit]
-// ]);
+  return matchedCrumbs.map((record, index) => {
+    const isLast = index === matchedCrumbs.length - 1;
+    let label = generateBreadcrumbLabel(record);
+    let tooltip = '';
 
-// function generateName(item: RouteLocationMatched) {
-//   console.log(item.meta);
-//   if (item?.meta?.breadcrumb_dynamic) {
-//     console.log('dynamic');
-//   } else {
-//     return item.meta.breadcrumb;
-//   }
-// }
-
-watch(
-  route,
-  async () => {
-    const value = toRaw({ ...route });
-    const oldValue = toRaw({ ...oldWatch.value });
-
-    const matched = value.matched.filter((x) => x.meta.breadcrumb);
-    const oldMatched = oldValue.matched?.filter((x) => x.meta.breadcrumb).map((x) => toRaw(x));
-
-    // const fullPath = route.fullPath;
-    // const path = route.path;
-    // const name = route.name;
-    // const params = route.params;
-    // const query = route.query;
-    // const hash = route.hash;
-    // const matched = route.matched;
-
-    // Fresh entry, just add
-    if (!oldMatched) {
-      routes.value.push(value);
+    if (!isLast && label.length > 10 && record.meta.dynamicBreadcrumb && label !== 'Missing Label') {
+      tooltip = label;
+      label = label.substring(0, 10) + '...';
     }
-    // Check for path divergence
-    else {
-      if (matched.length > oldMatched.length) {
-        for (let i = 0; i < oldMatched.length; ++i) {
-          if (matched[i].path !== oldMatched[i].path) {
-            routes.value = routes.value.slice(0, i);
-            break;
-          }
+
+    return {
+      label,
+      tooltip,
+      to: !isLast ? generateToObject(record) : null
+    };
+  });
+});
+
+// Actions
+function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
+  const dynamicBreadcrumb = routeRecord.meta.dynamicBreadcrumb as string;
+  if (dynamicBreadcrumb) {
+    switch (dynamicBreadcrumb) {
+      case 'project': {
+        const project = getSubmission;
+        if (project.value) {
+          return project.value.projectName;
+        } else {
+          return '...Loading';
         }
-        routes.value.push(value);
-      } else if (matched.length === oldMatched.length) {
-        routes.value[routes.value.length - 1] = value;
-      } else if (matched.length < oldMatched.length) {
-        for (let i = 0; i < matched.length; ++i) {
-          if (matched[i].path !== oldMatched[i].path || i === matched.length - 1) {
-            routes.value = routes.value.slice(0, Math.min(0, i - 1));
-            break;
-          }
-        }
-        routes.value.push(value);
       }
+      case 'enquiry': {
+        const enquiry = getEnquiry;
+        if (enquiry.value) {
+          const activityId = enquiry.value.activityId;
+          return `Enquiry ${activityId}`;
+        } else {
+          return '...Loading';
+        }
+      }
+      case 'permit': {
+        const permit = getPermit;
+        if (permit.value) {
+          return permit.value.permitType.name;
+        } else {
+          return '...Loading';
+        }
+      }
+      default:
+        return 'Missing Label';
     }
+  }
+  return routeRecord.meta.breadcrumb as string;
+}
 
-    oldWatch.value = value;
-  },
-  { deep: true }
-);
+function generateToObject(record: RouteLocationMatched) {
+  let toName: RouteRecordNameGeneric;
+
+  // If record has no name then the empty nested child/grandchild will define the route name
+  if (!record.name && record.children) {
+    toName = getRouteNameFromFirstChild(record.children[0]);
+  } else {
+    toName = record.name;
+  }
+
+  const toObject = {
+    name: toName,
+    // Note: Params not needed
+    // Breacrumb always navigates backwards so required params are present in router
+    // If navigation leads to different part of router tree without needed params
+    // The breadcrumbs will reflect that and not show link back to previous view/route
+    query: route.query,
+    hash: route.hash
+  };
+  return toObject;
+}
+
+// Recursively find a empty nested child path
+function getRouteNameFromFirstChild(record: RouteRecordRaw) {
+  if (record.name) {
+    return record.name;
+  } else if (record.children) {
+    return getRouteNameFromFirstChild(record.children[0]);
+  } else {
+    // Route name not found case
+    return RouteName.HOME;
+  }
+}
 </script>
 
 <template>
   <Breadcrumb
-    v-if="!route.meta.hideBreadcrumb"
-    :model="routes"
+    v-if="breadcrumbItems.length > 1"
+    :model="breadcrumbItems"
   >
     <template #separator>/</template>
     <template #item="{ item }">
-      <!-- TODO: Dont link last item, just plain text -->
       <router-link
-        :to="{
-          name: item.name,
-          params: item.params,
-          query: item.query,
-          hash: item.hash
-        }"
+        v-if="item.to"
+        class="breadcrumb-link"
+        :to="item.to"
       >
-        <span
-          class="app-primary-color cursor-pointer hover-underline"
-          :class="[item.class]"
-        >
-          {{ item?.meta?.breadcrumb }}
+        <span v-tooltip.bottom="item.tooltip">
+          <span v-tooltip.focus.bottom="item.tooltip">
+            {{ item.label }}
+          </span>
         </span>
       </router-link>
+      <span
+        v-else
+        class="breadcrumb-current"
+      >
+        {{ item.label }}
+      </span>
     </template>
   </Breadcrumb>
 </template>
 
 <style scoped lang="scss">
-a {
-  text-decoration: none;
-}
-
-.hover-underline:hover {
-  text-decoration: underline;
+.p-breadcrumb {
+  border: none;
+  padding: 0.125rem;
 }
 
 .p-breadcrumb {
   border: none;
   padding: 0.125rem;
+}
+
+.breadcrumb-link {
+  color: #255a90;
+  font-family: 'BC Sans', sans-serif;
+  font-weight: normal;
+  text-decoration: none;
+}
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.breadcrumb-current {
+  color: #2d2d2d;
+  font-family: 'BC Sans', sans-serif;
+  font-weight: bold;
 }
 </style>
