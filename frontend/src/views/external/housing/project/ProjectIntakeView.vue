@@ -3,7 +3,7 @@ import { onBeforeMount, ref } from 'vue';
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { permitService } from '@/services';
-import { useTypeStore } from '@/store';
+import { usePermitStore } from '@/store';
 
 import type { Ref } from 'vue';
 
@@ -18,13 +18,12 @@ const loading: Ref<boolean> = ref(true);
 
 // Actions
 onBeforeMount(async () => {
-  useTypeStore().setPermitTypes((await permitService.getPermitTypes()).data);
+  usePermitStore().setPermitTypes((await permitService.getPermitTypes()).data);
   loading.value = false;
 });
 </script>
 
 <template>
-  <!-- 'key' prop remounts component when it changes -->
   <SubmissionIntakeForm
     v-if="!loading"
     :activity-id="activityId"

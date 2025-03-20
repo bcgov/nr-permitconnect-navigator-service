@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { ref } from 'vue';
 import { date, object, string } from 'yup';
 
 import { DatePicker, InputText, Select } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { useSubmissionStore, useTypeStore } from '@/store';
+import { useSubmissionStore, usePermitStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
 import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 
 import type { SelectChangeEvent } from 'primevue/select';
-import type { Ref } from 'vue';
-import type { Permit, PermitForm, PermitType } from '@/types';
+import type { Permit, PermitForm } from '@/types';
 
 // Props
 const { activityId, permit = undefined } = defineProps<{
@@ -23,27 +21,24 @@ const { activityId, permit = undefined } = defineProps<{
 
 // Store
 const submissionStore = useSubmissionStore();
-const typeStore = useTypeStore();
-const { getPermitTypes } = storeToRefs(typeStore);
+const permitStore = usePermitStore();
+const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
-const permitType: Ref<PermitType | undefined> = ref(
-  getPermitTypes.value.find((x) => x.permitTypeId === permit?.permitTypeId)
-);
 const visible = defineModel<boolean>('visible');
 
 // Default form values
 let initialFormValues: PermitForm = {
   permitId: permit?.permitId,
-  permitType: permitType.value,
+  permitType: permit?.permitType,
   needed: permit?.needed,
   status: permit?.status ?? PermitStatus.NEW,
-  agency: permitType.value?.agency,
+  agency: permit?.permitType.agency,
   trackingId: permit?.trackingId,
-  businessDomain: permitType.value?.businessDomain,
+  businessDomain: permit?.permitType.businessDomain,
   authStatus: permit?.authStatus ?? PermitAuthorizationStatus.NONE,
   statusLastVerified: permit?.statusLastVerified ? new Date(permit.statusLastVerified) : undefined,
-  sourceSystem: permitType.value?.sourceSystem ?? permitType.value?.sourceSystemAcronym,
+  sourceSystem: permit?.permitType.sourceSystem ?? permit?.permitType.sourceSystemAcronym,
   submittedDate: permit?.submittedDate ? new Date(permit.submittedDate) : undefined,
   issuedPermitId: permit?.issuedPermitId,
   adjudicationDate: permit?.adjudicationDate ? new Date(permit.adjudicationDate) : undefined
@@ -111,10 +106,10 @@ function onDelete() {
 }
 
 function onPermitTypeChanged(e: SelectChangeEvent, setValues: Function) {
-  permitType.value = e.value;
   setValues({
     agency: e.value.agency,
     businessDomain: e.value.businessDomain,
+    permitType: e.value,
     sourceSystem: e.value.sourceSystem ?? e.value.sourceSystemAcronym
   });
 }

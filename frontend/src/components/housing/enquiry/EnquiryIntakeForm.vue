@@ -186,11 +186,11 @@ async function onSubmit(data: any) {
       ]
     );
 
-    if (permitName && permitAuthStatus) {
+    if (permit) {
       let permitDescription =
-        t('enquiryIntakeForm.re') + ': ' + permitName + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
-      const trackingId = permitTrackingId ? permitTrackingId : t('enquiryIntakeForm.notApplicable');
-      const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permitAuthStatus;
+        t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
+      const trackingId = permit.trackingId ? permit.trackingId : t('enquiryIntakeForm.notApplicable');
+      const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
       permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
       enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
       formRef.value?.setFieldValue('basic.enquiryDescription', enquiryData.basic.enquiryDescription);
@@ -285,10 +285,11 @@ onBeforeMount(async () => {
           <span class="section-header">
             {{ t('enquiryIntakeForm.about') }}
             <span class="text-primary">
-              {{ t('enquiryIntakeForm.permit') }}: {{ permitName }}| {{ t('enquiryIntakeForm.trackingId') }}:
-              {{ permitTrackingId ? permitTrackingId : t('enquiryIntakeForm.notApplicable') }}|
+              {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
+              {{ t('enquiryIntakeForm.trackingId') }}:
+              {{ permit?.trackingId ? permit.trackingId : t('enquiryIntakeForm.notApplicable') }}|
               {{ t('enquiryIntakeForm.authStatus') }}:
-              {{ permitAuthStatus }}
+              {{ permit?.authStatus ?? 'No authorization status.' }}
             </span>
           </span>
         </template>

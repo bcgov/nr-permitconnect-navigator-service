@@ -2,6 +2,8 @@
 import { onBeforeMount, ref } from 'vue';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
+import { permitService, submissionService } from '@/services';
+import { usePermitStore, useSubmissionStore } from '@/store';
 
 import type { Ref } from 'vue';
 
@@ -26,6 +28,12 @@ const {
   permitTrackingId?: string;
   permitAuthStatus?: string;
 }>();
+
+// Store
+const permitStore = usePermitStore();
+const submissionStore = useSubmissionStore();
+const { getPermit } = storeToRefs(permitStore);
+const { getSubmission } = storeToRefs(submissionStore);
 
 // State
 const loading: Ref<boolean> = ref(true);

@@ -15,5 +15,5 @@ export type Permit = {
   adjudicationDate: string | null;
   statusLastVerified: string | null;
   permitNote?: Array<PermitNote>;
-  permitType?: PermitType;
+  permitType: PermitType | null;
 } & Partial<IStamps>;

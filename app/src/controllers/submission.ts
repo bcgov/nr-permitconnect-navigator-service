@@ -141,7 +141,8 @@ const controller = {
         issuedPermitId: null,
         authStatus: PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: x.submittedDate,
-        adjudicationDate: null
+        adjudicationDate: null,
+        permitType: null
       }));
     }
 
@@ -157,7 +158,8 @@ const controller = {
         issuedPermitId: null,
         authStatus: PermitAuthorizationStatus.NONE,
         submittedDate: null,
-        adjudicationDate: null
+        adjudicationDate: null,
+        permitType: null
       }));
     }
 

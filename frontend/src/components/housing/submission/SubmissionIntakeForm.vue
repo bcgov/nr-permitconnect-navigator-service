@@ -41,7 +41,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
-import { useConfigStore, useContactStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useConfigStore, useContactStore, usePermitStore, useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -92,10 +92,10 @@ const VALIDATION_BANNER_TEXT = t('submissionIntakeForm.validationBanner');
 
 // Store
 const contactStore = useContactStore();
+const permitStore = usePermitStore();
 const submissionStore = useSubmissionStore();
-const typeStore = useTypeStore();
-const { getPermitTypes } = storeToRefs(typeStore);
 const { getConfig } = storeToRefs(useConfigStore());
+const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
 const activeStep: Ref<number> = ref(0);

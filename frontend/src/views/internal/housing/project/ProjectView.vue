@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -64,9 +64,7 @@ const SORT_TYPES = {
 
 // Store
 const submissionStore = useSubmissionStore();
-const typeStore = useTypeStore();
 const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
-const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -127,14 +125,13 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 }
 
 onBeforeMount(async () => {
-  const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
+  const [submission, documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
       submissionService.getSubmission(submissionId),
-      documentService.listDocuments(activityId),
-      noteService.listNotes(activityId),
-      permitService.listPermits({ activityId, includeNotes: true }),
-      permitService.getPermitTypes(),
-      enquiryService.listRelatedEnquiries(activityId)
+      documentService.listDocuments(submission.activityId),
+      noteService.listNotes(submission.activityId),
+      permitService.listPermits({ activityId: submission.activityId, includeNotes: true }),
+      enquiryService.listRelatedEnquiries(submission.activityId)
     ])
   ).map((r) => r.data);
 
@@ -147,7 +144,6 @@ onBeforeMount(async () => {
   submissionStore.setDocuments(documents);
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
-  typeStore.setPermitTypes(permitTypes);
   submissionStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
@@ -391,7 +387,7 @@ onBeforeMount(async () => {
         </DataTable>
       </TabPanel>
       <TabPanel :value="2">
-        <span v-if="getPermitTypes.length">
+        <span v-if="getPermits.length">
           <div class="flex items-center pb-5">
             <div class="grow">
               <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
