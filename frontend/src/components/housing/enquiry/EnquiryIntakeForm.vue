@@ -22,17 +22,20 @@ import { contactValidator } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Submission } from '@/types';
+import type { Enquiry, Permit, Submission } from '@/types';
 
 // Props
-const { enquiryId, projectActivityId, projectName, permitName, permitTrackingId, permitAuthStatus } = defineProps<{
+const { enquiryId, project, permit } = defineProps<{
   enquiryId?: string;
-  projectActivityId?: string;
-  projectName?: string;
-  permitName?: string;
-  permitTrackingId?: string;
-  permitAuthStatus?: string;
+  project?: Submission;
+  permit?: Permit;
 }>();
+
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const router = useRouter();
+const toast = useToast();
 
 // Store
 const contactStore = useContactStore();
@@ -40,12 +43,12 @@ const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const editable: Ref<boolean> = ref(true);
-const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<undefined | GenericObject> = ref(undefined);
-const projectActivityIds: Ref<Array<string>> = ref([]);
-const submissions: Ref<Array<Submission>> = ref([]);
 const validationErrors: Ref<string[]> = ref([]);
+
+const isOnlyProjectRelated: Ref<boolean> = computed(() => Boolean(project && !permit));
+const isPermitRelated: Ref<boolean> = computed(() => Boolean(permit));
 
 // Form validation schema
 const formSchema = object({
@@ -56,11 +59,6 @@ const formSchema = object({
 });
 
 // Actions
-const { t } = useI18n();
-const confirm = useConfirm();
-const router = useRouter();
-const toast = useToast();
-
 function confirmSubmit(data: any) {
   confirm.require({
     message: 'Are you sure you wish to submit this form?',
@@ -97,7 +95,8 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     '{{ contactName }}': formRef.value?.values.contactFirstName,
     '{{ activityId }}': activityId,
     '{{ enquiryDescription }}': firstTwoSentences.trim(),
-    '{{ enquiryId }}': enquiryId
+    '{{ enquiryId }}': enquiryId,
+    '{{ projectId }}': enquiryId
   });
   let applicantEmail = formRef.value?.values.contactEmail;
   let emailData = {
@@ -109,6 +108,31 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     body: body
   };
   await submissionService.emailConfirmation(emailData);
+}
+
+function getEnquiryConfirmationRoute(enquiry: Enquiry) {
+  if (isOnlyProjectRelated.value) {
+    return {
+      name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
+      params: {
+        enquiryId: enquiry.enquiryId
+      }
+    };
+  } else if (isPermitRelated.value) {
+    return {
+      name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
+      params: {
+        enquiryId: enquiry.enquiryId
+      }
+    };
+  } else {
+    return {
+      name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+      params: {
+        enquiryId: enquiry.enquiryId
+      }
+    };
+  }
 }
 
 async function loadEnquiry() {
@@ -155,8 +179,8 @@ async function onSubmit(data: any) {
 
   try {
     // Set related activity id if project activity id is passed in as a prop
-    if (projectActivityId) {
-      data.basic.relatedActivityId = projectActivityId;
+    if (project) {
+      data.basic.relatedActivityId = project.activityId;
     }
 
     // Convert contact fields into contacts array object then remove form keys from data
@@ -208,16 +232,7 @@ async function onSubmit(data: any) {
       // Save contact data to store
       contactStore.setContact(enquiryData.contacts[0]);
 
-      router.push({
-        name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
-        params: {
-          enquiryId: enquiryResponse.data.enquiryId
-        },
-        query: {
-          activityId: enquiryResponse.data.activityId,
-          showEnquiryLink: projectName || permitName ? '' : 'true'
-        }
-      });
+      router.push(getEnquiryConfirmationRoute(enquiryResponse.data));
     } else {
       throw new Error('Failed to retrieve correct enquiry data');
     }
@@ -230,8 +245,6 @@ async function onSubmit(data: any) {
 
 onBeforeMount(async () => {
   loadEnquiry();
-  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
-  submissions.value = (await submissionService.getSubmissions()).data;
 });
 </script>
 
@@ -242,7 +255,7 @@ onBeforeMount(async () => {
         role="heading"
         aria-level="1"
       >
-        Enquiry Form
+        {{ t('enquiryIntakeForm.header') }}
       </h3>
     </div>
 
@@ -268,19 +281,19 @@ onBeforeMount(async () => {
         type="hidden"
         name="enquiryId"
       />
-      <Card v-if="projectName && projectActivityId">
+      <Card v-if="isOnlyProjectRelated">
         <template #title>
           <span class="section-header">
             {{ t('enquiryIntakeForm.about') }}
             <span class="text-primary">
-              {{ projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
-              {{ projectActivityId }}
+              {{ project?.projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
+              {{ project?.activityId }}
             </span>
           </span>
         </template>
       </Card>
 
-      <Card v-if="permitName && permitAuthStatus">
+      <Card v-if="isPermitRelated">
         <template #title>
           <span class="section-header">
             {{ t('enquiryIntakeForm.about') }}

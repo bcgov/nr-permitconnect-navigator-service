@@ -9,7 +9,5 @@ const authzStore = useAuthZStore();
 
 <template>
   <h1>Submissions</h1>
-
-  <!-- Navigator view -->
   <SubmissionsNavigator v-if="authzStore.canNavigate(NavigationPermission.INT_HOUSING)" />
 </template>

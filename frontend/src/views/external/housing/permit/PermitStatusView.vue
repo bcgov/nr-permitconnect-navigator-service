@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
-import { usePermitStore } from '@/store';
+import { usePermitStore, useSubmissionStore } from '@/store';
+import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
 import { formatDate, formatDateLong } from '@/utils/formatters';
@@ -13,14 +15,12 @@ import { formatDate, formatDateLong } from '@/utils/formatters';
 import { contactService, permitService, submissionService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitType, Submission, User } from '@/types';
-import type { MenuItem } from 'primevue/menuitem';
+import type { User } from '@/types';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 
 // Props
-const { permitId, projectActivityId, submissionId } = defineProps<{
+const { permitId, submissionId } = defineProps<{
   permitId: string;
-  projectActivityId?: string;
   submissionId: string;
 }>();
 
@@ -62,18 +62,17 @@ const previous = (trackerStatus: string) => ({
 });
 
 // Store
+const authZStore = useAuthZStore();
 const permitStore = usePermitStore();
+const submissionStore = useSubmissionStore();
+const { canNavigate } = storeToRefs(authZStore);
 const { getPermit } = storeToRefs(permitStore);
+const { getSubmission } = storeToRefs(submissionStore);
 
 // State
-const breadcrumbItems: Ref<Array<MenuItem>> = ref([
-  { label: '...', route: undefined },
-  { label: '...', class: 'font-bold' }
-]);
-const descriptionModalVisible: Ref<boolean> = ref(false);
-const submission: Ref<Submission | undefined> = ref(undefined);
-const updatedBy: Ref<string | undefined> = ref(undefined);
 const assignedNavigator: Ref<User | undefined> = ref(undefined);
+const descriptionModalVisible: Ref<boolean> = ref(false);
+const updatedBy: Ref<string | undefined> = ref(undefined);
 
 const statusBoxStates = {
   [PermitAuthorizationStatus.ABANDONED]: {
@@ -196,22 +195,14 @@ onBeforeMount(async () => {
     const permitData = (await permitService.getPermit(permitId)).data;
     permitStore.setPermit(permitData);
 
-      const updatedByUser = (await contactService.searchContacts({ userId: [permitResponse.data.updatedBy] })).data[0];
-      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+    if (!getSubmission.value) {
+      const submission = (await submissionService.getSubmission(submissionId)).data;
+      submissionStore.setSubmission(submission);
     }
 
-    breadcrumbItems.value = [
-      {
-        label: submission.value?.projectName,
-        route: RouteName.EXT_HOUSING_PROJECT,
-        params: { submissionId: submission.value?.submissionId }
-      },
-      { label: permit?.value?.name, class: 'font-bold' }
-    ];
-
-    if (submission.value?.assignedUserId) {
+    if (getSubmission.value?.assignedUserId) {
       assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [submission.value.assignedUserId] })
+        await contactService.searchContacts({ userId: [getSubmission.value.assignedUserId] })
       ).data[0];
     }
 
@@ -350,20 +341,17 @@ onBeforeMount(async () => {
     </Card>
     <div class="updates-section">
       <h4 class="mb-6">{{ t('permitStatusView.additionalUpdates') }}</h4>
-      <div class="ask-navigator mb-16">
+      <div
+        v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+        class="ask-navigator mb-16"
+      >
         <Button
           outlined
           :label="t('permitStatusView.askNav')"
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, submissionId },
-              query: {
-                permitName: permit?.name,
-                permitTrackingId: permit?.trackingId,
-                permitAuthStatus: permit?.authStatus,
-                projectActivityId: projectActivityId
-              }
+              params: { permitId, submissionId }
             })
           "
         />

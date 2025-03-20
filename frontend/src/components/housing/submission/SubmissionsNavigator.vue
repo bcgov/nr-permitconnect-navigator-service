@@ -143,12 +143,10 @@ function getParamObject(bf: BringForward) {
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
-      activityId: bf.activityId,
       initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
-    activityId: bf.activityId,
     initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
@@ -227,14 +225,14 @@ watch(activeTabIndex, (newIndex) => {
   // wipe out the query when switching tabs otherwise append the tab index to the query
   if (route.query.tab != newIndex.toString()) {
     router.replace({
-      name: RouteName.EXT_HOUSING,
+      name: RouteName.INT_HOUSING,
       query: {
         tab: newIndex.toString()
       }
     });
   } else {
     router.replace({
-      name: RouteName.EXT_HOUSING,
+      name: RouteName.INT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()

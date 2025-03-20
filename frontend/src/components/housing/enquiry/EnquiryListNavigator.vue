@@ -202,8 +202,7 @@ function updateQueryParams() {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_ENQUIRY,
-              params: { enquiryId: data.enquiryId },
-              query: { activityId: data.activityId }
+              params: { enquiryId: data.enquiryId }
             }"
           >
             {{ data.activityId }}

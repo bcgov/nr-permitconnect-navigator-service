@@ -34,12 +34,10 @@ onBeforeMount(() => {
       <div class="flex items-center">
         <div class="grow">
           <h3 class="mb-0">
-            <!-- Enquiry: -->
             <router-link
               :to="{
                 name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
-                params: { enquiryId: enquiry.enquiryId },
-                query: { activityId: enquiry.activityId }
+                params: { enquiryId: enquiry.enquiryId }
               }"
             >
               {{ enquiry.activityId }}

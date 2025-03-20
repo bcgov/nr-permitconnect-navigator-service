@@ -268,6 +268,7 @@ const filters = ref({
 });
 
 onBeforeMount(async () => {
+  loading.value = true;
   const users: Array<User> = (
     await userService.searchUsers({
       active: true,
@@ -311,6 +312,8 @@ onBeforeMount(async () => {
     const accessRequest = currentAccessRequests.get(user.userId);
     usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
   });
+
+  loading.value = false;
 });
 </script>
 

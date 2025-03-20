@@ -39,12 +39,7 @@ import type { Ref } from 'vue';
 import type { Document, Note } from '@/types';
 
 // Props
-const {
-  activityId,
-  initialTab = '0',
-  submissionId
-} = defineProps<{
-  activityId: string;
+const { initialTab = '0', submissionId } = defineProps<{
   initialTab?: string;
   submissionId: string;
 }>();
@@ -62,12 +57,17 @@ const SORT_TYPES = {
   CREATED_BY: 'createdByFullName'
 };
 
+// Composables
+const { t } = useI18n();
+const router = useRouter();
+
 // Store
 const submissionStore = useSubmissionStore();
 const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
+const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
@@ -75,10 +75,8 @@ const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
-const router = useRouter();
 
 // Actions
-const { t } = useI18n();
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
   tempDocuments = tempDocuments.filter((x) => {
@@ -125,9 +123,10 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 }
 
 onBeforeMount(async () => {
-  const [submission, documents, notes, permits, relatedEnquiries] = (
+  const submission = (await submissionService.getSubmission(submissionId)).data;
+  activityId.value = submission.activityId;
+  const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
-      submissionService.getSubmission(submissionId),
       documentService.listDocuments(submission.activityId),
       noteService.listNotes(submission.activityId),
       permitService.listPermits({ activityId: submission.activityId, includeNotes: true }),
@@ -206,6 +205,7 @@ onBeforeMount(async () => {
       <TabPanel :value="1">
         <div class="mb-4 border-dashed file-upload rounded-md">
           <FileUpload
+            v-if="activityId"
             :activity-id="activityId"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
           />
@@ -417,6 +417,7 @@ onBeforeMount(async () => {
           </div>
 
           <PermitModal
+            v-if="activityId"
             v-model:visible="permitModalVisible"
             :activity-id="activityId"
           />
@@ -454,7 +455,7 @@ onBeforeMount(async () => {
         </div>
 
         <NoteModal
-          v-if="noteModalVisible"
+          v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
           @add-note="onAddNote"
@@ -462,7 +463,7 @@ onBeforeMount(async () => {
       </TabPanel>
       <TabPanel :value="4">
         <Roadmap
-          v-if="!loading"
+          v-if="!loading && activityId"
           :activity-id="activityId"
           :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
         />

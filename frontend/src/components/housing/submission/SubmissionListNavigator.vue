@@ -94,8 +94,7 @@ function handleCreateNewActivity() {
         if (response?.activityId) {
           router.push({
             name: RouteName.INT_HOUSING_PROJECT,
-            params: { submissionId: response.submissionId },
-            query: { activityId: response.activityId }
+            params: { submissionId: response.submissionId }
           });
         }
       } catch (e: any) {
@@ -149,7 +148,7 @@ function isFinanciallySupported(data: Submission) {
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.EXT_HOUSING,
+    name: RouteName.INT_HOUSING,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
@@ -259,8 +258,7 @@ onBeforeMount(() => {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { submissionId: data.submissionId },
-              query: { activityId: data.activityId }
+              params: { submissionId: data.submissionId }
             }"
           >
             {{ data.projectName }}
@@ -284,8 +282,7 @@ onBeforeMount(() => {
             <router-link
               :to="{
                 name: RouteName.INT_HOUSING_PROJECT,
-                params: { submissionId: data.submissionId },
-                query: { activityId: data.activityId }
+                params: { submissionId: data.submissionId }
               }"
             >
               {{ data.activityId }}

@@ -8,9 +8,9 @@ import { usePermitStore } from '@/store';
 import type { Ref } from 'vue';
 
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
-  activityId?: string;
+const { submissionId = undefined, draftId = undefined } = defineProps<{
   submissionId?: string;
+  draftId?: string;
 }>();
 
 // State
@@ -26,7 +26,7 @@ onBeforeMount(async () => {
 <template>
   <SubmissionIntakeForm
     v-if="!loading"
-    :activity-id="activityId"
     :submission-id="submissionId"
+    :draft-id="draftId"
   />
 </template>

@@ -31,11 +31,15 @@ const { submissionId } = defineProps<{
   submissionId: string;
 }>();
 
-// Constants
+// Composables
 const { t } = useI18n();
+const router = useRouter();
+const toast = useToast();
 
 // Store
+const authZStore = useAuthZStore();
 const submissionStore = useSubmissionStore();
+const { canNavigate } = storeToRefs(authZStore);
 const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
 // State
@@ -67,9 +71,6 @@ const permitsSubmitted: ComputedRef<Array<Permit>> = computed(() => {
 });
 
 // Actions
-const router = useRouter();
-const toast = useToast();
-
 function permitBusinessSortFcn(a: Permit, b: Permit) {
   return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
 }
@@ -103,8 +104,7 @@ function permitFilter(config: PermitFilterConfig) {
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { submissionId: getSubmission.value?.submissionId },
-    query: { activityId: getSubmission.value?.activityId }
+    params: { submissionId }
   });
 }
 
@@ -141,7 +141,6 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <RouterView />
   <div
     v-if="!loading && getSubmission"
     class="app-primary-color"
@@ -152,6 +151,7 @@ onBeforeMount(async () => {
     <div class="mt-20 flex justify-between">
       <div>
         <h1
+          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
           class="mt-0 mb-2 cursor-pointer hover:underline"
           tabindex="0"
           @click="navigateToSubmissionIntakeView()"
@@ -163,6 +163,12 @@ onBeforeMount(async () => {
             class="text-sm"
             icon="fa fa-external-link"
           />
+        </h1>
+        <h1
+          v-else
+          class="mt-0 mb-2"
+        >
+          {{ getSubmission.projectName }}
         </h1>
         <div>
           <span class="mr-4">
@@ -181,14 +187,15 @@ onBeforeMount(async () => {
         </div>
       </div>
       <Button
-        v-if="getSubmission?.submissionType !== SubmissionType.INAPPLICABLE"
+        v-if="
+          canNavigate(NavigationPermission.EXT_HOUSING) && getSubmission?.submissionType !== SubmissionType.INAPPLICABLE
+        "
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
         outlined
         @click="
           router.push({
-            name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            query: { projectName: getSubmission.projectName, projectActivityId: getSubmission.activityId }
+            name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY
           })
         "
       />
@@ -254,19 +261,17 @@ onBeforeMount(async () => {
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
       :to="{
-        name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+        name: canNavigate(NavigationPermission.INT_HOUSING)
           ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
           : RouteName.EXT_HOUSING_PROJECT_PERMIT,
-        params: { permitId: permit.permitId },
-        query: { projectActivityId: getSubmission.activityId }
+        params: { permitId: permit.permitId }
       }"
       @keydown.space.prevent="
         router.push({
-          name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+          name: canNavigate(NavigationPermission.INT_HOUSING)
             ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
             : RouteName.EXT_HOUSING_PROJECT_PERMIT,
-          params: { permitId: permit.permitId },
-          query: { projectActivityId: getSubmission.activityId }
+          params: { permitId: permit.permitId }
         })
       "
     >
@@ -322,6 +327,7 @@ onBeforeMount(async () => {
       <EnquiryListProponent
         :loading="loading"
         :enquiries="getRelatedEnquiries"
+        :submission-id="submissionId"
       />
     </div>
   </div>

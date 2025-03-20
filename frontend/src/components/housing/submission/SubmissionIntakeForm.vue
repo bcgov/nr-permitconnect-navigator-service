@@ -71,12 +71,7 @@ type SubmissionForm = {
 } & SubmissionIntake;
 
 // Props
-const {
-  activityId = undefined,
-  submissionId = undefined,
-  draftId = undefined
-} = defineProps<{
-  activityId?: string;
+const { submissionId = undefined, draftId = undefined } = defineProps<{
   submissionId?: string;
   draftId?: string;
 }>();
@@ -99,6 +94,7 @@ const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
 const activeStep: Ref<number> = ref(0);
+const activityId: Ref<string | undefined> = ref(undefined);
 const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
@@ -174,13 +170,20 @@ async function onAssistanceRequest(values: GenericObject) {
       ]
     };
 
-    const enquiryResponse = await enquiryService.createEnquiry(enquiryData);
+    const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
 
-    if (enquiryResponse.data.activityId) {
+    if (enquiryResponse.activityId) {
       toast.success('Form saved');
 
       // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId, false);
+      emailConfirmation(enquiryResponse.activityId, enquiryResponse.submissionId, false);
+
+      router.push({
+        name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+        params: {
+          enquiryId: enquiryResponse.enquiryId
+        }
+      });
     } else {
       toast.error('Failed to submit enquiry');
     }
@@ -302,10 +305,7 @@ async function onSubmit(data: any) {
 
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
-        params: {
-          submissionId: response.data.submissionId
-        },
-        query: { activityId: response.data.activityId }
+        params: { submissionId: response.data.submissionId }
       });
     } else {
       throw new Error('Failed to retrieve correct draft data');
@@ -366,14 +366,13 @@ function syncFormAndRoute(actId: string, drftId: string) {
     // Update route query for refreshing
     router.replace({
       name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
-      params: {
-        draftId: drftId
-      }
+      params: { draftId: drftId }
     });
   }
 
   if (actId) {
     formRef.value?.setFieldValue('activityId', actId);
+    activityId.value = actId;
   }
 }
 
@@ -400,6 +399,7 @@ onBeforeMount(async () => {
       };
 
       if (response.activityId) {
+        activityId.value = response.activityId;
         documents = (await documentService.listDocuments(response.activityId)).data;
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
@@ -407,10 +407,14 @@ onBeforeMount(async () => {
         submissionStore.setDocuments(documents);
       }
     } else {
-      if (submissionId && activityId) {
+      if (submissionId) {
         response = (await submissionService.getSubmission(submissionId)).data;
-        permits = (await permitService.listPermits({ activityId: activityId })).data;
-        documents = (await documentService.listDocuments(activityId)).data;
+
+        if (response.activityId) {
+          activityId.value = response.activityId;
+          permits = (await permitService.listPermits({ activityId: response.activityId })).data;
+          documents = (await documentService.listDocuments(response.activityId)).data;
+        }
 
         // Set form to read-only on non draft form reopening
         editable.value = false;
@@ -489,7 +493,7 @@ onBeforeMount(async () => {
 
     locationRef.value?.onLatLongInput();
   } catch (e) {
-    router.replace({ name: RouteName.EXT_HOUSING_PROJECT_INTAKE });
+    router.replace({ name: RouteName.EXT_HOUSING_INTAKE });
   }
 });
 
@@ -501,7 +505,7 @@ watch(
     );
 
     // Trigger autosave on form step change, if it has activityId
-    if (activityId && formRef?.value && isIntake) onSaveDraft(formRef?.value?.values, true, false);
+    if (activityId.value && formRef?.value && isIntake) onSaveDraft(formRef?.value?.values, true, false);
 
     // Map component misaligned if mounted while not visible. Trigger resize to fix on show
     if (activeStep.value === 2) nextTick().then(() => locationRef?.value?.resizeMap());

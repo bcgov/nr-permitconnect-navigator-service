@@ -67,6 +67,7 @@
     "about": "This enquiry is about",
     "authStatus": "Authorization status",
     "contactInformation": "Contact information",
+    "header": "Enquiry Form",
     "notApplicable": "N/A",
     "permit": "Permit",
     "projectId": "Project ID",
@@ -82,6 +83,12 @@
     "state": "State",
     "submittedDate": "Submitted date",
     "tableAlt": "A table containing a list of enquiries"
+  },
+  "enquiryView": {
+    "completed": "(Completed)",
+    "header": "Enquiry submission:",
+    "linkedActivity": "This activity is linked to Activity",
+    "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
   "footer": {
     "about": "About gov.bc.ca",
