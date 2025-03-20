@@ -6,7 +6,7 @@ import { Prisma } from '@prisma/client';
 import prisma from '../db/dataConnection';
 import { housing_project } from '../db/models';
 import { BasicResponse, Initiative } from '../utils/enums/application';
-import { ApplicationStatus } from '../utils/enums/housing';
+import { ApplicationStatus } from '../utils/enums/projectCommon';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';

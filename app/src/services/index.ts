@@ -5,6 +5,7 @@ export { default as comsService } from './coms';
 export { default as contactService } from './contact';
 export { default as documentService } from './document';
 export { default as draftService } from './draft';
+export { default as electrificationProjectService } from './electrificationProject';
 export { default as emailService } from './email';
 export { default as enquiryService } from './enquiry';
 export { default as housingProjectService } from './housingProject';
