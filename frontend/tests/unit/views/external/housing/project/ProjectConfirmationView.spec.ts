@@ -4,22 +4,26 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import { userService } from '@/services';
+import { submissionService } from '@/services';
 import ProjectConfirmationView from '@/views/external/housing/project/ProjectConfirmationView.vue';
 
 import type { AxiosResponse } from 'axios';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+
+getSubmissionSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
 
 const testSubmissionId = 'submission123';
-const testActivityId = 'activity123';
 
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
   props: {
-    submissionId: testSubmissionIdProp,
-    activityId: testActivityIdProp
+    submissionId: testSubmissionIdProp
   },
   global: {
     plugins: [

@@ -2,25 +2,38 @@
 import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { Message } from '@/lib/primevue';
+import { submissionService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 
+import type { Ref } from 'vue';
+
 // Props
-const { activityId, submissionId } = defineProps<{
-  activityId: string;
+const { submissionId } = defineProps<{
   submissionId: string;
 }>();
+
+// Composables
+const { t } = useI18n();
+
+// State
+const activityId: Ref<string | undefined> = ref(undefined);
+
+onBeforeMount(async () => {
+  activityId.value = (await submissionService.getSubmission(submissionId)).data.activityId;
+});
 </script>
 
 <template>
   <div>
-    <h2>Confirmation of Submission</h2>
+    <h2>{{ t('projectConfirmationView.header') }}</h2>
     <Message
       severity="success"
       :closable="false"
     >
-      Your application has been successfully submitted.
+      {{ t('projectConfirmationView.success') }}
     </Message>
-    <h3 class="inline-block my-7 mr-2">Project ID:</h3>
+    <h3 class="inline-block my-7 mr-2">{{ t('projectConfirmationView.projectId') }}</h3>
     <router-link
       :to="{
         name: RouteName.EXT_HOUSING_PROJECT,
@@ -30,10 +43,11 @@ const { activityId, submissionId } = defineProps<{
       <span class="text-2xl">{{ activityId }}</span>
     </router-link>
     <div>
-      Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check
-      your email for the confirmation email and keep the project ID for future reference.
+      {{ t('projectConfirmationView.message') }}
     </div>
-    <div class="mt-6"><router-link :to="{ name: RouteName.EXT_HOUSING }">Back to Housing</router-link></div>
+    <div class="mt-6">
+      <router-link :to="{ name: RouteName.EXT_HOUSING }">{{ t('projectConfirmationView.backToHousing') }}</router-link>
+    </div>
   </div>
 </template>
 
