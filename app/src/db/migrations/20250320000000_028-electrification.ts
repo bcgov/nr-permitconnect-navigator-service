@@ -27,6 +27,159 @@ const actions = [
   }
 ];
 
+const electrificationPermits = [
+  {
+    agency: 'Environment and Parks',
+    division: 'Conservation and Recreation',
+    branch: 'Provincial Services',
+    business_domain: 'Parks',
+    type: 'Park Use Permit - Land Use Occupancy',
+    name: 'Park Use Permit - Land Use Occupancy',
+    source_system: 'Electronic Park Use Permit System',
+    source_system_acronym: 'EPUPS'
+  },
+  {
+    agency: 'Environment and Parks',
+    division: 'Environmental Protection',
+    branch: 'Digital Services',
+    business_domain: 'Environment',
+    type: 'Waste Discharge Permit',
+    name: 'Waste Discharge Permit',
+    source_system: 'Waste Permit Administration System',
+    source_system_acronym: 'WASTE'
+  },
+  {
+    agency: 'Forests',
+    division: 'Integrated Resource Operations',
+    branch: 'Forest Tenures',
+    business_domain: 'Forestry',
+    type: 'Forest Road Use Permit',
+    name: 'Forest Road Use Permit',
+    source_system: 'Resource Roads System',
+    source_system_acronym: 'RRS'
+  },
+  {
+    agency: 'Forests',
+    division: 'Integrated Resource Operations',
+    branch: 'Forest Tenures',
+    business_domain: 'Forestry',
+    type: 'Works Permit',
+    name: 'Works Permit',
+    source_system: 'Forest Tenure Administration',
+    source_system_acronym: 'FTA'
+  },
+  {
+    agency: 'Forests',
+    division: 'Integrated Resource Operations',
+    branch: 'Forest Tenures',
+    business_domain: 'Forestry',
+    type: 'Special Use Permit',
+    name: 'Special Use Permit',
+    source_system: 'Forest Tenure Administration',
+    source_system_acronym: 'FTA'
+  },
+  {
+    agency: 'Forests',
+    division: 'Integrated Resource Operations',
+    branch: 'Forest Tenures',
+    business_domain: 'Forestry',
+    type: 'Forest Service Road Road Use Permit',
+    name: 'Forest Service Road Road Use Permit',
+    source_system: 'Resource Roads System',
+    source_system_acronym: 'RRS'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Integrated Resource Operations',
+    branch: 'Lands Program',
+    business_domain: 'Lands',
+    type: 'Wind Power Investigative Licence',
+    name: 'Wind Power Investigative Licence',
+    source_system: 'Tantalis',
+    source_system_acronym: 'TANTALIS'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Integrated Resource Operations',
+    branch: 'Lands Program',
+    business_domain: 'Lands',
+    type: 'Wind Power Multi-Tenure Instrument',
+    name: 'Wind Power Multi-Tenure Instrument',
+    source_system: 'Tantalis',
+    source_system_acronym: 'TANTALIS'
+  },
+  {
+    agency: 'Mining and Critical Minerals',
+    division: 'Mines Health, Safety and Enforcement',
+    branch: 'Office of the Chief Inspector',
+    business_domain: 'Mining',
+    type: 'Aggregates and Quarry Materials Tenure',
+    name: 'Aggregates and Quarry Materials Tenure',
+    source_system: 'Mines Digital Services',
+    source_system_acronym: 'MDS'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Integrated Resource Operations',
+    branch: 'Lands Program',
+    business_domain: 'Lands',
+    type: 'Industrial General Tenure',
+    name: 'Industrial General Tenure',
+    source_system: 'Tantalis',
+    source_system_acronym: 'TANTALIS'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Integrated Resource Operations',
+    branch: 'Lands Program',
+    business_domain: 'Lands',
+    type: 'Statutory Right of Way',
+    name: 'Statutory Right of Way',
+    source_system: 'Tantalis',
+    source_system_acronym: 'TANTALIS'
+  },
+  {
+    agency: 'Mining and Critical Minerals',
+    division: 'Mines Health, Safety and Enforcement',
+    branch: 'Office of the Chief Inspector',
+    business_domain: 'Mining',
+    type: 'Notice of Work',
+    name: 'Notice of Work',
+    source_system: 'Mines Digital Services',
+    source_system_acronym: 'MDS'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Water, Fisheries and Coast',
+    branch: 'Fisheries, Aquaculture and Wild Salmon',
+    business_domain: 'Fish and Wildlife',
+    type: 'Fish & Wildlife Application',
+    name: 'General Wildlife Permit',
+    source_system: 'POSSE (ELicencing)',
+    source_system_acronym: 'ELIC'
+  },
+  {
+    agency: 'Water, Land and Resource Stewardship',
+    division: 'Water, Fisheries and Coast',
+    branch: 'Fisheries, Aquaculture and Wild Salmon',
+    business_domain: 'Fish and Wildlife',
+    type: 'Fish & Wildlife Application',
+    name: 'Scientific Fish Collection Permit',
+    source_system: 'POSSE (ELicencing)',
+    source_system_acronym: 'ELIC'
+  },
+  {
+    agency: 'Environment and Parks',
+    division: 'Conservation and Recreation',
+    branch: 'Provincial Services',
+    business_domain: 'Parks',
+    type: '',
+    name: 'Section 16 Authorization for use of a site or trail for industrial purpose',
+    source_system: 'NO SYSTEM',
+    source_system_acronym: 'NA'
+  }
+];
+
 export async function up(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
@@ -58,10 +211,44 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      .then(() =>
+        knex.schema.createTable('permit_type_initiative_xref', (table) => {
+          table.primary(['permit_type_id', 'initiative_id']);
+          table
+            .integer('permit_type_id')
+            .notNullable()
+            .references('permit_type_id')
+            .inTable('permit_type')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE');
+          table
+            .uuid('initiative_id')
+            .notNullable()
+            .references('initiative_id')
+            .inTable('initiative')
+            .onDelete('CASCADE')
+            .onUpdate('CASCADE');
+          stamps(knex, table);
+        })
+      )
+
+      // Alter public schema tables
+      .then(() =>
+        knex.schema.alterTable('permit_type', (table) => {
+          table.unique(['agency', 'division', 'branch', 'name']);
+        })
+      )
+
       // Create before update triggers
       .then(() =>
         knex.schema.raw(`CREATE TRIGGER before_update_electrification_project_trigger
         BEFORE UPDATE ON electrification_project
+        FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`)
+      )
+
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER before_update_permit_type_initiative_xref_trigger
+        BEFORE UPDATE ON permit_type_initiative_xref
         FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`)
       )
 
@@ -71,6 +258,66 @@ export async function up(knex: Knex): Promise<void> {
         AFTER UPDATE OR DELETE ON electrification_project
         FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
+
+      .then(() =>
+        knex.schema.raw(`CREATE TRIGGER audit_permit_type_initiative_xref_trigger
+        AFTER UPDATE OR DELETE ON permit_type_initiative_xref
+        FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
+      )
+
+      // Add current permit types to xref table for housing initiative
+      .then(async () => {
+        const housing = await knex
+          .select('initiative_id')
+          .from('initiative')
+          .where({
+            code: Initiative.HOUSING
+          })
+          .first();
+
+        const housing_permit_ids = await knex.select('permit_type_id').from('permit_type');
+
+        const items = housing_permit_ids.map((x) => ({
+          permit_type_id: x.permit_type_id,
+          initiative_id: housing.initiative_id
+        }));
+
+        return knex('permit_type_initiative_xref').insert(items);
+      })
+
+      // Populate new permits for ELECTRIFICATION_PROJECT
+      .then(() => {
+        return knex('permit_type').insert(electrificationPermits);
+      })
+
+      // Add electrification permit types to xref table
+      .then(async () => {
+        const electrification = await knex
+          .select('initiative_id')
+          .from('initiative')
+          .where({
+            code: Initiative.ELECTRIFICATION
+          })
+          .first();
+
+        // All permits except these 4
+        const electrification_permit_ids = await knex
+          .select('permit_type_id')
+          .from('permit_type')
+          .whereNotIn('name', [
+            'Sponsored Crown Grant',
+            'Residential Lands Tenure',
+            'Nominal Rent Tenure',
+            'Site Remediation Authorization'
+          ]);
+
+        const items = electrification_permit_ids.map((x) => ({
+          permit_type_id: x.permit_type_id,
+          initiative_id: electrification.initiative_id
+        }));
+
+        return knex('permit_type_initiative_xref').insert(items);
+      })
 
       // YARS
       // Insert the ELECTRIFICATION_PROJECT resource
@@ -216,7 +463,7 @@ export async function up(knex: Knex): Promise<void> {
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const superviser_group_id = await knex('yars.group')
+        const supervisor_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
@@ -275,7 +522,7 @@ export async function up(knex: Knex): Promise<void> {
           await addResourceRoles(navigator_read_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
 
           // Add all supervisor role mappings
-          await addResourceRoles(superviser_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(supervisor_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
 
           // Add all admin role mappings
           await addResourceRoles(admin_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
@@ -409,15 +656,44 @@ export async function down(knex: Knex): Promise<void> {
       })
 
       // Drop audit triggers
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_electrification_project_trigger ON draft'))
+      .then(() =>
+        knex.schema.raw(
+          'DROP TRIGGER IF EXISTS audit_permit_type_initiative_xref_trigger ON permit_type_initiative_xref'
+        )
+      )
+      .then(() =>
+        knex.schema.raw('DROP TRIGGER IF EXISTS audit_electrification_project_trigger ON electrification_project')
+      )
 
       // Drop public schema table triggers
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_electrification_project_trigger ON draft'))
+      .then(() =>
+        knex.schema.raw(
+          'DROP TRIGGER IF EXISTS before_update_permit_type_initiative_xref_trigger ON permit_type_initiative_xref'
+        )
+      )
+      .then(() =>
+        knex.schema.raw(
+          'DROP TRIGGER IF EXISTS before_update_electrification_project_trigger ON electrification_project'
+        )
+      )
+
+      // Revert public schema table alters
+      .then(() =>
+        knex.schema.alterTable('permit_type', (table) => {
+          table.dropUnique(['agency', 'division', 'branch', 'name']);
+        })
+      )
 
       // Drop public schema tables
+      .then(() => knex.schema.dropTableIfExists('permit_type_initiative_xref'))
       .then(() => knex.schema.dropTableIfExists('electrification_project'))
 
       // Delete data
+      .then(async () => {
+        await Promise.all(
+          electrificationPermits.map(async (x) => await knex('permit_type').where('name', x.name).del())
+        );
+      })
       .then(() => knex('initiative').where('code', 'ELECTRIFICATION').del())
   );
 }

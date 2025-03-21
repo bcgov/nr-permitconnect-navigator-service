@@ -1,5 +1,6 @@
 import { permitController } from '../../../src/controllers';
 import { permitService } from '../../../src/services';
+import { Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -191,7 +192,8 @@ describe('getPermitTypes', () => {
 
   it('should return 200 if all good', async () => {
     const req = {
-      currentContext: CURRENT_CONTEXT
+      currentContext: CURRENT_CONTEXT,
+      query: { initiative: Initiative.HOUSING }
     };
 
     const permitTypesList = [
@@ -218,14 +220,15 @@ describe('getPermitTypes', () => {
     await permitController.getPermitTypes(req as any, res as any, next);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith();
+    expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(permitTypesList);
   });
 
   it('calls next if the permit service fails to get permit types', async () => {
     const req = {
-      currentContext: CURRENT_CONTEXT
+      currentContext: CURRENT_CONTEXT,
+      query: { initiative: Initiative.HOUSING }
     };
 
     permitTypesSpy.mockImplementationOnce(() => {
@@ -236,7 +239,7 @@ describe('getPermitTypes', () => {
     await permitController.getPermitTypes(req as any, res as any, next);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith();
+    expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
