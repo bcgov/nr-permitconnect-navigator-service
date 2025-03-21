@@ -133,7 +133,7 @@ onMounted(async () => {
       documentService.listDocuments(activityId),
       noteService.listNotes(activityId),
       permitService.listPermits({ activityId, includeNotes: true }),
-      permitService.getPermitTypes(),
+      permitService.getPermitTypes(Initiative.HOUSING),
       enquiryService.listRelatedEnquiries(activityId)
     ])
   ).map((r) => r.data);

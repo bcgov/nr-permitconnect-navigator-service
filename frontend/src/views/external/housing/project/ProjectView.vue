@@ -9,7 +9,7 @@ import StatusPill from '@/components/common/StatusPill.vue';
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
@@ -132,7 +132,10 @@ onMounted(async () => {
 
   try {
     [projectValue, permitTypesValue] = (
-      await Promise.all([housingProjectService.getHousingProject(housingProjectId), permitService.getPermitTypes()])
+      await Promise.all([
+        housingProjectService.getHousingProject(housingProjectId),
+        permitService.getPermitTypes(Initiative.HOUSING)
+      ])
     ).map((r) => r.data);
     if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {

@@ -5,7 +5,7 @@ import { permitController } from '../../controllers';
 import { hasAccess, hasAccessPermit, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
+import { Action, Initiative, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -62,7 +62,7 @@ router.delete(
 router.get(
   '/types',
   hasAuthorization(Resource.PERMIT, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, never, { initiative: Initiative }>, res: Response, next: NextFunction): void => {
     permitController.getPermitTypes(req, res, next);
   }
 );

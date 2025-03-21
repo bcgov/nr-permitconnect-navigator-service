@@ -4,6 +4,7 @@ import { onMounted, ref } from 'vue';
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { permitService } from '@/services';
 import { useTypeStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -18,7 +19,7 @@ const loading: Ref<boolean> = ref(true);
 
 // Actions
 onMounted(async () => {
-  useTypeStore().setPermitTypes((await permitService.getPermitTypes()).data);
+  useTypeStore().setPermitTypes((await permitService.getPermitTypes(Initiative.HOUSING)).data);
   loading.value = false;
 });
 </script>
