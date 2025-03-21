@@ -90,12 +90,6 @@ const routes: Array<RouteRecordRaw> = [
         meta: { hideBreadcrumb: true, hideNavbar: true }
       },
       {
-        path: '/login',
-        name: RouteName.LOGIN,
-        component: () => import('@/views/LoginView.vue'),
-        meta: { hideBreadcrumb: true, hideNavbar: true }
-      },
-      {
         path: '/developer',
         name: RouteName.DEVELOPER,
         component: () => import('@/views/DeveloperView.vue'),
@@ -169,7 +163,7 @@ export default function getRouter() {
       const user = await authService.getUser();
       if (!user || user.expired) {
         window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
-        router.replace({ name: RouteName.OIDC_LOGIN });
+        router.push({ name: RouteName.OIDC_LOGIN });
         return;
       }
     }
