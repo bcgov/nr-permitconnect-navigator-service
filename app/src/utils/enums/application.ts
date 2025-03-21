@@ -60,6 +60,11 @@ export enum Resource {
   USER = 'USER'
 }
 
+// Legacy resources that are kept for migration purposes
+export enum ResourceLegacy {
+  SUBMISSION = 'SUBMISSION'
+}
+
 export enum GroupName {
   DEVELOPER = 'DEVELOPER',
   PROPONENT = 'PROPONENT',
