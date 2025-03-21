@@ -72,6 +72,164 @@ export async function up(knex: Knex): Promise<void> {
         FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
       )
 
+      // Populate new permits for ELECTRIFICATION_PROJECT
+      .then(() => {
+        const items = [
+          {
+            agency: 'Environment and Parks',
+            division: 'Conservation and Recreation',
+            branch: 'Provincial Services',
+            business_domain: 'Parks',
+            type: 'Park Use Permit - Land Use Occupancy',
+            name: 'Park Use Permit - Land Use Occupancy',
+            source_system: 'Electronic Park Use Permit System',
+            source_system_acronym: 'EPUPS'
+          },
+          {
+            agency: 'Environment and Parks',
+            division: 'Environmental Protection',
+            branch: 'Digital Services',
+            business_domain: 'Environment',
+            type: 'Waste Discharge Permit',
+            name: 'Waste Discharge Permit',
+            source_system: 'Waste Permit Administration System',
+            source_system_acronym: 'WASTE'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            business_domain: 'Forestry',
+            type: 'Forest Road Use Permit',
+            name: 'Forest Road Use Permit',
+            source_system: 'Resource Roads System',
+            source_system_acronym: 'RRS'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            business_domain: 'Forestry',
+            type: 'Works Permit',
+            name: 'Works Permit',
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            business_domain: 'Forestry',
+            type: 'Special Use Permit',
+            name: 'Special Use Permit',
+            source_system: 'Forest Tenure Administration',
+            source_system_acronym: 'FTA'
+          },
+          {
+            agency: 'Forests',
+            division: 'Integrated Resource Operations',
+            branch: 'Forest Tenures',
+            business_domain: 'Forestry',
+            type: 'Forest Service Road Road Use Permit',
+            name: 'Forest Service Road Road Use Permit',
+            source_system: 'Resource Roads System',
+            source_system_acronym: 'RRS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            business_domain: 'Lands',
+            type: 'Wind Power Investigative Licence',
+            name: 'Wind Power Investigative Licence',
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            business_domain: 'Lands',
+            type: 'Wind Power Multi-Tenure Instrument',
+            name: 'Wind Power Multi-Tenure Instrument',
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
+          },
+          {
+            agency: 'Mining and Critical Minerals',
+            division: 'Mines Health, Safety and Enforcement',
+            branch: 'Office of the Chief Inspector',
+            business_domain: 'Mining',
+            type: 'Aggregates and Quarry Materials Tenure',
+            name: 'Aggregates and Quarry Materials Tenure',
+            source_system: 'Mines Digital Services',
+            source_system_acronym: 'MDS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            business_domain: 'Lands',
+            type: 'Industrial General Tenure',
+            name: 'Industrial General Tenure',
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Integrated Resource Operations',
+            branch: 'Lands Program',
+            business_domain: 'Lands',
+            type: 'Statutory Right of Way',
+            name: 'Statutory Right of Way',
+            source_system: 'Tantalis',
+            source_system_acronym: 'TANTALIS'
+          },
+          {
+            agency: 'Mining and Critical Minerals',
+            division: 'Mines Health, Safety and Enforcement',
+            branch: 'Office of the Chief Inspector',
+            business_domain: 'Mining',
+            type: 'Notice of Work',
+            name: 'Notice of Work',
+            source_system: 'Mines Digital Services',
+            source_system_acronym: 'MDS'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Fisheries, Aquaculture and Wild Salmon',
+            business_domain: 'Fish and Wildlife',
+            type: 'Fish & Wildlife Application',
+            name: 'General Wildlife Permit',
+            source_system: 'POSSE (ELicencing)',
+            source_system_acronym: 'ELIC'
+          },
+          {
+            agency: 'Water, Land and Resource Stewardship',
+            division: 'Water, Fisheries and Coast',
+            branch: 'Fisheries, Aquaculture and Wild Salmon',
+            business_domain: 'Fish and Wildlife',
+            type: 'Fish & Wildlife Application',
+            name: 'Scientific Fish Collection Permit',
+            source_system: 'POSSE (ELicencing)',
+            source_system_acronym: 'ELIC'
+          },
+          {
+            agency: 'Environment and Parks',
+            division: 'Conservation and Recreation',
+            branch: 'Provincial Services',
+            business_domain: 'Parks',
+            type: '',
+            name: 'Section 16 Authorization for use of a site or trail for industrial purpose',
+            source_system: 'NO SYSTEM',
+            source_system_acronym: 'NA'
+          }
+        ];
+
+        return knex('permit_type').insert(items);
+      })
+
       // YARS
       // Insert the ELECTRIFICATION_PROJECT resource
       .then(() => {
