@@ -1,5 +1,6 @@
 import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { Initiative } from '@/utils/enums/application';
 
 import type { Permit, PermitType } from '@/types';
 
@@ -80,9 +81,9 @@ describe('permitService test', () => {
   });
 
   it('calls get permit type list', async () => {
-    await permitService.getPermitTypes();
+    await permitService.getPermitTypes(Initiative.HOUSING);
     expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/types`);
+    expect(getSpy).toHaveBeenCalledWith(`${PATH}/types`, { params: { initiative: Initiative.HOUSING } });
   });
 
   it('calls get permit list', async () => {

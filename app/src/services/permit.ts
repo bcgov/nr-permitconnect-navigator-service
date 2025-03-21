@@ -4,6 +4,8 @@ import prisma from '../db/dataConnection';
 import { permit, permit_type } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
 
+import { Initiative } from '../utils/enums/application';
+
 import type { ListPermitsOptions, Permit } from '../types';
 
 const service = {
@@ -86,16 +88,36 @@ const service = {
 
   /**
    * @function getPermitTypes
-   * Get all Permit types
+   * Get all Permit types for the given initiative
    * @returns {Promise<PermitType[]>} The result of running the findMany operation
    */
-  getPermitTypes: async () => {
-    const result = await prisma.permit_type.findMany({
-      orderBy: {
-        permit_type_id: 'asc'
+  getPermitTypes: async (initiative: Initiative) => {
+    const initiativeResult = await prisma.initiative.findFirstOrThrow({
+      include: {
+        permit_type_initiative_xref: {
+          include: {
+            permit_type: true
+          },
+          orderBy: [
+            {
+              permit_type: {
+                business_domain: 'asc'
+              }
+            },
+            {
+              permit_type: {
+                name: 'asc'
+              }
+            }
+          ]
+        }
+      },
+      where: {
+        code: initiative
       }
     });
-    return result.map((x) => permit_type.fromPrismaModel(x));
+
+    return initiativeResult.permit_type_initiative_xref.map((y) => permit_type.fromPrismaModel(y.permit_type));
   },
 
   /**
