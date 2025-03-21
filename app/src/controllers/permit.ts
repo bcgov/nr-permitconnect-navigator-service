@@ -4,6 +4,7 @@ import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { ListPermitsOptions, Permit } from '../types';
+import { Initiative } from '../utils/enums/application';
 
 const controller = {
   createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
@@ -47,9 +48,13 @@ const controller = {
     }
   },
 
-  getPermitTypes: async (req: Request, res: Response, next: NextFunction) => {
+  getPermitTypes: async (
+    req: Request<never, never, never, { initiative: Initiative }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
-      const response = await permitService.getPermitTypes();
+      const response = await permitService.getPermitTypes(req.query.initiative);
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
