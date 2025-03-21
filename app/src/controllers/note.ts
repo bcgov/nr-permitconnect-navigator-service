@@ -1,5 +1,5 @@
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { enquiryService, noteService, submissionService, userService } from '../services';
+import { enquiryService, housingProjectService, noteService, userService } from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { BringForward, Note } from '../types';
@@ -40,7 +40,7 @@ const controller = {
       let response = new Array<BringForward>();
       const notes = await noteService.listBringForward(req.query.bringForwardState);
       if (notes && notes.length) {
-        const submissions = await submissionService.searchSubmissions({
+        const housingProjects = await housingProjectService.searchHousingProjects({
           activityId: notes.map((x) => x.activityId)
         });
         const users = await userService.searchUsers({
@@ -55,10 +55,10 @@ const controller = {
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,
-          submissionId: submissions.find((s) => s.activityId === note.activityId)?.submissionId as string,
+          housingProjectId: housingProjects.find((s) => s.activityId === note.activityId)?.housingProjectId as string,
           enquiryId: enquiries.find((s) => s.activityId === note.activityId)?.enquiryId as string,
           title: note.title,
-          projectName: submissions.find((s) => s.activityId === note.activityId)?.projectName ?? null,
+          projectName: housingProjects.find((s) => s.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
           bringForwardDate: note.bringForwardDate as string
         }));

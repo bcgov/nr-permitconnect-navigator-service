@@ -1,7 +1,7 @@
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
 
-export type SubmissionIntake = {
+export type HousingProjectIntake = {
   basic?: {
     consentToFeedback?: boolean;
     projectApplicantType?: string;

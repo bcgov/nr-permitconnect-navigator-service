@@ -6,7 +6,7 @@ import Tooltip from 'primevue/tooltip';
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
-import { contactService, submissionService } from '@/services';
+import { contactService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
 
@@ -46,12 +46,12 @@ const sampleContact: Contact = {
   updatedAt: new Date().toISOString()
 };
 
-const getActivityIds = vi.spyOn(submissionService, 'getActivityIds');
-const getSubmissions = vi.spyOn(submissionService, 'getSubmissions');
+const getActivityIds = vi.spyOn(housingProjectService, 'getActivityIds');
+const getHousingProjects = vi.spyOn(housingProjectService, 'getHousingProjects');
 const getContactSpy = vi.spyOn(contactService, 'searchContacts');
 
 getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
-getSubmissions.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getHousingProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 interface FormValues {
   contactFirstName: string;

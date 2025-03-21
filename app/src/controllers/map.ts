@@ -1,13 +1,14 @@
-import { mapService, submissionService } from '../services';
+import { housingProjectService, mapService } from '../services';
+
 import type { NextFunction, Request, Response } from 'express';
 
 const controller = {
-  getPIDs: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  getPIDs: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
     try {
-      const submission = await submissionService.getSubmission(req.params.submissionId);
+      const housingProject = await housingProjectService.getHousingProject(req.params.housingProjectId);
 
       let response;
-      if (submission?.geoJSON) response = await mapService.getPIDs(submission?.geoJSON);
+      if (housingProject?.geoJSON) response = await mapService.getPIDs(housingProject?.geoJSON);
 
       res.status(200).json(response);
     } catch (e: unknown) {

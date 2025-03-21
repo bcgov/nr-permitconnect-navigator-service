@@ -4,14 +4,14 @@ import config from 'config';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../db/dataConnection';
-import { submission } from '../db/models';
+import { housing_project } from '../db/models';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { ApplicationStatus } from '../utils/enums/housing';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { IStamps } from '../interfaces/IStamps';
-import type { Submission, SubmissionSearchParameters } from '../types';
+import type { HousingProject, HousingProjectSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -30,13 +30,13 @@ function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInst
 
 const service = {
   /**
-   * @function createSubmission
-   * Creates a new submission
-   * @returns {Promise<Partial<Submission>>} The result of running the transaction
+   * @function createHousingProject
+   * Creates a new housing project
+   * @returns {Promise<Partial<HousingProject>>} The result of running the transaction
    */
-  createSubmission: async (data: Partial<Submission>) => {
-    const s = submission.toPrismaModel(data as Submission);
-    const response = await prisma.submission.create({
+  createHousingProject: async (data: Partial<HousingProject>) => {
+    const s = housing_project.toPrismaModel(data as HousingProject);
+    const response = await prisma.housing_project.create({
       data: {
         ...s,
         geo_json: s.geo_json as Prisma.InputJsonValue,
@@ -55,16 +55,16 @@ const service = {
         }
       }
     });
-    return submission.fromPrismaModelWithContact(response);
+    return housing_project.fromPrismaModelWithContact(response);
   },
 
   /**
-   * @function createSubmissionsFromExport
-   * Creates the given activities and submissions from exported CHEFS data
-   * @param {Array<Partial<Submission>>} submissions Array of Submissions
+   * @function createHousingProjectsFromExport
+   * Creates the given activities and housing projects from exported CHEFS data
+   * @param {Array<Partial<HousingProject>>} housingProjects Array of housing projects
    * @returns {Promise<void>} The result of running the transaction
    */
-  createSubmissionsFromExport: async (submissions: Array<Partial<Submission>>) => {
+  createHousingProjectsFromExport: async (housingProjects: Array<Partial<HousingProject>>) => {
     await prisma.$transaction(async (trx) => {
       const initiative = await trx.initiative.findFirstOrThrow({
         where: {
@@ -73,16 +73,16 @@ const service = {
       });
 
       await trx.activity.createMany({
-        data: submissions.map((x) => ({
+        data: housingProjects.map((x) => ({
           activity_id: x.activityId as string,
           initiative_id: initiative.initiative_id,
           is_deleted: false
         }))
       });
 
-      await trx.submission.createMany({
-        data: submissions.map((x) => ({
-          submission_id: x.submissionId as string,
+      await trx.housing_project.createMany({
+        data: housingProjects.map((x) => ({
+          housing_project_id: x.housingProjectId as string,
           activity_id: x.activityId as string,
           application_status: ApplicationStatus.NEW,
           company_name_registered: x.companyNameRegistered,
@@ -123,17 +123,17 @@ const service = {
   },
 
   /**
-   * @function deleteSubmission
-   * Deletes the submission, followed by the associated activity
+   * @function deleteHousingProject
+   * Deletes the housing project, followed by the associated activity
    * This action will cascade delete across all linked items
-   * @param {string} submissionId Submission ID
-   * @returns {Promise<Submission>} The result of running the delete operation
+   * @param {string} housingProjectId Hosuing Project ID
+   * @returns {Promise<HousingProject>} The result of running the delete operation
    */
-  deleteSubmission: async (submissionId: string) => {
+  deleteHousingProject: async (housingProjectId: string) => {
     const response = await prisma.$transaction(async (trx) => {
-      const del = await trx.submission.delete({
+      const del = await trx.housing_project.delete({
         where: {
-          submission_id: submissionId
+          housing_project_id: housingProjectId
         },
         include: {
           activity: {
@@ -157,11 +157,11 @@ const service = {
       return del;
     });
 
-    return submission.fromPrismaModelWithContact(response);
+    return housing_project.fromPrismaModelWithContact(response);
   },
 
   /**
-   * @function getSubmission
+   * @function getFormExport
    * Gets a full data export for the requested CHEFS form
    * @param {string} formId CHEFS form id
    * @returns {Promise<any>} The result of running the get operation
@@ -179,7 +179,7 @@ const service = {
 
   /**
    * @function getStatistics
-   * Gets a set of submission related statistics
+   * Gets a set of housing project related statistics
    * @returns {Promise<object>} The result of running the query
    */
   getStatistics: async (filters: { dateFrom: string; dateTo: string; monthYear: string; userId: string }) => {
@@ -203,16 +203,16 @@ const service = {
   },
 
   /**
-   * @function getSubmission
-   * Gets a specific submission from the PCNS database
-   * @param {string} submissionId PCNS Submission ID
-   * @returns {Promise<Submission | null>} The result of running the findFirst operation
+   * @function getHousingProject
+   * Gets a specific housing project from the PCNS database
+   * @param {string} housingProjectId PCNS housing project ID
+   * @returns {Promise<HousingProject | null>} The result of running the findFirst operation
    */
-  getSubmission: async (submissionId: string) => {
+  getHousingProject: async (housingProjectId: string) => {
     try {
-      const result = await prisma.submission.findFirst({
+      const result = await prisma.housing_project.findFirst({
         where: {
-          submission_id: submissionId
+          housing_project_id: housingProjectId
         },
         include: {
           activity: {
@@ -227,20 +227,20 @@ const service = {
         }
       });
 
-      return result ? submission.fromPrismaModelWithContact(result) : null;
+      return result ? housing_project.fromPrismaModelWithContact(result) : null;
     } catch (e: unknown) {
       throw e;
     }
   },
 
   /**
-   * @function getSubmissions
-   * Gets a list of submissions
-   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
+   * @function getHousingProjects
+   * Gets a list of housing projects
+   * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
    */
-  getSubmissions: async () => {
+  getHousingProjects: async () => {
     try {
-      const result = await prisma.submission.findMany({
+      const result = await prisma.housing_project.findMany({
         include: {
           activity: {
             include: {
@@ -258,26 +258,28 @@ const service = {
         }
       });
 
-      return result.map((x) => submission.fromPrismaModelWithUser(x));
+      return result.map((x) => housing_project.fromPrismaModelWithUser(x));
     } catch (e: unknown) {
       throw e;
     }
   },
 
+  /* eslint-disable max-len */
   /**
-   * @function searchSubmissions
-   * Search and filter for specific submission
+   * @function searchHousingProjects
+   * Search and filter for specific housing projects
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
-   * @param {string[]} [params.createdBy] Optional array of uuids representing users who created submissions
+   * @param {string[]} [params.createdBy] Optional array of uuids representing users who created housing projects
+   * @param {string[]} [params.housingProjectId] Optional array of uuids representing the housing project ID
+   * @param {string[]} [params.housingProjectType] Optional array of strings representing the housing project type
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
-   * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted submissions should be included
+   * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted housing projects should be included
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
-   * @param {string[]} [params.submissionId] Optional array of uuids representing the submission ID
-   * @param {string[]} [params.submissionType] Optional array of strings representing the submission type
-   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
+   * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
    */
-  searchSubmissions: async (params: SubmissionSearchParameters) => {
-    let result = await prisma.submission.findMany({
+  /* eslint-enable max-len */
+  searchHousingProjects: async (params: HousingProjectSearchParameters) => {
+    let result = await prisma.housing_project.findMany({
       include: {
         activity: {
           include: {
@@ -299,40 +301,40 @@ const service = {
             created_by: { in: params.createdBy }
           },
           {
+            housing_project_id: { in: params.housingProjectId }
+          },
+          {
+            housing_project_type: { in: params.housingProjectType }
+          },
+          {
             intake_status: { in: params.intakeStatus }
-          },
-          {
-            submission_id: { in: params.submissionId }
-          },
-          {
-            submission_type: { in: params.submissionType }
           },
           params.includeDeleted ? {} : { activity: { is_deleted: false } }
         ]
       }
     });
 
-    // Remove soft deleted submissions
+    // Remove soft deleted housing projects
     if (!params.includeDeleted) result = result.filter((x) => !x.activity.is_deleted);
 
-    const submissions = params.includeUser
-      ? result.map((x) => submission.fromPrismaModelWithUser(x))
-      : result.map((x) => submission.fromPrismaModelWithContact(x));
+    const housingProjects = params.includeUser
+      ? result.map((x) => housing_project.fromPrismaModelWithUser(x))
+      : result.map((x) => housing_project.fromPrismaModelWithContact(x));
 
-    return submissions;
+    return housingProjects;
   },
 
   /**
    * @function updateIsDeletedFlag
    * Updates is_deleted flag for the corresponding activity
-   * @param {string} submissionId Submission ID
+   * @param {string} housingProjectId Housing project ID
    * @param {string} isDeleted flag
-   * @returns {Promise<Submission>} The result of running the delete operation
+   * @returns {Promise<HousingProject>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (submissionId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
-    const deleteSubmission = await prisma.submission.findUnique({
+  updateIsDeletedFlag: async (housingProjectId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
+    const deleteHousingProject = await prisma.housing_project.findUnique({
       where: {
-        submission_id: submissionId
+        housing_project_id: housingProjectId
       },
       include: {
         activity: {
@@ -347,27 +349,27 @@ const service = {
       }
     });
 
-    if (deleteSubmission) {
+    if (deleteHousingProject) {
       await prisma.activity.update({
         data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
         where: {
-          activity_id: deleteSubmission?.activity_id
+          activity_id: deleteHousingProject?.activity_id
         }
       });
-      return submission.fromPrismaModelWithContact(deleteSubmission);
+      return housing_project.fromPrismaModelWithContact(deleteHousingProject);
     }
   },
 
   /**
-   * @function updateSubmission
-   * Updates a specific submission
-   * @param {Submission} data Submission to update
-   * @returns {Promise<Submission | null>} The result of running the update operation
+   * @function updateHousingProject
+   * Updates a specific housing project
+   * @param {HousingProject} data Housing project to update
+   * @returns {Promise<HousingProject | null>} The result of running the update operation
    */
-  updateSubmission: async (data: Submission) => {
+  updateHousingProject: async (data: HousingProject) => {
     try {
-      const s = submission.toPrismaModel(data);
-      const result = await prisma.submission.update({
+      const s = housing_project.toPrismaModel(data);
+      const result = await prisma.housing_project.update({
         data: {
           ...s,
           geo_json: s.geo_json as Prisma.InputJsonValue,
@@ -375,7 +377,7 @@ const service = {
           updated_by: data.updatedBy
         },
         where: {
-          submission_id: data.submissionId
+          housing_project_id: data.housingProjectId
         },
         include: {
           activity: {
@@ -389,7 +391,7 @@ const service = {
           }
         }
       });
-      return submission.fromPrismaModelWithContact(result);
+      return housing_project.fromPrismaModelWithContact(result);
     } catch (e: unknown) {
       throw e;
     }

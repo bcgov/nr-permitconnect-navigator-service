@@ -6,9 +6,9 @@ import {
   documentService,
   draftService,
   enquiryService,
+  housingProjectService,
   noteService,
   permitService,
-  submissionService,
   userService,
   yarsService
 } from '../services';
@@ -111,9 +111,9 @@ const paramMap = new Map<string, (id: string) => any>([
   ['documentId', documentService.getDocument],
   ['draftId', draftService.getDraft],
   ['enquiryId', enquiryService.getEnquiry],
+  ['housingProjectId', housingProjectService.getHousingProject],
   ['noteId', noteService.getNote],
-  ['permitId', permitService.getPermit],
-  ['submissionId', submissionService.getSubmission]
+  ['permitId', permitService.getPermit]
 ]);
 
 /**
@@ -163,11 +163,8 @@ export const hasAccessPermit = (param: string) => {
         if (func) data = await func(id);
 
         if (!data || data?.createdBy !== userId) {
-          const submission = (await submissionService.searchSubmissions({ activityId: [data.activityId] }))[0];
-          if (
-            !submission ||
-            submission?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
-          )
+          const project = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
+          if (!project || project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase())
             throw new Error('No access');
         }
       }

@@ -42,8 +42,8 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { documentService, enquiryService, externalApiService, permitService, submissionService } from '@/services';
-import { useConfigStore, useContactStore, useSubmissionStore, useTypeStore } from '@/store';
+import { documentService, enquiryService, externalApiService, permitService, housingProjectService } from '@/services';
+import { useConfigStore, useContactStore, useHousingProjectStore, useTypeStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -62,24 +62,24 @@ import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 
-import type { Contact, Document, Permit, PermitType, SubmissionIntake } from '@/types';
+import type { Contact, Document, HousingProjectIntake, Permit, PermitType } from '@/types';
 import ContactCard from '@/components/form/common/ContactCard.vue';
 import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
 import LocationCard from '@/components/form/common/LocationCard.vue';
 
 // Types
-type SubmissionForm = {
+type HousingProjectForm = {
   addressSearch?: string;
-} & SubmissionIntake;
+} & HousingProjectIntake;
 
 // Props
 const {
   activityId = undefined,
-  submissionId = undefined,
+  housingProjectId = undefined,
   draftId = undefined
 } = defineProps<{
   activityId?: string;
-  submissionId?: string;
+  housingProjectId?: string;
   draftId?: string;
 }>();
 
@@ -94,7 +94,7 @@ const VALIDATION_BANNER_TEXT = t('submissionIntakeForm.validationBanner');
 
 // Store
 const contactStore = useContactStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
 const { getConfig } = storeToRefs(useConfigStore());
@@ -128,7 +128,7 @@ const getBackButtonConfig = computed(() => {
 });
 
 function confirmSubmit(data: GenericObject) {
-  const submitData: SubmissionIntake = omit(data as SubmissionForm, ['addressSearch']);
+  const submitData: HousingProjectIntake = omit(data as HousingProjectForm, ['addressSearch']);
 
   confirm.require({
     message: 'Are you sure you wish to submit this form?',
@@ -142,7 +142,7 @@ function confirmSubmit(data: GenericObject) {
 
 async function generateActivityId() {
   try {
-    const response = await submissionService.updateDraft({
+    const response = await housingProjectService.updateDraft({
       draftId: undefined,
       activityId: undefined,
       data: formRef?.value?.values
@@ -250,7 +250,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
   const draftData = omit(data, ['addressSearch']);
   let response;
   try {
-    response = await submissionService.updateDraft({
+    response = await housingProjectService.updateDraft({
       draftId: draftId,
       activityId: draftData.activityId,
       data: draftData
@@ -302,9 +302,9 @@ async function onSubmit(data: any) {
     submissionData.investigatePermits = filteredInvestigatePermits;
     submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
 
-    const response = await submissionService.submitDraft({ ...submissionData, draftId });
+    const response = await housingProjectService.submitDraft({ ...submissionData, draftId });
 
-    if (response.data.activityId && response.data.submissionId) {
+    if (response.data.activityId && response.data.housingProjectId) {
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
@@ -316,7 +316,7 @@ async function onSubmit(data: any) {
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
         params: {
-          submissionId: response.data.submissionId
+          housingProjectId: response.data.housingProjectId
         },
         query: { activityId: response.data.activityId }
       });
@@ -359,7 +359,7 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
       bodyType: 'html',
       body: body
     };
-    await submissionService.emailConfirmation(emailData);
+    await housingProjectService.emailConfirmation(emailData);
   } catch (e: any) {
     toast.error('Failed to send confirmation email. ', e);
   }
@@ -393,14 +393,14 @@ function syncFormAndRoute(actId: string, drftId: string) {
 onBeforeMount(async () => {
   try {
     // Clearing the document store on page load
-    submissionStore.setDocuments([]);
+    housingProjectStore.setDocuments([]);
 
     let response,
       permits: Array<Permit> = [],
       documents: Array<Document> = [];
 
     if (draftId) {
-      response = (await submissionService.getDraft(draftId)).data;
+      response = (await housingProjectService.getDraft(draftId)).data;
 
       initialFormValues.value = {
         ...response.data,
@@ -417,11 +417,11 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        submissionStore.setDocuments(documents);
+        housingProjectStore.setDocuments(documents);
       }
     } else {
-      if (submissionId && activityId) {
-        response = (await submissionService.getSubmission(submissionId)).data;
+      if (housingProjectId && activityId) {
+        response = (await housingProjectService.getHousingProject(housingProjectId)).data;
         permits = (await permitService.listPermits({ activityId: activityId })).data;
         documents = (await documentService.listDocuments(activityId)).data;
 
@@ -430,7 +430,7 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        submissionStore.setDocuments(documents);
+        housingProjectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
         response = { contacts: [contactStore.getContact] };
@@ -438,7 +438,7 @@ onBeforeMount(async () => {
 
       initialFormValues.value = {
         activityId: response?.activityId,
-        submissionId: response?.submissionId,
+        housingProjectId: response?.housingProjectId,
         contacts: {
           contactFirstName: response?.contacts[0]?.firstName,
           contactLastName: response?.contacts[0]?.lastName,

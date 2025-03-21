@@ -5,17 +5,17 @@ import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 
-import type { Submission } from '@/types';
+import type { HousingProject } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
-const { loading, submissions } = defineProps<{
+const { loading, housingProjects } = defineProps<{
   loading: boolean;
-  submissions: Array<Submission> | undefined;
+  housingProjects: Array<HousingProject> | undefined;
 }>();
 
 // State
-const selection: Ref<Submission | undefined> = ref(undefined);
+const selection: Ref<HousingProject | undefined> = ref(undefined);
 
 // Actions
 </script>
@@ -24,8 +24,8 @@ const selection: Ref<Submission | undefined> = ref(undefined);
   <DataTable
     v-model:selection="selection"
     :loading="loading"
-    :value="submissions"
-    data-key="submissionId"
+    :value="housingProjects"
+    data-key="housingProjectId"
     removable-sort
     scrollable
     responsive-layout="scroll"
@@ -49,7 +49,7 @@ const selection: Ref<Submission | undefined> = ref(undefined);
           <router-link
             :to="{
               name: RouteName.EXT_HOUSING_PROJECT,
-              params: { submissionId: data.submissionId }
+              params: { housingProjectId: data.housingProjectId }
             }"
           >
             {{ data.projectName }}

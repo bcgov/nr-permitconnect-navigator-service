@@ -30,16 +30,16 @@ const { t } = useI18n();
       v-if="showHeader"
       class="mb-9"
     >
-      {{ t('enquiryConfirmationView.confirmationHeader') }}
+      {{ t('e.housing.enquiryConfirmationView.confirmationHeader') }}
     </h2>
     <Message
       severity="success"
       :closable="false"
     >
-      {{ t('enquiryConfirmationView.confirmationBanner') }}
+      {{ t('e.housing.enquiryConfirmationView.confirmationBanner') }}
     </Message>
     <div v-if="showEnquiryLink">
-      <h3 class="inline-block my-7 mr-2">{{ t('enquiryConfirmationView.confirmationIdLabel') }}:</h3>
+      <h3 class="inline-block my-7 mr-2">{{ t('e.housing.enquiryConfirmationView.confirmationIdLabel') }}:</h3>
       <router-link
         :to="{
           name: RouteName.EXT_HOUSING_ENQUIRY,
@@ -51,14 +51,14 @@ const { t } = useI18n();
       </router-link>
     </div>
     <div class="mt-9">
-      {{ t('enquiryConfirmationView.confirmationMsg') }}
+      {{ t('e.housing.enquiryConfirmationView.confirmationMsg') }}
     </div>
     <div
       v-if="showHomeLink"
       class="mt-7"
     >
       <router-link :to="{ name: RouteName.EXT_HOUSING }">
-        {{ t('enquiryConfirmationView.linkSubmissions') }}
+        {{ t('e.housing.enquiryConfirmationView.linkSubmissions') }}
       </router-link>
     </div>
   </div>

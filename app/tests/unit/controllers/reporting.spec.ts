@@ -29,11 +29,11 @@ afterEach(() => {
 
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
-describe('getSubmissionPermitData', () => {
+describe('getHousingProjectPermitData', () => {
   const next = jest.fn();
 
   // Mock service call
-  const getSubmissionPermitDataSpy = jest.spyOn(reportingService, 'getSubmissionPermitData');
+  const getHousingProjectPermitDataSpy = jest.spyOn(reportingService, 'getHousingProjectPermitData');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -78,12 +78,12 @@ describe('getSubmissionPermitData', () => {
       }
     ];
 
-    getSubmissionPermitDataSpy.mockResolvedValue(mockData);
+    getHousingProjectPermitDataSpy.mockResolvedValue(mockData);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await reportingController.getSubmissionPermitData(req as any, res as any, next);
+    await reportingController.getHousingProjectPermitData(req as any, res as any, next);
 
-    expect(getSubmissionPermitDataSpy).toHaveBeenCalledTimes(1);
+    expect(getHousingProjectPermitDataSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockData);
   });
@@ -94,14 +94,14 @@ describe('getSubmissionPermitData', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    getSubmissionPermitDataSpy.mockImplementationOnce(() => {
+    getHousingProjectPermitDataSpy.mockImplementationOnce(() => {
       throw new Error('Service error');
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await reportingController.getSubmissionPermitData(req as any, res as any, next);
+    await reportingController.getHousingProjectPermitData(req as any, res as any, next);
 
-    expect(getSubmissionPermitDataSpy).toHaveBeenCalledTimes(1);
+    expect(getHousingProjectPermitDataSpy).toHaveBeenCalledTimes(1);
     expect(res.status).not.toHaveBeenCalled();
     expect(res.json).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalledTimes(1);

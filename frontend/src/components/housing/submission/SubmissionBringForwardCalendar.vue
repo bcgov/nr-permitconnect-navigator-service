@@ -36,9 +36,9 @@ watchEffect(() => {
 });
 
 function getParamObject(bf: BringForward) {
-  if (bf.submissionId) {
+  if (bf.housingProjectId) {
     return {
-      submissionId: bf.submissionId
+      housingProjectId: bf.housingProjectId
     };
   }
   return {
@@ -48,7 +48,7 @@ function getParamObject(bf: BringForward) {
 
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
-  if (bf.submissionId) {
+  if (bf.housingProjectId) {
     return {
       activityId: bf.activityId,
       initialTab: NOTES_TAB_INDEX.SUBMISSION
@@ -61,7 +61,7 @@ function getQueryObject(bf: BringForward) {
 }
 
 function filterForMyBringForwards(bf: BringForward): boolean {
-  return bf.createdByFullName === getProfile.value?.name || myAssignedTo.has(bf.submissionId ?? '');
+  return bf.createdByFullName === getProfile.value?.name || myAssignedTo.has(bf.housingProjectId ?? '');
 }
 </script>
 
@@ -99,7 +99,7 @@ function filterForMyBringForwards(bf: BringForward): boolean {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: data.submissionId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
+                  name: data.housingProjectId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
                   params: getParamObject(data),
                   query: getQueryObject(data),
                   hash: `#${data.noteId}`

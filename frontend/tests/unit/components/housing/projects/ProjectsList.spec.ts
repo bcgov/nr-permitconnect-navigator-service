@@ -6,7 +6,8 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
-import type { Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
+
+import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
 
 const currentDate = new Date().toISOString();
 
@@ -60,11 +61,11 @@ const exampleContact = {
 };
 
 // Example Submission object
-const testSubmission: Submission = {
+const testSubmission: HousingProject = {
   activityId: 'activity456',
-  submissionId: 'submission789',
+  housingProjectId: 'submission789',
   queuePriority: 1,
-  submissionType: 'Type A',
+  housingProjectType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
@@ -114,9 +115,9 @@ const testSubmission: Submission = {
 
 const testSubmissions = [testSubmission];
 
-const wrapperSettings = (testSubmissionsProp = testSubmissions) => ({
+const wrapperSettings = (testHousingProjectsProp = testSubmissions) => ({
   props: {
-    submissions: testSubmissionsProp,
+    housingProjects: testHousingProjectsProp,
     loading: false
   },
   global: {

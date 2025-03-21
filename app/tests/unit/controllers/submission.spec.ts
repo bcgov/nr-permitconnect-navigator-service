@@ -1,15 +1,16 @@
-import submissionController from '../../../src/controllers/submission';
+import housingProjectController from '../../../src/controllers/housingProject';
 import {
   activityService,
   contactService,
-  enquiryService,
-  permitService,
   draftService,
-  submissionService
+  enquiryService,
+  housingProjectService,
+  permitService
 } from '../../../src/services';
-import type { Permit, Submission, Draft } from '../../../src/types';
 import { ApplicationStatus, IntakeStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/housing';
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
+
+import type { Draft, HousingProject, Permit } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -41,8 +42,8 @@ const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
-const SUBMISSION_1 = {
-  submissionId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+const HOUSING_PROJECT_1 = {
+  housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: '5183f223',
   assignedUserId: null,
   submittedAt: new Date().toISOString(),
@@ -95,29 +96,32 @@ const SUBMISSION_1 = {
   user: null
 };
 
-describe('createSubmission', () => {
+describe('createHousingProject', () => {
   // Mock service calls
   const createPermitSpy = jest.spyOn(permitService, 'createPermit');
-  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
+  const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
 
   it('creates submission with unique activity ID', async () => {
     const req = {
-      body: { ...SUBMISSION_1, activityId: undefined, submissionId: undefined },
+      body: { ...HOUSING_PROJECT_1, activityId: undefined, housingProjectId: undefined },
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000', submissionId: '11111111' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({
+      activityId: '00000000',
+      housingProjectId: '11111111'
+    } as HousingProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createSubmission(req as any, res as any, next);
+    await housingProjectController.createHousingProject(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', submissionId: '11111111' });
+    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', housingProjectId: '11111111' });
   });
 
   it('populates data from body if it exists', async () => {
@@ -144,20 +148,20 @@ describe('createSubmission', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createSubmission(req as any, res as any, next);
+    await housingProjectController.createHousingProject(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledWith(
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
-        submissionId: expect.any(String),
+        housingProjectId: expect.any(String),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
         intakeStatus: IntakeStatus.SUBMITTED,
@@ -197,14 +201,14 @@ describe('createSubmission', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     createPermitSpy.mockResolvedValue({} as Permit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.createSubmission(req as any, res as any, next);
+    await housingProjectController.createHousingProject(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
 
     expect(createPermitSpy).toHaveBeenCalledTimes(3);
     expect(createPermitSpy).toHaveBeenNthCalledWith(
@@ -242,7 +246,7 @@ describe('getStatistics', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const statisticsSpy = jest.spyOn(submissionService, 'getStatistics');
+  const statisticsSpy = jest.spyOn(housingProjectService, 'getStatistics');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -267,7 +271,7 @@ describe('getStatistics', () => {
     statisticsSpy.mockResolvedValue(statistics);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getStatistics(req as any, res as any, next);
+    await housingProjectController.getStatistics(req as any, res as any, next);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -291,7 +295,7 @@ describe('getStatistics', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getStatistics(req as any, res as any, next);
+    await housingProjectController.getStatistics(req as any, res as any, next);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -300,57 +304,57 @@ describe('getStatistics', () => {
   });
 });
 
-describe('getSubmission', () => {
+describe('getHousingProject', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const submissionSpy = jest.spyOn(submissionService, 'getSubmission');
+  const housingProjectSpy = jest.spyOn(housingProjectService, 'getHousingProject');
   const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should return 200 if all good', async () => {
     const req = {
-      params: { submissionId: 'SOMEID' },
+      params: { housingProjectId: 'SOMEID' },
       currentContext: CURRENT_CONTEXT
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submissionSpy.mockResolvedValue(SUBMISSION_1 as any);
+    housingProjectSpy.mockResolvedValue(HOUSING_PROJECT_1 as any);
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmission(req as any, res as any, next);
+    await housingProjectController.getHousingProject(req as any, res as any, next);
 
-    expect(submissionSpy).toHaveBeenCalledTimes(1);
-    expect(submissionSpy).toHaveBeenCalledWith(req.params.submissionId);
+    expect(housingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(housingProjectSpy).toHaveBeenCalledWith(req.params.housingProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(SUBMISSION_1);
+    expect(res.json).toHaveBeenCalledWith(HOUSING_PROJECT_1);
   });
 
   it('calls next if the submission service fails to get submission', async () => {
     const req = {
-      params: { submissionId: 'SOMEID' },
+      params: { housingProjectId: 'SOMEID' },
       currentContext: CURRENT_CONTEXT
     };
 
-    submissionSpy.mockImplementationOnce(() => {
+    housingProjectSpy.mockImplementationOnce(() => {
       throw new Error();
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmission(req as any, res as any, next);
+    await housingProjectController.getHousingProject(req as any, res as any, next);
 
-    expect(submissionSpy).toHaveBeenCalledTimes(1);
-    expect(submissionSpy).toHaveBeenCalledWith(req.params.submissionId);
+    expect(housingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(housingProjectSpy).toHaveBeenCalledWith(req.params.housingProjectId);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
 });
 
-describe('getSubmissions', () => {
+describe('getHousingProjects', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const submissionsSpy = jest.spyOn(submissionService, 'getSubmissions');
+  const housingProjectsSpy = jest.spyOn(housingProjectService, 'getHousingProjects');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -359,15 +363,15 @@ describe('getSubmissions', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
+    housingProjectsSpy.mockResolvedValue([HOUSING_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmissions(req as any, res as any, next);
+    await housingProjectController.getHousingProjects(req as any, res as any, next);
 
-    expect(submissionsSpy).toHaveBeenCalledTimes(1);
-    expect(submissionsSpy).toHaveBeenCalledWith();
+    expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(housingProjectsSpy).toHaveBeenCalledWith();
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([SUBMISSION_1]);
+    expect(res.json).toHaveBeenCalledWith([HOUSING_PROJECT_1]);
   });
 
   it('calls checkAndStoreNewSubmissions', async () => {
@@ -376,12 +380,12 @@ describe('getSubmissions', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    submissionsSpy.mockResolvedValue([SUBMISSION_1 as any]);
+    housingProjectsSpy.mockResolvedValue([HOUSING_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmissions(req as any, res as any, next);
+    await housingProjectController.getHousingProjects(req as any, res as any, next);
 
-    expect(submissionsSpy).toHaveBeenCalledTimes(1);
+    expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
   });
 
   it('calls next if the submission service fails to get submissions', async () => {
@@ -389,15 +393,15 @@ describe('getSubmissions', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    submissionsSpy.mockImplementationOnce(() => {
+    housingProjectsSpy.mockImplementationOnce(() => {
       throw new Error();
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.getSubmissions(req as any, res as any, next);
+    await housingProjectController.getHousingProjects(req as any, res as any, next);
 
-    expect(submissionsSpy).toHaveBeenCalledTimes(1);
-    expect(submissionsSpy).toHaveBeenCalledWith();
+    expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(housingProjectsSpy).toHaveBeenCalledWith();
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
   });
@@ -406,7 +410,7 @@ describe('getSubmissions', () => {
 describe('submitDraft', () => {
   // Mock service calls
   const createPermitSpy = jest.spyOn(permitService, 'createPermit');
-  const createSubmissionSpy = jest.spyOn(submissionService, 'createSubmission');
+  const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
 
@@ -432,22 +436,22 @@ describe('submitDraft', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.submitDraft(req as any, res as any, next);
+    await housingProjectController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledWith(
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         projectApplicantType: 'Individual',
         projectName: 'TheProject',
         projectLocation: 'Some place',
         hasAppliedProvincialPermits: true,
-        submissionId: expect.stringMatching(uuidv4Pattern),
+        housingProjectId: expect.stringMatching(uuidv4Pattern),
         activityId: '00000000',
         submittedAt: expect.stringMatching(isoPattern),
         intakeStatus: IntakeStatus.SUBMITTED,
@@ -464,16 +468,16 @@ describe('submitDraft', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     upsertContacts.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.submitDraft(req as any, res as any, next);
+    await housingProjectController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(0);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledWith(
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         intakeStatus: IntakeStatus.SUBMITTED
       })
@@ -511,16 +515,16 @@ describe('submitDraft', () => {
     const next = jest.fn();
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createSubmissionSpy.mockResolvedValue({ activityId: '00000000' } as Submission);
+    createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     createPermitSpy.mockResolvedValue({} as Permit);
     upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.submitDraft(req as any, res as any, next);
+    await housingProjectController.submitDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(0);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
-    expect(createSubmissionSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createPermitSpy).toHaveBeenCalledTimes(3);
     expect(createPermitSpy).toHaveBeenNthCalledWith(
       1,
@@ -585,7 +589,7 @@ describe('updateDraft', () => {
     createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateDraft(req as any, res as any, next);
+    await housingProjectController.updateDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
@@ -627,7 +631,7 @@ describe('updateDraft', () => {
     updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateDraft(req as any, res as any, next);
+    await housingProjectController.updateDraft(req as any, res as any, next);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
@@ -641,25 +645,25 @@ describe('updateDraft', () => {
   });
 });
 
-describe('updateSubmission', () => {
+describe('updateHousingProject', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const updateSpy = jest.spyOn(submissionService, 'updateSubmission');
+  const updateSpy = jest.spyOn(housingProjectService, 'updateHousingProject');
 
   it('should return 200 if all good', async () => {
     const req = {
-      body: SUBMISSION_1,
+      body: HOUSING_PROJECT_1,
       currentContext: CURRENT_CONTEXT
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updated: any = SUBMISSION_1;
+    const updated: any = HOUSING_PROJECT_1;
 
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateSubmission(req as any, res as any, next);
+    await housingProjectController.updateHousingProject(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
@@ -671,9 +675,9 @@ describe('updateSubmission', () => {
     expect(res.json).toHaveBeenCalledWith(updated);
   });
 
-  it('calls next if the submission service fails to update', async () => {
+  it('calls next if the housingProject service fails to update', async () => {
     const req = {
-      body: SUBMISSION_1,
+      body: HOUSING_PROJECT_1,
       currentContext: CURRENT_CONTEXT
     };
 
@@ -682,7 +686,7 @@ describe('updateSubmission', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submissionController.updateSubmission(req as any, res as any, next);
+    await housingProjectController.updateHousingProject(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
 
@@ -697,73 +701,73 @@ describe('updateSubmission', () => {
 });
 
 describe('assignPriority', () => {
-  it('assigns priority 1 when submission matches priority 1 criteria - 50 to 500 units', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 criteria - 50 to 500 units', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '50-500',
       hasRentalUnits: 'No',
       financiallySupportedBC: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 1 when submission matches priority 1 criteria - over 500 units', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 criteria - over 500 units', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '>500',
       hasRentalUnits: 'No',
       financiallySupportedBC: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 1 when submission matches priority 1 criteria - Has Rental Units', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 criteria - Has Rental Units', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'Yes',
       financiallySupportedBC: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 1 when submission matches priority 1 criteria - Social Housing', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 criteria - Social Housing', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
       financiallySupportedBC: 'Yes',
       financiallySupportedIndigenous: 'No'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 1 when submission matches priority 1 criteria - Indigenous Led', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 criteria - Indigenous Led', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
       financiallySupportedBC: 'No',
       financiallySupportedIndigenous: 'Yes'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 1 when submission matches priority 1 and priority 2 criteria', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 1 when housing project matches priority 1 and priority 2 criteria', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '10-49',
       hasRentalUnits: 'Yes',
       financiallySupportedBC: 'No',
@@ -772,43 +776,43 @@ describe('assignPriority', () => {
       otherUnits: ''
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(1);
+    expect(housingProject.queuePriority).toBe(1);
   });
 
-  it('assigns priority 2 when submission matches priority 2 criteria - 10-49 single family units', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 2 when housing project matches priority 2 criteria - 10-49 single family units', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '10-49'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(2);
+    expect(housingProject.queuePriority).toBe(2);
   });
 
   it('assigns priority 2 if only multiFamilyUnits is provided', () => {
-    const submission: Partial<Submission> = {
+    const housingProject: Partial<HousingProject> = {
       multiFamilyUnits: '1-9'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(2);
+    expect(housingProject.queuePriority).toBe(2);
   });
 
   it('assigns priority 2 if only otherUnits is provided', () => {
-    const submission: Partial<Submission> = {
+    const housingProject: Partial<HousingProject> = {
       otherUnits: '1-9'
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(2);
+    expect(housingProject.queuePriority).toBe(2);
   });
 
-  it('assigns priority 3 when submission matches neither priority 1 nor priority 2 criteria', () => {
-    const submission: Partial<Submission> = {
+  it('assigns priority 3 when housing project matches neither priority 1 nor priority 2 criteria', () => {
+    const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
       financiallySupportedBC: 'No',
@@ -817,16 +821,16 @@ describe('assignPriority', () => {
       otherUnits: ''
     };
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(3);
+    expect(housingProject.queuePriority).toBe(3);
   });
 
   it('assigns priority 3 if no criteria are met/given', () => {
-    const submission: Partial<Submission> = {};
+    const housingProject: Partial<HousingProject> = {};
 
-    submissionController.assignPriority(submission);
+    housingProjectController.assignPriority(housingProject);
 
-    expect(submission.queuePriority).toBe(3);
+    expect(housingProject.queuePriority).toBe(3);
   });
 });

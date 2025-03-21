@@ -13,8 +13,8 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
-import { contactService, enquiryService, permitService, submissionService } from '@/services';
-import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
+import { useAuthZStore, useHousingProjectStore, useTypeStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit, PermitType } from '@/types';
@@ -31,16 +31,16 @@ type PermitFilterConfig = {
 type CombinedPermit = Permit & PermitType;
 
 // Props
-const { submissionId } = defineProps<{
-  submissionId: string;
+const { housingProjectId } = defineProps<{
+  housingProjectId: string;
 }>();
 
 // Constants
 const { t } = useI18n();
 
 // Store
-const submissionStore = useSubmissionStore();
-const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
+const housingProjectStore = useHousingProjectStore();
+const { getPermits, getRelatedEnquiries, getHousingProject } = storeToRefs(housingProjectStore);
 
 const typeStore = useTypeStore();
 const { getPermitTypes } = storeToRefs(typeStore);
@@ -123,40 +123,40 @@ function permitFilter(config: PermitFilterConfig) {
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { submissionId: getSubmission.value?.submissionId },
-    query: { activityId: getSubmission.value?.activityId }
+    params: { housingProjectId: getHousingProject.value?.housingProjectId },
+    query: { activityId: getHousingProject.value?.activityId }
   });
 }
 onMounted(async () => {
-  let enquiriesValue, permitTypesValue, submissionValue: any;
+  let enquiriesValue, permitTypesValue, projectValue: any;
 
   try {
-    [submissionValue, permitTypesValue] = (
-      await Promise.all([submissionService.getSubmission(submissionId), permitService.getPermitTypes()])
+    [projectValue, permitTypesValue] = (
+      await Promise.all([housingProjectService.getHousingProject(housingProjectId), permitService.getPermitTypes()])
     ).map((r) => r.data);
-    if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
+    if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {
-    toast.error(t('projectView.toastProjectLoadFailed'));
+    toast.error(t('e.housing.projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.EXT_HOUSING });
   }
 
   try {
-    const activityId = submissionValue.activityId;
+    const activityId = projectValue.activityId;
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    submissionStore.setPermits(permitsValue);
+    housingProjectStore.setPermits(permitsValue);
   } catch {
-    toast.error(t('projectView.toastPermitLoadFailed'));
+    toast.error(t('e.housing.projectView.toastPermitLoadFailed'));
   }
-  submissionStore.setSubmission(submissionValue);
-  submissionStore.setRelatedEnquiries(enquiriesValue);
+  housingProjectStore.setHousingProject(projectValue);
+  housingProjectStore.setRelatedEnquiries(enquiriesValue);
   typeStore.setPermitTypes(permitTypesValue);
 
   // Fetch contacts for createdBy and assignedUserId
   // Push only thruthy values into the array
-  const userIds = [submissionValue?.assignedUserId, submissionValue?.createdBy].filter(Boolean);
+  const userIds = [projectValue?.assignedUserId, projectValue?.createdBy].filter(Boolean);
   const contacts = (await contactService.searchContacts({ userId: userIds })).data;
-  assignee.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.assignedUserId);
-  createdBy.value = contacts.find((contact: Contact) => contact.userId === submissionValue?.createdBy);
+  assignee.value = contacts.find((contact: Contact) => contact.userId === projectValue?.assignedUserId);
+  createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
 
   loading.value = false;
 });
@@ -165,11 +165,11 @@ onMounted(async () => {
 <template>
   <RouterView />
   <div
-    v-if="!loading && getSubmission"
+    v-if="!loading && getHousingProject"
     class="app-primary-color"
   >
     <div class="disclaimer-block p-8 mt-8">
-      {{ t('projectView.disclaimer') }}
+      {{ t('e.housing.projectView.disclaimer') }}
     </div>
     <div class="mt-20 flex justify-between">
       <div>
@@ -180,7 +180,7 @@ onMounted(async () => {
           @keydown.enter.prevent="navigateToSubmissionIntakeView()"
           @keydown.space.prevent="navigateToSubmissionIntakeView()"
         >
-          {{ getSubmission.projectName }}
+          {{ getHousingProject.projectName }}
           <font-awesome-icon
             class="text-sm"
             icon="fa fa-external-link"
@@ -189,10 +189,10 @@ onMounted(async () => {
         <div>
           <span class="mr-4">
             Project ID:
-            <span class="font-bold">{{ getSubmission.activityId }}</span>
+            <span class="font-bold">{{ getHousingProject.activityId }}</span>
           </span>
           <span class="mr-4">
-            {{ t('projectView.createdBy') }}:
+            {{ t('e.housing.projectView.createdBy') }}:
             <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
           </span>
           <span v-if="assignee">
@@ -203,33 +203,33 @@ onMounted(async () => {
         </div>
       </div>
       <Button
-        v-if="getSubmission?.submissionType !== SubmissionType.INAPPLICABLE"
+        v-if="getHousingProject?.housingProjectType !== SubmissionType.INAPPLICABLE"
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
         outlined
         @click="
           router.push({
             name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            query: { projectName: getSubmission.projectName, projectActivityId: getSubmission.activityId }
+            query: { projectName: getHousingProject.projectName, projectActivityId: getHousingProject.activityId }
           })
         "
       />
     </div>
 
     <div
-      v-if="getSubmission?.submissionType === SubmissionType.INAPPLICABLE"
+      v-if="getHousingProject?.housingProjectType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
     >
-      {{ t('projectView.inapplicableSubmissionType') }}
+      {{ t('e.housing.projectView.inapplicableSubmissionType') }}
     </div>
     <div>
-      <h3 class="mb-8 mt-16">{{ t('projectView.recommendedPermits') }}</h3>
+      <h3 class="mb-8 mt-16">{{ t('e.housing.projectView.recommendedPermits') }}</h3>
     </div>
     <div
       v-if="!permitsNeeded?.length"
       class="empty-block p-8 mb-2"
     >
-      {{ t('projectView.recommendedPermitsDesc') }}
+      {{ t('e.housing.projectView.recommendedPermitsDesc') }}
     </div>
     <Card
       v-for="permit in permitsNeeded"
@@ -248,10 +248,10 @@ onMounted(async () => {
       expand-icon="pi pi-chevron-right"
     >
       <AccordionPanel value="0">
-        <AccordionHeader>{{ t('projectView.notNeeded') }}</AccordionHeader>
+        <AccordionHeader>{{ t('e.housing.projectView.notNeeded') }}</AccordionHeader>
         <AccordionContent>
           <div>
-            {{ t('projectView.notNeededDesc') }}
+            {{ t('e.housing.projectView.notNeededDesc') }}
           </div>
           <ul class="list-disc mt-4">
             <li
@@ -265,12 +265,12 @@ onMounted(async () => {
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-    <h3 class="mt-20 mb-8">{{ t('projectView.submittedApplications') }}</h3>
+    <h3 class="mt-20 mb-8">{{ t('e.housing.projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
       class="empty-block p-8"
     >
-      {{ t('projectView.submittedApplicationsDesc') }}
+      {{ t('e.housing.projectView.submittedApplicationsDesc') }}
     </div>
     <router-link
       v-for="permit in permitsSubmitted"
@@ -280,7 +280,7 @@ onMounted(async () => {
           ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
           : RouteName.EXT_HOUSING_PROJECT_PERMIT,
         params: { permitId: permit.permitId },
-        query: { projectActivityId: getSubmission.activityId }
+        query: { projectActivityId: getHousingProject.activityId }
       }"
       @keydown.space.prevent="
         router.push({
@@ -288,7 +288,7 @@ onMounted(async () => {
             ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
             : RouteName.EXT_HOUSING_PROJECT_PERMIT,
           params: { permitId: permit.permitId },
-          query: { projectActivityId: getSubmission.activityId }
+          query: { projectActivityId: getHousingProject.activityId }
         })
       "
     >
@@ -311,26 +311,26 @@ onMounted(async () => {
                 :auth-status="permit.authStatus"
               />
               <div>
-                <span class="label-verified mr-1">{{ t('projectView.statusVerified') }}</span>
+                <span class="label-verified mr-1">{{ t('e.housing.projectView.statusVerified') }}</span>
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
               </div>
             </div>
             <div class="col-span-3">
-              <div class="label-field">{{ t('projectView.trackingId') }}</div>
+              <div class="label-field">{{ t('e.housing.projectView.trackingId') }}</div>
               <div class="permit-data">
                 {{ permit?.trackingId }}
               </div>
             </div>
             <div class="col-span-3">
-              <div class="label-field">{{ t('projectView.agency') }}</div>
+              <div class="label-field">{{ t('e.housing.projectView.agency') }}</div>
               <div class="permit-data">
                 {{ permit?.agency }}
               </div>
             </div>
             <div class="col-span-6">
-              <div class="label-field">{{ t('projectView.latestUpdates') }}</div>
+              <div class="label-field">{{ t('e.housing.projectView.latestUpdates') }}</div>
               <div class="permit-data">
-                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('projectView.noUpdates') }}
+                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('e.housing.projectView.noUpdates') }}
               </div>
             </div>
           </div>
@@ -339,7 +339,7 @@ onMounted(async () => {
     </router-link>
     <div>
       <div>
-        <h3 class="mt-20 mb-8">{{ t('projectView.relatedEnquiries') }}</h3>
+        <h3 class="mt-20 mb-8">{{ t('e.housing.projectView.relatedEnquiries') }}</h3>
       </div>
       <EnquiryListProponent
         :loading="loading"

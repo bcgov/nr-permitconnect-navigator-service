@@ -4,9 +4,9 @@ import { Message } from '@/lib/primevue';
 import { RouteName } from '@/utils/enums/application';
 
 // Props
-const { activityId, submissionId } = defineProps<{
+const { activityId, housingProjectId } = defineProps<{
   activityId: string;
-  submissionId: string;
+  housingProjectId: string;
 }>();
 </script>
 
@@ -23,7 +23,7 @@ const { activityId, submissionId } = defineProps<{
     <router-link
       :to="{
         name: RouteName.EXT_HOUSING_PROJECT,
-        params: { submissionId: submissionId }
+        params: { housingProjectId: housingProjectId }
       }"
     >
       <span class="text-2xl">{{ activityId }}</span>
