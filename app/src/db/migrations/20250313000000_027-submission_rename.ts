@@ -25,6 +25,21 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
+      .then(async () => {
+        await knex('yars.role').where('name', '=', 'SUBMISSION_CREATOR').update({
+          name: 'HOUSING_PROJECT_CREATOR',
+          description: 'Can create housing_projects'
+        });
+        await knex('yars.role').where('name', '=', 'SUBMISSION_VIEWER').update({
+          name: 'HOUSING_PROJECT_VIEWER',
+          description: 'Can view housing_projects'
+        });
+        await knex('yars.role').where('name', '=', 'SUBMISSION_EDITOR').update({
+          name: 'HOUSING_PROJECT_EDITOR',
+          description: 'Can edit housing_projects'
+        });
+      })
+
       // Drop public schema functions
       .then(() =>
         knex.schema.raw(`drop function public.get_activity_statistics(
@@ -237,6 +252,21 @@ export async function down(knex: Knex): Promise<void> {
         from submission_counts, enquiry_counts;
         end; $$`)
       )
+
+      .then(async () => {
+        await knex('yars.role').where('name', '=', 'HOUSING_PROJECT_CREATOR').update({
+          name: 'SUBMISSION_CREATOR',
+          description: 'Can create submissions'
+        });
+        await knex('yars.role').where('name', '=', 'HOUSING_PROJECT_VIEWER').update({
+          name: 'SUBMISSION_VIEWER',
+          description: 'Can view submissions'
+        });
+        await knex('yars.role').where('name', '=', 'HOUSING_PROJECT_EDITOR').update({
+          name: 'SUBMISSION_EDITOR',
+          description: 'Can edit submissions'
+        });
+      })
 
       .then(() =>
         knex('yars.resource').where('name', '=', 'HOUSING_PROJECT').update({
