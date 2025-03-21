@@ -1,6 +1,7 @@
 import { appAxios } from './interceptors';
 
 import type { ListPermitsOptions, Permit } from '@/types';
+import type { Initiative } from '@/utils/enums/application';
 
 export default {
   /**
@@ -29,10 +30,11 @@ export default {
 
   /**
    * @function getPermitTypes
+   * @param {Initiative} initiative Initiative type to get permit types for
    * @returns {Promise} An axios response
    */
-  getPermitTypes() {
-    return appAxios().get('permit/types');
+  getPermitTypes(initiative: Initiative) {
+    return appAxios().get('permit/types', { params: { initiative } });
   },
 
   /**

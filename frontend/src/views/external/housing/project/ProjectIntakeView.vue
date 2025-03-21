@@ -5,6 +5,7 @@ import { useRoute } from 'vue-router';
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { permitService } from '@/services';
 import { usePermitStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 

@@ -45,6 +45,7 @@ export enum GroupName {
 
 export enum Initiative {
   PCNS = 'PCNS',
+  ELECTRIFICATION = 'ELECTRIFICATION',
   HOUSING = 'HOUSING'
 }
 
