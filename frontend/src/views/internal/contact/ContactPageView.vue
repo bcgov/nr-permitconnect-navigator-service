@@ -6,7 +6,7 @@ import { useRoute, useRouter } from 'vue-router';
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { InputText, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { submissionService, enquiryService, contactService, userService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
+import { IdentityProvider, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact, Enquiry, Submission, User } from '@/types';
@@ -86,7 +86,7 @@ onBeforeMount(async () => {
   });
 
   if (userIds) {
-    const users = (await userService.searchUsers({ userId: userIds })).data;
+    const users = (await userService.searchUsers({ userId: userIds, idp: [IdentityProvider.IDIR] })).data;
     users.forEach((u: User) => {
       assignedUsers.value[u.userId] = u.fullName;
     });
