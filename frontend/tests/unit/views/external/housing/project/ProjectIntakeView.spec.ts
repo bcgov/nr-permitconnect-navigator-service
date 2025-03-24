@@ -16,6 +16,10 @@ usePermitService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as Axio
 const testSubmissionId = 'enquiry123';
 const testActivityId = 'activity123';
 
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: {} })
+}));
+
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
   props: {
     submissionId: testSubmissionIdProp,

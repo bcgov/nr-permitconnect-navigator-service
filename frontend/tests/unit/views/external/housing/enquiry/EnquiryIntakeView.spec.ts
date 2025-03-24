@@ -16,6 +16,10 @@ useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosR
 const testEnquiryId = 'enquiry123';
 const testActivityId = 'activity123';
 
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: {} })
+}));
+
 const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp = testActivityId) => ({
   props: {
     enquiryId: testEnquiryIdProp,

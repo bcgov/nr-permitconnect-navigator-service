@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 import { permitService, submissionService } from '@/services';
@@ -14,6 +15,9 @@ const { enquiryId, permitId, submissionId } = defineProps<{
   permitId?: string;
   submissionId?: string;
 }>();
+
+// Composables
+const route = useRoute();
 
 // Store
 const permitStore = usePermitStore();
@@ -43,6 +47,7 @@ onBeforeMount(async () => {
 <template>
   <EnquiryIntakeForm
     v-if="!loading"
+    :key="route.fullPath"
     :enquiry-id="enquiryId"
     :project="getSubmission"
     :permit="getPermit"
