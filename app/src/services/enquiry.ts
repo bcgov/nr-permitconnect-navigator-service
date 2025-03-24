@@ -124,7 +124,7 @@ const service = {
 
   /**
    * @function searchEnquiries
-   * Search and filter for specific submission
+   * Search and filter for specific enquiries
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.createdBy] Optional array of uuids representing users who created enquiries
    * @param {string[]} [params.enquiry_id] Optional array of uuids representing the enquiry ID
