@@ -37,9 +37,9 @@ model activity {
   document         document[]
   draft            draft[]
   enquiry          enquiry[]
+  housing_project  housing_project[]
   note             note[]
   permit           permit[]
-  submission       submission[]
 
   @@schema("public")
 }
@@ -238,68 +238,6 @@ model permit_type {
   @@schema("public")
 }
 
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model submission {
-  submission_id                      String    @id @db.Uuid
-  activity_id                        String
-  assigned_user_id                   String?   @db.Uuid
-  submitted_at                       DateTime  @db.Timestamptz(6)
-  submitted_by                       String
-  location_pids                      String?
-  company_name_registered            String?
-  project_name                       String?
-  single_family_units                String?
-  street_address                     String?
-  latitude                           Decimal?  @db.Decimal(8, 6)
-  longitude                          Decimal?  @db.Decimal(9, 6)
-  queue_priority                     Int?
-  related_permits                    String?
-  ast_notes                          String?
-  ast_updated                        Boolean   @default(false)
-  added_to_ats                       Boolean   @default(false)
-  ats_client_id                      Int?
-  ltsa_completed                     Boolean   @default(false)
-  bc_online_completed                Boolean   @default(false)
-  natural_disaster                   Boolean   @default(false)
-  financially_supported              Boolean   @default(false)
-  financially_supported_bc           String?
-  financially_supported_indigenous   String?
-  financially_supported_non_profit   String?
-  financially_supported_housing_coop String?
-  aai_updated                        Boolean   @default(false)
-  waiting_on                         String?
-  intake_status                      String?
-  application_status                 String?
-  created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at                         DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by                         String?
-  updated_at                         DateTime? @db.Timestamptz(6)
-  has_rental_units                   String?
-  project_description                String?
-  project_applicant_type             String?
-  is_developed_in_bc                 String?
-  multi_family_units                 String?
-  other_units                        String?
-  other_units_description            String?
-  rental_units                       String?
-  project_location                   String?
-  project_location_description       String?
-  locality                           String?
-  province                           String?
-  has_applied_provincial_permits     String?
-  check_provincial_permits           String?
-  indigenous_description             String?
-  non_profit_description             String?
-  housing_coop_description           String?
-  submission_type                    String?
-  consent_to_feedback                Boolean   @default(false)
-  geo_json                           Json?     @db.Json
-  activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
-  user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
-
-  @@schema("public")
-}
-
 model user {
   user_id           String             @id @db.Uuid
   idp               String?
@@ -316,7 +254,7 @@ model user {
   access_request    access_request[]
   contact           contact[]
   enquiry           enquiry[]
-  submission        submission[]
+  housing_project   housing_project[]
   identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
@@ -518,6 +456,69 @@ model email_log {
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   updated_by   String?
   updated_at   DateTime? @db.Timestamptz(6)
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model housing_project {
+  housing_project_id                 String    @id(map: "submission_pkey") @db.Uuid
+  activity_id                        String
+  assigned_user_id                   String?   @db.Uuid
+  submitted_at                       DateTime  @db.Timestamptz(6)
+  submitted_by                       String
+  location_pids                      String?
+  company_name_registered            String?
+  project_name                       String?
+  single_family_units                String?
+  street_address                     String?
+  latitude                           Decimal?  @db.Decimal(8, 6)
+  longitude                          Decimal?  @db.Decimal(9, 6)
+  queue_priority                     Int?
+  related_permits                    String?
+  ast_notes                          String?
+  ast_updated                        Boolean   @default(false)
+  added_to_ats                       Boolean   @default(false)
+  ats_client_id                      Int?
+  ltsa_completed                     Boolean   @default(false)
+  bc_online_completed                Boolean   @default(false)
+  natural_disaster                   Boolean   @default(false)
+  financially_supported              Boolean   @default(false)
+  financially_supported_bc           String?
+  financially_supported_indigenous   String?
+  financially_supported_non_profit   String?
+  financially_supported_housing_coop String?
+  aai_updated                        Boolean   @default(false)
+  waiting_on                         String?
+  intake_status                      String?
+  application_status                 String?
+  created_by                         String?   @default("00000000-0000-0000-0000-000000000000")
+  created_at                         DateTime? @default(now()) @db.Timestamptz(6)
+  updated_by                         String?
+  updated_at                         DateTime? @db.Timestamptz(6)
+  has_rental_units                   String?
+  project_description                String?
+  project_applicant_type             String?
+  is_developed_in_bc                 String?
+  multi_family_units                 String?
+  other_units                        String?
+  other_units_description            String?
+  rental_units                       String?
+  project_location                   String?
+  project_location_description       String?
+  locality                           String?
+  province                           String?
+  has_applied_provincial_permits     String?
+  check_provincial_permits           String?
+  indigenous_description             String?
+  non_profit_description             String?
+  housing_coop_description           String?
+  housing_project_type               String?
+  consent_to_feedback                Boolean   @default(false)
+  geo_json                           Json?     @db.Json
+  activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
+  user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 
   @@schema("public")
 }

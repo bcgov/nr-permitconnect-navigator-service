@@ -28,8 +28,8 @@ import {
   TabPanel,
   TabPanels
 } from '@/lib/primevue';
-import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { useAuthZStore, useHousingProjectStore, useTypeStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -42,11 +42,11 @@ import type { Document, Note } from '@/types';
 const {
   activityId,
   initialTab = '0',
-  submissionId
+  housingProjectId
 } = defineProps<{
   activityId: string;
   initialTab?: string;
-  submissionId: string;
+  housingProjectId: string;
 }>();
 
 // Constants
@@ -63,9 +63,9 @@ const SORT_TYPES = {
 };
 
 // Store
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const typeStore = useTypeStore();
-const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
+const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getHousingProject } = storeToRefs(housingProjectStore);
 const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
@@ -113,14 +113,14 @@ const filteredDocuments = computed(() => {
 });
 
 const isCompleted = computed(() => {
-  return getSubmission.value?.applicationStatus === ApplicationStatus.COMPLETED;
+  return getHousingProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: Note) => submissionStore.addNote(note, true);
+const onAddNote = (note: Note) => housingProjectStore.addNote(note, true);
 
-const onDeleteNote = (note: Note) => submissionStore.removeNote(note);
+const onDeleteNote = (note: Note) => housingProjectStore.removeNote(note);
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => submissionStore.updateNote(oldNote, newNote);
+const onUpdateNote = (oldNote: Note, newNote: Note) => housingProjectStore.updateNote(oldNote, newNote);
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
@@ -129,7 +129,7 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 onMounted(async () => {
   const [submission, documents, notes, permits, permitTypes, relatedEnquiries] = (
     await Promise.all([
-      submissionService.getSubmission(submissionId),
+      housingProjectService.getHousingProject(housingProjectId),
       documentService.listDocuments(activityId),
       noteService.listNotes(activityId),
       permitService.listPermits({ activityId, includeNotes: true }),
@@ -143,12 +143,12 @@ onMounted(async () => {
     d.filename = decodeURI(d.filename);
   });
 
-  submissionStore.setSubmission(submission);
-  submissionStore.setDocuments(documents);
-  submissionStore.setNotes(notes);
-  submissionStore.setPermits(permits);
+  housingProjectStore.setHousingProject(submission);
+  housingProjectStore.setDocuments(documents);
+  housingProjectStore.setNotes(notes);
+  housingProjectStore.setPermits(permits);
   typeStore.setPermitTypes(permitTypes);
-  submissionStore.setRelatedEnquiries(relatedEnquiries);
+  housingProjectStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
 });
@@ -169,14 +169,14 @@ onMounted(async () => {
 
   <div class="flex items-center justify-between">
     <h1>
-      <span v-if="getSubmission?.projectName">
-        <span class="ml-1">{{ getSubmission.projectName + ': ' }}</span>
+      <span v-if="getHousingProject?.projectName">
+        <span class="ml-1">{{ getHousingProject.projectName + ': ' }}</span>
       </span>
       <span
-        v-if="getSubmission?.activityId"
+        v-if="getHousingProject?.activityId"
         class="mr-1"
       >
-        {{ getSubmission.activityId }}
+        {{ getHousingProject.activityId }}
       </span>
       <span
         v-if="isCompleted"
@@ -191,13 +191,13 @@ onMounted(async () => {
         router.push({
           name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
           params: {
-            submissionId: submissionId
+            housingProjectId: housingProjectId
           }
         })
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('submissionView.seePropViewButtonLabel') }}
+      {{ t('i.housing.projectView.seePropViewButtonLabel') }}
     </Button>
   </div>
 
@@ -212,10 +212,10 @@ onMounted(async () => {
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
-        <span v-if="!loading && getSubmission">
+        <span v-if="!loading && getHousingProject">
           <SubmissionForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.SUBMISSION, Action.UPDATE)"
-            :submission="getSubmission"
+            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
+            :housing-project="getHousingProject"
           />
         </span>
       </TabPanel>

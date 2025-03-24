@@ -51,13 +51,18 @@ export enum Resource {
   CONTACT = 'CONTACT',
   DOCUMENT = 'DOCUMENT',
   ENQUIRY = 'ENQUIRY',
+  HOUSING_PROJECT = 'HOUSING_PROJECT',
   NOTE = 'NOTE',
   PERMIT = 'PERMIT',
   REPORTING = 'REPORTING',
   ROADMAP = 'ROADMAP',
   SSO = 'SSO',
-  SUBMISSION = 'SUBMISSION',
   USER = 'USER'
+}
+
+// Legacy resources that are kept for migration purposes
+export enum ResourceLegacy {
+  SUBMISSION = 'SUBMISSION'
 }
 
 export enum GroupName {

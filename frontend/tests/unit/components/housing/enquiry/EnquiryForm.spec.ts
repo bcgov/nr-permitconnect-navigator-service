@@ -1,7 +1,7 @@
 import { nextTick } from 'vue';
 
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
-import { enquiryService, submissionService, userService } from '@/services';
+import { enquiryService, housingProjectService, userService } from '@/services';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
@@ -19,7 +19,7 @@ vi.mock('vue-i18n', () => ({
 
 const searchContactSpy = vi.spyOn(userService, 'searchUsers');
 const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
-const getActivityIdsSpy = vi.spyOn(submissionService, 'getActivityIds');
+const getActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
 
 const currentDate = new Date().toISOString();
 

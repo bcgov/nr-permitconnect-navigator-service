@@ -5,7 +5,7 @@ import { computed, ref } from 'vue';
 import { Button, FileUpload, ProgressBar, useToast } from '@/lib/primevue';
 import DocumentCardLite from '@/components/file/DocumentCardLite.vue';
 import { documentService } from '@/services';
-import { useConfigStore, useSubmissionStore } from '@/store';
+import { useConfigStore, useHousingProjectStore } from '@/store';
 
 import type { FileUploadUploaderEvent } from 'primevue/fileupload';
 import type { Ref } from 'vue';
@@ -27,7 +27,7 @@ const {
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 
 // State
 const fileInput: Ref<any> = ref(null);
@@ -70,7 +70,7 @@ const onUpload = async (files: Array<File>) => {
             .then((response) => {
               if (response?.data) {
                 response.data.filename = decodeURI(response.data.filename);
-                submissionStore.addDocument(response.data);
+                housingProjectStore.addDocument(response.data);
                 toast.success('Document uploaded');
               }
               return resolve(response);
@@ -92,7 +92,7 @@ const onUpload = async (files: Array<File>) => {
 // If accept is provided, only documents with extensions in accept are shown
 // If reject is provided, only documents with extensions not in reject are shown
 const filteredDocuments = computed(() => {
-  let documents = submissionStore.getDocuments;
+  let documents = housingProjectStore.getDocuments;
   return documents.filter(
     (document) =>
       (!accept && !reject) ||

@@ -9,7 +9,8 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
-import type { Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
+
+import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
 
 import type { AxiosResponse } from 'axios';
 // import { geoJSON } from 'leaflet';
@@ -71,11 +72,11 @@ const exampleContact = {
 };
 
 // Example Submission object
-const testSubmission: Submission = {
+const testSubmission: HousingProject = {
   activityId: 'activity456',
-  submissionId: 'submission789',
+  housingProjectId: 'submission789',
   queuePriority: 1,
-  submissionType: 'Type A',
+  housingProjectType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
@@ -125,7 +126,7 @@ const testSubmission: Submission = {
 
 const wrapperSettings = (testSubmissionProp = testSubmission, editableProp = true) => ({
   props: {
-    submission: testSubmissionProp,
+    housingProject: testSubmissionProp,
     editable: editableProp
   },
   global: {
@@ -223,7 +224,7 @@ describe('SubmissionForm.vue', () => {
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(getPIDsSpy).toHaveBeenCalledTimes(1);
-    expect(getPIDsSpy).toHaveBeenCalledWith(testSubmission.submissionId);
+    expect(getPIDsSpy).toHaveBeenCalledWith(testSubmission.housingProjectId);
   });
 
   it('there are correct numbers of disabled components when editable prop is false', async () => {

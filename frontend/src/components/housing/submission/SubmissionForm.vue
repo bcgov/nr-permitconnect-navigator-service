@@ -22,8 +22,8 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { mapService, submissionService, userService } from '@/services';
-import { useSubmissionStore } from '@/store';
+import { housingProjectService, mapService, userService } from '@/services';
+import { useHousingProjectStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
@@ -46,24 +46,24 @@ import {
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Submission, User } from '@/types';
+import type { ATSClientResource, HousingProject, User } from '@/types';
 import { omit, setEmptyStringsToNull } from '@/utils/utils';
 import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
-interface SubmissionForm extends Submission {
+interface HousingProjectForm extends HousingProject {
   locationAddress: string;
   user?: User;
 }
 
 // Props
-const { editable = true, submission } = defineProps<{
+const { editable = true, housingProject } = defineProps<{
   editable?: boolean;
-  submission: Submission;
+  housingProject: HousingProject;
 }>();
 
 // Store
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -84,7 +84,7 @@ const formSchema = object({
     .max(3)
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
+  housingProjectType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...contactValidator,
@@ -160,7 +160,7 @@ const getAssigneeOptionLabel = (e: User) => {
 };
 
 const isCompleted = computed(() => {
-  return submission.applicationStatus === ApplicationStatus.COMPLETED;
+  return housingProject.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
 const onAssigneeInput = async (e: IInputEvent) => {
@@ -231,8 +231,8 @@ const onSaveGeoJson = () => {
   downloadElement.href = downloadLink;
 
   const currentDateTime = formatDateFilename(new Date().toISOString());
-  const projectName = submissionStore?.getSubmission?.projectName ?? '';
-  const projectActivityId = submissionStore?.getSubmission?.activityId ?? '';
+  const projectName = housingProjectStore?.getHousingProject?.projectName ?? '';
+  const projectActivityId = housingProjectStore?.getHousingProject?.activityId ?? '';
 
   downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
   downloadElement.click();
@@ -271,14 +271,14 @@ const onSubmit = async (values: any) => {
     );
 
     // Generate final submission object
-    const submitData: Submission = omit(setEmptyStringsToNull(valuesWithContact) as SubmissionForm, [
+    const submitData: HousingProject = omit(setEmptyStringsToNull(valuesWithContact) as HousingProjectForm, [
       'locationAddress',
       'user'
     ]);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
-    const result = await submissionService.updateSubmission(values.submissionId, submitData);
-    submissionStore.setSubmission(result.data);
+    const result = await housingProjectService.updateHousingProject(values.housingProjectId, submitData);
+    housingProjectStore.setHousingProject(result.data);
     formRef.value?.resetForm({
       values: {
         ...submitData,
@@ -312,68 +312,68 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
 }
 
 onMounted(async () => {
-  if (submission.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
+  if (housingProject.assignedUserId) {
+    assigneeOptions.value = (await userService.searchUsers({ userId: [housingProject.assignedUserId] })).data;
   }
 
-  const locationPIDsAuto = (await mapService.getPIDs(submission.submissionId)).data;
+  const locationPIDsAuto = (await mapService.getPIDs(housingProject.housingProjectId)).data;
 
-  if (submission.geoJSON) geoJson.value = submission.geoJSON;
+  if (housingProject.geoJSON) geoJson.value = housingProject.geoJSON;
 
   // Default form values
   initialFormValues.value = {
-    activityId: submission.activityId,
-    submissionId: submission.submissionId,
-    queuePriority: submission.queuePriority,
-    submissionType: submission.submissionType,
-    submittedAt: new Date(submission.submittedAt),
-    relatedEnquiries: submission.relatedEnquiries,
-    companyNameRegistered: submission.companyNameRegistered,
-    isDevelopedInBC: submission.isDevelopedInBC,
-    consentToFeedback: submission.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
-    projectName: submission.projectName,
-    projectDescription: submission.projectDescription,
-    projectLocationDescription: submission.projectLocationDescription,
-    singleFamilyUnits: submission.singleFamilyUnits,
-    multiFamilyUnits: submission.multiFamilyUnits,
-    otherUnitsDescription: submission.otherUnitsDescription,
-    otherUnits: submission.otherUnits,
-    hasRentalUnits: submission.hasRentalUnits,
-    rentalUnits: submission.rentalUnits,
-    financiallySupportedBC: submission.financiallySupportedBC,
-    financiallySupportedIndigenous: submission.financiallySupportedIndigenous,
-    indigenousDescription: submission.indigenousDescription,
-    financiallySupportedNonProfit: submission.financiallySupportedNonProfit,
-    nonProfitDescription: submission.nonProfitDescription,
-    financiallySupportedHousingCoop: submission.financiallySupportedHousingCoop,
-    housingCoopDescription: submission.housingCoopDescription,
-    locationAddress: updateLocationAddress(submission),
-    streetAddress: submission.streetAddress,
-    locality: submission.locality,
-    province: submission.province,
-    locationPIDs: submission.locationPIDs,
+    activityId: housingProject.activityId,
+    housingProjectId: housingProject.housingProjectId,
+    queuePriority: housingProject.queuePriority,
+    housingProjectType: housingProject.housingProjectType,
+    submittedAt: new Date(housingProject.submittedAt),
+    relatedEnquiries: housingProject.relatedEnquiries,
+    companyNameRegistered: housingProject.companyNameRegistered,
+    isDevelopedInBC: housingProject.isDevelopedInBC,
+    consentToFeedback: housingProject.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
+    projectName: housingProject.projectName,
+    projectDescription: housingProject.projectDescription,
+    projectLocationDescription: housingProject.projectLocationDescription,
+    singleFamilyUnits: housingProject.singleFamilyUnits,
+    multiFamilyUnits: housingProject.multiFamilyUnits,
+    otherUnitsDescription: housingProject.otherUnitsDescription,
+    otherUnits: housingProject.otherUnits,
+    hasRentalUnits: housingProject.hasRentalUnits,
+    rentalUnits: housingProject.rentalUnits,
+    financiallySupportedBC: housingProject.financiallySupportedBC,
+    financiallySupportedIndigenous: housingProject.financiallySupportedIndigenous,
+    indigenousDescription: housingProject.indigenousDescription,
+    financiallySupportedNonProfit: housingProject.financiallySupportedNonProfit,
+    nonProfitDescription: housingProject.nonProfitDescription,
+    financiallySupportedHousingCoop: housingProject.financiallySupportedHousingCoop,
+    housingCoopDescription: housingProject.housingCoopDescription,
+    locationAddress: updateLocationAddress(housingProject),
+    streetAddress: housingProject.streetAddress,
+    locality: housingProject.locality,
+    province: housingProject.province,
+    locationPIDs: housingProject.locationPIDs,
     locationPIDsAuto: locationPIDsAuto,
-    latitude: submission.latitude,
-    longitude: submission.longitude,
-    geomarkUrl: submission.geomarkUrl,
-    naturalDisaster: submission.naturalDisaster,
-    addedToATS: submission.addedToATS,
-    atsClientId: submission.atsClientId,
-    ltsaCompleted: submission.ltsaCompleted,
-    bcOnlineCompleted: submission.bcOnlineCompleted,
-    aaiUpdated: submission.aaiUpdated,
-    astNotes: submission.astNotes,
-    intakeStatus: submission.intakeStatus,
-    contactId: submission?.contacts[0]?.contactId,
-    contactFirstName: submission?.contacts[0]?.firstName,
-    contactLastName: submission?.contacts[0]?.lastName,
-    contactPhoneNumber: submission?.contacts[0]?.phoneNumber,
-    contactEmail: submission?.contacts[0]?.email,
-    contactApplicantRelationship: submission?.contacts[0]?.contactApplicantRelationship,
-    contactPreference: submission?.contacts[0]?.contactPreference,
+    latitude: housingProject.latitude,
+    longitude: housingProject.longitude,
+    geomarkUrl: housingProject.geomarkUrl,
+    naturalDisaster: housingProject.naturalDisaster,
+    addedToATS: housingProject.addedToATS,
+    atsClientId: housingProject.atsClientId,
+    ltsaCompleted: housingProject.ltsaCompleted,
+    bcOnlineCompleted: housingProject.bcOnlineCompleted,
+    aaiUpdated: housingProject.aaiUpdated,
+    astNotes: housingProject.astNotes,
+    intakeStatus: housingProject.intakeStatus,
+    contactId: housingProject?.contacts[0]?.contactId,
+    contactFirstName: housingProject?.contacts[0]?.firstName,
+    contactLastName: housingProject?.contacts[0]?.lastName,
+    contactPhoneNumber: housingProject?.contacts[0]?.phoneNumber,
+    contactEmail: housingProject?.contacts[0]?.email,
+    contactApplicantRelationship: housingProject?.contacts[0]?.contactApplicantRelationship,
+    contactPreference: housingProject?.contacts[0]?.contactPreference,
     user: assigneeOptions.value[0] ?? null,
-    applicationStatus: submission.applicationStatus,
-    waitingOn: submission.waitingOn
+    applicationStatus: housingProject.applicationStatus,
+    waitingOn: housingProject.waitingOn
   };
 });
 </script>
@@ -409,7 +409,7 @@ onMounted(async () => {
       />
       <Select
         class="col-span-3"
-        name="submissionType"
+        name="housingProjectType"
         label="Submission type"
         :disabled="!editable"
         :options="SUBMISSION_TYPE_LIST"
@@ -852,7 +852,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :submission-or-enquiry="submission"
+      :housing-project-or-enquiry="housingProject"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -872,7 +872,7 @@ onMounted(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :submission-or-enquiry="submission"
+      :housing-project-or-enquiry="housingProject"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;

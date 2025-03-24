@@ -8,7 +8,7 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useConfigStore, useHousingProjectStore, useTypeStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
@@ -25,7 +25,7 @@ const { activityId, editable = true } = defineProps<{
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
 const typeStore = useTypeStore();
-const { getDocuments, getPermits, getSubmission } = storeToRefs(useSubmissionStore());
+const { getDocuments, getPermits, getHousingProject } = storeToRefs(useHousingProjectStore());
 const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
@@ -111,7 +111,7 @@ watchEffect(async () => {
   // Dumb, but need to do something with the ref for it to be watched properly
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const permits = getPermits.value.concat();
-  const submission = getSubmission.value;
+  const project = getHousingProject.value;
 
   // Get navigator details
   const configBCC = getConfig.value.ches?.roadmap?.bcc;
@@ -121,8 +121,8 @@ watchEffect(async () => {
     fullName: 'Permit Connect Navigator Service'
   };
 
-  if (submission?.assignedUserId) {
-    const assignee = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data[0];
+  if (project?.assignedUserId) {
+    const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] })).data[0];
 
     if (assignee) {
       navigator = assignee;
@@ -143,10 +143,10 @@ watchEffect(async () => {
 
   const body = roadmapTemplate({
     '{{ contactName }}':
-      submission?.contacts[0]?.firstName && submission?.contacts[0]?.lastName
-        ? `${submission?.contacts[0]?.firstName} ${submission?.contacts[0]?.lastName}`
+      project?.contacts[0]?.firstName && project?.contacts[0]?.lastName
+        ? `${project?.contacts[0]?.firstName} ${project?.contacts[0]?.lastName}`
         : '',
-    '{{ locationAddress }}': submission?.streetAddress ?? '',
+    '{{ locationAddress }}': project?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
     '{{ permitStateApplied }}': permitStateApplied,
@@ -157,7 +157,7 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: submission?.contacts[0]?.email,
+    to: project?.contacts[0]?.email,
     cc: undefined,
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
@@ -166,7 +166,7 @@ watchEffect(async () => {
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
-  formRef.value?.setFieldValue('to', submission?.contacts[0]?.email);
+  formRef.value?.setFieldValue('to', project?.contacts[0]?.email);
   formRef.value?.setFieldValue('bcc', bcc);
   formRef.value?.setFieldValue('body', body);
 });

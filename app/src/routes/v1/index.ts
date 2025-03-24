@@ -8,13 +8,13 @@ import contact from './contact';
 import docs from './docs';
 import document from './document';
 import enquiry from './enquiry';
+import housingProject from './housingProject';
 import map from './map';
 import note from './note';
 import permit from './permit';
 import reporting from './reporting';
 import roadmap from './roadmap';
 import sso from './sso';
-import submission from './submission';
 import user from './user';
 import yars from './yars';
 
@@ -39,7 +39,7 @@ router.get('/', (_req, res) => {
       '/reporting',
       '/roadmap',
       '/sso',
-      '/submission',
+      '/housingProject',
       '/user',
       '/yars'
     ]
@@ -58,7 +58,7 @@ router.use('/permit', permit);
 router.use('/reporting', reporting);
 router.use('/roadmap', roadmap);
 router.use('/sso', sso);
-router.use('/submission', submission);
+router.use('/housingProject', housingProject);
 router.use('/user', user);
 router.use('/yars', yars);
 

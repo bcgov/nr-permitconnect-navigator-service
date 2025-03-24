@@ -7,7 +7,7 @@ import {
   draftService,
   emailService,
   enquiryService,
-  submissionService,
+  housingProjectService,
   permitService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
@@ -28,49 +28,60 @@ import type {
   CurrentContext,
   Draft,
   Email,
+  HousingProject,
+  HousingProjectIntake,
+  HousingProjectSearchParameters,
   Permit,
-  StatisticsFilters,
-  Submission,
-  SubmissionIntake,
-  SubmissionSearchParameters
+  StatisticsFilters
 } from '../types';
 
 const controller = {
   /**
    * @function assignPriority
-   * Assigns a priority level to a submission based on given criteria
+   * Assigns a priority level to a housing project based on given criteria
    * Criteria defined below
    */
-  assignPriority: (submission: Partial<Submission>) => {
+  assignPriority: (housingProject: Partial<HousingProject>) => {
     const matchesPriorityOneCriteria = // Priority 1 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED || // 1. More than 50 units (any)
-      submission.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-      submission.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-      submission.hasRentalUnits === 'Yes' || // 2. Supports Rental Units
-      submission.financiallySupportedBC === 'Yes' || // 3. Social Housing
-      submission.financiallySupportedIndigenous === 'Yes'; // 4. Indigenous Led
+      // 1. More than 50 units (any)
+      housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      housingProject.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      housingProject.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      housingProject.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      housingProject.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
+      housingProject.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
+      // 2. Supports Rental Units
+      housingProject.hasRentalUnits === 'Yes' ||
+      // 3. Social Housing
+      housingProject.financiallySupportedBC === 'Yes' ||
+      // 4. Indigenous Led
+      housingProject.financiallySupportedIndigenous === 'Yes';
 
     const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-      submission.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 1. Single Family >= 10 Units
-      submission.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 2. Has 1 or more MultiFamily Units
-      submission.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
-      submission.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE || // 3. Has 1 or more Other Units
-      submission.otherUnits === NumResidentialUnits.ONE_TO_NINE;
+      // 1. Single Family >= 10 Units
+      housingProject.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
+      // 2. Has 1 or more MultiFamily Units
+      housingProject.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
+      housingProject.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
+      // 3. Has 1 or more Other Units
+      housingProject.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
+      housingProject.otherUnits === NumResidentialUnits.ONE_TO_NINE;
 
     if (matchesPriorityOneCriteria) {
-      submission.queuePriority = 1;
+      housingProject.queuePriority = 1;
     } else if (matchesPriorityTwoCriteria) {
-      submission.queuePriority = 2;
+      housingProject.queuePriority = 2;
     } else {
       // Prioriy 3 Criteria:
-      submission.queuePriority = 3; // Everything Else
+      housingProject.queuePriority = 3; // Everything Else
     }
   },
 
-  generateSubmissionData: async (data: SubmissionIntake, intakeStatus: string, currentContext: CurrentContext) => {
+  generateHousingProjectData: async (
+    data: HousingProjectIntake,
+    intakeStatus: string,
+    currentContext: CurrentContext
+  ) => {
     const activityId =
       data.activityId ??
       (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
@@ -161,34 +172,34 @@ const controller = {
       }));
     }
 
-    // Put new submission together
-    const submissionData = {
-      submission: {
+    // Put new housing project together
+    const housingProjectData = {
+      housingProject: {
         ...basic,
         ...housing,
         ...location,
         ...permits,
-        submissionId: uuidv4(),
+        housingProjectId: uuidv4(),
         activityId: activityId,
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: getCurrentUsername(currentContext),
         intakeStatus: intakeStatus,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
-        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
-      } as Submission,
+        housingProjectType: data?.housingProjectType ?? SubmissionType.GUIDANCE
+      } as HousingProject,
       appliedPermits,
       investigatePermits
     };
 
-    controller.assignPriority(submissionData.submission);
+    controller.assignPriority(housingProjectData.housingProject);
 
-    return submissionData;
+    return housingProjectData;
   },
 
   /**
    * @function emailConfirmation
-   * Send an email with the confirmation of submission
+   * Send an email with the confirmation of housing project
    */
   emailConfirmation: async (req: Request<never, never, Email>, res: Response, next: NextFunction) => {
     try {
@@ -201,10 +212,10 @@ const controller = {
 
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await submissionService.getSubmissions();
+      let response = await housingProjectService.getHousingProjects();
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
       res.status(200).json(response.map((x) => x.activityId));
@@ -213,9 +224,9 @@ const controller = {
     }
   },
 
-  createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+  createHousingProject: async (req: Request<never, never, HousingProjectIntake>, res: Response, next: NextFunction) => {
     try {
-      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+      const { housingProject, appliedPermits, investigatePermits } = await controller.generateHousingProjectData(
         req.body,
         IntakeStatus.SUBMITTED,
         req.currentContext
@@ -223,11 +234,11 @@ const controller = {
 
       // Create contacts
       if (req.body.contacts)
-        await contactService.upsertContacts(req.body.contacts, req.currentContext, submission.activityId);
+        await contactService.upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
 
-      // Create new submission
-      const result = await submissionService.createSubmission({
-        ...submission,
+      // Create new housing project
+      const result = await housingProjectService.createHousingProject({
+        ...housingProject,
         ...generateCreateStamps(req.currentContext)
       });
 
@@ -235,18 +246,18 @@ const controller = {
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
       await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
 
-      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+      res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  deleteSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  deleteHousingProject: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.deleteSubmission(req.params.submissionId);
+      const response = await housingProjectService.deleteHousingProject(req.params.housingProjectId);
 
       if (!response) {
-        return res.status(404).json({ message: 'Submission not found' });
+        return res.status(404).json({ message: 'Housing Project not found' });
       }
 
       res.status(200).json(response);
@@ -260,7 +271,7 @@ const controller = {
       const response = await draftService.deleteDraft(req.params.draftId);
 
       if (!response) {
-        return res.status(404).json({ message: 'Submission draft not found' });
+        return res.status(404).json({ message: 'Housing Project draft not found' });
       }
 
       res.status(200).json(response);
@@ -281,7 +292,7 @@ const controller = {
 
   getDrafts: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await draftService.getDrafts(DraftCode.SUBMISSION);
+      let response = await draftService.getDrafts(DraftCode.HOUSING_PROJECT);
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
@@ -295,19 +306,19 @@ const controller = {
 
   getStatistics: async (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getStatistics(req.query);
+      const response = await housingProjectService.getStatistics(req.query);
       res.status(200).json(response[0]);
     } catch (e: unknown) {
       next(e);
     }
   },
 
-  getSubmission: async (req: Request<{ submissionId: string }>, res: Response, next: NextFunction) => {
+  getHousingProject: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await submissionService.getSubmission(req.params.submissionId);
+      const response = await housingProjectService.getHousingProject(req.params.housingProjectId);
 
       if (!response) {
-        return res.status(404).json({ message: 'Submission not found' });
+        return res.status(404).json({ message: 'Housing Project not found' });
       }
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -327,13 +338,13 @@ const controller = {
     }
   },
 
-  getSubmissions: async (req: Request, res: Response, next: NextFunction) => {
+  getHousingProjects: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await submissionService.getSubmissions();
+      let response = await housingProjectService.getHousingProjects();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 
@@ -343,13 +354,13 @@ const controller = {
     }
   },
 
-  searchSubmissions: async (
-    req: Request<never, never, never, SubmissionSearchParameters>,
+  searchHousingProjects: async (
+    req: Request<never, never, never, HousingProjectSearchParameters>,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      let response = await submissionService.searchSubmissions({
+      let response = await housingProjectService.searchHousingProjects({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser),
         includeDeleted: isTruthy(req.query.includeDeleted)
@@ -357,7 +368,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: Submission) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 
@@ -367,9 +378,9 @@ const controller = {
     }
   },
 
-  submitDraft: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
+  submitDraft: async (req: Request<never, never, HousingProjectIntake>, res: Response, next: NextFunction) => {
     try {
-      const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
+      const { housingProject, appliedPermits, investigatePermits } = await controller.generateHousingProjectData(
         req.body,
         IntakeStatus.SUBMITTED,
         req.currentContext
@@ -377,11 +388,11 @@ const controller = {
 
       // Create contacts
       if (req.body.contacts)
-        await contactService.upsertContacts(req.body.contacts, req.currentContext, submission.activityId);
+        await contactService.upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
 
-      // Create new submission
-      const result = await submissionService.createSubmission({
-        ...submission,
+      // Create new housing project
+      const result = await housingProjectService.createHousingProject({
+        ...housingProject,
         ...generateCreateStamps(req.currentContext)
       });
 
@@ -392,7 +403,7 @@ const controller = {
       // Delete old draft
       if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);
 
-      res.status(201).json({ activityId: result.activityId, submissionId: result.submissionId });
+      res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
     } catch (e: unknown) {
       next(e);
     }
@@ -419,7 +430,7 @@ const controller = {
         response = await draftService.createDraft({
           draftId: uuidv4(),
           activityId: activityId,
-          draftCode: DraftCode.SUBMISSION,
+          draftCode: DraftCode.HOUSING_PROJECT,
           data: req.body.data,
           ...generateCreateStamps(req.currentContext)
         });
@@ -432,19 +443,19 @@ const controller = {
   },
 
   updateIsDeletedFlag: async (
-    req: Request<{ submissionId: string }, never, { isDeleted: boolean }>,
+    req: Request<{ housingProjectId: string }, never, { isDeleted: boolean }>,
     res: Response,
     next: NextFunction
   ) => {
     try {
-      const response = await submissionService.updateIsDeletedFlag(
-        req.params.submissionId,
+      const response = await housingProjectService.updateIsDeletedFlag(
+        req.params.housingProjectId,
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
       );
 
       if (!response) {
-        return res.status(404).json({ message: 'Submission not found' });
+        return res.status(404).json({ message: 'Housing Project not found' });
       }
 
       res.status(200).json(response);
@@ -453,22 +464,22 @@ const controller = {
     }
   },
 
-  updateSubmission: async (req: Request<never, never, Submission>, res: Response, next: NextFunction) => {
+  updateHousingProject: async (req: Request<never, never, HousingProject>, res: Response, next: NextFunction) => {
     try {
-      // If Navigator created empty submission we need to assign contactIds on save
+      // If Navigator created empty housing project we need to assign contactIds on save
       req.body.contacts = req.body.contacts.map((x) => {
         if (!x.contactId) x.contactId = uuidv4();
         return x;
       });
       await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
-      const response = await submissionService.updateSubmission({
+      const response = await housingProjectService.updateHousingProject({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
 
       if (!response) {
-        return res.status(404).json({ message: 'Submission not found' });
+        return res.status(404).json({ message: 'Housing Project not found' });
       }
 
       res.status(200).json(response);

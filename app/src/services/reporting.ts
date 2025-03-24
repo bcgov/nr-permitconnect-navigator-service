@@ -1,11 +1,11 @@
 import prisma from '../db/dataConnection';
 
 const service = {
-  getSubmissionPermitData: async () => {
+  getHousingProjectPermitData: async () => {
     const result = await prisma.$queryRaw`
     select project_name,
       case
-        when s.consent_to_feedback then 'Yes'
+        when hp.consent_to_feedback then 'Yes'
         else 'No'
       end as consent_to_feedback,
       c.first_name,
@@ -14,13 +14,13 @@ const service = {
       c.email,
       c.contact_preference,
       c.contact_applicant_relationship,
-      s.activity_id,
+      hp.activity_id,
       street_address,
       locality,
       latitude,
       longitude,
       location_pids,
-      submission_type,
+      housing_project_type,
       intake_status,
       application_status,
       p.issued_permit_id,
@@ -41,11 +41,11 @@ const service = {
       pt.tracked_in_ats,
       pt.source_system,
       pt.source_system_acronym
-    from submission as s
-    join activity as a on s.activity_id = a.activity_id
-    join activity_contact as ac on s.activity_id = ac.activity_id
+    from housing_project as hp
+    join activity as a on hp.activity_id = a.activity_id
+    join activity_contact as ac on hp.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
-    join permit as p on s.activity_id = p.activity_id
+    join permit as p on hp.activity_id = p.activity_id
     join permit_type pt on p.permit_type_id = pt.permit_type_id
     where a.is_deleted = false`;
 

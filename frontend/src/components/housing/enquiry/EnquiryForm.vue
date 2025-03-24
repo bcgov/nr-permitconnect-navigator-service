@@ -20,7 +20,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, submissionService, userService } from '@/services';
+import { enquiryService, housingProjectService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
@@ -270,7 +270,7 @@ onMounted(async () => {
     atsClientId: enquiry?.atsClientId,
     user: assigneeOptions.value[0] ?? null
   };
-  projectActivityIds.value = filteredProjectActivityIds.value = (await submissionService.getActivityIds()).data;
+  projectActivityIds.value = filteredProjectActivityIds.value = (await housingProjectService.getActivityIds()).data;
 });
 </script>
 
@@ -312,7 +312,7 @@ onMounted(async () => {
       <EditableSelect
         class="col-span-3"
         name="relatedActivityId"
-        label="Related submission"
+        label="Related project"
         :disabled="!editable"
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"
@@ -473,7 +473,7 @@ onMounted(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :submission-or-enquiry="enquiry"
+      :housing-project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -494,7 +494,7 @@ onMounted(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :submission-or-enquiry="enquiry"
+      :housing-project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;
