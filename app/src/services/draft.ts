@@ -1,6 +1,5 @@
 import prisma from '../db/dataConnection';
 import { draft } from '../db/models';
-
 import { DraftCode } from '../utils/enums/projectCommon';
 
 import type { Draft } from '../types';
