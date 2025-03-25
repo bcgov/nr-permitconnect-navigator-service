@@ -8,7 +8,7 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useConfigStore, useSubmissionStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
@@ -24,9 +24,7 @@ const { activityId, editable = true } = defineProps<{
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const typeStore = useTypeStore();
 const { getDocuments, getPermits, getSubmission } = storeToRefs(useSubmissionStore());
-const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);
@@ -86,17 +84,11 @@ const confirmSubmit = (data: any) => {
 };
 
 function getPermitTypeNamesByStatus(status: string) {
-  return getPermits.value
-    .map((p) => getPermitTypes.value.find((pt) => pt.permitTypeId === p.permitTypeId && p.status === status)?.name)
-    .filter((pt) => !!pt)
-    .map((name) => name as string);
+  return getPermits.value.filter((p) => p.status === status).map((p) => p.permitType.name);
 }
 
 function getPermitTypeNamesByNeeded(needed: string) {
-  return getPermits.value
-    .map((p) => getPermitTypes.value.find((pt) => pt.permitTypeId === p.permitTypeId && p.needed === needed)?.name)
-    .filter((pt) => !!pt)
-    .map((name) => name as string);
+  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType.name);
 }
 
 function onFileRemove(document: Document) {

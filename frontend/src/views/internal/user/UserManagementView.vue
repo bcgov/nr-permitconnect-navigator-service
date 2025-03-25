@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 
 import { ProgressLoader } from '@/components/layout';
 import UserCreateModal from '@/components/user/UserCreateModal.vue';
@@ -267,7 +267,8 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-onMounted(async () => {
+onBeforeMount(async () => {
+  loading.value = true;
   const users: Array<User> = (
     await userService.searchUsers({
       active: true,
@@ -311,6 +312,8 @@ onMounted(async () => {
     const accessRequest = currentAccessRequests.get(user.userId);
     usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
   });
+
+  loading.value = false;
 });
 </script>
 

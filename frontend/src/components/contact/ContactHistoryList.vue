@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -44,14 +44,12 @@ function getRouteToObject(data: Enquiry | Submission) {
   if ('submissionId' in data) {
     toObject = {
       name: RouteName.INT_HOUSING_PROJECT,
-      params: { submissionId: data.submissionId },
-      query: { activityId: data.activityId }
+      params: { submissionId: data.submissionId }
     };
   } else {
     toObject = {
       name: RouteName.INT_HOUSING_ENQUIRY,
-      params: { enquiryId: data.enquiryId },
-      query: { activityId: data.activityId }
+      params: { enquiryId: data.enquiryId }
     };
   }
   return toObject;
@@ -79,7 +77,7 @@ function updateQueryParams() {
   });
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   // If contactsHistory > largest page option a add page display option to include all items
   if (
     contactsHistory?.length &&

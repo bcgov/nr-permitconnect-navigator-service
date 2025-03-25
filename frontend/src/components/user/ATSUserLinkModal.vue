@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
@@ -56,7 +56,7 @@ async function searchATSUsers() {
   }
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   if (submissionOrEnquiry.contacts[0]?.firstName && submissionOrEnquiry.contacts[0]?.lastName) {
     firstName.value = submissionOrEnquiry.contacts[0]?.firstName;
     lastName.value = submissionOrEnquiry.contacts[0]?.lastName;

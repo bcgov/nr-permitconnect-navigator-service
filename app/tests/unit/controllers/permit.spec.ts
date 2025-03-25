@@ -60,7 +60,8 @@ describe('createPermit', () => {
       status: 'FOO',
       submittedDate: now.toISOString(),
       adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString()
+      statusLastVerified: now.toISOString(),
+      permitType: null
     };
 
     createSpy.mockResolvedValue(created);
@@ -147,7 +148,8 @@ describe('deletePermit', () => {
       status: 'FOO',
       submittedDate: now.toISOString(),
       adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString()
+      statusLastVerified: now.toISOString(),
+      permitType: null
     };
 
     deleteSpy.mockResolvedValue(deleted);
@@ -265,7 +267,8 @@ describe('listPermits', () => {
         status: 'FOO',
         submittedDate: now.toISOString(),
         adjudicationDate: now.toISOString(),
-        statusLastVerified: now.toISOString()
+        statusLastVerified: now.toISOString(),
+        permitType: null
       }
     ];
 
@@ -308,7 +311,8 @@ describe('listPermits', () => {
             createdAt: now.toISOString(),
             createdBy: 'abc-123'
           }
-        ]
+        ],
+        permitType: null
       }
     ];
 
@@ -381,7 +385,8 @@ describe('updatePermit', () => {
       status: 'FOO',
       submittedDate: now.toISOString(),
       adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString()
+      statusLastVerified: now.toISOString(),
+      permitType: null
     };
 
     updateSpy.mockResolvedValue(updated);

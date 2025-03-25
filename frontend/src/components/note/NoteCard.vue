@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
@@ -26,7 +26,7 @@ const noteModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string> = ref('');
 
 // Actions
-onMounted(() => {
+onBeforeMount(() => {
   if (note.createdBy) {
     userService.searchUsers({ userId: [note.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { boolean, number, object, string } from 'yup';
 
 import { formatDateFilename } from '@/utils/formatters';
@@ -34,7 +34,7 @@ import {
   QUEUE_PRIORITY,
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/housing';
-import { BasicResponse, Regex } from '@/utils/enums/application';
+import { BasicResponse, IdentityProvider, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   assignedToValidator,
@@ -167,9 +167,11 @@ const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
 
   if (input.length >= 3) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input })).data;
+    assigneeOptions.value = (
+      await userService.searchUsers({ email: input, fullName: input, idp: [IdentityProvider.IDIR] })
+    ).data;
   } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
+    assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [IdentityProvider.IDIR] })).data;
   } else {
     assigneeOptions.value = [];
   }
@@ -311,7 +313,7 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
   return locationAddressStr;
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (submission.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
   }

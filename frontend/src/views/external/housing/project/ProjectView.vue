@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -14,126 +14,105 @@ import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType }
 import { formatDate } from '@/utils/formatters';
 
 import { contactService, enquiryService, permitService, submissionService } from '@/services';
-import { useAuthZStore, useSubmissionStore, useTypeStore } from '@/store';
+import { useAuthZStore, useSubmissionStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
-import type { Contact, Permit, PermitType } from '@/types';
+import type { Contact, Permit } from '@/types';
 
 // Types
 type PermitFilterConfig = {
   permitNeeded?: string;
-  permits: Array<Permit>;
   permitStatus?: string;
-  permitTypes: Array<PermitType>;
   submitted?: boolean;
 };
-
-type CombinedPermit = Permit & PermitType;
 
 // Props
 const { submissionId } = defineProps<{
   submissionId: string;
 }>();
 
-// Constants
+// Composables
 const { t } = useI18n();
+const router = useRouter();
+const toast = useToast();
 
 // Store
+const authZStore = useAuthZStore();
 const submissionStore = useSubmissionStore();
+const { canNavigate } = storeToRefs(authZStore);
 const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
-
-const typeStore = useTypeStore();
-const { getPermitTypes } = storeToRefs(typeStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 
-const permitsNeeded = computed(() => {
+const permitsNeeded: ComputedRef<Array<Permit>> = computed(() => {
   return permitFilter({
     permitNeeded: PermitNeeded.YES,
-    permitStatus: PermitStatus.NEW,
-    permits: getPermits.value,
-    permitTypes: getPermitTypes.value
+    permitStatus: PermitStatus.NEW
   })
     .sort(permitNameSortFcn)
     .sort(permitBusinessSortFcn);
 });
-const permitsNotNeeded = computed(() => {
+const permitsNotNeeded: ComputedRef<Array<Permit>> = computed(() => {
   return permitFilter({
-    permitNeeded: PermitNeeded.NO,
-    permits: getPermits.value,
-    permitTypes: getPermitTypes.value
+    permitNeeded: PermitNeeded.NO
   })
     .sort(permitNameSortFcn)
     .sort(permitBusinessSortFcn);
 });
-const permitsSubmitted: ComputedRef<Array<CombinedPermit>> = computed(() => {
-  let firstFilter = permitFilter({
-    submitted: true,
-    permits: getPermits.value,
-    permitTypes: getPermitTypes.value
-  });
-  return firstFilter.sort(permitNameSortFcn).sort(permitBusinessSortFcn);
+const permitsSubmitted: ComputedRef<Array<Permit>> = computed(() => {
+  return permitFilter({
+    submitted: true
+  })
+    .sort(permitNameSortFcn)
+    .sort(permitBusinessSortFcn);
 });
 
 // Actions
-const router = useRouter();
-const toast = useToast();
-
-function permitBusinessSortFcn(a: CombinedPermit, b: CombinedPermit) {
-  return a.businessDomain > b.businessDomain ? 1 : -1;
+function permitBusinessSortFcn(a: Permit, b: Permit) {
+  return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
 }
 
-function permitNameSortFcn(a: CombinedPermit, b: CombinedPermit) {
-  return a.name > b.name ? 1 : -1;
+function permitNameSortFcn(a: Permit, b: Permit) {
+  return a.permitType.name > b.permitType.name ? 1 : -1;
 }
 
 function permitFilter(config: PermitFilterConfig) {
-  const { permitNeeded, permits, permitStatus, permitTypes, submitted } = config;
+  const { permitNeeded, permitStatus, submitted } = config;
+  const permits = getPermits.value;
   let returnArray: Array<any> = permits;
 
   if (permitNeeded) {
-    returnArray = returnArray.map((p) => {
-      const pType = permitTypes.find((pt) => pt.permitTypeId === p?.permitTypeId && p.needed === permitNeeded);
-      if (pType) return { ...p, ...pType };
-    });
+    returnArray = returnArray.filter((p) => p.needed === permitNeeded);
   }
 
   if (permitStatus) {
-    returnArray = returnArray.map((p) => {
-      const pType = permitTypes.find((pt) => pt.permitTypeId === p?.permitTypeId && p.status === permitStatus);
-      if (pType) return { ...p, ...pType };
-    });
+    returnArray = returnArray.filter((p) => p.status === permitStatus);
   }
 
   if (submitted) {
-    returnArray = returnArray
-      .filter((item) => item.authStatus !== PermitAuthorizationStatus.NONE && item.status !== PermitStatus.NEW)
-      .map((p) => {
-        const pType = permitTypes.find((pt) => pt.permitTypeId === p?.permitTypeId);
-        if (pType) return { ...p, ...pType };
-      });
+    returnArray = returnArray.filter((p) => {
+      return p.authStatus !== PermitAuthorizationStatus.NONE && p.status !== PermitStatus.NEW;
+    });
   }
 
-  return returnArray.filter((pt) => !!pt) as Array<CombinedPermit>;
+  return returnArray as Array<Permit>;
 }
 
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { submissionId: getSubmission.value?.submissionId },
-    query: { activityId: getSubmission.value?.activityId }
+    params: { submissionId }
   });
 }
-onMounted(async () => {
-  let enquiriesValue, permitTypesValue, submissionValue: any;
+
+onBeforeMount(async () => {
+  let enquiriesValue, submissionValue: any;
 
   try {
-    [submissionValue, permitTypesValue] = (
-      await Promise.all([submissionService.getSubmission(submissionId), permitService.getPermitTypes()])
-    ).map((r) => r.data);
+    [submissionValue] = (await Promise.all([submissionService.getSubmission(submissionId)])).map((r) => r.data);
     if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
   } catch {
     toast.error(t('projectView.toastProjectLoadFailed'));
@@ -149,7 +128,6 @@ onMounted(async () => {
   }
   submissionStore.setSubmission(submissionValue);
   submissionStore.setRelatedEnquiries(enquiriesValue);
-  typeStore.setPermitTypes(permitTypesValue);
 
   // Fetch contacts for createdBy and assignedUserId
   // Push only thruthy values into the array
@@ -163,7 +141,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <RouterView />
   <div
     v-if="!loading && getSubmission"
     class="app-primary-color"
@@ -174,6 +151,7 @@ onMounted(async () => {
     <div class="mt-20 flex justify-between">
       <div>
         <h1
+          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
           class="mt-0 mb-2 cursor-pointer hover:underline"
           tabindex="0"
           @click="navigateToSubmissionIntakeView()"
@@ -185,6 +163,12 @@ onMounted(async () => {
             class="text-sm"
             icon="fa fa-external-link"
           />
+        </h1>
+        <h1
+          v-else
+          class="mt-0 mb-2"
+        >
+          {{ getSubmission.projectName }}
         </h1>
         <div>
           <span class="mr-4">
@@ -203,14 +187,15 @@ onMounted(async () => {
         </div>
       </div>
       <Button
-        v-if="getSubmission?.submissionType !== SubmissionType.INAPPLICABLE"
+        v-if="
+          canNavigate(NavigationPermission.EXT_HOUSING) && getSubmission?.submissionType !== SubmissionType.INAPPLICABLE
+        "
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
         outlined
         @click="
           router.push({
-            name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            query: { projectName: getSubmission.projectName, projectActivityId: getSubmission.activityId }
+            name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY
           })
         "
       />
@@ -237,7 +222,7 @@ onMounted(async () => {
       class="app-primary-color permit-card mb-2"
     >
       <template #content>
-        <h5 class="m-0 p-0">{{ permit.name }}</h5>
+        <h5 class="m-0 p-0">{{ permit.permitType.name }}</h5>
       </template>
     </Card>
     <Accordion
@@ -259,7 +244,7 @@ onMounted(async () => {
               :key="permit.permitId"
               class="ml-12"
             >
-              {{ permit.name }}
+              {{ permit.permitType.name }}
             </li>
           </ul>
         </AccordionContent>
@@ -276,26 +261,24 @@ onMounted(async () => {
       v-for="permit in permitsSubmitted"
       :key="permit.permitId"
       :to="{
-        name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+        name: canNavigate(NavigationPermission.INT_HOUSING)
           ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
           : RouteName.EXT_HOUSING_PROJECT_PERMIT,
-        params: { permitId: permit.permitId },
-        query: { projectActivityId: getSubmission.activityId }
+        params: { permitId: permit.permitId }
       }"
       @keydown.space.prevent="
         router.push({
-          name: useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)
+          name: canNavigate(NavigationPermission.INT_HOUSING)
             ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
             : RouteName.EXT_HOUSING_PROJECT_PERMIT,
-          params: { permitId: permit.permitId },
-          query: { projectActivityId: getSubmission.activityId }
+          params: { permitId: permit.permitId }
         })
       "
     >
       <Card class="permit-card--hover mb-4">
         <template #title>
           <div class="flex justify-between">
-            <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.name }}</h5>
+            <h5 class="m-0 app-primary-color cursor-pointer">{{ permit.permitType.name }}</h5>
             <font-awesome-icon
               class="ellipsis-icon"
               icon="fa fa-ellipsis"
@@ -324,7 +307,7 @@ onMounted(async () => {
             <div class="col-span-3">
               <div class="label-field">{{ t('projectView.agency') }}</div>
               <div class="permit-data">
-                {{ permit?.agency }}
+                {{ permit?.permitType.agency }}
               </div>
             </div>
             <div class="col-span-6">
@@ -344,6 +327,7 @@ onMounted(async () => {
       <EnquiryListProponent
         :loading="loading"
         :enquiries="getRelatedEnquiries"
+        :submission-id="submissionId"
       />
     </div>
   </div>

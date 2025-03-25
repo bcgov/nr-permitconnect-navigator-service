@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { InputText, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { submissionService, enquiryService, contactService, userService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
+import { IdentityProvider, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact, Enquiry, Submission, User } from '@/types';
@@ -61,7 +61,7 @@ watch(
   }
 );
 
-onMounted(async () => {
+onBeforeMount(async () => {
   const includeActivities = true;
   const contactData = (await contactService.getContact(contactId, includeActivities)).data;
   const activityIds = contactData.activityContact.map((ac: ActivityContact) => ac.activityId);
@@ -86,7 +86,7 @@ onMounted(async () => {
   });
 
   if (userIds) {
-    const users = (await userService.searchUsers({ userId: userIds })).data;
+    const users = (await userService.searchUsers({ userId: userIds, idp: [IdentityProvider.IDIR] })).data;
     users.forEach((u: User) => {
       assignedUsers.value[u.userId] = u.fullName;
     });

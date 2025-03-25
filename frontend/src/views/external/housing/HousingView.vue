@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -57,7 +57,7 @@ watch(
   }
 );
 
-onMounted(async () => {
+onBeforeMount(async () => {
   [enquiries.value, projects.value, drafts.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),

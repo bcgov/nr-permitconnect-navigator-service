@@ -1,33 +1,37 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
+import { useRoute } from 'vue-router';
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
 import { permitService } from '@/services';
-import { useTypeStore } from '@/store';
+import { usePermitStore } from '@/store';
 
 import type { Ref } from 'vue';
 
 // Props
-const { activityId = undefined, submissionId = undefined } = defineProps<{
-  activityId?: string;
+const { submissionId = undefined, draftId = undefined } = defineProps<{
   submissionId?: string;
+  draftId?: string;
 }>();
+
+// Composables
+const route = useRoute();
 
 // State
 const loading: Ref<boolean> = ref(true);
 
 // Actions
-onMounted(async () => {
-  useTypeStore().setPermitTypes((await permitService.getPermitTypes()).data);
+onBeforeMount(async () => {
+  usePermitStore().setPermitTypes((await permitService.getPermitTypes()).data);
   loading.value = false;
 });
 </script>
 
 <template>
-  <!-- 'key' prop remounts component when it changes -->
   <SubmissionIntakeForm
     v-if="!loading"
-    :activity-id="activityId"
+    :key="route.fullPath"
     :submission-id="submissionId"
+    :draft-id="draftId"
   />
 </template>

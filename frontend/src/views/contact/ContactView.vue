@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { object, string } from 'yup';
 
@@ -55,7 +55,7 @@ const onSubmit = async (values: any) => {
   }
 };
 
-onMounted(async () => {
+onBeforeMount(async () => {
   initialFormValues.value = {
     ...contactStore.getContact
   };

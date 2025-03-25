@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -50,7 +50,7 @@ function updateQueryParams() {
   });
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   // If contacts > largest page option a add page display option to include all contacts
   if (contacts?.length && contacts.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
     rowsPerPageOptions.value.push(contacts.length);

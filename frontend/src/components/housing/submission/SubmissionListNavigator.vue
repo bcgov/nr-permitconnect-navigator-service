@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -94,8 +94,7 @@ function handleCreateNewActivity() {
         if (response?.activityId) {
           router.push({
             name: RouteName.INT_HOUSING_PROJECT,
-            params: { submissionId: response.submissionId },
-            query: { activityId: response.activityId }
+            params: { submissionId: response.submissionId }
           });
         }
       } catch (e: any) {
@@ -149,7 +148,7 @@ function isFinanciallySupported(data: Submission) {
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.EXT_HOUSING,
+    name: RouteName.INT_HOUSING,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
@@ -160,7 +159,7 @@ function updateQueryParams() {
   });
 }
 
-onMounted(() => {
+onBeforeMount(() => {
   if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
     rowsPerPageOptions.value.push(submissions.length);
   }
@@ -259,8 +258,7 @@ onMounted(() => {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { submissionId: data.submissionId },
-              query: { activityId: data.activityId }
+              params: { submissionId: data.submissionId }
             }"
           >
             {{ data.projectName }}
@@ -284,8 +282,7 @@ onMounted(() => {
             <router-link
               :to="{
                 name: RouteName.INT_HOUSING_PROJECT,
-                params: { submissionId: data.submissionId },
-                query: { activityId: data.activityId }
+                params: { submissionId: data.submissionId }
               }"
             >
               {{ data.activityId }}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { boolean, date, mixed, object, string } from 'yup';
 
@@ -22,7 +22,7 @@ import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { Regex } from '@/utils/enums/application';
+import { IdentityProvider, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
@@ -122,9 +122,11 @@ const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
 
   if (input.length >= 3) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input })).data;
+    assigneeOptions.value = (
+      await userService.searchUsers({ email: input, fullName: input, idp: [IdentityProvider.IDIR] })
+    ).data;
   } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
+    assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [IdentityProvider.IDIR] })).data;
   } else {
     assigneeOptions.value = [];
   }
@@ -252,7 +254,7 @@ const onSubmit = async (values: any) => {
   }
 };
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (enquiry?.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }

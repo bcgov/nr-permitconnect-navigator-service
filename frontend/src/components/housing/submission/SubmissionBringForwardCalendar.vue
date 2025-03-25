@@ -50,12 +50,10 @@ function getParamObject(bf: BringForward) {
 function getQueryObject(bf: BringForward) {
   if (bf.submissionId) {
     return {
-      activityId: bf.activityId,
       initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
   }
   return {
-    activityId: bf.activityId,
     initialTab: NOTES_TAB_INDEX.ENQUIRY
   };
 }
