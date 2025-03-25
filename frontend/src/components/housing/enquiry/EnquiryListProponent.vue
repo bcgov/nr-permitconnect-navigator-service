@@ -7,7 +7,7 @@ import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
-import { IntakeStatus } from '@/utils/enums/housing';
+import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -85,7 +85,7 @@ function getRouteToObject(data: Enquiry) {
     >
       <template #body="{ data }">
         <div
-          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+          v-if="canNavigate(NavigationPermission.EXT_HOUSING) && data.submittedMethod === EnquirySubmittedMethod.PCNS"
           :data-activityId="data.activityId"
         >
           <router-link :to="getRouteToObject(data)">
