@@ -53,7 +53,8 @@
     "atsSearchBtn": "Search ATS",
     "atsNewClientBtn": "New ATS Client",
     "formSaveBtn": "Save",
-    "formReopenBtn": "Re-open enquiry"
+    "formReopenBtn": "Re-open enquiry",
+    "submittedMethod": "Submitted method"
   },
   "enquiryConfirmationView": {
     "confirmationHeader": "Confirmation of Submission",
@@ -75,6 +76,13 @@
     "re": "Re",
     "registerEnquiryTooltip": "Consider registering if you are working or getting started on a housing project.",
     "trackingId": "Tracking ID"
+  },
+  "enquiryListNavigator": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "confirmCreateHeader": "Confirm create submission",
+    "confirmCreateMsg": "Please confirm that you want to create a new submission.",
+    "failedSubmission": "Failed to create new submission"
   },
   "enquiryListProponent": {
     "enquiryId": "Enquiry ID",

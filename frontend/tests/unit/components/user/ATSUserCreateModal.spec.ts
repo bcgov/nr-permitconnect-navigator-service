@@ -1,5 +1,5 @@
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 import { GroupName } from '@/utils/enums/application';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
@@ -122,6 +122,7 @@ const testEnquiryProp: Enquiry = {
   enquiryType: 'General enquiry',
   submittedAt: '2025-02-04T18:38:39.497Z',
   submittedBy: 'testUser',
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   relatedActivityId: '',
   enquiryDescription: 'gshsrthsftfgjdfjdyjyj',
   intakeStatus: 'Pending',

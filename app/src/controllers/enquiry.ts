@@ -71,7 +71,8 @@ const controller = {
       const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
 
       // Create or update contacts
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, enquiry.activityId);
+      if (req.body.contacts)
+        await contactService.upsertContacts(req.body.contacts, req.currentContext, enquiry.activityId);
 
       // Create new enquiry
       const result = await enquiryService.createEnquiry({
@@ -165,6 +166,13 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
+      // Assign contactId if not present
+      if (req.body.contacts) {
+        req.body.contacts = req.body.contacts.map((x) => ({
+          ...x,
+          contactId: x.contactId ?? uuidv4()
+        }));
+      }
       await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
       const result = await enquiryService.updateEnquiry({

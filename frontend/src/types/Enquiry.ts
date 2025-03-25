@@ -1,7 +1,7 @@
 import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
 
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
 export type Enquiry = {
   enquiryId: string;
@@ -18,4 +18,5 @@ export type Enquiry = {
   enquiryStatus: ApplicationStatus;
   waitingOn?: string;
   contacts: Array<Contact>;
+  submittedMethod: EnquirySubmittedMethod;
 } & Partial<IStamps>;
