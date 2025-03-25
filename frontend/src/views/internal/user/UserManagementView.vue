@@ -272,17 +272,9 @@ const filters = ref({
 
 onBeforeMount(async () => {
   loading.value = true;
-  const users: Array<User> = (
-    await userService.searchUsers({
-      active: true,
-      idp: [IdentityProvider.IDIR],
-      includeUserGroups: true,
-      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
-    })
-  ).data;
-  const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
-  const currentAccessRequests = new Map();
 
+  try {
+    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
     if (!idpCfg) throw new Error('Failed to obtain IDP config');
 
     const users: Array<User> = (
@@ -307,12 +299,33 @@ onBeforeMount(async () => {
       }
     });
 
-  newRequestingUsers.forEach((user) => {
-    const accessRequest = currentAccessRequests.get(user.userId);
-    usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
-  });
+    // Combine user and access request data
+    // Filter out users who have no assigned group and no access requests
+    usersAndAccessRequests.value = users
+      .map((user) => {
+        const accessRequest = currentAccessRequests.get(user.userId);
+        currentAccessRequests.delete(user.userId);
+        return assignUserStatus({ accessRequest, user });
+      })
+      .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
-  loading.value = false;
+    // Get requesting users and add their access requests
+    const newRequestingUsers: Array<User> = (
+      await userService.searchUsers({
+        userId: Array.from(currentAccessRequests.keys())
+      })
+    ).data;
+
+    newRequestingUsers.forEach((user) => {
+      const accessRequest = currentAccessRequests.get(user.userId);
+      usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
+    });
+  } catch (error: any) {
+    toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+  } finally {
+    createUserModalVisible.value = false;
+    loading.value = false;
+  }
 });
 </script>
 

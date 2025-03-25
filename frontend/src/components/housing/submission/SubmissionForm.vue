@@ -34,7 +34,7 @@ import {
   QUEUE_PRIORITY,
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/housing';
-import { BasicResponse, IdentityProvider, Regex } from '@/utils/enums/application';
+import { BasicResponse, IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   assignedToValidator,
@@ -47,7 +47,7 @@ import {
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, Submission, User } from '@/types';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
@@ -166,14 +166,18 @@ const isCompleted = computed(() => {
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
 
-  if (input.length >= 3) {
-    assigneeOptions.value = (
-      await userService.searchUsers({ email: input, fullName: input, idp: [IdentityProvider.IDIR] })
-    ).data;
-  } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [IdentityProvider.IDIR] })).data;
-  } else {
-    assigneeOptions.value = [];
+  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+
+  if (idpCfg) {
+    if (input.length >= 3) {
+      assigneeOptions.value = (
+        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
+      ).data;
+    } else if (input.match(Regex.EMAIL)) {
+      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
+    } else {
+      assigneeOptions.value = [];
+    }
   }
 };
 

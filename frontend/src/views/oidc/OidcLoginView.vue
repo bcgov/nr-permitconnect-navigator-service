@@ -10,7 +10,8 @@ import { findIdpConfig } from '@/utils/utils';
 const { t } = useI18n();
 
 function login(kind: IdentityProviderKind) {
-  useAuthNStore().login(findIdpConfig(kind)?.idp);
+  const idpCfg = findIdpConfig(kind);
+  if (idpCfg) useAuthNStore().login(idpCfg.idp);
 }
 </script>
 

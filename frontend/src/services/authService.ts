@@ -89,10 +89,10 @@ export default class AuthService {
    * @param {idp} idp The identity provider
    * @returns {Promise<void>}
    */
-  public async login(idp: string | undefined): Promise<void> {
+  public async login(idp: string): Promise<void> {
     return AuthService._userManager.signinRedirect({
       redirectMethod: 'assign',
-      extraQueryParams: { kc_idp_hint: idp as string }
+      extraQueryParams: { kc_idp_hint: idp }
     });
   }
 

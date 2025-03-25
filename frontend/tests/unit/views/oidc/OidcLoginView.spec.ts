@@ -67,6 +67,8 @@ describe('OidcLoginView', () => {
   });
 
   it('should invoke auth login flow with BCSC when the BCSC button is clicked', async () => {
+    findIdpConfigSpy.mockResolvedValue({ kind: IdentityProviderKind.BCSC, idp: 'bcsc', username: '' });
+
     const wrapper = mount(OidcLoginView, wrapperSettings());
     const authNStore = useAuthNStore();
     const bcscButton = wrapper.find('[data-test="bcsc-login-button"]');
@@ -79,6 +81,8 @@ describe('OidcLoginView', () => {
   });
 
   it('should invoke auth login flow with BCEID when the BCEID button is clicked', async () => {
+    findIdpConfigSpy.mockResolvedValue({ kind: IdentityProviderKind.BCEID, idp: 'bceidbasic', username: '' });
+
     const wrapper = mount(OidcLoginView, wrapperSettings());
     const authNStore = useAuthNStore();
     const bceidButton = wrapper.find('[data-test="bceid-login-button"]');
@@ -91,6 +95,12 @@ describe('OidcLoginView', () => {
   });
 
   it('should invoke auth login flow with BCEIDBUSINESS on BCEIDBUSINESS button click', async () => {
+    findIdpConfigSpy.mockResolvedValue({
+      kind: IdentityProviderKind.BCEIDBUSINESS,
+      idp: 'bceidbusiness',
+      username: ''
+    });
+
     const wrapper = mount(OidcLoginView, wrapperSettings());
     const authNStore = useAuthNStore();
     const bceidBusinessButton = wrapper.find('[data-test="bceid-business-login-button"]');
@@ -101,7 +111,10 @@ describe('OidcLoginView', () => {
     expect(findIdpConfigSpy).toHaveBeenCalledWith(IdentityProviderKind.BCEIDBUSINESS);
     expect(authNStore.login).toHaveBeenCalled();
   });
+
   it('should invoke auth login flow with IDIR when the IDIR button is clicked', async () => {
+    findIdpConfigSpy.mockResolvedValue({ kind: IdentityProviderKind.IDIR, idp: 'idir', username: '' });
+
     const wrapper = mount(OidcLoginView, wrapperSettings());
     const authNStore = useAuthNStore();
     const idirButton = wrapper.find('[data-test="idir-login-button"]');

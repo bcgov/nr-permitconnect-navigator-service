@@ -86,7 +86,7 @@ export const useAuthNStore = defineStore('authn', () => {
     await _updateState();
   }
 
-  async function login(idp: string | undefined) {
+  async function login(idp: string) {
     return authService.login(idp);
   }
 

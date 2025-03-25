@@ -6,10 +6,11 @@ import { useRoute, useRouter } from 'vue-router';
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { InputText, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { submissionService, enquiryService, contactService, userService } from '@/services';
-import { IdentityProvider, RouteName } from '@/utils/enums/application';
+import { IdentityProviderKind, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact, Enquiry, Submission, User } from '@/types';
+import { findIdpConfig } from '@/utils/utils';
 
 // Props
 const { contactId } = defineProps<{
@@ -86,10 +87,13 @@ onBeforeMount(async () => {
   });
 
   if (userIds) {
-    const users = (await userService.searchUsers({ userId: userIds, idp: [IdentityProvider.IDIR] })).data;
-    users.forEach((u: User) => {
-      assignedUsers.value[u.userId] = u.fullName;
-    });
+    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    if (idpCfg) {
+      const users = (await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] })).data;
+      users.forEach((u: User) => {
+        assignedUsers.value[u.userId] = u.fullName;
+      });
+    }
   }
 
   loading.value = false;
