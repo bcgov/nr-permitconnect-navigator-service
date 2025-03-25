@@ -3,20 +3,16 @@
  */
 
 import {
-  ApplicationStatus,
   BringForwardType,
   ContactPreference,
-  IntakeStatus,
   NoteType,
   NumResidentialUnits,
-  PermitAuthorizationStatus,
-  PermitNeeded,
-  PermitStatus,
   ProjectApplicant,
   ProjectLocation,
-  ProjectRelationship,
-  SubmissionType
+  ProjectRelationship
 } from '../enums/housing';
+
+import { SubmissionType } from '../enums/projectCommon';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,
@@ -30,13 +26,6 @@ export const ADDRESS_CODER_QUERY_PARAMS = {
   precisionPoints: 100
 };
 
-export const APPLICATION_STATUS_LIST = [
-  ApplicationStatus.NEW,
-  ApplicationStatus.IN_PROGRESS,
-  ApplicationStatus.DELAYED,
-  ApplicationStatus.COMPLETED
-];
-
 export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
 
 export const CONTACT_PREFERENCE_LIST = [
@@ -45,17 +34,7 @@ export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.EITHER
 ];
 
-export const ENQUIRY_TYPE_LIST = [
-  SubmissionType.ASSISTANCE,
-  SubmissionType.GENERAL_ENQUIRY,
-  SubmissionType.STATUS_REQUEST,
-  SubmissionType.ESCALATION,
-  SubmissionType.INAPPLICABLE
-];
-
 export const HOUSING_PROJECT_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
-
-export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 
@@ -81,27 +60,6 @@ export const PROJECT_RELATIONSHIP_LIST = [
   ProjectRelationship.OWNER,
   ProjectRelationship.CONSULTANT,
   ProjectRelationship.OTHER
-];
-
-export const PERMIT_AUTHORIZATION_STATUS_LIST = [
-  PermitAuthorizationStatus.ISSUED,
-  PermitAuthorizationStatus.PENDING,
-  PermitAuthorizationStatus.IN_REVIEW,
-  PermitAuthorizationStatus.DENIED,
-  PermitAuthorizationStatus.CANCELLED,
-  PermitAuthorizationStatus.WITHDRAWN,
-  PermitAuthorizationStatus.ABANDONED,
-  PermitAuthorizationStatus.NONE
-];
-
-export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
-
-export const PERMIT_STATUS_LIST = [
-  PermitStatus.NEW,
-  PermitStatus.APPLIED,
-  PermitStatus.COMPLETED,
-  PermitStatus.TECHNICAL_REVIEW,
-  PermitStatus.PENDING
 ];
 
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
