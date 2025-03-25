@@ -1,22 +1,22 @@
 [
   {
-    "name": "IDIR",
     "idp": "idir",
+    "kind": "idir",
     "username": "idir_username"
   },
   {
-    "name": "BCeID Basic",
     "idp": "bceidbasic",
+    "kind": "bceidbasic",
     "username": "bceid_username"
   },
   {
-    "name": "BCeID Business",
     "idp": "bceidbusiness",
+    "kind": "bceidbusiness",
     "username": "bceid_username"
   },
   {
-    "name": "BCSC",
     "idp": "nr-permit-connect-navigator-service-5188",
+    "kind": "bcsc",
     "username": "sub"
   }
 ]

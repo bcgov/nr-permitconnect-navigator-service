@@ -23,8 +23,8 @@ import {
 import { accessRequestService, userService, yarsService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
-import { IdentityProvider, AccessRequestStatus, GroupName } from '@/utils/enums/application';
-import { omit } from '@/utils/utils';
+import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/enums/application';
+import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AccessRequest, User, UserAccessRequest } from '@/types';
@@ -227,7 +227,10 @@ async function onCreateUserAccessRequest(user: User, group: GroupName) {
   try {
     loading.value = true;
 
-    user.idp = IdentityProvider.IDIR;
+    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    if (!idpCfg) throw new Error('Failed to obtain IDP config');
+
+    user.idp = idpCfg.idp;
 
     const userAccessRequest: UserAccessRequest = {
       user,
@@ -269,51 +272,60 @@ const filters = ref({
 
 onBeforeMount(async () => {
   loading.value = true;
-  const users: Array<User> = (
-    await userService.searchUsers({
-      active: true,
-      idp: [IdentityProvider.IDIR],
-      includeUserGroups: true,
-      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
-    })
-  ).data;
-  const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
-  const currentAccessRequests = new Map();
 
-  // Create map of all pending requests
-  accessRequests.forEach((request) => {
-    const currentRequest = currentAccessRequests.get(request.userId);
-    if (
-      (!currentRequest || (request.createdAt && request.createdAt > currentRequest.createdAt)) &&
-      request.status === AccessRequestStatus.PENDING
-    ) {
-      currentAccessRequests.set(request.userId, request);
-    }
-  });
+  try {
+    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    if (!idpCfg) throw new Error('Failed to obtain IDP config');
 
-  // Combine user and access request data
-  // Filter out users who have no assigned group and no access requests
-  usersAndAccessRequests.value = users
-    .map((user) => {
+    const users: Array<User> = (
+      await userService.searchUsers({
+        active: true,
+        idp: [idpCfg.idp],
+        includeUserGroups: true,
+        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
+      })
+    ).data;
+    const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
+    const currentAccessRequests = new Map();
+
+    // Create map of all pending requests
+    accessRequests.forEach((request) => {
+      const currentRequest = currentAccessRequests.get(request.userId);
+      if (
+        (!currentRequest || (request.createdAt && request.createdAt > currentRequest.createdAt)) &&
+        request.status === AccessRequestStatus.PENDING
+      ) {
+        currentAccessRequests.set(request.userId, request);
+      }
+    });
+
+    // Combine user and access request data
+    // Filter out users who have no assigned group and no access requests
+    usersAndAccessRequests.value = users
+      .map((user) => {
+        const accessRequest = currentAccessRequests.get(user.userId);
+        currentAccessRequests.delete(user.userId);
+        return assignUserStatus({ accessRequest, user });
+      })
+      .filter((x) => x.user.groups.length > 0 || x.accessRequest);
+
+    // Get requesting users and add their access requests
+    const newRequestingUsers: Array<User> = (
+      await userService.searchUsers({
+        userId: Array.from(currentAccessRequests.keys())
+      })
+    ).data;
+
+    newRequestingUsers.forEach((user) => {
       const accessRequest = currentAccessRequests.get(user.userId);
-      currentAccessRequests.delete(user.userId);
-      return assignUserStatus({ accessRequest, user });
-    })
-    .filter((x) => x.user.groups.length > 0 || x.accessRequest);
-
-  // Get requesting users and add their access requests
-  const newRequestingUsers: Array<User> = (
-    await userService.searchUsers({
-      userId: Array.from(currentAccessRequests.keys())
-    })
-  ).data;
-
-  newRequestingUsers.forEach((user) => {
-    const accessRequest = currentAccessRequests.get(user.userId);
-    usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
-  });
-
-  loading.value = false;
+      usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
+    });
+  } catch (error: any) {
+    toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+  } finally {
+    createUserModalVisible.value = false;
+    loading.value = false;
+  }
 });
 </script>
 

@@ -22,7 +22,7 @@ import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, submissionService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { IdentityProvider, Regex } from '@/utils/enums/application';
+import { IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
 import {
   APPLICATION_STATUS_LIST,
@@ -31,7 +31,7 @@ import {
   INTAKE_STATUS_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/housing';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
 import type { Ref } from 'vue';
@@ -121,14 +121,18 @@ const isCompleted = computed(() => {
 const onAssigneeInput = async (e: IInputEvent) => {
   const input = e.target.value;
 
-  if (input.length >= 3) {
-    assigneeOptions.value = (
-      await userService.searchUsers({ email: input, fullName: input, idp: [IdentityProvider.IDIR] })
-    ).data;
-  } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [IdentityProvider.IDIR] })).data;
-  } else {
-    assigneeOptions.value = [];
+  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+
+  if (idpCfg) {
+    if (input.length >= 3) {
+      assigneeOptions.value = (
+        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
+      ).data;
+    } else if (input.match(Regex.EMAIL)) {
+      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
+    } else {
+      assigneeOptions.value = [];
+    }
   }
 };
 

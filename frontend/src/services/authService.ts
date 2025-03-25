@@ -86,10 +86,14 @@ export default class AuthService {
   /**
    * @function login
    * Performs the OIDC user login flow
+   * @param {idp} idp The identity provider
    * @returns {Promise<void>}
    */
-  public async login(): Promise<void> {
-    return AuthService._userManager.signinRedirect({ redirectMethod: 'replace' });
+  public async login(idp: string): Promise<void> {
+    return AuthService._userManager.signinRedirect({
+      redirectMethod: 'assign',
+      extraQueryParams: { kc_idp_hint: idp }
+    });
   }
 
   /**

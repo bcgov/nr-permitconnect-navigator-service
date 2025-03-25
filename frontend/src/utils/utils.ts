@@ -1,7 +1,10 @@
 import { toRaw, isRef, isReactive, isProxy } from 'vue';
 
+import { useConfigStore } from '@/store';
 import { DELIMITER } from '@/utils/constants/application';
-import { FileCategory } from '@/utils/enums/application';
+import { FileCategory, IdentityProviderKind } from '@/utils/enums/application';
+
+import type { IdentityProvider } from '@/types';
 
 /**
  * @function deepToRaw
@@ -51,6 +54,16 @@ export function delimitEmails(value: string): Array<string> {
  */
 export function differential(source: any, comparer: any): any {
   return Object.fromEntries(Object.entries(source).filter(([key, value]) => comparer[key] !== value));
+}
+
+/**
+ * @function findIdpConfig
+ * Get the identity provider configuration for the given kind
+ * @param {IdentityProviderKind} kind The kind of identity provider
+ * @returns {IdentityProvider | undefined} IDP config for the given kind or undefined if not found
+ */
+export function findIdpConfig(kind: IdentityProviderKind): IdentityProvider | undefined {
+  return useConfigStore().getConfig?.idpList?.find((x: IdentityProvider) => x.kind === kind);
 }
 
 /**
