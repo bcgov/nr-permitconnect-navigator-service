@@ -44,7 +44,7 @@ function getRouteToObject(data: Enquiry | HousingProject) {
   if ('housingProjectId' in data) {
     toObject = {
       name: RouteName.INT_HOUSING_PROJECT,
-      params: { submissionId: data.submissionId }
+      params: { housingProjectId: data.housingProjectId }
     };
   } else {
     toObject = {

@@ -94,7 +94,7 @@ function handleCreateNewActivity() {
         if (response?.activityId) {
           router.push({
             name: RouteName.INT_HOUSING_PROJECT,
-            params: { housingProjectId: response.housingProjectId },
+            params: { housingProjectId: response.housingProjectId }
           });
         }
       } catch (e: any) {
@@ -258,7 +258,7 @@ onBeforeMount(() => {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { housingProjectId: data.housingProjectId },
+              params: { housingProjectId: data.housingProjectId }
             }"
           >
             {{ data.projectName }}
@@ -282,7 +282,7 @@ onBeforeMount(() => {
             <router-link
               :to="{
                 name: RouteName.INT_HOUSING_PROJECT,
-                params: { housingProjectId: data.housingProjectId },
+                params: { housingProjectId: data.housingProjectId }
               }"
             >
               {{ data.activityId }}

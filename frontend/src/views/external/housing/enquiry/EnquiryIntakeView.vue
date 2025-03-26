@@ -4,17 +4,15 @@ import { onBeforeMount, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
-import { permitService, submissionService } from '@/services';
-import { usePermitStore, useSubmissionStore } from '@/store';
+import { permitService, housingProjectService } from '@/services';
+import { useHousingProjectStore, usePermitStore } from '@/store';
 
 import type { Ref } from 'vue';
 
 // Props
-const {
-  enquiryId,
-  housingProjectId
-} = defineProps<{
+const { enquiryId, housingProjectId, permitId } = defineProps<{
   enquiryId?: string;
+  housingProjectId?: string;
   permitId?: string;
 }>();
 
@@ -23,18 +21,18 @@ const route = useRoute();
 
 // Store
 const permitStore = usePermitStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { getPermit } = storeToRefs(permitStore);
-const { getSubmission } = storeToRefs(submissionStore);
+const { getHousingProject } = storeToRefs(housingProjectStore);
 
 // State
 const loading: Ref<boolean> = ref(true);
 
 // Actions
 onBeforeMount(async () => {
-  if (submissionId) {
-    const project = (await submissionService.getSubmission(submissionId)).data;
-    submissionStore.setSubmission(project);
+  if (housingProjectId) {
+    const project = (await housingProjectService.getHousingProject(housingProjectId)).data;
+    housingProjectStore.setHousingProject(project);
   }
 
   if (permitId) {
@@ -51,7 +49,7 @@ onBeforeMount(async () => {
     v-if="!loading"
     :key="route.fullPath"
     :enquiry-id="enquiryId"
-    :project="getSubmission"
+    :project="getHousingProject"
     :permit="getPermit"
   />
 </template>
