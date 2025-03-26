@@ -49,8 +49,6 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, HousingProject, User } from '@/types';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
-import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
 interface HousingProjectForm extends HousingProject {
