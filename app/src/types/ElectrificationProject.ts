@@ -8,6 +8,13 @@ export type ElectrificationProject = {
   activityId: string;
   assignedUserId: string | null;
   submittedAt: string;
+  projectName: string | null;
+  projectDescription: string | null;
+  companyNameRegistered: string | null;
+  projectType: string | null;
+  bcHydroNumber: string | null;
+  submissionType: string | null;
+
   contacts: Array<Contact>;
   user: User | null;
 } & Partial<IStamps>;
