@@ -2,17 +2,27 @@ import Joi from 'joi';
 
 import { activityId, email, uuidv4 } from './common';
 import { contacts } from './contact';
-
 import { validate } from '../middleware/validation';
-
+import { PROJECT_TYPES } from '../utils/constants/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
+
+const electrificationIntake = {
+  projectName: Joi.string().required().max(255).trim(),
+  projectDescription: Joi.string().max(4000).allow(null),
+  companyNameRegistered: Joi.string().required().max(255).trim(),
+  projectType: Joi.string()
+    .required()
+    .valid(...PROJECT_TYPES),
+  bcHydroNumber: Joi.string().required().max(255).trim().allow(null)
+};
 
 const schema = {
   createElectrificationProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
-      contacts: contacts
+      contacts: contacts,
+      ...electrificationIntake
     })
   },
   emailConfirmation: {
@@ -76,8 +86,8 @@ const schema = {
         then: uuidv4,
         otherwise: uuidv4.allow(null)
       }),
-
-      contacts: contacts
+      contacts: contacts,
+      ...electrificationIntake
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()

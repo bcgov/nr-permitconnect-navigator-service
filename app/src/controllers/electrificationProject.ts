@@ -9,7 +9,7 @@ import {
   electrificationProjectService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { DraftCode, IntakeStatus } from '../utils/enums/projectCommon';
+import { DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -39,7 +39,9 @@ const controller = {
       electrificationProject: {
         electrificationProjectId: uuidv4(),
         activityId: activityId,
-        submittedAt: data.submittedAt ?? new Date().toISOString()
+        submittedAt: data.submittedAt ?? new Date().toISOString(),
+        ...data,
+        submissionType: SubmissionType.GUIDANCE
       } as ElectrificationProject
     };
 
@@ -257,7 +259,7 @@ const controller = {
         response = await draftService.createDraft({
           draftId: uuidv4(),
           activityId: activityId,
-          draftCode: DraftCode.HOUSING_PROJECT,
+          draftCode: DraftCode.ELECTRIFICATION_PROJECT,
           data: req.body.data,
           ...generateCreateStamps(req.currentContext)
         });
