@@ -8,7 +8,7 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, housingProjectService, noteService } from '@/services';
-import { useAuthZStore, useEnquiryStore, useSubmissionStore } from '@/store';
+import { useAuthZStore, useEnquiryStore, useHousingProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 
@@ -18,12 +18,12 @@ import type { Ref } from 'vue';
 // Props
 const {
   enquiryId,
-  initialTab = '0',
-  submissionId
+  housingProjectId,
+  initialTab = '0'
 } = defineProps<{
-  initialTab?: string;
   enquiryId: string;
-  submissionId?: string;
+  housingProjectId?: string;
+  initialTab?: string;
 }>();
 
 // Composables
@@ -31,7 +31,7 @@ const { t } = useI18n();
 
 // Store
 const enquiryStore = useEnquiryStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // State
@@ -85,9 +85,9 @@ onBeforeMount(async () => {
     updateRelatedEnquiry();
   }
 
-  if (submissionId) {
-    const submission = (await submissionService.getSubmission(submissionId)).data;
-    submissionStore.setSubmission(submission);
+  if (housingProjectId) {
+    const submission = (await housingProjectService.getHousingProject(housingProjectId)).data;
+    housingProjectStore.setHousingProject(submission);
   }
 
   loading.value = false;
@@ -127,7 +127,7 @@ onBeforeMount(async () => {
           <router-link
             :to="{
               name: RouteName.INT_HOUSING_PROJECT,
-              params: { housingProjectId: relatedHousingProjects.housingProjectId },
+              params: { housingProjectId: relatedHousingProjects.housingProjectId }
             }"
           >
             {{ getEnquiry?.relatedActivityId }}

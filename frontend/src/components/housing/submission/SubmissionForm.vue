@@ -36,6 +36,7 @@ import {
 } from '@/utils/constants/housing';
 import { BasicResponse, IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import {
   assignedToValidator,
   atsClientIdValidator,
@@ -44,11 +45,10 @@ import {
   longitudeValidator
 } from '@/validators';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, HousingProject, User } from '@/types';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
-import type { SelectChangeEvent } from 'primevue/select';
 
 // Interfaces
 interface HousingProjectForm extends HousingProject {
@@ -317,7 +317,7 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
   return locationAddressStr;
 }
 
-onMounted(async () => {
+onBeforeMount(async () => {
   if (housingProject.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [housingProject.assignedUserId] })).data;
   }

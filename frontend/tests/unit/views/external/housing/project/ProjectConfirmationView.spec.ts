@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import { submissionService } from '@/services';
+import { housingProjectService } from '@/services';
 import ProjectConfirmationView from '@/views/external/housing/project/ProjectConfirmationView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -15,15 +15,15 @@ vi.mock('vue-i18n', () => ({
   })
 }));
 
-const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
 
-getSubmissionSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
+getHousingProjectSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
 
 const testSubmissionId = 'submission123';
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
   props: {
-    housingProjectId: testSubmissionIdProp,
+    housingProjectId: testSubmissionIdProp
   },
   global: {
     plugins: [

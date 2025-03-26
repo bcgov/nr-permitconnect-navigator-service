@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
-import { useAuthZStore, useSubmissionStore } from '@/store';
+import { useAuthZStore, useHousingProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -39,10 +39,7 @@ import type { Ref } from 'vue';
 import type { Document, Note } from '@/types';
 
 // Props
-const {
-  initialTab = '0',
-  housingProjectId
-} = defineProps<{
+const { initialTab = '0', housingProjectId } = defineProps<{
   initialTab?: string;
   housingProjectId: string;
 }>();
@@ -66,7 +63,7 @@ const router = useRouter();
 
 // Store
 const housingProjectStore = useHousingProjectStore();
-const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
+const { getDocuments, getHousingProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(housingProjectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -126,14 +123,14 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 }
 
 onBeforeMount(async () => {
-  const submission = (await submissionService.getSubmission(submissionId)).data;
-  activityId.value = submission.activityId;
+  const project = (await housingProjectService.getHousingProject(housingProjectId)).data;
+  activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
-      documentService.listDocuments(submission.activityId),
-      noteService.listNotes(submission.activityId),
-      permitService.listPermits({ activityId: submission.activityId, includeNotes: true }),
-      enquiryService.listRelatedEnquiries(submission.activityId)
+      documentService.listDocuments(project.activityId),
+      noteService.listNotes(project.activityId),
+      permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
+      enquiryService.listRelatedEnquiries(project.activityId)
     ])
   ).map((r) => r.data);
 
@@ -142,11 +139,11 @@ onBeforeMount(async () => {
     d.filename = decodeURI(d.filename);
   });
 
-  submissionStore.setSubmission(submission);
-  submissionStore.setDocuments(documents);
-  submissionStore.setNotes(notes);
-  submissionStore.setPermits(permits);
-  submissionStore.setRelatedEnquiries(relatedEnquiries);
+  housingProjectStore.setHousingProject(project);
+  housingProjectStore.setDocuments(documents);
+  housingProjectStore.setNotes(notes);
+  housingProjectStore.setPermits(permits);
+  housingProjectStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
 });

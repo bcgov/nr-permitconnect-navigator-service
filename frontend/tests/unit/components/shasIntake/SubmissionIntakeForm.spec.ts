@@ -170,18 +170,18 @@ describe('SubmissionIntakeForm', () => {
       expect(editable).toBeTruthy();
     });
 
-    it('sets editable to false when submission ID given', async () => {
-      const getSubmissionSpy = vi.spyOn(submissionService, 'getSubmission');
+    it('sets editable to false when housing project ID given', async () => {
+      const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 
-      getSubmissionSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as any);
+      getHousingProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as any);
       listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as any);
       listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as any);
 
       const wrapper = shallowMount(SubmissionIntakeForm, {
         ...wrapperSettings(),
-        props: { submissionId: '456' }
+        props: { housingProjectId: '456' }
       });
 
       await nextTick();

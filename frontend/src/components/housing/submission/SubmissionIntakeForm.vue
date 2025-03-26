@@ -41,7 +41,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { documentService, enquiryService, externalApiService, permitService, housingProjectService } from '@/services';
-import { useConfigStore, useContactStore, useHousingProjectStore, useTypeStore } from '@/store';
+import { useConfigStore, useContactStore, useHousingProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -71,8 +71,8 @@ type HousingProjectForm = {
 } & HousingProjectIntake;
 
 // Props
-const { submissionId = undefined, draftId = undefined } = defineProps<{
-  submissionId?: string;
+const { housingProjectId = undefined, draftId = undefined } = defineProps<{
+  housingProjectId?: string;
   draftId?: string;
 }>();
 
@@ -176,7 +176,7 @@ async function onAssistanceRequest(values: GenericObject) {
       toast.success('Form saved');
 
       // Send confirmation email
-      emailConfirmation(enquiryResponse.activityId, enquiryResponse.submissionId, false);
+      emailConfirmation(enquiryResponse.activityId, enquiryResponse.housingProjectId, false);
 
       router.push({
         name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
@@ -298,7 +298,7 @@ async function onSubmit(data: any) {
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
-      emailConfirmation(response.data.activityId, response.data.submissionId, true);
+      emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
       contactStore.setContact(submissionData.contacts[0]);
@@ -307,7 +307,7 @@ async function onSubmit(data: any) {
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
         params: {
           housingProjectId: response.data.housingProjectId
-        },
+        }
       });
     } else {
       throw new Error('Failed to retrieve correct draft data');
@@ -330,7 +330,7 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
       body = confirmationTemplateSubmission({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
-        '{{ submissionId }}': subId
+        '{{ housingProjectId }}': subId
       });
     } else {
       body = confirmationTemplateEnquiry({

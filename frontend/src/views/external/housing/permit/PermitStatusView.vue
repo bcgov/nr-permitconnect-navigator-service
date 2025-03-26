@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
-import { usePermitStore, useSubmissionStore } from '@/store';
+import { useHousingProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
@@ -19,9 +19,9 @@ import type { User } from '@/types';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 
 // Props
-const { permitId, submissionId } = defineProps<{
+const { permitId, housingProjectId } = defineProps<{
   permitId: string;
-  submissionId: string;
+  housingProjectId: string;
 }>();
 
 // Composables
@@ -64,10 +64,10 @@ const previous = (trackerStatus: string) => ({
 // Store
 const authZStore = useAuthZStore();
 const permitStore = usePermitStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
 const { getPermit } = storeToRefs(permitStore);
-const { getSubmission } = storeToRefs(submissionStore);
+const { getHousingProject } = storeToRefs(housingProjectStore);
 
 // State
 const assignedNavigator: Ref<User | undefined> = ref(undefined);
@@ -195,14 +195,14 @@ onBeforeMount(async () => {
     const permitData = (await permitService.getPermit(permitId)).data;
     permitStore.setPermit(permitData);
 
-    if (!getSubmission.value) {
-      const submission = (await submissionService.getSubmission(submissionId)).data;
-      submissionStore.setSubmission(submission);
+    if (!getHousingProject.value) {
+      const submission = (await housingProjectService.getHousingProject(housingProjectId)).data;
+      housingProjectStore.setHousingProject(submission);
     }
 
-    if (getSubmission.value?.assignedUserId) {
+    if (getHousingProject.value?.assignedUserId) {
       assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [getSubmission.value.assignedUserId] })
+        await contactService.searchContacts({ userId: [getHousingProject.value.assignedUserId] })
       ).data[0];
     }
 
@@ -328,7 +328,8 @@ onBeforeMount(async () => {
           <div class="status-verified-message">
             <div v-if="updatedBy">
               <p class="verified-text my-0">
-                {{ t('permitStatusView.statusLastVerified') }} {{ formatDate(getPermit?.statusLastVerified) }} by
+                {{ t('e.housing.permitStatusView.statusLastVerified') }}
+                {{ formatDate(getPermit?.statusLastVerified) }} by
                 {{ updatedBy }}
               </p>
             </div>
@@ -340,7 +341,7 @@ onBeforeMount(async () => {
       </template>
     </Card>
     <div class="updates-section">
-      <h4 class="mb-6">{{ t('permitStatusView.additionalUpdates') }}</h4>
+      <h4 class="mb-6">{{ t('e.housing.permitStatusView.additionalUpdates') }}</h4>
       <div
         v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
         class="ask-navigator mb-16"
@@ -351,7 +352,7 @@ onBeforeMount(async () => {
           @click="
             router.push({
               name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, submissionId }
+              params: { permitId, housingProjectId }
             })
           "
         />

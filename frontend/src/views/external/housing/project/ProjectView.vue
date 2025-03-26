@@ -9,12 +9,12 @@ import StatusPill from '@/components/common/StatusPill.vue';
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { NavigationPermission } from '@/store/authzStore';
-import { Initiative, RouteName } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
-import { contactService, enquiryService, permitService, submissionService } from '@/services';
-import { useAuthZStore, useSubmissionStore } from '@/store';
+import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
+import { useAuthZStore, useHousingProjectStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit } from '@/types';
@@ -38,9 +38,9 @@ const toast = useToast();
 
 // Store
 const authZStore = useAuthZStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
+const { getHousingProject, getPermits, getRelatedEnquiries } = storeToRefs(housingProjectStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
@@ -104,16 +104,18 @@ function permitFilter(config: PermitFilterConfig) {
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { submissionId }
+    params: { housingProjectId }
   });
 }
 
 onBeforeMount(async () => {
-  let enquiriesValue, submissionValue: any;
+  let enquiriesValue, projectValue: any;
 
   try {
-    [submissionValue] = (await Promise.all([submissionService.getSubmission(submissionId)])).map((r) => r.data);
-    if (submissionValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(submissionValue.activityId)).data;
+    [projectValue] = (await Promise.all([housingProjectService.getHousingProject(housingProjectId)])).map(
+      (r) => r.data
+    );
+    if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {
     toast.error(t('e.housing.projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.EXT_HOUSING });
@@ -168,7 +170,7 @@ onBeforeMount(async () => {
           v-else
           class="mt-0 mb-2"
         >
-          {{ getSubmission.projectName }}
+          {{ getHousingProject.projectName }}
         </h1>
         <div>
           <span class="mr-4">
@@ -188,7 +190,8 @@ onBeforeMount(async () => {
       </div>
       <Button
         v-if="
-          canNavigate(NavigationPermission.EXT_HOUSING) && getSubmission?.submissionType !== SubmissionType.INAPPLICABLE
+          canNavigate(NavigationPermission.EXT_HOUSING) &&
+          getHousingProject?.housingProjectType !== SubmissionType.INAPPLICABLE
         "
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
@@ -327,7 +330,7 @@ onBeforeMount(async () => {
       <EnquiryListProponent
         :loading="loading"
         :enquiries="getRelatedEnquiries"
-        :submission-id="submissionId"
+        :submission-id="housingProjectId"
       />
     </div>
   </div>
