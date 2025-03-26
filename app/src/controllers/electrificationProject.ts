@@ -36,12 +36,14 @@ const controller = {
         ?.activityId;
 
     // Put new electrification project together
-    const electrificationProjectData: ElectrificationProject = {
-      ...data.project,
-      electrificationProjectId: uuidv4(),
-      activityId: activityId,
-      submittedAt: new Date().toISOString(),
-      submissionType: SubmissionType.GUIDANCE
+    const electrificationProjectData = {
+      electrificationProject: {
+        electrificationProjectId: uuidv4(),
+        activityId: activityId,
+        submittedAt: data.submittedAt ?? new Date().toISOString(),
+        ...data,
+        submissionType: SubmissionType.GUIDANCE
+      } as ElectrificationProject
     };
 
     return electrificationProjectData;
