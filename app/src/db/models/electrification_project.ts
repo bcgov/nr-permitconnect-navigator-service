@@ -54,7 +54,13 @@ export default {
       electrification_project_id: input.electrificationProjectId,
       activity_id: input.activityId,
       assigned_user_id: input.assignedUserId,
-      submitted_at: new Date(input.submittedAt ?? Date.now())
+      submitted_at: new Date(input.submittedAt ?? Date.now()),
+      project_name: input.projectName,
+      project_description: input.projectDescription,
+      company_name_registered: input.companyNameRegistered,
+      project_type: input.projectType,
+      bc_hydro_number: input.bcHydroNumber,
+      submission_type: input.submissionType
     };
   },
 
@@ -64,6 +70,12 @@ export default {
       activityId: input.activity_id,
       assignedUserId: input.assigned_user_id,
       submittedAt: input.submitted_at?.toISOString() as string,
+      projectName: input.project_name,
+      projectDescription: input.project_description,
+      companyNameRegistered: input.company_name_registered,
+      projectType: input.project_type,
+      bcHydroNumber: input.bc_hydro_number,
+      submissionType: input.submission_type,
 
       createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,

@@ -194,6 +194,15 @@ export async function up(knex: Knex): Promise<void> {
         return knex('initiative').insert(items);
       })
 
+      .then(() => {
+        const items = [
+          {
+            draft_code: 'ELECTRIFICATION_PROJECT'
+          }
+        ];
+        return knex('draft_code').insert(items);
+      })
+
       // Create public schema tables
       .then(() =>
         knex.schema.createTable('electrification_project', (table) => {
@@ -207,6 +216,12 @@ export async function up(knex: Knex): Promise<void> {
             .onDelete('CASCADE');
           table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
           table.timestamp('submitted_at', { useTz: true }).notNullable();
+          table.text('project_name');
+          table.text('project_description');
+          table.text('company_name_registered');
+          table.text('project_type');
+          table.text('bc_hydro_number');
+          table.text('submission_type');
           stamps(knex, table);
         })
       )
@@ -694,6 +709,7 @@ export async function down(knex: Knex): Promise<void> {
           electrificationPermits.map(async (x) => await knex('permit_type').where('name', x.name).del())
         );
       })
+      .then(() => knex('draft_code').where('draft_code', 'ELECTRIFICATION_PROJECT').del())
       .then(() => knex('initiative').where('code', 'ELECTRIFICATION').del())
   );
 }
