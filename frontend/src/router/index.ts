@@ -13,7 +13,7 @@ import {
   useContactStore,
   useEnquiryStore,
   usePermitStore,
-  useSubmissionStore
+  useHousingProjectStore
 } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
@@ -162,7 +162,7 @@ export default function getRouter() {
     if (isEmptyObject(to.params)) {
       useEnquiryStore().reset();
       usePermitStore().reset();
-      useSubmissionStore().reset();
+      useHousingProjectStore().reset();
     }
 
     // Backend Redirection Handler
