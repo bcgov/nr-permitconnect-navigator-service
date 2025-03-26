@@ -10,9 +10,9 @@ import { Initiative } from '@/utils/enums/application';
 import type { Ref } from 'vue';
 
 // Props
-const { submissionId = undefined, draftId = undefined } = defineProps<{
-  submissionId?: string;
+const { draftId = undefined, housingProjectId = undefined } = defineProps<{
   draftId?: string;
+  housingProjectId?: string;
 }>();
 
 // Composables
@@ -23,7 +23,7 @@ const loading: Ref<boolean> = ref(true);
 
 // Actions
 onBeforeMount(async () => {
-  usePermitStore().setPermitTypes((await permitService.getPermitTypes()).data);
+  usePermitStore().setPermitTypes((await permitService.getPermitTypes(Initiative.HOUSING)).data);
   loading.value = false;
 });
 </script>
@@ -32,7 +32,7 @@ onBeforeMount(async () => {
   <SubmissionIntakeForm
     v-if="!loading"
     :key="route.fullPath"
-    :submission-id="housingProjectId"
+    :housing-project-id="housingProjectId"
     :draft-id="draftId"
   />
 </template>

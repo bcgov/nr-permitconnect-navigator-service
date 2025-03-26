@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Breadcrumb } from '@/lib/primevue';
-import { useEnquiryStore, usePermitStore, useSubmissionStore } from '@/store';
+import { useEnquiryStore, useHousingProjectStore, usePermitStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 import type { MenuItem } from 'primevue/menuitem';
@@ -17,10 +17,10 @@ const route = useRoute();
 // Store
 const enquiryStore = useEnquiryStore();
 const permitStore = usePermitStore();
-const submissionStore = useSubmissionStore();
+const housingProjectStore = useHousingProjectStore();
 const { getEnquiry } = storeToRefs(enquiryStore);
 const { getPermit } = storeToRefs(permitStore);
-const { getSubmission } = storeToRefs(submissionStore);
+const { getHousingProject } = storeToRefs(housingProjectStore);
 
 // State
 const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => {
@@ -51,7 +51,7 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
   if (dynamicBreadcrumb) {
     switch (dynamicBreadcrumb) {
       case 'project': {
-        const project = getSubmission;
+        const project = getHousingProject;
         if (project.value) {
           return project.value.projectName;
         } else {

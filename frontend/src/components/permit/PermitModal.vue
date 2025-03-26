@@ -7,7 +7,7 @@ import { date, object, string } from 'yup';
 import { DatePicker, InputText, Select } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService } from '@/services';
-import { useHousingProjectStore, useTypeStore } from '@/store';
+import { useHousingProjectStore, usePermitStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/housing';
 import { PermitAuthorizationStatus, PermitStatus } from '@/utils/enums/housing';
 

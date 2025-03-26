@@ -22,12 +22,12 @@ import { contactValidator } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Enquiry, Permit, Submission } from '@/types';
+import type { Enquiry, HousingProject, Permit } from '@/types';
 
 // Props
 const { enquiryId, project, permit } = defineProps<{
   enquiryId?: string;
-  project?: Submission;
+  project?: HousingProject;
   permit?: Permit;
 }>();
 

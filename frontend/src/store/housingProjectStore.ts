@@ -100,7 +100,7 @@ export const useHousingProjectStore = defineStore('housingProject', () => {
     state.relatedEnquiries.value = [];
     state.notes.value = [];
     state.permits.value = [];
-    state.submission.value = undefined;
+    state.housingProject.value = undefined;
   }
 
   return {
@@ -125,7 +125,7 @@ export const useHousingProjectStore = defineStore('housingProject', () => {
     addRelatedEnquiry,
     removeRelatedEnquiry,
     setRelatedEnquiries,
-    setHousingProject
+    setHousingProject,
     reset
   };
 });
