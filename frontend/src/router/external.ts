@@ -1,3 +1,4 @@
+import { default as externalElectrificationRoutes } from '@/router/externalElectrification';
 import { default as externalHousingRoutes } from '@/router/externalHousing';
 
 import type { RouteRecordRaw } from 'vue-router';
@@ -5,7 +6,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/e',
-    children: [...externalHousingRoutes]
+    children: [...externalElectrificationRoutes, ...externalHousingRoutes]
   }
 ];
 
