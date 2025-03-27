@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
-import { formatDateLong } from '@/utils/formatters';
+import { permitNoteService, submissionService } from '@/services';
+import { useConfigStore } from '@/store';
+import { formatDate, formatDateLong } from '@/utils/formatters';
+import { PermitNeeded } from '@/utils/enums/housing';
+import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
-import permitNoteService from '@/services/permitNoteService';
 import { useSubmissionStore } from '@/store';
 
 // Props
@@ -20,6 +24,7 @@ const { permit, permitName } = defineProps<{
 
 // Store
 const submissionStore = useSubmissionStore();
+const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -54,12 +59,34 @@ async function onSubmit(data: any, { resetForm }) {
       };
 
       submissionStore.updatePermit(updatedPermit);
+      // send email to the user if permit is needed
+      if (permit.needed === PermitNeeded.YES) emailNotification();
     }
 
     resetForm();
   } catch (e: any) {
     toast.error('Failed to save note', e.message);
   }
+}
+
+async function emailNotification() {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const body = permitNoteNotificationTemplate({
+    '{{ contactName }}': submissionStore.getSubmission?.contacts[0].firstName,
+    '{{ activityId }}': submissionStore.getSubmission?.activityId,
+    '{{ permitName }}': permitName,
+    '{{ submittedDate }}': formatDate(permit.submittedDate ?? permit.createdAt)
+  });
+  let applicantEmail = submissionStore.getSubmission?.contacts[0].email as string;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: `Updates for project ${submissionStore.getSubmission?.activityId}, ${permitName}`,
+    bodyType: 'html',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
 }
 </script>
 

@@ -39,6 +39,7 @@ export default {
       permitId: input.permit_id,
       permitTypeId: input.permit_type_id,
       activityId: input.activity_id,
+      createdAt: input.created_at?.toISOString() ?? null,
       issuedPermitId: input.issued_permit_id,
       trackingId: input.tracking_id,
       authStatus: input.auth_status,
