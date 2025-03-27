@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { submissionService, documentService, enquiryService, noteService, permitService } from '@/services';
-import { useAuthZStore, useSubmissionStore } from '@/store';
+import { useAuthZStore, usePermitStore, useSubmissionStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -62,7 +62,9 @@ const { t } = useI18n();
 const router = useRouter();
 
 // Store
+const permitStore = usePermitStore();
 const submissionStore = useSubmissionStore();
+const { getPermitTypes } = storeToRefs(permitStore);
 const { getDocuments, getNotes, getPermits, getRelatedEnquiries, getSubmission } = storeToRefs(submissionStore);
 
 // State
@@ -144,6 +146,11 @@ onBeforeMount(async () => {
   submissionStore.setNotes(notes);
   submissionStore.setPermits(permits);
   submissionStore.setRelatedEnquiries(relatedEnquiries);
+
+  if (getPermitTypes.value.length === 0) {
+    const permitTypes = (await permitService.getPermitTypes()).data;
+    permitStore.setPermitTypes(permitTypes);
+  }
 
   loading.value = false;
 });
@@ -387,41 +394,39 @@ onBeforeMount(async () => {
         </DataTable>
       </TabPanel>
       <TabPanel :value="2">
-        <span v-if="getPermits.length">
-          <div class="flex items-center pb-5">
-            <div class="grow">
-              <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
-            </div>
-            <Button
-              aria-label="Add permit"
-              :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
-              @click="permitModalVisible = true"
-            >
-              <font-awesome-icon
-                class="pr-2"
-                icon="fa-solid fa-plus"
-              />
-              Add permit
-            </Button>
+        <div class="flex items-center pb-5">
+          <div class="grow">
+            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
           </div>
-          <div
-            v-for="(permit, index) in getPermits"
-            :key="permit.permitId"
-            :index="index"
-            class="mb-6"
+          <Button
+            aria-label="Add permit"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
+            @click="permitModalVisible = true"
           >
-            <PermitCard
-              :editable="!isCompleted"
-              :permit="permit"
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-plus"
             />
-          </div>
-
-          <PermitModal
-            v-if="activityId"
-            v-model:visible="permitModalVisible"
-            :activity-id="activityId"
+            Add permit
+          </Button>
+        </div>
+        <div
+          v-for="(permit, index) in getPermits"
+          :key="permit.permitId"
+          :index="index"
+          class="mb-6"
+        >
+          <PermitCard
+            :editable="!isCompleted"
+            :permit="permit"
           />
-        </span>
+        </div>
+
+        <PermitModal
+          v-if="activityId"
+          v-model:visible="permitModalVisible"
+          :activity-id="activityId"
+        />
       </TabPanel>
       <TabPanel :value="3">
         <div class="flex items-center pb-5">
