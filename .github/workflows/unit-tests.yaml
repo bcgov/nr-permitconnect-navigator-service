@@ -152,7 +152,7 @@ jobs:
       - name: Restore Coverage Results
         uses: actions/download-artifact@v4
       - name: Publish code coverage
-        uses: paambaati/codeclimate-action@v5
+        uses: paambaati/codeclimate-action@v9
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
