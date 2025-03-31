@@ -41,7 +41,7 @@
     "geojson": "^0.5.0",
     "leaflet": "^1.9.4",
     "oidc-client-ts": "^3.2.0",
-    "pinia": "^2.2.7",
+    "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.2.0",
     "primeicons": "^7.0.0",
     "primevue": "^4.3.3",
@@ -57,7 +57,7 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
-    "@pinia/testing": "^0.1.7",
+    "@pinia/testing": "^1.0.0",
     "@testing-library/vue": "^8.1.0",
     "@tsconfig/node22": "^22.0.1",
     "@types/node": "^22.13.17",
