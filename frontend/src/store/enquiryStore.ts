@@ -51,6 +51,11 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     state.enquiry.value = undefined;
   }
 
+  function reset() {
+    state.notes.value = [];
+    state.enquiry.value = undefined;
+  }
+
   return {
     // State
     state: readonly(state),
@@ -64,7 +69,8 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     setNotes,
     updateNote,
     removeEnquiry,
-    setEnquiry
+    setEnquiry,
+    reset
   };
 });
 
