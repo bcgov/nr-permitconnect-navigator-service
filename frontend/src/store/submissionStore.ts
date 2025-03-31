@@ -95,6 +95,14 @@ export const useSubmissionStore = defineStore('submission', () => {
     state.submission.value = data;
   }
 
+  function reset() {
+    state.documents.value = [];
+    state.relatedEnquiries.value = [];
+    state.notes.value = [];
+    state.permits.value = [];
+    state.submission.value = undefined;
+  }
+
   return {
     // State
     state: readonly(state),
@@ -117,7 +125,8 @@ export const useSubmissionStore = defineStore('submission', () => {
     addRelatedEnquiry,
     removeRelatedEnquiry,
     setRelatedEnquiries,
-    setSubmission
+    setSubmission,
+    reset
   };
 });
 

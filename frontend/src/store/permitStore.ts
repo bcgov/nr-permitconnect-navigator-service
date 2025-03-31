@@ -31,6 +31,11 @@ export const usePermitStore = defineStore('permit', () => {
     state.permitTypes.value = data;
   }
 
+  function reset() {
+    state.permit.value = undefined;
+    state.permitTypes.value = [];
+  }
+
   return {
     // State
     state: readonly(state),
@@ -40,7 +45,8 @@ export const usePermitStore = defineStore('permit', () => {
 
     // Actions
     setPermit,
-    setPermitTypes
+    setPermitTypes,
+    reset
   };
 });
 

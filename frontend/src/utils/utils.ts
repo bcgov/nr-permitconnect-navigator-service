@@ -156,6 +156,16 @@ export function isDebugMode(): boolean {
 }
 
 /**
+ * Checks whether the given object is empty, no properties
+ *
+ * @param {object} obj - The object to check.
+ * @returns {boolean} True if the object is empty, false otherwise.
+ */
+export function isEmptyObject(obj: object): boolean {
+  return Object.keys(obj).length === 0;
+}
+
+/**
  * @function isTruthy
  * Returns true if the element name in the object contains a truthy value
  * @param {object} value The object to evaluate

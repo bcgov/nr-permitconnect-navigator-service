@@ -6,9 +6,18 @@ import { default as internalRoutes } from '@/router/internal';
 import { default as oidcRoutes } from '@/router/oidc';
 import { default as contactRoutes } from '@/router/contact';
 import { AuthService, contactService, yarsService } from '@/services';
-import { useAppStore, useAuthNStore, useAuthZStore, useContactStore } from '@/store';
+import {
+  useAppStore,
+  useAuthNStore,
+  useAuthZStore,
+  useContactStore,
+  useEnquiryStore,
+  usePermitStore,
+  useSubmissionStore
+} from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName, StorageKey } from '@/utils/enums/application';
+import { isEmptyObject } from '@/utils/utils';
 
 import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
 import type { Contact } from '@/types';
@@ -148,6 +157,13 @@ export default function getRouter() {
 
   router.beforeEach(async (to) => {
     appStore.beginDeterminateLoading();
+
+    // If no router params reset stores
+    if (isEmptyObject(to.params)) {
+      useEnquiryStore().reset();
+      usePermitStore().reset();
+      useSubmissionStore().reset();
+    }
 
     // Backend Redirection Handler
     if (to.query?.r) {
