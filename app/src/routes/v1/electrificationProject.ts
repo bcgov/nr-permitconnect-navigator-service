@@ -14,7 +14,8 @@ import type {
   StatisticsFilters,
   ElectrificationProject,
   ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters
+  ElectrificationProjectSearchParameters,
+  Contact
 } from '../../types';
 
 const router = express.Router();
@@ -160,7 +161,11 @@ router.put(
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.UPDATE),
   hasAccess('electrificationProjectId'),
   electrificationProjectValidator.updateElectrificationProject,
-  (req: Request<never, never, ElectrificationProject>, res: Response, next: NextFunction): void => {
+  (
+    req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
+    res: Response,
+    next: NextFunction
+  ): void => {
     electrificationProjectController.updateElectrificationProject(req, res, next);
   }
 );

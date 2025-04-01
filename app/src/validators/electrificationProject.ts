@@ -1,12 +1,13 @@
 import Joi from 'joi';
 
-import { activityId, email, uuidv4 } from './common';
+import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { PROJECT_TYPES } from '../utils/constants/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
 
 const electrificationIntake = {
+  activityId: Joi.string().min(8).max(8).allow(null),
   projectName: Joi.string().required().max(255).trim(),
   projectDescription: Joi.string().max(4000).allow(null),
   companyNameRegistered: Joi.string().required().max(255).trim(),
@@ -20,9 +21,10 @@ const schema = {
   createElectrificationProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
-      activityId: Joi.string().min(8).max(8).allow(null),
       contacts: contacts,
-      ...electrificationIntake
+      project: {
+        ...electrificationIntake
+      }
     })
   },
   emailConfirmation: {
@@ -78,16 +80,17 @@ const schema = {
   },
   updateElectrificationProject: {
     body: Joi.object({
-      electrificationProjectId: uuidv4.required(),
-      activityId: activityId,
-      submittedAt: Joi.string().required(),
-      assignedUserId: Joi.when('intakeStatus', {
-        is: IntakeStatus.SUBMITTED,
-        then: uuidv4,
-        otherwise: uuidv4.allow(null)
-      }),
       contacts: contacts,
-      ...electrificationIntake
+      project: {
+        ...electrificationIntake,
+        electrificationProjectId: uuidv4.required(),
+        submittedAt: Joi.string().required(),
+        assignedUserId: Joi.when('intakeStatus', {
+          is: IntakeStatus.SUBMITTED,
+          then: uuidv4,
+          otherwise: uuidv4.allow(null)
+        })
+      }
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()

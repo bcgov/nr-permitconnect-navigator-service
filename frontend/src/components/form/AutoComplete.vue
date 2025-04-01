@@ -4,8 +4,7 @@ import { onBeforeMount } from 'vue';
 
 import { AutoComplete } from '@/lib/primevue';
 
-import type { IInputEvent } from '@/interfaces';
-import type { AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 
 // Props
 
@@ -39,7 +38,7 @@ const {
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, handleBlur, value, resetField, handleChange } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 onBeforeMount(() => {
   resetField({ touched: false });
@@ -72,14 +71,7 @@ onBeforeMount(() => {
       :placeholder="placeholder"
       :suggestions="suggestions"
       @blur="handleBlur"
-      @change="
-        (e: AutoCompleteChangeEvent) => {
-          handleChange(e.originalEvent);
-          emit('onChange', e);
-        }
-      "
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
-      @input="(e: IInputEvent) => emit('onInput', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div class="mt-2">
