@@ -84,7 +84,7 @@ const formSchema = object({
     .max(3)
     .typeError('Queue Priority must be a number')
     .label('Queue Priority'),
-  housingProjectType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
+  submissionType: string().required().oneOf(SUBMISSION_TYPE_LIST).label('Submission type'),
   submittedAt: string().required().label('Submission date'),
   relatedEnquiries: string().notRequired().label('Related enquiries'),
   ...contactValidator,
@@ -415,7 +415,7 @@ onBeforeMount(async () => {
       />
       <Select
         class="col-span-3"
-        name="housingProjectType"
+        name="submissionType"
         label="Submission type"
         :disabled="!editable"
         :options="SUBMISSION_TYPE_LIST"
