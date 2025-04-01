@@ -72,7 +72,7 @@ onBeforeMount(() => {
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
               <span class="key font-bold">Submission type:</span>
-              {{ enquiry.enquiryType }}
+              {{ enquiry.submissionType }}
             </p>
           </div>
         </div>

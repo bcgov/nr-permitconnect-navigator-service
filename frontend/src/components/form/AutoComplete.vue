@@ -39,7 +39,7 @@ const {
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField, handleChange } = useField<string>(name);
 
 onBeforeMount(() => {
   resetField({ touched: false });
@@ -72,7 +72,12 @@ onBeforeMount(() => {
       :placeholder="placeholder"
       :suggestions="suggestions"
       @blur="handleBlur"
-      @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
+      @change="
+        (e: AutoCompleteChangeEvent) => {
+          handleChange(e.originalEvent);
+          emit('onChange', e);
+        }
+      "
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
       @input="(e: IInputEvent) => emit('onInput', e)"
     />

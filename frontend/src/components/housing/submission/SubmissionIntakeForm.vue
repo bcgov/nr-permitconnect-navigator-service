@@ -153,7 +153,7 @@ async function onAssistanceRequest(values: GenericObject) {
     const enquiryData = {
       basic: {
         enquiryDescription: t('submissionIntakeForm.assistanceMessage'),
-        enquiryType: SubmissionType.ASSISTANCE
+        submissionType: SubmissionType.ASSISTANCE
       },
       contacts: [
         setEmptyStringsToNull({

@@ -73,7 +73,7 @@ const schema = {
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),
-      housingProjectType: Joi.array().items(...HOUSING_PROJECT_TYPE_LIST)
+      submissionType: Joi.array().items(...HOUSING_PROJECT_TYPE_LIST)
     })
   },
   updateIsDeletedFlag: {
@@ -90,7 +90,7 @@ const schema = {
       activityId: activityId,
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
-      housingProjectType: Joi.string()
+      submissionType: Joi.string()
         .required()
         .valid(...HOUSING_PROJECT_TYPE_LIST),
       submittedAt: Joi.string().required(),
