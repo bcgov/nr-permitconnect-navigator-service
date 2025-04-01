@@ -4,6 +4,7 @@ import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { PROJECT_TYPES } from '../utils/constants/electrification';
+import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
 
 const electrificationIntake = {
@@ -14,7 +15,11 @@ const electrificationIntake = {
   projectType: Joi.string()
     .required()
     .valid(...PROJECT_TYPES),
-  bcHydroNumber: Joi.string().required().max(255).trim().allow(null)
+  bcHydroNumber: Joi.when('project.projectType', {
+    is: (val: string) => val === ProjectType.IPP_WIND || val === ProjectType.IPP_SOLAR,
+    then: Joi.string().required().max(255).trim(),
+    otherwise: Joi.string().max(255).trim().allow(null)
+  })
 };
 
 const schema = {
