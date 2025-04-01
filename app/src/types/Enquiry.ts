@@ -10,7 +10,7 @@ export type Enquiry = {
   addedToATS: boolean;
   assignedUserId: string | null;
   atsClientId: number | null;
-  enquiryType: string | null;
+  submissionType: string | null;
   submittedAt: string;
   submittedBy: string;
   relatedActivityId: string | null;

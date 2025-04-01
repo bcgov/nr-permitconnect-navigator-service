@@ -6,11 +6,11 @@ export type EnquiryIntake = {
   enquiryId?: string;
   submittedAt?: string;
   enquiryStatus?: ApplicationStatus;
-  enquiryType?: SubmissionType;
+  submissionType?: SubmissionType;
   submit?: boolean;
 
   basic?: {
-    enquiryType?: string;
+    submissionType?: string;
     relatedActivityId?: string;
     enquiryDescription?: string;
   };
