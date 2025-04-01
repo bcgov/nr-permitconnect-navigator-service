@@ -465,22 +465,22 @@ model email_log {
 }
 
 model electrification_project {
-  electrification_project_id String    @id @db.Uuid
-  activity_id                String
-  assigned_user_id           String?   @db.Uuid
-  submitted_at               DateTime  @db.Timestamptz(6)
-  project_name               String?
-  project_description        String?
-  company_name_registered    String?
-  project_type               String?
-  bc_hydro_number            String?
-  submission_type            String?
-  created_by                 String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at                 DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by                 String?
-  updated_at                 DateTime? @db.Timestamptz(6)
-  activity                   activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                       user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
+  electrificationProjectId String    @id @map("electrification_project_id") @db.Uuid
+  activityId               String    @map("activity_id")
+  assignedUserId           String?   @map("assigned_user_id") @db.Uuid
+  submittedAt              DateTime  @map("submitted_at") @db.Timestamptz(6)
+  projectName              String?   @map("project_name")
+  projectDescription       String?   @map("project_description")
+  companyNameRegistered    String?   @map("company_name_registered")
+  projectType              String?   @map("project_type")
+  bcHydroNumber            String?   @map("bc_hydro_number")
+  submissionType           String?   @map("submission_type")
+  createdBy                String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt                DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                String?   @map("updated_by")
+  updatedAt                DateTime? @map("updated_at") @db.Timestamptz(6)
+  activity                 activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
+  user                     user?     @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
 
   @@schema("public")
 }
