@@ -217,6 +217,9 @@ const controller = {
 
   createSubmission: async (req: Request<never, never, SubmissionIntake>, res: Response, next: NextFunction) => {
     try {
+      if (req.body === undefined) {
+        req.body = {};
+      }
       const { submission, appliedPermits, investigatePermits } = await controller.generateSubmissionData(
         req.body,
         IntakeStatus.SUBMITTED,

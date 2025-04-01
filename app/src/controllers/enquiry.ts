@@ -68,6 +68,9 @@ const controller = {
 
   createEnquiry: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
+      if (req.body === undefined) {
+        req.body = { contacts: [] };
+      }
       const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
 
       // Create or update contacts
