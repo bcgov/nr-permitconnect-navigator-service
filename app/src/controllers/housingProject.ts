@@ -70,11 +70,7 @@ const controller = {
     }
   },
 
-  generateHousingProjectData: async (
-    data: HousingProjectIntake,
-    intakeStatus: string,
-    currentContext: CurrentContext
-  ) => {
+  generateHousingProjectData: async (data: HousingProjectIntake, currentContext: CurrentContext) => {
     const activityId =
       data.activityId ??
       (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
@@ -179,9 +175,9 @@ const controller = {
         submittedAt: data.submittedAt ?? new Date().toISOString(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: getCurrentUsername(currentContext),
-        intakeStatus: intakeStatus,
+        intakeStatus: IntakeStatus.SUBMITTED,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
-        housingProjectType: data?.housingProjectType ?? SubmissionType.GUIDANCE
+        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
       } as HousingProject,
       appliedPermits,
       investigatePermits
@@ -213,7 +209,7 @@ const controller = {
           (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
-      res.status(200).json(response.map((x) => x.activityId));
+      res.status(200).json(response.map((x: HousingProject) => x.activityId));
     } catch (e: unknown) {
       next(e);
     }
@@ -225,7 +221,6 @@ const controller = {
       if (req.body === undefined) req.body = {};
       const { housingProject, appliedPermits, investigatePermits } = await controller.generateHousingProjectData(
         req.body,
-        IntakeStatus.SUBMITTED,
         req.currentContext
       );
 
@@ -379,7 +374,6 @@ const controller = {
     try {
       const { housingProject, appliedPermits, investigatePermits } = await controller.generateHousingProjectData(
         req.body,
-        IntakeStatus.SUBMITTED,
         req.currentContext
       );
 

@@ -95,7 +95,7 @@ export default {
       indigenous_description: input.indigenousDescription,
       non_profit_description: input.nonProfitDescription,
       housing_coop_description: input.housingCoopDescription,
-      housing_project_type: input.housingProjectType
+      submission_type: input.submissionType
     };
   },
 
@@ -149,7 +149,7 @@ export default {
       indigenousDescription: input.indigenous_description,
       nonProfitDescription: input.non_profit_description,
       housingCoopDescription: input.housing_coop_description,
-      housingProjectType: input.housing_project_type,
+      submissionType: input.submission_type,
       relatedEnquiries: null,
       createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,

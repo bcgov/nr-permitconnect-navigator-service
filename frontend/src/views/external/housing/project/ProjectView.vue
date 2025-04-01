@@ -191,7 +191,7 @@ onBeforeMount(async () => {
       <Button
         v-if="
           canNavigate(NavigationPermission.EXT_HOUSING) &&
-          getHousingProject?.housingProjectType !== SubmissionType.INAPPLICABLE
+          getHousingProject?.submissionType !== SubmissionType.INAPPLICABLE
         "
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
@@ -205,7 +205,7 @@ onBeforeMount(async () => {
     </div>
 
     <div
-      v-if="getHousingProject?.housingProjectType === SubmissionType.INAPPLICABLE"
+      v-if="getHousingProject?.submissionType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
     >
       {{ t('e.housing.projectView.inapplicableSubmissionType') }}

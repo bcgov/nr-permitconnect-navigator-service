@@ -1149,13 +1149,13 @@ paths:
             items:
               $ref: '#/components/parameters/IntakeStatus'
         - in: query
-          name: housingProjectType
+          name: submissionType
           required: false
           schema:
             type: array
-            description: The housing project types to filter on
+            description: The housing submission types to filter on
             items:
-              $ref: '#/components/parameters/Query-HousingProjectType'
+              $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of housing projects matching the search criteria
@@ -2115,10 +2115,10 @@ components:
       schema:
         type: boolean
         example: false
-    Query-HousingProjectType:
+    Query-SubmissionType:
       in: query
-      name: housingProjectType
-      description: The submission type of the housing project
+      name: submissionType
+      description: The submission type of the project
       required: false
       schema:
         type: string
@@ -2252,7 +2252,7 @@ components:
           type: string
           description: ID for the activity
           example: 2DE67F13
-        enquiryType:
+        submissionType:
           type: string
           description: The type of enquiry
           example: General enquiry
@@ -3018,7 +3018,7 @@ components:
     Enquiry-Basic:
       type: object
       properties:
-        enquiryType:
+        submissionType:
           type: string
           description: The type of enquiry
           example: General enquiry
@@ -3405,9 +3405,9 @@ components:
           type: string
           description: Status of the application
           example: New
-        housingProjectType:
+        submissionType:
           type: string
-          description: The submission type of the housing project
+          description: The submission type of the project
           example: Guidance
     Request-HousingProjectSearch:
       title: Request Housing Project Search
@@ -3436,9 +3436,9 @@ components:
           description: UUID of housing project
           format: Uuid
           example: ac246e31-c807-496c-bc93-cd8bc2f1b2b4
-        housingProjectType:
+        submissionType:
           type: string
-          description: The submission type of the housing project
+          description: The submission type of the project
           example: Guidance
     Request-ElectrificationProjectUpdate:
       title: Request to Update Electrification Project
@@ -3469,7 +3469,7 @@ components:
         - housingProjectId
         - activityId
         - queuePriority
-        - housingProjectType
+        - submissionType
         - submittedAt
         - projectName
         - hasRentalUnits
@@ -3498,9 +3498,9 @@ components:
           format: integer
           example: 2
           default: 3
-        housingProjectType:
+        submissionType:
           type: string
-          description: The submission type of the housing project
+          description: The submission type of the project
           example: Guidance
         submittedAt:
           type: string
