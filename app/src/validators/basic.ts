@@ -27,7 +27,7 @@ export const basicIntake = Joi.object({
 export const basicEnquiry = Joi.object({
   enquiryDescription: Joi.string().required(),
   relatedActivityId: Joi.string().max(255).allow(null),
-  enquiryType: Joi.string()
+  submissionType: Joi.string()
     .valid(...ENQUIRY_TYPE_LIST)
     .allow(null)
 });

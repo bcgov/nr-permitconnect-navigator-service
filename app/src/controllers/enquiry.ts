@@ -47,7 +47,7 @@ const controller = {
 
     if (data.basic) {
       basic = {
-        enquiryType: data.basic.enquiryType,
+        submissionType: data.basic.submissionType,
         relatedActivityId: data.basic.relatedActivityId,
         enquiryDescription: data.basic.enquiryDescription
       };
@@ -63,7 +63,7 @@ const controller = {
       submittedBy: getCurrentUsername(req.currentContext),
       intakeStatus: intakeStatus,
       enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
-      enquiryType: data?.basic?.enquiryType ?? SubmissionType.GENERAL_ENQUIRY
+      submissionType: data?.basic?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
     };
   },
 

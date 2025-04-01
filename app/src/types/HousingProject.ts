@@ -55,7 +55,7 @@ export type HousingProject = {
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;
-  housingProjectType: string | null;
+  submissionType: string | null;
   relatedEnquiries: string | null;
   contacts: Array<Contact>;
   user: User | null;
