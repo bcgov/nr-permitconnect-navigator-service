@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form, useField } from 'vee-validate';
+import { Form } from 'vee-validate';
 import { computed, onBeforeMount, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -181,7 +181,9 @@ async function onSubmit(data: any) {
 
     // Convert contact fields into contacts array object
     const submissionData = {
-      ...data,
+      project: {
+        ...data.project
+      },
       contacts: [
         {
           contactId: data.contacts.contactId,
@@ -328,8 +330,6 @@ onBeforeMount(async () => {
       }
 
       initialFormValues.value = {
-        activityId: response?.activityId,
-        electrificationProjectId: response?.electrificationProjectId,
         contacts: {
           contactFirstName: response?.contacts[0]?.firstName,
           contactLastName: response?.contacts[0]?.lastName,
@@ -339,11 +339,15 @@ onBeforeMount(async () => {
           contactPreference: response?.contacts[0]?.contactPreference,
           contactId: response?.contacts[0]?.contactId
         },
-        companyNameRegistered: response?.companyNameRegistered,
-        projectName: response?.projectName,
-        projectType: response?.projectType,
-        bcHydroNumber: response?.bcHydroNumber,
-        projectDescription: response?.projectDescription
+        project: {
+          activityId: response?.activityId,
+          electrificationProjectId: response?.electrificationProjectId,
+          companyNameRegistered: response?.companyNameRegistered,
+          projectName: response?.projectName,
+          projectType: response?.projectType,
+          bcHydroNumber: response?.bcHydroNumber,
+          projectDescription: response?.projectDescription
+        }
       };
     }
   } catch (e) {
@@ -391,7 +395,7 @@ onBeforeMount(async () => {
 
     <input
       type="hidden"
-      name="activityId"
+      name="project.activityId"
     />
 
     <CollectionDisclaimer />
@@ -424,7 +428,7 @@ onBeforeMount(async () => {
       </template>
       <template #content>
         <AutoComplete
-          name="companyNameRegistered"
+          name="project.companyNameRegistered"
           :bold="false"
           :disabled="!editable"
           :editable="true"
@@ -449,7 +453,7 @@ onBeforeMount(async () => {
       </template>
       <template #content>
         <InputText
-          name="projectName"
+          name="project.projectName"
           :bold="false"
           :disabled="!editable"
         />
@@ -469,7 +473,7 @@ onBeforeMount(async () => {
       </template>
       <template #content>
         <RadioList
-          name="projectType"
+          name="project.projectType"
           :disabled="!editable"
           :options="PROJECT_TYPES"
           @on-change="
@@ -481,7 +485,9 @@ onBeforeMount(async () => {
       </template>
     </Card>
 
-    <Card v-if="values.projectType === ProjectType.IPP_WIND || values.projectType === ProjectType.IPP_SOLAR">
+    <Card
+      v-if="values.project.projectType === ProjectType.IPP_WIND || values.project.projectType === ProjectType.IPP_SOLAR"
+    >
       <template #title>
         <span
           class="section-header"
@@ -494,7 +500,7 @@ onBeforeMount(async () => {
       </template>
       <template #content>
         <InputText
-          name="bcHydroNumber"
+          name="project.bcHydroNumber"
           :bold="false"
           :disabled="!editable"
         />
@@ -516,7 +522,7 @@ onBeforeMount(async () => {
         <!-- eslint-disable max-len -->
         <TextArea
           class="col-span-12 mb-0 pb-0"
-          name="projectDescription"
+          name="project.projectDescription"
           placeholder="Provide us with additional information - short description about the project and/or project website link"
           :disabled="!editable"
         />

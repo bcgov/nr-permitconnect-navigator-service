@@ -6,14 +6,14 @@ import { CurrentContext } from '../../types';
 
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
-    createdBy: currentContext?.userId,
+    createdBy: currentContext?.userId ?? null,
     createdAt: new Date().toISOString()
   };
 }
 
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
-    updatedBy: currentContext?.userId,
+    updatedBy: (currentContext?.userId as string) ?? null,
     updatedAt: new Date().toISOString()
   };
 }

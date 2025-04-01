@@ -4,14 +4,13 @@ import {
   contactService,
   draftService,
   enquiryService,
-  electrificationProjectService,
-  permitService
+  electrificationProjectService
 } from '../../../src/services';
-import { PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
-import { IntakeStatus } from '../../../src/utils/enums/projectCommon';
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
+import { ProjectType } from '../../../src/utils/enums/electrification';
+import { SubmissionType } from '../../../src/utils/enums/projectCommon';
 
-import type { Draft, ElectrificationProject, Permit } from '../../../src/types';
+import type { Draft, ElectrificationProject } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -43,11 +42,15 @@ const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
 
-const HOUSING_PROJECT_1 = {
-  electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: '5183f223',
-  assignedUserId: null,
-  submittedAt: new Date().toISOString(),
+const ELECTRIFICATION_INTAKE = {
+  project: {
+    projectName: 'Test',
+    projectDescription: 'Test description',
+    companyNameRegistered: 'Company name',
+    projectType: ProjectType.IPP_WIND,
+    bcHydroNumber: '123',
+    submissionType: SubmissionType.GUIDANCE
+  },
   contacts: [
     {
       contactId: undefined,
@@ -62,24 +65,52 @@ const HOUSING_PROJECT_1 = {
   createdAt: new Date().toISOString(),
   createdBy: 'abc-123',
   updatedAt: new Date().toISOString(),
-  updatedBy: 'abc-123',
-  user: null
+  updatedBy: 'abc-123'
+};
+
+const ELECTRIFICATION_PROJECT_1 = {
+  project: {
+    electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+    activityId: '5183f223',
+    assignedUserId: null,
+    submittedAt: new Date().toISOString()
+  },
+  contacts: [
+    {
+      contactId: undefined,
+      firstName: 'Test',
+      lastName: 'Person',
+      phoneNumber: null,
+      email: null,
+      contactPreference: null,
+      contactApplicantRelationship: 'Property owner'
+    }
+  ],
+  createdAt: new Date().toISOString(),
+  createdBy: 'abc-123',
+  updatedAt: new Date().toISOString(),
+  updatedBy: 'abc-123'
 };
 
 describe('createElectrificationProject', () => {
   // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
+  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
 
   it('creates submission with unique activity ID', async () => {
     const req = {
-      body: { ...HOUSING_PROJECT_1, activityId: undefined, electrificationProjectId: undefined },
+      body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    upsertContacts.mockResolvedValue();
+    createActivitySpy.mockResolvedValue({
+      activityId: '00000000',
+      initiativeId: Initiative.ELECTRIFICATION,
+      isDeleted: false
+    });
     createElectrificationProjectSpy.mockResolvedValue({
       activityId: '00000000',
       electrificationProjectId: '11111111'
@@ -88,6 +119,7 @@ describe('createElectrificationProject', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.createElectrificationProject(req as any, res as any, next);
 
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(201);
@@ -95,99 +127,33 @@ describe('createElectrificationProject', () => {
   });
 
   it('populates data from body if it exists', async () => {
-    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
     const req = {
-      body: {},
+      body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    upsertContacts.mockResolvedValue();
+    createActivitySpy.mockResolvedValue({
+      activityId: '00000000',
+      initiativeId: Initiative.ELECTRIFICATION,
+      isDeleted: false
+    });
     createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.createElectrificationProject(req as any, res as any, next);
 
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        electrificationProjectId: expect.any(String),
+        ...ELECTRIFICATION_INTAKE.project,
+        electrificationProjectId: expect.stringMatching(uuidv4Pattern),
         activityId: '00000000',
-        submittedAt: expect.stringMatching(isoPattern)
-      })
-    );
-  });
-
-  // TODO: Remove skip once permits implemented
-  it.skip('creates permits if they exist', async () => {
-    const now = new Date().toISOString();
-
-    const req = {
-      body: {
-        appliedPermits: [
-          {
-            permitTypeId: 1,
-            trackingId: '123',
-            status: PermitStatus.APPLIED,
-            submittedDate: now
-          },
-          {
-            permitTypeId: 3,
-            trackingId: '456',
-            status: PermitStatus.APPLIED,
-            submittedDate: now
-          }
-        ],
-        investigatePermits: [
-          {
-            permitTypeId: 12,
-            needed: PermitNeeded.UNDER_INVESTIGATION
-          }
-        ]
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
-    createPermitSpy.mockResolvedValue({} as Permit);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.createElectrificationProject(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-
-    expect(createPermitSpy).toHaveBeenCalledTimes(3);
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        permitTypeId: 1,
-        activityId: '00000000',
-        trackingId: '123',
-        status: PermitStatus.APPLIED,
-        submittedDate: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        permitTypeId: 3,
-        activityId: '00000000',
-        trackingId: '456',
-        status: PermitStatus.APPLIED,
-        submittedDate: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        permitTypeId: 12,
-        activityId: '00000000',
-        needed: PermitNeeded.UNDER_INVESTIGATION
+        submittedAt: expect.stringMatching(isoPattern),
+        submissionType: SubmissionType.GUIDANCE
       })
     );
   });
@@ -269,7 +235,7 @@ describe('getElectrificationProject', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    electrificationProjectSpy.mockResolvedValue(HOUSING_PROJECT_1 as any);
+    electrificationProjectSpy.mockResolvedValue(ELECTRIFICATION_PROJECT_1 as any);
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -278,7 +244,7 @@ describe('getElectrificationProject', () => {
     expect(electrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(HOUSING_PROJECT_1);
+    expect(res.json).toHaveBeenCalledWith(ELECTRIFICATION_PROJECT_1);
   });
 
   it('calls next if the submission service fails to get submission', async () => {
@@ -314,7 +280,7 @@ describe('getElectrificationProjects', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    electrificationProjectsSpy.mockResolvedValue([HOUSING_PROJECT_1 as any]);
+    electrificationProjectsSpy.mockResolvedValue([ELECTRIFICATION_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.getElectrificationProjects(req as any, res as any, next);
@@ -322,10 +288,10 @@ describe('getElectrificationProjects', () => {
     expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectsSpy).toHaveBeenCalledWith();
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([HOUSING_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith([ELECTRIFICATION_PROJECT_1]);
   });
 
-  it('calls next if the submission service fails to get submissions', async () => {
+  it('calls next if the electrification service fails to get projects', async () => {
     const req = {
       currentContext: CURRENT_CONTEXT
     };
@@ -346,132 +312,38 @@ describe('getElectrificationProjects', () => {
 
 describe('submitDraft', () => {
   // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
+  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
 
   it('populates data from body if it exists', async () => {
     const req = {
-      body: {
-        contacts: [{ firstName: 'test', lastName: 'person' }]
-      },
+      body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
     upsertContacts.mockResolvedValue();
+    createActivitySpy.mockResolvedValue({
+      activityId: '00000000',
+      initiativeId: Initiative.ELECTRIFICATION,
+      isDeleted: false
+    });
+    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.submitDraft(req as any, res as any, next);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(1);
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
       expect.objectContaining({
+        ...ELECTRIFICATION_INTAKE.project,
+        electrificationProjectId: expect.stringMatching(uuidv4Pattern),
         activityId: '00000000',
-        submittedAt: expect.stringMatching(isoPattern)
-      })
-    );
-  });
-
-  // TODO: Remove skip once further data implemented
-  it.skip('sets intake status to Submitted', async () => {
-    const req = {
-      body: {},
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
-    upsertContacts.mockResolvedValue();
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.submitDraft(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContacts).toHaveBeenCalledTimes(0);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        intakeStatus: IntakeStatus.SUBMITTED
-      })
-    );
-  });
-
-  // TODO: Remove skip once permits implemented
-  it.skip('creates permits if they exist', async () => {
-    const now = new Date().toISOString();
-
-    const req = {
-      body: {
-        appliedPermits: [
-          {
-            permitTypeId: 1,
-            trackingId: '123',
-            status: PermitStatus.APPLIED,
-            submittedDate: now
-          },
-          {
-            permitTypeId: 3,
-            trackingId: '456',
-            status: PermitStatus.APPLIED,
-            submittedDate: now
-          }
-        ],
-        investigatePermits: [
-          {
-            permitTypeId: 12,
-            needed: PermitNeeded.UNDER_INVESTIGATION
-          }
-        ]
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-    const next = jest.fn();
-
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
-    createPermitSpy.mockResolvedValue({} as Permit);
-    upsertContacts.mockResolvedValue();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.submitDraft(req as any, res as any, next);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContacts).toHaveBeenCalledTimes(0);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(3);
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        permitTypeId: 1,
-        activityId: '00000000',
-        trackingId: '123',
-        status: PermitStatus.APPLIED,
-        submittedDate: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        permitTypeId: 3,
-        activityId: '00000000',
-        trackingId: '456',
-        status: PermitStatus.APPLIED,
-        submittedDate: now
-      })
-    );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
-      3,
-      expect.objectContaining({
-        permitTypeId: 12,
-        activityId: '00000000',
-        needed: PermitNeeded.UNDER_INVESTIGATION
+        submittedAt: expect.stringMatching(isoPattern),
+        submissionType: SubmissionType.GUIDANCE
       })
     );
   });
@@ -505,7 +377,11 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue({
+      activityId: '00000000',
+      initiativeId: Initiative.ELECTRIFICATION,
+      isDeleted: false
+    });
     createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -547,7 +423,11 @@ describe('updateDraft', () => {
     };
     const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue({
+      activityId: '00000000',
+      initiativeId: Initiative.ELECTRIFICATION,
+      isDeleted: false
+    });
     updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -569,25 +449,28 @@ describe('updateElectrificationProject', () => {
   const next = jest.fn();
 
   // Mock service calls
+  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const updateSpy = jest.spyOn(electrificationProjectService, 'updateElectrificationProject');
 
   it('should return 200 if all good', async () => {
     const req = {
-      body: HOUSING_PROJECT_1,
+      body: ELECTRIFICATION_PROJECT_1,
       currentContext: CURRENT_CONTEXT
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updated: any = HOUSING_PROJECT_1;
+    const updated: any = ELECTRIFICATION_PROJECT_1;
 
+    upsertContacts.mockResolvedValue();
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
 
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
-      ...req.body,
+      ...req.body.project,
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -597,10 +480,11 @@ describe('updateElectrificationProject', () => {
 
   it('calls next if the electrificationProject service fails to update', async () => {
     const req = {
-      body: HOUSING_PROJECT_1,
+      body: ELECTRIFICATION_PROJECT_1,
       currentContext: CURRENT_CONTEXT
     };
 
+    upsertContacts.mockResolvedValue();
     updateSpy.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -608,10 +492,10 @@ describe('updateElectrificationProject', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
 
+    expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
-
     expect(updateSpy).toHaveBeenCalledWith({
-      ...req.body,
+      ...req.body.project,
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
