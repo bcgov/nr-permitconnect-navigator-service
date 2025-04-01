@@ -12,10 +12,12 @@ product_external_dependencies:
     - IDIR
     - BceId
     - Business-BceId
+    - BC-Services-Card
   notification_standard:
     - Common-Hosted-Email-Service
 product_information:
-  api_specifications: []
+  api_specifications:
+    - https://pcns-prod-master.apps.silver.devops.gov.bc.ca/api/v1/docs
   business_capabilities_custom: Case Management
   business_capabilities_standard:
     - Manage Object Storage Objects
@@ -34,9 +36,13 @@ product_technology_information:
   backend_frameworks:
     - name: Express
       version: 4.18.3
+    - name: Other
+      version: knex 3.1.0
+    - name: Other
+      version: jest 29.7.0
   backend_languages_version:
     - name: TypeScript
-      version: 5.4.2
+      version: 5.8.2
   ci_cd_tools:
     - GitHub-Actions
     - Helm
@@ -44,18 +50,23 @@ product_technology_information:
     - Postgresql
   frontend_frameworks:
     - name: Vue
-      version: 3.4.21
-    - name: Pinia
-      version: 2.1.7
-    - name: Primevue
-      version: 3.50.0
-    - name: oidc-client-ts
-      version: 3.0.1
+      version: 3.5.13
+    - name: Other
+      version: Pinia 3.0.1
+    - name: Other
+      version: Primevue 4.3.3
+    - name: Other
+      version: oidc-client-ts 3.2.0
+    - name: Other
+      version: Vite 6.0.1
+    - name: Other
+      version: vitest 3.1.1
   frontend_languages:
     - name: TypeScript
-      version: 5.4.2
+      version: 5.8.2
   hosting_platforms:
     - Private-Cloud-Openshift
+  other_tools: Jira On-Prem, Figma, Miro
   spatial_mapping_technologies:
     - Leaflet
 version: 1
