@@ -64,7 +64,7 @@
     "@types/uuid": "^10.0.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vitejs/plugin-vue-jsx": "^4.1.2",
-    "@vitest/coverage-istanbul": "^2.1.6",
+    "@vitest/coverage-istanbul": "^3.1.1",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
@@ -83,7 +83,7 @@
     "typescript": "^5.8.2",
     "vite": "^6.0.1",
     "vite-plugin-vue-devtools": "^7.7.2",
-    "vitest": "^2.1.6",
+    "vitest": "^3.1.1",
     "volar-service-eslint": "^0.0.17",
     "vue-tsc": "^2.2.8"
   }
