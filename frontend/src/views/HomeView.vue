@@ -81,6 +81,10 @@ h3 {
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
+h3 {
+  font-weight: 400;
+}
+
 .bg {
   position: fixed;
   top: 0;
@@ -112,6 +116,9 @@ h3 {
       background-color: white;
       border-color: white;
       color: var(--p-primary-color);
+    }
+    &:hover {
+      background-color: var(--p-greyscale-200);
     }
   }
 }
