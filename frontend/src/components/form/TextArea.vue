@@ -48,7 +48,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       @blur="handleBlur"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
-    <div class="mt-2">
+    <div class="mt-1">
       <ErrorMessage
         :name="name"
         class="app-error-message"
