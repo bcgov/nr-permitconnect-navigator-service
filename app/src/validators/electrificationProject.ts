@@ -10,7 +10,6 @@ import { IntakeStatus } from '../utils/enums/projectCommon';
 const electrificationIntake = {
   activityId: Joi.string().min(8).max(8).allow(null),
   projectName: Joi.string().required().max(255).trim(),
-  projectDescription: Joi.string().max(4000).allow(null),
   companyNameRegistered: Joi.string().required().max(255).trim(),
   projectType: Joi.string()
     .required()
@@ -19,6 +18,11 @@ const electrificationIntake = {
     is: (val: string) => val === ProjectType.IPP_WIND || val === ProjectType.IPP_SOLAR,
     then: Joi.string().required().max(255).trim(),
     otherwise: Joi.string().max(255).trim().allow(null)
+  }),
+  projectDescription: Joi.when('project.projectType', {
+    is: ProjectType.OTHER,
+    then: Joi.string().required().max(4000),
+    otherwise: Joi.string().max(4000).allow(null)
   })
 };
 
