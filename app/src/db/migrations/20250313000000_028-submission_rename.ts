@@ -9,7 +9,12 @@ export async function up(knex: Knex): Promise<void> {
       .then(() =>
         knex.schema.alterTable('housing_project', function (table) {
           table.renameColumn('submission_id', 'housing_project_id');
-          table.renameColumn('submission_type', 'housing_project_type');
+        })
+      )
+
+      .then(() =>
+        knex.schema.alterTable('enquiry', function (table) {
+          table.renameColumn('enquiry_type', 'submission_type');
         })
       )
 
@@ -84,8 +89,8 @@ export async function up(knex: Knex): Promise<void> {
                 count(*) filter (where hp."queue_priority" = 1) as queue_1_housing_project_count,
                 count(*) filter (where hp."queue_priority" = 2) as queue_2_housing_project_count,
                 count(*) filter (where hp."queue_priority" = 3) as queue_3_housing_project_count,
-                count(*) filter (where hp."housing_project_type" = 'Guidance') as guidance_housing_project_count,
-                count(*) filter (where hp."housing_project_type" = 'Inapplicable') as inapplicable_housing_project_count,
+                count(*) filter (where hp."submission_type" = 'Guidance') as guidance_housing_project_count,
+                count(*) filter (where hp."submission_type" = 'Inapplicable') as inapplicable_housing_project_count,
                 count(distinct hp.activity_id) filter (where permit_counts.permit_count > 1) as multi_permits_needed
               from public.housing_project hp
               join public.activity a on hp.activity_id = a.activity_id
@@ -107,10 +112,10 @@ export async function up(knex: Knex): Promise<void> {
                 count(*) filter (where e."intake_status" = 'Assigned') as intake_assigned_enquiry_count,
                 count(*) filter (where e."intake_status" = 'Completed') as intake_completed_enquiry_count,
                 count(*) filter (where e."waiting_on" is not null) waiting_on_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Escalation') escalation_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'General enquiry') general_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Inapplicable') as inapplicable_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Status request') as status_request_enquiry_count
+                count(*) filter (where e."submission_type" = 'Escalation') escalation_enquiry_count,
+                count(*) filter (where e."submission_type" = 'General enquiry') general_enquiry_count,
+                count(*) filter (where e."submission_type" = 'Inapplicable') as inapplicable_enquiry_count,
+                count(*) filter (where e."submission_type" = 'Status request') as status_request_enquiry_count
               from public.enquiry e
               join public.activity a on e.activity_id = a.activity_id
               where a.is_deleted = false and e.intake_status <> 'Draft')
@@ -216,10 +221,10 @@ export async function down(knex: Knex): Promise<void> {
                 count(*) filter (where e."intake_status" = 'Assigned') as intake_assigned_enquiry_count,
                 count(*) filter (where e."intake_status" = 'Completed') as intake_completed_enquiry_count,
                 count(*) filter (where e."waiting_on" is not null) waiting_on_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Escalation') escalation_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'General enquiry') general_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Inapplicable') as inapplicable_enquiry_count,
-                count(*) filter (where e."enquiry_type" = 'Status request') as status_request_enquiry_count
+                count(*) filter (where e."submission_type" = 'Escalation') escalation_enquiry_count,
+                count(*) filter (where e."submission_type" = 'General enquiry') general_enquiry_count,
+                count(*) filter (where e."submission_type" = 'Inapplicable') as inapplicable_enquiry_count,
+                count(*) filter (where e."submission_type" = 'Status request') as status_request_enquiry_count
               from public.enquiry e
               join public.activity a on e.activity_id = a.activity_id
               where a.is_deleted = false and e.intake_status <> 'Draft')
@@ -281,8 +286,13 @@ export async function down(knex: Knex): Promise<void> {
       )
 
       .then(() =>
+        knex.schema.alterTable('enquiry', function (table) {
+          table.renameColumn('submission_type', 'enquiry_type');
+        })
+      )
+
+      .then(() =>
         knex.schema.alterTable('housing_project', function (table) {
-          table.renameColumn('housing_project_type', 'submission_type');
           table.renameColumn('housing_project_id', 'submission_id');
         })
       )

@@ -271,7 +271,7 @@ const service = {
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.createdBy] Optional array of uuids representing users who created housing projects
    * @param {string[]} [params.housingProjectId] Optional array of uuids representing the housing project ID
-   * @param {string[]} [params.housingProjectType] Optional array of strings representing the housing project type
+   * @param {string[]} [params.submissionType] Optional array of strings representing the housing submission type
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted housing projects should be included
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
@@ -304,7 +304,7 @@ const service = {
             housing_project_id: { in: params.housingProjectId }
           },
           {
-            housing_project_type: { in: params.housingProjectType }
+            submission_type: { in: params.submissionType }
           },
           {
             intake_status: { in: params.intakeStatus }

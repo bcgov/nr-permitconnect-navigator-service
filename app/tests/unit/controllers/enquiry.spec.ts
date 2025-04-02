@@ -24,7 +24,7 @@ const ENQUIRY_DATA: Enquiry = {
   addedToATS: false,
   assignedUserId: null,
   atsClientId: null,
-  enquiryType: 'general',
+  submissionType: 'general',
   submittedAt: '2025-02-28T00:00:00.000Z',
   submittedBy: 'testuser',
   relatedActivityId: 'activity123',
@@ -44,7 +44,7 @@ const GENERATE_ENQUIRY_DATA = {
   submittedBy: 'testuser',
   intakeStatus: 'submitted',
   enquiryStatus: ApplicationStatus.NEW,
-  enquiryType: 'general',
+  submissionType: 'general',
   relatedActivityId: 'activity123',
   enquiryDescription: 'Test enquiry description'
 };
@@ -52,7 +52,7 @@ const GENERATE_ENQUIRY_DATA = {
 const ENQUIRY_INTAKE_DATA: EnquiryIntake = {
   contacts: [CONTACT_DATA],
   basic: {
-    enquiryType: 'general',
+    submissionType: 'general',
     relatedActivityId: 'activity123',
     enquiryDescription: 'Test enquiry description'
   }

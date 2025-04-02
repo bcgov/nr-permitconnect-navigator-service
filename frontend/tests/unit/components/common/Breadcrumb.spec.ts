@@ -25,7 +25,7 @@ const exampleContact = {
 const testEnquiry: Enquiry = {
   enquiryId: '789',
   activityId: '789',
-  enquiryType: 'General Inquiry',
+  submissionType: 'General Inquiry',
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   intakeStatus: 'Pending',

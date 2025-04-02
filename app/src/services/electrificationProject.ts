@@ -11,14 +11,9 @@ const service = {
    * Creates a new electrification project
    * @returns {Promise<Partial<ElectrificationProject>>} The result of running the transaction
    */
-  createElectrificationProject: async (data: Partial<ElectrificationProject>) => {
-    const s = electrification_project.toPrismaModel(data as ElectrificationProject);
+  createElectrificationProject: async (data: ElectrificationProject) => {
     const response = await prisma.electrification_project.create({
-      data: {
-        ...s,
-        created_at: data.createdAt,
-        created_by: data.createdBy
-      },
+      data: data,
       include: {
         activity: {
           include: {
@@ -45,7 +40,7 @@ const service = {
     const response = await prisma.$transaction(async (trx) => {
       const del = await trx.electrification_project.delete({
         where: {
-          electrification_project_id: electrificationProjectId
+          electrificationProjectId: electrificationProjectId
         },
         include: {
           activity: {
@@ -62,7 +57,7 @@ const service = {
 
       await trx.activity.delete({
         where: {
-          activity_id: del.activity_id
+          activity_id: del.activityId
         }
       });
 
@@ -107,7 +102,7 @@ const service = {
     try {
       const result = await prisma.electrification_project.findFirst({
         where: {
-          electrification_project_id: electrificationProjectId
+          electrificationProjectId: electrificationProjectId
         },
         include: {
           activity: {
@@ -149,7 +144,7 @@ const service = {
           user: true
         },
         orderBy: {
-          created_at: 'desc'
+          createdAt: 'desc'
         }
       });
 
@@ -188,13 +183,13 @@ const service = {
       where: {
         AND: [
           {
-            activity_id: { in: params.activityId }
+            activityId: { in: params.activityId }
           },
           {
-            created_by: { in: params.createdBy }
+            createdBy: { in: params.createdBy }
           },
           {
-            electrification_project_id: { in: params.electrificationProjectId }
+            electrificationProjectId: { in: params.electrificationProjectId }
           },
           params.includeDeleted ? {} : { activity: { is_deleted: false } }
         ]
@@ -221,7 +216,7 @@ const service = {
   updateIsDeletedFlag: async (electrificationProjectId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteElectrificationProject = await prisma.electrification_project.findUnique({
       where: {
-        electrification_project_id: electrificationProjectId
+        electrificationProjectId: electrificationProjectId
       },
       include: {
         activity: {
@@ -240,9 +235,10 @@ const service = {
       await prisma.activity.update({
         data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
         where: {
-          activity_id: deleteElectrificationProject?.activity_id
+          activity_id: deleteElectrificationProject?.activityId
         }
       });
+
       return electrification_project.fromPrismaModelWithContact(deleteElectrificationProject);
     }
   },
@@ -255,15 +251,10 @@ const service = {
    */
   updateElectrificationProject: async (data: ElectrificationProject) => {
     try {
-      const s = electrification_project.toPrismaModel(data);
       const result = await prisma.electrification_project.update({
-        data: {
-          ...s,
-          updated_at: data.updatedAt,
-          updated_by: data.updatedBy
-        },
+        data: data,
         where: {
-          electrification_project_id: data.electrificationProjectId
+          electrificationProjectId: data.electrificationProjectId
         },
         include: {
           activity: {

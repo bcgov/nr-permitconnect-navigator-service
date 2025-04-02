@@ -15,6 +15,20 @@ const { t } = useI18n();
 const toast = useToast();
 
 // Actions
+const toElectrification = (): void => {
+  if (useAuthNStore().getIsAuthenticated) {
+    if (useAuthZStore().canNavigate(NavigationPermission.INT_ELECTRIFICATION))
+      router.push({ name: RouteName.INT_ELECTRIFICATION });
+    else if (useAuthZStore().canNavigate(NavigationPermission.EXT_ELECTRIFICATION))
+      router.push({ name: RouteName.EXT_ELECTRIFICATION });
+    else {
+      toast.warn(t('homeView.cantNavigate'));
+    }
+  } else {
+    router.push({ name: RouteName.EXT_ELECTRIFICATION });
+  }
+};
+
 const toHousing = (): void => {
   if (useAuthNStore().getIsAuthenticated) {
     if (useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
@@ -34,20 +48,28 @@ const toHousing = (): void => {
     <div class="bg" />
     <div class="poly" />
     <div class="flex items-center justify-start h-full">
-      <div class="text-left text-white/90">
-        <h1 class="mb-0">
-          Welcome to the
-          <br />
-          Permit Connect Services
-        </h1>
-        <h2>Choose your project type</h2>
-        <Button @click="toHousing">
-          <font-awesome-icon
-            icon="fa-solid fa-house"
-            class="mr-1"
-          />
-          Housing
-        </Button>
+      <div class="text-left">
+        <h3>{{ t('homeView.welcome') }}</h3>
+        <h1 class="!mt-0">{{ t('homeView.pcns') }}</h1>
+        <h3 class="mb-7">{{ t('homeView.chooseProject') }}</h3>
+        <div class="space-x-4">
+          <Button @click="toHousing">
+            <img
+              class="mr-4"
+              src="@/assets/images/H.Land.Button.svg"
+              alt="Housing image"
+            />
+            {{ t('homeView.housing') }}
+          </Button>
+          <Button @click="toElectrification">
+            <img
+              class="mr-4"
+              src="@/assets/images/E.Land.Button.svg"
+              alt="Electrification image"
+            />
+            {{ t('homeView.electrification') }}
+          </Button>
+        </div>
       </div>
     </div>
   </div>
@@ -55,8 +77,12 @@ const toHousing = (): void => {
 
 <style scoped lang="scss">
 h1,
-h2 {
+h3 {
   color: rgba(255, 255, 255, 0.9) !important;
+}
+
+h3 {
+  font-weight: 400;
 }
 
 .bg {
@@ -90,6 +116,9 @@ h2 {
       background-color: white;
       border-color: white;
       color: var(--p-primary-color);
+    }
+    &:hover {
+      background-color: var(--p-greyscale-200);
     }
   }
 }
