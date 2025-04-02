@@ -1,6 +1,5 @@
 ARG APP_ROOT=/opt/app-root/src
-# Temporarily peg to alpine3.20 https://github.com/prisma/prisma/issues/25809
-ARG BASE_IMAGE=docker.io/node:22.12.0-alpine3.20
+ARG BASE_IMAGE=docker.io/node:22.14.0-alpine
 
 #
 # Build the app

@@ -84,7 +84,7 @@
     "@types/jest": "^29.5.14",
     "@types/js-yaml": "^4.0.9",
     "@types/jsonwebtoken": "^9.0.9",
-    "@types/node": "^22.10.1",
+    "@types/node": "^22.13.17",
     "@types/pg": "^8.11.11",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^7.16.1",
