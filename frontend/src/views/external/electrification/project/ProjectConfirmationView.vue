@@ -1,38 +1,58 @@
 <script setup lang="ts">
-import { Message } from '@/lib/primevue';
+import { onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import { Message } from '@/lib/primevue';
+import { electrificationProjectService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 
+import type { Ref } from 'vue';
+
 // Props
-const { activityId, housingProjectId } = defineProps<{
-  activityId: string;
-  housingProjectId: string;
+const { electrificationProjectId } = defineProps<{
+  electrificationProjectId: string;
 }>();
+
+// Composables
+const { t } = useI18n();
+
+// State
+const activityId: Ref<string | undefined> = ref(undefined);
+
+onBeforeMount(async () => {
+  activityId.value = (
+    await electrificationProjectService.getElectrificationProject(electrificationProjectId)
+  ).data.activityId;
+});
 </script>
 
 <template>
   <div>
-    <h2>Confirmation of Submission</h2>
+    <h2>{{ t('e.electrification.projectConfirmationView.header') }}</h2>
     <Message
       severity="success"
       :closable="false"
     >
-      Your application has been successfully submitted.
+      {{ t('e.electrification.projectConfirmationView.success') }}
     </Message>
-    <h3 class="inline-block my-7 mr-2">Project ID:</h3>
-    <router-link
+    <h3 class="inline-block my-7 mr-2">{{ t('e.electrification.projectConfirmationView.projectId') }}</h3>
+    <!-- TODO: Uncomment when view is added -->
+    <!-- <router-link
       :to="{
-        name: RouteName.EXT_HOUSING_PROJECT,
-        params: { housingProjectId: housingProjectId }
+        name: RouteName.EXT_ELECTRIFICATION_PROJECT,
+        params: { electrificationProjectId: electrificationProjectId }
       }"
-    >
-      <span class="text-2xl">{{ activityId }}</span>
-    </router-link>
+    > -->
+    <span class="text-2xl">{{ activityId }}</span>
+    <!-- </router-link> -->
     <div>
-      Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check
-      your email for the confirmation email and keep the project ID for future reference.
+      {{ t('e.electrification.projectConfirmationView.message') }}
     </div>
-    <div class="mt-6"><router-link :to="{ name: RouteName.EXT_HOUSING }">Back to Housing</router-link></div>
+    <div class="mt-6">
+      <router-link :to="{ name: RouteName.EXT_HOUSING }">
+        {{ t('e.electrification.projectConfirmationView.backToElectrification') }}
+      </router-link>
+    </div>
   </div>
 </template>
 

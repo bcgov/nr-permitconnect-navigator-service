@@ -64,10 +64,10 @@ const validationErrors = computed(() => {
 // Actions
 function confirmSubmit(data: GenericObject) {
   confirm.require({
-    message: 'Are you sure you wish to submit this form?',
-    header: 'Please confirm submission',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('e.electrification.projectIntakeForm.confirmSubmitMessage'),
+    header: t('e.electrification.projectIntakeForm.confirmSubmitHeader'),
+    acceptLabel: t('e.electrification.projectIntakeForm.confirm'),
+    rejectLabel: t('e.electrification.projectIntakeForm.cancel'),
     rejectProps: { outlined: true },
     accept: () => onSubmit(data)
   });
@@ -93,7 +93,7 @@ async function generateActivityId() {
       return undefined;
     }
   } catch (error) {
-    toast.error('Failed to generate activity ID');
+    toast.error(t('e.electrification.projectIntakeForm.failedGenerateActivity'));
     return undefined;
   }
 }
@@ -121,7 +121,7 @@ async function onAssistanceRequest(values: GenericObject) {
     const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
 
     if (enquiryResponse.activityId) {
-      toast.success('Form saved');
+      toast.success(t('e.electrification.projectIntakeForm.formSaved'));
 
       // Send confirmation email
       emailConfirmation(enquiryResponse.activityId, enquiryResponse.electrificationProjectId, false);
@@ -133,10 +133,10 @@ async function onAssistanceRequest(values: GenericObject) {
         }
       });
     } else {
-      toast.error('Failed to submit enquiry');
+      toast.error(t('e.electrification.projectIntakeForm.failedSaveEnquiry'));
     }
   } catch (e: any) {
-    toast.error('Failed to save enquiry', e);
+    toast.error(t('e.electrification.projectIntakeForm.failedSaveEnquiry'), e);
   } finally {
     editable.value = true;
   }
@@ -163,9 +163,14 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
     syncFormAndRoute(response?.data.activityId, response?.data.draftId);
     editable.value = true;
 
-    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
+    if (showToast)
+      toast.success(
+        isAutoSave
+          ? t('e.electrification.projectIntakeForm.draftAutoSaved')
+          : t('e.electrification.projectIntakeForm.draftSaved')
+      );
   } catch (e: any) {
-    toast.error('Failed to save draft', e);
+    toast.error(t('e.electrification.projectIntakeForm.failedSaveDraft'), e);
   }
 
   return { activityId: response?.data.activityId, draftId: response?.data.draftId };
@@ -217,10 +222,10 @@ async function onSubmit(data: any) {
         }
       });
     } else {
-      throw new Error('Failed to retrieve correct draft data');
+      throw new Error(t('e.electrification.projectIntakeForm.failedRetrieveDraft'));
     }
   } catch (e: any) {
-    toast.error('Failed to save intake', e);
+    toast.error(t('e.electrification.projectIntakeForm.failedSaveIntake'), e);
     editable.value = true;
   }
 }
@@ -257,7 +262,7 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
     };
     await electrificationProjectService.emailConfirmation(emailData);
   } catch (e: any) {
-    toast.error('Failed to send confirmation email. ', e);
+    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), e);
   }
 }
 
@@ -433,7 +438,7 @@ onBeforeMount(async () => {
           :disabled="!editable"
           :editable="true"
           :force-selection="true"
-          :placeholder="'Type to search the B.C registered name'"
+          :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
           :suggestions="orgBookOptions"
           @on-complete="onRegisteredNameInput"
         />
@@ -514,7 +519,12 @@ onBeforeMount(async () => {
           role="heading"
           aria-level="2"
         >
-          {{ t('e.electrification.projectIntakeForm.projectDescriptionCard') }}
+          <span v-if="values.project.projectType === ProjectType.OTHER">
+            {{ t('e.electrification.projectIntakeForm.projectDescriptionCard') }}
+          </span>
+          <span v-else>
+            {{ t('e.electrification.projectIntakeForm.projectDescriptionCardOptional') }}
+          </span>
         </span>
         <Divider type="solid" />
       </template>
@@ -523,21 +533,21 @@ onBeforeMount(async () => {
         <TextArea
           class="col-span-12 mb-0 pb-0"
           name="project.projectDescription"
-          placeholder="Provide us with additional information - short description about the project and/or project website link"
+          :placeholder="t('e.electrification.projectIntakeForm.provideDetails')"
           :disabled="!editable"
         />
         <!-- eslint-enable max-len -->
 
         <label class="col-span-12 mt-0 pt-0">
-          Upload documents about your electrification project (pdfs, maps,
+          {{ t('e.electrification.projectIntakeForm.upload1') }}
           <a
             href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
             target="_blank"
             class="text-blue-500 underline"
           >
-            shape files
+            {{ t('e.electrification.projectIntakeForm.upload2') }}
           </a>
-          , etc)
+          {{ t('e.electrification.projectIntakeForm.upload3') }}
         </label>
         <AdvancedFileUpload
           :activity-id="values.activityId"
@@ -549,7 +559,7 @@ onBeforeMount(async () => {
 
     <div class="flex items-center justify-center mt-6">
       <Button
-        label="Submit"
+        :label="t('e.electrification.projectIntakeForm.submit')"
         type="submit"
         icon="pi pi-upload"
         :disabled="!editable || isSubmitting"

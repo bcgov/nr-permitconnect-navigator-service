@@ -17,6 +17,10 @@ export const projectIntakeSchema = object({
       then: (schema) => schema.required().label('BC Hydro Call for Power project number'),
       otherwise: (schema) => schema.notRequired().nullable().label('BC Hydro Call for Power project number')
     }),
-    projectDescription: string().label('Project description')
+    projectDescription: string().when('projectType', {
+      is: ProjectType.OTHER,
+      then: (schema) => schema.required().label('Project description'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Project description')
+    })
   })
 });
