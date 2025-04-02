@@ -7,7 +7,7 @@
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
   "scripts": {
     "build:all": "ts-node ./deploy-utils.ts",
-    "build": "tsc",
+    "build": "tsc --project tsconfig.build.json",
     "clean:all": "ts-node ./deploy-utils.ts clean",
     "clean": "rimraf coverage dist sbin",
     "debug": "ts-node-dev --debug --respawn --transpile-only --rs --watch bin,config,dist ./bin/www",
