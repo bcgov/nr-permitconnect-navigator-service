@@ -22,6 +22,7 @@
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
   "editor.formatOnSave": true,
   "eslint.format.enable": true,
+  "files.eol": "\n",
   "files.insertFinalNewline": true,
   "scss.lint.unknownAtRules": "ignore",
   "yaml.schemas": {

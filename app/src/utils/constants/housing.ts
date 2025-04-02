@@ -43,8 +43,6 @@ export const ENQUIRY_SUBMITTED_METHOD = [
 
 export const HOUSING_PROJECT_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
 
-export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
-
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 
 export const NUM_RESIDENTIAL_UNITS_LIST = [
