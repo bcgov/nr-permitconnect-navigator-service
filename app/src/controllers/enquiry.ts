@@ -68,6 +68,8 @@ const controller = {
 
   createEnquiry: async (req: Request<never, never, EnquiryIntake>, res: Response, next: NextFunction) => {
     try {
+      // TODO: Remove when create PUT calls get switched to POST
+      if (req.body === undefined) req.body = { contacts: [] };
       const enquiry = await controller.generateEnquiryData(req, IntakeStatus.SUBMITTED);
 
       // Create or update contacts

@@ -2,9 +2,9 @@
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { InputNumber } from '@/lib/primevue';
+import type { InputNumberBlurEvent } from 'primevue/inputnumber';
 
 // Props
-
 const {
   helpText = '',
   label = '',
@@ -45,7 +45,7 @@ const { errorMessage, handleBlur, value } = useField<number>(name);
       :disabled="disabled"
       :min-fraction-digits="0"
       :max-fraction-digits="6"
-      @blur="handleBlur"
+      @blur="(e: InputNumberBlurEvent) => handleBlur(e.originalEvent)"
     />
     <small
       v-if="helpText"

@@ -116,7 +116,7 @@ onBeforeMount(() => {
             @click="navigate"
           >
             <span
-              :id="item.label"
+              :id="item.label as string"
               class="flex"
             >
               {{ item.label }}
@@ -130,13 +130,13 @@ onBeforeMount(() => {
           :target="item.target"
           v-bind="props.action"
         >
-          <span :id="item.label">
+          <span :id="item.label as string">
             {{ item.label }}
           </span>
         </a>
         <a
           v-else
-          :aria-labelledby="item.label"
+          :aria-labelledby="item.label as string"
           :href="item.url"
           :target="item.target"
           v-bind="props.action"
@@ -146,7 +146,7 @@ onBeforeMount(() => {
           </span>
           <span
             v-if="hasSubmenu"
-            :id="item.label"
+            :id="item.label as string"
             class="pi pi-angle-down mt-1 ml-1"
           />
         </a>

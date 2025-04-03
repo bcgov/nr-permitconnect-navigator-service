@@ -31,6 +31,7 @@ app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
+app.set('query parser', 'extended');
 
 app.use((_req, res, next) => {
   res.locals.cspNonce = randomBytes(32).toString('hex');

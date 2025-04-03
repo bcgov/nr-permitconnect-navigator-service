@@ -1,14 +1,17 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import { Button, Menu } from '@/lib/primevue';
-import { storeToRefs } from 'pinia';
 import { useAuthNStore } from '@/store';
-
-import { type Ref } from 'vue';
 import { RouteName } from '@/utils/enums/application';
+
+import type { Ref } from 'vue';
+
+// Types
+type MenuType = InstanceType<typeof Menu>;
 
 // Store
 const { getIsAuthenticated, getProfile } = storeToRefs(useAuthNStore());
@@ -31,7 +34,7 @@ const items = ref([
     }
   }
 ]);
-const menu: Ref<typeof Menu | undefined> = ref(undefined);
+const menu: Ref<MenuType | undefined> = ref(undefined);
 
 // Actions
 const router = useRouter();

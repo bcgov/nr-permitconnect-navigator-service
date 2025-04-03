@@ -42,8 +42,8 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     class="w-full"
     :class="{ 'p-invalid': errorMessage }"
     :disabled="disabled"
-    @change="(e) => emit('onChange', e)"
-    @click="(e) => emit('onClick', e)"
+    @change="(e: Event) => emit('onChange', e)"
+    @click="(e: MouseEvent) => emit('onClick', e)"
     @blur="handleBlur"
   />
 </template>
