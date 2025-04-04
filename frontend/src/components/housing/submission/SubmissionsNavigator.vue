@@ -48,13 +48,18 @@ const permits = defineModel<Array<Permit>>('permits', { required: true });
 const projects = defineModel<Array<ElectrificationProject | HousingProject>>('projects', { required: true });
 const statistics = defineModel<Statistics>('statistics');
 
+// Injections
+const projectService = inject('projectService') as IProjectService;
+
+// Composables
+const toast = useToast();
+const router = useRouter();
+
 // Store
 const authnStore = useAuthNStore();
 const authzStore = useAuthZStore();
 
 const { getProfile } = storeToRefs(authnStore);
-
-const projectService = inject('projectService') as IProjectService;
 
 // State
 const route = useRoute();
@@ -65,9 +70,6 @@ const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const showToggle: Ref<boolean> = ref(true);
 
 // Actions
-const toast = useToast();
-const router = useRouter();
-
 function assignEnquiriesAndFullName() {
   const relatedActivityIds = new Set();
 
