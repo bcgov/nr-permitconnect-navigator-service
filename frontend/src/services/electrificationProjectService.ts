@@ -13,51 +13,27 @@ export default {
   },
 
   /**
-   * @function createElectrificationProject
+   * @function createProject
    * @returns {Promise} An axios response
    */
-  createElectrificationProject(data?: any) {
+  createProject(data?: any) {
     return appAxios().put('electrificationProject', data);
   },
 
   /**
-   * @function deleteElectrificationProject
+   * @function deleteProject
    * @returns {Promise} An axios response
    */
-  deleteElectrificationProject(electrificationProjectId: string) {
+  deleteProject(electrificationProjectId: string) {
     return appAxios().delete(`electrificationProject/${electrificationProjectId}`);
   },
 
   /**
-   * @function deleteDraft
+   * @function getProjects
    * @returns {Promise} An axios response
    */
-  deleteDraft(draftId: string) {
-    return appAxios().delete(`electrificationProject/draft/${draftId}`);
-  },
-
-  /**
-   * @function getElectrificationProjects
-   * @returns {Promise} An axios response
-   */
-  getElectrificationProjects() {
+  getProjects() {
     return appAxios().get('electrificationProject');
-  },
-
-  /**
-   * @function getDraft
-   * @returns {Promise} An axios response
-   */
-  getDraft(draftId: string) {
-    return appAxios().get(`electrificationProject/draft/${draftId}`);
-  },
-
-  /**
-   * @function getDrafts
-   * @returns {Promise} An axios response
-   */
-  getDrafts() {
-    return appAxios().get('electrificationProject/draft');
   },
 
   /**
@@ -69,18 +45,18 @@ export default {
   },
 
   /**
-   * @function getElectrificationProject
+   * @function getProject
    * @returns {Promise} An axios response
    */
-  getElectrificationProject(electrificationProjectId: string) {
+  getProject(electrificationProjectId: string) {
     return appAxios().get(`electrificationProject/${electrificationProjectId}`);
   },
 
   /**
-   * @function searchElectrificationProjects
+   * @function searchProjects
    * @returns {Promise} An axios response
    */
-  searchElectrificationProjects(filters?: ElectrificationProjectSearchParameters) {
+  searchProjects(filters?: ElectrificationProjectSearchParameters) {
     return appAxios().get('electrificationProject/search', { params: { ...filters } });
   },
 
@@ -93,14 +69,6 @@ export default {
   },
 
   /**
-   * @function updateDraft
-   * @returns {Promise} An axios response
-   */
-  updateDraft(data?: Partial<Draft>) {
-    return appAxios().put('electrificationProject/draft', data);
-  },
-
-  /**
    * @function updateIsDeletedFlag
    * @returns {Promise} An axios response
    */
@@ -109,15 +77,15 @@ export default {
   },
 
   /**
-   * @function updateElectrificationProject
+   * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateElectrificationProject(electrificationProjectId: string, data: any) {
+  updateProject(electrificationProjectId: string, data: any) {
     return appAxios().put(`electrificationProject/${electrificationProjectId}`, data);
   },
 
   /**
-   * @function send
+   * @function emailConfirmation
    * Send an email with the housing project confirmation data
    * @returns {Promise} An axios response
    */

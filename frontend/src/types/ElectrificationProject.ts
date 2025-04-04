@@ -1,12 +1,7 @@
-import type { Contact } from './Contact';
-import type { IStamps } from '@/interfaces';
-import type { User } from './User';
+import type { IProject } from '../interfaces/IProject';
 
 export type ElectrificationProject = {
-  activityId: string;
-  electrificationProjectId: string;
-  submittedAt: string;
-  assignedUserId?: string;
-  contacts: Array<Contact>;
-  user?: User;
-} & Partial<IStamps>;
+  electrificationProjectId: string; // Primary key
+  projectType?: string;
+  bcHydroNumber?: string;
+} & IProject;

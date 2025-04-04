@@ -8,7 +8,7 @@ import { default as contactRoutes } from '@/router/contact';
 import { AuthService, contactService, yarsService } from '@/services';
 import { useAppStore, useAuthNStore, useAuthZStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { Initiative, RouteName, StorageKey } from '@/utils/enums/application';
 
 import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
 import type { Contact } from '@/types';
@@ -81,7 +81,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: [bootstrap, entryRedirect, accessHandler],
+    beforeEnter: [bootstrap, entryRedirect, accessHandler, () => useAppStore().setInitiative(Initiative.PCNS)],
     children: [
       {
         path: '/',
