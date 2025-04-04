@@ -1,5 +1,11 @@
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { enquiryService, housingProjectService, noteService, userService } from '../services';
+import {
+  electrificationProjectService,
+  enquiryService,
+  housingProjectService,
+  noteService,
+  userService
+} from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { BringForward, Note } from '../types';
@@ -40,6 +46,9 @@ const controller = {
       let response = new Array<BringForward>();
       const notes = await noteService.listBringForward(req.query.bringForwardState);
       if (notes && notes.length) {
+        const electrificationProjects = await electrificationProjectService.searchElectrificationProjects({
+          activityId: notes.map((x) => x.activityId)
+        });
         const housingProjects = await housingProjectService.searchHousingProjects({
           activityId: notes.map((x) => x.activityId)
         });
@@ -55,6 +64,8 @@ const controller = {
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,
+          electrificationProjectId: electrificationProjects.find((s) => s.activityId === note.activityId)
+            ?.electrificationProjectId as string,
           housingProjectId: housingProjects.find((s) => s.activityId === note.activityId)?.housingProjectId as string,
           enquiryId: enquiries.find((s) => s.activityId === note.activityId)?.enquiryId as string,
           title: note.title,

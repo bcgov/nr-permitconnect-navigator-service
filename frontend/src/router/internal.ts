@@ -1,4 +1,5 @@
 import { accessHandler, createProps, entryRedirect } from '@/router';
+import { default as internalElectrificationRoutes } from '@/router/internalElectrification';
 import { default as internalHousingRoutes } from '@/router/internalHousing';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
@@ -42,6 +43,7 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
 
+      ...internalElectrificationRoutes,
       ...internalHousingRoutes
     ]
   }

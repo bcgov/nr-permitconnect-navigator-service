@@ -1,6 +1,7 @@
 import { accessHandler, createProps, entryRedirect } from '@/router';
+import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 import { type RouteRecordRaw } from 'vue-router';
 
@@ -8,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'electrification',
     meta: { access: [NavigationPermission.EXT_ELECTRIFICATION], breadcrumb: 'Electrification', requiresAuth: true },
-    beforeEnter: entryRedirect,
+    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.ELECTRIFICATION)],
     children: [
       // {
       //   path: '',

@@ -48,14 +48,14 @@ export default {
     return {
       housing_project_id: input.housingProjectId,
       activity_id: input.activityId,
-      assigned_user_id: input.assignedUserId,
-      project_name: input.projectName,
-      project_description: input.projectDescription,
+      assigned_user_id: input.assignedUserId ?? null,
+      project_name: input.projectName ?? null,
+      project_description: input.projectDescription ?? null,
       submitted_at: new Date(input.submittedAt ?? Date.now()),
       submitted_by: input.submittedBy,
       consent_to_feedback: input.consentToFeedback,
       location_pids: input.locationPIDs,
-      company_name_registered: input.companyNameRegistered,
+      company_name_registered: input.companyNameRegistered ?? null,
       geo_json: input.geoJSON,
       geomark_url: input.geomarkUrl,
       single_family_units: input.singleFamilyUnits,
@@ -96,22 +96,22 @@ export default {
       indigenous_description: input.indigenousDescription,
       non_profit_description: input.nonProfitDescription,
       housing_coop_description: input.housingCoopDescription,
-      submission_type: input.submissionType
+      submission_type: input.submissionType ?? null
     };
   },
 
-  fromPrismaModel(input: PrismaGraphHousingProject): HousingProject {
+  fromPrismaModel(input: any): HousingProject {
     return {
       housingProjectId: input.housing_project_id,
       activityId: input.activity_id,
-      assignedUserId: input.assigned_user_id,
+      assignedUserId: input.assigned_user_id ?? undefined,
       submittedAt: input.submitted_at?.toISOString() as string,
       submittedBy: input.submitted_by,
       locationPIDs: input.location_pids,
       consentToFeedback: input.consent_to_feedback,
-      projectName: input.project_name,
-      projectDescription: input.project_description,
-      companyNameRegistered: input.company_name_registered,
+      projectName: input.project_name ?? undefined,
+      projectDescription: input.project_description ?? undefined,
+      companyNameRegistered: input.company_name_registered ?? undefined,
       geoJSON: input.geo_json,
       geomarkUrl: input.geomark_url,
       singleFamilyUnits: input.single_family_units,
@@ -135,8 +135,8 @@ export default {
       financiallySupportedHousingCoop: input.financially_supported_housing_coop,
       aaiUpdated: input.aai_updated,
       waitingOn: input.waiting_on,
-      intakeStatus: input.intake_status,
-      applicationStatus: input.application_status,
+      intakeStatus: input.intake_status as string,
+      applicationStatus: input.application_status as string,
       projectApplicantType: input.project_applicant_type,
       isDevelopedInBC: input.is_developed_in_bc,
       multiFamilyUnits: input.multi_family_units,
@@ -151,10 +151,11 @@ export default {
       indigenousDescription: input.indigenous_description,
       nonProfitDescription: input.non_profit_description,
       housingCoopDescription: input.housing_coop_description,
-      submissionType: input.submission_type,
+      submissionType: input.submission_type ?? undefined,
       relatedEnquiries: null,
       createdBy: input.created_by,
       updatedAt: input.updated_at?.toISOString() as string,
+      projectId: input.projectId,
       contacts: [],
       user: null
     };
