@@ -20,9 +20,7 @@ const { t } = useI18n();
 const activityId: Ref<string | undefined> = ref(undefined);
 
 onBeforeMount(async () => {
-  activityId.value = (
-    await electrificationProjectService.getElectrificationProject(electrificationProjectId)
-  ).data.activityId;
+  activityId.value = (await electrificationProjectService.getProject(electrificationProjectId)).data.activityId;
 });
 </script>
 

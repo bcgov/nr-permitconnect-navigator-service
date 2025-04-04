@@ -5,12 +5,11 @@ import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNav
 import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-
+import { Resource, RouteName } from '@/utils/enums/application';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
-import { Resource, RouteName } from '@/utils/enums/application';
 
 // Store
 const authzStore = useAuthZStore();
@@ -23,9 +22,9 @@ const permits: Ref<Array<Permit>> = ref([]);
 const projects: Ref<Array<HousingProject>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
-provide('projectService', housingProjectService);
 provide('projectResource', Resource.HOUSING_PROJECT);
 provide('projectRoute', RouteName.INT_HOUSING_PROJECT);
+provide('projectService', housingProjectService);
 
 // Actions
 onBeforeMount(async () => {

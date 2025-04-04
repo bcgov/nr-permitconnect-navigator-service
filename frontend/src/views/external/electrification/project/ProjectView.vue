@@ -14,7 +14,7 @@ import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType }
 import { formatDate } from '@/utils/formatters';
 
 import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
-import { useAuthZStore, useHousingProjectStore, usePermitStore } from '@/store';
+import { useAuthZStore, useProjectStore, usePermitStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit, PermitType } from '@/types';
@@ -39,8 +39,8 @@ const { housingProjectId } = defineProps<{
 const { t } = useI18n();
 
 // Store
-const housingProjectStore = useHousingProjectStore();
-const { getPermits, getRelatedEnquiries, getHousingProject } = storeToRefs(housingProjectStore);
+const projectStore = useProjectStore();
+const { getPermits, getRelatedEnquiries, getProject } = storeToRefs(projectStore);
 
 const permitStore = usePermitStore();
 const { getPermitTypes } = storeToRefs(permitStore);
@@ -123,8 +123,8 @@ function permitFilter(config: PermitFilterConfig) {
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { housingProjectId: getHousingProject.value?.housingProjectId },
-    query: { activityId: getHousingProject.value?.activityId }
+    params: { projectId: getProject.value?.projectId },
+    query: { activityId: getProject.value?.activityId }
   });
 }
 
@@ -134,7 +134,7 @@ onBeforeMount(async () => {
   try {
     [projectValue, permitTypesValue] = (
       await Promise.all([
-        housingProjectService.getHousingProject(housingProjectId),
+        housingProjectService.getProject(housingProjectId),
         permitService.getPermitTypes(Initiative.HOUSING)
       ])
     ).map((r) => r.data);
@@ -147,12 +147,12 @@ onBeforeMount(async () => {
   try {
     const activityId = projectValue.activityId;
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    housingProjectStore.setPermits(permitsValue);
+    projectStore.setPermits(permitsValue);
   } catch {
     toast.error(t('e.housing.projectView.toastPermitLoadFailed'));
   }
-  housingProjectStore.setHousingProject(projectValue);
-  housingProjectStore.setRelatedEnquiries(enquiriesValue);
+  projectStore.setProject(projectValue);
+  projectStore.setRelatedEnquiries(enquiriesValue);
   permitStore.setPermitTypes(permitTypesValue);
 
   // Fetch contacts for createdBy and assignedUserId
@@ -169,7 +169,7 @@ onBeforeMount(async () => {
 <template>
   <RouterView />
   <div
-    v-if="!loading && getHousingProject"
+    v-if="!loading && getProject"
     class="app-primary-color"
   >
     <div class="disclaimer-block p-8 mt-8">
@@ -184,7 +184,7 @@ onBeforeMount(async () => {
           @keydown.enter.prevent="navigateToSubmissionIntakeView()"
           @keydown.space.prevent="navigateToSubmissionIntakeView()"
         >
-          {{ getHousingProject.projectName }}
+          {{ getProject.projectName }}
           <font-awesome-icon
             class="text-sm"
             icon="fa fa-external-link"
@@ -193,7 +193,7 @@ onBeforeMount(async () => {
         <div>
           <span class="mr-4">
             Project ID:
-            <span class="font-bold">{{ getHousingProject.activityId }}</span>
+            <span class="font-bold">{{ getProject.activityId }}</span>
           </span>
           <span class="mr-4">
             {{ t('e.housing.projectView.createdBy') }}:
@@ -207,21 +207,21 @@ onBeforeMount(async () => {
         </div>
       </div>
       <Button
-        v-if="getHousingProject?.submissionType !== SubmissionType.INAPPLICABLE"
+        v-if="getProject?.submissionType !== SubmissionType.INAPPLICABLE"
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
         outlined
         @click="
           router.push({
             name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            query: { projectName: getHousingProject.projectName, projectActivityId: getHousingProject.activityId }
+            query: { projectName: getProject.projectName, projectActivityId: getProject.activityId }
           })
         "
       />
     </div>
 
     <div
-      v-if="getHousingProject?.submissionType === SubmissionType.INAPPLICABLE"
+      v-if="getProject?.submissionType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
     >
       {{ t('e.housing.projectView.inapplicableSubmissionType') }}
@@ -284,7 +284,7 @@ onBeforeMount(async () => {
           ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
           : RouteName.EXT_HOUSING_PROJECT_PERMIT,
         params: { permitId: permit.permitId },
-        query: { projectActivityId: getHousingProject.activityId }
+        query: { projectActivityId: getProject.activityId }
       }"
       @keydown.space.prevent="
         router.push({
@@ -292,7 +292,7 @@ onBeforeMount(async () => {
             ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
             : RouteName.EXT_HOUSING_PROJECT_PERMIT,
           params: { permitId: permit.permitId },
-          query: { projectActivityId: getHousingProject.activityId }
+          query: { projectActivityId: getProject.activityId }
         })
       "
     >

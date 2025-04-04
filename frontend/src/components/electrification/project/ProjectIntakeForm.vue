@@ -42,7 +42,7 @@ const VALIDATION_BANNER_TEXT = t('e.electrification.projectIntakeForm.validation
 
 // Store
 const contactStore = useContactStore();
-const electrificationProjectStore = useElectrificationProjectStore();
+const projectStore = useProjectStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -247,7 +247,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
 onBeforeMount(async () => {
   try {
     // Clearing the document store on page load
-    electrificationProjectStore.setDocuments([]);
+    projectStore.setDocuments([]);
 
     let response,
       documents: Array<Document> = [];
@@ -266,11 +266,11 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        electrificationProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       }
     } else {
       if (electrificationProjectId && activityId) {
-        response = (await electrificationProjectService.getElectrificationProject(electrificationProjectId)).data;
+        response = (await electrificationProjectService.getProject(electrificationProjectId)).data;
 
         if (response.activityId) {
           activityId.value = response.activityId;
@@ -282,7 +282,7 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        electrificationProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
         response = { contacts: [contactStore.getContact] };

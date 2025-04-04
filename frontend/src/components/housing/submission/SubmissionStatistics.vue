@@ -50,7 +50,7 @@ async function onAssigneeInput(e: IInputEvent) {
 }
 
 async function onDownloadHousingProjectPermitData() {
-  const response = await reportingService.getHousingProjectPermitData();
+  const response = await reportingService.getProjectPermitData();
   const data = response.data;
 
   if (!data || data.length === 0) {

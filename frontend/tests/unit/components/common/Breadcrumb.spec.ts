@@ -5,7 +5,7 @@ import PrimeVue from 'primevue/config';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
-import { useHousingProjectStore } from '@/store/housingProjectStore';
+import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
@@ -209,8 +209,8 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const housingProjectStore = useHousingProjectStore();
-    housingProjectStore.setHousingProject(testProject);
+    const projectStore = useProjectStore();
+    projectStore.setProject(testProject);
     await nextTick();
 
     const links = wrapper.findAll('a.breadcrumb-link');
@@ -234,8 +234,8 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const housingProjectStore = useHousingProjectStore();
-    housingProjectStore.setHousingProject(testProject);
+    const projectStore = useProjectStore();
+    projectStore.setProject(testProject);
     await nextTick();
 
     const links = wrapper.findAll('a.breadcrumb-link');
