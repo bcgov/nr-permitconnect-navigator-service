@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router';
 
 import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
 import { permitService, housingProjectService } from '@/services';
-import { useHousingProjectStore, usePermitStore } from '@/store';
+import { useProjectStore, usePermitStore } from '@/store';
 
 import type { Ref } from 'vue';
 
@@ -21,9 +21,9 @@ const route = useRoute();
 
 // Store
 const permitStore = usePermitStore();
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const { getPermit } = storeToRefs(permitStore);
-const { getHousingProject } = storeToRefs(housingProjectStore);
+const { getProject } = storeToRefs(projectStore);
 
 // State
 const loading: Ref<boolean> = ref(true);
@@ -31,8 +31,8 @@ const loading: Ref<boolean> = ref(true);
 // Actions
 onBeforeMount(async () => {
   if (housingProjectId) {
-    const project = (await housingProjectService.getHousingProject(housingProjectId)).data;
-    housingProjectStore.setHousingProject(project);
+    const project = (await housingProjectService.getProject(housingProjectId)).data;
+    projectStore.setProject(project);
   }
 
   if (permitId) {
@@ -49,7 +49,7 @@ onBeforeMount(async () => {
     v-if="!loading"
     :key="route.fullPath"
     :enquiry-id="enquiryId"
-    :project="getHousingProject"
+    :project="getProject"
     :permit="getPermit"
   />
 </template>

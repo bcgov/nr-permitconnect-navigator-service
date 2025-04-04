@@ -2,10 +2,10 @@ import { appAxios } from './interceptors';
 
 export default {
   /**
-   * @function getHousingProjectPermitData
+   * @function getProjectPermitData
    * @returns {Promise} An axios response
    */
-  getHousingProjectPermitData() {
+  getProjectPermitData() {
     return appAxios().get('reporting/housingProject/permit');
   }
 };

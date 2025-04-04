@@ -70,7 +70,7 @@ onBeforeMount(async () => {
   if (activityIds.length) {
     const [submissions, enquiries] = (
       await Promise.all([
-        housingProjectService.searchHousingProjects({ activityId: activityIds }),
+        housingProjectService.searchProjects({ activityId: activityIds }),
         enquiryService.searchEnquiries({ activityId: activityIds })
       ])
     ).map((r) => r.data);

@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
-import { useHousingProjectStore, usePermitStore } from '@/store';
+import { useProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
@@ -64,10 +64,10 @@ const previous = (trackerStatus: string) => ({
 // Store
 const authZStore = useAuthZStore();
 const permitStore = usePermitStore();
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
 const { getPermit } = storeToRefs(permitStore);
-const { getHousingProject } = storeToRefs(housingProjectStore);
+const { getProject } = storeToRefs(projectStore);
 
 // State
 const assignedNavigator: Ref<User | undefined> = ref(undefined);
@@ -195,14 +195,14 @@ onBeforeMount(async () => {
     const permitData = (await permitService.getPermit(permitId)).data;
     permitStore.setPermit(permitData);
 
-    if (!getHousingProject.value) {
-      const submission = (await housingProjectService.getHousingProject(housingProjectId)).data;
-      housingProjectStore.setHousingProject(submission);
+    if (!getProject.value) {
+      const submission = (await housingProjectService.getProject(housingProjectId)).data;
+      projectStore.setProject(submission);
     }
 
-    if (getHousingProject.value?.assignedUserId) {
+    if (getProject.value?.assignedUserId) {
       assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [getHousingProject.value.assignedUserId] })
+        await contactService.searchContacts({ userId: [getProject.value.assignedUserId] })
       ).data[0];
     }
 

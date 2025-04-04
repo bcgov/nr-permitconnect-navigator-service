@@ -118,9 +118,9 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('getHousingProjects', () => {
+  describe('getProjects', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.getHousingProjects();
+      housingProjectService.getProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(PATH);
@@ -142,10 +142,10 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('getHousingProject', () => {
+  describe('getProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      housingProjectService.getHousingProject(testActivityId);
+      housingProjectService.getProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);

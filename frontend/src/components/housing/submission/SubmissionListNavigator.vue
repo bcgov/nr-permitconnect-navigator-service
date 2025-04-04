@@ -34,9 +34,10 @@ const { submissions } = defineProps<{
   submissions: Array<ElectrificationProject | HousingProject> | undefined;
 }>();
 
-const projectService = inject('projectService') as IProjectService;
+// Injections
 const projectResource = inject('projectResource') as Resource;
 const projectRoute = inject('projectRoute') as RouteName;
+const projectService = inject('projectService') as IProjectService;
 
 // Composables
 const confirmDialog = useConfirm();

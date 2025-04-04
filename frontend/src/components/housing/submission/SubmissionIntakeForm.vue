@@ -44,7 +44,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
-import { useConfigStore, useContactStore, useHousingProjectStore, usePermitStore } from '@/store';
+import { useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -85,7 +85,7 @@ const VALIDATION_BANNER_TEXT = t('submissionIntakeForm.validationBanner');
 
 // Store
 const contactStore = useContactStore();
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const permitStore = usePermitStore();
 const { getConfig } = storeToRefs(useConfigStore());
 const { getPermitTypes } = storeToRefs(permitStore);
@@ -379,7 +379,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
 onBeforeMount(async () => {
   try {
     // Clearing the document store on page load
-    housingProjectStore.setDocuments([]);
+    projectStore.setDocuments([]);
 
     let response,
       permits: Array<Permit> = [],
@@ -404,11 +404,11 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        housingProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       }
     } else {
       if (housingProjectId && activityId) {
-        response = (await housingProjectService.getHousingProject(housingProjectId)).data;
+        response = (await housingProjectService.getProject(housingProjectId)).data;
 
         if (response.activityId) {
           activityId.value = response.activityId;
@@ -421,7 +421,7 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        housingProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
         response = { contacts: [contactStore.getContact] };

@@ -8,7 +8,7 @@ import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, housingProjectService, noteService } from '@/services';
-import { useAuthZStore, useEnquiryStore, useHousingProjectStore } from '@/store';
+import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 
@@ -31,7 +31,7 @@ const { t } = useI18n();
 
 // Store
 const enquiryStore = useEnquiryStore();
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 
 // State
@@ -65,7 +65,7 @@ function onEnquiryFormSaved() {
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
     relatedHousingProjects.value = (
-      await housingProjectService.searchHousingProjects({
+      await housingProjectService.searchProjects({
         activityId: [getEnquiry?.value?.relatedActivityId]
       })
     ).data[0];
@@ -86,8 +86,8 @@ onBeforeMount(async () => {
   }
 
   if (housingProjectId) {
-    const submission = (await housingProjectService.getHousingProject(housingProjectId)).data;
-    housingProjectStore.setHousingProject(submission);
+    const submission = (await housingProjectService.getProject(housingProjectId)).data;
+    projectStore.setProject(submission);
   }
 
   loading.value = false;

@@ -22,14 +22,14 @@ vi.mock('vue-router', () => ({
   }))
 }));
 
-const getHousingProjects = vi.spyOn(housingProjectService, 'getHousingProjects');
+const getProjects = vi.spyOn(housingProjectService, 'getProjects');
 const getEnquiries = vi.spyOn(enquiryService, 'getEnquiries');
 const listPermits = vi.spyOn(permitService, 'listPermits');
 const listBringForward = vi.spyOn(noteService, 'listBringForward');
 const searchHousingProjects = vi.spyOn(housingProjectService, 'searchHousingProjects');
 const getStatistics = vi.spyOn(housingProjectService, 'getStatistics');
 
-getHousingProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getEnquiries.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 listPermits.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 listBringForward.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);

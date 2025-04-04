@@ -8,7 +8,7 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useHousingProjectStore } from '@/store';
+import { useConfigStore, useProjectStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
@@ -24,7 +24,7 @@ const { activityId, editable = true } = defineProps<{
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getHousingProject } = storeToRefs(useHousingProjectStore());
+const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);
@@ -103,7 +103,7 @@ watchEffect(async () => {
   // Dumb, but need to do something with the ref for it to be watched properly
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
   const permits = getPermits.value.concat();
-  const project = getHousingProject.value;
+  const project = getProject.value;
 
   // Get navigator details
   const configBCC = getConfig.value.ches?.roadmap?.bcc;

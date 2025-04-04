@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { documentService } from '@/services';
-import { useHousingProjectStore } from '@/store';
+import { useProjectStore } from '@/store';
 
 import type { Document } from '@/types';
 
@@ -14,7 +14,7 @@ const { document, disabled = false } = defineProps<{
 }>();
 
 // Store
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 
 // Actions
 const { t } = useI18n();
@@ -34,7 +34,7 @@ const confirmDelete = (document: Document) => {
         documentService
           .deleteDocument(document.documentId)
           .then(() => {
-            housingProjectStore.removeDocument(document);
+            projectStore.removeDocument(document);
             toast.success('Document deleted');
           })
           .catch((e: any) => toast.error('Failed to deleted document', e.message));

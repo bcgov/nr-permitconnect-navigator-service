@@ -29,14 +29,14 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
-import { useAuthZStore, useHousingProjectStore } from '@/store';
+import { useAuthZStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, Note } from '@/types';
+import type { Document, ElectrificationProject, Note } from '@/types';
 
 // Props
 const { initialTab = '0', housingProjectId } = defineProps<{
@@ -62,8 +62,8 @@ const { t } = useI18n();
 const router = useRouter();
 
 // Store
-const housingProjectStore = useHousingProjectStore();
-const { getDocuments, getHousingProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(housingProjectStore);
+const projectStore = useProjectStore();
+const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -109,21 +109,21 @@ const filteredDocuments = computed(() => {
 });
 
 const isCompleted = computed(() => {
-  return getHousingProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
+  return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: Note) => housingProjectStore.addNote(note, true);
+const onAddNote = (note: Note) => projectStore.addNote(note, true);
 
-const onDeleteNote = (note: Note) => housingProjectStore.removeNote(note);
+const onDeleteNote = (note: Note) => projectStore.removeNote(note);
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => housingProjectStore.updateNote(oldNote, newNote);
+const onUpdateNote = (oldNote: Note, newNote: Note) => projectStore.updateNote(oldNote, newNote);
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
 onBeforeMount(async () => {
-  const project = (await housingProjectService.getHousingProject(housingProjectId)).data;
+  const project = (await housingProjectService.getProject(housingProjectId)).data;
   activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
@@ -139,11 +139,11 @@ onBeforeMount(async () => {
     d.filename = decodeURI(d.filename);
   });
 
-  housingProjectStore.setHousingProject(project);
-  housingProjectStore.setDocuments(documents);
-  housingProjectStore.setNotes(notes);
-  housingProjectStore.setPermits(permits);
-  housingProjectStore.setRelatedEnquiries(relatedEnquiries);
+  projectStore.setProject(project);
+  projectStore.setDocuments(documents);
+  projectStore.setNotes(notes);
+  projectStore.setPermits(permits);
+  projectStore.setRelatedEnquiries(relatedEnquiries);
 
   loading.value = false;
 });
@@ -152,14 +152,14 @@ onBeforeMount(async () => {
 <template>
   <div class="flex items-center justify-between">
     <h1>
-      <span v-if="getHousingProject?.projectName">
-        <span class="ml-1">{{ getHousingProject.projectName + ': ' }}</span>
+      <span v-if="getProject?.projectName">
+        <span class="ml-1">{{ getProject.projectName + ': ' }}</span>
       </span>
       <span
-        v-if="getHousingProject?.activityId"
+        v-if="getProject?.activityId"
         class="mr-1"
       >
-        {{ getHousingProject.activityId }}
+        {{ getProject.activityId }}
       </span>
       <span
         v-if="isCompleted"
@@ -195,10 +195,10 @@ onBeforeMount(async () => {
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
-        <span v-if="!loading && getHousingProject">
+        <span v-if="!loading && getProject">
           <SubmissionForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
-            :housing-project="getHousingProject"
+            :housing-project="getProject as ElectrificationProject"
           />
         </span>
       </TabPanel>

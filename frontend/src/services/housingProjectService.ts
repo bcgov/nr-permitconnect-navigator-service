@@ -1,18 +1,10 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, Draft, HousingProjectSearchParameters } from '@/types';
-import type { IProjectService } from '@/interfaces/IProjectService';
 
-const service: IProjectService = {
-  /**
-   * @function getActivityIds
-   * @returns {Promise} An axios response
-   */
-  getActivityIds() {
-    return appAxios().get('housingProject/activityIds');
-  },
-
+const service: IDraftableProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -35,6 +27,29 @@ const service: IProjectService = {
    */
   deleteDraft(draftId: string) {
     return appAxios().delete(`housingProject/draft/${draftId}`);
+  },
+
+  /**
+   * @function emailConfirmation
+   * Send an email with the housing project confirmation data
+   * @returns {Promise} An axios response
+   */
+  emailConfirmation(emailData: Email) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = delimitEmails(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = delimitEmails(emailData.cc);
+    }
+    return appAxios().put('housingProject/email', emailData);
+  },
+
+  /**
+   * @function getActivityIds
+   * @returns {Promise} An axios response
+   */
+  getActivityIds() {
+    return appAxios().get('housingProject/activityIds');
   },
 
   /**
@@ -115,21 +130,6 @@ const service: IProjectService = {
    */
   updateProject(projectId: string, data: any) {
     return appAxios().put(`housingProject/${projectId}`, data);
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the housing project confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put('housingProject/email', emailData);
   }
 };
 

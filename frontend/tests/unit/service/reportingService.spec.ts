@@ -21,9 +21,9 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('getHousingProjectPermitData', () => {
+describe('getProjectPermitData', () => {
   it('calls correct endpoint', () => {
-    reportingService.getHousingProjectPermitData();
+    reportingService.getProjectPermitData();
 
     expect(getSpy).toHaveBeenCalledTimes(1);
     expect(getSpy).toHaveBeenCalledWith(`${PATH}/housingProject/permit`);
