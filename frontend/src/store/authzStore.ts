@@ -96,14 +96,15 @@ export const useAuthZStore = defineStore('authz', () => {
   // Getters
   const getters = {
     can: computed(
-      () => (initiative: Initiative, resource: Resource, action: Action, group?: GroupName) =>
-        state.permissions.value.some(
-          (x) =>
-            initiative === x.initiative &&
-            x.resource === resource &&
-            x.action === action &&
-            (group ? x.group === group : true)
-        ) || getters.isInGroup.value([GroupName.DEVELOPER])
+      () =>
+        (initiative: Initiative, resource: Resource | undefined = undefined, action: Action, group?: GroupName) =>
+          state.permissions.value.some(
+            (x) =>
+              initiative === x.initiative &&
+              x.resource === resource &&
+              x.action === action &&
+              (group ? x.group === group : true)
+          ) || getters.isInGroup.value([GroupName.DEVELOPER])
     ),
     canNavigate: computed(
       () =>

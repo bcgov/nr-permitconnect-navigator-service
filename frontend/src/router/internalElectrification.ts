@@ -7,14 +7,14 @@ import { type RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: 'housing',
-    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
-    meta: { access: [NavigationPermission.INT_HOUSING], breadcrumb: 'Submissions', requiresAuth: true },
+    path: 'electrification',
+    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.ELECTRIFICATION)],
+    meta: { access: [NavigationPermission.INT_ELECTRIFICATION], breadcrumb: 'Submissions', requiresAuth: true },
     children: [
       {
         path: '',
-        name: RouteName.INT_HOUSING,
-        component: () => import('@/views/internal/housing/HousingView.vue'),
+        name: RouteName.INT_ELECTRIFICATION,
+        component: () => import('@/views/internal/electrification/ElectrificationView.vue'),
         beforeEnter: accessHandler
       },
       {
@@ -24,8 +24,8 @@ const routes: Array<RouteRecordRaw> = [
         children: [
           {
             path: '',
-            name: RouteName.INT_HOUSING_PROJECT,
-            component: () => import('@/views/internal/housing/project/ProjectView.vue'),
+            name: RouteName.INT_ELECTRIFICATION_PROJECT,
+            component: () => import('@/views/internal/electrification/project/ProjectView.vue'),
             beforeEnter: accessHandler,
             props: createProps
           },
@@ -35,8 +35,8 @@ const routes: Array<RouteRecordRaw> = [
             children: [
               {
                 path: ':enquiryId',
-                name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
-                component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+                name: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY,
+                component: () => import('@/views/internal/electrification/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: { dynamicBreadcrumb: 'enquiry' }
@@ -50,17 +50,17 @@ const routes: Array<RouteRecordRaw> = [
             children: [
               {
                 path: '',
-                name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
+                name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
                 // TODO: Consider creating reuse component from view so we can create a separate internal view
-                component: () => import('@/views/external/housing/project/ProjectView.vue'),
+                component: () => import('@/views/external/electrification/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
               {
                 path: ':permitId',
-                name: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
+                name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT,
                 // TODO: Consider creating reuse component from view so we can create a separate internal view
-                component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
+                component: () => import('@/views/external/electrification/permit/PermitStatusView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: { dynamicBreadcrumb: 'permit' }
@@ -75,8 +75,8 @@ const routes: Array<RouteRecordRaw> = [
         children: [
           {
             path: ':enquiryId',
-            name: RouteName.INT_HOUSING_ENQUIRY,
-            component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+            name: RouteName.INT_ELECTRIFICATION_ENQUIRY,
+            component: () => import('@/views/internal/electrification/enquiry/EnquiryView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: { dynamicBreadcrumb: 'enquiry' }

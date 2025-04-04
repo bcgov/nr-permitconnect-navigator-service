@@ -2,8 +2,9 @@ import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
 import type { Email, Draft, HousingProjectSearchParameters } from '@/types';
+import type { IProjectService } from '@/interfaces/IProjectService';
 
-export default {
+const service: IProjectService = {
   /**
    * @function getActivityIds
    * @returns {Promise} An axios response
@@ -13,19 +14,19 @@ export default {
   },
 
   /**
-   * @function createHousingProject
+   * @function createProject
    * @returns {Promise} An axios response
    */
-  createHousingProject(data?: any) {
+  createProject(data?: any) {
     return appAxios().put('housingProject', data);
   },
 
   /**
-   * @function deleteHousingProject
+   * @function deleteProject
    * @returns {Promise} An axios response
    */
-  deleteHousingProject(housingProjectId: string) {
-    return appAxios().delete(`housingProject/${housingProjectId}`);
+  deleteProject(projectId: string) {
+    return appAxios().delete(`housingProject/${projectId}`);
   },
 
   /**
@@ -37,10 +38,10 @@ export default {
   },
 
   /**
-   * @function getHousingProjects
+   * @function getProjects
    * @returns {Promise} An axios response
    */
-  getHousingProjects() {
+  getProjects() {
     return appAxios().get('housingProject');
   },
 
@@ -69,18 +70,18 @@ export default {
   },
 
   /**
-   * @function getHousingProject
+   * @function getProject
    * @returns {Promise} An axios response
    */
-  getHousingProject(housingProjectId: string) {
-    return appAxios().get(`housingProject/${housingProjectId}`);
+  getProject(projectId: string) {
+    return appAxios().get(`housingProject/${projectId}`);
   },
 
   /**
-   * @function searchHousingProjects
+   * @function searchProjects
    * @returns {Promise} An axios response
    */
-  searchHousingProjects(filters?: HousingProjectSearchParameters) {
+  searchProjects(filters?: HousingProjectSearchParameters) {
     return appAxios().get('housingProject/search', { params: { ...filters } });
   },
 
@@ -104,20 +105,20 @@ export default {
    * @function updateIsDeletedFlag
    * @returns {Promise} An axios response
    */
-  updateIsDeletedFlag(housingProjectId: string, isDeleted: boolean) {
-    return appAxios().patch(`housingProject/${housingProjectId}/delete`, { isDeleted: isDeleted });
+  updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
+    return appAxios().patch(`housingProject/${projectId}/delete`, { isDeleted: isDeleted });
   },
 
   /**
-   * @function updateHousingProject
+   * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateHousingProject(housingProjectId: string, data: any) {
-    return appAxios().put(`housingProject/${housingProjectId}`, data);
+  updateProject(projectId: string, data: any) {
+    return appAxios().put(`housingProject/${projectId}`, data);
   },
 
   /**
-   * @function send
+   * @function emailConfirmation
    * Send an email with the housing project confirmation data
    * @returns {Promise} An axios response
    */
@@ -131,3 +132,5 @@ export default {
     return appAxios().put('housingProject/email', emailData);
   }
 };
+
+export default service;

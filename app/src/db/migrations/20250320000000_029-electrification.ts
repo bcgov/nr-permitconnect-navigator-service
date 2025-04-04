@@ -216,6 +216,8 @@ export async function up(knex: Knex): Promise<void> {
             .onDelete('CASCADE');
           table.uuid('assigned_user_id').references('user_id').inTable('user').onUpdate('CASCADE').onDelete('CASCADE');
           table.timestamp('submitted_at', { useTz: true }).notNullable();
+          table.text('intake_status');
+          table.text('application_status');
           table.text('project_name');
           table.text('project_description');
           table.text('company_name_registered');

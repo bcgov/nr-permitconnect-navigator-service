@@ -1,22 +1,16 @@
 import { Prisma } from '@prisma/client';
 
-import { IStamps } from '../interfaces/IStamps';
+import { IProject } from '../interfaces/IProject';
 
-import type { Contact } from './Contact';
-import type { User } from './User';
+import type { Contact } from '../types/Contact';
+import type { User } from '../types/User';
 
 export type HousingProject = {
   housingProjectId: string; // Primary key
-  activityId: string;
-  assignedUserId: string | null;
-  submittedAt: string;
   submittedBy: string;
   locationPIDs: string | null;
-  companyNameRegistered: string | null;
   consentToFeedback: boolean;
   geoJSON: Prisma.JsonValue;
-  projectName: string | null;
-  projectDescription: string | null;
   singleFamilyUnits: string | null;
   hasRentalUnits: string | null;
   streetAddress: string | null;
@@ -38,8 +32,6 @@ export type HousingProject = {
   financiallySupportedHousingCoop: string | null;
   aaiUpdated: boolean;
   waitingOn: string | null;
-  intakeStatus: string | null;
-  applicationStatus: string | null;
   projectApplicantType: string | null;
   isDevelopedInBC: string | null;
   multiFamilyUnits: string | null;
@@ -54,8 +46,10 @@ export type HousingProject = {
   indigenousDescription: string | null;
   nonProfitDescription: string | null;
   housingCoopDescription: string | null;
-  submissionType: string | null;
   relatedEnquiries: string | null;
+
+  // TODO: Can be removed and aligned with ElectrificationProject once schema mapping is completed
+  // Just need things to remain working as they were for now...
   contacts: Array<Contact>;
   user: User | null;
-} & Partial<IStamps>;
+} & IProject;

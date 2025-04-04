@@ -9,7 +9,7 @@ import {
   electrificationProjectService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { DraftCode, SubmissionType } from '../utils/enums/projectCommon';
+import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -36,14 +36,14 @@ const controller = {
         ?.activityId;
 
     // Put new electrification project together
-    const electrificationProjectData = {
-      electrificationProject: {
-        electrificationProjectId: uuidv4(),
-        activityId: activityId,
-        submittedAt: data.submittedAt ?? new Date().toISOString(),
-        ...data,
-        submissionType: SubmissionType.GUIDANCE
-      } as ElectrificationProject
+    const electrificationProjectData: ElectrificationProject = {
+      ...data.project,
+      electrificationProjectId: uuidv4(),
+      activityId: activityId,
+      submittedAt: new Date().toISOString(),
+      submissionType: SubmissionType.GUIDANCE,
+      intakeStatus: IntakeStatus.SUBMITTED,
+      applicationStatus: ApplicationStatus.NEW
     };
 
     return electrificationProjectData;
