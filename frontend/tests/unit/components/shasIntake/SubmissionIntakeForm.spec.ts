@@ -171,11 +171,11 @@ describe('SubmissionIntakeForm', () => {
     });
 
     it('sets editable to false when housing project ID given', async () => {
-      const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+      const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 
-      getHousingProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as any);
+      getProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as any);
       listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as any);
       listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as any);
 

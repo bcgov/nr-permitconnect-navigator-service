@@ -47,11 +47,11 @@ const sampleContact: Contact = {
 };
 
 const getActivityIds = vi.spyOn(housingProjectService, 'getActivityIds');
-const getHousingProjects = vi.spyOn(housingProjectService, 'getHousingProjects');
+const getProjects = vi.spyOn(housingProjectService, 'getProjects');
 const getContactSpy = vi.spyOn(contactService, 'searchContacts');
 
 getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
-getHousingProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 interface FormValues {
   contactFirstName: string;

@@ -26,7 +26,7 @@ const { t } = useI18n();
 const toast = useToast();
 
 // Store
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -50,7 +50,7 @@ async function onSubmit(data: any, { resetForm }) {
   try {
     const response = await permitNoteService.createPermitNote({ note: data.note as string, permitId: permit.permitId });
     const newNote = response.data;
-    const permitForNote = housingProjectStore.getPermits.find((p) => p.permitId === newNote.permitId);
+    const permitForNote = projectStore.getPermits.find((p) => p.permitId === newNote.permitId);
 
     if (permitForNote) {
       const updatedPermit = {
@@ -58,7 +58,7 @@ async function onSubmit(data: any, { resetForm }) {
         permitNote: permitForNote.permitNote ? [newNote, ...permitForNote.permitNote] : [newNote]
       };
 
-      housingProjectStore.updatePermit(updatedPermit);
+      projectStore.updatePermit(updatedPermit);
       // send email to the user if permit is needed and uis submitted
       if (permit.needed === PermitNeeded.YES || permit.status !== PermitStatus.NEW) emailNotification();
     }

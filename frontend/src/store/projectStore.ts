@@ -2,33 +2,36 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Document, Enquiry, ElectrificationProject, Note, Permit } from '@/types';
+import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, Permit } from '@/types';
 
-export type ElectrificationProjectStoreState = {
+// Types
+export type ProjectType = ElectrificationProject | HousingProject | undefined;
+
+export type ProjectStoreState = {
   documents: Ref<Array<Document>>;
-  electrificationProject: Ref<ElectrificationProject | undefined>;
+  relatedEnquiries: Ref<Array<Enquiry>>;
   notes: Ref<Array<Note>>;
   permits: Ref<Array<Permit>>;
-  relatedEnquiries: Ref<Array<Enquiry>>;
+  project: Ref<ProjectType>;
 };
 
-export const useElectrificationProjectStore = defineStore('electrificationProject', () => {
+export const useProjectStore = defineStore('project', () => {
   // State
-  const state: ElectrificationProjectStoreState = {
+  const state: ProjectStoreState = {
     documents: ref([]),
-    electrificationProject: ref(undefined),
+    relatedEnquiries: ref([]),
     notes: ref([]),
     permits: ref([]),
-    relatedEnquiries: ref([])
+    project: ref(undefined)
   };
 
   // Getters
   const getters = {
     getDocuments: computed(() => state.documents.value),
-    getElectrificationProject: computed(() => state.electrificationProject.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
-    getRelatedEnquiries: computed(() => state.relatedEnquiries.value)
+    getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
+    getProject: computed(() => state.project.value)
   };
 
   // Actions
@@ -91,8 +94,16 @@ export const useElectrificationProjectStore = defineStore('electrificationProjec
     if (idx >= 0) state.permits.value[idx] = data;
   }
 
-  function setElectrificationProject(data: ElectrificationProject | undefined) {
-    state.electrificationProject.value = data;
+  function setProject(data: ProjectType) {
+    state.project.value = data;
+  }
+
+  function reset() {
+    state.documents.value = [];
+    state.relatedEnquiries.value = [];
+    state.notes.value = [];
+    state.permits.value = [];
+    state.housingProject.value = undefined;
   }
 
   return {
@@ -117,8 +128,9 @@ export const useElectrificationProjectStore = defineStore('electrificationProjec
     addRelatedEnquiry,
     removeRelatedEnquiry,
     setRelatedEnquiries,
-    setElectrificationProject
+    setProject
+    reset
   };
 });
 
-export default useElectrificationProjectStore;
+export default useProjectStore;

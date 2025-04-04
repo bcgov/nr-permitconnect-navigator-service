@@ -1,17 +1,10 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email, Draft, ElectrificationProjectSearchParameters } from '@/types';
+import type { IProjectService } from '@/interfaces/IProjectService';
+import type { Email, ElectrificationProjectSearchParameters } from '@/types';
 
-export default {
-  /**
-   * @function getActivityIds
-   * @returns {Promise} An axios response
-   */
-  getActivityIds() {
-    return appAxios().get('electrificationProject/activityIds');
-  },
-
+const service: IProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -21,11 +14,34 @@ export default {
   },
 
   /**
+   * @function emailConfirmation
+   * Send an email with the housing project confirmation data
+   * @returns {Promise} An axios response
+   */
+  emailConfirmation(emailData: Email) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = delimitEmails(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = delimitEmails(emailData.cc);
+    }
+    return appAxios().put('electrificationProject/email', emailData);
+  },
+
+  /**
    * @function deleteProject
    * @returns {Promise} An axios response
    */
   deleteProject(electrificationProjectId: string) {
     return appAxios().delete(`electrificationProject/${electrificationProjectId}`);
+  },
+
+  /**
+   * @function getActivityIds
+   * @returns {Promise} An axios response
+   */
+  getActivityIds() {
+    return appAxios().get('electrificationProject/activityIds');
   },
 
   /**
@@ -82,20 +98,7 @@ export default {
    */
   updateProject(electrificationProjectId: string, data: any) {
     return appAxios().put(`electrificationProject/${electrificationProjectId}`, data);
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the housing project confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put('electrificationProject/email', emailData);
   }
 };
+
+export default service;
