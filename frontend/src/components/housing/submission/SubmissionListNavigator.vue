@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
@@ -15,25 +15,28 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { housingProjectService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
-import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, BasicResponse, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Pagination, HousingProject } from '@/types';
+import type { IProjectService } from '@/interfaces/IProjectService';
+import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
 
 // Types
 type FilterOption = { label: string; statuses: string[] };
 
 // Props
-const { loading, submissions } = defineProps<{
-  loading: boolean;
-  submissions: Array<HousingProject> | undefined;
+const { submissions } = defineProps<{
+  submissions: Array<ElectrificationProject | HousingProject> | undefined;
 }>();
+
+const projectService = inject('projectService') as IProjectService;
+const projectResource = inject('projectResource') as Resource;
+const projectRoute = inject('projectRoute') as RouteName;
 
 // Composables
 const confirmDialog = useConfirm();
@@ -58,7 +61,6 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
-const dataTable = ref(null);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -90,11 +92,11 @@ function handleCreateNewActivity() {
     message: 'Please confirm that you want to create a new submission.',
     accept: async () => {
       try {
-        const response = (await housingProjectService.createHousingProject()).data;
+        const response = (await projectService.createProject()).data;
         if (response?.activityId) {
           router.push({
-            name: RouteName.INT_HOUSING_PROJECT,
-            params: { housingProjectId: response.housingProjectId }
+            name: projectRoute,
+            params: { projectId: response.projectId }
           });
         }
       } catch (e: any) {
@@ -112,7 +114,7 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-function onDelete(housingProjectId: string, activityId: string) {
+function onDelete(projectId: string, activityId: string) {
   confirmDialog.require({
     message: 'Please confirm that you want to delete this project',
     header: 'Delete project?',
@@ -121,10 +123,10 @@ function onDelete(housingProjectId: string, activityId: string) {
     rejectLabel: 'Cancel',
     rejectProps: { outlined: true },
     accept: () => {
-      housingProjectService
-        .updateIsDeletedFlag(housingProjectId, true)
+      projectService
+        .updateIsDeletedFlag(projectId, true)
         .then(() => {
-          emit('submission:delete', housingProjectId, activityId);
+          emit('submission:delete', projectId, activityId);
           selection.value = undefined;
           toast.success('Project deleted');
         })
@@ -168,12 +170,10 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
-    ref="dataTable"
     v-model:filters="filters"
     v-model:selection="selection"
-    :loading="loading"
     :value="filteredSubmissions"
-    data-key="housingProjectId"
+    data-key="projectId"
     removable-sort
     scrollable
     responsive-layout="scroll"
@@ -238,7 +238,7 @@ onBeforeMount(() => {
           </IconField>
         </div>
         <Button
-          v-if="authzStore.can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.CREATE)"
+          v-if="authzStore.can(useAppStore().getInitiative, projectResource, Action.CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
@@ -257,8 +257,8 @@ onBeforeMount(() => {
         <div :data-projectName="data.projectName">
           <router-link
             :to="{
-              name: RouteName.INT_HOUSING_PROJECT,
-              params: { housingProjectId: data.housingProjectId }
+              name: projectRoute,
+              params: { projectId: data.projectId }
             }"
           >
             {{ data.projectName }}
@@ -281,8 +281,8 @@ onBeforeMount(() => {
           <div v-else>
             <router-link
               :to="{
-                name: RouteName.INT_HOUSING_PROJECT,
-                params: { housingProjectId: data.housingProjectId }
+                name: projectRoute,
+                params: { projectId: data.projectId }
               }"
             >
               {{ data.activityId }}
@@ -427,9 +427,9 @@ onBeforeMount(() => {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete submission"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.DELETE)"
+          :disabled="!useAuthZStore().can(useAppStore().getInitiative, projectResource, Action.DELETE)"
           @click="
-            onDelete(data.housingProjectId, data.activityId);
+            onDelete(data.projectId, data.activityId);
             selection = data;
           "
         >

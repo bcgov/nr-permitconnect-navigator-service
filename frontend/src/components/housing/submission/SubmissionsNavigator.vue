@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref, watch } from 'vue';
+import { inject, onBeforeMount, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { Spinner } from '@/components/layout';
 import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
@@ -21,15 +20,15 @@ import {
   TabPanels,
   useToast
 } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
-import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
+
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
+import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
+import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -42,25 +41,28 @@ const TAB_INDEX = {
   ENQUIRY: 1
 };
 
+// Props
+const bringForward = defineModel<Array<BringForward>>('bringForward', { required: true });
+const enquiries = defineModel<Array<Enquiry>>('enquiries', { required: true });
+const permits = defineModel<Array<Permit>>('permits', { required: true });
+const projects = defineModel<Array<ElectrificationProject | HousingProject>>('projects', { required: true });
+const statistics = defineModel<Statistics>('statistics');
+
 // Store
 const authnStore = useAuthNStore();
 const authzStore = useAuthZStore();
 
 const { getProfile } = storeToRefs(authnStore);
 
+const projectService = inject('projectService') as IProjectService;
+
 // State
 const route = useRoute();
 const accordionIndex: Ref<string | null> = ref(null);
 const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
-const bringForward: Ref<Array<BringForward>> = ref([]);
-const enquiries: Ref<Array<Enquiry>> = ref([]);
 const myBringForward: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
-const permits: Ref<Array<Permit>> = ref([]);
-const loading: Ref<boolean> = ref(true);
 const showToggle: Ref<boolean> = ref(true);
-const housingProjects: Ref<Array<HousingProject>> = ref([]);
-const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Actions
 const toast = useToast();
@@ -71,7 +73,7 @@ function assignEnquiriesAndFullName() {
 
   enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
 
-  housingProjects.value.forEach((sub) => {
+  projects.value.forEach((sub) => {
     if (relatedActivityIds.has(sub.activityId)) {
       sub.hasRelatedEnquiry = true;
     } else {
@@ -79,7 +81,7 @@ function assignEnquiriesAndFullName() {
     }
   });
 
-  housingProjects.value.forEach((sub) => {
+  projects.value.forEach((sub) => {
     if (sub.user) {
       sub.user.fullName =
         sub.user.firstName && sub.user.lastName
@@ -92,7 +94,7 @@ function assignEnquiriesAndFullName() {
 // Set multiPermitsNeeded property of each submission to Yes/No (count)
 // if the submission have more than one permit with needed Yes
 function assignMultiPermitsNeeded() {
-  housingProjects.value.forEach((sub) => {
+  projects.value.forEach((sub) => {
     const multiPermitsNeededCount = permits.value.filter(
       (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
     ).length;
@@ -128,7 +130,18 @@ function getBringForwardStyling(bf: BringForward) {
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
 
+function getNameObject(bf: BringForward) {
+  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
+  if (bf.housingProjectId) RouteName.INT_HOUSING_PROJECT;
+  return RouteName.INT_HOUSING_ENQUIRY;
+}
+
 function getParamObject(bf: BringForward) {
+  if (bf.electrificationProjectId) {
+    return {
+      electrificationProjectId: bf.electrificationProjectId
+    };
+  }
   if (bf.housingProjectId) {
     return {
       housingProjectId: bf.housingProjectId
@@ -141,7 +154,7 @@ function getParamObject(bf: BringForward) {
 
 // return the query object for the router link based on the submission type
 function getQueryObject(bf: BringForward) {
-  if (bf.housingProjectId) {
+  if (bf.electrificationProjectId || bf.housingProjectId) {
     return {
       initialTab: NOTES_TAB_INDEX.SUBMISSION
     };
@@ -157,15 +170,15 @@ function onEnquiryDelete(enquiryId: string, activityId: string) {
   refreshStatistics();
 }
 
-function onSubmissionDelete(housingProjectId: string, activityId: string) {
-  housingProjects.value = housingProjects.value.filter((x) => x.housingProjectId !== housingProjectId);
+function onSubmissionDelete(projectId: string, activityId: string) {
+  projects.value = projects.value.filter((x) => x.projectId !== projectId);
   bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
   refreshStatistics();
 }
 
 function refreshStatistics() {
-  housingProjectService
-    .getStatistics()
+  projectService
+    ?.getStatistics()
     .then((response) => {
       statistics.value = response.data;
     })
@@ -175,27 +188,14 @@ function refreshStatistics() {
 }
 
 onBeforeMount(async () => {
-  [enquiries.value, permits.value, housingProjects.value, statistics.value, bringForward.value] = (
-    await Promise.all([
-      enquiryService.getEnquiries(),
-      permitService.listPermits(),
-      housingProjectService.searchHousingProjects({
-        includeUser: true,
-        intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
-      }),
-      housingProjectService.getStatistics(),
-      noteService.listBringForward(BringForwardType.UNRESOLVED)
-    ])
-  ).map((r) => r.data);
-
   assignEnquiriesAndFullName();
   assignMultiPermitsNeeded();
 
   const profile = getProfile.value;
 
-  housingProjects.value.forEach((sub) => {
+  projects.value.forEach((sub) => {
     if (sub.user?.sub === profile?.sub) {
-      myAssignedTo.value.add(sub.housingProjectId);
+      myAssignedTo.value.add(sub.projectId);
     }
   });
 
@@ -205,8 +205,6 @@ onBeforeMount(async () => {
       (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
     );
   });
-
-  loading.value = false;
 
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey) accordionIndex.value = accordionKey;
@@ -246,10 +244,7 @@ watch(activeTabIndex, (newIndex) => {
 </script>
 
 <template>
-  <Tabs
-    v-if="!loading"
-    :value="activeTabIndex"
-  >
+  <Tabs :value="activeTabIndex">
     <TabList>
       <Tab :value="0">Projects</Tab>
       <Tab :value="1">Enquiries</Tab>
@@ -286,7 +281,7 @@ watch(activeTabIndex, (newIndex) => {
                     Bring forward {{ getBringForwardDate(bf) }}:
                     <router-link
                       :to="{
-                        name: bf.housingProjectId ? RouteName.INT_HOUSING_PROJECT : RouteName.INT_HOUSING_ENQUIRY,
+                        name: getNameObject(bf),
                         params: getParamObject(bf),
                         query: getQueryObject(bf),
                         hash: `#${bf.noteId}`
@@ -301,14 +296,12 @@ watch(activeTabIndex, (newIndex) => {
           </AccordionPanel>
         </Accordion>
         <SubmissionListNavigator
-          :loading="loading"
-          :submissions="housingProjects"
+          :submissions="projects"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>
       <TabPanel :value="1">
         <EnquiryListNavigator
-          :loading="loading"
           :enquiries="enquiries"
           @enquiry:delete="onEnquiryDelete"
         />
@@ -318,13 +311,7 @@ watch(activeTabIndex, (newIndex) => {
           v-if="statistics"
           v-model:statistics="statistics"
         />
-        <div v-else>
-          <span v-if="loading">
-            <Spinner />
-            Loading statistics...
-          </span>
-          <span v-else>Failed to load statistics.</span>
-        </div>
+        <div v-else>Failed to load statistics.</div>
       </TabPanel>
       <TabPanel :value="3">
         <SubmissionBringForwardCalendar
