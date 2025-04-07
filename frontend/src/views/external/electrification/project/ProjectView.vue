@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -127,7 +127,8 @@ function navigateToSubmissionIntakeView() {
     query: { activityId: getHousingProject.value?.activityId }
   });
 }
-onMounted(async () => {
+
+onBeforeMount(async () => {
   let enquiriesValue, permitTypesValue, projectValue: any;
 
   try {
