@@ -2,6 +2,7 @@
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { DatePicker } from '@/lib/primevue';
+import type { InputNumberBlurEvent } from 'primevue/inputnumber';
 
 // Props
 const {
@@ -51,7 +52,7 @@ const { errorMessage, handleBlur, value } = useField<Date>(name);
       date-format="yy/mm/dd"
       :placeholder="placeholder"
       :max-date="maxDate"
-      @blur="handleBlur"
+      @blur="(e: InputNumberBlurEvent) => handleBlur(e.originalEvent)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>
