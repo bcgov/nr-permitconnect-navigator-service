@@ -38,7 +38,7 @@ const {
 
 // Emits
 const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
-const { errorMessage, handleBlur, value, resetField, handleChange } = useField<string>(name);
+const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 onBeforeMount(() => {
   resetField({ touched: false });

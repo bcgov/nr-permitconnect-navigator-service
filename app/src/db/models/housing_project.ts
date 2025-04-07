@@ -39,7 +39,6 @@ const _housingProjectWithUserGraph = Prisma.validator<Prisma.housing_projectDefa
 });
 
 type PrismaRelationHousingProject = Omit<Prisma.housing_projectGetPayload<typeof _housingProject>, keyof Stamps>;
-type PrismaGraphHousingProject = Prisma.housing_projectGetPayload<typeof _housingProject>;
 type PrismaGraphHousingProjectWithContact = Prisma.housing_projectGetPayload<typeof _housingProjectWithContactGraph>;
 type PrismaGraphHousingProjectWithUser = Prisma.housing_projectGetPayload<typeof _housingProjectWithUserGraph>;
 
@@ -100,6 +99,8 @@ export default {
     };
   },
 
+  // TODO: Temp any until this conversion layer is removed
+  // eslint-disable-next-line
   fromPrismaModel(input: any): HousingProject {
     return {
       housingProjectId: input.housing_project_id,

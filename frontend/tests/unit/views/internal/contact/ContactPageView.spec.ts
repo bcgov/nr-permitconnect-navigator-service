@@ -43,7 +43,7 @@ vi.spyOn(contactService, 'getContact').mockResolvedValue({
     headers: {} as AxiosRequestHeaders
   }
 });
-vi.spyOn(housingProjectService, 'searchHousingProjects').mockResolvedValue({
+vi.spyOn(housingProjectService, 'searchProjects').mockResolvedValue({
   data: [],
   status: 200,
   statusText: 'OK',

@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
+import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';

@@ -13,7 +13,7 @@ import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue'
 import { projectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
-import { useConfigStore, useContactStore, useElectrificationProjectStore } from '@/store';
+import { useConfigStore, useContactStore, useProjectStore } from '@/store';
 import { PROJECT_TYPE_LIST } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { ProjectType } from '@/utils/enums/electrification';
