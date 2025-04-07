@@ -2,10 +2,11 @@
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import SubmissionListNavigatorElectrification from '@/components/electrification/submission/SubmissionListNavigatorElectrification.vue'; // eslint-disable-line max-len
+import SubmissionListNavigatorHousing from '@/components/housing/submission/SubmissionListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {
   Button,
-  Column,
   DataTable,
   FilterMatchMode,
   IconField,
@@ -17,9 +18,8 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
-import { Action, BasicResponse, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
-import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -69,7 +69,7 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selection: Ref<HousingProject | undefined> = ref(undefined);
+const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 
 const filteredSubmissions = computed(() => {
@@ -134,19 +134,6 @@ function onDelete(projectId: string, activityId: string) {
         .catch((e: any) => toast.error('Failed to delete project', e.message));
     }
   });
-}
-
-function isFinanciallySupported(data: HousingProject) {
-  if (
-    data.financiallySupportedBC === BasicResponse.YES ||
-    data.financiallySupportedHousingCoop === BasicResponse.YES ||
-    data.financiallySupportedIndigenous === BasicResponse.YES ||
-    data.financiallySupportedNonProfit === BasicResponse.YES
-  ) {
-    return BasicResponse.YES;
-  } else {
-    return BasicResponse.NO;
-  }
 }
 
 function updateQueryParams() {
@@ -247,197 +234,17 @@ onBeforeMount(() => {
         />
       </div>
     </template>
-    <Column
-      field="projectName"
-      header="Project name"
-      :sortable="true"
-      style="min-width: 200px"
-      frozen
-    >
-      <template #body="{ data }">
-        <div :data-projectName="data.projectName">
-          <router-link
-            :to="{
-              name: projectRoute,
-              params: { projectId: data.projectId }
-            }"
-          >
-            {{ data.projectName }}
-          </router-link>
-        </div>
-      </template>
-    </Column>
-    <Column
-      field="activityId"
-      header="Project ID"
-      :sortable="true"
-      style="min-width: 133px"
-      frozen
-    >
-      <template #body="{ data }">
-        <div :data-activityId="data.activityId">
-          <div v-if="data.projectName">
-            {{ data.activityId }}
-          </div>
-          <div v-else>
-            <router-link
-              :to="{
-                name: projectRoute,
-                params: { projectId: data.projectId }
-              }"
-            >
-              {{ data.activityId }}
-            </router-link>
-          </div>
-        </div>
-      </template>
-    </Column>
-    <Column
-      field="contacts.0.firstName"
-      header="First name"
-      :sortable="true"
-      style="min-width: 150px"
+
+    <SubmissionListNavigatorHousing
+      v-if="useAppStore().getInitiative === Initiative.HOUSING"
+      :on-delete-callback="onDelete"
+      :selection="selection"
     />
-    <Column
-      field="contacts.0.lastName"
-      header="Last name"
-      :sortable="true"
-      style="min-width: 150px"
+    <SubmissionListNavigatorElectrification
+      v-if="useAppStore().getInitiative === Initiative.ELECTRIFICATION"
+      :on-delete-callback="onDelete"
+      :selection="selection"
     />
-    <Column
-      field="companyNameRegistered"
-      header="Company"
-      :sortable="true"
-      style="min-width: 150px"
-    />
-    <Column
-      field="streetAddress"
-      header="Location address"
-      :sortable="true"
-      style="min-width: 250px"
-    >
-      <template #body="{ data }">
-        {{ [data.streetAddress, data.locality, data.province].filter((str) => str?.trim()).join(', ') }}
-      </template>
-    </Column>
-    <Column
-      field="submittedAt"
-      header="Submitted date"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        {{ formatDate(data?.submittedAt) }}
-      </template>
-    </Column>
-    <Column
-      field="submissionType"
-      header="Submission type"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="queuePriority"
-      header="Priority"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="multiPermitsNeeded"
-      header="Multi-authorization project"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="user.fullName"
-      header="Assigned to"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="hasRelatedEnquiry"
-      header="Related enquiry"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        {{ data.hasRelatedEnquiry ? BasicResponse.YES : BasicResponse.NO }}
-      </template>
-    </Column>
-    <Column
-      field="singleFamilyUnits"
-      header="Single family units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="multiFamilyUnits"
-      header="Multi family units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="otherUnitsDescription"
-      header="Other type"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="otherUnits"
-      header="Other type units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="hasRentalUnits"
-      header="Rental"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="rentalUnits"
-      header="Rental units"
-      :sortable="true"
-      style="min-width: 150px"
-    />
-    <Column
-      field="financiallySupported"
-      header="Financially supported"
-      :sortable="true"
-      style="min-width: 225px"
-    >
-      <template #body="{ data }">
-        {{ isFinanciallySupported(data) }}
-      </template>
-    </Column>
-    <Column
-      field="naturalDisaster"
-      header="Affected by natural disaster"
-      :sortable="true"
-      style="min-width: 275px"
-    />
-    <Column
-      field="action"
-      header="Action"
-      class="text-center header-center"
-      style="min-width: 75px"
-      frozen
-      align-frozen="right"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
-          aria-label="Delete submission"
-          :disabled="!useAuthZStore().can(useAppStore().getInitiative, projectResource, Action.DELETE)"
-          @click="
-            onDelete(data.projectId, data.activityId);
-            selection = data;
-          "
-        >
-          <font-awesome-icon icon="fa-solid fa-trash" />
-        </Button>
-      </template>
-    </Column>
   </DataTable>
 </template>
 <style scoped lang="scss">
