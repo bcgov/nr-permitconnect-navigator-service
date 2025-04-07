@@ -10,15 +10,13 @@ import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
 import ContactCard from '@/components/form/common/ContactCard.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
 import { projectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
-import { documentService, electrificationProjectService, enquiryService, externalApiService } from '@/services';
+import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useConfigStore, useContactStore, useElectrificationProjectStore } from '@/store';
 import { PROJECT_TYPES } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { ProjectType } from '@/utils/enums/electrification';
-import { SubmissionType } from '@/utils/enums/housing';
 import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/utils/templates';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
@@ -95,50 +93,6 @@ async function generateActivityId() {
   } catch (error) {
     toast.error(t('e.electrification.projectIntakeForm.failedGenerateActivity'));
     return undefined;
-  }
-}
-
-async function onAssistanceRequest(values: GenericObject) {
-  try {
-    const enquiryData = {
-      basic: {
-        enquiryDescription: t('e.electrification.projectIntakeForm.assistanceMessage'),
-        submissionType: SubmissionType.ASSISTANCE
-      },
-      contacts: [
-        setEmptyStringsToNull({
-          contactId: values.contacts.contactId,
-          firstName: values.contacts.contactFirstName,
-          lastName: values.contacts.contactLastName,
-          phoneNumber: values.contacts.contactPhoneNumber,
-          email: values.contacts.contactEmail,
-          contactApplicantRelationship: values.contacts.contactApplicantRelationship,
-          contactPreference: values.contacts.contactPreference
-        })
-      ]
-    };
-
-    const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
-
-    if (enquiryResponse.activityId) {
-      toast.success(t('e.electrification.projectIntakeForm.formSaved'));
-
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.activityId, enquiryResponse.electrificationProjectId, false);
-
-      router.push({
-        name: RouteName.EXT_ELECTRIFICATION_ENQUIRY_CONFIRMATION,
-        params: {
-          enquiryId: enquiryResponse.enquiryId
-        }
-      });
-    } else {
-      toast.error(t('e.electrification.projectIntakeForm.failedSaveEnquiry'));
-    }
-  } catch (e: any) {
-    toast.error(t('e.electrification.projectIntakeForm.failedSaveEnquiry'), e);
-  } finally {
-    editable.value = true;
   }
 }
 
@@ -385,12 +339,6 @@ onBeforeMount(async () => {
       v-if="editable"
       ref="autoSaveRef"
       :callback="() => onSaveDraft(values, true)"
-    />
-
-    <SubmissionAssistance
-      v-if="editable && values?.contacts"
-      :form-values="values"
-      @on-submit-assistance="onAssistanceRequest(values)"
     />
 
     <input
