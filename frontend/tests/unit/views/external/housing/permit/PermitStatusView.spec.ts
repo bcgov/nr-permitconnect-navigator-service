@@ -12,7 +12,7 @@ import type { AxiosResponse } from 'axios';
 
 const getPermitSpy = vi.spyOn(permitService, 'getPermit');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -68,7 +68,7 @@ beforeEach(() => {
 
   searchContactsSpy.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
   getPermitSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-  searchHousingProjectsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
+  searchProjectsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
 });
 
 afterEach(() => {

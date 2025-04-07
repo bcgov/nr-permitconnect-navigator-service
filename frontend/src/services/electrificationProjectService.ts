@@ -1,10 +1,10 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { IProjectService } from '@/interfaces/IProjectService';
-import type { Email, ElectrificationProjectSearchParameters } from '@/types';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';
 
-const service: IProjectService = {
+const service: IDraftableProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -37,11 +37,35 @@ const service: IProjectService = {
   },
 
   /**
+   * @function deleteDraft
+   * @returns {Promise} An axios response
+   */
+  deleteDraft(draftId: string) {
+    return appAxios().delete(`electrificationProject/draft/${draftId}`);
+  },
+
+  /**
    * @function getActivityIds
    * @returns {Promise} An axios response
    */
   getActivityIds() {
     return appAxios().get('electrificationProject/activityIds');
+  },
+
+  /**
+   * @function getDraft
+   * @returns {Promise} An axios response
+   */
+  getDraft(draftId: string) {
+    return appAxios().get(`electrificationProject/draft/${draftId}`);
+  },
+
+  /**
+   * @function getDrafts
+   * @returns {Promise} An axios response
+   */
+  getDrafts() {
+    return appAxios().get('electrificationProject/draft');
   },
 
   /**
@@ -82,6 +106,14 @@ const service: IProjectService = {
    */
   submitDraft(data?: any) {
     return appAxios().put('electrificationProject/draft/submit', data);
+  },
+
+  /**
+   * @function updateDraft
+   * @returns {Promise} An axios response
+   */
+  updateDraft(data?: Partial<Draft>) {
+    return appAxios().put('electrificationProject/draft', data);
   },
 
   /**

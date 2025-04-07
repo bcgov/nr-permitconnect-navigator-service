@@ -9,7 +9,7 @@ import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
-import type { Enquiry, Permit, PermitType, Submission } from '@/types';
+import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
 import { RouteName } from '@/utils/enums/application';
 
 let mockRoute: any = {};
@@ -40,9 +40,10 @@ const testEnquiry: Enquiry = {
   atsClientId: '123456'
 };
 
-const testProject: Submission = {
+const testProject: HousingProject = {
   activityId: 'activity456',
-  submissionId: '456',
+  housingProjectId: '456',
+  projectId: '456',
   queuePriority: 1,
   submissionType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
