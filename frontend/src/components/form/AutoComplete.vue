@@ -4,8 +4,7 @@ import { onBeforeMount } from 'vue';
 
 import { AutoComplete } from '@/lib/primevue';
 
-import type { IInputEvent } from '@/interfaces';
-import type { AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 
 // Props
 
@@ -72,9 +71,7 @@ onBeforeMount(() => {
       :placeholder="placeholder"
       :suggestions="suggestions"
       @blur="handleBlur"
-      @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
-      @input="(e: IInputEvent) => emit('onInput', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div class="mt-2">

@@ -71,7 +71,7 @@ const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
 const intakeSchema = object({
-  enquiryType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
+  submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
@@ -306,7 +306,7 @@ onBeforeMount(async () => {
     <div class="grid grid-cols-12 gap-4">
       <Select
         class="col-span-3"
-        name="enquiryType"
+        name="submissionType"
         label="Submission type"
         :disabled="!editable"
         :options="ENQUIRY_TYPE_LIST"

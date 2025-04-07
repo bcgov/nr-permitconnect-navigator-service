@@ -7,9 +7,10 @@
     "eamodio.gitlens",
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
+    "gruntfuggly.todo-tree",
     "redhat.vscode-yaml",
     "ryanluker.vscode-coverage-gutters",
-    "vue.volar",
-    "42crunch.vscode-openapi"
+    "usernamehw.errorlens",
+    "vue.volar"
   ]
 }

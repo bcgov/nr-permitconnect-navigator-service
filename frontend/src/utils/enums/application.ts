@@ -65,6 +65,22 @@ export enum RouteName {
   /*
    * External route names
    */
+  EXT_ELECTRIFICATION = 'ext_electrification',
+  EXT_ELECTRIFICATION_ENQUIRY_CONFIRMATION = 'ext_electrification_enquiry_confirmation',
+  EXT_ELECTRIFICATION_ENQUIRY = 'ext_electrification_enquiry',
+  EXT_ELECTRIFICATION_ENQUIRY_INTAKE = 'ext_electrification_enquiry_intake',
+  EXT_ELECTRIFICATION_INTAKE = 'ext_electrification_intake',
+  EXT_ELECTRIFICATION_INTAKE_DRAFT = 'ext_electrification_intake_draft',
+  EXT_ELECTRIFICATION_INTAKE_CONFIRMATION = 'ext_electrification_intake_confirmation',
+  EXT_ELECTRIFICATION_GUIDE = 'ext_electrification_guide',
+  EXT_ELECTRIFICATION_PROJECT = 'ext_electrification_project',
+  EXT_ELECTRIFICATION_PROJECT_ENQUIRY = 'ext_electrification_project_enquiry',
+  EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_enquiry_confirmation',
+  EXT_ELECTRIFICATION_PROJECT_INTAKE = 'ext_electrification_project_intake',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT = 'ext_electrification_project_permit',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY = 'ext_electrification_project_permit_enquiry',
+  EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_permit_enquiry_confirmation',
+
   EXT_HOUSING = 'ext_housing',
   EXT_HOUSING_ENQUIRY_CONFIRMATION = 'ext_housing_enquiry_confirmation',
   EXT_HOUSING_ENQUIRY = 'ext_housing_enquiry',
@@ -90,12 +106,21 @@ export enum RouteName {
    */
   INT_CONTACT = 'int_contact',
   INT_CONTACT_PAGE = 'int_contact_page',
+
+  INT_ELECTRIFICATION = 'int_electrification',
+  INT_ELECTRIFICATION_ENQUIRY = 'int_electrification_enquiry',
+  INT_ELECTRIFICATION_PROJECT = 'int_electrification_submissions',
+  INT_ELECTRIFICATION_PROJECT_ENQUIRY = 'int_electrification_project_enquiry',
+  INT_ELECTRIFICATION_PROJECT_PROPONENT = 'int_electrification_project_proponent',
+  INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT = 'int_electrification_project_proponent_permit',
+
   INT_HOUSING = 'int_housing',
   INT_HOUSING_ENQUIRY = 'int_housing_enquiry',
   INT_HOUSING_PROJECT = 'int_housing_submissions',
   INT_HOUSING_PROJECT_ENQUIRY = 'int_housing_project_enquiry',
   INT_HOUSING_PROJECT_PROPONENT = 'int_housing_project_proponent',
   INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_housing_project_proponent_permit',
+
   INT_USER_MANAGEMENT = 'int_user_management',
   /*
    * End Internal route names

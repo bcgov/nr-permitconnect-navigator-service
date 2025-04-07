@@ -1,18 +1,39 @@
 import Joi from 'joi';
 
-import { activityId, email, uuidv4 } from './common';
+import { email, uuidv4 } from './common';
 import { contacts } from './contact';
-
 import { validate } from '../middleware/validation';
-
+import { PROJECT_TYPES } from '../utils/constants/electrification';
+import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
+
+const electrificationIntake = {
+  activityId: Joi.string().min(8).max(8).allow(null),
+  projectName: Joi.string().required().max(255).trim(),
+  companyNameRegistered: Joi.string().required().max(255).trim(),
+  projectType: Joi.string()
+    .required()
+    .valid(...PROJECT_TYPES),
+  bcHydroNumber: Joi.when('project.projectType', {
+    is: (val: string) => val === ProjectType.IPP_WIND || val === ProjectType.IPP_SOLAR,
+    then: Joi.string().required().max(255).trim(),
+    otherwise: Joi.string().max(255).trim().allow(null)
+  }),
+  projectDescription: Joi.when('project.projectType', {
+    is: ProjectType.OTHER,
+    then: Joi.string().required().max(4000),
+    otherwise: Joi.string().max(4000).allow(null)
+  })
+};
 
 const schema = {
   createElectrificationProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
-      activityId: Joi.string().min(8).max(8).allow(null),
-      contacts: contacts
+      contacts: contacts,
+      project: {
+        ...electrificationIntake
+      }
     })
   },
   emailConfirmation: {
@@ -68,16 +89,17 @@ const schema = {
   },
   updateElectrificationProject: {
     body: Joi.object({
-      electrificationProjectId: uuidv4.required(),
-      activityId: activityId,
-      submittedAt: Joi.string().required(),
-      assignedUserId: Joi.when('intakeStatus', {
-        is: IntakeStatus.SUBMITTED,
-        then: uuidv4,
-        otherwise: uuidv4.allow(null)
-      }),
-
-      contacts: contacts
+      contacts: contacts,
+      project: {
+        ...electrificationIntake,
+        electrificationProjectId: uuidv4.required(),
+        submittedAt: Joi.string().required(),
+        assignedUserId: Joi.when('intakeStatus', {
+          is: IntakeStatus.SUBMITTED,
+          then: uuidv4,
+          otherwise: uuidv4.allow(null)
+        })
+      }
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()

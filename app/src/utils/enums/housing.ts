@@ -13,6 +13,10 @@ export enum ContactPreference {
   EITHER = 'Either'
 }
 
+export enum DraftCode {
+  HOUSING_PROJECT = 'HOUSING_PROJECT'
+}
+
 export enum EnquirySubmittedMethod {
   PHONE = 'Phone',
   EMAIL = 'Email',

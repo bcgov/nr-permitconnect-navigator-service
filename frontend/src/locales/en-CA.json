@@ -29,6 +29,43 @@
     }
   },
   "e": {
+    "electrification": {
+      "projectConfirmationView": {
+        "backToElectrification": "Back to Electrification",
+        "header": "Confirmation of Submission",
+        "message": "Your submission will be reviewed and you will be contacted by an Electrification Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
+        "projectId": "Project ID:",
+        "success": "Your application has been successfully submitted."
+      },
+      "projectIntakeForm": {
+        "bcHydroNumber": "What is your BC Hydro Call for Power project number?",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "confirmSubmitMessage": "Are you sure you wish to submit this form?",
+        "confirmSubmitHeader": "Please confirm submission",
+        "declareBusinessName": "What is the name of your business?",
+        "draftAutoSaved": "Draft autosaved",
+        "draftSaved": "Draft saved",
+        "failedConfirmationEmail": "Failed to send confirmation email",
+        "failedGenerateActivity": "Failed to generate activity ID",
+        "failedRetrieveDraft": "Failed to retrieve correct draft data",
+        "failedSaveDraft": "Failed to save draft",
+        "failedSaveEnquiry": "Failed to save enquiry",
+        "failedSaveIntake": "Failed to save intake",
+        "formSaved": "Form saved",
+        "projectDescriptionCard": "Help us learn more about your project",
+        "projectDescriptionCardOptional": "Help us learn more about your project (optional)",
+        "projectNameCard": "What is the name of your project?",
+        "projectTypeCard": "What is your project type?",
+        "provideDetails": "Provide us with additional information - short description about the project and/or project website link",
+        "searchBCRegistered": "Type to search the B.C registered name",
+        "submit": "Submit",
+        "upload1": "Upload documents about your electrification project (pdfs, maps,",
+        "upload2": "shape files",
+        "upload3": ", etc)",
+        "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+      }
+    },
     "housing": {
       "enquiryConfirmationView": {
         "confirmationHeader": "Confirmation of Submission",
@@ -212,7 +249,12 @@
     "admin": "ADMIN"
   },
   "homeView": {
-    "cantNavigate": "Please contact and administrator to verify your permissions"
+    "cantNavigate": "Please contact and administrator to verify your permissions",
+    "chooseProject": "Choose your project type",
+    "electrification": "Electrification",
+    "housing": "Housing",
+    "pcns": "Permit Connect Services",
+    "welcome": "Welcome to the"
   },
   "intakeAssistance": {
     "confirmationHeader": "Confirmation of Assistance Request",

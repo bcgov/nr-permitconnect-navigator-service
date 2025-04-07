@@ -4,6 +4,6 @@ export type HousingProjectSearchParameters = {
   intakeStatus?: Array<string>;
   includeUser?: boolean;
   housingProjectId?: Array<string>;
-  housingProjectType?: Array<string>;
+  submissionType?: Array<string>;
   includeDeleted?: boolean;
 };

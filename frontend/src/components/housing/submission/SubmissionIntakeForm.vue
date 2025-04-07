@@ -21,6 +21,9 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
+import ContactCard from '@/components/form/common/ContactCard.vue';
+import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
+import LocationCard from '@/components/form/common/LocationCard.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
 import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
@@ -40,7 +43,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { documentService, enquiryService, externalApiService, permitService, housingProjectService } from '@/services';
+import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
 import { useConfigStore, useContactStore, useHousingProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
@@ -56,14 +59,9 @@ import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/u
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-
 import type { Contact, Document, HousingProjectIntake, Permit, PermitType } from '@/types';
-import ContactCard from '@/components/form/common/ContactCard.vue';
-import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
-import LocationCard from '@/components/form/common/LocationCard.vue';
 
 // Types
 type HousingProjectForm = {
@@ -155,7 +153,7 @@ async function onAssistanceRequest(values: GenericObject) {
     const enquiryData = {
       basic: {
         enquiryDescription: t('submissionIntakeForm.assistanceMessage'),
-        enquiryType: SubmissionType.ASSISTANCE
+        submissionType: SubmissionType.ASSISTANCE
       },
       contacts: [
         setEmptyStringsToNull({
@@ -1056,6 +1054,7 @@ watch(
                 placeholder="Provide us with additional information - short description about the project and/or project website link"
                 :disabled="!editable"
               />
+              <!-- eslint-enable max-len -->
               <label class="col-span-12 mt-0 pt-0">
                 Upload documents about your housing project (pdfs, maps,
                 <a

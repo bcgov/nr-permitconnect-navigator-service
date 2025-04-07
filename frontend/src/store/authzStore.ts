@@ -20,12 +20,14 @@ export enum NavigationPermission {
   /*
    * External navigation permissions
    */
+  EXT_ELECTRIFICATION = 'ext_electrification',
   EXT_HOUSING = 'ext_housing',
 
   /*
    * Internal navigation permissions
    */
   INT_CONTACT = 'int_contact',
+  INT_ELECTRIFICATION = 'int_electrification',
   INT_HOUSING = 'int_housing',
   INT_USER_MANAGEMENT = 'int_user_management'
 }
@@ -37,6 +39,7 @@ const NavigationAuthorizationMap = [
     group: GroupName.ADMIN,
     permissions: [
       NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_ELECTRIFICATION,
       NavigationPermission.INT_HOUSING,
       NavigationPermission.INT_USER_MANAGEMENT,
       ...GlobalNavigations
@@ -44,20 +47,31 @@ const NavigationAuthorizationMap = [
   },
   {
     group: GroupName.NAVIGATOR,
-    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING, ...GlobalNavigations]
+    permissions: [
+      NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_ELECTRIFICATION,
+      NavigationPermission.INT_HOUSING,
+      ...GlobalNavigations
+    ]
   },
   {
     group: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING, ...GlobalNavigations]
+    permissions: [
+      NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_ELECTRIFICATION,
+      NavigationPermission.INT_HOUSING,
+      ...GlobalNavigations
+    ]
   },
   {
     group: GroupName.PROPONENT,
-    permissions: [NavigationPermission.EXT_HOUSING, ...GlobalNavigations]
+    permissions: [NavigationPermission.EXT_ELECTRIFICATION, NavigationPermission.EXT_HOUSING, ...GlobalNavigations]
   },
   {
     group: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_ELECTRIFICATION,
       NavigationPermission.INT_HOUSING,
       NavigationPermission.INT_USER_MANAGEMENT,
       ...GlobalNavigations

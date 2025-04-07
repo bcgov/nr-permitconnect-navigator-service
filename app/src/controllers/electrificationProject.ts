@@ -9,7 +9,7 @@ import {
   electrificationProjectService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { DraftCode, IntakeStatus } from '../utils/enums/projectCommon';
+import { DraftCode, SubmissionType } from '../utils/enums/projectCommon';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -20,27 +20,28 @@ import type {
   ElectrificationProject,
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
-  StatisticsFilters
+  StatisticsFilters,
+  Contact
 } from '../types';
 
 const controller = {
-  generateElectrificationProjectData: async (
-    data: ElectrificationProjectIntake,
-    intakeStatus: string,
-    currentContext: CurrentContext
-  ) => {
+  /**
+   * @function generateElectrificationProjectData
+   * Handles creating a project from intake data
+   */
+  generateElectrificationProjectData: async (data: ElectrificationProjectIntake, currentContext: CurrentContext) => {
     const activityId =
-      data.activityId ??
+      data.project.activityId ??
       (await activityService.createActivity(Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
         ?.activityId;
 
     // Put new electrification project together
-    const electrificationProjectData = {
-      electrificationProject: {
-        electrificationProjectId: uuidv4(),
-        activityId: activityId,
-        submittedAt: data.submittedAt ?? new Date().toISOString()
-      } as ElectrificationProject
+    const electrificationProjectData: ElectrificationProject = {
+      ...data.project,
+      electrificationProjectId: uuidv4(),
+      activityId: activityId,
+      submittedAt: new Date().toISOString(),
+      submissionType: SubmissionType.GUIDANCE
     };
 
     return electrificationProjectData;
@@ -74,11 +75,7 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const { electrificationProject } = await controller.generateElectrificationProjectData(
-        req.body,
-        IntakeStatus.SUBMITTED,
-        req.currentContext
-      );
+      const electrificationProject = await controller.generateElectrificationProjectData(req.body, req.currentContext);
 
       // Create contacts
       if (req.body.contacts)
@@ -209,11 +206,7 @@ const controller = {
 
   submitDraft: async (req: Request<never, never, ElectrificationProjectIntake>, res: Response, next: NextFunction) => {
     try {
-      const { electrificationProject } = await controller.generateElectrificationProjectData(
-        req.body,
-        IntakeStatus.SUBMITTED,
-        req.currentContext
-      );
+      const electrificationProject = await controller.generateElectrificationProjectData(req.body, req.currentContext);
 
       // Create contacts
       if (req.body.contacts)
@@ -257,7 +250,7 @@ const controller = {
         response = await draftService.createDraft({
           draftId: uuidv4(),
           activityId: activityId,
-          draftCode: DraftCode.HOUSING_PROJECT,
+          draftCode: DraftCode.ELECTRIFICATION_PROJECT,
           data: req.body.data,
           ...generateCreateStamps(req.currentContext)
         });
@@ -292,7 +285,7 @@ const controller = {
   },
 
   updateElectrificationProject: async (
-    req: Request<never, never, ElectrificationProject>,
+    req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
     res: Response,
     next: NextFunction
   ) => {
@@ -302,10 +295,10 @@ const controller = {
         if (!x.contactId) x.contactId = uuidv4();
         return x;
       });
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
+      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.project.activityId);
 
       const response = await electrificationProjectService.updateElectrificationProject({
-        ...req.body,
+        ...req.body.project,
         ...generateUpdateStamps(req.currentContext)
       });
 
