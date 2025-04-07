@@ -293,9 +293,12 @@ onBeforeMount(async () => {
                 class="mr-2"
                 :auth-status="permit.authStatus"
               />
-              <div>
+              <div v-if="permit.statusLastVerified">
                 <span class="label-verified mr-1">{{ t('projectView.statusVerified') }}</span>
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
+              </div>
+              <div v-else>
+                <span class="label-verified mr-1">{{ t('projectView.statusNotVerified') }}</span>
               </div>
             </div>
             <div class="col-span-3">

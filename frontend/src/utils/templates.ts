@@ -63,6 +63,7 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   return newText;
 };
 
+// TODO: Make all email templates dynmaic based on initiative
 export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   const baseTemplate =
     '<div style="width: 880px">' +
@@ -131,7 +132,10 @@ export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: s
     'Dear {{ contactName }},<br><br>' +
     'Your navigator has an update for you.<br><br>' +
     '<b>Project ID: {{ activityId }}</b><br><br>' +
-    '{{ permitName }} (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '/e/housing/project/{{ projectId }}/permit/{{ permitId }}' +
+    '">{{ permitName }}<a> (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +

@@ -1,26 +1,29 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
-import { storeToRefs } from 'pinia';
+import { useI18n } from 'vue-i18n';
 import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
 import { permitNoteService, submissionService } from '@/services';
-import { useConfigStore } from '@/store';
+import { useConfigStore, useSubmissionStore } from '@/store';
 import { formatDate, formatDateLong } from '@/utils/formatters';
-import { PermitNeeded } from '@/utils/enums/housing';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
-import { useSubmissionStore } from '@/store';
 
 // Props
-const { permit, permitName } = defineProps<{
+const { permit } = defineProps<{
   permit: Permit;
-  permitName: string;
 }>();
+
+// Composables
+const { t } = useI18n();
+const toast = useToast();
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -41,9 +44,6 @@ const formSchema = object({
   note: string().required().label('Note')
 });
 
-// Actions
-const toast = useToast();
-
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
@@ -59,8 +59,8 @@ async function onSubmit(data: any, { resetForm }) {
       };
 
       submissionStore.updatePermit(updatedPermit);
-      // send email to the user if permit is needed
-      if (permit.needed === PermitNeeded.YES) emailNotification();
+      // send email to the user if permit is needed and uis submitted
+      if (permit.needed === PermitNeeded.YES || permit.status !== PermitStatus.NEW) emailNotification();
     }
 
     resetForm();
@@ -71,18 +71,21 @@ async function onSubmit(data: any, { resetForm }) {
 
 async function emailNotification() {
   const configCC = getConfig.value.ches?.submission?.cc;
+  const project = submissionStore.getSubmission;
   const body = permitNoteNotificationTemplate({
-    '{{ contactName }}': submissionStore.getSubmission?.contacts[0].firstName,
-    '{{ activityId }}': submissionStore.getSubmission?.activityId,
-    '{{ permitName }}': permitName,
-    '{{ submittedDate }}': formatDate(permit.submittedDate ?? permit.createdAt)
+    '{{ contactName }}': project?.contacts[0].firstName,
+    '{{ activityId }}': project?.activityId,
+    '{{ permitName }}': permit.permitType.name,
+    '{{ submittedDate }}': formatDate(permit.submittedDate ?? permit.createdAt),
+    '{{ projectId }}': project?.submissionId,
+    '{{ permitId }}': permit.permitId
   });
   let applicantEmail = submissionStore.getSubmission?.contacts[0].email as string;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: `Updates for project ${submissionStore.getSubmission?.activityId}, ${permitName}`,
+    subject: `Updates for project ${submissionStore.getSubmission?.activityId}, ${permit.permitType.name}`,
     bodyType: 'html',
     body: body
   };
@@ -103,9 +106,9 @@ async function emailNotification() {
         fixed-width
         class="mr-2"
       />
-      <span class="p-dialog-title">Add updates</span>
+      <span class="p-dialog-title">{{ t('permitNotesModal.title') }}</span>
     </template>
-    <h4 class="mb-4">{{ permitName }}</h4>
+    <h4 class="mb-4">{{ permit.permitType.name }}</h4>
     <Form
       ref="formRef"
       :initial-values="initialFormValues"
@@ -125,8 +128,8 @@ async function emailNotification() {
           name="note"
           label="Note"
           maxlength="255"
-          placeholder="Please try to keep the note concise, ideally under 60 words."
           required
+          :placeholder="t('permitNotesModal.notePlaceholder')"
         />
         <div class="field col-span-12 flex">
           <div class="flex-auto">
@@ -158,7 +161,7 @@ async function emailNotification() {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">There are no updates.</p>
+        <p class="text-gray-500">{{ t('permitNotesModal.noUpdates') }}</p>
       </div>
     </div>
   </Dialog>
