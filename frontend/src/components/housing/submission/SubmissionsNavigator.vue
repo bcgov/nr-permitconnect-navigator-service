@@ -20,8 +20,8 @@ import {
   TabPanels,
   useToast
 } from '@/lib/primevue';
-import { useAuthNStore, useAuthZStore } from '@/store';
-import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
+import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
+import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
 
 import { formatDate } from '@/utils/formatters';
@@ -203,7 +203,9 @@ onBeforeMount(async () => {
 
   myBringForward.value = bringForward.value.filter((x) => {
     return (
-      (x.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(x.housingProjectId ?? '')) &&
+      (x.createdByFullName === getProfile.value?.name ||
+        myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
+        myAssignedTo.value.has(x.housingProjectId ?? '')) &&
       (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
     );
   });
@@ -252,7 +254,7 @@ watch(activeTabIndex, (newIndex) => {
       <Tab :value="1">Enquiries</Tab>
       <Tab :value="2">Statistics</Tab>
       <Tab
-        v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
+        v-if="authzStore.can(useAppStore().getInitiative, Resource.NOTE, Action.READ)"
         :value="3"
       >
         Bring Forward Calendar
@@ -261,7 +263,7 @@ watch(activeTabIndex, (newIndex) => {
     <TabPanels>
       <TabPanel :value="0">
         <Accordion
-          v-if="authzStore.can(Initiative.HOUSING, Resource.NOTE, Action.READ)"
+          v-if="authzStore.can(useAppStore().getInitiative, Resource.NOTE, Action.READ)"
           v-model:value="accordionIndex"
           collapse-icon="pi pi-chevron-up"
           expand-icon="pi pi-chevron-right"
