@@ -19,6 +19,8 @@ export type IProject = {
   projectDescription: string;
   multiPermitsNeeded: string;
 
+  streetAddress: string;
+
   // Joined
   contacts: Array<Contact>;
   user?: User;

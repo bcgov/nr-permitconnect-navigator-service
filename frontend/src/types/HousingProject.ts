@@ -20,7 +20,6 @@ export type HousingProject = {
   nonProfitDescription: string;
   financiallySupportedHousingCoop: string;
   housingCoopDescription: string;
-  streetAddress: string;
   locality: string;
   province: string;
   locationPIDs: string;

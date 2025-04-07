@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+// import SubmissionForm from '@/components/electrification/submission/SubmissionForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -14,7 +15,6 @@ import NoteModal from '@/components/note/NoteModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
-import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import {
   Button,
   Column,
@@ -28,7 +28,7 @@ import {
   TabPanel,
   TabPanels
 } from '@/lib/primevue';
-import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
@@ -39,9 +39,9 @@ import type { Ref } from 'vue';
 import type { Document, ElectrificationProject, Note } from '@/types';
 
 // Props
-const { initialTab = '0', housingProjectId } = defineProps<{
+const { initialTab = '0', electrificationProjectId } = defineProps<{
   initialTab?: string;
-  housingProjectId: string;
+  electrificationProjectId: string;
 }>();
 
 // Constants
@@ -123,7 +123,7 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 }
 
 onBeforeMount(async () => {
-  const project = (await housingProjectService.getProject(housingProjectId)).data;
+  const project = (await electrificationProjectService.getProject(electrificationProjectId)).data;
   activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
@@ -172,15 +172,15 @@ onBeforeMount(async () => {
       outlined
       @click="
         router.push({
-          name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
+          name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
           params: {
-            housingProjectId: housingProjectId
+            electrificationProjectId: electrificationProjectId
           }
         })
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('i.housing.projectView.seePropViewButtonLabel') }}
+      {{ t('i.electrification.projectView.seePropViewButtonLabel') }}
     </Button>
   </div>
 
@@ -197,8 +197,11 @@ onBeforeMount(async () => {
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
           <SubmissionForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
-            :housing-project="getProject as ElectrificationProject"
+            :editable="
+              !isCompleted &&
+              useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
+            "
+            :electrification-project="getProject as ElectrificationProject"
           />
         </span>
       </TabPanel>
@@ -207,7 +210,9 @@ onBeforeMount(async () => {
           <FileUpload
             v-if="activityId"
             :activity-id="activityId"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.CREATE)"
+            :disabled="
+              isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.CREATE)
+            "
           />
         </div>
         <div class="flex flex-row justify-between pb-4">
@@ -332,7 +337,7 @@ onBeforeMount(async () => {
                 href="#"
                 @click="
                   () => {
-                    if (useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.READ))
+                    if (useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.READ))
                       documentService.downloadDocument(data.documentId, data.filename);
                   }
                 "
@@ -378,7 +383,9 @@ onBeforeMount(async () => {
             <template #body="{ data }">
               <div class="flex justify-center">
                 <DeleteDocument
-                  :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
+                  :disabled="
+                    isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.DELETE)
+                  "
                   :document="data"
                 />
               </div>
@@ -394,7 +401,9 @@ onBeforeMount(async () => {
             </div>
             <Button
               aria-label="Add permit"
-              :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
+              :disabled="
+                isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.PERMIT, Action.CREATE)
+              "
               @click="permitModalVisible = true"
             >
               <font-awesome-icon
@@ -430,7 +439,7 @@ onBeforeMount(async () => {
           </div>
           <Button
             aria-label="Add note"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
             @click="noteModalVisible = true"
           >
             <font-awesome-icon
@@ -465,7 +474,7 @@ onBeforeMount(async () => {
         <Roadmap
           v-if="!loading && activityId"
           :activity-id="activityId"
-          :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ROADMAP, Action.CREATE)"
+          :editable="!isCompleted && useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ROADMAP, Action.CREATE)"
         />
       </TabPanel>
       <TabPanel :value="5">
