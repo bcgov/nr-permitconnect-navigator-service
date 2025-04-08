@@ -38,6 +38,7 @@ export type SubmissionIntake = {
     naturalDisaster?: string;
     projectLocation?: string;
     projectLocationDescription?: string;
+    geomarkUrl?: string | null;
     geoJSON?: string | null;
     ltsaPIDLookup?: string;
     latitude?: number | null;

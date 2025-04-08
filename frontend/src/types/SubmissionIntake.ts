@@ -37,6 +37,7 @@ export type SubmissionIntake = {
     streetAddress?: string;
     locality?: string;
     province?: string;
+    geomarkUrl: string;
   };
 
   permits?: {
