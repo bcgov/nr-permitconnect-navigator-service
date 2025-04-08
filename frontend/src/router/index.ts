@@ -87,7 +87,8 @@ export function entryRedirect(to: RouteLocationNormalizedGeneric) {
 }
 
 function convertRemToPixels(rem: number) {
-  return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const pixels = rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  return pixels || 64;
 }
 
 const routes: Array<RouteRecordRaw> = [
@@ -187,7 +188,8 @@ export default function getRouter() {
       router.replace({
         path: to.query.r ? to.query.r.toString() : to.path,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
-        query: (({ r, ...q }) => q)(to.query)
+        query: (({ r, ...q }) => q)(to.query),
+        hash: to.hash
       });
     }
 
