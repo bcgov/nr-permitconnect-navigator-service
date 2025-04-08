@@ -259,6 +259,7 @@ onBeforeMount(async () => {
     </div>
     <router-link
       v-for="permit in permitsSubmitted"
+      :id="permit.permitId"
       :key="permit.permitId"
       :to="{
         name: canNavigate(NavigationPermission.INT_HOUSING)

@@ -134,7 +134,7 @@ export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: s
     '<b>Project ID: {{ activityId }}</b><br><br>' +
     '<a href="' +
     PCNS_URL +
-    '/e/housing/project/{{ projectId }}/permit/{{ permitId }}' +
+    '/e/housing/project/{{ projectId }}#{{ permitId }}' +
     '">{{ permitName }}<a> (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +

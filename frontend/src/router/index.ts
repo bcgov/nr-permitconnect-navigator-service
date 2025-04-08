@@ -86,6 +86,10 @@ export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   }
 }
 
+function convertRemToPixels(rem: number) {
+  return rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+}
+
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
@@ -133,6 +137,8 @@ export default function getRouter() {
   const router = createRouter({
     history: createWebHistory(),
     routes,
+    // TODO: Uncomment when navigating to last location/tab/etc. is fixed
+    // scrollBehavior(to, from, savedPosition) {
     scrollBehavior(to, from) {
       // Scroll to hash
       // Slight delay to account for asynchronous loading
@@ -141,16 +147,27 @@ export default function getRouter() {
           setTimeout(() => {
             resolve({
               el: to.hash,
-              behavior: 'smooth'
+              behavior: 'smooth',
+              top: convertRemToPixels(5)
             });
           }, 500);
         });
+        // TODO: Uncomment when navigating to last location/tab/etc. is fixed
+        // } else if (savedPosition) {
+        //   // Scroll to previous position on forward/back buttons
+        //   return new Promise((resolve) => {
+        //     setTimeout(() => {
+        //       resolve({
+        //         ...savedPosition,
+        //         behavior: 'smooth'
+        //       });
+        //     }, 500);
+        //   });
       } else {
         // Do not scroll if same page
         if (to.name === from.name) return false;
       }
-
-      // default scroll to top
+      // Default scroll to top
       return { top: 0 };
     }
   });
