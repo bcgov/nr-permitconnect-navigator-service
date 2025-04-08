@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { version as uuidVersion, validate as uuidValidate } from 'uuid';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 
 import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
-import { housingProjectService, reportingService, userService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { reportingService, userService } from '@/services';
+import { useAppStore, useAuthZStore } from '@/store';
 import { Action, Initiative, Regex, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
+import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -19,6 +20,9 @@ type StatisticFilters = {
   monthYear?: Date;
   userId?: string;
 };
+
+// Injections
+const projectService = inject(projectServiceKey);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -49,9 +53,15 @@ async function onAssigneeInput(e: IInputEvent) {
   }
 }
 
-async function onDownloadHousingProjectPermitData() {
-  const response = await reportingService.getProjectPermitData();
-  const data = response.data;
+async function onDownloadProjectPermitData() {
+  const initiative = useAppStore().getInitiative;
+
+  let response;
+  if (initiative === Initiative.ELECTRIFICATION)
+    response = await reportingService.getElectrificationProjectPermitData();
+  else if (initiative === Initiative.HOUSING) response = await reportingService.getHousingProjectPermitData();
+
+  const data = response?.data;
 
   if (!data || data.length === 0) {
     toast.info('No Data', 'Data not available for downloaded.');
@@ -115,7 +125,7 @@ watch(
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
     if (validUser) {
-      statistics.value = (await housingProjectService.getStatistics(statisticFilters.value)).data;
+      if (projectService) statistics.value = (await projectService.getStatistics(statisticFilters.value)).data;
     }
   },
   { deep: true }
@@ -127,8 +137,8 @@ watch(
     <div class="flex justify-end mb-4">
       <Button
         class="download-production-btn"
-        :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.REPORTING, Action.READ)"
-        @click="onDownloadHousingProjectPermitData"
+        :disabled="!useAuthZStore().can(useAppStore().getInitiative, Resource.REPORTING, Action.READ)"
+        @click="onDownloadProjectPermitData"
       >
         <font-awesome-icon
           class="pr-2"
@@ -259,7 +269,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.state_completed }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.state_completed) }}%</td>
         </tr>
-        <tr>
+        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">BC Housing</span>
@@ -267,7 +277,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_bc }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_bc) }}%</td>
         </tr>
-        <tr>
+        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Indigenous</span>
@@ -275,7 +285,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_indigenous }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_indigenous) }}%</td>
         </tr>
-        <tr>
+        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Non-profit</span>
@@ -283,7 +293,7 @@ watch(
           <td class="col-span-1 text-right">{{ statistics.supported_non_profit }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_non_profit) }}%</td>
         </tr>
-        <tr>
+        <tr v-if="useAppStore().getInitiative === Initiative.HOUSING">
           <td class="col-span-9">
             Submissions by financially supported:
             <span class="font-bold">Co-operative</span>

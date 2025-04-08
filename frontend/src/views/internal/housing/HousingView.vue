@@ -7,6 +7,7 @@ import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
+import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
@@ -22,9 +23,9 @@ const permits: Ref<Array<Permit>> = ref([]);
 const projects: Ref<Array<HousingProject>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
-provide('projectResource', Resource.HOUSING_PROJECT);
-provide('projectRoute', RouteName.INT_HOUSING_PROJECT);
-provide('projectService', housingProjectService);
+provide(resourceKey, Resource.HOUSING_PROJECT);
+provide(projectRouteNameKey, RouteName.INT_HOUSING_PROJECT);
+provide(projectServiceKey, housingProjectService);
 
 // Actions
 onBeforeMount(async () => {
@@ -46,7 +47,14 @@ loading.value = false;
 </script>
 
 <template>
-  <h1>Submissions</h1>
+  <div class="flex justify-between">
+    <h1>Housing</h1>
+    <img
+      class="banner-img"
+      src="@/assets/images/housing_banner.png"
+      alt="Housing image"
+    />
+  </div>
   <SubmissionsNavigator
     v-if="authzStore.canNavigate(NavigationPermission.INT_HOUSING) && !loading"
     v-model:bring-forward="bringForward"
@@ -56,3 +64,12 @@ loading.value = false;
     v-model:statistics="statistics"
   />
 </template>
+
+<style lang="scss" scoped>
+.banner-img {
+  max-height: 105px;
+  max-width: 137px;
+  width: auto;
+  height: auto;
+}
+</style>
