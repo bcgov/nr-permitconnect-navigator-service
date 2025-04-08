@@ -9,13 +9,13 @@ import { housingProjectValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
+  Contact,
   Draft,
   Email,
   StatisticsFilters,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
-  Contact
+  HousingProjectSearchParameters
 } from '../../types';
 
 const router = express.Router();

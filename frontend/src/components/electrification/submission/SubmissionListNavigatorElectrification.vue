@@ -3,8 +3,9 @@ import { inject } from 'vue';
 
 import { Button, Column } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
-import { Action, Resource, RouteName } from '@/utils/enums/application';
+import { Action } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
+import { projectRouteNameKey, resourceKey } from '@/utils/keys';
 
 import type { ElectrificationProject, HousingProject } from '@/types';
 
@@ -16,8 +17,8 @@ const { onDeleteCallback } = defineProps<{
 const selection = defineModel<ElectrificationProject | HousingProject | undefined>('selection');
 
 // Injections
-const projectResource = inject('projectResource') as Resource;
-const projectRoute = inject('projectRoute') as RouteName;
+const projectResource = inject(resourceKey);
+const projectRoute = inject(projectRouteNameKey);
 </script>
 
 <template>

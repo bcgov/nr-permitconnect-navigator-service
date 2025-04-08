@@ -4,9 +4,9 @@ import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { PROJECT_TYPE_LIST } from '../utils/constants/electrification';
+import { INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
-import { INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 
 const electrificationIntake = {
   activityId: Joi.string().min(8).max(8).allow(null),

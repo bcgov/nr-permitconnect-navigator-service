@@ -23,12 +23,11 @@ import {
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/housing';
-
 import { formatDate } from '@/utils/formatters';
+import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
-import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Constants
 const NOTES_TAB_INDEX = {
@@ -49,7 +48,7 @@ const projects = defineModel<Array<ElectrificationProject | HousingProject>>('pr
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
-const projectService = inject('projectService') as IProjectService;
+const projectService = inject(projectServiceKey);
 
 // Composables
 const toast = useToast();
