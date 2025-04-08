@@ -472,23 +472,23 @@ export async function up(knex: Knex): Promise<void> {
           })
           .select('initiative_id');
 
-        const navigator_group_id = await knex('yars.group')
+        const elec_navigator_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const navigator_read_group_id = await knex('yars.group')
+        const elec_navigator_read_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const supervisor_group_id = await knex('yars.group')
+        const elec_supervisor_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const admin_group_id = await knex('yars.group')
+        const elec_admin_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const proponent_group_id = await knex('yars.group')
+        const elec_proponent_group_id = await knex('yars.group')
           .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.PROPONENT })
           .select('group_id');
 
@@ -533,19 +533,46 @@ export async function up(knex: Knex): Promise<void> {
         // prettier-ignore
         {
           // Add all navigator role mappings
-          await addResourceRoles(navigator_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_navigator_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
 
           // Add all navigator read only role mappings
-          await addResourceRoles(navigator_read_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.DOCUMENT, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.ENQUIRY, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.NOTE, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
+          await addResourceRoles(elec_navigator_read_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
 
           // Add all supervisor role mappings
-          await addResourceRoles(supervisor_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.ACCESS_REQUEST, [Action.CREATE, Action.READ]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.ROADMAP, [Action.CREATE, Action.READ, Action.UPDATE]);
 
           // Add all admin role mappings
-          await addResourceRoles(admin_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.ACCESS_REQUEST, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.DOCUMENT, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.ENQUIRY, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.NOTE, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.PERMIT, [Action.READ]);
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.ROADMAP, [Action.READ]);
 
           // Add all proponent role mappings
-          await addResourceRoles(proponent_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_proponent_group_id[0].group_id, Resource.DOCUMENT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_proponent_group_id[0].group_id, Resource.ELECTRIFICATION_PROJECT, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_proponent_group_id[0].group_id, Resource.ENQUIRY, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_proponent_group_id[0].group_id, Resource.NOTE, [Action.CREATE, Action.READ, Action.UPDATE]);
+          await addResourceRoles(elec_proponent_group_id[0].group_id, Resource.PERMIT, [Action.CREATE, Action.READ, Action.UPDATE]);
+
         }
         return knex('yars.group_role').insert(items);
       })
