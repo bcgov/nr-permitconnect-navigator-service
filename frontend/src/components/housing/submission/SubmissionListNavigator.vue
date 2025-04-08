@@ -18,12 +18,12 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
-import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
+import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces/IProjectService';
 import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
 
 // Types
@@ -35,9 +35,9 @@ const { submissions } = defineProps<{
 }>();
 
 // Injections
-const projectResource = inject('projectResource') as Resource;
-const projectRoute = inject('projectRoute') as RouteName;
-const projectService = inject('projectService') as IProjectService;
+const projectResource = inject(resourceKey);
+const projectRoute = inject(projectRouteNameKey);
+const projectService = inject(projectServiceKey);
 
 // Composables
 const confirmDialog = useConfirm();
@@ -93,6 +93,8 @@ function handleCreateNewActivity() {
     message: 'Please confirm that you want to create a new submission.',
     accept: async () => {
       try {
+        if (!projectService) throw new Error('No service');
+
         const response = (await projectService.createProject()).data;
         if (response?.activityId) {
           router.push({
@@ -125,7 +127,7 @@ function onDelete(projectId: string, activityId: string) {
     rejectProps: { outlined: true },
     accept: () => {
       projectService
-        .updateIsDeletedFlag(projectId, true)
+        ?.updateIsDeletedFlag(projectId, true)
         .then(() => {
           emit('submission:delete', projectId, activityId);
           selection.value = undefined;
@@ -138,7 +140,7 @@ function onDelete(projectId: string, activityId: string) {
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.INT_HOUSING,
+    name: router.currentRoute.value.name,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
