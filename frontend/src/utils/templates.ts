@@ -63,6 +63,7 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   return newText;
 };
 
+// TODO: Make all email templates dynmaic based on initiative
 export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   const baseTemplate =
     '<div style="width: 880px">' +
@@ -109,6 +110,32 @@ export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: stri
     PCNS_URL +
     ENQUIRY_URL +
     '">here<a>.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+  const baseTemplate =
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'Dear {{ contactName }},<br><br>' +
+    'Your navigator has an update for you.<br><br>' +
+    '<b>Project ID: {{ activityId }}</b><br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '/e/housing/project/{{ projectId }}#{{ permitId }}' +
+    '">{{ permitName }}<a> (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +

@@ -1,25 +1,33 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
-import { formatDateLong } from '@/utils/formatters';
+import { permitNoteService, submissionService } from '@/services';
+import { useConfigStore, useSubmissionStore } from '@/store';
+import { formatDate, formatDateLong } from '@/utils/formatters';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
+import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
-import permitNoteService from '@/services/permitNoteService';
-import { useSubmissionStore } from '@/store';
 
 // Props
-const { permit, permitName } = defineProps<{
+const { permit } = defineProps<{
   permit: Permit;
-  permitName: string;
 }>();
+
+// Composables
+const { t } = useI18n();
+const toast = useToast();
 
 // Store
 const submissionStore = useSubmissionStore();
+const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
@@ -36,9 +44,6 @@ const formSchema = object({
   note: string().required().label('Note')
 });
 
-// Actions
-const toast = useToast();
-
 // @ts-expect-error TS7031
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
@@ -54,12 +59,37 @@ async function onSubmit(data: any, { resetForm }) {
       };
 
       submissionStore.updatePermit(updatedPermit);
+      // send email to the user if permit is needed and uis submitted
+      if (permit.needed === PermitNeeded.YES || permit.status !== PermitStatus.NEW) emailNotification();
     }
 
     resetForm();
   } catch (e: any) {
     toast.error('Failed to save note', e.message);
   }
+}
+
+async function emailNotification() {
+  const configCC = getConfig.value.ches?.submission?.cc;
+  const project = submissionStore.getSubmission;
+  const body = permitNoteNotificationTemplate({
+    '{{ contactName }}': project?.contacts[0].firstName,
+    '{{ activityId }}': project?.activityId,
+    '{{ permitName }}': permit.permitType.name,
+    '{{ submittedDate }}': formatDate(permit.submittedDate ?? permit.createdAt),
+    '{{ projectId }}': project?.submissionId,
+    '{{ permitId }}': permit.permitId
+  });
+  let applicantEmail = submissionStore.getSubmission?.contacts[0].email as string;
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: `Updates for project ${submissionStore.getSubmission?.activityId}, ${permit.permitType.name}`,
+    bodyType: 'html',
+    body: body
+  };
+  await submissionService.emailConfirmation(emailData);
 }
 </script>
 
@@ -76,9 +106,9 @@ async function onSubmit(data: any, { resetForm }) {
         fixed-width
         class="mr-2"
       />
-      <span class="p-dialog-title">Add updates</span>
+      <span class="p-dialog-title">{{ t('permitNotesModal.title') }}</span>
     </template>
-    <h4 class="mb-4">{{ permitName }}</h4>
+    <h4 class="mb-4">{{ permit.permitType.name }}</h4>
     <Form
       ref="formRef"
       :initial-values="initialFormValues"
@@ -98,8 +128,8 @@ async function onSubmit(data: any, { resetForm }) {
           name="note"
           label="Note"
           maxlength="255"
-          placeholder="Please try to keep the note concise, ideally under 60 words."
           required
+          :placeholder="t('permitNotesModal.notePlaceholder')"
         />
         <div class="field col-span-12 flex">
           <div class="flex-auto">
@@ -131,7 +161,7 @@ async function onSubmit(data: any, { resetForm }) {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">There are no updates.</p>
+        <p class="text-gray-500">{{ t('permitNotesModal.noUpdates') }}</p>
       </div>
     </div>
   </Dialog>

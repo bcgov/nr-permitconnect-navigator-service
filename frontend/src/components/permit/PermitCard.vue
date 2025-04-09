@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import StatusPill from '@/components/common/StatusPill.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
@@ -19,6 +20,9 @@ const { editable, permit } = defineProps<{
   editable?: boolean;
   permit: Permit;
 }>();
+
+// Composables
+const { t } = useI18n();
 
 // State
 const cardUpdatedBy: Ref<string> = ref('');
@@ -70,7 +74,7 @@ function isCompleted(authStatus: string | undefined): boolean {
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            Add updates
+            {{ t('permitCard.addUpdates') }}
           </Button>
           <Button
             class="p-button-outlined"
@@ -98,57 +102,57 @@ function isCompleted(authStatus: string | undefined): boolean {
         <!-- Left column -->
         <div class="grid grid-cols-1 space-y-4">
           <p>
-            <span class="key font-bold">Tracking ID:</span>
+            <span class="key font-bold">{{ t('permitCard.trackingId') }}</span>
             {{ permit.trackingId }}
           </p>
           <p>
-            <span class="key font-bold">Status verified date:</span>
+            <span class="key font-bold">{{ t('permitCard.statusVerified') }}</span>
             {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
           </p>
           <p>
-            <span class="key font-bold">Submitted date:</span>
+            <span class="key font-bold">{{ t('permitCard.submittedDate') }}</span>
             {{ permit.submittedDate ? formatDate(permit.submittedDate) : undefined }}
           </p>
           <p>
-            <span class="key font-bold">Permit state:</span>
+            <span class="key font-bold">{{ t('permitCard.permitState') }}</span>
             {{ permit.status }}
           </p>
         </div>
         <!-- Middle column -->
         <div class="grid grid-cols-1 space-y-4">
           <p>
-            <span class="key font-bold">Last updated:</span>
+            <span class="key font-bold">{{ t('permitCard.lastUpdated') }}</span>
             {{ permit.updatedAt ? ` ${formatDateTime(permit.updatedAt)}` : undefined }}
           </p>
           <p>
-            <span class="key font-bold">Updated by:</span>
+            <span class="key font-bold">{{ t('permitCard.updatedBy') }}</span>
             {{ cardUpdatedBy }}
           </p>
           <p>
-            <span class="key font-bold">Adjudication date:</span>
+            <span class="key font-bold">{{ t('permitCard.adjudicationDate') }}</span>
             {{ permit.adjudicationDate ? formatDate(permit.adjudicationDate) : undefined }}
           </p>
           <p>
-            <span class="key font-bold">Issued Permit ID:</span>
+            <span class="key font-bold">{{ t('permitCard.issuedPermitId') }}</span>
             {{ permit.issuedPermitId }}
           </p>
         </div>
         <!-- Right column -->
         <div class="grid grid-cols-1 space-y-4">
           <p>
-            <span class="key font-bold">Agency:</span>
+            <span class="key font-bold">{{ t('permitCard.agency') }}</span>
             {{ permit.permitType.agency }}
           </p>
           <p>
-            <span class="key font-bold">Business domain:</span>
+            <span class="key font-bold">{{ t('permitCard.businessDomain') }}</span>
             {{ permit.permitType.businessDomain }}
           </p>
           <p>
-            <span class="key font-bold">Source system:</span>
+            <span class="key font-bold">{{ t('permitCard.sourceSystem') }}</span>
             {{ permit.permitType.sourceSystem }}
           </p>
           <p>
-            <span class="key font-bold">Needed:</span>
+            <span class="key font-bold">{{ t('permitCard.needed') }}</span>
             {{ permit.needed }}
           </p>
         </div>
@@ -157,7 +161,7 @@ function isCompleted(authStatus: string | undefined): boolean {
         v-if="permit.permitNote?.length"
         class="pb-2 pt-3"
       >
-        <span class="key font-bold">Latest update for the client:</span>
+        <span class="key font-bold">{{ t('permitCard.latestUpdate') }}</span>
         <div class="pt-3">
           <span class="font-bold">{{ ' ' + formatDateTime(permit.permitNote[0].createdAt) }},</span>
           {{ permit.permitNote[0].note }}
@@ -168,7 +172,7 @@ function isCompleted(authStatus: string | undefined): boolean {
             text
             @click="notesModalVisible = true"
           >
-            Previous updates
+            {{ t('permitCard.previousUpdates') }}
           </Button>
         </div>
       </div>
@@ -183,7 +187,6 @@ function isCompleted(authStatus: string | undefined): boolean {
   <NotesModal
     v-model:visible="notesModalVisible"
     :permit="permit"
-    :permit-name="permit.permitType.name"
   />
 </template>
 

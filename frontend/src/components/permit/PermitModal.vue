@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
 import { date, object, string } from 'yup';
 
 import { DatePicker, InputText, Select } from '@/components/form';
@@ -18,6 +19,11 @@ const { activityId, permit = undefined } = defineProps<{
   activityId: string;
   permit?: Permit;
 }>();
+
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const toast = useToast();
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -79,9 +85,6 @@ const formSchema = object({
 });
 
 // Actions
-const confirm = useConfirm();
-const toast = useToast();
-
 function onDelete() {
   if (permit) {
     confirm.require({
@@ -173,7 +176,7 @@ async function onSubmit(data: PermitForm, { resetForm }) {
         fixed-width
         class="mr-2"
       />
-      <span class="p-dialog-title">{{ permit ? 'Edit' : 'Add' }} permit</span>
+      <span class="p-dialog-title">{{ permit ? t('permitModal.editTitle') : t('permitModal.addTitle') }}</span>
     </template>
 
     <Form

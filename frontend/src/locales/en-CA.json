@@ -166,6 +166,32 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "permitCard": {
+    "addUpdates": "Add updates",
+    "adjudicationDate": "Adjudication date:",
+    "agency": "Agency:",
+    "businessDomain": "Business domain:",
+    "issuedPermitId": "Issued Permit ID:",
+    "lastUpdated": "Last updated:",
+    "latestUpdate": "Latest update for the client:",
+    "needed": "Needed:",
+    "permitState": "Permit state:",
+    "previousUpdates": "Previous Updates",
+    "sourceSystem": "Source system:",
+    "statusVerified": "Status verified date:",
+    "submittedDate": "Submitted date:",
+    "trackingId": "Tracking ID:",
+    "updatedBy": "Updated by:"
+  },
+  "permitModal": {
+    "addTitle": "Add permit",
+    "editTitle": "Edit permit"
+  },
+  "permitNotesModal": {
+    "title": "Add updates",
+    "notePlaceholder": "Please try to keep the note concise, ideally under 60 words.",
+    "noUpdates": "There are no updates."
+  },
   "oidcLoginView": {
     "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",
     "BCServicesCardRequirement": "If you do not have a BC Services Card, you must live in Canada and provide 2 pieces of government-issued ID.",
@@ -217,6 +243,7 @@
     "relatedEnquiries": "Related enquiries",
     "status": "Status",
     "statusVerified": "Status last verified on",
+    "statusNotVerified": "This status has not yet been verified by Navigators",
     "submittedApplications": "Submitted applications",
     "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
     "submittedDate": "Submitted date",
