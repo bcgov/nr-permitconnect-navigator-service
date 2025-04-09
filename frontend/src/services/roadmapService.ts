@@ -1,8 +1,10 @@
 import { appAxios } from './interceptors';
-
+import { useAppStore } from '@/store';
 import { delimitEmails } from '@/utils/utils';
 
 import type { Email } from '@/types';
+
+const PATH = 'roadmap';
 
 export default {
   /**
@@ -22,6 +24,10 @@ export default {
       emailData.bcc = delimitEmails(emailData.bcc);
     }
 
-    return appAxios().put('roadmap', { activityId, selectedFileIds, emailData });
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+      activityId,
+      selectedFileIds,
+      emailData
+    });
   }
 };

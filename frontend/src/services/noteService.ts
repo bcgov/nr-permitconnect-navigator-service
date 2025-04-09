@@ -1,6 +1,9 @@
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 
 import type { Note } from '@/types';
+
+const PATH = 'note';
 
 export default {
   /**
@@ -8,7 +11,7 @@ export default {
    * @returns {Promise} An axios response
    */
   createNote(data: Note) {
-    return appAxios().put('note', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -16,7 +19,7 @@ export default {
    * @returns {Promise} An axios response
    */
   async deleteNote(noteId: string) {
-    return appAxios().delete(`note/${noteId}`);
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteId}`);
   },
 
   /**
@@ -24,7 +27,9 @@ export default {
    * @returns {Promise} An axios response
    */
   async listBringForward(bringForwardState?: string) {
-    return appAxios().get('note/bringForward', { params: { bringForwardState: bringForwardState } });
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/bringForward`, {
+      params: { bringForwardState: bringForwardState }
+    });
   },
 
   /**
@@ -32,7 +37,7 @@ export default {
    * @returns {Promise} An axios response
    */
   async listNotes(activityId: string) {
-    return appAxios().get(`note/list/${activityId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
   },
 
   /**
@@ -40,6 +45,6 @@ export default {
    * @returns {Promise} An axios response
    */
   async updateNote(note: Note) {
-    return appAxios().put(`note/${note.noteId}`, note);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${note.noteId}`, note);
   }
 };
