@@ -113,6 +113,7 @@ const controller = {
         naturalDisaster: data.location.naturalDisaster,
         projectLocation: data.location.projectLocation,
         projectLocationDescription: data.location.projectLocationDescription,
+        geomarkUrl: data.location.geomarkUrl,
         geoJSON: data.location.geoJSON,
         locationPIDs: data.location.ltsaPIDLookup,
         latitude: data.location.latitude,
