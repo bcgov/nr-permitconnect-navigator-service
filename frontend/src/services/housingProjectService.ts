@@ -1,8 +1,11 @@
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 import { delimitEmails } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, Draft, HousingProjectSearchParameters } from '@/types';
+
+const PATH = 'project';
 
 const service: IDraftableProjectService = {
   /**
@@ -10,7 +13,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   createProject(data?: any) {
-    return appAxios().put('housingProject', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase().toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -18,7 +21,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   deleteProject(projectId: string) {
-    return appAxios().delete(`housingProject/${projectId}`);
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -26,7 +29,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   deleteDraft(draftId: string) {
-    return appAxios().delete(`housingProject/draft/${draftId}`);
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -41,7 +44,7 @@ const service: IDraftableProjectService = {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('housingProject/email', emailData);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**
@@ -49,7 +52,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getActivityIds() {
-    return appAxios().get('housingProject/activityIds');
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/activityIds`);
   },
 
   /**
@@ -57,7 +60,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getProjects() {
-    return appAxios().get('housingProject');
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
   },
 
   /**
@@ -65,7 +68,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDraft(draftId: string) {
-    return appAxios().get(`housingProject/draft/${draftId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -73,7 +76,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDrafts() {
-    return appAxios().get('housingProject/draft');
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft`);
   },
 
   /**
@@ -81,7 +84,9 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getStatistics(filters?: any) {
-    return appAxios().get('housingProject/statistics', { params: { ...filters } });
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/statistics`, {
+      params: { ...filters }
+    });
   },
 
   /**
@@ -89,7 +94,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getProject(projectId: string) {
-    return appAxios().get(`housingProject/${projectId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -97,7 +102,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   searchProjects(filters?: HousingProjectSearchParameters) {
-    return appAxios().get('housingProject/search', { params: { ...filters } });
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
   },
 
   /**
@@ -105,7 +110,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   submitDraft(data?: any) {
-    return appAxios().put('housingProject/draft/submit', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/submit`, data);
   },
 
   /**
@@ -113,7 +118,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateDraft(data?: Partial<Draft>) {
-    return appAxios().put('housingProject/draft', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft`, data);
   },
 
   /**
@@ -121,7 +126,9 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
-    return appAxios().patch(`housingProject/${projectId}/delete`, { isDeleted: isDeleted });
+    return appAxios().patch(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}/delete`, {
+      isDeleted: isDeleted
+    });
   },
 
   /**
@@ -129,7 +136,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateProject(projectId: string, data: any) {
-    return appAxios().put(`housingProject/${projectId}`, data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 
