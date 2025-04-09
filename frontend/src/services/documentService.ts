@@ -2,9 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import comsService from './comsService';
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
 
-const PATH = '/document';
+const PATH = 'document';
 const PROJECT_ID = 'Project ID';
 
 export default {
@@ -36,7 +37,7 @@ export default {
       );
 
       // Create document link
-      return await appAxios().put(PATH, {
+      return await appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
         activityId: activityId,
         documentId: comsResponse.data.id,
         filename: comsResponse.data.name,
@@ -59,7 +60,7 @@ export default {
   async deleteDocument(documentId: string, versionId?: string) {
     try {
       await comsService.deleteObject(documentId, versionId);
-      await appAxios().delete(`${PATH}/${documentId}`, {
+      await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
         params: {
           versionId: versionId
         }
@@ -82,6 +83,6 @@ export default {
    * @returns {Promise} An axios response
    */
   async listDocuments(activityId: string) {
-    return appAxios().get(`${PATH}/list/${activityId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
   }
 };

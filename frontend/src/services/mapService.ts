@@ -1,4 +1,7 @@
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
+
+const PATH = 'map';
 
 export default {
   /**
@@ -7,6 +10,6 @@ export default {
    * @returns {Promise<data | null>} The result of calling the get api
    */
   getPIDs(housingProjectId: string) {
-    return appAxios().get(`map/pids/${housingProjectId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/pids/${housingProjectId}`);
   }
 };
