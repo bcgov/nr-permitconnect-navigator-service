@@ -8,7 +8,7 @@ import type { NextFunction, Request, Response } from 'express';
 
 /**
  * @function requireSomeGroup
- * Attempt to assign default group if user has no groups
+ * Attempt to assign default groups if user has no group
  * Rejects the request if user has no assigned group
  * @param {object} req Express request object
  * @param {object} _res Express response object

@@ -1,6 +1,9 @@
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 
 import type { EnquirySearchParameters } from '@/types';
+
+const PATH = 'enquiry';
 
 export default {
   /**
@@ -8,7 +11,7 @@ export default {
    * @returns {Promise} An axios response
    */
   createEnquiry(data?: any) {
-    return appAxios().put('enquiry', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -16,7 +19,7 @@ export default {
    * @returns {Promise} An axios response
    */
   deleteEnquiry(enquiryId: string) {
-    return appAxios().delete(`enquiry/${enquiryId}`);
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
   },
 
   /**
@@ -24,7 +27,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getEnquiries() {
-    return appAxios().get('enquiry');
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
   },
 
   /**
@@ -32,7 +35,7 @@ export default {
    * @returns {Promise} An axios response
    */
   getEnquiry(enquiryId: string) {
-    return appAxios().get(`enquiry/${enquiryId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
   },
 
   /**
@@ -42,7 +45,7 @@ export default {
    * @returns {Promise} An axios response
    */
   async listRelatedEnquiries(activityId: string) {
-    return appAxios().get(`enquiry/list/${activityId}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
   },
 
   /**
@@ -50,7 +53,7 @@ export default {
    * @returns {Promise} An axios response
    */
   searchEnquiries(filters?: EnquirySearchParameters) {
-    return appAxios().get('enquiry/search', { params: { ...filters } });
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
   },
 
   /**
@@ -58,7 +61,9 @@ export default {
    * @returns {Promise} An axios response
    */
   updateIsDeletedFlag(enquiryId: string, isDeleted: boolean) {
-    return appAxios().patch(`enquiry/${enquiryId}/delete`, { isDeleted: isDeleted });
+    return appAxios().patch(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}/delete`, {
+      isDeleted: isDeleted
+    });
   },
 
   /**
@@ -66,6 +71,6 @@ export default {
    * @returns {Promise} An axios response
    */
   updateEnquiry(enquiryId: string, data?: any) {
-    return appAxios().put(`enquiry/${enquiryId}`, data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`, data);
   }
 };
