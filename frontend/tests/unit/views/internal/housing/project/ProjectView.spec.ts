@@ -47,9 +47,9 @@ listRelatedEnquiriesSpy.mockResolvedValue({
 const testHousingProjectId = 'submission123';
 const testActivityId = 'activity123';
 
-const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (projectId = testHousingProjectId, testActivityIdProp = testActivityId) => ({
   props: {
-    housingProjectId: testHousingProjectIdProp,
+    projectId: projectId,
     activityId: testActivityIdProp
   },
   global: {
