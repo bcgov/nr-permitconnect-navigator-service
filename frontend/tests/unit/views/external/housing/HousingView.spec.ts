@@ -35,9 +35,9 @@ afterEach(() => {
 
 const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
 const getDraftsSpy = vi.spyOn(housingProjectService, 'getDrafts');
-const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
-searchHousingProjectsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+searchProjectsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getEnquiriesSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getDraftsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 

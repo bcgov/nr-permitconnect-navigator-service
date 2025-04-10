@@ -83,9 +83,9 @@ describe('ProjectView.vue', () => {
     const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
     const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
     const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-    const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+    const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
     const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
-    const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+    const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
     listRelatedEnquiriesSpy.mockResolvedValue({
       data: 'notTested'
@@ -99,7 +99,7 @@ describe('ProjectView.vue', () => {
       data: 'notTested'
     } as AxiosResponse);
 
-    getHousingProjectSpy.mockResolvedValue({
+    getProjectSpy.mockResolvedValue({
       data: 'notTested'
     } as AxiosResponse);
 
@@ -107,7 +107,7 @@ describe('ProjectView.vue', () => {
       data: [exampleContact]
     } as AxiosResponse);
 
-    searchHousingProjectsSpy.mockResolvedValue({
+    searchProjectsSpy.mockResolvedValue({
       data: [{ activityId: 'activity456' }]
     } as AxiosResponse);
 

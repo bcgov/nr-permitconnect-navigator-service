@@ -31,8 +31,7 @@ import type { Enquiry, Pagination } from '@/types';
 type FilterOption = { label: string; statuses: string[] };
 
 // Props
-const { loading, enquiries } = defineProps<{
-  loading: boolean;
+const { enquiries } = defineProps<{
   enquiries: Array<Enquiry> | undefined;
 }>();
 
@@ -154,7 +153,6 @@ function updateQueryParams() {
   <DataTable
     v-model:filters="filters"
     v-model:selection="selection"
-    :loading="loading"
     :value="filteredEnquiries"
     data-key="enquiryId"
     removable-sort

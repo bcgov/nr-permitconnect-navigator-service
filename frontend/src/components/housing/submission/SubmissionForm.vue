@@ -23,7 +23,7 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService, mapService, userService } from '@/services';
-import { useHousingProjectStore } from '@/store';
+import { useProjectStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
@@ -63,7 +63,7 @@ const { editable = true, housingProject } = defineProps<{
 }>();
 
 // Store
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -237,8 +237,8 @@ const onSaveGeoJson = () => {
   downloadElement.href = downloadLink;
 
   const currentDateTime = formatDateFilename(new Date().toISOString());
-  const projectName = housingProjectStore?.getHousingProject?.projectName ?? '';
-  const projectActivityId = housingProjectStore?.getHousingProject?.activityId ?? '';
+  const projectName = projectStore?.getProject?.projectName ?? '';
+  const projectActivityId = projectStore?.getProject?.activityId ?? '';
 
   downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
   downloadElement.click();
@@ -283,8 +283,8 @@ const onSubmit = async (values: any) => {
     ]);
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
-    const result = await housingProjectService.updateHousingProject(values.housingProjectId, submitData);
-    housingProjectStore.setHousingProject(result.data);
+    const result = await housingProjectService.updateProject(values.housingProjectId, submitData);
+    projectStore.setProject(result.data);
     formRef.value?.resetForm({
       values: {
         ...submitData,

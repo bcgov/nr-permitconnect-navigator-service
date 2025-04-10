@@ -1,5 +1,11 @@
 import { noteController } from '../../../src/controllers';
-import { enquiryService, housingProjectService, noteService, userService } from '../../../src/services';
+import {
+  electrificationProjectService,
+  enquiryService,
+  housingProjectService,
+  noteService,
+  userService
+} from '../../../src/services';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -110,6 +116,7 @@ describe('listBringForward', () => {
 
   // Mock service calls
   const listSpy = jest.spyOn(noteService, 'listBringForward');
+  const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
   const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
   const searchEnquiries = jest.spyOn(enquiryService, 'searchEnquiries');
   const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
@@ -141,7 +148,14 @@ describe('listBringForward', () => {
       }
     ];
 
-    const submissionList = [
+    const electrificationList = [
+      {
+        activityId: '123',
+        projectName: 'Project ABC'
+      }
+    ];
+
+    const housingList = [
       {
         activityId: '123',
         projectName: 'Project ABC'
@@ -157,7 +171,8 @@ describe('listBringForward', () => {
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     listSpy.mockResolvedValue(noteList);
-    searchHousingProjectsSpy.mockResolvedValue(submissionList as any);
+    searchElectrificationProjectsSpy.mockResolvedValue(electrificationList as any);
+    searchHousingProjectsSpy.mockResolvedValue(housingList as any);
     searchEnquiries.mockResolvedValue(enquiriesList as any);
     searchUsersSpy.mockResolvedValue(userList as any);
 
@@ -166,6 +181,8 @@ describe('listBringForward', () => {
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(undefined);
+    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(searchHousingProjectsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);

@@ -13,10 +13,10 @@ import {
   useContactStore,
   useEnquiryStore,
   usePermitStore,
-  useHousingProjectStore
+  useProjectStore
 } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { Initiative, RouteName, StorageKey } from '@/utils/enums/application';
 import { isEmptyObject } from '@/utils/utils';
 
 import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
@@ -90,7 +90,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: [bootstrap, entryRedirect, accessHandler],
+    beforeEnter: [bootstrap, entryRedirect, accessHandler, () => useAppStore().setInitiative(Initiative.PCNS)],
     children: [
       {
         path: '/',
@@ -162,7 +162,7 @@ export default function getRouter() {
     if (isEmptyObject(to.params)) {
       useEnquiryStore().reset();
       usePermitStore().reset();
-      useHousingProjectStore().reset();
+      useProjectStore().reset();
     }
 
     // Backend Redirection Handler

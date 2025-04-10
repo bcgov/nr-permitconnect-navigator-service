@@ -1,27 +1,14 @@
-import { ApplicationStatus } from '@/utils/enums/housing';
-
-import type { Contact } from './Contact';
-import type { IStamps } from '@/interfaces';
-import type { User } from './User';
+import type { IProject } from '../interfaces/IProject';
 
 export type HousingProject = {
-  activityId: string;
   housingProjectId: string;
-  queuePriority: number;
-  submissionType: string;
-  submittedAt: string;
   relatedEnquiries: string;
-  hasRelatedEnquiry: boolean;
-  companyNameRegistered: string;
   consentToFeedback?: boolean;
   isDevelopedInBC: string;
   geoJSON?: any;
-  projectName: string;
-  projectDescription: string;
   projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;
-  multiPermitsNeeded: string;
   otherUnitsDescription: string;
   otherUnits: string;
   hasRentalUnits: string;
@@ -33,7 +20,6 @@ export type HousingProject = {
   nonProfitDescription: string;
   financiallySupportedHousingCoop: string;
   housingCoopDescription: string;
-  streetAddress: string;
   locality: string;
   province: string;
   locationPIDs: string;
@@ -47,10 +33,5 @@ export type HousingProject = {
   bcOnlineCompleted: boolean;
   aaiUpdated: boolean;
   astNotes: string;
-  intakeStatus: string;
-  assignedUserId?: string;
-  applicationStatus: ApplicationStatus;
   waitingOn?: string;
-  contacts: Array<Contact>;
-  user?: User;
-} & Partial<IStamps>;
+} & IProject;

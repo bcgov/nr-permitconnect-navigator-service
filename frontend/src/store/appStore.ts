@@ -1,9 +1,11 @@
+import { Initiative } from '@/utils/enums/application';
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 
 export type AppStoreState = {
+  initiative: Ref<Initiative>;
   loadingCalls: Ref<number>;
   loadingInterval: Ref<ReturnType<typeof setTimeout> | undefined>;
   loadingMode: Ref<'determinate' | 'indeterminate'>;
@@ -13,6 +15,7 @@ export type AppStoreState = {
 export const useAppStore = defineStore('app', () => {
   // State
   const state: AppStoreState = {
+    initiative: ref(Initiative.PCNS),
     loadingCalls: ref(0),
     loadingInterval: ref(undefined),
     loadingMode: ref('indeterminate'),
@@ -21,6 +24,7 @@ export const useAppStore = defineStore('app', () => {
 
   // Getters
   const getters = {
+    getInitiative: computed(() => state.initiative.value),
     getIsLoading: computed(() => state.loadingCalls.value > 0),
     getLoadingCalls: computed(() => state.loadingCalls.value),
     getLoadingMode: computed(() => state.loadingMode.value),
@@ -28,6 +32,10 @@ export const useAppStore = defineStore('app', () => {
   };
 
   // Actions
+  function setInitiative(initiative: Initiative) {
+    state.initiative.value = initiative;
+  }
+
   function beginDeterminateLoading() {
     state.loadingValue.value = 0;
     ++state.loadingCalls.value;
@@ -67,6 +75,7 @@ export const useAppStore = defineStore('app', () => {
     ...getters,
 
     // Actions
+    setInitiative,
     beginDeterminateLoading,
     beginIndeterminateLoading,
     endDeterminateLoading,

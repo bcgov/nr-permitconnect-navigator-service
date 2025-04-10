@@ -61,7 +61,7 @@ onBeforeMount(async () => {
   [enquiries.value, projects.value, drafts.value] = (
     await Promise.all([
       enquiryService.getEnquiries(),
-      housingProjectService.searchHousingProjects({ includeDeleted: false }),
+      housingProjectService.searchProjects({ includeDeleted: false }),
       housingProjectService.getDrafts()
     ])
   ).map((r) => r.data);

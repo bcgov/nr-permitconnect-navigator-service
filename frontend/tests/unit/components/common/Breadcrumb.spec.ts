@@ -5,11 +5,11 @@ import PrimeVue from 'primevue/config';
 
 import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
-import { useHousingProjectStore } from '@/store/housingProjectStore';
+import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 
-import type { Enquiry, Permit, PermitType, Submission } from '@/types';
+import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
 import { RouteName } from '@/utils/enums/application';
 
 let mockRoute: any = {};
@@ -40,9 +40,10 @@ const testEnquiry: Enquiry = {
   atsClientId: '123456'
 };
 
-const testProject: Submission = {
+const testProject: HousingProject = {
   activityId: 'activity456',
-  submissionId: '456',
+  housingProjectId: '456',
+  projectId: '456',
   queuePriority: 1,
   submissionType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
@@ -209,8 +210,8 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const housingProjectStore = useHousingProjectStore();
-    housingProjectStore.setHousingProject(testProject);
+    const projectStore = useProjectStore();
+    projectStore.setProject(testProject);
     await nextTick();
 
     const links = wrapper.findAll('a.breadcrumb-link');
@@ -234,8 +235,8 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const housingProjectStore = useHousingProjectStore();
-    housingProjectStore.setHousingProject(testProject);
+    const projectStore = useProjectStore();
+    projectStore.setProject(testProject);
     await nextTick();
 
     const links = wrapper.findAll('a.breadcrumb-link');

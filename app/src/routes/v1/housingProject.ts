@@ -9,6 +9,7 @@ import { housingProjectValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
+  Contact,
   Draft,
   Email,
   StatisticsFilters,
@@ -156,7 +157,11 @@ router.put(
   hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE),
   hasAccess('housingProjectId'),
   housingProjectValidator.updateHousingProject,
-  (req: Request<never, never, HousingProject>, res: Response, next: NextFunction): void => {
+  (
+    req: Request<never, never, HousingProject & { contacts: Array<Contact> }>,
+    res: Response,
+    next: NextFunction
+  ): void => {
     housingProjectController.updateHousingProject(req, res, next);
   }
 );

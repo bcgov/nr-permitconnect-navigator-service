@@ -66,25 +66,25 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('createHousingProject', () => {
+  describe('createProject', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.createHousingProject();
+      housingProjectService.createProject();
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
     });
 
     it('passes parameters', () => {
-      housingProjectService.createHousingProject({ foo: 'bar' });
+      housingProjectService.createProject({ foo: 'bar' });
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
     });
   });
 
-  describe('deleteHousingProject', () => {
+  describe('deleteProject', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.deleteHousingProject(testID);
+      housingProjectService.deleteProject(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testID}`);
@@ -118,9 +118,9 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('getHousingProjects', () => {
+  describe('getProjects', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.getHousingProjects();
+      housingProjectService.getProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(PATH);
@@ -142,26 +142,26 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('getHousingProject', () => {
+  describe('getProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      housingProjectService.getHousingProject(testActivityId);
+      housingProjectService.getProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
     });
   });
 
-  describe('searchHousingProjects', () => {
+  describe('searchProjects', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.searchHousingProjects({ activityId: [testID] });
+      housingProjectService.searchProjects({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      housingProjectService.searchHousingProjects({ activityId: [testID], includeDeleted: false });
+      housingProjectService.searchProjects({ activityId: [testID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -173,7 +173,7 @@ describe('housingProjectService', () => {
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      housingProjectService.searchHousingProjects({ includeDeleted: true });
+      housingProjectService.searchProjects({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -211,7 +211,7 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('updateHousingProject', () => {
+  describe('updateProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
       const testObj = {
@@ -219,7 +219,7 @@ describe('housingProjectService', () => {
         date1: new Date().toISOString(),
         field2: 'testField2'
       };
-      housingProjectService.updateHousingProject(testActivityId, testObj);
+      housingProjectService.updateProject(testActivityId, testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);

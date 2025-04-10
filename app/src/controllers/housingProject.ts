@@ -18,6 +18,7 @@ import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
+  Contact,
   CurrentContext,
   Draft,
   Email,
@@ -455,14 +456,19 @@ const controller = {
     }
   },
 
-  updateHousingProject: async (req: Request<never, never, HousingProject>, res: Response, next: NextFunction) => {
+  updateHousingProject: async (
+    req: Request<never, never, HousingProject & { contacts: Array<Contact> }>,
+    res: Response,
+    next: NextFunction
+  ) => {
     try {
       // If Navigator created empty housing project we need to assign contactIds on save
-      req.body.contacts = req.body.contacts.map((x) => {
+      const contacts = req.body.contacts?.map((x) => {
         if (!x.contactId) x.contactId = uuidv4();
         return x;
       });
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
+
+      if (contacts) await contactService.upsertContacts(contacts, req.currentContext, req.body.activityId);
 
       const response = await housingProjectService.updateHousingProject({
         ...req.body,

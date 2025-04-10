@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import SubmissionListNavigatorElectrification from '@/components/electrification/submission/SubmissionListNavigatorElectrification.vue'; // eslint-disable-line max-len
+import SubmissionListNavigatorHousing from '@/components/housing/submission/SubmissionListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {
   Button,
-  Column,
   DataTable,
   FilterMatchMode,
   IconField,
@@ -15,25 +16,28 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { housingProjectService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
-import { Action, BasicResponse, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
-import { formatDate } from '@/utils/formatters';
+import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Pagination, HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
 
 // Types
 type FilterOption = { label: string; statuses: string[] };
 
 // Props
-const { loading, submissions } = defineProps<{
-  loading: boolean;
-  submissions: Array<HousingProject> | undefined;
+const { submissions } = defineProps<{
+  submissions: Array<ElectrificationProject | HousingProject> | undefined;
 }>();
+
+// Injections
+const projectResource = inject(resourceKey);
+const projectRoute = inject(projectRouteNameKey);
+const projectService = inject(projectServiceKey);
 
 // Composables
 const confirmDialog = useConfirm();
@@ -58,7 +62,6 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
-const dataTable = ref(null);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -66,7 +69,7 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selection: Ref<HousingProject | undefined> = ref(undefined);
+const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 
 const filteredSubmissions = computed(() => {
@@ -90,11 +93,13 @@ function handleCreateNewActivity() {
     message: 'Please confirm that you want to create a new submission.',
     accept: async () => {
       try {
-        const response = (await housingProjectService.createHousingProject()).data;
+        if (!projectService) throw new Error('No service');
+
+        const response = (await projectService.createProject()).data;
         if (response?.activityId) {
           router.push({
-            name: RouteName.INT_HOUSING_PROJECT,
-            params: { housingProjectId: response.housingProjectId }
+            name: projectRoute,
+            params: { projectId: response.projectId }
           });
         }
       } catch (e: any) {
@@ -112,7 +117,7 @@ const filters = ref({
   global: { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 
-function onDelete(housingProjectId: string, activityId: string) {
+function onDelete(projectId: string, activityId: string) {
   confirmDialog.require({
     message: 'Please confirm that you want to delete this project',
     header: 'Delete project?',
@@ -121,10 +126,10 @@ function onDelete(housingProjectId: string, activityId: string) {
     rejectLabel: 'Cancel',
     rejectProps: { outlined: true },
     accept: () => {
-      housingProjectService
-        .updateIsDeletedFlag(housingProjectId, true)
+      projectService
+        ?.updateIsDeletedFlag(projectId, true)
         .then(() => {
-          emit('submission:delete', housingProjectId, activityId);
+          emit('submission:delete', projectId, activityId);
           selection.value = undefined;
           toast.success('Project deleted');
         })
@@ -133,22 +138,9 @@ function onDelete(housingProjectId: string, activityId: string) {
   });
 }
 
-function isFinanciallySupported(data: HousingProject) {
-  if (
-    data.financiallySupportedBC === BasicResponse.YES ||
-    data.financiallySupportedHousingCoop === BasicResponse.YES ||
-    data.financiallySupportedIndigenous === BasicResponse.YES ||
-    data.financiallySupportedNonProfit === BasicResponse.YES
-  ) {
-    return BasicResponse.YES;
-  } else {
-    return BasicResponse.NO;
-  }
-}
-
 function updateQueryParams() {
   router.replace({
-    name: RouteName.INT_HOUSING,
+    name: router.currentRoute.value.name,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
@@ -168,12 +160,10 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
-    ref="dataTable"
     v-model:filters="filters"
     v-model:selection="selection"
-    :loading="loading"
     :value="filteredSubmissions"
-    data-key="housingProjectId"
+    data-key="projectId"
     removable-sort
     scrollable
     responsive-layout="scroll"
@@ -238,7 +228,7 @@ onBeforeMount(() => {
           </IconField>
         </div>
         <Button
-          v-if="authzStore.can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.CREATE)"
+          v-if="authzStore.can(useAppStore().getInitiative, projectResource, Action.CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
@@ -246,197 +236,17 @@ onBeforeMount(() => {
         />
       </div>
     </template>
-    <Column
-      field="projectName"
-      header="Project name"
-      :sortable="true"
-      style="min-width: 200px"
-      frozen
-    >
-      <template #body="{ data }">
-        <div :data-projectName="data.projectName">
-          <router-link
-            :to="{
-              name: RouteName.INT_HOUSING_PROJECT,
-              params: { housingProjectId: data.housingProjectId }
-            }"
-          >
-            {{ data.projectName }}
-          </router-link>
-        </div>
-      </template>
-    </Column>
-    <Column
-      field="activityId"
-      header="Project ID"
-      :sortable="true"
-      style="min-width: 133px"
-      frozen
-    >
-      <template #body="{ data }">
-        <div :data-activityId="data.activityId">
-          <div v-if="data.projectName">
-            {{ data.activityId }}
-          </div>
-          <div v-else>
-            <router-link
-              :to="{
-                name: RouteName.INT_HOUSING_PROJECT,
-                params: { housingProjectId: data.housingProjectId }
-              }"
-            >
-              {{ data.activityId }}
-            </router-link>
-          </div>
-        </div>
-      </template>
-    </Column>
-    <Column
-      field="contacts.0.firstName"
-      header="First name"
-      :sortable="true"
-      style="min-width: 150px"
+
+    <SubmissionListNavigatorHousing
+      v-if="useAppStore().getInitiative === Initiative.HOUSING"
+      :on-delete-callback="onDelete"
+      :selection="selection"
     />
-    <Column
-      field="contacts.0.lastName"
-      header="Last name"
-      :sortable="true"
-      style="min-width: 150px"
+    <SubmissionListNavigatorElectrification
+      v-if="useAppStore().getInitiative === Initiative.ELECTRIFICATION"
+      :on-delete-callback="onDelete"
+      :selection="selection"
     />
-    <Column
-      field="companyNameRegistered"
-      header="Company"
-      :sortable="true"
-      style="min-width: 150px"
-    />
-    <Column
-      field="streetAddress"
-      header="Location address"
-      :sortable="true"
-      style="min-width: 250px"
-    >
-      <template #body="{ data }">
-        {{ [data.streetAddress, data.locality, data.province].filter((str) => str?.trim()).join(', ') }}
-      </template>
-    </Column>
-    <Column
-      field="submittedAt"
-      header="Submitted date"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        {{ formatDate(data?.submittedAt) }}
-      </template>
-    </Column>
-    <Column
-      field="submissionType"
-      header="Submission type"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="queuePriority"
-      header="Priority"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="multiPermitsNeeded"
-      header="Multi-authorization project"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="user.fullName"
-      header="Assigned to"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="hasRelatedEnquiry"
-      header="Related enquiry"
-      :sortable="true"
-      style="min-width: 200px"
-    >
-      <template #body="{ data }">
-        {{ data.hasRelatedEnquiry ? BasicResponse.YES : BasicResponse.NO }}
-      </template>
-    </Column>
-    <Column
-      field="singleFamilyUnits"
-      header="Single family units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="multiFamilyUnits"
-      header="Multi family units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="otherUnitsDescription"
-      header="Other type"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="otherUnits"
-      header="Other type units"
-      :sortable="true"
-      style="min-width: 200px"
-    />
-    <Column
-      field="hasRentalUnits"
-      header="Rental"
-      :sortable="true"
-      style="min-width: 125px"
-    />
-    <Column
-      field="rentalUnits"
-      header="Rental units"
-      :sortable="true"
-      style="min-width: 150px"
-    />
-    <Column
-      field="financiallySupported"
-      header="Financially supported"
-      :sortable="true"
-      style="min-width: 225px"
-    >
-      <template #body="{ data }">
-        {{ isFinanciallySupported(data) }}
-      </template>
-    </Column>
-    <Column
-      field="naturalDisaster"
-      header="Affected by natural disaster"
-      :sortable="true"
-      style="min-width: 275px"
-    />
-    <Column
-      field="action"
-      header="Action"
-      class="text-center header-center"
-      style="min-width: 75px"
-      frozen
-      align-frozen="right"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
-          aria-label="Delete submission"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.DELETE)"
-          @click="
-            onDelete(data.housingProjectId, data.activityId);
-            selection = data;
-          "
-        >
-          <font-awesome-icon icon="fa-solid fa-trash" />
-        </Button>
-      </template>
-    </Column>
   </DataTable>
 </template>
 <style scoped lang="scss">
