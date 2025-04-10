@@ -27,8 +27,8 @@ type PermitFilterConfig = {
 };
 
 // Props
-const { housingProjectId } = defineProps<{
-  housingProjectId: string;
+const { projectId } = defineProps<{
+  projectId: string;
 }>();
 
 // Composables
@@ -104,7 +104,7 @@ function permitFilter(config: PermitFilterConfig) {
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-    params: { housingProjectId }
+    params: { projectId }
   });
 }
 
@@ -112,7 +112,7 @@ onBeforeMount(async () => {
   let enquiriesValue, projectValue: any;
 
   try {
-    [projectValue] = (await Promise.all([housingProjectService.getProject(housingProjectId)])).map((r) => r.data);
+    [projectValue] = (await Promise.all([housingProjectService.getProject(projectId)])).map((r) => r.data);
     if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {
     toast.error(t('e.housing.projectView.toastProjectLoadFailed'));
@@ -327,7 +327,7 @@ onBeforeMount(async () => {
       <EnquiryListProponent
         :loading="loading"
         :enquiries="getRelatedEnquiries"
-        :submission-id="housingProjectId"
+        :submission-id="projectId"
       />
     </div>
   </div>

@@ -6,7 +6,7 @@ import { StorageKey } from '@/utils/enums/application';
 const storageType = window.sessionStorage;
 
 const testData: string = 'testData';
-const PATH = '/config';
+const PATH = 'config';
 const axiosConfig = {
   headers: {
     'Cache-Control': 'no-cache',
@@ -52,7 +52,7 @@ describe('Config Store', () => {
       await ConfigService.init();
 
       expect(axios.get).toHaveBeenCalledOnce();
-      expect(axios.get).toHaveBeenCalledWith(PATH, axiosConfig);
+      expect(axios.get).toHaveBeenCalledWith(`/${PATH}`, axiosConfig);
       expect(storageType.getItem(StorageKey.CONFIG)).toBe(`"${testData}"`);
     });
 

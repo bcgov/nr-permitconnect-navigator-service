@@ -1,16 +1,16 @@
+import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+
 import { enquiryService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { useAppStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
-}));
+// Constants
+const PATH = 'enquiry';
 
-const isDeleted = true;
+const IS_DELETED = true;
 
-const testActivityId = '25357C4A';
+const TEST_ACTIVITY_ID = '25357C4A';
 
 const testEnquiry = {
   enquiryId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
@@ -35,10 +35,18 @@ const testEnquiry = {
   ]
 };
 
+// Mocks
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
 const patchSpy = vi.fn();
 const putSpy = vi.fn();
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn()
+  })
+}));
 
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
@@ -48,64 +56,86 @@ vi.mocked(appAxios).mockReturnValue({
   put: putSpy
 } as any);
 
+// Tests
 beforeEach(() => {
+  setActivePinia(createPinia());
+
   vi.clearAllMocks();
 });
 
 describe('enquiryService', () => {
-  it('calls deleteEnquiry with correct data', () => {
-    enquiryService.deleteEnquiry(testEnquiry.enquiryId);
+  let appStore: StoreGeneric;
 
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
-  });
+  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
+    '$initiative',
+    ({ initiative }) => {
+      beforeEach(() => {
+        appStore = useAppStore();
+        appStore.setInitiative(initiative);
+      });
 
-  it('calls getEnquiries', () => {
-    enquiryService.getEnquiries();
+      it('calls deleteEnquiry with correct data', () => {
+        enquiryService.deleteEnquiry(testEnquiry.enquiryId);
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('enquiry');
-  });
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
+      });
 
-  it('calls getEnquiry with correct data', () => {
-    enquiryService.getEnquiry(testEnquiry.enquiryId);
+      it('calls getEnquiries', () => {
+        enquiryService.getEnquiries();
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`);
-  });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`);
+      });
 
-  it('calls listRelatedEnquiries with correct data', () => {
-    enquiryService.listRelatedEnquiries(testActivityId);
+      it('calls getEnquiry with correct data', () => {
+        enquiryService.getEnquiry(testEnquiry.enquiryId);
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`enquiry/list/${testActivityId}`);
-  });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
+      });
 
-  it('calls createEnquiry with correct data', () => {
-    enquiryService.createEnquiry(testEnquiry);
+      it('calls listRelatedEnquiries with correct data', () => {
+        enquiryService.listRelatedEnquiries(TEST_ACTIVITY_ID);
 
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('enquiry', testEnquiry);
-  });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ACTIVITY_ID}`);
+      });
 
-  it('calls searchEnquiries with correct data', () => {
-    enquiryService.searchEnquiries({ activityId: [testActivityId] });
+      it('calls createEnquiry with correct data', () => {
+        enquiryService.createEnquiry(testEnquiry);
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('enquiry/search', { params: { activityId: [testActivityId] } });
-  });
+        expect(putSpy).toHaveBeenCalledTimes(1);
+        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testEnquiry);
+      });
 
-  it('calls updateIsDeletedFlag with correct data', () => {
-    enquiryService.updateIsDeletedFlag(testEnquiry.enquiryId, isDeleted);
+      it('calls searchEnquiries with correct data', () => {
+        enquiryService.searchEnquiries({ activityId: [TEST_ACTIVITY_ID] });
 
-    expect(patchSpy).toHaveBeenCalledTimes(1);
-    expect(patchSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}/delete`, { isDeleted: isDeleted });
-  });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/search`, {
+          params: { activityId: [TEST_ACTIVITY_ID] }
+        });
+      });
 
-  it('calls updateEnquiry with correct data', () => {
-    enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
+      it('calls updateIsDeletedFlag with correct data', () => {
+        enquiryService.updateIsDeletedFlag(testEnquiry.enquiryId, IS_DELETED);
 
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(`enquiry/${testEnquiry.enquiryId}`, testEnquiry);
-  });
+        expect(patchSpy).toHaveBeenCalledTimes(1);
+        expect(patchSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}/delete`, {
+          isDeleted: IS_DELETED
+        });
+      });
+
+      it('calls updateEnquiry with correct data', () => {
+        enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
+
+        expect(putSpy).toHaveBeenCalledTimes(1);
+        expect(putSpy).toHaveBeenCalledWith(
+          `${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`,
+          testEnquiry
+        );
+      });
+    }
+  );
 });
