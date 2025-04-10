@@ -39,9 +39,9 @@ import type { Ref } from 'vue';
 import type { Document, ElectrificationProject, Note } from '@/types';
 
 // Props
-const { initialTab = '0', electrificationProjectId } = defineProps<{
+const { initialTab = '0', projectId } = defineProps<{
   initialTab?: string;
-  electrificationProjectId: string;
+  projectId: string;
 }>();
 
 // Constants
@@ -123,7 +123,7 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
 }
 
 onBeforeMount(async () => {
-  const project = (await electrificationProjectService.getProject(electrificationProjectId)).data;
+  const project = (await electrificationProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
@@ -174,7 +174,7 @@ onBeforeMount(async () => {
         router.push({
           name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
           params: {
-            electrificationProjectId: electrificationProjectId
+            projectId: projectId
           }
         })
       "

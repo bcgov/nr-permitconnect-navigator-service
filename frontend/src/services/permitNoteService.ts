@@ -1,6 +1,9 @@
+import { useAppStore } from '@/store';
 import { appAxios } from './interceptors';
 
 import type { PermitNote } from '@/types';
+
+const PATH = 'permit/note';
 
 export default {
   /**
@@ -8,7 +11,7 @@ export default {
    * @returns {Promise} An axios response
    */
   createPermitNote(data: Partial<PermitNote>) {
-    return appAxios().put('permit/note', data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -16,7 +19,7 @@ export default {
    * @returns {Promise} An axios response
    */
   deletePermitNote(permitNoteId: string) {
-    return appAxios().delete(`permit/note/${permitNoteId}`);
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${permitNoteId}`);
   },
 
   /**
@@ -24,6 +27,6 @@ export default {
    * @returns {Promise} An axios response
    */
   updatePermit(data: PermitNote) {
-    return appAxios().put(`permit/note/${data.permitNoteId}`, data);
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${data.permitNoteId}`, data);
   }
 };

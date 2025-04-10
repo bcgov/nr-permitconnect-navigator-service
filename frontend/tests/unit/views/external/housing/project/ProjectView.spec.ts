@@ -52,9 +52,9 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
+const wrapperSettings = (projectId = testHousingProjectId) => ({
   props: {
-    housingProjectId: testHousingProjectIdProp
+    projectId: projectId
   },
   global: {
     plugins: [

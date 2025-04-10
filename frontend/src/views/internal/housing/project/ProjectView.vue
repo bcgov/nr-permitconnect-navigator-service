@@ -181,7 +181,7 @@ onBeforeMount(async () => {
         router.push({
           name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
           params: {
-            housingProjectId: projectId
+            projectId: projectId
           }
         })
       "

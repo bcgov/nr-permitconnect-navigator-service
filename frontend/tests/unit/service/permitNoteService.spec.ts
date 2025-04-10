@@ -1,14 +1,14 @@
+import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+
 import permitNoteService from '@/services/permitNoteService';
 import { appAxios } from '@/services/interceptors';
+import { useAppStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
-}));
+// Constants
+const PATH = 'permit/note';
 
-const testPermitNote = {
+const TEST_PERMIT_NOTE = {
   permitNoteId: 'note123',
   permitId: 'permit456',
   note: 'This is a test note.',
@@ -19,9 +19,17 @@ const testPermitNote = {
   updatedAt: new Date().toISOString()
 };
 
+// Mocks
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
 const putSpy = vi.fn();
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn()
+  })
+}));
 
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
@@ -30,35 +38,55 @@ vi.mocked(appAxios).mockReturnValue({
   put: putSpy
 } as any);
 
+// Tests
 beforeEach(() => {
+  setActivePinia(createPinia());
+
   vi.clearAllMocks();
 });
 
 describe('permitNoteService', () => {
-  describe('createPermitNote', () => {
-    it('calls with given data', () => {
-      permitNoteService.createPermitNote(testPermitNote);
+  let appStore: StoreGeneric;
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith('permit/note', testPermitNote);
-    });
-  });
+  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
+    '$initiative',
+    ({ initiative }) => {
+      beforeEach(() => {
+        appStore = useAppStore();
+        appStore.setInitiative(initiative);
+      });
 
-  describe('deletePermitNote', () => {
-    it('calls with given data', () => {
-      permitNoteService.deletePermitNote(testPermitNote.permitNoteId);
+      describe('createPermitNote', () => {
+        it('calls with given data', () => {
+          permitNoteService.createPermitNote(TEST_PERMIT_NOTE);
 
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`permit/note/${testPermitNote.permitNoteId}`);
-    });
-  });
+          expect(putSpy).toHaveBeenCalledTimes(1);
+          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_NOTE);
+        });
+      });
 
-  describe('updatePermitNote', () => {
-    it('calls with given data', () => {
-      permitNoteService.updatePermit(testPermitNote);
+      describe('deletePermitNote', () => {
+        it('calls with given data', () => {
+          permitNoteService.deletePermitNote(TEST_PERMIT_NOTE.permitNoteId);
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`permit/note/${testPermitNote.permitNoteId}`, testPermitNote);
-    });
-  });
+          expect(deleteSpy).toHaveBeenCalledTimes(1);
+          expect(deleteSpy).toHaveBeenCalledWith(
+            `${initiative.toLowerCase()}/${PATH}/${TEST_PERMIT_NOTE.permitNoteId}`
+          );
+        });
+      });
+
+      describe('updatePermitNote', () => {
+        it('calls with given data', () => {
+          permitNoteService.updatePermit(TEST_PERMIT_NOTE);
+
+          expect(putSpy).toHaveBeenCalledTimes(1);
+          expect(putSpy).toHaveBeenCalledWith(
+            `${initiative.toLowerCase()}/${PATH}/${TEST_PERMIT_NOTE.permitNoteId}`,
+            TEST_PERMIT_NOTE
+          );
+        });
+      });
+    }
+  );
 });

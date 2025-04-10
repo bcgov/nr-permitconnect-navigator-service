@@ -1,17 +1,12 @@
+import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+
 import { electrificationProjectService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { useAppStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
-}));
-
-const PATH = 'electrificationProject';
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
-const patchSpy = vi.fn();
-const putSpy = vi.fn();
+// Constants
+const PATH = 'project';
 
 const testID = 'foobar';
 const testObj = {
@@ -44,6 +39,18 @@ const testEmail = {
   tag: 'test'
 };
 
+// Mocks
+const getSpy = vi.fn();
+const deleteSpy = vi.fn();
+const patchSpy = vi.fn();
+const putSpy = vi.fn();
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn()
+  })
+}));
+
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
@@ -52,17 +59,27 @@ vi.mocked(appAxios).mockReturnValue({
   put: putSpy
 } as any);
 
+// Tests
 beforeEach(() => {
+  setActivePinia(createPinia());
+
   vi.clearAllMocks();
 });
 
 describe('electrificationProjectService', () => {
+  let appStore: StoreGeneric;
+
+  beforeEach(() => {
+    appStore = useAppStore();
+    appStore.setInitiative(Initiative.ELECTRIFICATION);
+  });
+
   describe('getActivityIds', () => {
     it('calls correct endpoint', () => {
       electrificationProjectService.getActivityIds();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/activityIds`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/activityIds`);
     });
   });
 
@@ -71,14 +88,14 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.createProject();
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, undefined);
     });
 
     it('passes parameters', () => {
       electrificationProjectService.createProject({ foo: 'bar' });
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, { foo: 'bar' });
     });
   });
 
@@ -87,7 +104,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.deleteProject(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
     });
   });
 
@@ -96,7 +113,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.deleteDraft(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${testID}`);
     });
   });
 
@@ -105,7 +122,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.getDraft(testID);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${testID}`);
     });
   });
 
@@ -114,7 +131,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.getDrafts();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`);
     });
   });
 
@@ -123,7 +140,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.getProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(PATH);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`);
     });
   });
 
@@ -138,7 +155,9 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.getStatistics(testFilter);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/statistics`, { params: testFilter });
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/statistics`, {
+        params: testFilter
+      });
     });
   });
 
@@ -148,7 +167,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.getProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`);
     });
   });
 
@@ -157,14 +176,16 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.searchProjects({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
+        params: { activityId: [testID] }
+      });
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
       electrificationProjectService.searchProjects({ activityId: [testID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
         params: {
           activityId: [testID],
           includeDeleted: false
@@ -176,7 +197,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.searchProjects({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
         params: {
           includeDeleted: true
         }
@@ -189,7 +210,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.submitDraft(testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft/submit`, testObj);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, testObj);
     });
   });
 
@@ -198,7 +219,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.updateDraft(testDraft);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft`, testDraft);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);
     });
   });
 
@@ -207,7 +228,9 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.updateIsDeletedFlag(testID, true);
 
       expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${PATH}/${testID}/delete`, { isDeleted: true });
+      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}/delete`, {
+        isDeleted: true
+      });
     });
   });
 
@@ -222,7 +245,10 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.updateProject(testActivityId, testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);
+      expect(putSpy).toHaveBeenCalledWith(
+        `${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`,
+        testObj
+      );
     });
   });
 
@@ -231,7 +257,7 @@ describe('electrificationProjectService', () => {
       electrificationProjectService.emailConfirmation(testEmail);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/email`, testEmail);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, testEmail);
     });
   });
 });

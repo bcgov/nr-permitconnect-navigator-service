@@ -8,7 +8,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const PATH = '/object';
+const PATH = 'object';
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
 const putSpy = vi.fn();

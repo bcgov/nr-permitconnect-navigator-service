@@ -1,17 +1,16 @@
+import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
 import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { Permit, PermitType } from '@/types';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
-}));
+// Constants
+const PATH = 'permit';
+const TEST_ID = 'testID';
 
-const testPermitType: PermitType = {
+const TEST_PERMIT_TYPE: PermitType = {
   permitTypeId: 1,
   agency: 'Water, Land and Resource Stewardship',
   division: 'Forest Resiliency and Archaeology',
@@ -27,7 +26,7 @@ const testPermitType: PermitType = {
   sourceSystemAcronym: 'APTS'
 };
 
-const testPermit1: Permit = {
+const TEST_PERMIT_1: Permit = {
   permitId: 'permitId',
   permitTypeId: 0,
   activityId: 'activityId',
@@ -38,17 +37,20 @@ const testPermit1: Permit = {
   status: 'status',
   submittedDate: new Date().toISOString(),
   adjudicationDate: new Date().toISOString(),
-  permitType: testPermitType
+  permitType: TEST_PERMIT_TYPE
 };
 
-const PATH = 'permit';
-const TEST_ID = 'testID';
-
+// Mocks
 const getSpy = vi.fn();
 const putSpy = vi.fn();
 const deleteSpy = vi.fn();
 
-const updatePermitSpy = vi.spyOn(permitService, 'updatePermit');
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn()
+  })
+}));
 
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
@@ -57,71 +59,94 @@ vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy
 } as any);
 
+// Spies
+const updatePermitSpy = vi.spyOn(permitService, 'updatePermit');
+
+// Tests
 beforeEach(() => {
+  setActivePinia(createPinia());
+
   vi.clearAllMocks();
 });
 
-describe('permitService test', () => {
-  it('calls creates a permit', async () => {
-    await permitService.createPermit(testPermit1);
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(PATH, testPermit1);
-  });
+describe('permitService', () => {
+  let appStore: StoreGeneric;
 
-  it('calls delete permit', async () => {
-    await permitService.deletePermit(TEST_ID);
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${TEST_ID}`);
-  });
+  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
+    '$initiative',
+    ({ initiative }) => {
+      beforeEach(() => {
+        appStore = useAppStore();
+        appStore.setInitiative(initiative);
+      });
 
-  it('calls delete permit with wrong ID', async () => {
-    await permitService.deletePermit('wrongId');
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).not.toHaveBeenCalledWith(`${PATH}/${TEST_ID}`);
-  });
+      it('calls creates a permit', async () => {
+        await permitService.createPermit(TEST_PERMIT_1);
+        expect(putSpy).toHaveBeenCalledTimes(1);
+        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
+      });
 
-  it('calls get permit type list', async () => {
-    await permitService.getPermitTypes(Initiative.HOUSING);
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/types`, { params: { initiative: Initiative.HOUSING } });
-  });
+      it('calls delete permit', async () => {
+        await permitService.deletePermit(TEST_ID);
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_ID}`);
+      });
 
-  it('calls get permit list', async () => {
-    await permitService.listPermits({ activityId: TEST_ID });
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}`, { params: { activityId: TEST_ID } });
-  });
+      it('calls delete permit with wrong ID', async () => {
+        await permitService.deletePermit('wrongId');
+        expect(deleteSpy).toHaveBeenCalledTimes(1);
+        expect(deleteSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_ID}`);
+      });
 
-  it('calls get permit list with wrong ID', async () => {
-    await permitService.listPermits({ activityId: 'wrongId' });
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).not.toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
-  });
+      it('calls get permit type list', async () => {
+        await permitService.getPermitTypes(Initiative.HOUSING);
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/types`, {
+          params: { initiative: Initiative.HOUSING }
+        });
+      });
 
-  it('calls put permit', async () => {
-    await permitService.updatePermit(testPermit1);
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testPermit1.permitId}`, testPermit1);
-  });
+      it('calls get permit list', async () => {
+        await permitService.listPermits({ activityId: TEST_ID });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, { params: { activityId: TEST_ID } });
+      });
 
-  it('calls put permit with wrong object type', async () => {
-    const modifiedPermit = { ...testPermit1 } as any;
-    delete modifiedPermit.permitTypeId;
+      it('calls get permit list with wrong ID', async () => {
+        await permitService.listPermits({ activityId: 'wrongId' });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ID}`);
+      });
 
-    await permitService.updatePermit(modifiedPermit);
-    expect(updatePermitSpy).toHaveBeenCalledTimes(1);
-    expect(updatePermitSpy).toThrow();
-  });
+      it('calls put permit', async () => {
+        await permitService.updatePermit(TEST_PERMIT_1);
+        expect(putSpy).toHaveBeenCalledTimes(1);
+        expect(putSpy).toHaveBeenCalledWith(
+          `${initiative.toLowerCase()}/${PATH}/${TEST_PERMIT_1.permitId}`,
+          TEST_PERMIT_1
+        );
+      });
 
-  it('calls get permit', async () => {
-    await permitService.listPermits({ activityId: TEST_ID });
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}`, { params: { activityId: TEST_ID } });
-  });
+      it('calls put permit with wrong object type', async () => {
+        const modifiedPermit = { ...TEST_PERMIT_1 } as any;
+        delete modifiedPermit.permitTypeId;
 
-  it('calls get permit with wrong ID', async () => {
-    await permitService.listPermits({ activityId: 'wrongId' });
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).not.toHaveBeenCalledWith(`${PATH}/list/${TEST_ID}`);
-  });
+        await permitService.updatePermit(modifiedPermit);
+        expect(updatePermitSpy).toHaveBeenCalledTimes(1);
+        expect(updatePermitSpy).toThrow();
+      });
+
+      it('calls get permit', async () => {
+        await permitService.listPermits({ activityId: TEST_ID });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, { params: { activityId: TEST_ID } });
+      });
+
+      it('calls get permit with wrong ID', async () => {
+        await permitService.listPermits({ activityId: 'wrongId' });
+        expect(getSpy).toHaveBeenCalledTimes(1);
+        expect(getSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ID}`);
+      });
+    }
+  );
 });

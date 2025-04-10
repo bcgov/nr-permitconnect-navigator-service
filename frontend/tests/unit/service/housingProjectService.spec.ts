@@ -1,26 +1,21 @@
 import { housingProjectService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { useAppStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
+import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
-}));
+// Constants
+const PATH = 'project';
 
-const PATH = 'housingProject';
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
-const patchSpy = vi.fn();
-const putSpy = vi.fn();
+const TEST_ID = 'foobar';
 
-const testID = 'foobar';
-const testObj = {
+const TEST_OBJ = {
   field1: 'testField1',
   date1: new Date().toISOString(),
   field2: 'testField2'
 };
 
-const testDraft = {
+const TEST_DRAFT = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
@@ -31,7 +26,7 @@ const testDraft = {
   updatedAt: new Date().toISOString()
 };
 
-const testEmail = {
+const TEST_EMAIL = {
   bodyType: 'text/plain',
   body: 'This is a test email body.',
   from: 'sender@example.com',
@@ -44,6 +39,18 @@ const testEmail = {
   tag: 'test'
 };
 
+// Mocks
+const getSpy = vi.fn();
+const deleteSpy = vi.fn();
+const patchSpy = vi.fn();
+const putSpy = vi.fn();
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({
+    push: vi.fn()
+  })
+}));
+
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
@@ -52,17 +59,27 @@ vi.mocked(appAxios).mockReturnValue({
   put: putSpy
 } as any);
 
+// Tests
 beforeEach(() => {
+  setActivePinia(createPinia());
+
   vi.clearAllMocks();
 });
 
 describe('housingProjectService', () => {
+  let appStore: StoreGeneric;
+
+  beforeEach(() => {
+    appStore = useAppStore();
+    appStore.setInitiative(Initiative.HOUSING);
+  });
+
   describe('getActivityIds', () => {
     it('calls correct endpoint', () => {
       housingProjectService.getActivityIds();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/activityIds`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/activityIds`);
     });
   });
 
@@ -71,41 +88,41 @@ describe('housingProjectService', () => {
       housingProjectService.createProject();
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, undefined);
     });
 
     it('passes parameters', () => {
       housingProjectService.createProject({ foo: 'bar' });
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, { foo: 'bar' });
     });
   });
 
   describe('deleteProject', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.deleteProject(testID);
+      housingProjectService.deleteProject(TEST_ID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
     });
   });
 
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.deleteDraft(testID);
+      housingProjectService.deleteDraft(TEST_ID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
     });
   });
 
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.getDraft(testID);
+      housingProjectService.getDraft(TEST_ID);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft/${testID}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
     });
   });
 
@@ -114,7 +131,7 @@ describe('housingProjectService', () => {
       housingProjectService.getDrafts();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/draft`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`);
     });
   });
 
@@ -123,7 +140,7 @@ describe('housingProjectService', () => {
       housingProjectService.getProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(PATH);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`);
     });
   });
 
@@ -138,7 +155,9 @@ describe('housingProjectService', () => {
       housingProjectService.getStatistics(testFilter);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/statistics`, { params: testFilter });
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/statistics`, {
+        params: testFilter
+      });
     });
   });
 
@@ -148,25 +167,27 @@ describe('housingProjectService', () => {
       housingProjectService.getProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`);
     });
   });
 
   describe('searchProjects', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.searchProjects({ activityId: [testID] });
+      housingProjectService.searchProjects({ activityId: [TEST_ID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
+        params: { activityId: [TEST_ID] }
+      });
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      housingProjectService.searchProjects({ activityId: [testID], includeDeleted: false });
+      housingProjectService.searchProjects({ activityId: [TEST_ID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
         params: {
-          activityId: [testID],
+          activityId: [TEST_ID],
           includeDeleted: false
         }
       });
@@ -176,7 +197,7 @@ describe('housingProjectService', () => {
       housingProjectService.searchProjects({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
         params: {
           includeDeleted: true
         }
@@ -186,52 +207,54 @@ describe('housingProjectService', () => {
 
   describe('submitDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.submitDraft(testObj);
+      housingProjectService.submitDraft(TEST_OBJ);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft/submit`, testObj);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/submit`, TEST_OBJ);
     });
   });
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.updateDraft(testDraft);
+      housingProjectService.updateDraft(TEST_DRAFT);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/draft`, testDraft);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
     });
   });
 
   describe('updateIsDeletedFlag', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.updateIsDeletedFlag(testID, true);
+      housingProjectService.updateIsDeletedFlag(TEST_ID, true);
 
       expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${PATH}/${testID}/delete`, { isDeleted: true });
+      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}/delete`, {
+        isDeleted: true
+      });
     });
   });
 
   describe('updateProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      const testObj = {
+      const TEST_OBJ = {
         field1: 'testField1',
         date1: new Date().toISOString(),
         field2: 'testField2'
       };
-      housingProjectService.updateProject(testActivityId, testObj);
+      housingProjectService.updateProject(testActivityId, TEST_OBJ);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
     });
   });
 
   describe('emailConfirmation', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.emailConfirmation(testEmail);
+      housingProjectService.emailConfirmation(TEST_EMAIL);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${PATH}/email`, testEmail);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/email`, TEST_EMAIL);
     });
   });
 });
