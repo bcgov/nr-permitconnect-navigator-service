@@ -21,7 +21,7 @@ export default {
    * @returns {Promise<AxiosResponse>} An axios response or empty object
    */
   getCurrentUserContact(): Promise<AxiosResponse> {
-    return appAxios().get(`${PATH}/`);
+    return appAxios().get(`${PATH}`);
   },
 
   /**
