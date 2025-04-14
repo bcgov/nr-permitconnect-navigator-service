@@ -536,6 +536,7 @@ model electrification_project {
   submittedAt              DateTime  @map("submitted_at") @db.Timestamptz(6)
   intakeStatus             String?   @map("intake_status")
   applicationStatus        String?   @map("application_status")
+  queuePriority            Int?      @map("queue_priority")
   projectName              String?   @map("project_name")
   projectDescription       String?   @map("project_description")
   companyNameRegistered    String?   @map("company_name_registered")
