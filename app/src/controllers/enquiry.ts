@@ -152,7 +152,8 @@ const controller = {
     try {
       let response = await enquiryService.searchEnquiries({
         ...req.query,
-        includeUser: isTruthy(req.query.includeUser)
+        includeUser: isTruthy(req.query.includeUser),
+        initiative: [req.currentContext.initiative ?? Initiative.PCNS]
       });
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
