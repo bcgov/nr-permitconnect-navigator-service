@@ -83,7 +83,7 @@ const service = {
 
     /* eslint-disable max-len */
     const response =
-      await prisma.$queryRaw`select * from get_activity_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+      await prisma.$queryRaw`select * from get_electrification_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
     /* eslint-enable max-len */
 
     // count() returns BigInt

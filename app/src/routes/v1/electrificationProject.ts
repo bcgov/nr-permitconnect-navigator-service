@@ -57,7 +57,7 @@ router.get(
 /** Gets electrification project statistics*/
 router.get(
   '/statistics',
-  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+
   electrificationProjectValidator.getStatistics,
   (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction): void => {
     electrificationProjectController.getStatistics(req, res, next);
