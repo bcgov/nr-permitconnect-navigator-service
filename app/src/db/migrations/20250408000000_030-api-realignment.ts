@@ -1,12 +1,22 @@
 /* eslint-disable max-len */
-import { GroupName, Initiative } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
 
 import type { Knex } from 'knex';
 
-/*
-TODO
-Deal with YARS permissions somehow. Currently not protected
-*/
+const resources = [
+  {
+    name: Resource.YARS
+  }
+];
+
+const actions = [
+  {
+    name: Action.READ
+  },
+  {
+    name: Action.DELETE
+  }
+];
 
 /*
 This migration creates a new groups under the PCNS initiative and
@@ -17,6 +27,145 @@ export async function up(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
       // YARS
+      .then(() => {
+        return knex('yars.resource').insert(resources);
+      })
+
+      .then(() => {
+        const items = [];
+        for (const resource of resources) {
+          for (const action of actions) {
+            items.push({
+              resource_id: knex('yars.resource').where({ name: resource.name }).select('resource_id'),
+              action_id: knex('yars.action').where({ name: action.name }).select('action_id')
+            });
+          }
+        }
+        return knex('yars.policy').insert(items);
+      })
+
+      .then(() => {
+        const items: Array<{ name: string; description: string }> = [];
+        for (const resource of resources) {
+          items.push(
+            {
+              name: `${resource.name.toUpperCase()}_VIEWER`,
+              description: `Can view ${resource.name.toLowerCase()}s`
+            },
+            {
+              name: `${resource.name.toUpperCase()}_EDITOR`,
+              description: `Can edit ${resource.name.toLowerCase()}s`
+            }
+          );
+        }
+        return knex('yars.role').insert(items);
+      })
+
+      .then(async () => {
+        const policies = await knex
+          .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
+          .from({ p: 'yars.policy' })
+          .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
+          .innerJoin({ a: 'yars.action' }, 'p.action_id', '=', 'a.action_id');
+
+        const items: Array<{ role_id: number; policy_id: number }> = [];
+
+        const addRolePolicies = async (resourceName: string) => {
+          const viewerId = await knex('yars.role')
+            .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
+            .select('role_id');
+          const editorId = await knex('yars.role')
+            .where({ name: `${resourceName.toUpperCase()}_EDITOR` })
+            .select('role_id');
+
+          const resourcePolicies = policies.filter((x) => x.resource_name === resourceName);
+          items.push(
+            {
+              role_id: viewerId[0].role_id,
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ).policy_id
+            },
+            {
+              role_id: editorId[0].role_id,
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE).policy_id
+            }
+          );
+        };
+
+        await addRolePolicies(Resource.YARS);
+
+        return knex('yars.role_policy').insert(items);
+      })
+
+      .then(async () => {
+        const electrification_id = await knex('initiative')
+          .where({
+            code: Initiative.ELECTRIFICATION
+          })
+          .select('initiative_id');
+
+        const housing_id = await knex('initiative')
+          .where({
+            code: Initiative.HOUSING
+          })
+          .select('initiative_id');
+
+        const elec_supervisor_group_id = await knex('yars.group')
+          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.SUPERVISOR })
+          .select('group_id');
+
+        const elec_admin_group_id = await knex('yars.group')
+          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.ADMIN })
+          .select('group_id');
+
+        const housing_supervisor_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.SUPERVISOR })
+          .select('group_id');
+
+        const housing_admin_group_id = await knex('yars.group')
+          .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.ADMIN })
+          .select('group_id');
+
+        const items: Array<{ group_id: number; role_id: number }> = [];
+
+        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Array<Action>) => {
+          if (actionNames.includes(Action.READ)) {
+            items.push({
+              group_id: group_id,
+              role_id: (
+                await knex('yars.role')
+                  .where({ name: `${resourceName}_VIEWER` })
+                  .select('role_id')
+              )[0].role_id
+            });
+          }
+
+          if (actionNames.includes(Action.DELETE)) {
+            items.push({
+              group_id: group_id,
+              role_id: (
+                await knex('yars.role')
+                  .where({ name: `${resourceName}_EDITOR` })
+                  .select('role_id')
+              )[0].role_id
+            });
+          }
+        };
+
+        // Note: Only UPDATE or DELETE is required to be given EDITOR role, don't include both
+        // prettier-ignore
+        {
+
+          // Add all supervisor role mappings
+          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.YARS, [Action.READ]);
+          await addResourceRoles(housing_supervisor_group_id[0].group_id, Resource.YARS, [Action.READ]);
+
+          // Add all admin role mappings
+          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.YARS, [Action.READ, Action.DELETE]);
+          await addResourceRoles(housing_admin_group_id[0].group_id, Resource.YARS, [Action.READ, Action.DELETE]);
+        }
+        return knex('yars.group_role').insert(items);
+      })
+
       // Add new groups for PCNS initiative
       .then(async () => {
         const pcns_id = knex('initiative')
@@ -57,26 +206,6 @@ export async function up(knex: Knex): Promise<void> {
 
       // Update policies
       .then(async () => {
-        /*
-        SELECT
-          "group".group_id,
-          role.role_id,
-          initiative.code AS initiative_code,
-          "group".name AS group_name,
-          role.name AS role_name,
-          policy.policy_id
-        FROM yars."group"
-          JOIN initiative ON "group".initiative_id = initiative.initiative_id
-          JOIN yars.group_role ON group_role.group_id = "group".group_id
-          JOIN yars.role ON role.role_id = group_role.role_id
-          JOIN yars.role_policy ON role_policy.role_id = role.role_id
-          JOIN yars.policy ON policy.policy_id = role_policy.policy_id
-          JOIN yars.resource ON resource.resource_id = policy.resource_id
-        WHERE
-          initiative.code = 'HOUSING' and
-          resource.name in ('ATS', 'CONTACT', 'SSO', 'USER')
-        */
-
         const pcns_id = await knex('initiative')
           .where({
             code: Initiative.PCNS
@@ -322,6 +451,61 @@ export async function down(knex: Knex): Promise<void> {
           await knex('yars.group').where({ initiative_id: pcns_id.initiative_id, name: GroupName.SUPERVISOR }).del();
           await knex('yars.group').where({ initiative_id: pcns_id.initiative_id, name: GroupName.PROPONENT }).del();
         }
+      })
+
+      // Remove group to role mappings for YARS
+      .then(async () => {
+        const viewerRole = await knex('yars.role')
+          .where({ name: `${Resource.YARS}_VIEWER` })
+          .select('role_id');
+        const editorRole = await knex('yars.role')
+          .where({ name: `${Resource.YARS}_EDITOR` })
+          .select('role_id');
+        if (viewerRole && viewerRole.length > 0) {
+          await knex('yars.group_role').where({ role_id: viewerRole[0].role_id }).del();
+        }
+        if (editorRole && editorRole.length > 0) {
+          await knex('yars.group_role').where({ role_id: editorRole[0].role_id }).del();
+        }
+      })
+
+      // Remove role to policy mappings for YARS
+      .then(async () => {
+        const viewerRole = await knex('yars.role')
+          .where({ name: `${Resource.YARS}_VIEWER` })
+          .select('role_id');
+        const editorRole = await knex('yars.role')
+          .where({ name: `${Resource.YARS}_EDITOR` })
+          .select('role_id');
+        if (viewerRole && viewerRole.length > 0) {
+          await knex('yars.role_policy').where({ role_id: viewerRole[0].role_id }).del();
+        }
+        if (editorRole && editorRole.length > 0) {
+          await knex('yars.role_policy').where({ role_id: editorRole[0].role_id }).del();
+        }
+      })
+
+      // Remove the YARS roles
+      .then(async () => {
+        await knex('yars.role')
+          .where({ name: `${Resource.YARS}_VIEWER` })
+          .del();
+        await knex('yars.role')
+          .where({ name: `${Resource.YARS}_EDITOR` })
+          .del();
+      })
+
+      // Remove the YARS policies
+      .then(async () => {
+        const resourceRow = await knex('yars.resource').where({ name: Resource.YARS }).select('resource_id').first();
+        if (resourceRow) {
+          return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
+        }
+      })
+
+      // Remove the YARS resource
+      .then(() => {
+        return knex('yars.resource').where({ name: Resource.YARS }).del();
       })
   );
 }
