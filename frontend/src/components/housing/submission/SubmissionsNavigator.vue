@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
-import { inject, onBeforeMount, ref, watch } from 'vue';
+import { inject, onBeforeMount, ref, toRaw, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
@@ -133,24 +133,26 @@ function getBringForwardStyling(bf: BringForward) {
 
 function getNameObject(bf: BringForward) {
   if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
-  if (bf.housingProjectId) RouteName.INT_HOUSING_PROJECT;
-  return RouteName.INT_HOUSING_ENQUIRY;
+  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT;
+  if (bf.enquiryId) return RouteName.INT_HOUSING_ENQUIRY;
 }
 
 function getParamObject(bf: BringForward) {
   if (bf.electrificationProjectId) {
     return {
-      electrificationProjectId: bf.electrificationProjectId
+      projectId: bf.electrificationProjectId
     };
   }
   if (bf.housingProjectId) {
     return {
-      housingProjectId: bf.housingProjectId
+      projectId: bf.housingProjectId
     };
   }
-  return {
-    enquiryId: bf.enquiryId
-  };
+  if (bf.enquiryId) {
+    return {
+      enquiryId: bf.enquiryId
+    };
+  }
 }
 
 // return the query object for the router link based on the submission type
@@ -200,15 +202,6 @@ onBeforeMount(async () => {
     }
   });
 
-  myBringForward.value = bringForward.value.filter((x) => {
-    return (
-      (x.createdByFullName === getProfile.value?.name ||
-        myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
-        myAssignedTo.value.has(x.housingProjectId ?? '')) &&
-      (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
-    );
-  });
-
   const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey) accordionIndex.value = accordionKey;
 });
@@ -243,6 +236,17 @@ watch(activeTabIndex, (newIndex) => {
 
   // Show toggle only for submissions and enquiries tab
   showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY;
+});
+
+watchEffect(() => {
+  myBringForward.value = bringForward.value.filter((x) => {
+    return (
+      (x.createdByFullName === getProfile.value?.name ||
+        myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
+        myAssignedTo.value.has(x.housingProjectId ?? '')) &&
+      (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
+    );
+  });
 });
 </script>
 
