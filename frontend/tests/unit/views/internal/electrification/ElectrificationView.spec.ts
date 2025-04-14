@@ -2,8 +2,8 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import { shallowMount } from '@vue/test-utils';
 
-import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
-import HousingView from '@/views/internal/housing/HousingView.vue';
+import { electrificationProjectService, enquiryService, noteService, permitService } from '@/services';
+import ElectrificationView from '@/views/internal/electrification/ElectrificationView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -23,8 +23,8 @@ afterEach(() => {
 
 const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
-const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
-const getStatisticsSpy = vi.spyOn(housingProjectService, 'getStatistics');
+const searchProjectsSpy = vi.spyOn(electrificationProjectService, 'searchProjects');
+const getStatisticsSpy = vi.spyOn(electrificationProjectService, 'getStatistics');
 const listBringForwardSpy = vi.spyOn(noteService, 'listBringForward');
 
 searchEnquiriesSpy.mockResolvedValue({ data: [] } as AxiosResponse);
@@ -50,9 +50,9 @@ const wrapperSettings = () => ({
   }
 });
 
-describe('HousingView.vue', () => {
+describe('ElectrificationView.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(HousingView, wrapperSettings());
+    const wrapper = shallowMount(ElectrificationView, wrapperSettings());
 
     expect(wrapper).toBeTruthy();
   });

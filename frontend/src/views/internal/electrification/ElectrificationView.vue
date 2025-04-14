@@ -31,7 +31,7 @@ provide(projectServiceKey, electrificationProjectService);
 onBeforeMount(async () => {
   [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = (
     await Promise.all([
-      enquiryService.getEnquiries(), // TODO: Get enquiries for correct initiative
+      enquiryService.searchEnquiries(),
       permitService.listPermits(),
       electrificationProjectService.searchProjects({
         includeUser: true,
