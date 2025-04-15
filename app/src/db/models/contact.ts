@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import activity_contact from './activty_contact';
+import activity_contact from './activity_contact';
 
 import type { Stamps } from '../stamps';
 import type { Contact } from '../../types/';

@@ -22,7 +22,7 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
-import { SubmissionType } from '@/utils/enums/housing';
+import { NoteType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
@@ -294,7 +294,7 @@ watchEffect(() => {
                         hash: `#${bf.noteId}`
                       }"
                     >
-                      {{ bf.title }}, {{ bf.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
+                      {{ bf.title }}, {{ bf.projectName ?? NoteType.BRING_FORWARD }}
                     </router-link>
                   </span>
                 </div>

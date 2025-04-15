@@ -10,9 +10,9 @@ import { Initiative } from '@/utils/enums/application';
 import type { Ref } from 'vue';
 
 // Props
-const { draftId = undefined, housingProjectId = undefined } = defineProps<{
+const { draftId = undefined, projectId = undefined } = defineProps<{
   draftId?: string;
-  housingProjectId?: string;
+  projectId?: string;
 }>();
 
 // Composables
@@ -32,7 +32,7 @@ onBeforeMount(async () => {
   <SubmissionIntakeForm
     v-if="!loading"
     :key="route.fullPath"
-    :housing-project-id="housingProjectId"
+    :housing-project-id="projectId"
     :draft-id="draftId"
   />
 </template>
