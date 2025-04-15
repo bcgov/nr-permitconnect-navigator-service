@@ -26,6 +26,7 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
   if (groups && groups.length === 0) {
     await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.ELECTRIFICATION, GroupName.PROPONENT);
     await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.HOUSING, GroupName.PROPONENT);
+    await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.PCNS, GroupName.PROPONENT);
     groups = await yarsService.getSubjectGroups(sub);
   }
 
