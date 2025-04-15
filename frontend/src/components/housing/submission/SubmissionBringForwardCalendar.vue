@@ -5,7 +5,7 @@ import { ref, watchEffect } from 'vue';
 import { Column, DataTable, ToggleSwitch } from '@/lib/primevue';
 import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { SubmissionType } from '@/utils/enums/housing';
+import { NoteType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -126,7 +126,7 @@ function filterForMyBringForwards(bf: BringForward): boolean {
           :sortable="true"
         >
           <template #body="{ data }">
-            {{ data.projectName ?? SubmissionType.GENERAL_ENQUIRY }}
+            {{ data.projectName ?? NoteType.BRING_FORWARD }}
           </template>
         </Column>
         <Column

@@ -1,4 +1,5 @@
 import type { IStamps } from '@/interfaces';
+import type { Activity } from '../types/Activity';
 import type { Contact } from '../types/Contact';
 import type { User } from '../types/User';
 import type { ApplicationStatus } from '@/utils/enums/housing';
@@ -22,6 +23,7 @@ export type IProject = {
   streetAddress: string;
 
   // Joined
+  activity?: Activity;
   contacts: Array<Contact>;
   user?: User;
 } & Partial<IStamps>;
