@@ -143,6 +143,11 @@
         "proponentsTab": "Proponents"
       }
     },
+    "electrification": {
+      "projectView": {
+        "seePropViewButtonLabel": "See Proponent's View"
+      }
+    },
     "housing": {
       "contactPageView": {
         "historyTab": "History",

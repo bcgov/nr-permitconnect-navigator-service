@@ -45,12 +45,10 @@ listRelatedEnquiriesSpy.mockResolvedValue({
 } as AxiosResponse);
 
 const testHousingProjectId = 'submission123';
-const testActivityId = 'activity123';
 
-const wrapperSettings = (projectId = testHousingProjectId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
-    projectId: projectId,
-    activityId: testActivityIdProp
+    projectId: testHousingProjectIdProp
   },
   global: {
     plugins: [

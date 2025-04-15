@@ -40,10 +40,16 @@ onBeforeMount(async () => {
       electrificationProjectService.getStatistics(),
       noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
-  ).map((r) => r.data);
-});
+  ).map((r) => {
+    // TODO: temp initiative filter... remove when search param added to api
+    if (r.data.length && r.data[0].noteId) {
+      return r.data.filter((bf: BringForward) => bf.electrificationProjectId);
+    }
+    return r.data;
+  });
 
-loading.value = false;
+  loading.value = false;
+});
 </script>
 
 <template>
@@ -52,7 +58,7 @@ loading.value = false;
     <img
       class="banner-img"
       src="@/assets/images/elec_banner.png"
-      alt="Housing image"
+      alt="Electrification image"
     />
   </div>
   <SubmissionsNavigator

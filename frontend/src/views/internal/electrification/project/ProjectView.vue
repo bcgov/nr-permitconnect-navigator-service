@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-// import SubmissionForm from '@/components/electrification/submission/SubmissionForm.vue';
+import ProjectIntakeForm from '@/components/electrification/project/ProjectIntakeForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -29,7 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
+import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/housing';
 import { formatDateLong } from '@/utils/formatters';
@@ -62,7 +62,9 @@ const { t } = useI18n();
 const router = useRouter();
 
 // Store
+const permitStore = usePermitStore();
 const projectStore = useProjectStore();
+const { getPermitTypes } = storeToRefs(permitStore);
 const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
@@ -145,6 +147,11 @@ onBeforeMount(async () => {
   projectStore.setPermits(permits);
   projectStore.setRelatedEnquiries(relatedEnquiries);
 
+  if (getPermitTypes.value.length === 0) {
+    const permitTypes = (await permitService.getPermitTypes(Initiative.ELECTRIFICATION)).data;
+    permitStore.setPermitTypes(permitTypes);
+  }
+
   loading.value = false;
 });
 </script>
@@ -196,7 +203,8 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
-          <SubmissionForm
+          <!-- TODO: Put correct form here -->
+          <ProjectIntakeForm
             :editable="
               !isCompleted &&
               useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
@@ -394,43 +402,39 @@ onBeforeMount(async () => {
         </DataTable>
       </TabPanel>
       <TabPanel :value="2">
-        <span v-if="getPermits.length">
-          <div class="flex items-center pb-5">
-            <div class="grow">
-              <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
-            </div>
-            <Button
-              aria-label="Add permit"
-              :disabled="
-                isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.PERMIT, Action.CREATE)
-              "
-              @click="permitModalVisible = true"
-            >
-              <font-awesome-icon
-                class="pr-2"
-                icon="fa-solid fa-plus"
-              />
-              Add permit
-            </Button>
+        <div class="flex items-center pb-5">
+          <div class="grow">
+            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
           </div>
-          <div
-            v-for="(permit, index) in getPermits"
-            :key="permit.permitId"
-            :index="index"
-            class="mb-6"
+          <Button
+            aria-label="Add permit"
+            :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.PERMIT, Action.CREATE)"
+            @click="permitModalVisible = true"
           >
-            <PermitCard
-              :editable="!isCompleted"
-              :permit="permit"
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-plus"
             />
-          </div>
-
-          <PermitModal
-            v-if="activityId"
-            v-model:visible="permitModalVisible"
-            :activity-id="activityId"
+            Add permit
+          </Button>
+        </div>
+        <div
+          v-for="(permit, index) in getPermits"
+          :key="permit.permitId"
+          :index="index"
+          class="mb-6"
+        >
+          <PermitCard
+            :editable="!isCompleted"
+            :permit="permit"
           />
-        </span>
+        </div>
+
+        <PermitModal
+          v-if="activityId"
+          v-model:visible="permitModalVisible"
+          :activity-id="activityId"
+        />
       </TabPanel>
       <TabPanel :value="3">
         <div class="flex items-center pb-5">

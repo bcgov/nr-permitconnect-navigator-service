@@ -50,18 +50,24 @@ const controller = {
         req.query.bringForwardState
       );
       if (notes && notes.length) {
-        const electrificationProjects = await electrificationProjectService.searchElectrificationProjects({
-          activityId: notes.map((x) => x.activityId)
-        });
-        const housingProjects = await housingProjectService.searchHousingProjects({
-          activityId: notes.map((x) => x.activityId)
-        });
+        const projects = (
+          await Promise.all([
+            electrificationProjectService.searchElectrificationProjects({
+              activityId: notes.map((x) => x.activityId)
+            }),
+            housingProjectService.searchHousingProjects({
+              activityId: notes.map((x) => x.activityId)
+            })
+          ])
+        ).flatMap((x) => x);
+
         const users = await userService.searchUsers({
           userId: notes
             .map((x) => x.createdBy)
             .filter((x) => !!x)
             .map((x) => x as string)
         });
+
         const enquiries = (
           await Promise.all([
             enquiryService.searchEnquiries(
@@ -82,12 +88,12 @@ const controller = {
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,
-          electrificationProjectId: electrificationProjects.find((s) => s.activityId === note.activityId)
+          electrificationProjectId: projects.find((s) => s.activityId === note.activityId)
             ?.electrificationProjectId as string,
-          housingProjectId: housingProjects.find((s) => s.activityId === note.activityId)?.housingProjectId as string,
+          housingProjectId: projects.find((s) => s.activityId === note.activityId)?.housingProjectId as string,
           enquiryId: enquiries.find((s) => s.activityId === note.activityId)?.enquiryId as string,
           title: note.title,
-          projectName: housingProjects.find((s) => s.activityId === note.activityId)?.projectName ?? null,
+          projectName: projects.find((s) => s.activityId === note.activityId)?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
           bringForwardDate: note.bringForwardDate as string
         }));
