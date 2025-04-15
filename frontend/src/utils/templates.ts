@@ -63,7 +63,37 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   return newText;
 };
 
-export const confirmationTemplateSubmission = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+export const confirmationTemplateElectrificationSubmission = (replaceConfig: {
+  [key: string]: string | string[] | undefined;
+}) => {
+  const baseTemplate =
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'Dear {{ contactName }},<br><br>' +
+    '<b>Project ID: {{ activityId }}</b><br><br>' +
+    // eslint-disable-next-line max-len
+    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
+    'View your project submission <a href="' +
+    PCNS_URL +
+    '/e/electrification/project/{{ submissionId }}/intake">here<a>.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+export const confirmationTemplateHousingSubmission = (replaceConfig: {
+  [key: string]: string | string[] | undefined;
+}) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +

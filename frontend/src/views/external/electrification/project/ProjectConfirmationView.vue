@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 
 import { Message } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -47,9 +46,10 @@ onBeforeMount(async () => {
       {{ t('e.electrification.projectConfirmationView.message') }}
     </div>
     <div class="mt-6">
-      <router-link :to="{ name: RouteName.EXT_HOUSING }">
+      <!-- TODO: Uncomment when view is added -->
+      <!-- <router-link :to="{ name: RouteName.EXT_ELECTRIFICATION }">
         {{ t('e.electrification.projectConfirmationView.backToElectrification') }}
-      </router-link>
+      </router-link> -->
     </div>
   </div>
 </template>

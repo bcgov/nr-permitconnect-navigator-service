@@ -11,7 +11,6 @@ const service = {
       c.contact_preference,
       c.contact_applicant_relationship,
       ep.activity_id,
-      street_address,
       submission_type,
       intake_status,
       application_status,
@@ -37,8 +36,8 @@ const service = {
     join activity as a on ep.activity_id = a.activity_id
     join activity_contact as ac on ep.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
-    join permit as p on ep.activity_id = p.activity_id
-    join permit_type pt on p.permit_type_id = pt.permit_type_id
+    left join permit as p on ep.activity_id = p.activity_id
+    left join permit_type pt on p.permit_type_id = pt.permit_type_id
     where a.is_deleted = false`;
 
     return result;
@@ -88,8 +87,8 @@ const service = {
     join activity as a on hp.activity_id = a.activity_id
     join activity_contact as ac on hp.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
-    join permit as p on hp.activity_id = p.activity_id
-    join permit_type pt on p.permit_type_id = pt.permit_type_id
+    left join permit as p on hp.activity_id = p.activity_id
+    left join permit_type pt on p.permit_type_id = pt.permit_type_id
     where a.is_deleted = false`;
 
     return result;
