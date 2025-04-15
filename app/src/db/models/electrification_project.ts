@@ -6,7 +6,7 @@ export default {
   fromPrismaModelWithContact(input: any): any {
     const electrificationProject = input;
     if (electrificationProject && input.activity.activity_contact) {
-      input.activity.activity_contact = input.activity.activity_contact.map((x: any) => ({
+      electrificationProject.activity.activity_contact = input.activity.activity_contact.map((x: any) => ({
         ...x,
         contact: contact.fromPrismaModel(x.contact)
       }));

@@ -1,6 +1,7 @@
 import { accessHandler, createProps, entryRedirect } from '@/router';
+import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 import { type RouteRecordRaw } from 'vue-router';
 
@@ -8,7 +9,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'housing',
     meta: { access: [NavigationPermission.EXT_HOUSING], breadcrumb: 'Housing', requiresAuth: true },
-    beforeEnter: entryRedirect,
+    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
     children: [
       {
         path: '',

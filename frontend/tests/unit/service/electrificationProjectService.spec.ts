@@ -66,25 +66,25 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('createElectrificationProject', () => {
+  describe('createProject', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.createElectrificationProject();
+      electrificationProjectService.createProject();
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, undefined);
     });
 
     it('passes parameters', () => {
-      electrificationProjectService.createElectrificationProject({ foo: 'bar' });
+      electrificationProjectService.createProject({ foo: 'bar' });
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(PATH, { foo: 'bar' });
     });
   });
 
-  describe('deleteElectrificationProject', () => {
+  describe('deleteProject', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.deleteElectrificationProject(testID);
+      electrificationProjectService.deleteProject(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testID}`);
@@ -118,9 +118,9 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('getElectrificationProjects', () => {
+  describe('getProjects', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.getElectrificationProjects();
+      electrificationProjectService.getProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(PATH);
@@ -142,26 +142,26 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('getElectrificationProject', () => {
+  describe('getProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      electrificationProjectService.getElectrificationProject(testActivityId);
+      electrificationProjectService.getProject(testActivityId);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`);
     });
   });
 
-  describe('searchElectrificationProjects', () => {
+  describe('searchProjects', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.searchElectrificationProjects({ activityId: [testID] });
+      electrificationProjectService.searchProjects({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, { params: { activityId: [testID] } });
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      electrificationProjectService.searchElectrificationProjects({ activityId: [testID], includeDeleted: false });
+      electrificationProjectService.searchProjects({ activityId: [testID], includeDeleted: false });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -173,7 +173,7 @@ describe('electrificationProjectService', () => {
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      electrificationProjectService.searchElectrificationProjects({ includeDeleted: true });
+      electrificationProjectService.searchProjects({ includeDeleted: true });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${PATH}/search`, {
@@ -211,7 +211,7 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('updateElectrificationProject', () => {
+  describe('updateProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
       const testObj = {
@@ -219,7 +219,7 @@ describe('electrificationProjectService', () => {
         date1: new Date().toISOString(),
         field2: 'testField2'
       };
-      electrificationProjectService.updateElectrificationProject(testActivityId, testObj);
+      electrificationProjectService.updateProject(testActivityId, testObj);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${PATH}/${testActivityId}`, testObj);

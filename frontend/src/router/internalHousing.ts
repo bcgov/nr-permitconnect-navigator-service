@@ -1,13 +1,14 @@
 import { accessHandler, createProps, entryRedirect } from '@/router';
+import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 import { type RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: 'housing',
-    beforeEnter: entryRedirect,
+    beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
     meta: { access: [NavigationPermission.INT_HOUSING], breadcrumb: 'Submissions', requiresAuth: true },
     children: [
       {
@@ -17,7 +18,7 @@ const routes: Array<RouteRecordRaw> = [
         beforeEnter: accessHandler
       },
       {
-        path: 'project/:housingProjectId',
+        path: 'project/:projectId',
         component: () => import('@/views/GenericView.vue'),
         meta: { dynamicBreadcrumb: 'project' },
         children: [

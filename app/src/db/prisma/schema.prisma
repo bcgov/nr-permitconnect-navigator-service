@@ -25,21 +25,22 @@ model access_request {
 }
 
 model activity {
-  activity_id      String             @id
-  initiative_id    String             @db.Uuid
-  created_by       String?            @default("00000000-0000-0000-0000-000000000000")
-  created_at       DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_by       String?
-  updated_at       DateTime?          @db.Timestamptz(6)
-  is_deleted       Boolean            @default(false)
-  initiative       initiative         @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
-  activity_contact activity_contact[]
-  document         document[]
-  draft            draft[]
-  enquiry          enquiry[]
-  housing_project  housing_project[]
-  note             note[]
-  permit           permit[]
+  activity_id             String                    @id
+  initiative_id           String                    @db.Uuid
+  created_by              String?                   @default("00000000-0000-0000-0000-000000000000")
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_by              String?
+  updated_at              DateTime?                 @db.Timestamptz(6)
+  is_deleted              Boolean                   @default(false)
+  initiative              initiative                @relation(fields: [initiative_id], references: [initiative_id], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  activity_contact        activity_contact[]
+  document                document[]
+  draft                   draft[]
+  electrification_project electrification_project[]
+  enquiry                 enquiry[]
+  housing_project         housing_project[]
+  note                    note[]
+  permit                  permit[]
 
   @@schema("public")
 }
@@ -243,23 +244,24 @@ model permit_type {
 }
 
 model user {
-  user_id           String             @id @db.Uuid
-  idp               String?
-  sub               String             @unique(map: "user_sub_unique")
-  email             String?
-  first_name        String?
-  full_name         String?
-  last_name         String?
-  active            Boolean            @default(true)
-  created_by        String?            @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime?          @db.Timestamptz(6)
-  access_request    access_request[]
-  contact           contact[]
-  enquiry           enquiry[]
-  housing_project   housing_project[]
-  identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
+  user_id                 String                    @id @db.Uuid
+  idp                     String?
+  sub                     String                    @unique(map: "user_sub_unique")
+  email                   String?
+  first_name              String?
+  full_name               String?
+  last_name               String?
+  active                  Boolean                   @default(true)
+  created_by              String?                   @default("00000000-0000-0000-0000-000000000000")
+  created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
+  updated_by              String?
+  updated_at              DateTime?                 @db.Timestamptz(6)
+  access_request          access_request[]
+  contact                 contact[]
+  electrification_project electrification_project[]
+  enquiry                 enquiry[]
+  housing_project         housing_project[]
+  identity_provider       identity_provider?        @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
   @@index([sub], map: "user_username_index")
@@ -464,27 +466,6 @@ model email_log {
   @@schema("public")
 }
 
-model electrification_project {
-  electrificationProjectId String    @id @map("electrification_project_id") @db.Uuid
-  activityId               String    @map("activity_id")
-  assignedUserId           String?   @map("assigned_user_id") @db.Uuid
-  submittedAt              DateTime  @map("submitted_at") @db.Timestamptz(6)
-  projectName              String?   @map("project_name")
-  projectDescription       String?   @map("project_description")
-  companyNameRegistered    String?   @map("company_name_registered")
-  projectType              String?   @map("project_type")
-  bcHydroNumber            String?   @map("bc_hydro_number")
-  submissionType           String?   @map("submission_type")
-  createdBy                String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                String?   @map("updated_by")
-  updatedAt                DateTime? @map("updated_at") @db.Timestamptz(6)
-  activity                 activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                     user?     @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
-
-  @@schema("public")
-}
-
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model housing_project {
@@ -544,6 +525,30 @@ model housing_project {
   geo_json                           Json?     @db.Json
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
+
+  @@schema("public")
+}
+
+model electrification_project {
+  electrificationProjectId String    @id @map("electrification_project_id") @db.Uuid
+  activityId               String    @map("activity_id")
+  assignedUserId           String?   @map("assigned_user_id") @db.Uuid
+  submittedAt              DateTime  @map("submitted_at") @db.Timestamptz(6)
+  intakeStatus             String?   @map("intake_status")
+  applicationStatus        String?   @map("application_status")
+  queuePriority            Int?      @map("queue_priority")
+  projectName              String?   @map("project_name")
+  projectDescription       String?   @map("project_description")
+  companyNameRegistered    String?   @map("company_name_registered")
+  projectType              String?   @map("project_type")
+  bcHydroNumber            String?   @map("bc_hydro_number")
+  submissionType           String?   @map("submission_type")
+  createdBy                String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt                DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                String?   @map("updated_by")
+  updatedAt                DateTime? @map("updated_at") @db.Timestamptz(6)
+  activity                 activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
+  user                     user?     @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
 
   @@schema("public")
 }

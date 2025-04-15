@@ -130,6 +130,7 @@ const service = {
    * @param {string[]} [params.enquiry_id] Optional array of uuids representing the enquiry ID
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
+   * @param {Initiative[]} [params.initiative] Optional array of initiatives
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchEnquiries: async (params: EnquirySearchParameters) => {
@@ -142,13 +143,21 @@ const service = {
                 include: {
                   contact: true
                 }
-              }
+              },
+              initiative: true
             }
           },
           user: params.includeUser
         },
         where: {
           AND: [
+            {
+              activity: {
+                initiative: {
+                  code: { in: params.initiative }
+                }
+              }
+            },
             {
               activity_id: { in: params.activityId }
             },

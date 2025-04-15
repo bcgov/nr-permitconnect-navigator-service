@@ -36,23 +36,16 @@ if (!prisma) {
             args.data.updatedAt instanceof String ? new Date(args.data.updatedAt as string) : args.data.updatedAt;
           return query(args);
         }
-        // upsert({ args, query }) {
-        //   if (args.create) {
-        //     args.create.createdAt = args.create.createdAt ? new Date(args.create.createdAt) : null;
-        //   }
-
-        //   if (args.update) {
-        //     args.update.updatedAt =
-        //       args.update.updatedAt instanceof String
-        //         ? new Date(args.update.updatedAt as string)
-        //         : args.update.updatedAt;
-        //   }
-        //   return query(args);
-        // }
       }
     },
     result: {
       electrification_project: {
+        projectId: {
+          needs: { electrificationProjectId: true },
+          compute(data: { electrificationProjectId: string }) {
+            return data.electrificationProjectId;
+          }
+        },
         submittedAt: {
           needs: { submittedAt: true },
           compute(data: { submittedAt: Date }) {
@@ -69,6 +62,14 @@ if (!prisma) {
           needs: { updatedAt: true },
           compute(data: { updatedAt: Date }) {
             return data.updatedAt ? new Date(data.updatedAt).toISOString() : null;
+          }
+        }
+      },
+      housing_project: {
+        projectId: {
+          needs: { housing_project_id: true },
+          compute(data: { housing_project_id: string }) {
+            return data.housing_project_id;
           }
         }
       }

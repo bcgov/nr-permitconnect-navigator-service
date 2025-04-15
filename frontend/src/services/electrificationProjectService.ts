@@ -1,30 +1,38 @@
 import { appAxios } from './interceptors';
 import { delimitEmails } from '@/utils/utils';
 
-import type { Email, Draft, ElectrificationProjectSearchParameters } from '@/types';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';
 
-export default {
+const service: IDraftableProjectService = {
   /**
-   * @function getActivityIds
+   * @function createProject
    * @returns {Promise} An axios response
    */
-  getActivityIds() {
-    return appAxios().get('electrificationProject/activityIds');
-  },
-
-  /**
-   * @function createElectrificationProject
-   * @returns {Promise} An axios response
-   */
-  createElectrificationProject(data?: any) {
+  createProject(data?: any) {
     return appAxios().put('electrificationProject', data);
   },
 
   /**
-   * @function deleteElectrificationProject
+   * @function emailConfirmation
+   * Send an email with the housing project confirmation data
    * @returns {Promise} An axios response
    */
-  deleteElectrificationProject(electrificationProjectId: string) {
+  emailConfirmation(emailData: Email) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = delimitEmails(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = delimitEmails(emailData.cc);
+    }
+    return appAxios().put('electrificationProject/email', emailData);
+  },
+
+  /**
+   * @function deleteProject
+   * @returns {Promise} An axios response
+   */
+  deleteProject(electrificationProjectId: string) {
     return appAxios().delete(`electrificationProject/${electrificationProjectId}`);
   },
 
@@ -37,11 +45,11 @@ export default {
   },
 
   /**
-   * @function getElectrificationProjects
+   * @function getActivityIds
    * @returns {Promise} An axios response
    */
-  getElectrificationProjects() {
-    return appAxios().get('electrificationProject');
+  getActivityIds() {
+    return appAxios().get('electrificationProject/activityIds');
   },
 
   /**
@@ -61,6 +69,14 @@ export default {
   },
 
   /**
+   * @function getProjects
+   * @returns {Promise} An axios response
+   */
+  getProjects() {
+    return appAxios().get('electrificationProject');
+  },
+
+  /**
    * @function getStatistics
    * @returns {Promise} An axios response
    */
@@ -69,18 +85,18 @@ export default {
   },
 
   /**
-   * @function getElectrificationProject
+   * @function getProject
    * @returns {Promise} An axios response
    */
-  getElectrificationProject(electrificationProjectId: string) {
+  getProject(electrificationProjectId: string) {
     return appAxios().get(`electrificationProject/${electrificationProjectId}`);
   },
 
   /**
-   * @function searchElectrificationProjects
+   * @function searchProjects
    * @returns {Promise} An axios response
    */
-  searchElectrificationProjects(filters?: ElectrificationProjectSearchParameters) {
+  searchProjects(filters?: ElectrificationProjectSearchParameters) {
     return appAxios().get('electrificationProject/search', { params: { ...filters } });
   },
 
@@ -109,25 +125,12 @@ export default {
   },
 
   /**
-   * @function updateElectrificationProject
+   * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateElectrificationProject(electrificationProjectId: string, data: any) {
+  updateProject(electrificationProjectId: string, data: any) {
     return appAxios().put(`electrificationProject/${electrificationProjectId}`, data);
-  },
-
-  /**
-   * @function send
-   * Send an email with the housing project confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put('electrificationProject/email', emailData);
   }
 };
+
+export default service;

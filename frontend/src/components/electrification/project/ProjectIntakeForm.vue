@@ -13,8 +13,8 @@ import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue'
 import { projectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
-import { useConfigStore, useContactStore, useElectrificationProjectStore } from '@/store';
-import { PROJECT_TYPES } from '@/utils/constants/electrification';
+import { useConfigStore, useContactStore, useProjectStore } from '@/store';
+import { PROJECT_TYPE_LIST } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { ProjectType } from '@/utils/enums/electrification';
 import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/utils/templates';
@@ -42,7 +42,7 @@ const VALIDATION_BANNER_TEXT = t('e.electrification.projectIntakeForm.validation
 
 // Store
 const contactStore = useContactStore();
-const electrificationProjectStore = useElectrificationProjectStore();
+const projectStore = useProjectStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -247,7 +247,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
 onBeforeMount(async () => {
   try {
     // Clearing the document store on page load
-    electrificationProjectStore.setDocuments([]);
+    projectStore.setDocuments([]);
 
     let response,
       documents: Array<Document> = [];
@@ -266,11 +266,11 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        electrificationProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       }
     } else {
       if (electrificationProjectId && activityId) {
-        response = (await electrificationProjectService.getElectrificationProject(electrificationProjectId)).data;
+        response = (await electrificationProjectService.getProject(electrificationProjectId)).data;
 
         if (response.activityId) {
           activityId.value = response.activityId;
@@ -282,7 +282,7 @@ onBeforeMount(async () => {
         documents.forEach((d: Document) => {
           d.filename = decodeURI(d.filename);
         });
-        electrificationProjectStore.setDocuments(documents);
+        projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
         response = { contacts: [contactStore.getContact] };
@@ -428,7 +428,7 @@ onBeforeMount(async () => {
         <RadioList
           name="project.projectType"
           :disabled="!editable"
-          :options="PROJECT_TYPES"
+          :options="PROJECT_TYPE_LIST"
           @on-change="
             (e: string) => {
               if (e === ProjectType.NCTL || e === ProjectType.OTHER) setFieldValue('bcHydroNumber', null);

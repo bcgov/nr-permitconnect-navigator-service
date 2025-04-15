@@ -83,7 +83,7 @@ const service = {
 
     /* eslint-disable max-len */
     const response =
-      await prisma.$queryRaw`select * from get_activity_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+      await prisma.$queryRaw`select * from get_electrification_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
     /* eslint-enable max-len */
 
     // count() returns BigInt
@@ -161,6 +161,8 @@ const service = {
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.createdBy] Optional array of uuids representing users who created electrification projects
    * @param {string[]} [params.electrificationProjectId] Optional array of uuids representing the electrification project ID
+   * @param {string[]} [params.submissionType] Optional array of strings representing the electrification submission type
+   * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted electrification projects should be included
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
    * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
@@ -190,6 +192,12 @@ const service = {
           },
           {
             electrificationProjectId: { in: params.electrificationProjectId }
+          },
+          {
+            submissionType: { in: params.submissionType }
+          },
+          {
+            intakeStatus: { in: params.intakeStatus }
           },
           params.includeDeleted ? {} : { activity: { is_deleted: false } }
         ]

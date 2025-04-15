@@ -9,7 +9,7 @@ import {
   electrificationProjectService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { DraftCode, SubmissionType } from '../utils/enums/projectCommon';
+import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -41,7 +41,9 @@ const controller = {
       electrificationProjectId: uuidv4(),
       activityId: activityId,
       submittedAt: new Date().toISOString(),
-      submissionType: SubmissionType.GUIDANCE
+      submissionType: SubmissionType.GUIDANCE,
+      intakeStatus: IntakeStatus.SUBMITTED,
+      applicationStatus: ApplicationStatus.NEW
     };
 
     return electrificationProjectData;

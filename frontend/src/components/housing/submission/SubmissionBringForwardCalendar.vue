@@ -36,14 +36,21 @@ watchEffect(() => {
 });
 
 function getParamObject(bf: BringForward) {
-  if (bf.housingProjectId) {
+  if (bf.electrificationProjectId) {
     return {
-      housingProjectId: bf.housingProjectId
+      projectId: bf.electrificationProjectId
     };
   }
-  return {
-    enquiryId: bf.enquiryId
-  };
+  if (bf.housingProjectId) {
+    return {
+      projectId: bf.housingProjectId
+    };
+  }
+  if (bf.enquiryId) {
+    return {
+      enquiryId: bf.enquiryId
+    };
+  }
 }
 
 // return the query object for the router link based on the submission type

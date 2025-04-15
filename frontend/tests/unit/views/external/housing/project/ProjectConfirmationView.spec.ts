@@ -15,9 +15,9 @@ vi.mock('vue-i18n', () => ({
   })
 }));
 
-const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
 
-getHousingProjectSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
+getProjectSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
 
 const testSubmissionId = 'submission123';
 

@@ -14,7 +14,7 @@ import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType }
 import { formatDate } from '@/utils/formatters';
 
 import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
-import { useAuthZStore, useHousingProjectStore } from '@/store';
+import { useAuthZStore, useProjectStore } from '@/store';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit } from '@/types';
@@ -38,9 +38,9 @@ const toast = useToast();
 
 // Store
 const authZStore = useAuthZStore();
-const housingProjectStore = useHousingProjectStore();
+const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getHousingProject, getPermits, getRelatedEnquiries } = storeToRefs(housingProjectStore);
+const { getProject, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
@@ -112,9 +112,7 @@ onBeforeMount(async () => {
   let enquiriesValue, projectValue: any;
 
   try {
-    [projectValue] = (await Promise.all([housingProjectService.getHousingProject(housingProjectId)])).map(
-      (r) => r.data
-    );
+    [projectValue] = (await Promise.all([housingProjectService.getProject(housingProjectId)])).map((r) => r.data);
     if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {
     toast.error(t('e.housing.projectView.toastProjectLoadFailed'));
@@ -124,12 +122,12 @@ onBeforeMount(async () => {
   try {
     const activityId = projectValue.activityId;
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    housingProjectStore.setPermits(permitsValue);
+    projectStore.setPermits(permitsValue);
   } catch {
     toast.error(t('e.housing.projectView.toastPermitLoadFailed'));
   }
-  housingProjectStore.setHousingProject(projectValue);
-  housingProjectStore.setRelatedEnquiries(enquiriesValue);
+  projectStore.setProject(projectValue);
+  projectStore.setRelatedEnquiries(enquiriesValue);
 
   // Fetch contacts for createdBy and assignedUserId
   // Push only thruthy values into the array
@@ -144,7 +142,7 @@ onBeforeMount(async () => {
 
 <template>
   <div
-    v-if="!loading && getHousingProject"
+    v-if="!loading && getProject"
     class="app-primary-color"
   >
     <div class="disclaimer-block p-8 mt-8">
@@ -160,7 +158,7 @@ onBeforeMount(async () => {
           @keydown.enter.prevent="navigateToSubmissionIntakeView()"
           @keydown.space.prevent="navigateToSubmissionIntakeView()"
         >
-          {{ getHousingProject.projectName }}
+          {{ getProject.projectName }}
           <font-awesome-icon
             class="text-sm"
             icon="fa fa-external-link"
@@ -170,12 +168,12 @@ onBeforeMount(async () => {
           v-else
           class="mt-0 mb-2"
         >
-          {{ getHousingProject.projectName }}
+          {{ getProject.projectName }}
         </h1>
         <div>
           <span class="mr-4">
             Project ID:
-            <span class="font-bold">{{ getHousingProject.activityId }}</span>
+            <span class="font-bold">{{ getProject.activityId }}</span>
           </span>
           <span class="mr-4">
             {{ t('e.housing.projectView.createdBy') }}:
@@ -190,8 +188,7 @@ onBeforeMount(async () => {
       </div>
       <Button
         v-if="
-          canNavigate(NavigationPermission.EXT_HOUSING) &&
-          getHousingProject?.submissionType !== SubmissionType.INAPPLICABLE
+          canNavigate(NavigationPermission.EXT_HOUSING) && getProject?.submissionType !== SubmissionType.INAPPLICABLE
         "
         class="p-button-sm header-btn mt-3"
         label="Ask my Navigator"
@@ -205,7 +202,7 @@ onBeforeMount(async () => {
     </div>
 
     <div
-      v-if="getHousingProject?.submissionType === SubmissionType.INAPPLICABLE"
+      v-if="getProject?.submissionType === SubmissionType.INAPPLICABLE"
       class="inapplicable-block p-4 mt-12"
     >
       {{ t('e.housing.projectView.inapplicableSubmissionType') }}

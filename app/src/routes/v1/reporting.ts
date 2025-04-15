@@ -12,6 +12,15 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+/** Get all electrification project and permit data for csv download */
+router.get(
+  '/electrificationProject/permit',
+  hasAuthorization(Resource.REPORTING, Action.READ),
+  (req: Request, res: Response, next: NextFunction): void => {
+    reportingController.getElectrificationProjectPermitData(req, res, next);
+  }
+);
+
 /** Get all housing project and permit data for csv download */
 router.get(
   '/housingProject/permit',
