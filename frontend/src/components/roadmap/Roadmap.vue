@@ -133,11 +133,11 @@ watchEffect(async () => {
   const permitStateApplied = getPermitTypeNamesByStatus(PermitStatus.APPLIED);
   const permitStateCompleted = getPermitTypeNamesByStatus(PermitStatus.COMPLETED);
 
+  // TODO: Remove nullish coalescing operator when prisma db has mappings for housing projects
+  const contact = project?.activity?.activityContact?.[0]?.contact ?? project?.contacts?.[0];
+
   const body = roadmapTemplate({
-    '{{ contactName }}':
-      project?.contacts[0]?.firstName && project?.contacts[0]?.lastName
-        ? `${project?.contacts[0]?.firstName} ${project?.contacts[0]?.lastName}`
-        : '',
+    '{{ contactName }}': contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
     '{{ locationAddress }}': project?.streetAddress ?? '',
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
@@ -149,7 +149,7 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: project?.contacts[0]?.email,
+    to: contact?.email,
     cc: undefined,
     bcc: bcc,
     subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
@@ -158,7 +158,7 @@ watchEffect(async () => {
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
-  formRef.value?.setFieldValue('to', project?.contacts[0]?.email);
+  formRef.value?.setFieldValue('to', contact?.email);
   formRef.value?.setFieldValue('bcc', bcc);
   formRef.value?.setFieldValue('body', body);
 });

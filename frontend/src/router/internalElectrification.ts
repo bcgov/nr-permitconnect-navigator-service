@@ -3,7 +3,7 @@ import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
 
-import { type RouteRecordRaw } from 'vue-router';
+import type { RouteRecordRaw } from 'vue-router';
 
 const routes: Array<RouteRecordRaw> = [
   {

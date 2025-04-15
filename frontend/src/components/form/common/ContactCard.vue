@@ -8,7 +8,7 @@ import { Card } from '@/lib/primevue';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 
 // Props
-const { editable = true } = defineProps<{
+const { editable = true, initialFormValues } = defineProps<{
   editable?: boolean;
   initialFormValues: any;
 }>();
