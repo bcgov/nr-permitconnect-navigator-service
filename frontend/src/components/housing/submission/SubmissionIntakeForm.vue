@@ -55,7 +55,7 @@ import {
   ProjectApplicant,
   SubmissionType
 } from '@/utils/enums/housing';
-import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/utils/templates';
+import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -325,7 +325,7 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
     let body: string;
 
     if (forProjectSubmission) {
-      body = confirmationTemplateSubmission({
+      body = confirmationTemplateHousingSubmission({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
         '{{ housingProjectId }}': subId
