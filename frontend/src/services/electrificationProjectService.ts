@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
 import { delimitEmails } from '@/utils/utils';
+import { Initiative } from '@/utils/enums/application';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';
@@ -13,7 +13,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   createProject(data?: any) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -28,7 +28,7 @@ const service: IDraftableProjectService = {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/email`, emailData);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**
@@ -36,7 +36,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   deleteProject(projectId: string) {
-    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`);
+    return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -44,7 +44,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   deleteDraft(draftId: string) {
-    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/${draftId}`);
+    return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -52,7 +52,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getActivityIds() {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/activityIds`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/activityIds`);
   },
 
   /**
@@ -60,7 +60,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDraft(draftId: string) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/${draftId}`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -68,7 +68,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDrafts() {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`);
   },
 
   /**
@@ -76,7 +76,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getProjects() {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`);
   },
 
   /**
@@ -84,7 +84,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getStatistics(filters?: any) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/statistics`, {
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/statistics`, {
       params: { ...filters }
     });
   },
@@ -94,7 +94,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getProject(projectId: string) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -102,7 +102,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   searchProjects(filters?: ElectrificationProjectSearchParameters) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
   },
 
   /**
@@ -110,7 +110,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   submitDraft(data?: any) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft/submit`, data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, data);
   },
 
   /**
@@ -118,7 +118,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateDraft(data?: Partial<Draft>) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/draft`, data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, data);
   },
 
   /**
@@ -126,7 +126,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
-    return appAxios().patch(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}/delete`, {
+    return appAxios().patch(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}/delete`, {
       isDeleted: isDeleted
     });
   },
@@ -136,7 +136,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateProject(projectId: string, data: any) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${projectId}`, data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 
