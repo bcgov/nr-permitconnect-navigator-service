@@ -152,6 +152,29 @@ watchEffect(() => {
         public: true
       }
     ];
+  } else {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'Contacts',
+        route: RouteName.INT_CONTACT,
+        access: NavigationPermission.INT_CONTACT
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      }
+    ];
   }
 });
 </script>

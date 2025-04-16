@@ -304,7 +304,7 @@ async function onSubmit(data: any) {
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
         params: {
-          housingProjectId: response.data.housingProjectId
+          projectId: response.data.housingProjectId
         }
       });
     } else {
