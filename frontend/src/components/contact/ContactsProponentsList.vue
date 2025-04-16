@@ -44,8 +44,7 @@ function updateQueryParams() {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
       field: pagination.value.field ?? undefined,
-      page: pagination.value.page ?? undefined,
-      tab: route.query.tab ?? 0
+      page: pagination.value.page ?? undefined
     }
   });
 }
