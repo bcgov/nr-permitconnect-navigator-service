@@ -71,7 +71,7 @@ function normalizeContactHistory() {
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.INT_CONTACT_PAGE,
+    name: router.currentRoute.value.name,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,

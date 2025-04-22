@@ -9,8 +9,8 @@ import { RouteName } from '@/utils/enums/application';
 import type { Ref } from 'vue';
 
 // Props
-const { housingProjectId } = defineProps<{
-  housingProjectId: string;
+const { projectId } = defineProps<{
+  projectId: string;
 }>();
 
 // Composables
@@ -20,7 +20,7 @@ const { t } = useI18n();
 const activityId: Ref<string | undefined> = ref(undefined);
 
 onBeforeMount(async () => {
-  activityId.value = (await housingProjectService.getProject(housingProjectId)).data.activityId;
+  activityId.value = (await housingProjectService.getProject(projectId)).data.activityId;
 });
 </script>
 
@@ -37,7 +37,7 @@ onBeforeMount(async () => {
     <router-link
       :to="{
         name: RouteName.EXT_HOUSING_PROJECT,
-        params: { housingProjectId: housingProjectId }
+        params: { projectId: projectId }
       }"
     >
       <span class="text-2xl">{{ activityId }}</span>

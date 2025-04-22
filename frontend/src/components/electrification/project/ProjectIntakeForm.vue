@@ -172,7 +172,7 @@ async function onSubmit(data: any) {
       router.push({
         name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,
         params: {
-          electrificationProjectId: response.data.electrificationProjectId
+          projectId: response.data.electrificationProjectId
         }
       });
     } else {
@@ -196,7 +196,7 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
       body = confirmationTemplateElectrificationSubmission({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
-        '{{ electrificationProjectId }}': subId
+        '{{ projectId }}': subId
       });
     } else {
       body = confirmationTemplateEnquiry({

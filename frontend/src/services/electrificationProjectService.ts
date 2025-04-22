@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
-import { delimitEmails } from '@/utils/utils';
 import { Initiative } from '@/utils/enums/application';
+import { delimitEmails } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';

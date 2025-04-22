@@ -8,8 +8,8 @@ import { electrificationProjectService } from '@/services';
 import type { Ref } from 'vue';
 
 // Props
-const { electrificationProjectId } = defineProps<{
-  electrificationProjectId: string;
+const { projectId } = defineProps<{
+  projectId: string;
 }>();
 
 // Composables
@@ -19,7 +19,7 @@ const { t } = useI18n();
 const activityId: Ref<string | undefined> = ref(undefined);
 
 onBeforeMount(async () => {
-  activityId.value = (await electrificationProjectService.getProject(electrificationProjectId)).data.activityId;
+  activityId.value = (await electrificationProjectService.getProject(projectId)).data.activityId;
 });
 </script>
 
@@ -37,7 +37,7 @@ onBeforeMount(async () => {
     <!-- <router-link
       :to="{
         name: RouteName.EXT_ELECTRIFICATION_PROJECT,
-        params: { electrificationProjectId: electrificationProjectId }
+        params: { projectId: projectId }
       }"
     > -->
     <span class="text-2xl">{{ activityId }}</span>
