@@ -52,7 +52,8 @@ const controller = {
         firstName: req.query.firstName,
         lastName: req.query.lastName,
         contactApplicantRelationship: req.query.contactApplicantRelationship,
-        phoneNumber: req.query.phoneNumber
+        phoneNumber: req.query.phoneNumber,
+        initiative: req.query.initiative
       });
       res.status(200).json(response);
     } catch (e: unknown) {

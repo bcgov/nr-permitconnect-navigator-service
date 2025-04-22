@@ -3,6 +3,7 @@ import Joi from 'joi';
 import { email, phoneNumber, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/housing';
+import { Initiative } from '../utils/enums/application';
 
 export const contacts = Joi.array()
   .items(
@@ -43,6 +44,9 @@ const schema = {
         .valid(...PROJECT_RELATIONSHIP_LIST),
       contactPreference: Joi.string()
         .valid(...CONTACT_PREFERENCE_LIST)
+        .allow(null),
+      initiative: Joi.string()
+        .valid(...Object.values(Initiative))
         .allow(null)
     })
   },

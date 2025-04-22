@@ -1,3 +1,5 @@
+import type { Initiative } from '@/utils/enums/application';
+
 export type ContactSearchParameters = {
   contactApplicantRelationship?: string;
   contactPreference?: string;
@@ -7,4 +9,5 @@ export type ContactSearchParameters = {
   lastName?: string;
   phoneNumber?: string;
   userId?: string[];
+  initiative?: Initiative;
 };

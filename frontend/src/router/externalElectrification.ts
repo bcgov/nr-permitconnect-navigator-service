@@ -78,7 +78,7 @@ const routes: Array<RouteRecordRaw> = [
             }
           },
           {
-            path: ':electrificationProjectId/confirmation',
+            path: ':projectId/confirmation',
             name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,
             component: () => import('@/views/external/electrification/project/ProjectConfirmationView.vue'),
             beforeEnter: accessHandler,
@@ -94,7 +94,7 @@ const routes: Array<RouteRecordRaw> = [
       //   component: () => import('@/views/GenericView.vue'),
       //   children: [
       //     {
-      //       path: ':electrificationProjectId',
+      //       path: ':projectId',
       //       component: () => import('@/views/GenericView.vue'),
       //       children: [
       //         {

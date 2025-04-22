@@ -1,5 +1,5 @@
-import { useAppStore } from '@/store';
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 
 import type { AxiosResponse } from 'axios';
 

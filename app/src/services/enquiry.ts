@@ -2,6 +2,7 @@
 import prisma from '../db/dataConnection';
 import { enquiry } from '../db/models';
 import { IStamps } from '../interfaces/IStamps';
+import { Initiative } from '../utils/enums/application';
 
 import type { Enquiry, EnquirySearchParameters } from '../types';
 
@@ -127,13 +128,13 @@ const service = {
    * Search and filter for specific enquiries
    * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
    * @param {string[]} [params.createdBy] Optional array of uuids representing users who created enquiries
-   * @param {string[]} [params.enquiry_id] Optional array of uuids representing the enquiry ID
+   * @param {string[]} [params.enquiryId] Optional array of uuids representing the enquiry ID
    * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
-   * @param {Initiative[]} [params.initiative] Optional array of initiatives
+   * @param {Initiative} [initiative] Initiative to search in
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
-  searchEnquiries: async (params: EnquirySearchParameters) => {
+  searchEnquiries: async (params: EnquirySearchParameters, initiative: Initiative) => {
     try {
       const result = await prisma.enquiry.findMany({
         include: {
@@ -154,7 +155,7 @@ const service = {
             {
               activity: {
                 initiative: {
-                  code: { in: params.initiative }
+                  code: initiative
                 }
               }
             },

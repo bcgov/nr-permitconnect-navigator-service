@@ -86,6 +86,7 @@ const service = {
    * @param {string} [params.contactApplicantRelationship] Optional contactApplicantRelationship string to match on
    * @param {string} [params.lastName] Optional lastName string to match on
    * @param {boolean} [params.contactPreference] Optional contactPreference string to match on
+   * @param {Initiative} [params.initiative] Optional Initiative to match on
    * @returns {Promise<object>} The result of running the findMany operation
    */
   searchContacts: async (params: ContactSearchParameters) => {
@@ -115,7 +116,10 @@ const service = {
           },
           {
             phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
-          }
+          },
+          ...(params.initiative
+            ? [{ activity_contact: { some: { activity: { initiative: { code: params.initiative } } } } }]
+            : [])
         ]
       },
       include: {
