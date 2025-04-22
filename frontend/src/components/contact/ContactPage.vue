@@ -1,18 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { InputText, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import {
-  contactService,
-  electrificationProjectService,
-  housingProjectService,
-  enquiryService,
-  userService
-} from '@/services';
-import { useAppStore } from '@/store';
-import { IdentityProviderKind, Initiative } from '@/utils/enums/application';
+import { contactService, enquiryService, userService } from '@/services';
+import { IdentityProviderKind } from '@/utils/enums/application';
+import { projectServiceKey } from '@/utils/keys';
 import { findIdpConfig } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -22,6 +16,8 @@ import type { ActivityContact, Contact, ElectrificationProject, Enquiry, Housing
 const { contactId } = defineProps<{
   contactId: string;
 }>();
+
+const projectService = inject(projectServiceKey);
 
 // Composables
 const { t } = useI18n();
@@ -40,39 +36,26 @@ const fullName = computed(() => {
 
 // Actions
 onBeforeMount(async () => {
-  const includeActivities = true;
-  const contactData = (await contactService.getContact(contactId, includeActivities)).data;
+  const contactData = (await contactService.getContact(contactId, true)).data;
   const activityIds = contactData.activityContact.map((ac: ActivityContact) => ac.activityId);
 
   if (activityIds.length) {
-    const [electrification, housing] = (
+    const [projects, enquiries] = (
       await Promise.all([
-        electrificationProjectService.searchProjects({ activityId: activityIds }),
-        housingProjectService.searchProjects({ activityId: activityIds })
+        projectService?.searchProjects({ activityId: activityIds }),
+        enquiryService.searchEnquiries({ activityId: activityIds })
       ])
-    ).map((r) => r.data);
+    ).map((r: any) => r?.data);
 
-    projectsEnquiries.value = projectsEnquiries.value.concat(electrification).concat(housing);
-
-    // Need to force override the initiative for these calls
-    useAppStore().setInitiative(Initiative.ELECTRIFICATION);
-    const elecEnquiries = (await enquiryService.searchEnquiries({ activityId: activityIds })).data;
-    projectsEnquiries.value = projectsEnquiries.value.concat(elecEnquiries);
-
-    useAppStore().setInitiative(Initiative.HOUSING);
-    const housingEnquiries = (await enquiryService.searchEnquiries({ activityId: activityIds })).data;
-    projectsEnquiries.value = projectsEnquiries.value.concat(housingEnquiries);
-
-    // Set initiative back to what it should be
-    useAppStore().setInitiative(Initiative.PCNS);
+    projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
   }
 
   contact.value = contactData;
 
   // Map users ids to full names for history data table
   let userIds: Array<string> = [];
-  projectsEnquiries.value.forEach((se) => {
-    if (se.assignedUserId) userIds.push(se.assignedUserId);
+  projectsEnquiries.value.forEach((pe) => {
+    if (pe.assignedUserId) userIds.push(pe.assignedUserId);
   });
 
   if (userIds) {

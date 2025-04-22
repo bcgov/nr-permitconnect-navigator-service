@@ -75,7 +75,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, initiative: Initiative.PCNS };
 
 describe('enquiryController', () => {
   const next = jest.fn();
@@ -307,11 +307,13 @@ describe('enquiryController', () => {
 
       await enquiryController.searchEnquiries(req, res, next);
 
-      expect(searchEnquiriesSpy).toHaveBeenCalledWith({
-        enquiryId: ['enquiry123'],
-        includeUser: true,
-        initiative: [Initiative.PCNS]
-      });
+      expect(searchEnquiriesSpy).toHaveBeenCalledWith(
+        {
+          enquiryId: ['enquiry123'],
+          includeUser: true
+        },
+        Initiative.PCNS
+      );
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(enquiries);
     });

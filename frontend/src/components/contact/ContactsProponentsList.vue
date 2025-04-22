@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import { Column, DataTable, FilterMatchMode, IconField, InputIcon, InputText } from '@/lib/primevue';
-import { RouteName } from '@/utils/enums/application';
+import { contactInitiativeRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -16,6 +16,9 @@ const { contacts, loading } = defineProps<{
   contacts: Array<Contact> | undefined;
   loading: boolean;
 }>();
+
+// Injections
+const contactInitiativeRoute = inject(contactInitiativeRouteNameKey);
 
 // Composables
 const { t } = useI18n();
@@ -39,7 +42,7 @@ const filters = ref({
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.INT_CONTACT,
+    name: router.currentRoute.value.name,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
@@ -137,7 +140,7 @@ onBeforeMount(() => {
       <template #body="{ data }">
         <router-link
           :to="{
-            name: RouteName.INT_CONTACT_PAGE,
+            name: contactInitiativeRoute,
             params: { contactId: data.contactId }
           }"
         >

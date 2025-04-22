@@ -54,7 +54,7 @@ watchEffect(() => {
       },
       {
         label: 'Contacts',
-        route: RouteName.INT_CONTACT,
+        route: RouteName.INT_ELECTRIFICATION_CONTACT,
         access: NavigationPermission.INT_CONTACT
       },
       {
@@ -118,7 +118,7 @@ watchEffect(() => {
       },
       {
         label: 'Contacts',
-        route: RouteName.INT_CONTACT,
+        route: RouteName.INT_HOUSING_CONTACT,
         access: NavigationPermission.INT_CONTACT
       },
       {
@@ -158,11 +158,6 @@ watchEffect(() => {
         label: 'Home',
         route: RouteName.HOME,
         public: true
-      },
-      {
-        label: 'Contacts',
-        route: RouteName.INT_CONTACT,
-        access: NavigationPermission.INT_CONTACT
       },
       {
         label: 'User Management',

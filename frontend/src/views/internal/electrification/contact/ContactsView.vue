@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { contactService } from '@/services';
+import { RouteName } from '@/utils/enums/application';
+import { contactInitiativeRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Contact } from '@/types';
@@ -15,6 +17,8 @@ const { t } = useI18n();
 // State
 const contacts: Ref<Array<Contact>> = ref([]);
 const loading: Ref<boolean> = ref(true);
+
+provide(contactInitiativeRouteNameKey, RouteName.INT_ELECTRIFICATION_CONTACT_PAGE);
 
 // Actions
 onBeforeMount(async () => {

@@ -4,7 +4,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
 import { shallowMount } from '@vue/test-utils';
 
-import ContactPageView from '@/views/internal/contact/ContactPageView.vue';
+import ContactPage from '@/components/contact/ContactPage.vue';
 import { contactService, housingProjectService, enquiryService, userService } from '@/services';
 
 import type { AxiosRequestHeaders } from 'axios';
@@ -94,9 +94,9 @@ const wrapperSettings = () => ({
   }
 });
 
-describe('ContactPageView.vue', () => {
+describe('ContactPage.vue', () => {
   it('renders correctly', () => {
-    const wrapper = shallowMount(ContactPageView, wrapperSettings());
+    const wrapper = shallowMount(ContactPage, wrapperSettings());
     expect(wrapper.exists()).toBe(true);
   });
 });

@@ -18,6 +18,27 @@ const routes: Array<RouteRecordRaw> = [
         beforeEnter: accessHandler
       },
       {
+        path: 'contact',
+        beforeEnter: entryRedirect,
+        meta: { breadcrumb: 'Contacts', requiresAuth: true },
+        children: [
+          {
+            path: '',
+            name: RouteName.INT_ELECTRIFICATION_CONTACT,
+            component: () => import('@/views/internal/electrification/contact/ContactsView.vue'),
+            beforeEnter: accessHandler
+          },
+          {
+            path: ':contactId',
+            name: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE,
+            component: () => import('@/views/internal/electrification/contact/ContactPageView.vue'),
+            beforeEnter: accessHandler,
+            props: createProps,
+            meta: { breadcrumb: 'Contact Details' }
+          }
+        ]
+      },
+      {
         path: 'project/:projectId',
         component: () => import('@/views/GenericView.vue'),
         meta: { dynamicBreadcrumb: 'project' },

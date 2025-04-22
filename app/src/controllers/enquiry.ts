@@ -150,11 +150,13 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      let response = await enquiryService.searchEnquiries({
-        ...req.query,
-        includeUser: isTruthy(req.query.includeUser),
-        initiative: [req.currentContext.initiative ?? Initiative.PCNS]
-      });
+      let response = await enquiryService.searchEnquiries(
+        {
+          ...req.query,
+          includeUser: isTruthy(req.query.includeUser)
+        },
+        req.currentContext.initiative ?? Initiative.PCNS
+      );
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
