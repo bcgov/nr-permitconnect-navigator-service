@@ -23,7 +23,7 @@ const testSubmissionId = 'submission123';
 
 const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
   props: {
-    housingProjectId: testSubmissionIdProp
+    projectId: testSubmissionIdProp
   },
   global: {
     plugins: [

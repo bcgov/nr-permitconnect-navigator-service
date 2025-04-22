@@ -78,7 +78,7 @@ export const confirmationTemplateElectrificationSubmission = (replaceConfig: {
     'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
     'View your project submission <a href="' +
     PCNS_URL +
-    '/e/electrification/project/{{ submissionId }}/intake">here<a>.<br><br>' +
+    '/e/electrification/project/{{ projectId }}/intake">here<a>.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +
