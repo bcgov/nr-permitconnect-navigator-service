@@ -6,6 +6,7 @@ import {
   noteService,
   userService
 } from '../../../src/services';
+import { Initiative } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -27,7 +28,7 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123', initiative: Initiative.HOUSING };
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
@@ -180,7 +181,7 @@ describe('listBringForward', () => {
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(undefined);
+    expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
@@ -214,7 +215,7 @@ describe('listBringForward', () => {
     await noteController.listBringForward(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(undefined);
+    expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(0);
     expect(searchUsersSpy).toHaveBeenCalledTimes(0);
     expect(res.status).toHaveBeenCalledTimes(0);
