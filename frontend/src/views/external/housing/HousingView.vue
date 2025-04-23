@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Tooltip from '@/components/common/Tooltip.vue';
+import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
 import { enquiryService, housingProjectService } from '@/services';
@@ -12,10 +13,14 @@ import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject } from '@/types';
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 
 // Constants
 const PAGE_ROWS = 5;
+
+// Composables
+const { t } = useI18n();
+const route = useRoute();
+const router = useRouter();
 
 // State
 const drafts: Ref<Array<any>> = ref([]);
@@ -26,10 +31,6 @@ const displayedProjects = computed(() => projects.value.slice(first.value, first
 const loading: Ref<boolean> = ref(true);
 
 // Actions
-const { t } = useI18n();
-const route = useRoute();
-const router = useRouter();
-
 function onHousingProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
@@ -175,7 +176,7 @@ onBeforeMount(async () => {
               class="no-underline"
               :to="{
                 name: RouteName.EXT_HOUSING_PROJECT,
-                params: { housingProjectId: project.housingProjectId }
+                params: { projectId: project.housingProjectId }
               }"
             >
               <h4 class="font-bold mb-0">{{ project.projectName }}</h4>

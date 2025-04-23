@@ -59,7 +59,8 @@ export enum Resource {
   REPORTING = 'REPORTING',
   ROADMAP = 'ROADMAP',
   SSO = 'SSO',
-  USER = 'USER'
+  USER = 'USER',
+  YARS = 'YARS'
 }
 
 // Legacy resources that are kept for migration purposes

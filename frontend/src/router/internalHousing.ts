@@ -9,25 +9,17 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: 'housing',
     beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.HOUSING)],
-    meta: { access: [NavigationPermission.INT_HOUSING], breadcrumb: 'Submissions', requiresAuth: true },
+    meta: { access: [NavigationPermission.INT_HOUSING], requiresAuth: true },
     children: [
       {
         path: '',
-        name: RouteName.INT_HOUSING,
-        component: () => import('@/views/internal/housing/HousingView.vue'),
-        beforeEnter: accessHandler
-      },
-      {
-        path: 'project/:projectId',
-        component: () => import('@/views/GenericView.vue'),
-        meta: { dynamicBreadcrumb: 'project' },
+        meta: { breadcrumb: 'Submissions' },
         children: [
           {
             path: '',
-            name: RouteName.INT_HOUSING_PROJECT,
-            component: () => import('@/views/internal/housing/project/ProjectView.vue'),
-            beforeEnter: accessHandler,
-            props: createProps
+            name: RouteName.INT_HOUSING,
+            component: () => import('@/views/internal/housing/HousingView.vue'),
+            beforeEnter: accessHandler
           },
           {
             path: 'enquiry',
@@ -35,7 +27,7 @@ const routes: Array<RouteRecordRaw> = [
             children: [
               {
                 path: ':enquiryId',
-                name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
+                name: RouteName.INT_HOUSING_ENQUIRY,
                 component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
@@ -44,42 +36,77 @@ const routes: Array<RouteRecordRaw> = [
             ]
           },
           {
-            path: 'proponent',
+            path: 'project/:projectId',
             component: () => import('@/views/GenericView.vue'),
-            meta: { breadcrumb: 'Proponent view' },
+            meta: { dynamicBreadcrumb: 'project' },
             children: [
               {
                 path: '',
-                name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
-                // TODO: Consider creating reuse component from view so we can create a separate internal view
-                component: () => import('@/views/external/housing/project/ProjectView.vue'),
+                name: RouteName.INT_HOUSING_PROJECT,
+                component: () => import('@/views/internal/housing/project/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
               {
-                path: ':permitId',
-                name: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
-                // TODO: Consider creating reuse component from view so we can create a separate internal view
-                component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
-                beforeEnter: accessHandler,
-                props: createProps,
-                meta: { dynamicBreadcrumb: 'permit' }
+                path: 'enquiry',
+                component: () => import('@/views/GenericView.vue'),
+                children: [
+                  {
+                    path: ':enquiryId',
+                    name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
+                    component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps,
+                    meta: { dynamicBreadcrumb: 'enquiry' }
+                  }
+                ]
+              },
+              {
+                path: 'proponent',
+                component: () => import('@/views/GenericView.vue'),
+                meta: { breadcrumb: 'Proponent view' },
+                children: [
+                  {
+                    path: '',
+                    name: RouteName.INT_HOUSING_PROJECT_PROPONENT,
+                    // TODO: Consider creating reuse component from view so we can create a separate internal view
+                    component: () => import('@/views/external/housing/project/ProjectView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps
+                  },
+                  {
+                    path: ':permitId',
+                    name: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
+                    // TODO: Consider creating reuse component from view so we can create a separate internal view
+                    component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps,
+                    meta: { dynamicBreadcrumb: 'permit' }
+                  }
+                ]
               }
             ]
           }
         ]
       },
       {
-        path: 'enquiry',
-        component: () => import('@/views/GenericView.vue'),
+        path: 'contact',
+        beforeEnter: entryRedirect,
+        meta: { breadcrumb: 'Contacts', requiresAuth: true },
         children: [
           {
-            path: ':enquiryId',
-            name: RouteName.INT_HOUSING_ENQUIRY,
-            component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+            path: '',
+            name: RouteName.INT_HOUSING_CONTACT,
+            component: () => import('@/views/internal/housing/contact/ContactsView.vue'),
+            beforeEnter: accessHandler
+          },
+          {
+            path: ':contactId',
+            name: RouteName.INT_HOUSING_CONTACT_PAGE,
+            component: () => import('@/views/internal/housing/contact/ContactPageView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
-            meta: { dynamicBreadcrumb: 'enquiry' }
+            meta: { breadcrumb: 'Contact Details' }
           }
         ]
       }

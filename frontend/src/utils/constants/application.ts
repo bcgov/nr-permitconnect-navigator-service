@@ -14,6 +14,8 @@ export const ACCESS_REQUEST_STATUS = [
 
 export const DELIMITER = '/';
 
+export const ISO_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
 export const PCNS_CONTACT = {
   email: 'NRM.PermittingAndData@gov.bc.ca',
   subject: 'Reporting an Issue with PCNS'
@@ -55,6 +57,8 @@ export const SPATIAL_FILE_FORMATS = [
 export const SYSTEM_USER = NIL;
 
 export const USER_SEARCH_PARAMS = [UserSearchParams.FIRST_NAME, UserSearchParams.LAST_NAME, UserSearchParams.EMAIL];
+
+export const UUID_V4_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];

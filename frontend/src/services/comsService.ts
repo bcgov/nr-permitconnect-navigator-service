@@ -3,7 +3,7 @@ import { setDispositionHeader } from '@/utils/utils';
 
 import type { AxiosRequestConfig } from 'axios';
 
-const PATH = '/object';
+const PATH = 'object';
 
 export default {
   /**

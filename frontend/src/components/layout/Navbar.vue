@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import { Menubar } from '@/lib/primevue';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_ASSISTANCE } from '@/utils/constants/housing';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -21,75 +21,156 @@ type NavItem = {
 };
 
 // Store
+const appStore = useAppStore();
 const authzStore = useAuthZStore();
 
 // State
 const items: Ref<Array<NavItem>> = ref([]);
 
-onBeforeMount(() => {
-  items.value = [
-    {
-      label: 'Home',
-      route: RouteName.HOME,
-      public: true
-    },
-    {
-      label: 'Housing',
-      items: [
-        {
-          label: 'Submit a housing project to the Navigator Service',
-          route: RouteName.EXT_HOUSING_INTAKE,
-          access: NavigationPermission.EXT_HOUSING
-        },
-        {
-          label: 'Submit general enquiries',
-          route: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-          access: NavigationPermission.EXT_HOUSING
-        }
-      ],
-      access: [NavigationPermission.EXT_HOUSING]
-    },
-    {
-      label: 'Submissions',
-      route: RouteName.INT_HOUSING,
-      access: NavigationPermission.INT_HOUSING
-    },
-    {
-      label: 'Contacts',
-      route: RouteName.INT_CONTACT,
-      access: NavigationPermission.INT_CONTACT
-    },
-    {
-      label: 'User Management',
-      route: RouteName.INT_USER_MANAGEMENT,
-      access: NavigationPermission.INT_USER_MANAGEMENT
-    },
-    {
-      label: 'Developer',
-      route: RouteName.DEVELOPER,
-      access: NavigationPermission.DEVELOPER
-    },
-    {
-      label: 'Help',
-      items: [
-        {
-          label: 'User Guide',
-          route: RouteName.EXT_HOUSING_GUIDE
-        },
-        {
-          label: 'Report a problem',
-          mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
-          public: true
-        },
-        {
-          label: 'Contact a Navigator',
-          mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
-          access: [NavigationPermission.EXT_HOUSING]
-        }
-      ],
-      public: true
-    }
-  ];
+// Actions
+watchEffect(() => {
+  if (appStore.getInitiative === Initiative.ELECTRIFICATION) {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'Electrification',
+        items: [
+          {
+            label: 'Submit an electrification project to the Navigator Service',
+            route: RouteName.EXT_ELECTRIFICATION_INTAKE,
+            access: NavigationPermission.EXT_ELECTRIFICATION
+          }
+        ],
+        access: [NavigationPermission.EXT_ELECTRIFICATION]
+      },
+      {
+        label: 'Submissions',
+        route: RouteName.INT_ELECTRIFICATION,
+        access: NavigationPermission.INT_ELECTRIFICATION
+      },
+      {
+        label: 'Contacts',
+        route: RouteName.INT_ELECTRIFICATION_CONTACT,
+        access: NavigationPermission.INT_CONTACT
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      },
+      {
+        label: 'Help',
+        items: [
+          // {
+          //   label: 'User Guide',
+          //   route: RouteName.EXT_ELECTRIFICATION_GUIDE
+          // },
+          {
+            label: 'Report a problem',
+            mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
+            public: true
+          },
+          {
+            label: 'Contact a Navigator',
+            mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
+            access: [NavigationPermission.EXT_ELECTRIFICATION]
+          }
+        ],
+        public: true
+      }
+    ];
+  } else if (appStore.getInitiative === Initiative.HOUSING) {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'Housing',
+        items: [
+          {
+            label: 'Submit a housing project to the Navigator Service',
+            route: RouteName.EXT_HOUSING_INTAKE,
+            access: NavigationPermission.EXT_HOUSING
+          },
+          {
+            label: 'Submit general enquiries',
+            route: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
+            access: NavigationPermission.EXT_HOUSING
+          }
+        ],
+        access: [NavigationPermission.EXT_HOUSING]
+      },
+      {
+        label: 'Submissions',
+        route: RouteName.INT_HOUSING,
+        access: NavigationPermission.INT_HOUSING
+      },
+      {
+        label: 'Contacts',
+        route: RouteName.INT_HOUSING_CONTACT,
+        access: NavigationPermission.INT_CONTACT
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      },
+      {
+        label: 'Help',
+        items: [
+          {
+            label: 'User Guide',
+            route: RouteName.EXT_HOUSING_GUIDE
+          },
+          {
+            label: 'Report a problem',
+            mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
+            public: true
+          },
+          {
+            label: 'Contact a Navigator',
+            mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
+            access: [NavigationPermission.EXT_HOUSING]
+          }
+        ],
+        public: true
+      }
+    ];
+  } else {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      }
+    ];
+  }
 });
 </script>
 

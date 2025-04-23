@@ -4,13 +4,12 @@ import { useI18n } from 'vue-i18n';
 
 import { Message } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
 // Props
-const { electrificationProjectId } = defineProps<{
-  electrificationProjectId: string;
+const { projectId } = defineProps<{
+  projectId: string;
 }>();
 
 // Composables
@@ -20,7 +19,7 @@ const { t } = useI18n();
 const activityId: Ref<string | undefined> = ref(undefined);
 
 onBeforeMount(async () => {
-  activityId.value = (await electrificationProjectService.getProject(electrificationProjectId)).data.activityId;
+  activityId.value = (await electrificationProjectService.getProject(projectId)).data.activityId;
 });
 </script>
 
@@ -38,7 +37,7 @@ onBeforeMount(async () => {
     <!-- <router-link
       :to="{
         name: RouteName.EXT_ELECTRIFICATION_PROJECT,
-        params: { electrificationProjectId: electrificationProjectId }
+        params: { projectId: projectId }
       }"
     > -->
     <span class="text-2xl">{{ activityId }}</span>
@@ -47,9 +46,10 @@ onBeforeMount(async () => {
       {{ t('e.electrification.projectConfirmationView.message') }}
     </div>
     <div class="mt-6">
-      <router-link :to="{ name: RouteName.EXT_HOUSING }">
+      <!-- TODO: Uncomment when view is added -->
+      <!-- <router-link :to="{ name: RouteName.EXT_ELECTRIFICATION }">
         {{ t('e.electrification.projectConfirmationView.backToElectrification') }}
-      </router-link>
+      </router-link> -->
     </div>
   </div>
 </template>

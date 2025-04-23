@@ -17,7 +17,7 @@ import { useConfigStore, useContactStore, useProjectStore } from '@/store';
 import { PROJECT_TYPE_LIST } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { ProjectType } from '@/utils/enums/electrification';
-import { confirmationTemplateEnquiry, confirmationTemplateSubmission } from '@/utils/templates';
+import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -172,7 +172,7 @@ async function onSubmit(data: any) {
       router.push({
         name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,
         params: {
-          electrificationProjectId: response.data.electrificationProjectId
+          projectId: response.data.electrificationProjectId
         }
       });
     } else {
@@ -193,10 +193,10 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
     let body: string;
 
     if (forProjectSubmission) {
-      body = confirmationTemplateSubmission({
+      body = confirmationTemplateElectrificationSubmission({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
-        '{{ electrificationProjectId }}': subId
+        '{{ projectId }}': subId
       });
     } else {
       body = confirmationTemplateEnquiry({

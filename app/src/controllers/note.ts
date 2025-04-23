@@ -6,6 +6,7 @@ import {
   noteService,
   userService
 } from '../services';
+import { Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { BringForward, Note } from '../types';
@@ -44,7 +45,10 @@ const controller = {
   ) {
     try {
       let response = new Array<BringForward>();
-      const notes = await noteService.listBringForward(req.query.bringForwardState);
+      const notes = await noteService.listBringForward(
+        req.currentContext.initiative as Initiative,
+        req.query.bringForwardState
+      );
       if (notes && notes.length) {
         const electrificationProjects = await electrificationProjectService.searchElectrificationProjects({
           activityId: notes.map((x) => x.activityId)
@@ -58,9 +62,23 @@ const controller = {
             .filter((x) => !!x)
             .map((x) => x as string)
         });
-        const enquiries = await enquiryService.searchEnquiries({
-          activityId: notes.map((x) => x.activityId)
-        });
+        const enquiries = (
+          await Promise.all([
+            enquiryService.searchEnquiries(
+              {
+                activityId: notes.map((x) => x.activityId)
+              },
+              Initiative.ELECTRIFICATION
+            ),
+            enquiryService.searchEnquiries(
+              {
+                activityId: notes.map((x) => x.activityId)
+              },
+              Initiative.HOUSING
+            )
+          ])
+        ).flatMap((x) => x);
+
         response = notes.map((note) => ({
           activityId: note.activityId,
           noteId: note.noteId as string,

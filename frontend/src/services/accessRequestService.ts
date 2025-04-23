@@ -1,4 +1,5 @@
 import { appAxios } from './interceptors';
+import { useAppStore } from '@/store';
 
 import type { AxiosResponse } from 'axios';
 
@@ -26,7 +27,7 @@ export default {
    * @returns {Promise} An axios response
    */
   createUserAccessRequest(data: any) {
-    return appAxios().post(`${PATH}/`, data);
+    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -34,7 +35,7 @@ export default {
    * @returns {Promise} An axios response
    */
   processUserAccessRequest(accessRequestId: string, data: any) {
-    return appAxios().post(`${PATH}/${accessRequestId}`, data);
+    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${accessRequestId}`, data);
   },
 
   /**
@@ -42,6 +43,6 @@ export default {
    * @returns {Promise} An axios response
    */
   getAccessRequests(): Promise<AxiosResponse> {
-    return appAxios().get(`${PATH}`);
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
   }
 };

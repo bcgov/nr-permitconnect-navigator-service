@@ -10,12 +10,12 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject, Pagination } from '@/types';
+import type { ElectrificationProject, Enquiry, HousingProject, Pagination } from '@/types';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
   assignedUsers: Record<string, string>;
-  contactsHistory: Array<HousingProject | Enquiry>;
+  contactsHistory: Array<ElectrificationProject | HousingProject | Enquiry>;
   loading: boolean;
 }>();
 
@@ -32,19 +32,24 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
-const selection: Ref<Enquiry | HousingProject | undefined> = ref(undefined);
+const selection: Ref<ElectrificationProject | HousingProject | Enquiry | undefined> = ref(undefined);
 
 // Actions
 function getUsersName(userId: string) {
   return assignedUsers[userId];
 }
 
-function getRouteToObject(data: Enquiry | HousingProject) {
+function getRouteToObject(data: ElectrificationProject | HousingProject | Enquiry) {
   let toObject = {};
-  if ('housingProjectId' in data) {
+  if ('electrificationProjectId' in data) {
+    toObject = {
+      name: RouteName.INT_ELECTRIFICATION_PROJECT,
+      params: { projectId: data.electrificationProjectId }
+    };
+  } else if ('housingProjectId' in data) {
     toObject = {
       name: RouteName.INT_HOUSING_PROJECT,
-      params: { housingProjectId: data.housingProjectId }
+      params: { projectId: data.housingProjectId }
     };
   } else {
     toObject = {
@@ -58,21 +63,20 @@ function getRouteToObject(data: Enquiry | HousingProject) {
 function normalizeContactHistory() {
   return contactsHistory.map((se) => ({
     ...se,
-    state: 'housingProjectId' in se ? se.applicationStatus : se.enquiryStatus,
+    state: 'projectId' in se ? se.applicationStatus : se.enquiryStatus,
     assignedUser: se.assignedUserId ? getUsersName(se.assignedUserId) : 'Unassigned',
-    historyType: 'housingProjectId' in se ? 'Project' : 'Enquiry'
+    historyType: 'projectId' in se ? 'Project' : 'Enquiry'
   }));
 }
 
 function updateQueryParams() {
   router.replace({
-    name: RouteName.INT_CONTACT_PAGE,
+    name: router.currentRoute.value.name,
     query: {
       rows: pagination.value.rows ?? undefined,
       order: pagination.value.order ?? undefined,
       field: pagination.value.field ?? undefined,
-      page: pagination.value.page ?? undefined,
-      tab: route.query.tab ?? 0
+      page: pagination.value.page ?? undefined
     }
   });
 }
@@ -89,7 +93,7 @@ onBeforeMount(() => {
   // If path query pagination params present, read, else set defaults
   pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
   pagination.value.order = toNumber(route.query.order as string) ?? -1;
-  pagination.value.field = (route.query.field as string) ?? 'lastName';
+  pagination.value.field = (route.query.field as string) ?? 'submittedAt';
   pagination.value.page = toNumber(route.query.page as string) ?? 0;
 });
 </script>

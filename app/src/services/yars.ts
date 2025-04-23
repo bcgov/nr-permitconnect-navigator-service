@@ -40,6 +40,7 @@ const service = {
       const comsPermsMap = new Map<GroupName, Array<Action>>([
         [GroupName.PROPONENT, [Action.CREATE]],
         [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+        [GroupName.NAVIGATOR_READ_ONLY, [Action.READ]],
         [GroupName.SUPERVISOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
         [GroupName.ADMIN, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
         [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]

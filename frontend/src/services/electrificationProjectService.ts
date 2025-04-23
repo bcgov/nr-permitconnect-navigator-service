@@ -1,8 +1,11 @@
 import { appAxios } from './interceptors';
+import { Initiative } from '@/utils/enums/application';
 import { delimitEmails } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';
+
+const PATH = 'project';
 
 const service: IDraftableProjectService = {
   /**
@@ -10,7 +13,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   createProject(data?: any) {
-    return appAxios().put('electrificationProject', data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, data);
   },
 
   /**
@@ -25,15 +28,15 @@ const service: IDraftableProjectService = {
     if (emailData.cc && !Array.isArray(emailData.cc)) {
       emailData.cc = delimitEmails(emailData.cc);
     }
-    return appAxios().put('electrificationProject/email', emailData);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**
    * @function deleteProject
    * @returns {Promise} An axios response
    */
-  deleteProject(electrificationProjectId: string) {
-    return appAxios().delete(`electrificationProject/${electrificationProjectId}`);
+  deleteProject(projectId: string) {
+    return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -41,7 +44,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   deleteDraft(draftId: string) {
-    return appAxios().delete(`electrificationProject/draft/${draftId}`);
+    return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -49,7 +52,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getActivityIds() {
-    return appAxios().get('electrificationProject/activityIds');
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/activityIds`);
   },
 
   /**
@@ -57,7 +60,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDraft(draftId: string) {
-    return appAxios().get(`electrificationProject/draft/${draftId}`);
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
   },
 
   /**
@@ -65,7 +68,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getDrafts() {
-    return appAxios().get('electrificationProject/draft');
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`);
   },
 
   /**
@@ -73,7 +76,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getProjects() {
-    return appAxios().get('electrificationProject');
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`);
   },
 
   /**
@@ -81,15 +84,17 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   getStatistics(filters?: any) {
-    return appAxios().get('electrificationProject/statistics', { params: { ...filters } });
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/statistics`, {
+      params: { ...filters }
+    });
   },
 
   /**
    * @function getProject
    * @returns {Promise} An axios response
    */
-  getProject(electrificationProjectId: string) {
-    return appAxios().get(`electrificationProject/${electrificationProjectId}`);
+  getProject(projectId: string) {
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`);
   },
 
   /**
@@ -97,7 +102,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   searchProjects(filters?: ElectrificationProjectSearchParameters) {
-    return appAxios().get('electrificationProject/search', { params: { ...filters } });
+    return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
   },
 
   /**
@@ -105,7 +110,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   submitDraft(data?: any) {
-    return appAxios().put('electrificationProject/draft/submit', data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, data);
   },
 
   /**
@@ -113,23 +118,25 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   updateDraft(data?: Partial<Draft>) {
-    return appAxios().put('electrificationProject/draft', data);
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, data);
   },
 
   /**
    * @function updateIsDeletedFlag
    * @returns {Promise} An axios response
    */
-  updateIsDeletedFlag(electrificationProjectId: string, isDeleted: boolean) {
-    return appAxios().patch(`electrificationProject/${electrificationProjectId}/delete`, { isDeleted: isDeleted });
+  updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
+    return appAxios().patch(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}/delete`, {
+      isDeleted: isDeleted
+    });
   },
 
   /**
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(electrificationProjectId: string, data: any) {
-    return appAxios().put(`electrificationProject/${electrificationProjectId}`, data);
+  updateProject(projectId: string, data: any) {
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 

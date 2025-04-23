@@ -18,24 +18,36 @@ security:
 tags:
   - name: Contact
     description: Operations for managing Contacts
-  - name: Document
-    description: Operations for managing Documents
+  - name: Electrification Document
+    description: Operations for managing Electrification Documents
+  - name: Electrification Enquiry
+    description: Operations for managing Electrification Enquiries
+  - name: Electrification Note
+    description: Operations for managing Electrification Notes
+  - name: Electrification Permit
+    description: Operations for managing Electrification Permits
+  - name: Electrification Permit Note
+    description: Operations for Electrification Permit Notes
   - name: Electrification Project
     description: Operations for managing Electrification Projects, Drafts, and Statistics
-  - name: Enquiry
-    description: Operations for managing Enquiries
+  - name: Electrification Roadmap
+    description: Operations for validating Electrification Roadmaps
+  - name: Housing Document
+    description: Operations for managing Housing Documents
+  - name: Housing Enquiry
+    description: Operations for managing Housing Enquiries
+  - name: Housing Note
+    description: Operations for managing Housing Notes
+  - name: Housing Permit
+    description: Operations for managing Housing Permits
+  - name: Housing Permit Note
+    description: Operations for Housing Permit Notes
   - name: Housing Project
     description: Operations for managing Housing Projects, Drafts, and Statistics
-  - name: Note
-    description: Operations for managing Notes
-  - name: Permit
-    description: Operations for managing Permits
-  - name: Permit Note
-    description: Operations for Permit Notes
+  - name: Housing Roadmap
+    description: Operations for validating Housing Roadmaps
   - name: Reporting
     description: Operations for performings actions related to reporting
-  - name: Roadmap
-    description: Operations for validating Roadmaps
   - name: User
     description: Operations for managing users
 paths:
@@ -204,15 +216,15 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /document:
+  /electrification/document:
     put:
       summary: Create a document
       description: >-
         Creates a link between an activity and a previously existing object in
         COMS.
-      operationId: createDocument
+      operationId: createElectrificationDocument
       tags:
-        - Document
+        - Electrification Document
       requestBody:
         required: true
         content:
@@ -234,13 +246,13 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /document/{documentId}:
+  /electrification/document/{documentId}:
     delete:
       summary: Delete a document by ID
       description: Deletes the document associated with the provided document ID.
-      operationId: deleteDocument
+      operationId: deleteElectrificationDocument
       tags:
-        - Document
+        - Electrification Document
       parameters:
         - $ref: '#/components/parameters/Path-DocumentId'
       responses:
@@ -260,13 +272,13 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /document/list/{activityId}:
+  /electrification/document/list/{activityId}:
     get:
       summary: List documents by Activity ID
       description: Retrieves a list of documents associated with a given activity.
-      operationId: listDocuments
+      operationId: listElectrificationDocuments
       tags:
-        - Document
+        - Electrification Document
       parameters:
         - $ref: '#/components/parameters/Path-ActivityId'
       responses:
@@ -288,7 +300,577 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject:
+  /electrification/enquiry:
+    get:
+      summary: Gets a list of enquiries
+      description: >-
+        Gets a list of enquiries, if the current authorization includes scope:self
+        the list returned will contain just the enquiries made by the user.
+      operationId: getElectrificationEnquiries
+      tags:
+        - Electrification Enquiry
+      responses:
+        '200':
+          description: A list of enquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create an enquiry
+      description: Creates an enquiry and set status to Submitted
+      operationId: putElectrificationEnquiry
+      tags:
+        - Electrification Enquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-CreateEnquiry'
+      responses:
+        '201':
+          description: Enquiry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-CreateEnquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/enquiry/{enquiryId}:
+    get:
+      summary: Get a specific enquiry
+      operationId: getElectrificationEnquiry
+      tags:
+        - Electrification Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      responses:
+        '200':
+          description: Details of the specific enquiry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update an enquiry
+      operationId: updateElectrificationEnquiry
+      tags:
+        - Electrification Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Enquiry'
+      responses:
+        '200':
+          description: Enquiry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete an enquiry
+      description: >-
+        Deletes the enquiry, followed by the associated activity. This action
+        will cascade delete across all linked items
+      operationId: deleteElectrificationEnquiry
+      tags:
+        - Electrification Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      responses:
+        '200':
+          description: Enquiry deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/enquiry/{enquiryId}/delete:
+    patch:
+      summary: Soft delete
+      description: A soft delete of an enquiry using a is_deleted flag
+      operationId: electrificationEnquiry-updateIsDeletedFlag
+      tags:
+        - Electrification Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isDeleted:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: The is_deleted flag updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - type: object
+                    required:
+                      - is_deleted
+                    properties:
+                      is_deleted:
+                        type: boolean
+                        example: true
+                  - $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/enquiry/search:
+    get:
+      summary: Search enquiries
+      description: Returns a list of enquiries based on the given queries
+      operationId: searchElectrificationEnquiries
+      tags:
+        - Electrification Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeDeleted'
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: enquiryId
+          required: false
+          schema:
+            type: array
+            description: The Enquiry IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-EnquiryId'
+        - in: query
+          name: intakeStatus
+          required: false
+          schema:
+            type: array
+            description: The intake statuses to filter on
+            items:
+              $ref: '#/components/parameters/IntakeStatus'
+      responses:
+        '200':
+          description: A list of enquiries matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/note:
+    put:
+      summary: Create a note
+      operationId: createElectrificationNote
+      tags:
+        - Electrification Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Notes'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/note/{noteId}:
+    put:
+      summary: Update a note
+      operationId: updateElectrificationNote
+      tags:
+        - Housing Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Note'
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a note
+      description: Soft deletes a note by marking isDeleted true
+      operationId: deleteElectrificationNote
+      tags:
+        - Electrification Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteId'
+      responses:
+        '200':
+          description: Note deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/note/bringForward:
+    get:
+      summary: List notes with bring forward type
+      description: Retrieve a list of notes with the Bring forward type given
+      operationId: listElectrificationBringForward
+      tags:
+        - Electrification Note
+      parameters:
+        - $ref: '#/components/parameters/Query-BringForwardState'
+      responses:
+        '200':
+          description: A list of bring forward notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-BringForwardNotes'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/note/list/{activityId}:
+    get:
+      summary: List notes by Activity ID
+      description: Return a list of notes that have the given Activity ID
+      operationId: listElectrificationNotes
+      tags:
+        - Electrification Note
+      parameters:
+        - $ref: '#/components/parameters/Path-ActivityId'
+      responses:
+        '200':
+          description: A list of notes for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/permit:
+    get:
+      summary: List permits by Activity ID
+      description: Gets a list of permits that are associated to a specific activity
+      operationId: listElectrificationPermits
+      tags:
+        - Electrification Permit
+      parameters:
+        - $ref: '#/components/parameters/Query-ActivityId'
+        - in: query
+          name: includeNotes
+          description: Whether to include associated permit notes in the response.
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: A list of permits for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/DB-Permit'
+                    - type: object
+                      properties:
+                        permitNotes:
+                          type: array
+                          description: List of notes associated with the permit (if `includeNotes` is true)
+                          items:
+                            $ref: '#/components/schemas/DB-PermitNote'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create a permit
+      operationId: createElectrificationPermit
+      tags:
+        - Electrification Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Permit'
+      responses:
+        '201':
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/permit/{permitId}:
+    get:
+      summary: Get a permit
+      operationId: getElectrificationPermit
+      tags:
+        - Electrification Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      responses:
+        '200':
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a permit
+      operationId: updateElectrificationPermit
+      tags:
+        - Electrification Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Permit'
+      responses:
+        '200':
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a permit
+      operationId: deleteElectrificationPermit
+      tags:
+        - Electrification Permit
+      parameters:
+        - $ref: '#/components/parameters/Path-PermitId'
+      responses:
+        '200':
+          description: Permit deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/permit/types:
+    get:
+      summary: Get all permit types
+      operationId: getElectrificationPermitTypes
+      tags:
+        - Electrification Permit
+      responses:
+        '200':
+          description: A list of all permit types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-PermitType'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/permit/note:
+    put:
+      summary: Create a permit note
+      description: Creates a new permit note for a specified permit.
+      operationId: createElectrificationPermitNote
+      tags:
+        - Electrification Permit Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitNote'
+      responses:
+        '201':
+          description: Permit note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-PermitNote'
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/project:
     get:
       summary: Get a list of electrification projects
       operationId: getElectrificationProjects
@@ -329,7 +911,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/{electrificationProjectId}:
+  /electrification/project/{electrificationProjectId}:
     get:
       summary: Get a specific electrification project
       operationId: getElectrificationProject
@@ -408,7 +990,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/{electrificationProjectId}/delete:
+  /electrification/project/{electrificationProjectId}/delete:
     patch:
       summary: Soft delete
       description: A soft delete of a electrification project using a is_deleted flag
@@ -447,7 +1029,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/draft:
+  /electrification/project/draft:
     put:
       summary: Create or update a draft electrification project
       description: >-
@@ -475,7 +1057,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/draft/submit:
+  /electrification/project/draft/submit:
     put:
       summary: Submit a draft electrification project
       description: Creates or updates an intake and set status to Submitted
@@ -503,7 +1085,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/email:
+  /electrification/project/email:
     put:
       summary: Send confirmation Email
       operationId: electrificationEmailConfirmation
@@ -530,7 +1112,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/search:
+  /electrification/project/search:
     get:
       summary: Search electrification projects
       description: Returns a list of electrification projects based on the given queries
@@ -581,7 +1163,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrificationProject/statistics:
+  /electrification/project/statistics:
     get:
       summary: Get electrification project and enquiry statistics
       description: Gets a set of electrification project and enquiry related statistics
@@ -630,15 +1212,126 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /enquiry:
+  /electrification/roadmap:
+    put:
+      summary: Send an email with the roadmap data
+      operationId: electrificationRoadmap
+      tags:
+        - Electrification Roadmap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Roadmap'
+      responses:
+        '201':
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Email'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/document:
+    put:
+      summary: Create a document
+      description: >-
+        Creates a link between an activity and a previously existing object in
+        COMS.
+      operationId: createHousingDocument
+      tags:
+        - Housing Document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Document'
+      responses:
+        '201':
+          description: Document created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/document/{documentId}:
+    delete:
+      summary: Delete a document by ID
+      description: Deletes the document associated with the provided document ID.
+      operationId: deleteHousingDocument
+      tags:
+        - Housing Document
+      parameters:
+        - $ref: '#/components/parameters/Path-DocumentId'
+      responses:
+        '200':
+          description: Document deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/document/list/{activityId}:
+    get:
+      summary: List documents by Activity ID
+      description: Retrieves a list of documents associated with a given activity.
+      operationId: listHousingDocuments
+      tags:
+        - Housing Document
+      parameters:
+        - $ref: '#/components/parameters/Path-ActivityId'
+      responses:
+        '200':
+          description: A list of documents for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/enquiry:
     get:
       summary: Gets a list of enquiries
       description: >-
         Gets a list of enquiries, if the current authorization includes scope:self
         the list returned will contain just the enquiries made by the user.
-      operationId: getEnquiries
+      operationId: getHousingEnquiries
       tags:
-        - Enquiry
+        - Housing Enquiry
       responses:
         '200':
           description: A list of enquiries
@@ -657,9 +1350,9 @@ paths:
     put:
       summary: Create an enquiry
       description: Creates an enquiry and set status to Submitted
-      operationId: putEnquiry
+      operationId: putHousingEnquiry
       tags:
-        - Enquiry
+        - Housing Enquiry
       requestBody:
         required: true
         content:
@@ -683,12 +1376,12 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /enquiry/{enquiryId}:
+  /housing/enquiry/{enquiryId}:
     get:
       summary: Get a specific enquiry
-      operationId: getEnquiry
+      operationId: getHousingEnquiry
       tags:
-        - Enquiry
+        - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
@@ -708,9 +1401,9 @@ paths:
           $ref: '#/components/responses/Error'
     put:
       summary: Update an enquiry
-      operationId: updateEnquiry
+      operationId: updateHousingEnquiry
       tags:
-        - Enquiry
+        - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       requestBody:
@@ -741,9 +1434,9 @@ paths:
       description: >-
         Deletes the enquiry, followed by the associated activity. This action
         will cascade delete across all linked items
-      operationId: deleteEnquiry
+      operationId: deleteHousingEnquiry
       tags:
-        - Enquiry
+        - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
@@ -761,13 +1454,13 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /enquiry/{enquiryId}/delete:
+  /housing/enquiry/{enquiryId}/delete:
     patch:
       summary: Soft delete
       description: A soft delete of an enquiry using a is_deleted flag
-      operationId: enquiry-updateIsDeletedFlag
+      operationId: HousingEnquiry-updateIsDeletedFlag
       tags:
-        - Enquiry
+        - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       requestBody:
@@ -805,13 +1498,13 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /enquiry/search:
+  /housing/enquiry/search:
     get:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
-      operationId: searchEnquiries
+      operationId: searchHousingEnquiries
       tags:
-        - Enquiry
+        - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
@@ -864,7 +1557,343 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject:
+  /housing/note:
+    put:
+      summary: Create a note
+      operationId: createHousingNote
+      tags:
+        - Housing Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Notes'
+      responses:
+        '201':
+          description: Note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/note/{noteId}:
+    put:
+      summary: Update a note
+      operationId: updateHousingNote
+      tags:
+        - Housing Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Note'
+      responses:
+        '200':
+          description: Note updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a note
+      description: Soft deletes a note by marking isDeleted true
+      operationId: deleteHousingNote
+      tags:
+        - Housing Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteId'
+      responses:
+        '200':
+          description: Note deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/note/bringForward:
+    get:
+      summary: List notes with bring forward type
+      description: Retrieve a list of notes with the Bring forward type given
+      operationId: listHousingBringForward
+      tags:
+        - Housing Note
+      parameters:
+        - $ref: '#/components/parameters/Query-BringForwardState'
+      responses:
+        '200':
+          description: A list of bring forward notes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-BringForwardNotes'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/note/list/{activityId}:
+    get:
+      summary: List notes by Activity ID
+      description: Return a list of notes that have the given Activity ID
+      operationId: lisHousingtNotes
+      tags:
+        - Housing Note
+      parameters:
+        - $ref: '#/components/parameters/Path-ActivityId'
+      responses:
+        '200':
+          description: A list of notes for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Note'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/permit:
+    get:
+      summary: List permits by Activity ID
+      description: Gets a list of permits that are associated to a specific activity
+      operationId: listHousingPermits
+      tags:
+        - Housing Permit
+      parameters:
+        - $ref: '#/components/parameters/Query-ActivityId'
+        - in: query
+          name: includeNotes
+          description: Whether to include associated permit notes in the response.
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: A list of permits for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/DB-Permit'
+                    - type: object
+                      properties:
+                        permitNotes:
+                          type: array
+                          description: List of notes associated with the permit (if `includeNotes` is true)
+                          items:
+                            $ref: '#/components/schemas/DB-PermitNote'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create a permit
+      operationId: createHousingPermit
+      tags:
+        - Housing Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Permit'
+      responses:
+        '201':
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/permit/{permitId}:
+    get:
+      summary: Get a permit
+      operationId: getHousingPermit
+      tags:
+        - Housing Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      responses:
+        '200':
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a permit
+      operationId: updateHousingPermit
+      tags:
+        - Housing Permit
+      parameters:
+        - in: path
+          name: permitId
+          required: true
+          schema:
+            type: string
+            description: The ID of the permit to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Permit'
+      responses:
+        '200':
+          description: Permit updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a permit
+      operationId: deleteHousingPermit
+      tags:
+        - Housing Permit
+      parameters:
+        - $ref: '#/components/parameters/Path-PermitId'
+      responses:
+        '200':
+          description: Permit deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/permit/types:
+    get:
+      summary: Get all permit types
+      operationId: getHousingPermitTypes
+      tags:
+        - Housing Permit
+      responses:
+        '200':
+          description: A list of all permit types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-PermitType'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/permit/note:
+    put:
+      summary: Create a permit note
+      description: Creates a new permit note for a specified permit.
+      operationId: createHousingPermitNote
+      tags:
+        - Housing Permit Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitNote'
+      responses:
+        '201':
+          description: Permit note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-PermitNote'
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/project:
     get:
       summary: Get a list of housing projects
       operationId: getHousingProjects
@@ -905,7 +1934,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}:
+  /housing/project/{housingProjectId}:
     get:
       summary: Get a specific housing project
       operationId: getHousingProject
@@ -984,7 +2013,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}/delete:
+  /housing/project/{housingProjectId}/delete:
     patch:
       summary: Soft delete
       description: A soft delete of a housing project using a is_deleted flag
@@ -1023,7 +2052,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/draft:
+  /housing/project/draft:
     put:
       summary: Create or update a draft housing project
       description: >-
@@ -1051,7 +2080,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/draft/submit:
+  /housing/project/draft/submit:
     put:
       summary: Submit a draft housing project
       description: Creates or updates an intake and set status to Submitted
@@ -1079,7 +2108,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/email:
+  /housing/project/email:
     put:
       summary: Send confirmation Email
       operationId: housingEmailConfirmation
@@ -1106,7 +2135,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/search:
+  /housing/project/search:
     get:
       summary: Search housing projects
       description: Returns a list of housing projects based on the given queries
@@ -1173,7 +2202,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject/statistics:
+  /housing/project/statistics:
     get:
       summary: Get housing project and enquiry statistics
       description: Gets a set of housing project and enquiry related statistics
@@ -1222,369 +2251,12 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /note:
-    put:
-      summary: Create a note
-      operationId: createNote
-      tags:
-        - Note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Notes'
-      responses:
-        '201':
-          description: Note created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Note'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /note/{noteId}:
-    put:
-      summary: Update a note
-      operationId: updateNote
-      tags:
-        - Note
-      parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DB-Note'
-      responses:
-        '200':
-          description: Note updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Note'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    delete:
-      summary: Delete a note
-      description: Soft deletes a note by marking isDeleted true
-      operationId: deleteNote
-      tags:
-        - Note
-      parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
-      responses:
-        '200':
-          description: Note deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Note'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /note/bringForward:
-    get:
-      summary: List notes with bring forward type
-      description: Retrieve a list of notes with the Bring forward type given
-      operationId: listBringForward
-      tags:
-        - Note
-      parameters:
-        - $ref: '#/components/parameters/Query-BringForwardState'
-      responses:
-        '200':
-          description: A list of bring forward notes
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Response-BringForwardNotes'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /note/list/{activityId}:
-    get:
-      summary: List notes by Activity ID
-      description: Return a list of notes that have the given Activity ID
-      operationId: listNotes
-      tags:
-        - Note
-      parameters:
-        - $ref: '#/components/parameters/Path-ActivityId'
-      responses:
-        '200':
-          description: A list of notes for the specified activity
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-Note'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /permit:
-    get:
-      summary: List permits by Activity ID
-      description: Gets a list of permits that are associated to a specific activity
-      operationId: listPermits
-      tags:
-        - Permit
-      parameters:
-        - $ref: '#/components/parameters/Query-ActivityId'
-        - in: query
-          name: includeNotes
-          description: Whether to include associated permit notes in the response.
-          required: false
-          schema:
-            type: boolean
-            example: true
-      responses:
-        '200':
-          description: A list of permits for the specified activity
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  allOf:
-                    - $ref: '#/components/schemas/DB-Permit'
-                    - type: object
-                      properties:
-                        permitNotes:
-                          type: array
-                          description: List of notes associated with the permit (if `includeNotes` is true)
-                          items:
-                            $ref: '#/components/schemas/DB-PermitNote'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Create a permit
-      operationId: createPermit
-      tags:
-        - Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '201':
-          description: Permit created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /permit/{permitId}:
-    get:
-      summary: Get a permit
-      operationId: getPermit
-      tags:
-        - Permit
-      parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
-      responses:
-        '200':
-          description: Permit updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Update a permit
-      operationId: updatePermit
-      tags:
-        - Permit
-      parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '200':
-          description: Permit updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    delete:
-      summary: Delete a permit
-      operationId: deletePermit
-      tags:
-        - Permit
-      parameters:
-        - $ref: '#/components/parameters/Path-PermitId'
-      responses:
-        '200':
-          description: Permit deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /permit/types:
-    get:
-      summary: Get all permit types
-      operationId: getPermitTypes
-      tags:
-        - Permit
-      responses:
-        '200':
-          description: A list of all permit types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /permit/note:
-    put:
-      summary: Create a permit note
-      description: Creates a new permit note for a specified permit.
-      operationId: createPermitNote
-      tags:
-        - Permit Note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-PermitNote'
-      responses:
-        '201':
-          description: Permit note created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-PermitNote'
-        '401':
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        default:
-          $ref: '#/components/responses/Error'
-  /reporting/housingProject/permit:
-    get:
-      summary: Query and retrieve all housing project data related to permits
-      operationId: getHousingProjectPermitData
-      tags:
-        - Reporting
-      responses:
-        '200':
-          description: A list of housing projects joined with permits and permit type
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Response-HousingProjectPermitData'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /roadmap:
+  /housing/roadmap:
     put:
       summary: Send an email with the roadmap data
-      operationId: send
+      operationId: housingRoadmap
       tags:
-        - Roadmap
+        - Housing Roadmap
       requestBody:
         required: true
         content:
@@ -1606,362 +2278,46 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housingProject:
+  /reporting/electrificationProject/permit:
     get:
-      summary: Get a list of housing projects
-      operationId: getHousingProjects
+      summary: Query and retrieve all electrification project data related to permits
+      operationId: getElectrificationProjectPermitData
       tags:
-        - Housing Project
+        - Reporting
       responses:
         '200':
-          description: A list of housing projects
+          description: A list of housing projects joined with permits and permit type
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-HousingProject'
+                  $ref: '#/components/schemas/Response-HousingProjectPermitData'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Create a housing project
-      operationId: createHousingProject
-      tags:
-        - Housing Project
-      responses:
-        '201':
-          description: Housing Project created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-SubmissionCreate'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}:
+  /reporting/housingProject/permit:
     get:
-      summary: Get a specific housing project
-      operationId: getHousingProject
+      summary: Query and retrieve all housing project data related to permits
+      operationId: getHousingProjectPermitData
       tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
+        - Reporting
       responses:
         '200':
-          description: Details of the specific housing project
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Update a housing project
-      operationId: updateHousingProject
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-SubmissionUpdate'
-      responses:
-        '200':
-          description: Housing Project updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    delete:
-      summary: Delete a housing project
-      operationId: deleteHousingProject
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
-      responses:
-        '200':
-          description: Housing Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/{housingProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a housing project using a is_deleted flag
-      operationId: housingProject-updateIsDeletedFlag
-      tags:
-        - Submission
-      parameters:
-        - $ref: '#/components/parameters/Path-SubmissionId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/draft:
-    put:
-      summary: Create or update a draft housing project
-      description: >-
-        Creates or updates an intake and set status to Draft
-        so unfinished/unvalidatd housing projects can be saved
-      operationId: housingProject-createDraft
-      tags:
-        - Housing Project
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
-      responses:
-        '201':
-          description: Draft housing project created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-DraftSubmission'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/draft/submit:
-    put:
-      summary: Submit a draft housing project
-      description: Creates or updates an intake and set status to Submitted
-      operationId: housingProject-updateDraft
-      tags:
-        - Submission
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-SaveSubmissionDraft'
-      responses:
-        '200':
-          description: Draft housing project updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/email:
-    put:
-      summary: Send confirmation Email
-      operationId: emailConfirmation
-      tags:
-        - Submission
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EmailData'
-      responses:
-        '201':
-          description: Email Confirmation was set
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/search:
-    get:
-      summary: Search housing projects
-      description: Returns a list of housing projects based on the given queries
-      operationId: searchSubmissions
-      tags:
-        - Submission
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: housingProjectId
-          required: false
-          schema:
-            type: array
-            description: The Submission IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-SubmissionId'
-        - in: query
-          name: intakeStatus
-          required: false
-          schema:
-            type: array
-            description: The intake statuses to filter on
-            items:
-              $ref: '#/components/parameters/IntakeStatus'
-        - in: query
-          name: submissionType
-          required: false
-          schema:
-            type: array
-            description: The housing project types to filter on
-            items:
-              $ref: '#/components/parameters/Query-SubmissionType'
-      responses:
-        '200':
-          description: A list of housing projects matching the search criteria
+          description: A list of housing projects joined with permits and permit type
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-HousingProject'
+                  $ref: '#/components/schemas/Response-HousingProjectPermitData'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housingProject/statistics:
-    get:
-      summary: Get housing project and enquiry statistics
-      description: Gets a set of housing project and enquiry related statistics
-      operationId: getStatistics
-      tags:
-        - Submission
-      parameters:
-        - in: query
-          name: dateFrom
-          required: false
-          schema:
-            type: string
-            format: date
-            description: Start date for the statistics
-        - in: query
-          name: dateTo
-          required: false
-          schema:
-            type: string
-            format: date
-            description: End date for the statistics
-        - in: query
-          name: monthYear
-          required: false
-          schema:
-            type: string
-            description: Month and year for the statistics
-        - in: query
-          name: userId
-          required: false
-          schema:
-            type: string
-            description: User ID to filter statistics
-      responses:
-        '200':
-          description: Submission statistics
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Response-SubmissionStatistics'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
   /user:
@@ -2218,7 +2574,7 @@ components:
         - activityId
         - submittedAt
       properties:
-        housingProjectId:
+        electrificationProjectId:
           type: string
           description: UUID for the electrification project
           format: uuid
@@ -2236,6 +2592,42 @@ components:
           description: Date it was submitted
           format: date-time
           example: '2024-04-03T00:57:09.070Z'
+        intakeStatus:
+          type: string
+          description: Intake status type
+          example: Submitted
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          example: 3
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription:
+          type: string
+          description: A description of the project
+          example: Project description example.
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        projectType:
+          type: string
+          description: The type of project
+          example: IPP Wind
+        bcHydroNumber:
+          type: string
+          description: Assigned BC Hydro number
+          example: 1234ABCD
+        submissionType:
+          type: string
+          description: The type of submission
+          example: Assistance
     DB-Enquiry:
       title: DB Enquiry
       type: object
@@ -2733,203 +3125,6 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
-    DB-HousingProject:
-      type: object
-      required:
-        - housingProjectId
-        - activityId
-        - submittedAt
-        - submittedBy
-        - addedToATS
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - naturalDisaster
-        - aaiUpdated
-      properties:
-        housingProjectId:
-          type: string
-          description: UUID for the housing project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
-        assignedUserId:
-          type: string
-          description: User assigned to the housing project
-          example: Smith, John
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
-        submittedBy:
-          type: string
-          description: Who made the housing project
-          example: JSMITH
-        locationPIDs:
-          type: string
-          description: Location PIDs
-          example: 006-209-521, 007-209-522
-        projectName:
-          type: string
-          description: Name of the Project
-          example: New Project
-        projectDescription:
-          type: string
-          description: A description of the project
-          example: Project description example.
-        companyNameRegistered:
-          type: string
-          description: Name of the company connected to the project
-          example: QW URBAN FOOD LTD.
-        singleFamilyUnits:
-          type: string
-          description: Range of units to be for single family
-          example: 10-49
-        hasRentalUnits:
-          type: string
-          description: Whether or not the project will have rental units
-          example: 'Yes'
-        streetAddress:
-          type: string
-          description: Street address of project
-          example: 2975 Jutland Rd
-        latitude:
-          type: number
-          description: Latitude Cordinate for project
-          example: 48.440531
-        longitude:
-          type: number
-          description: Longitude Cordinate for project
-          example: -123.377677
-        queuePriority:
-          type: number
-          description: Navigator assigned priority rank
-          example: 3
-        relatedPermits:
-          type: string
-          description: Permits related to the project
-        astNotes:
-          type: string
-          description: Notes from AST
-        astUpdated:
-          type: boolean
-          description: Whether updated by AST
-          example: false
-        addedToATS:
-          type: boolean
-          description: Whether added to AST
-          example: false
-        atsClientId:
-          type: number
-          description: Client number from ATS
-        ltsaCompleted:
-          type: boolean
-          description: Ltsa completed
-          example: false
-        bcOnlineCompleted:
-          type: boolean
-          description: Completed
-          example: false
-        naturalDisaster:
-          type: string
-          description: Is it affected by Natural disaster?
-          example: 'No'
-        financiallySupported:
-          type: boolean
-          description: Is it financially supported?
-          example: false
-        financiallySupportedBC:
-          type: string
-          description: Is is financially supported by BC Housing?
-          example: 'No'
-        financiallySupportedIndigenous:
-          type: string
-          description: Is it an Indigenous led project?
-          example: 'No'
-        financiallySupportedNonProfit:
-          type: string
-          description: Is is financially supported by a Non-Profit
-          example: 'No'
-        financiallySupportedHousingCoop:
-          type: string
-          description: Is is financially supported by a House Cooperative
-          example: 'No'
-        aaiUpdated:
-          type: boolean
-          description: Updated by aai
-          example: false
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
-        applicationStatus:
-          type: string
-          description: Status of the application
-          example: New
-        projectApplicantType:
-          type: string
-          enum: [Business, Individual]
-          description: Are you applying as an individual or as a business?
-          example: 'Business'
-        isDevelopedInBC:
-          type: string
-          description: Is the project developed in BC?
-          example: 'Yes'
-        multiFamilyUnits:
-          type: string
-          description: Range of multi-family units in the project
-          example: 10-49
-        otherUnits:
-          type: string
-          description: Range of "other" units in the project
-          example: 10-49
-        otherUnitsDescription:
-          type: string
-          description: Description of the "other" units
-          example: detached garages
-        rentalUnits:
-          type: string
-          description: Range of rental units
-          example: 1-9
-        projectLocation:
-          type: string
-          description: Project's location
-          example: Street address
-        projectLocationDescription:
-          type: string
-          description: Description of the location of the project
-          example: 'no'
-        locality:
-          type: string
-          description: City, town, etc. (Location) of project
-          example: Maple Ridge
-        province:
-          type: string
-          description: Province (Location) of project
-          example: BC
-        hasAppliedProvincialPermits:
-          type: string
-          description: Has applied for provincial permits
-          example: 'Yes'
-        checkProvincialPermits:
-          type: string
-          description: Needs to check for provincial permits
-          example: 'Yes'
-        indigenousDescription:
-          type: string
-          description: Description for the Indigenous Led
-        nonProfitDescription:
-          type: string
-          description: Description for  Non-Profit
-        housingCoopDescription:
-          type: string
-          description: Description for COOP Housing
-        consentToFeedback:
-          type: boolean
-          description: Whether or not user consents to feedback requests
     DB-User:
       type: object
       properties:
