@@ -1,9 +1,11 @@
-import prisma from '../db/dataConnection';
-import { note } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { Note } from '../types';
+import prisma from '../db/dataConnection';
+import { note } from '../db/models';
 import { IStamps } from '../interfaces/IStamps';
+import { Initiative } from '../utils/enums/application';
+
+import type { Note } from '../types';
 
 const service = {
   /**
@@ -65,10 +67,12 @@ const service = {
   /**
    * @function listBringForward
    * Retrieve a list of notes with the Bring forward type
+   * @param {Initiative} initiative Initiative to filter on
    * @param {string} bringForwardState Optional state to filter on
+   * @param {boolean} isDeleted Optional deleted flag to filter on
    * @returns {Promise<Note[]>} The result of running the findMany operation
    */
-  listBringForward: async (bringForwardState?: string, isDeleted: boolean = false) => {
+  listBringForward: async (initiative: Initiative, bringForwardState?: string, isDeleted: boolean = false) => {
     const response = await prisma.note.findMany({
       orderBy: {
         bring_forward_date: 'asc'
@@ -78,7 +82,10 @@ const service = {
         bring_forward_state: bringForwardState,
         is_deleted: isDeleted,
         activity: {
-          is_deleted: false
+          is_deleted: false,
+          initiative: {
+            code: initiative
+          }
         }
       }
     });

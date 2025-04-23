@@ -45,7 +45,10 @@ const controller = {
   ) {
     try {
       let response = new Array<BringForward>();
-      const notes = await noteService.listBringForward(req.query.bringForwardState);
+      const notes = await noteService.listBringForward(
+        req.currentContext.initiative as Initiative,
+        req.query.bringForwardState
+      );
       if (notes && notes.length) {
         const electrificationProjects = await electrificationProjectService.searchElectrificationProjects({
           activityId: notes.map((x) => x.activityId)
