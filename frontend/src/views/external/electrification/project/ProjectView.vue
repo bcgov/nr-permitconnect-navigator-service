@@ -9,6 +9,7 @@ import StatusPill from '@/components/common/StatusPill.vue';
 import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { NavigationPermission } from '@/store/authzStore';
+import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus, SubmissionType } from '@/utils/enums/housing';
 import { formatDate } from '@/utils/formatters';
@@ -157,7 +158,9 @@ onBeforeMount(async () => {
 
   // Fetch contacts for createdBy and assignedUserId
   // Push only thruthy values into the array
-  const userIds = [projectValue?.assignedUserId, projectValue?.createdBy].filter(Boolean);
+  const userIds = [projectValue?.assignedUserId, projectValue?.createdBy]
+    .filter(Boolean)
+    .filter((x) => !UUID_V4_PATTERN.test(x));
   const contacts = (await contactService.searchContacts({ userId: userIds })).data;
   assignee.value = contacts.find((contact: Contact) => contact.userId === projectValue?.assignedUserId);
   createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
@@ -197,13 +200,24 @@ onBeforeMount(async () => {
           </span>
           <span class="mr-4">
             {{ t('e.housing.projectView.createdBy') }}:
-            <span class="font-bold">{{ createdBy?.firstName }} {{ createdBy?.lastName }}</span>
+            <span
+              v-if="createdBy"
+              class="font-bold"
+            >
+              {{ createdBy?.firstName }} {{ createdBy?.lastName }}
+            </span>
+            <span v-else>-</span>
           </span>
-          <span v-if="assignee">
+          <span>
             Navigator:
-            <span class="font-bold">{{ assignee?.firstName }} {{ assignee?.lastName }}</span>
+            <span
+              v-if="assignee"
+              class="font-bold"
+            >
+              {{ assignee?.firstName }} {{ assignee?.lastName }}
+            </span>
+            <span v-else>-</span>
           </span>
-          <span v-else>Navigator: -</span>
         </div>
       </div>
       <Button
