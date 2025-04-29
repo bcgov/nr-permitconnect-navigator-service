@@ -1,6 +1,5 @@
 import type { IStamps } from '@/interfaces';
-import type { BasicBCeIDAttribute, BusinessBCeIDAttribute, IDIRAttribute } from '@/types';
-import type { GroupName } from '@/utils/enums/application';
+import type { BasicBCeIDAttribute, BusinessBCeIDAttribute, Group, IDIRAttribute } from '@/types';
 
 export type User = {
   active: boolean;
@@ -9,7 +8,7 @@ export type User = {
   fullName: string;
   idp: string;
   lastName: string;
-  groups: Array<GroupName>;
+  groups: Array<Group>;
   status?: string;
   userId: string;
   sub: string;

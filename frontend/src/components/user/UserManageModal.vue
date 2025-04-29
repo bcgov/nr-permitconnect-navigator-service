@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import { RadioList } from '@/components/form';
 import { yarsService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { Button, Dialog } from '@/lib/primevue';
 import { GroupName } from '@/utils/enums/application';
 
@@ -22,8 +22,8 @@ const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
 const group: Ref<GroupName | undefined> = ref(undefined);
 
 // Actions
-onBeforeMount(async () => {
-  const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
+watchEffect(async () => {
+  const yarsGroups: Array<Group> = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
