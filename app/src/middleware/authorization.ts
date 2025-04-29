@@ -53,7 +53,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         }
 
         // Permission checking for non developers
-        if (!groups.find((x) => x.groupName === GroupName.DEVELOPER)) {
+        if (!groups.find((x) => x.name === GroupName.DEVELOPER)) {
           const policyDetails = await Promise.all(
             groups.map((x) => {
               const initiative = req.currentContext?.initiative as Initiative;
@@ -90,7 +90,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         }
 
         // Update current authorization and freeze
-        currentAuthorization.groups = groups.map((x) => x.groupName);
+        currentAuthorization.groups = groups;
         req.currentAuthorization = Object.freeze(currentAuthorization);
       } else {
         throw new Error('No current user');

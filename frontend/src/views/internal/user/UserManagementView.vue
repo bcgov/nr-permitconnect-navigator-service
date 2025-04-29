@@ -27,7 +27,7 @@ import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/en
 import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { AccessRequest, User, UserAccessRequest } from '@/types';
+import type { AccessRequest, Group, User, UserAccessRequest } from '@/types';
 
 // Constants
 const PENDING_STATUSES = {
@@ -160,11 +160,10 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         if (admin) {
           // Delete subject group
-          const body = {
-            sub: userAccessRequest.user.sub,
-            group: userAccessRequest.user.groups[0]
-          };
-          response = await yarsService.deleteSubjectGroup(body);
+          response = await yarsService.deleteSubjectGroup(
+            userAccessRequest.user.sub,
+            userAccessRequest.user.groups[0].groupId
+          );
         } else {
           // Create user access request
           response = await accessRequestService.createUserAccessRequest({
@@ -195,7 +194,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
   });
 }
 
-async function onUserGroupChange(group: GroupName) {
+async function onUserGroupChange(group: Group) {
   try {
     const user = selectedUserAccessRequest.value?.user;
     if (user) {
@@ -223,7 +222,7 @@ async function onUserGroupChange(group: GroupName) {
   }
 }
 
-async function onCreateUserAccessRequest(user: User, group: GroupName) {
+async function onCreateUserAccessRequest(user: User, group: Group) {
   try {
     loading.value = true;
 
@@ -238,7 +237,7 @@ async function onCreateUserAccessRequest(user: User, group: GroupName) {
         userId: user.userId,
         grant: true,
         status: AccessRequestStatus.PENDING,
-        group: group
+        groupId: group.groupId
       }
     };
 
@@ -251,7 +250,7 @@ async function onCreateUserAccessRequest(user: User, group: GroupName) {
     } else {
       userAccessRequest.accessRequest = undefined;
       userAccessRequest.user.status = AccessRequestStatus.APPROVED;
-      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = Array<GroupName>();
+      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = Array<Group>();
       userAccessRequest.user.groups.push(group);
       usersAndAccessRequests.value.push(userAccessRequest);
     }

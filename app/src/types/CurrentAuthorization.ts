@@ -1,6 +1,6 @@
-import { GroupName } from '../utils/enums/application';
+import { Group } from './Group';
 
 export type CurrentAuthorization = {
   attributes: Array<string>;
-  groups: Array<GroupName>;
+  groups: Array<Group>;
 };

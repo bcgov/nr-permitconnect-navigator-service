@@ -2,6 +2,7 @@
 
 import { comsService } from '.';
 import prisma from '../db/dataConnection';
+import { Group } from '../types/Group';
 import { Initiative, GroupName, Action } from '../utils/enums/application';
 
 const service = {
@@ -11,22 +12,14 @@ const service = {
    * Assigns permissions to COMS based on the given group
    * @param {string | undefined} bearerToken The bearer token of the authorized user
    * @param {string} sub Subject of the authorized user
-   * @param {Initiative} initiative The initiative to associate with the group
-   * @param {GroupName} group The group to add the user to
+   * @param {number} groupId The group ID to add the user to
    * @returns {Promise<{sub: string; roleId: number;}>} The result of running the create operation
    */
-  assignGroup: async (bearerToken: string | undefined, sub: string, initiative: Initiative, group: GroupName) => {
+  assignGroup: async (bearerToken: string | undefined, sub: string, groupId?: number) => {
     try {
-      const i = await prisma.initiative.findFirstOrThrow({
-        where: {
-          code: initiative
-        }
-      });
-
       const groupResult = await prisma.group.findFirstOrThrow({
         where: {
-          initiative_id: i.initiative_id,
-          name: group
+          group_id: groupId
         }
       });
 
@@ -46,7 +39,7 @@ const service = {
         [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]
       ]);
 
-      const comsPerms = comsPermsMap.get(group);
+      const comsPerms = comsPermsMap.get(groupResult.name as GroupName);
       if (comsPerms && bearerToken) {
         await comsService.createBucket(bearerToken, comsPerms);
       }
@@ -77,8 +70,9 @@ const service = {
       return result.map((x) => ({
         initiativeId: x.group.initiative_id,
         groupId: x.group_id,
-        groupName: x.group.name as GroupName
-      }));
+        name: x.group.name as GroupName,
+        label: x.group.label
+      })) as Array<Group>;
     } catch (e: unknown) {
       throw e;
     }
@@ -171,7 +165,7 @@ const service = {
       return result.map((x) => ({
         groupId: x.group_id,
         initiativeId: x.initiative_id,
-        name: x.name,
+        name: x.name as GroupName,
         label: x.label
       }));
     } catch (e: unknown) {
@@ -210,26 +204,13 @@ const service = {
     }
   },
 
-  removeGroup: async (sub: string, initiative: Initiative, group: GroupName) => {
+  removeGroup: async (sub: string, groupId: number) => {
     try {
-      const i = await prisma.initiative.findFirstOrThrow({
-        where: {
-          code: initiative
-        }
-      });
-
-      const groupResult = await prisma.group.findFirstOrThrow({
-        where: {
-          initiative_id: i.initiative_id,
-          name: group
-        }
-      });
-
       const result = await prisma.subject_group.delete({
         where: {
           sub_group_id: {
             sub: sub,
-            group_id: groupResult.group_id
+            group_id: groupId
           }
         }
       });

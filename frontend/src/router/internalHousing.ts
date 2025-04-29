@@ -91,7 +91,6 @@ const routes: Array<RouteRecordRaw> = [
       },
       {
         path: 'contact',
-        beforeEnter: entryRedirect,
         meta: { breadcrumb: 'Contacts', requiresAuth: true },
         children: [
           {
@@ -109,6 +108,17 @@ const routes: Array<RouteRecordRaw> = [
             meta: { breadcrumb: 'Contact Details' }
           }
         ]
+      },
+      {
+        path: 'user',
+        name: RouteName.INT_HOUSING_USER_MANAGEMENT,
+        component: () => import('@/views/internal/user/UserManagementView.vue'),
+        beforeEnter: accessHandler,
+        meta: {
+          access: [NavigationPermission.INT_USER_MANAGEMENT],
+          breadcrumb: 'User management',
+          requiresAuth: true
+        }
       }
     ]
   }

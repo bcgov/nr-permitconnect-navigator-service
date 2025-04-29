@@ -4,7 +4,7 @@ import { computed, readonly, ref } from 'vue';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { Permission } from '@/types';
+import type { Group, Permission } from '@/types';
 
 export enum NavigationPermission {
   /*
@@ -36,7 +36,7 @@ const GlobalNavigations = [NavigationPermission.GLO_USER];
 
 const NavigationAuthorizationMap = [
   {
-    group: GroupName.ADMIN,
+    groupName: GroupName.ADMIN,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
@@ -46,7 +46,7 @@ const NavigationAuthorizationMap = [
     ]
   },
   {
-    group: GroupName.NAVIGATOR,
+    groupName: GroupName.NAVIGATOR,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
@@ -55,7 +55,7 @@ const NavigationAuthorizationMap = [
     ]
   },
   {
-    group: GroupName.NAVIGATOR_READ_ONLY,
+    groupName: GroupName.NAVIGATOR_READ_ONLY,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
@@ -64,11 +64,11 @@ const NavigationAuthorizationMap = [
     ]
   },
   {
-    group: GroupName.PROPONENT,
+    groupName: GroupName.PROPONENT,
     permissions: [NavigationPermission.EXT_ELECTRIFICATION, NavigationPermission.EXT_HOUSING, ...GlobalNavigations]
   },
   {
-    group: GroupName.SUPERVISOR,
+    groupName: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
@@ -80,7 +80,7 @@ const NavigationAuthorizationMap = [
 ];
 
 export type AuthZStoreState = {
-  groups: Ref<Array<GroupName>>;
+  groups: Ref<Array<Group>>;
   permissions: Ref<Array<Permission>>;
   groupOverride: Ref<GroupName | undefined>;
 };
@@ -110,17 +110,21 @@ export const useAuthZStore = defineStore('authz', () => {
       () =>
         (navPerm: NavigationPermission | Array<NavigationPermission>, allowGroupOverride: boolean = true) => {
           const groups =
-            allowGroupOverride && state.groupOverride.value ? state.groupOverride.value : state.groups.value;
+            allowGroupOverride && state.groupOverride.value
+              ? [{ name: state.groupOverride.value } as Group]
+              : state.groups.value;
           const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
-          const perms = NavigationAuthorizationMap.filter((p) => groups?.includes(p.group)).flatMap(
+          const perms = NavigationAuthorizationMap.filter((p) => groups?.some((g) => g.name === p.groupName)).flatMap(
             (p) => p.permissions
           );
-          return groups?.includes(GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
+          return groups?.some((g) => g.name === GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
         }
     ),
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
-    isInGroup: computed(() => (group: Array<GroupName>) => state.groups.value.some((x) => group.includes(x)))
+    isInGroup: computed(
+      () => (group: Array<GroupName>) => state.groups.value.some((x) => group.some((g) => g === x.name))
+    )
   };
 
   // Actions

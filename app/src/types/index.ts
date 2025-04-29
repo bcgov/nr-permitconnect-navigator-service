@@ -22,6 +22,7 @@ export type { Enquiry } from './Enquiry';
 export type { EnquiryIntake } from './EnquiryIntake';
 export type { EnquirySearchParameters } from './EnquirySearchParameters';
 export type { EmailAttachment } from './EmailAttachment';
+export type { Group } from './Group';
 export type { HousingProject } from './HousingProject';
 export type { HousingProjectIntake } from './HousingProjectIntake';
 export type { HousingProjectSearchParameters } from './HousingProjectSearchParameters';
