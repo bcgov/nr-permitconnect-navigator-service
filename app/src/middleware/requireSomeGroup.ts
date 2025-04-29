@@ -24,9 +24,25 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
 
   // Auto assign all PROPONENT groups if user has none
   if (groups && groups.length === 0) {
-    await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.ELECTRIFICATION, GroupName.PROPONENT);
-    await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.HOUSING, GroupName.PROPONENT);
-    await yarsService.assignGroup(req.currentContext.bearerToken, sub, Initiative.PCNS, GroupName.PROPONENT);
+    const e = await yarsService.getGroups(Initiative.ELECTRIFICATION);
+    const h = await yarsService.getGroups(Initiative.HOUSING);
+    const p = await yarsService.getGroups(Initiative.PCNS);
+
+    await yarsService.assignGroup(
+      req.currentContext.bearerToken,
+      sub,
+      e.find((x) => x.name === GroupName.PROPONENT)?.groupId
+    );
+    await yarsService.assignGroup(
+      req.currentContext.bearerToken,
+      sub,
+      h.find((x) => x.name === GroupName.PROPONENT)?.groupId
+    );
+    await yarsService.assignGroup(
+      req.currentContext.bearerToken,
+      sub,
+      p.find((x) => x.name === GroupName.PROPONENT)?.groupId
+    );
     groups = await yarsService.getSubjectGroups(sub);
   }
 

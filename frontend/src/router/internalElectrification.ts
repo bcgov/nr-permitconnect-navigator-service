@@ -109,6 +109,17 @@ const routes: Array<RouteRecordRaw> = [
             meta: { breadcrumb: 'Contact Details' }
           }
         ]
+      },
+      {
+        path: 'user',
+        name: RouteName.INT_ELECTRIFICATION_USER_MANAGEMENT,
+        component: () => import('@/views/internal/user/UserManagementView.vue'),
+        beforeEnter: accessHandler,
+        meta: {
+          access: [NavigationPermission.INT_USER_MANAGEMENT],
+          breadcrumb: 'User management',
+          requiresAuth: true
+        }
       }
     ]
   }

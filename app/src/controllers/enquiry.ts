@@ -155,7 +155,7 @@ const controller = {
           ...req.query,
           includeUser: isTruthy(req.query.includeUser)
         },
-        req.currentContext.initiative ?? Initiative.PCNS
+        req.currentContext.initiative as Initiative
       );
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {

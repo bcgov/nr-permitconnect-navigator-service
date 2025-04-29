@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import axios from 'axios';
-import { onBeforeMount, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 
-import { Select } from '@/components/form';
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, useToast } from '@/lib/primevue';
+import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, Select, useToast } from '@/lib/primevue';
 import { ssoService, yarsService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -29,8 +28,8 @@ const authzStore = useAuthZStore();
 // State
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
-const selectedGroup: Ref<GroupName | undefined> = ref(undefined);
+const selectableGroups: Ref<Array<Group>> = ref([]);
+const selectedGroup: Ref<Group | undefined> = ref(undefined);
 const selectedParam: Ref<string | undefined> = ref('Last name');
 const selectedUser: Ref<User | undefined> = ref(undefined);
 const users: Ref<Array<User>> = ref([]);
@@ -85,20 +84,15 @@ async function searchIdirUsers() {
   }
 }
 
-onBeforeMount(async () => {
-  const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
+watchEffect(async () => {
+  const yarsGroups: Array<Group> = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
 
-  selectableGroups.value = new Map(
-    allowedGroups.map((groupName) => {
-      const group = yarsGroups.find((group) => group.name === groupName);
-      return [group?.label ?? groupName.toLowerCase(), groupName];
-    })
-  );
+  selectableGroups.value = yarsGroups.filter((x) => allowedGroups.includes(x.name));
 });
 </script>
 
@@ -114,7 +108,7 @@ onBeforeMount(async () => {
     </template>
     <div class="grid grid-cols-12 gap-4 items-center">
       <Select
-        class="col-span-3 m-0"
+        class="col-span-3"
         name="searchParam"
         placeholder="Last name"
         :options="Object.values(USER_SEARCH_PARAMS)"
@@ -125,7 +119,7 @@ onBeforeMount(async () => {
           }
         "
       />
-      <div class="col-span-9 mb-2">
+      <div class="col-span-9">
         <IconField icon-position="left">
           <InputIcon class="pi pi-search" />
           <InputText
@@ -180,12 +174,13 @@ onBeforeMount(async () => {
       />
     </DataTable>
     <Select
-      class="col-span-12"
+      v-model="selectedGroup"
+      class="w-full"
       name="assignRole"
       label="Assign role"
-      :options="[...selectableGroups.keys()]"
+      :options="selectableGroups"
+      option-label="label"
       :disabled="!selectedUser"
-      @on-change="(e: SelectChangeEvent) => (selectedGroup = selectableGroups.get(e.value))"
     />
     <div class="mt-6">
       <Button

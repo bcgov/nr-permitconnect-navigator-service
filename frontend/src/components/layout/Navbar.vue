@@ -59,7 +59,7 @@ watchEffect(() => {
       },
       {
         label: 'User Management',
-        route: RouteName.INT_USER_MANAGEMENT,
+        route: RouteName.INT_ELECTRIFICATION_USER_MANAGEMENT,
         access: NavigationPermission.INT_USER_MANAGEMENT
       },
       {
@@ -123,7 +123,7 @@ watchEffect(() => {
       },
       {
         label: 'User Management',
-        route: RouteName.INT_USER_MANAGEMENT,
+        route: RouteName.INT_HOUSING_USER_MANAGEMENT,
         access: NavigationPermission.INT_USER_MANAGEMENT
       },
       {
@@ -158,11 +158,6 @@ watchEffect(() => {
         label: 'Home',
         route: RouteName.HOME,
         public: true
-      },
-      {
-        label: 'User Management',
-        route: RouteName.INT_USER_MANAGEMENT,
-        access: NavigationPermission.INT_USER_MANAGEMENT
       },
       {
         label: 'Developer',
