@@ -1,5 +1,8 @@
 {
   "common": {
+    "basicContactInformationCard": {
+      "header": "Basic information"
+    },
     "contactCard": {
       "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
       "header": "Who is the primary contact regarding this project?"
@@ -137,6 +140,29 @@
     }
   },
   "i": {
+    "common": {
+      "form": {
+        "cancelMessage": "Your changes have not been saved.",
+        "savedMessage": "Form saved"
+      },
+      "projectView": {
+        "applicablePermits": "Applicable permits",
+        "seePropViewButtonLabel": "See Proponent's View",
+        "tabFiles": "Files",
+        "tabInformation": "Information",
+        "tabNotes": "Notes",
+        "tabPermits": "Permits",
+        "tabRelatedEnquiries": "Related enquiries",
+        "tabRoadmap": "Roadmap"
+      },
+      "projectForm": {
+        "failedMessage": "Failed to save project",
+        "reopenReject": "Cancel",
+        "reopenAccept": "Confirm",
+        "confirmReopenMessage": "Please confirm that you want to re-open this project",
+        "confirmReopenHeader": "Re-open project?"
+      }
+    },
     "contact": {
       "contactsView": {
         "contactsHeader": "Contacts list",
@@ -144,8 +170,31 @@
       }
     },
     "electrification": {
-      "projectView": {
-        "seePropViewButtonLabel": "See Proponent's View"
+      "projectForm": {
+        "additionalInfoHeader": "Additional information about project",
+        "astNotesHeader": "Automated Status Tool (AST) Notes",
+        "atsClientIdHeader": "ATS Client ID",
+        "atsHeader": "ATS link",
+        "atsSearchButton": "Search ATS",
+        "atsNewButton": "New ATS",
+        "locationHeader": "Location description",
+        "projectHeader": "Electrification",
+        "submissionDate": "Submission date",
+        "submissionStateHeader": "Submission state",
+        "updatesHeader": "Updates",
+        "projectTypeLabel": "Project type",
+        "bcHydroNumberLabel": "BC Hydro Call for Power number",
+        "projectNameLabel": "Project name",
+        "hasEpaLabel": "Do they have an EPA?",
+        "megawattsLabel": "How many megawatts will it produce?",
+        "companyLabel": "Company",
+        "bcEnvironmentAssessNeededLabel": "BC Environmental Assessment needed?",
+        "projectCategoryLabel": "Project category",
+        "assignedToLabel": "Assigned to",
+        "projectStateLabel": "Project state",
+        "submissionTypeLabel": "Submission type",
+        "priorityLabel": "Priority",
+        "aaiUpdateLabel": "AAI Update"
       }
     },
     "housing": {
@@ -155,9 +204,6 @@
         "contactPhoneLabel": "Phone",
         "contactPreferredLabel": "Preferred contact method",
         "contactRelationshipLabel": "Relationship to project"
-      },
-      "projectView": {
-        "seePropViewButtonLabel": "See Proponent's View"
       }
     },
     "user": {
@@ -221,7 +267,12 @@
     "atsNewClientBtn": "New ATS Client",
     "formSaveBtn": "Save",
     "formReopenBtn": "Re-open enquiry",
-    "submittedMethod": "Submitted method"
+    "submittedMethod": "Submitted method",
+    "reopenReject": "Cancel",
+    "reopenAccept": "Confirm",
+    "confirmReopenMessage": "Please confirm that you want to re-open this enquiry",
+    "confirmReopenHeader": "Re-open enquiry?",
+    "failedMessage": "Failed to save enquiry"
   },
   "enquiryConfirmationView": {
     "confirmationHeader": "Confirmation of Submission",

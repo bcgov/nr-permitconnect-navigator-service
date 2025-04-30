@@ -19,7 +19,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['onChange', 'onClick']);
+const emit = defineEmits(['onChange', 'onClick', 'onInput']);
 
 // State
 const { errorMessage, handleBlur, value } = useField<string>(name);
@@ -45,5 +45,6 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     @change="(e: Event) => emit('onChange', e)"
     @click="(e: MouseEvent) => emit('onClick', e)"
     @blur="handleBlur"
+    @input="(e: Event) => emit('onInput', e)"
   />
 </template>

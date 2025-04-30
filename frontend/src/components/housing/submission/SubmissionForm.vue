@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { boolean, number, object, string } from 'yup';
 
 import { formatDateFilename } from '@/utils/formatters';
@@ -24,7 +25,7 @@ import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   CONTACT_PREFERENCE_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
@@ -63,6 +64,11 @@ const { editable = true, housingProject } = defineProps<{
   editable?: boolean;
   housingProject: HousingProject;
 }>();
+
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
@@ -154,9 +160,6 @@ const formSchema = object({
 });
 
 // Actions
-const confirm = useConfirm();
-const toast = useToast();
-
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
@@ -171,7 +174,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
 
   if (idpCfg) {
-    if (input.length >= 3) {
+    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
       assigneeOptions.value = (
         await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
       ).data;
@@ -216,10 +219,10 @@ function onInvalidSubmit(e: any) {
 
 function onReOpen() {
   confirm.require({
-    message: 'Please confirm that you want to re-open this submission',
-    header: 'Re-open submission?',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('i.common.projectForm.confirmReopenMessage'),
+    header: t('i.common.projectForm.confirmReopenHeader'),
+    acceptLabel: t('i.common.projectForm.reopenAccept'),
+    rejectLabel: t('i.common.projectForm.reopenReject'),
     accept: () => {
       formRef.value?.setFieldValue('applicationStatus', ApplicationStatus.IN_PROGRESS);
       onSubmit(formRef.value?.values);
@@ -303,9 +306,9 @@ const onSubmit = async (values: any) => {
       }
     });
 
-    toast.success('Form saved');
+    toast.success(t('i.common.form.savedMessage'));
   } catch (e: any) {
-    toast.error('Failed to save submission', e.message);
+    toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
 
@@ -394,7 +397,7 @@ onBeforeMount(async () => {
     :closable="false"
     :life="5500"
   >
-    Your changes have not been saved.
+    {{ t('i.common.form.cancelMessage') }}
   </Message>
   <Form
     v-if="initialFormValues"
