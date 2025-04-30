@@ -222,9 +222,27 @@ export async function up(knex: Knex): Promise<void> {
           table.text('project_name');
           table.text('project_description');
           table.text('company_name_registered');
-          table.text('project_type');
           table.text('bc_hydro_number');
           table.text('submission_type');
+          table.enu('project_type', ['IPP_SOLAR', 'IPP_WIND', 'NCTL', 'OTHER'], {
+            useNative: true,
+            enumName: 'electrification_project_type'
+          });
+          table.enu(
+            'project_category',
+            ['EXISTING', 'IPP', 'NEW_CALL', 'NEW_TRANSMISSION', 'REMOTE_RENEWABLE', 'SUSTAINMENT'],
+            {
+              useNative: true,
+              enumName: 'electrification_project_category'
+            }
+          );
+          table.text('has_epa');
+          table.text('bc_environment_assess_needed');
+          table.decimal('megawatts', null);
+          table.text('location_description');
+          table.boolean('aai_updated').notNullable().defaultTo(false);
+          table.integer('ats_client_id');
+          table.text('ast_notes');
           stamps(knex, table);
         })
       )
@@ -1034,6 +1052,10 @@ export async function down(knex: Knex): Promise<void> {
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('permit_type_initiative_xref'))
       .then(() => knex.schema.dropTableIfExists('electrification_project'))
+
+      // Drop enums
+      .then(() => knex.schema.raw('DROP TYPE IF EXISTS electrification_project_category'))
+      .then(() => knex.schema.raw('DROP TYPE IF EXISTS electrification_project_type'))
 
       // Delete data
       .then(async () => {

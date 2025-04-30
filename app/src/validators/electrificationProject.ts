@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
-import { PROJECT_TYPE_LIST } from '../utils/constants/electrification';
+import { PROJECT_CATEGORY_LIST, PROJECT_TYPE_LIST } from '../utils/constants/electrification';
 import { INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
@@ -79,7 +79,8 @@ const schema = {
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
-      submissionType: Joi.array().items(...PROJECT_TYPE_LIST)
+      projectType: Joi.array().items(...PROJECT_TYPE_LIST),
+      projectCategory: Joi.array().items(...PROJECT_CATEGORY_LIST)
     })
   },
   updateIsDeletedFlag: {
