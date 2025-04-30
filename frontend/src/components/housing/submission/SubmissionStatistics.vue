@@ -5,6 +5,7 @@ import { inject, ref, watch } from 'vue';
 import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
 import { reportingService, userService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
+import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { Action, Initiative, Regex, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
@@ -44,7 +45,7 @@ const isEmpty = (value: unknown) =>
 async function onAssigneeInput(e: IInputEvent) {
   const input = e.target.value;
 
-  if (input.length >= 3) {
+  if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
     assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input })).data;
   } else if (input.match(Regex.EMAIL)) {
     assigneeOptions.value = (await userService.searchUsers({ email: input })).data;

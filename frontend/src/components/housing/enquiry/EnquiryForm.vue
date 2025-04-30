@@ -22,8 +22,7 @@ import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, housingProjectService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { IdentityProviderKind, Regex } from '@/utils/enums/application';
-import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
@@ -31,6 +30,8 @@ import {
   ENQUIRY_TYPE_LIST,
   INTAKE_STATUS_LIST
 } from '@/utils/constants/projectCommon';
+import { IdentityProviderKind, Regex } from '@/utils/enums/application';
+import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
@@ -125,7 +126,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
 
   if (idpCfg) {
-    if (input.length >= 3) {
+    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
       assigneeOptions.value = (
         await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
       ).data;
@@ -184,10 +185,10 @@ function onRelatedActivityInput(e: IInputEvent) {
 
 function onReOpen() {
   confirm.require({
-    message: 'Please confirm that you want to re-open this enquiry',
-    header: 'Re-open enquiry?',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('i.common.enquiryForm.confirmReopenMessage'),
+    header: t('i.common.enquiryForm.confirmReopenHeader'),
+    acceptLabel: t('i.common.enquiryForm.reopenAccept'),
+    rejectLabel: t('i.common.enquiryForm.reopenReject'),
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
       onSubmit(formRef.value?.values);
@@ -253,9 +254,9 @@ const onSubmit = async (values: any) => {
     });
     emit('enquiryForm:saved');
 
-    toast.success('Form saved');
+    toast.success(t('i.common.form.savedMessage'));
   } catch (e: any) {
-    toast.error('Failed to save enquiry', e);
+    toast.error(t('enquiryForm.failedMessage'), e.message);
   }
 };
 
@@ -289,7 +290,7 @@ onBeforeMount(async () => {
     :closable="false"
     :life="5500"
   >
-    Your changes have not been saved.
+    {{ t('i.common.form.cancelMessage') }}
   </Message>
   <Form
     v-if="initialFormValues"

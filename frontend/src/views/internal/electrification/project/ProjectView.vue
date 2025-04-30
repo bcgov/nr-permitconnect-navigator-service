@@ -3,9 +3,9 @@ import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
-import { useRouter } from 'vue-router';
+// import { useRouter } from 'vue-router';
 
-import ProjectIntakeForm from '@/components/electrification/project/ProjectIntakeForm.vue';
+import ProjectForm from '@/components/electrification/project/ProjectForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -30,7 +30,8 @@ import {
 } from '@/lib/primevue';
 import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
-import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Initiative, Resource } from '@/utils/enums/application';
+// import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
 import { getFilenameAndExtension } from '@/utils/utils';
@@ -59,7 +60,7 @@ const SORT_TYPES = {
 
 // Composables
 const { t } = useI18n();
-const router = useRouter();
+// const router = useRouter();
 
 // Store
 const permitStore = usePermitStore();
@@ -70,6 +71,7 @@ const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
+const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const permitModalVisible: Ref<boolean> = ref(false);
@@ -124,6 +126,10 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
+function updateLiveName(name: string) {
+  liveName.value = name;
+}
+
 onBeforeMount(async () => {
   const project = (await electrificationProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
@@ -147,6 +153,8 @@ onBeforeMount(async () => {
   projectStore.setPermits(permits);
   projectStore.setRelatedEnquiries(relatedEnquiries);
 
+  liveName.value = project.projectName;
+
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(Initiative.ELECTRIFICATION)).data;
     permitStore.setPermitTypes(permitTypes);
@@ -159,8 +167,8 @@ onBeforeMount(async () => {
 <template>
   <div class="flex items-center justify-between">
     <h1>
-      <span v-if="getProject?.projectName">
-        <span class="ml-1">{{ getProject.projectName + ': ' }}</span>
+      <span v-if="liveName">
+        <span class="ml-1">{{ liveName + ': ' }}</span>
       </span>
       <span
         v-if="getProject?.activityId"
@@ -175,6 +183,7 @@ onBeforeMount(async () => {
         (Completed)
       </span>
     </h1>
+    <!-- TODO: Uncomment this and imports once prop side is finished
     <Button
       outlined
       @click="
@@ -187,29 +196,29 @@ onBeforeMount(async () => {
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('i.electrification.projectView.seePropViewButtonLabel') }}
-    </Button>
+      {{ t('i.common.projectView.seePropViewButtonLabel') }}
+    </Button> -->
   </div>
 
   <Tabs :value="activeTab">
     <TabList>
-      <Tab :value="0">Information</Tab>
-      <Tab :value="1">Files</Tab>
-      <Tab :value="2">Permits</Tab>
-      <Tab :value="3">Notes</Tab>
-      <Tab :value="4">Roadmap</Tab>
-      <Tab :value="5">Related enquiries</Tab>
+      <Tab :value="0">{{ t('i.common.projectView.tabInformation') }}</Tab>
+      <Tab :value="1">{{ t('i.common.projectView.tabFiles') }}</Tab>
+      <Tab :value="2">{{ t('i.common.projectView.tabPermits') }}</Tab>
+      <Tab :value="3">{{ t('i.common.projectView.tabNotes') }}</Tab>
+      <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
+      <Tab :value="5">{{ t('i.common.projectView.tabRelatedEnquiries') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
-          <!-- TODO: Put correct form here -->
-          <ProjectIntakeForm
+          <ProjectForm
             :editable="
               !isCompleted &&
               useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
             "
-            :electrification-project="getProject as ElectrificationProject"
+            :project="getProject as ElectrificationProject"
+            @input-project-name="updateLiveName"
           />
         </span>
       </TabPanel>
@@ -404,7 +413,7 @@ onBeforeMount(async () => {
       <TabPanel :value="2">
         <div class="flex items-center pb-5">
           <div class="grow">
-            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
+            <p class="font-bold">{{ t('i.common.projectView.applicablePermits') }} ({{ getPermits.length }})</p>
           </div>
           <Button
             aria-label="Add permit"
@@ -484,7 +493,9 @@ onBeforeMount(async () => {
       <TabPanel :value="5">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
+            <p class="font-bold">
+              {{ t('i.common.projectView.tabRelatedEnquiries') }} ({{ getRelatedEnquiries.length }})
+            </p>
           </div>
         </div>
         <div
