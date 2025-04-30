@@ -20,7 +20,7 @@ export const ThemeOverride = definePreset(Material, {
   primitive: {
     // bcblue.500 is BC mandated blue
     bcblue: {
-      50: '#F1F8FE',
+      50: '#F7F9FC',
       100: '#F1F8FE',
       200: '#D8EAFD',
       300: '#C1DDFC',
@@ -265,6 +265,18 @@ export const ThemeOverride = definePreset(Material, {
           }
         }
       }
+    },
+    panel: {
+      header: { padding: '1.5rem 2.25rem 1.5rem 2.25rem' },
+      toggleable: {
+        header: { padding: '1.5rem 2.25rem 1.5rem 2.25rem' }
+      },
+      content: { padding: '0 2.25rem 1.5rem 2.25rem' },
+      css: () => `
+        .p-panel {
+          box-shadow: 0px 1.5px 6px 0px rgba(0, 0, 0, 0.25);
+          border: none;
+        }`
     },
     radiobutton: {
       icon: {

@@ -4,9 +4,10 @@ import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
 import { PROJECT_CATEGORY_LIST, PROJECT_TYPE_LIST } from '../utils/constants/electrification';
-import { INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
+import { YES_NO_LIST } from '../utils/constants/application';
 
 const electrificationIntake = {
   activityId: Joi.string().min(8).max(8).allow(null),
@@ -97,12 +98,30 @@ const schema = {
       project: {
         ...electrificationIntake,
         electrificationProjectId: uuidv4.required(),
-        submittedAt: Joi.string().required(),
+        projectCategory: Joi.string()
+          .valid(...PROJECT_CATEGORY_LIST)
+          .allow(null),
         assignedUserId: Joi.when('intakeStatus', {
           is: IntakeStatus.SUBMITTED,
           then: uuidv4,
           otherwise: uuidv4.allow(null)
-        })
+        }),
+        hasEpa: Joi.string()
+          .valid(...YES_NO_LIST)
+          .allow(null),
+        megawatts: Joi.number().positive().allow(null),
+        bcEnvironmentAssessNeeded: Joi.string()
+          .valid(...YES_NO_LIST)
+          .allow(null),
+        locationDescription: Joi.string().max(4000).allow(null),
+        astNotes: Joi.string().max(4000).allow(null),
+        queuePriority: Joi.number().integer().required().min(0).max(3),
+        submissionType: Joi.string()
+          .required()
+          .valid(...SUBMISSION_TYPE_LIST),
+        applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+        atsClientId: Joi.number().integer().min(0).allow(null),
+        aaiUpdated: Joi.boolean().required()
       }
     }),
     params: Joi.object({

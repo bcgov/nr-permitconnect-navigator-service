@@ -187,18 +187,18 @@ onBeforeMount(async () => {
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('i.housing.projectView.seePropViewButtonLabel') }}
+      {{ t('i.common.projectView.seePropViewButtonLabel') }}
     </Button>
   </div>
 
   <Tabs :value="activeTab">
     <TabList>
-      <Tab :value="0">Information</Tab>
-      <Tab :value="1">Files</Tab>
-      <Tab :value="2">Permits</Tab>
-      <Tab :value="3">Notes</Tab>
-      <Tab :value="4">Roadmap</Tab>
-      <Tab :value="5">Related enquiries</Tab>
+      <Tab :value="0">{{ t('i.common.projectView.tabInformation') }}</Tab>
+      <Tab :value="1">{{ t('i.common.projectView.tabFiles') }}</Tab>
+      <Tab :value="2">{{ t('i.common.projectView.tabPermits') }}</Tab>
+      <Tab :value="3">{{ t('i.common.projectView.tabNotes') }}</Tab>
+      <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
+      <Tab :value="5">{{ t('i.common.projectView.tabRelatedEnquiries') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
@@ -396,7 +396,7 @@ onBeforeMount(async () => {
       <TabPanel :value="2">
         <div class="flex items-center pb-5">
           <div class="grow">
-            <p class="font-bold">Applicable permits ({{ getPermits.length }})</p>
+            <p class="font-bold">{{ t('i.common.projectView.applicablePermits') }} ({{ getPermits.length }})</p>
           </div>
           <Button
             aria-label="Add permit"
@@ -476,7 +476,9 @@ onBeforeMount(async () => {
       <TabPanel :value="5">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Related enquiries ({{ getRelatedEnquiries.length }})</p>
+            <p class="font-bold">
+              {{ t('i.common.projectView.tabRelatedEnquiries') }}({{ getRelatedEnquiries.length }})
+            </p>
           </div>
         </div>
         <div

@@ -78,6 +78,10 @@ const controller = {
     next: NextFunction
   ) => {
     try {
+      // TODO: Remove when create PUT calls get switched to POST
+      if (req.body === undefined) {
+        req.body = { project: {} };
+      }
       const electrificationProject = await controller.generateElectrificationProjectData(req.body, req.currentContext);
 
       // Create contacts
@@ -90,9 +94,7 @@ const controller = {
         ...generateCreateStamps(req.currentContext)
       });
 
-      res
-        .status(201)
-        .json({ activityId: result.activityId, electrificationProjectId: result.electrificationProjectId });
+      res.status(201).json(result);
     } catch (e: unknown) {
       next(e);
     }

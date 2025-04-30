@@ -44,6 +44,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     </label>
     <Select
       v-model="value"
+      append-to="body"
       editable
       :aria-describedby="`${name}-help`"
       :aria-labelledby="`${name}-label`"
