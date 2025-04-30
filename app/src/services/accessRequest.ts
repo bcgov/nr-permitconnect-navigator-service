@@ -24,7 +24,10 @@ const service = {
     };
 
     const accessRequestResponse = await prisma.access_request.create({
-      data: access_request.toPrismaModel(newAccessRequest)
+      data: access_request.toPrismaModel(newAccessRequest),
+      include: {
+        group: true
+      }
     });
 
     return access_request.fromPrismaModel(accessRequestResponse);
@@ -45,6 +48,9 @@ const service = {
             code: initiative
           }
         }
+      },
+      include: {
+        group: true
       }
     });
     return response ? access_request.fromPrismaModel(response) : null;
@@ -63,6 +69,9 @@ const service = {
             code: initiative
           }
         }
+      },
+      include: {
+        group: true
       }
     });
     return response.map((x) => access_request.fromPrismaModel(x));
@@ -79,6 +88,9 @@ const service = {
       data: { ...access_request.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
       where: {
         access_request_id: data.accessRequestId
+      },
+      include: {
+        group: true
       }
     });
 

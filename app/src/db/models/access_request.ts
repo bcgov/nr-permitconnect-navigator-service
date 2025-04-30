@@ -7,7 +7,11 @@ import type { AccessRequest } from '../../types/AccessRequest';
 
 // Define types
 const _accessRequest = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
-const _accessRequestWithGraph = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
+const _accessRequestWithGraph = Prisma.validator<Prisma.access_requestDefaultArgs>()({
+  include: {
+    group: true
+  }
+});
 
 type PrismaRelationAccessRequest = Omit<Prisma.access_requestGetPayload<typeof _accessRequest>, keyof Stamps>;
 type PrismaGraphAccessRequest = Prisma.access_requestGetPayload<typeof _accessRequestWithGraph>;
@@ -28,6 +32,7 @@ export default {
       accessRequestId: input.access_request_id,
       grant: input.grant,
       groupId: input.group_id,
+      groupLabel: input.group.label,
       userId: input.user_id as string,
       status: input.status as AccessRequestStatus,
       createdAt: input.created_at?.toISOString()

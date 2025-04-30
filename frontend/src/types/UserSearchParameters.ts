@@ -1,4 +1,4 @@
-import type { GroupName } from '@/utils/enums/application';
+import type { GroupName, Initiative } from '@/utils/enums/application';
 
 export type UserSearchParameters = {
   userId?: string[];
@@ -11,4 +11,5 @@ export type UserSearchParameters = {
   active?: boolean;
   group?: GroupName[];
   includeUserGroups?: boolean;
+  initiative?: Initiative[];
 };

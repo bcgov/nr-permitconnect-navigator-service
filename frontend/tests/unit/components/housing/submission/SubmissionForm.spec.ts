@@ -1,19 +1,17 @@
-import { nextTick } from 'vue';
-
-import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
-import { ApplicationStatus } from '@/utils/enums/housing';
-import { GroupName } from '@/utils/enums/application';
-import { mapService, userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import { nextTick } from 'vue';
+
+import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
+import { mapService, userService } from '@/services';
+import { ApplicationStatus } from '@/utils/enums/housing';
+import { GroupName } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 
-import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
-
 import type { AxiosResponse } from 'axios';
-// import { geoJSON } from 'leaflet';
+import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
 
 const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
@@ -49,7 +47,7 @@ const testUser = {
   fullName: 'John Doe',
   idp: 'idir',
   lastName: 'Doe',
-  groups: [GroupName.DEVELOPER],
+  groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
   status: 'active',
   userId: 'user123',
   sub: 'sub-123',

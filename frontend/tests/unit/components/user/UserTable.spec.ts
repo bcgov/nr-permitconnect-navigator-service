@@ -1,9 +1,18 @@
-import { mount } from '@vue/test-utils';
-import { AccessRequestStatus, GroupName } from '@/utils/enums/application';
-import UserTable from '@/components/user/UserTable.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
-import type { IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, User, UserAccessRequest } from '@/types';
+import { mount } from '@vue/test-utils';
+
+import { AccessRequestStatus, GroupName } from '@/utils/enums/application';
+import UserTable from '@/components/user/UserTable.vue';
+
+import type {
+  IDIRAttribute,
+  BasicBCeIDAttribute,
+  BusinessBCeIDAttribute,
+  User,
+  UserAccessRequest,
+  Group
+} from '@/types';
 
 const currentDate = new Date().toISOString();
 
@@ -28,7 +37,7 @@ const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
 const exampleAccessRequest = {
   accessRequestId: 'accessRequest123',
   grant: true,
-  group: GroupName.ADMIN,
+  groupId: 6,
   status: AccessRequestStatus.PENDING,
   userId: 'user123',
   createdBy: 'testCreatedBy',
@@ -45,7 +54,7 @@ const exampleUser: User = {
   fullName: 'John Doe',
   idp: 'idir',
   lastName: 'Doe',
-  groups: [GroupName.ADMIN],
+  groups: [{ groupId: 6, name: GroupName.ADMIN } as Group],
   status: 'active',
   userId: 'user123',
   sub: 'sub-123',

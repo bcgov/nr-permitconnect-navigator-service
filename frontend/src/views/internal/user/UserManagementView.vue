@@ -21,7 +21,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { accessRequestService, userService, yarsService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
 import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import { findIdpConfig, omit } from '@/utils/utils';
@@ -170,7 +170,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
             user: omittedUser,
             accessRequest: {
               grant: false,
-              group: userAccessRequest.user.groups[0]
+              groupId: userAccessRequest.user.groups[0].groupId
             }
           });
         }
@@ -203,7 +203,7 @@ async function onUserGroupChange(group: Group) {
         user: omittedUser,
         accessRequest: {
           userId: user.userId,
-          group: group,
+          groupId: group.groupId,
           grant: true
         }
       });
@@ -281,7 +281,8 @@ onBeforeMount(async () => {
         active: true,
         idp: [idpCfg.idp],
         includeUserGroups: true,
-        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
+        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
+        initiative: [useAppStore().getInitiative]
       })
     ).data;
     const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
