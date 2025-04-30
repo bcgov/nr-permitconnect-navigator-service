@@ -1,12 +1,14 @@
-import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
-import { ApplicationStatus } from '@/utils/enums/housing';
-import { GroupName } from '@/utils/enums/application';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
-import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute } from '@/types';
+
+import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import { ApplicationStatus } from '@/utils/enums/housing';
+import { GroupName } from '@/utils/enums/application';
+
+import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
 
 const currentDate = new Date().toISOString();
 
@@ -37,7 +39,7 @@ const testUser = {
   fullName: 'John Doe',
   idp: 'idir',
   lastName: 'Doe',
-  groups: [GroupName.DEVELOPER],
+  groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
   status: 'active',
   userId: 'user123',
   sub: 'sub-123',

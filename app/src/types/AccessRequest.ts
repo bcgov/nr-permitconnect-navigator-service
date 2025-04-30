@@ -5,6 +5,7 @@ export type AccessRequest = {
   accessRequestId: string; // Primary key
   grant: boolean;
   groupId: number;
+  groupLabel?: string;
   status: AccessRequestStatus;
   userId: string;
 } & Partial<IStamps>;

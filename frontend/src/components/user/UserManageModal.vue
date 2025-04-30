@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 
-import { RadioList } from '@/components/form';
+import { RadioButton } from '@/lib/primevue';
 import { yarsService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { Button, Dialog } from '@/lib/primevue';
@@ -18,8 +18,8 @@ const authzStore = useAuthZStore();
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
-const group: Ref<GroupName | undefined> = ref(undefined);
+const selectableGroups: Ref<Array<Group>> = ref([]);
+const group: Ref<Group | undefined> = ref(undefined);
 
 // Actions
 watchEffect(async () => {
@@ -30,12 +30,7 @@ watchEffect(async () => {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
 
-  selectableGroups.value = new Map(
-    allowedGroups.map((groupName) => {
-      const group = yarsGroups.find((group) => group.name === groupName);
-      return [group?.label ?? groupName.toLowerCase(), groupName];
-    })
-  );
+  selectableGroups.value = yarsGroups.filter((x) => allowedGroups.includes(x.name));
 });
 </script>
 
@@ -49,15 +44,30 @@ watchEffect(async () => {
     <template #header>
       <span class="p-dialog-title">Manage user role</span>
     </template>
-    <div>Select role</div>
-    <RadioList
-      name="role"
-      :bold="false"
-      :options="[...selectableGroups.keys()]"
-      class="mt-4 mb-6"
-      @on-change="(value) => (group = selectableGroups.get(value))"
-    />
-    <div class="flex-auto">
+    <div class="mb-2">Select role</div>
+    <div
+      v-for="option in selectableGroups"
+      :key="option.groupId"
+      class="flex flex-col items-start mb-2"
+    >
+      <div>
+        <RadioButton
+          v-model="group"
+          :aria-describedby="`role-help`"
+          :aria-labelledby="`role-option-${option.groupId}`"
+          name="role"
+          :value="option"
+        />
+        <span
+          :id="`role-option-${option.groupId}`"
+          :for="option"
+          class="ml-2 mb-0"
+        >
+          {{ option.label }}
+        </span>
+      </div>
+    </div>
+    <div class="flex-auto mt-6">
       <Button
         class="mr-2"
         label="Save"
