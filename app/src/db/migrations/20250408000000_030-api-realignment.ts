@@ -96,76 +96,6 @@ export async function up(knex: Knex): Promise<void> {
         return knex('yars.role_policy').insert(items);
       })
 
-      .then(async () => {
-        const electrification_id = await knex('initiative')
-          .where({
-            code: Initiative.ELECTRIFICATION
-          })
-          .select('initiative_id');
-
-        const housing_id = await knex('initiative')
-          .where({
-            code: Initiative.HOUSING
-          })
-          .select('initiative_id');
-
-        const elec_supervisor_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.SUPERVISOR })
-          .select('group_id');
-
-        const elec_admin_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.ADMIN })
-          .select('group_id');
-
-        const housing_supervisor_group_id = await knex('yars.group')
-          .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.SUPERVISOR })
-          .select('group_id');
-
-        const housing_admin_group_id = await knex('yars.group')
-          .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.ADMIN })
-          .select('group_id');
-
-        const items: Array<{ group_id: number; role_id: number }> = [];
-
-        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Array<Action>) => {
-          if (actionNames.includes(Action.READ)) {
-            items.push({
-              group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_VIEWER` })
-                  .select('role_id')
-              )[0].role_id
-            });
-          }
-
-          if (actionNames.includes(Action.DELETE)) {
-            items.push({
-              group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_EDITOR` })
-                  .select('role_id')
-              )[0].role_id
-            });
-          }
-        };
-
-        // Note: Only UPDATE or DELETE is required to be given EDITOR role, don't include both
-        // prettier-ignore
-        {
-
-          // Add all supervisor role mappings
-          await addResourceRoles(elec_supervisor_group_id[0].group_id, Resource.YARS, [Action.READ]);
-          await addResourceRoles(housing_supervisor_group_id[0].group_id, Resource.YARS, [Action.READ]);
-
-          // Add all admin role mappings
-          await addResourceRoles(elec_admin_group_id[0].group_id, Resource.YARS, [Action.READ, Action.DELETE]);
-          await addResourceRoles(housing_admin_group_id[0].group_id, Resource.YARS, [Action.READ, Action.DELETE]);
-        }
-        return knex('yars.group_role').insert(items);
-      })
-
       // Add new groups for PCNS initiative
       .then(async () => {
         const pcns_id = knex('initiative')
@@ -314,6 +244,56 @@ export async function up(knex: Knex): Promise<void> {
           .update({
             group_id: pcns_proponent_group_id[0].group_id
           });
+      })
+
+      .then(async () => {
+        const pcns_id = await knex('initiative')
+          .where({
+            code: Initiative.PCNS
+          })
+          .select('initiative_id');
+
+        const pcns_supervisor_group_id = await knex('yars.group')
+          .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.SUPERVISOR })
+          .select('group_id');
+
+        const pcns_admin_group_id = await knex('yars.group')
+          .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.ADMIN })
+          .select('group_id');
+        const items: Array<{ group_id: number; role_id: number }> = [];
+
+        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Array<Action>) => {
+          if (actionNames.includes(Action.READ)) {
+            items.push({
+              group_id: group_id,
+              role_id: (
+                await knex('yars.role')
+                  .where({ name: `${resourceName}_VIEWER` })
+                  .select('role_id')
+              )[0].role_id
+            });
+          }
+
+          if (actionNames.includes(Action.DELETE)) {
+            items.push({
+              group_id: group_id,
+              role_id: (
+                await knex('yars.role')
+                  .where({ name: `${resourceName}_EDITOR` })
+                  .select('role_id')
+              )[0].role_id
+            });
+          }
+        };
+
+        // Note: Only UPDATE or DELETE is required to be given EDITOR role, don't include both
+        // prettier-ignore
+        {
+          // Add role mappings
+          await addResourceRoles(pcns_supervisor_group_id[0].group_id, Resource.YARS, [Action.READ]);
+          await addResourceRoles(pcns_admin_group_id[0].group_id, Resource.YARS, [Action.READ, Action.DELETE]);
+        }
+        return knex('yars.group_role').insert(items);
       })
   );
 }
