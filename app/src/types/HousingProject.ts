@@ -16,12 +16,9 @@ export type HousingProject = {
   streetAddress: string | null;
   latitude: number | null;
   longitude: number | null;
-  queuePriority: number | null;
   relatedPermits: string | null;
-  astNotes: string | null;
   astUpdated: boolean;
   addedToATS: boolean;
-  atsClientId: number | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   naturalDisaster: string;
@@ -30,7 +27,6 @@ export type HousingProject = {
   financiallySupportedIndigenous: string | null;
   financiallySupportedNonProfit: string | null;
   financiallySupportedHousingCoop: string | null;
-  aaiUpdated: boolean;
   waitingOn: string | null;
   projectApplicantType: string | null;
   isDevelopedInBC: string | null;
