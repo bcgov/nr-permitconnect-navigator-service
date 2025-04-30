@@ -108,16 +108,12 @@ watchEffect(async () => {
     </template>
     <div class="grid grid-cols-12 gap-4 items-center">
       <Select
+        v-model="selectedParam"
         class="col-span-3"
         name="searchParam"
         placeholder="Last name"
         :options="Object.values(USER_SEARCH_PARAMS)"
-        @on-change="
-          (param: SelectChangeEvent) => {
-            selectedParam = param.value;
-            searchIdirUsers();
-          }
-        "
+        @change="searchIdirUsers"
       />
       <div class="col-span-9">
         <IconField icon-position="left">

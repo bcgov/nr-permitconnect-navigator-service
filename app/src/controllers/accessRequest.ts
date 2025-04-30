@@ -28,14 +28,13 @@ const controller = {
       if (admin) {
         userAllowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
       }
-      const modifyableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
+      const modifiableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
 
       let userResponse;
 
       if (!user.userId) userResponse = await userService.createUser(user);
       else userResponse = await userService.readUser(user.userId);
 
-      // TODO: Group type doesnt exist in backend?
       let userGroups: Array<Group> = [];
 
       if (!userResponse) {
@@ -43,7 +42,7 @@ const controller = {
       } else {
         userGroups = await yarsService.getSubjectGroups(userResponse.sub);
 
-        if (accessRequest.grant && !modifyableGroups.some((x) => x.groupId == accessRequest.groupId)) {
+        if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
           res.status(403).json({ message: 'Cannot modify requested group' });
         }
         if (

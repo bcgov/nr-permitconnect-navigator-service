@@ -1,6 +1,6 @@
 import { appAxios } from '@/services/interceptors';
 import yarsService from '@/services/yarsService';
-import { GroupName } from '@/utils/enums/application';
+import { Initiative } from '@/utils/enums/application';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -11,7 +11,7 @@ vi.mock('vue-router', () => ({
 
 const testObj = {
   sub: 'foobar',
-  group: GroupName.DEVELOPER
+  groupId: 1
 };
 
 const getSpy = vi.fn();
@@ -30,10 +30,10 @@ beforeEach(() => {
 describe('yarsService', () => {
   describe('getGroups', () => {
     it('calls with given data', () => {
-      yarsService.getGroups();
+      yarsService.getGroups(Initiative.HOUSING);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('yars/groups');
+      expect(getSpy).toHaveBeenCalledWith('yars/groups', { params: { initiative: Initiative.HOUSING } });
     });
   });
 
@@ -48,7 +48,7 @@ describe('yarsService', () => {
 
   describe('deleteSubjectGroup', () => {
     it('calls with given data', () => {
-      yarsService.deleteSubjectGroup(testObj);
+      yarsService.deleteSubjectGroup(testObj.sub, testObj.groupId);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith('yars/subject/group', { data: testObj });

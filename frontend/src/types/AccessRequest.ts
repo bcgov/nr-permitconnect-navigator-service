@@ -6,6 +6,7 @@ export type AccessRequest = {
   accessRequestId?: string;
   grant?: boolean;
   groupId: number;
+  groupLabel?: string;
   status: AccessRequestStatus;
   userId?: string;
 } & IStamps;
