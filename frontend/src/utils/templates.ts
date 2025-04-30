@@ -5,7 +5,7 @@ const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e
 export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
   const baseTemplate =
     'Dear {{ contactName }},\n\n' +
-    'Here is your Permit Roadmap for {{ locationAddress }}.\n\n' +
+    'Here is your Permit Roadmap for {{ projectName }}: {{ activityId }}.\n\n' +
     // You need to apply for the following permit(s):
     (replaceConfig['{{ permitStateNew }}']?.length ? templateConfig.permitStateNew : '') +
     // Based on the information provided, you may need the following permit(s):

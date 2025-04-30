@@ -7,7 +7,7 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
 import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
 import { RouteName } from '@/utils/enums/application';
@@ -37,7 +37,7 @@ const testEnquiry: Enquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientId: '123456'
+  atsClientId: 123456
 };
 
 const testProject: HousingProject = {
@@ -78,7 +78,7 @@ const testProject: HousingProject = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientId: '654321',
+  atsClientId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,

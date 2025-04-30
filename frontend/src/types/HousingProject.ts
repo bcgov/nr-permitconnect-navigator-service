@@ -25,13 +25,11 @@ export type HousingProject = {
   locationPIDs: string;
   latitude: number;
   longitude: number;
+  streetAddress: string;
   geomarkUrl: string;
   naturalDisaster: string;
   addedToATS: boolean;
-  atsClientId: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
-  aaiUpdated: boolean;
-  astNotes: string;
   waitingOn?: string;
 } & IProject;

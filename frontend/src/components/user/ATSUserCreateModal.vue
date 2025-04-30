@@ -1,14 +1,16 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
-import { BasicResponse } from '@/utils/enums/application';
+import { useAppStore } from '@/store';
+import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Enquiry, HousingProject } from '@/types';
+import type { ATSClientResource, ElectrificationProject, Enquiry, HousingProject } from '@/types';
 import type { AddressResource } from '@/types/ATSClientResource';
 
 // Types
@@ -21,15 +23,22 @@ type ATSUser = {
 };
 
 // Props
-const { housingProjectOrEnquiry } = defineProps<{
-  housingProjectOrEnquiry: Enquiry | HousingProject;
+const { projectOrEnquiry } = defineProps<{
+  projectOrEnquiry: Enquiry | HousingProject | ElectrificationProject;
 }>();
 
 // Constants
 const ATS_REGION_NAME: string = 'Navigator';
 
+// Composables
+const toast = useToast();
+
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
+
+// Store
+const appStore = useAppStore();
+const { getInitiative } = storeToRefs(appStore);
 
 // State
 const atsClientId: Ref<string> = ref('');
@@ -38,28 +47,31 @@ const atsUser: Ref<ATSUser | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
 // Actions
-
-const toast = useToast();
-
 async function createATSClient() {
   try {
     loading.value = true;
 
+    // TODO: Remove conditional when prisma db has full mappings
+    const contact =
+      'enquiryId' in projectOrEnquiry || getInitiative.value === Initiative.HOUSING
+        ? projectOrEnquiry.contacts[0]
+        : projectOrEnquiry.activity?.activityContact?.[0]?.contact;
+
     const address: Partial<AddressResource> = {
       '@type': 'AddressResource',
-      primaryPhone: housingProjectOrEnquiry.contacts[0]?.phoneNumber ?? '',
-      email: housingProjectOrEnquiry.contacts[0]?.email ?? ''
+      primaryPhone: contact?.phoneNumber ?? '',
+      email: contact?.email ?? ''
     };
 
-    if ('streetAddress' in housingProjectOrEnquiry) address.addressLine1 = housingProjectOrEnquiry.streetAddress;
-    if ('locality' in housingProjectOrEnquiry) address.city = housingProjectOrEnquiry.streetAddress;
-    if ('province' in housingProjectOrEnquiry) address.provinceCode = housingProjectOrEnquiry.streetAddress;
+    if ('streetAddress' in projectOrEnquiry) address.addressLine1 = projectOrEnquiry.streetAddress;
+    if ('locality' in projectOrEnquiry) address.city = projectOrEnquiry.streetAddress;
+    if ('province' in projectOrEnquiry) address.provinceCode = projectOrEnquiry.streetAddress;
 
     const data = {
       '@type': 'ClientResource',
       address: address,
-      firstName: housingProjectOrEnquiry.contacts[0]?.firstName,
-      surName: housingProjectOrEnquiry?.contacts[0]?.lastName,
+      firstName: contact?.firstName,
+      surName: contact?.lastName,
       regionName: ATS_REGION_NAME,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
@@ -84,19 +96,25 @@ async function createATSClient() {
 
 onBeforeMount(() => {
   const locationAddressStr = [
-    'streetAddress' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : '',
-    'locality' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : '',
-    'province' in housingProjectOrEnquiry ? housingProjectOrEnquiry.streetAddress : ''
+    'streetAddress' in projectOrEnquiry ? projectOrEnquiry.streetAddress : '',
+    'locality' in projectOrEnquiry ? projectOrEnquiry.streetAddress : '',
+    'province' in projectOrEnquiry ? projectOrEnquiry.streetAddress : ''
   ]
     .filter((str) => str?.trim())
     .join(', ');
 
+  // TODO: Remove conditional when prisma db has full mappings
+  const contact =
+    'enquiryId' in projectOrEnquiry || getInitiative.value === Initiative.HOUSING
+      ? projectOrEnquiry.contacts[0]
+      : projectOrEnquiry.activity?.activityContact?.[0]?.contact;
+
   atsUser.value = {
-    firstName: housingProjectOrEnquiry.contacts[0]?.firstName ?? '',
-    lastName: housingProjectOrEnquiry.contacts[0]?.lastName ?? '',
-    email: housingProjectOrEnquiry.contacts[0]?.email ?? '',
+    firstName: contact?.firstName ?? '',
+    lastName: contact?.lastName ?? '',
+    email: contact?.email ?? '',
     address: locationAddressStr,
-    phone: housingProjectOrEnquiry.contacts[0]?.phoneNumber ?? ''
+    phone: contact?.phoneNumber ?? ''
   };
 });
 </script>
@@ -145,6 +163,7 @@ onBeforeMount(() => {
           header="Email"
         />
         <Column
+          v-if="getInitiative === Initiative.HOUSING"
           field="address"
           header="Location address"
         />

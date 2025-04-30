@@ -3,7 +3,7 @@ import { enquiryService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import type { AxiosResponse } from 'axios';
 
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -53,7 +53,7 @@ const testEnquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientId: '123456'
+  atsClientId: 123456
 };
 
 const testEnquiries = [testEnquiry];

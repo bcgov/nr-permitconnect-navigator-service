@@ -31,7 +31,7 @@ import {
 import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
 import { getFilenameAndExtension } from '@/utils/utils';
 

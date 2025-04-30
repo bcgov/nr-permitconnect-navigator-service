@@ -9,7 +9,7 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
-import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
@@ -138,7 +138,8 @@ watchEffect(async () => {
 
   const body = roadmapTemplate({
     '{{ contactName }}': contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
-    '{{ locationAddress }}': project?.streetAddress ?? '',
+    '{{ projectName }}': project?.projectName,
+    '{{ activityId }}': project?.activityId,
     '{{ permitStateNew }}': permitStateNew,
     '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
     '{{ permitStateApplied }}': permitStateApplied,

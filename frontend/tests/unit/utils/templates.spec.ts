@@ -3,7 +3,8 @@ import { roadmapTemplate } from '@/utils/templates';
 /**
  * Helper function for setting up the expected templated output.
  * @param contactName             Contact name
- * @param locationAddress         Location address
+ * @param projectName             Project name
+ * @param activityId              Linked activity ID
  * @param permitStateNew          Required permit(s).
  *                                 If multiple, each should be separated by a newline.
  * @param permitPossiblyNeeded    Permit(s) that may be needed.
@@ -17,7 +18,8 @@ import { roadmapTemplate } from '@/utils/templates';
  */
 function setupOutputTemplate(inputs: {
   contactName: string;
-  locationAddress: string;
+  projectName: string;
+  activityId: string;
   permitStateNew: string[];
   permitPossiblyNeeded: string[];
   permitStateApplied: string[];
@@ -29,7 +31,7 @@ function setupOutputTemplate(inputs: {
   //       with something like string.replace('You need to apply...\n\n\n','')
   return `Dear ${inputs.contactName},
 
-Here is your Permit Roadmap for ${inputs.locationAddress}.
+Here is your Permit Roadmap for ${inputs.projectName}: ${inputs.activityId}.
 
 You need to apply for the following permit(s):
 ${inputs.permitStateNew.join('\n')}
@@ -51,7 +53,8 @@ ${inputs.navigatorName}`;
 let replaceConfig: any = {}; // the part actually fed into the function we're testing
 const sampleInputs = {
   contactName: 'Contact Name',
-  locationAddress: '501 Belleville St',
+  projectName: 'My Permit Project',
+  activityId: '12345678',
   permitStateNew: ['Contaminated Sites Remediation Permit', 'Rezoning'],
   permitPossiblyNeeded: ['Rezoning'],
   permitStateApplied: ['Groundwater Licence - Wells'],
@@ -64,7 +67,8 @@ beforeEach(() => {
   testCases = Object.assign(testCases, sampleInputs);
   replaceConfig = {
     '{{ contactName }}': sampleInputs.contactName,
-    '{{ locationAddress }}': sampleInputs.locationAddress,
+    '{{ projectName }}': sampleInputs.projectName,
+    '{{ activityId }}': sampleInputs.activityId,
     '{{ permitStateNew }}': sampleInputs.permitStateNew,
     '{{ permitPossiblyNeeded }}': sampleInputs.permitPossiblyNeeded,
     '{{ permitStateApplied }}': sampleInputs.permitStateApplied,
