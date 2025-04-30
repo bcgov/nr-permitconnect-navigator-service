@@ -5,7 +5,7 @@ import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
-import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/housing';
+import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/projectCommon';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
 
 const schema = {

@@ -176,7 +176,7 @@ const routes: Array<RouteRecordRaw> = [
       //                 {
       //                   path: ':enquiryId/confirmation',
       //                   name: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
-      //                   component: () => import('@/views/external/electrification/enquiry/EnquiryConfirmationView.vue'),
+      //              component: () => import('@/views/external/electrification/enquiry/EnquiryConfirmationView.vue'),
       //                   beforeEnter: accessHandler,
       //                   props: createProps,
       //                   meta: {

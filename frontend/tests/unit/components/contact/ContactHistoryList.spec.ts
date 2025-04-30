@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({

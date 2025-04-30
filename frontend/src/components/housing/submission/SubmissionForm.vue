@@ -26,16 +26,18 @@ import { housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
-  APPLICATION_STATUS_LIST,
   CONTACT_PREFERENCE_LIST,
-  INTAKE_STATUS_LIST,
   NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_RELATIONSHIP_LIST,
+  PROJECT_RELATIONSHIP_LIST
+} from '@/utils/constants/housing';
+import {
+  APPLICATION_STATUS_LIST,
+  INTAKE_STATUS_LIST,
   QUEUE_PRIORITY,
   SUBMISSION_TYPE_LIST
-} from '@/utils/constants/housing';
+} from '@/utils/constants/projectCommon';
 import { BasicResponse, IdentityProviderKind, Regex } from '@/utils/enums/application';
-import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import {
   assignedToValidator,
@@ -858,7 +860,7 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :housing-project-or-enquiry="housingProject"
+      :project-or-enquiry="housingProject"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -878,7 +880,7 @@ onBeforeMount(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :housing-project-or-enquiry="housingProject"
+      :project-or-enquiry="housingProject"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;

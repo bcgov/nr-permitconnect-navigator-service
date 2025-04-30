@@ -1,6 +1,6 @@
 import EnquiryCard from '@/components/housing/enquiry/EnquiryCard.vue';
 import { userService } from '@/services';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -35,7 +35,7 @@ const testEnquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientId: '123456'
+  atsClientId: 123456
 };
 
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);

@@ -1,4 +1,4 @@
-import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus, SubmissionType } from '../enums/projectCommon';
+import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus, SubmissionType } from '@/utils/enums/projectCommon';
 
 export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.NEW,
@@ -22,5 +22,7 @@ export const ENQUIRY_TYPE_LIST = [
 ];
 
 export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
+
+export const QUEUE_PRIORITY = [1, 2, 3];
 
 export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];

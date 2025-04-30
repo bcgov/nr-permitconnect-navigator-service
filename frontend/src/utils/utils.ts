@@ -57,6 +57,23 @@ export function differential(source: any, comparer: any): any {
 }
 
 /**
+ * @function objectToOptions
+ * Converts an object into an array of option items that a UI Form component could consume
+ * Each item has a value and label property
+ * @template E The enum object type
+ * @param {E} enm the enum to convert to option objects
+ * @return {Array<{ value: keyof E; label: string | number }>} An array of options objects
+ */
+export function objectToOptions<E extends Record<string, string | number>>(
+  enm: E
+): { value: keyof E; label: string | number }[] {
+  return (Object.keys(enm) as Array<keyof E>).map((key) => ({
+    value: key,
+    label: enm[key]
+  })) as { value: keyof E; label: string | number }[];
+}
+
+/**
  * @function findIdpConfig
  * Get the identity provider configuration for the given kind
  * @param {IdentityProviderKind} kind The kind of identity provider
@@ -271,18 +288,20 @@ export function setDispositionHeader(filename: string) {
 
 /**
  * @function setEmptyStringsToNull
- * Converts empty string values to null values
+ * Converts empty string values to null values, recursively
  * @param  {object} data The object to change
  * @returns {object} The object with the remapped values
  */
-export function setEmptyStringsToNull(data: any) {
-  Object.keys(data).forEach((key) => {
-    const keyWithType = key as keyof typeof data;
-    const value = data[keyWithType];
-    if (typeof value === 'string' && value === '') {
-      data = { ...data, [keyWithType]: null };
-    }
-  });
+export function setEmptyStringsToNull(data: any): any {
+  if (data === '' || data === null) return null;
+
+  if (Array.isArray(data)) {
+    return data.map(setEmptyStringsToNull);
+  }
+
+  if (typeof data === 'object' && data !== null) {
+    return Object.fromEntries(Object.entries(data).map(([k, v]) => [k, setEmptyStringsToNull(v)]));
+  }
 
   return data;
 }

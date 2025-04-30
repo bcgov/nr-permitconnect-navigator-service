@@ -6,12 +6,18 @@ import { nextTick } from 'vue';
 
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import { mapService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { GroupName } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 
 import type { AxiosResponse } from 'axios';
 import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
@@ -108,7 +114,7 @@ const testSubmission: HousingProject = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientId: '654321',
+  atsClientId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,

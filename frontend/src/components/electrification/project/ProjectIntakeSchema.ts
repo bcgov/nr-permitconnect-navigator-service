@@ -1,3 +1,4 @@
+import { PROJECT_TYPE_LIST } from '@/utils/constants/electrification';
 import { ProjectType } from '@/utils/enums/electrification';
 import { IntakeFormCategory } from '@/utils/enums/housing';
 import { contactValidator } from '@/validators';
@@ -11,7 +12,7 @@ export const projectIntakeSchema = object({
   project: object({
     companyNameRegistered: stringRequiredSchema.label('Business name'),
     projectName: stringRequiredSchema.label('Project name'),
-    projectType: stringRequiredSchema.label('Project type'),
+    projectType: stringRequiredSchema.oneOf(PROJECT_TYPE_LIST).label('Project type'),
     bcHydroNumber: string().when('projectType', {
       is: (value: string) => value === ProjectType.IPP_SOLAR || value === ProjectType.IPP_WIND,
       then: (schema) => schema.required().label('BC Hydro Call for Power project number'),

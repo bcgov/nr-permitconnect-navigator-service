@@ -5,7 +5,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-const testAtsClientId = '123456';
+const testAtsClientId = 123456;
 
 const wrapperSettings = (testAtsClientIdProp = testAtsClientId) => ({
   props: {

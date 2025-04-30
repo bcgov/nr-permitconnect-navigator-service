@@ -1,14 +1,14 @@
 import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
 
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 export type Enquiry = {
   enquiryId: string;
   activityId: string;
   addedToATS: boolean;
   assignedUserId?: string;
-  atsClientId: string | null;
+  atsClientId: number | null;
   submissionType: string;
   submittedAt: string;
   submittedBy: string;

@@ -18,9 +18,9 @@ import {
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { useAuthZStore } from '@/store';
-import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
+import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { ApplicationStatus, IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 

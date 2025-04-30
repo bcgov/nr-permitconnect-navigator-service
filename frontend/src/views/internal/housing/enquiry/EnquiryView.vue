@@ -10,7 +10,7 @@ import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/
 import { enquiryService, housingProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 
 import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';

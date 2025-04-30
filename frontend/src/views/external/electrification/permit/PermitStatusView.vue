@@ -5,18 +5,18 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import StatusPill from '@/components/common/StatusPill.vue';
+import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateLong } from '@/utils/formatters';
 
 import { contactService, housingProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { User } from '@/types';
-import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 
 // Props
 const { permitId, housingProjectId } = defineProps<{

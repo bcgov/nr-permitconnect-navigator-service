@@ -2,7 +2,7 @@ import { nextTick } from 'vue';
 
 import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import { enquiryService, housingProjectService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -58,7 +58,7 @@ vi.mock(import('vue-router'), async (importOriginal) => {
   };
 });
 
-const wrapperSettings = (testEnquiryProp = testEnquiry, editableProp?: boolean, relatedAtsNumberProp?: string) => ({
+const wrapperSettings = (testEnquiryProp = testEnquiry, editableProp?: boolean, relatedAtsNumberProp?: number) => ({
   props: {
     editable: editableProp,
     enquiry: testEnquiryProp,
@@ -167,7 +167,7 @@ describe('EnquiryForm.vue', () => {
   });
 
   it('there are correct numbers of disabled components when editable prop is false', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false, 'test'));
+    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false, 123456));
     await nextTick();
 
     const elements = wrapper.findAll('.p-disabled');
@@ -185,12 +185,12 @@ describe('EnquiryForm.vue', () => {
   });
 
   it('displays correct ATS # when relatedActivityId in enquiry and relatedAtsNumber in prop', async () => {
-    const testAtsNumber = 'testRAId';
+    const testAtsNumber = 123456;
     const mountEnquiry = { ...testEnquiry, relatedActivityId: 'testRAId' };
     const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, testAtsNumber));
     await nextTick();
 
     const element = wrapper.find('a.hover-hand');
-    expect(element.text()).toBe(testAtsNumber);
+    expect(element.text()).toBe(testAtsNumber.toString());
   });
 });
