@@ -54,16 +54,25 @@ export const hasAuthorization = (resource: string, action: string) => {
 
         // Permission checking for non developers
         if (!groups.find((x) => x.name === GroupName.DEVELOPER)) {
-          const policyDetails = await Promise.all(
-            groups.map((x) => {
-              const initiative = req.currentContext?.initiative as Initiative;
+          let policyDetails;
 
-              return yarsService.getGroupPolicyDetails(x.groupId, initiative, resource, action);
-            })
-          ).then((x) => x.flat());
+          if (req.currentContext.initiative === Initiative.PCNS) {
+            const groupNames = Array.from(new Set(groups.map((x) => x.name)));
+            policyDetails = await Promise.all(
+              groupNames.map((x) => {
+                return yarsService.getPCNSGroupPolicyDetails(x, resource, action);
+              })
+            ).then((x) => x.flat());
+          } else {
+            policyDetails = await Promise.all(
+              groups.map((x) => {
+                return yarsService.getGroupPolicyDetails(x.groupId, resource, action);
+              })
+            ).then((x) => x.flat());
+          }
 
           if (!policyDetails || policyDetails.length === 0) {
-            throw new Error('Invalid policies(s)');
+            throw new Error('Invalid policies');
           }
 
           // Inject policy attributes at global level and matching users groups

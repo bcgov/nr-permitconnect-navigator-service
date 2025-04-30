@@ -82,22 +82,48 @@ const service = {
    * @function getGroupPolicyDetails
    * Gets a list of group/role/policy/resource/action matching the given parameters
    * @param {string} groupId Group ID to match on
-   * @param {Initiative} initiativeCode Initiative code to match on
    * @param {string} resourceName Resource name to match on
    * @param {string} actionName Action name to match on
    * @returns The result of running the findMany operation
    */
-  getGroupPolicyDetails: async (
-    groupId: number,
-    initiativeCode: Initiative,
-    resourceName: string,
-    actionName: string
-  ) => {
+  getGroupPolicyDetails: async (groupId: number, resourceName: string, actionName: string) => {
     try {
       const result = await prisma.group_role_policy_vw.findMany({
         where: {
           group_id: groupId,
-          initiative_code: initiativeCode,
+          resource_name: resourceName,
+          action_name: actionName
+        }
+      });
+
+      return result.map((x) => ({
+        groupId: x.group_id,
+        initiativeCode: x.initiative_code,
+        groupName: x.group_name,
+        roleName: x.role_name,
+        policyId: x.policy_id,
+        resourceName: x.resource_name,
+        actionName: x.action_name
+      }));
+    } catch (e: unknown) {
+      throw e;
+    }
+  },
+
+  /**
+   * @function getPCNSGroupPolicyDetails
+   * Gets a list of group/role/policy/resource/action matching the given parameters for the PCNS initiative
+   * @param {string} groupName Group name to match on
+   * @param {string} resourceName Resource name to match on
+   * @param {string} actionName Action name to match on
+   * @returns The result of running the findMany operation
+   */
+  getPCNSGroupPolicyDetails: async (groupName: string, resourceName: string, actionName: string) => {
+    try {
+      const result = await prisma.group_role_policy_vw.findMany({
+        where: {
+          initiative_code: Initiative.PCNS,
+          group_name: groupName,
           resource_name: resourceName,
           action_name: actionName
         }
