@@ -43,7 +43,8 @@ const controller = {
       submittedAt: new Date().toISOString(),
       submissionType: SubmissionType.GUIDANCE,
       intakeStatus: IntakeStatus.SUBMITTED,
-      applicationStatus: ApplicationStatus.NEW
+      applicationStatus: ApplicationStatus.NEW,
+      aaiUpdated: false
     };
 
     return electrificationProjectData;

@@ -1,6 +1,9 @@
-export enum ProjectType {
-  IPP_WIND = 'IPP Wind',
-  IPP_SOLAR = 'IPP Solar',
-  NCTL = 'North Coast Transmission Line (NCTL)',
-  OTHER = 'Other'
-}
+import Prisma from '@prisma/client';
+
+export type ProjectCategoryT = Prisma.electrification_project_category;
+
+export type ProjectTypeT = Prisma.electrification_project_type;
+
+export const ProjectCategory = Prisma.electrification_project_category;
+
+export const ProjectType = Prisma.electrification_project_type;

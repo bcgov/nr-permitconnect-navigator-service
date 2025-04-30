@@ -532,25 +532,33 @@ model housing_project {
 }
 
 model electrification_project {
-  electrificationProjectId String    @id @map("electrification_project_id") @db.Uuid
-  activityId               String    @map("activity_id")
-  assignedUserId           String?   @map("assigned_user_id") @db.Uuid
-  submittedAt              DateTime  @map("submitted_at") @db.Timestamptz(6)
-  intakeStatus             String?   @map("intake_status")
-  applicationStatus        String?   @map("application_status")
-  queuePriority            Int?      @map("queue_priority")
-  projectName              String?   @map("project_name")
-  projectDescription       String?   @map("project_description")
-  companyNameRegistered    String?   @map("company_name_registered")
-  projectType              String?   @map("project_type")
-  bcHydroNumber            String?   @map("bc_hydro_number")
-  submissionType           String?   @map("submission_type")
-  createdBy                String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                String?   @map("updated_by")
-  updatedAt                DateTime? @map("updated_at") @db.Timestamptz(6)
-  activity                 activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                     user?     @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
+  electrificationProjectId  String                            @id @map("electrification_project_id") @db.Uuid
+  activityId                String                            @map("activity_id")
+  assignedUserId            String?                           @map("assigned_user_id") @db.Uuid
+  submittedAt               DateTime                          @map("submitted_at") @db.Timestamptz(6)
+  intakeStatus              String?                           @map("intake_status")
+  applicationStatus         String?                           @map("application_status")
+  queuePriority             Int?                              @map("queue_priority")
+  projectName               String?                           @map("project_name")
+  projectDescription        String?                           @map("project_description")
+  companyNameRegistered     String?                           @map("company_name_registered")
+  bcHydroNumber             String?                           @map("bc_hydro_number")
+  submissionType            String?                           @map("submission_type")
+  projectType               electrification_project_type?     @map("project_type")
+  projectCategory           electrification_project_category? @map("project_category")
+  hasEpa                    String?                           @map("has_epa")
+  bcEnvironmentAssessNeeded String?                           @map("bc_environment_assess_needed")
+  megawatts                 Decimal?                          @db.Decimal
+  locationDescription       String?                           @map("location_description")
+  aaiUpdated                Boolean                           @default(false) @map("aai_updated")
+  atsClientId               Int?                              @map("ats_client_id")
+  astNotes                  String?                           @map("ast_notes")
+  createdBy                 String?                           @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt                 DateTime?                         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                 String?                           @map("updated_by")
+  updatedAt                 DateTime?                         @map("updated_at") @db.Timestamptz(6)
+  activity                  activity                          @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
+  user                      user?                             @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
 
   @@schema("public")
 }
@@ -594,6 +602,26 @@ enum enquiry_submitted_method_enum {
   Email
   Phone
   PCNS
+
+  @@schema("public")
+}
+
+enum electrification_project_category {
+  EXISTING
+  IPP
+  NEW_CALL
+  NEW_TRANSMISSION
+  REMOTE_RENEWABLE
+  SUSTAINMENT
+
+  @@schema("public")
+}
+
+enum electrification_project_type {
+  IPP_SOLAR
+  IPP_WIND
+  NCTL
+  OTHER
 
   @@schema("public")
 }
