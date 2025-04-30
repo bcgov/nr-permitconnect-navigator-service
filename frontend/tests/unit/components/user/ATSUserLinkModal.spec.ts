@@ -5,8 +5,8 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
-import { ApplicationStatus } from '@/utils/enums/housing';
 import { GroupName } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 
 import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
 
@@ -100,7 +100,7 @@ const testSubmission: HousingProject = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientId: '654321',
+  atsClientId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
@@ -117,7 +117,7 @@ const testSubmission: HousingProject = {
 
 const wrapperSettings = (testSubmissionProp = testSubmission) => ({
   props: {
-    housingProjectOrEnquiry: testSubmissionProp
+    projectOrEnquiry: testSubmissionProp
   },
   global: {
     plugins: [

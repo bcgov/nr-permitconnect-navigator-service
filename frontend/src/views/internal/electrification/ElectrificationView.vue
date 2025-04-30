@@ -6,7 +6,8 @@ import { electrificationProjectService, enquiryService, noteService, permitServi
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
-import { BringForwardType, IntakeStatus } from '@/utils/enums/housing';
+import { BringForwardType } from '@/utils/enums/housing';
+import { IntakeStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -40,13 +41,7 @@ onBeforeMount(async () => {
       electrificationProjectService.getStatistics(),
       noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
-  ).map((r) => {
-    // TODO: temp initiative filter... remove when search param added to api
-    if (r.data.length && r.data[0].noteId) {
-      return r.data.filter((bf: BringForward) => bf.electrificationProjectId);
-    }
-    return r.data;
-  });
+  ).map((r) => r.data);
 
   loading.value = false;
 });

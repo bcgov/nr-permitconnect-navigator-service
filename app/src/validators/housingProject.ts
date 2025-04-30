@@ -10,8 +10,8 @@ import { housing } from './housing';
 import { permits } from './permits';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { HOUSING_PROJECT_TYPE_LIST, NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { BasicResponse } from '../utils/enums/application';
 import { IntakeStatus } from '../utils/enums/projectCommon';
 
@@ -73,7 +73,7 @@ const schema = {
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),
-      submissionType: Joi.array().items(...HOUSING_PROJECT_TYPE_LIST)
+      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
   updateIsDeletedFlag: {
@@ -92,7 +92,7 @@ const schema = {
       queuePriority: Joi.number().required().integer().min(0).max(3),
       submissionType: Joi.string()
         .required()
-        .valid(...HOUSING_PROJECT_TYPE_LIST),
+        .valid(...SUBMISSION_TYPE_LIST),
       submittedAt: Joi.string().required(),
       relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),

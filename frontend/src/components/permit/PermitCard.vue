@@ -8,7 +8,7 @@ import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
-import { PermitAuthorizationStatus } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';

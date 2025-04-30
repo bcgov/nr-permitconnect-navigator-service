@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Dialog } from '@/lib/primevue';
-import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/housing';
+import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
 
 const visible = defineModel<boolean>('visible');
 </script>

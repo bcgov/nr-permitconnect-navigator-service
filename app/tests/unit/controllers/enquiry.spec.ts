@@ -3,8 +3,7 @@ import enquiryController from '../../../src/controllers/enquiry';
 import { Request, Response } from 'express';
 import { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
 import { Initiative } from '../../../src/utils/enums/application';
-import { EnquirySubmittedMethod } from '../../../src/utils/enums/housing';
-import { ApplicationStatus } from '../../../src/utils/enums/projectCommon';
+import { EnquirySubmittedMethod, ApplicationStatus } from '../../../src/utils/enums/projectCommon';
 
 jest.mock('config');
 

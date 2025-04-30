@@ -48,13 +48,9 @@ import { useConfigStore, useContactStore, useProjectStore, usePermitStore } from
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import {
-  IntakeFormCategory,
-  PermitNeeded,
-  PermitStatus,
-  ProjectApplicant,
-  SubmissionType
-} from '@/utils/enums/housing';
+import { IntakeFormCategory, ProjectApplicant } from '@/utils/enums/housing';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { SubmissionType } from '@/utils/enums/projectCommon';
 import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 

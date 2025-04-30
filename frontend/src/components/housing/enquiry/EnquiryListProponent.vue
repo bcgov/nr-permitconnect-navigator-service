@@ -7,7 +7,7 @@ import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
-import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
+import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';

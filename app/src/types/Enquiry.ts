@@ -1,6 +1,6 @@
 import { IStamps } from '../interfaces/IStamps';
 import { Contact } from './Contact';
-import { EnquirySubmittedMethod } from '../utils/enums/housing';
+import { EnquirySubmittedMethod } from '../utils/enums/projectCommon';
 
 import type { User } from './User';
 

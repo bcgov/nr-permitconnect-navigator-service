@@ -5,15 +5,12 @@
 import {
   BringForwardType,
   ContactPreference,
-  EnquirySubmittedMethod,
   NoteType,
   NumResidentialUnits,
   ProjectApplicant,
   ProjectLocation,
   ProjectRelationship
 } from '../enums/housing';
-
-import { SubmissionType } from '../enums/projectCommon';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,
@@ -34,14 +31,6 @@ export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.EMAIL,
   ContactPreference.EITHER
 ];
-
-export const ENQUIRY_SUBMITTED_METHOD = [
-  EnquirySubmittedMethod.EMAIL,
-  EnquirySubmittedMethod.PCNS,
-  EnquirySubmittedMethod.PHONE
-];
-
-export const HOUSING_PROJECT_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 

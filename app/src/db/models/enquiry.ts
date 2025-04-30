@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 
 import contact from './contact';
 import user from './user';
-import { EnquirySubmittedMethod } from '../../utils/enums/housing';
+import { EnquirySubmittedMethod } from '../../utils/enums/projectCommon';
 
 import type { Enquiry } from '../../types';
 

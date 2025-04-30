@@ -9,15 +9,15 @@ export enum ApplicationStatus {
   COMPLETED = 'Completed'
 }
 
+export enum DraftCode {
+  ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
+  HOUSING_PROJECT = 'HOUSING_PROJECT'
+}
+
 export enum EnquirySubmittedMethod {
   PHONE = 'Phone',
   EMAIL = 'Email',
   PCNS = 'PCNS'
-}
-
-export enum DraftCode {
-  ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
-  HOUSING_PROJECT = 'HOUSING_PROJECT'
 }
 
 export enum IntakeStatus {
