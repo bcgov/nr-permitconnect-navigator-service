@@ -11,4 +11,8 @@ export interface IProject extends Partial<IStamps> {
   projectDescription?: string;
   submissionType?: string;
   companyNameRegistered?: string;
+  aaiUpdated: boolean;
+  astNotes?: string;
+  queuePriority?: number;
+  atsClientId?: number;
 }
