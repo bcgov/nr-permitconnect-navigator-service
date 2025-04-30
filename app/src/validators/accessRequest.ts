@@ -25,7 +25,8 @@ const schema = {
           then: Joi.number().required(),
           otherwise: Joi.number().allow(null)
         }),
-        status: Joi.string().max(255).allow(null)
+        status: Joi.string().max(255).allow(null),
+        update: Joi.boolean().allow(null)
       })
     })
   },
