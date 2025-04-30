@@ -1,6 +1,15 @@
+export enum ProjectCategory {
+  EXISTING = 'EXISTING',
+  IPP = 'IPP',
+  NEW_CALL = 'NEW_CALL',
+  NEW_TRANSMISSION = 'NEW_TRANSMISSION',
+  REMOTE_RENEWABLE = 'REMOTE_RENEWABLE',
+  SUSTAINMENT = 'SUSTAINMENT'
+}
+
 export enum ProjectType {
-  IPP_WIND = 'IPP Wind',
-  IPP_SOLAR = 'IPP Solar',
-  NCTL = 'North Coast Transmission Line (NCTL)',
-  OTHER = 'Other'
+  IPP_SOLAR = 'IPP_SOLAR',
+  IPP_WIND = 'IPP_WIND',
+  NCTL = 'NCTL',
+  OTHER = 'OTHER'
 }

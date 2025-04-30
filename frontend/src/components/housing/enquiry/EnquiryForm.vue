@@ -23,15 +23,14 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, housingProjectService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
-import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/housing';
+import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
-  CONTACT_PREFERENCE_LIST,
   ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST,
-  INTAKE_STATUS_LIST,
-  PROJECT_RELATIONSHIP_LIST
-} from '@/utils/constants/housing';
+  INTAKE_STATUS_LIST
+} from '@/utils/constants/projectCommon';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
@@ -50,7 +49,7 @@ const {
   editable = true,
   enquiry
 } = defineProps<{
-  relatedAtsNumber?: string | null;
+  relatedAtsNumber?: number | null;
   editable?: boolean;
   enquiry: any;
 }>();
@@ -490,7 +489,7 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :housing-project-or-enquiry="enquiry"
+      :project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -511,7 +510,7 @@ onBeforeMount(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :housing-project-or-enquiry="enquiry"
+      :project-or-enquiry="enquiry"
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;

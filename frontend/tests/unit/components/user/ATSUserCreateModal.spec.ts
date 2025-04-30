@@ -5,16 +5,17 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/housing';
 import { GroupName } from '@/utils/enums/application';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import type {
-  Enquiry,
-  HousingProject,
-  IDIRAttribute,
   BasicBCeIDAttribute,
   BusinessBCeIDAttribute,
-  Group
+  ElectrificationProject,
+  Enquiry,
+  Group,
+  HousingProject,
+  IDIRAttribute
 } from '@/types';
 
 const currentDate = new Date().toISOString();
@@ -107,7 +108,7 @@ const testSubmission: HousingProject = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
-  atsClientId: '654321',
+  atsClientId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
@@ -128,7 +129,7 @@ const testEnquiryProp: Enquiry = {
   activityId: '85C6700B',
   addedToATS: true,
   assignedUserId: 'someId',
-  atsClientId: '654321',
+  atsClientId: 654321,
   submissionType: 'General enquiry',
   submittedAt: '2025-02-04T18:38:39.497Z',
   submittedBy: 'testUser',
@@ -152,9 +153,9 @@ const testEnquiryProp: Enquiry = {
   ]
 };
 
-const wrapperSettings = (testSubmissionProp: Enquiry | HousingProject = testSubmission) => ({
+const wrapperSettings = (testSubmissionProp: Enquiry | HousingProject | ElectrificationProject = testSubmission) => ({
   props: {
-    housingProjectOrEnquiry: testSubmissionProp
+    projectOrEnquiry: testSubmissionProp
   },
   global: {
     plugins: [

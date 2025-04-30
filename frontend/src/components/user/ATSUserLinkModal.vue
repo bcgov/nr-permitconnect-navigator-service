@@ -1,20 +1,30 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
+import { useAppStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, Enquiry, HousingProject } from '@/types';
+import type { ATSClientResource, ElectrificationProject, Enquiry, HousingProject } from '@/types';
 
 // Props
-const { housingProjectOrEnquiry } = defineProps<{
-  housingProjectOrEnquiry: Enquiry | HousingProject;
+const { projectOrEnquiry } = defineProps<{
+  projectOrEnquiry: Enquiry | HousingProject | ElectrificationProject;
 }>();
+
+// Composables
+const toast = useToast();
 
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
+
+// Store
+const appStore = useAppStore();
+const { getInitiative } = storeToRefs(appStore);
 
 // State
 const atsClientId: Ref<string> = ref('');
@@ -28,8 +38,6 @@ const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
-const toast = useToast();
-
 async function searchATSUsers() {
   selectedUser.value = undefined;
   try {
@@ -57,9 +65,20 @@ async function searchATSUsers() {
 }
 
 onBeforeMount(() => {
-  if (housingProjectOrEnquiry.contacts[0]?.firstName && housingProjectOrEnquiry.contacts[0]?.lastName) {
-    firstName.value = housingProjectOrEnquiry.contacts[0]?.firstName;
-    lastName.value = housingProjectOrEnquiry.contacts[0]?.lastName;
+  // TODO: Remove conditional when prisma db has full mappings
+  if ('enquiryId' in projectOrEnquiry || getInitiative.value === Initiative.HOUSING) {
+    if (projectOrEnquiry.contacts[0]?.firstName && projectOrEnquiry.contacts[0]?.lastName) {
+      firstName.value = projectOrEnquiry.contacts[0]?.firstName;
+      lastName.value = projectOrEnquiry.contacts[0]?.lastName;
+    }
+  } else {
+    if (
+      projectOrEnquiry.activity?.activityContact?.[0]?.contact?.firstName &&
+      projectOrEnquiry.activity?.activityContact?.[0]?.contact?.lastName
+    ) {
+      firstName.value = projectOrEnquiry.activity?.activityContact?.[0]?.contact?.firstName;
+      lastName.value = projectOrEnquiry.activity?.activityContact?.[0]?.contact?.lastName;
+    }
   }
 });
 </script>
@@ -165,6 +184,7 @@ onBeforeMount(() => {
         sortable
       />
       <Column
+        v-if="getInitiative === Initiative.HOUSING"
         field="formattedAddress"
         header="Location address"
         sortable

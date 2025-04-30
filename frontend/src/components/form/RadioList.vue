@@ -4,6 +4,12 @@ import { onBeforeMount, watch } from 'vue';
 
 import { RadioButton } from '@/lib/primevue';
 
+// Interfaces
+interface RadioOptionObject {
+  label: string | number;
+  value: string | number;
+}
+
 // Props
 const {
   helpText = '',
@@ -14,7 +20,7 @@ const {
   helpText?: string;
   name: string;
   disabled?: boolean;
-  options: Array<string> | undefined;
+  options: Array<RadioOptionObject | string> | undefined;
 }>();
 
 // Emits
@@ -24,6 +30,18 @@ const emit = defineEmits(['onChange', 'onClick']);
 const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 // Actions
+function isRadioListOptionObject(option: RadioOptionObject | string): option is RadioOptionObject {
+  return typeof option === 'object' && option !== null && 'label' in option && 'value' in option;
+}
+
+function getRadioListOptionLabel(option: RadioOptionObject | string): string {
+  return isRadioListOptionObject(option) ? option.label.toString() : option;
+}
+
+function getRadioListOptionValue(option: RadioOptionObject | string): string {
+  return isRadioListOptionObject(option) ? option.value.toString() : option;
+}
+
 watch(value, () => {
   emit('onChange', value.value);
 });
@@ -38,7 +56,7 @@ onBeforeMount(() => {
     <div class="flex flex-col gap-4">
       <div
         v-for="option in options"
-        :key="option"
+        :key="getRadioListOptionValue(option)"
         class="flex flex-col items-start"
       >
         <div>
@@ -46,20 +64,20 @@ onBeforeMount(() => {
             v-model="value"
             :aria-describedby="`${name}-help`"
             :aria-labelledby="`${name}-option-${option}`"
-            :input-id="option"
+            :input-id="getRadioListOptionValue(option)"
             :name="name"
-            :value="option"
+            :value="getRadioListOptionValue(option)"
             :class="{ 'p-invalid': errorMessage }"
             :disabled="disabled"
             @blur="handleBlur"
             @click="emit('onClick', value)"
           />
           <span
-            :id="`${name}-option-${option}`"
-            :for="option"
+            :id="`${name}-option-${getRadioListOptionValue(option)}`"
+            :for="getRadioListOptionValue(option)"
             class="ml-2 mb-0"
           >
-            {{ option }}
+            {{ getRadioListOptionLabel(option) }}
           </span>
         </div>
       </div>

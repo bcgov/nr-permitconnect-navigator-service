@@ -14,7 +14,7 @@ import { projectIntakeSchema } from '@/components/electrification/project/Projec
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useConfigStore, useContactStore, useProjectStore } from '@/store';
-import { PROJECT_TYPE_LIST } from '@/utils/constants/electrification';
+import { PROJECT_TYPE_OPTIONS } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { ProjectType } from '@/utils/enums/electrification';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
@@ -428,7 +428,7 @@ onBeforeMount(async () => {
         <RadioList
           name="project.projectType"
           :disabled="!editable"
-          :options="PROJECT_TYPE_LIST"
+          :options="PROJECT_TYPE_OPTIONS"
           @on-change="
             (e: string) => {
               if (e === ProjectType.NCTL || e === ProjectType.OTHER) setFieldValue('bcHydroNumber', null);

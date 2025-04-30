@@ -17,9 +17,9 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
-import { APPLICATION_STATUS_LIST } from '@/utils/constants/housing';
+import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Initiative } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/housing';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 

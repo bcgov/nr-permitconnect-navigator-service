@@ -2,7 +2,7 @@ import type { IStamps } from '@/interfaces';
 import type { Activity } from '../types/Activity';
 import type { Contact } from '../types/Contact';
 import type { User } from '../types/User';
-import type { ApplicationStatus } from '@/utils/enums/housing';
+import type { ApplicationStatus } from '@/utils/enums/projectCommon';
 
 export type IProject = {
   projectId: string;
@@ -19,8 +19,9 @@ export type IProject = {
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
-
-  streetAddress: string;
+  astNotes: string;
+  atsClientId: number | null;
+  aaiUpdated: boolean;
 
   // Joined
   activity?: Activity;
