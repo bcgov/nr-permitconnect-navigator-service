@@ -169,6 +169,13 @@ watchEffect(async () => {
         sortable
       />
     </DataTable>
+    <label
+      id="assignRole-label"
+      for="assignRole"
+      class="font-bold"
+    >
+      Assign role
+    </label>
     <Select
       v-model="selectedGroup"
       class="w-full"

@@ -41,9 +41,13 @@ const controller = {
         res.status(404).json({ message: 'User not found' });
       } else {
         userGroups = await yarsService.getSubjectGroups(userResponse.sub);
+        const userInitiativeGroups = userGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
 
         if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
           res.status(403).json({ message: 'Cannot modify requested group' });
+        }
+        if (!accessRequest.update && userInitiativeGroups.length) {
+          return res.status(409).json({ message: 'User already exists' });
         }
         if (
           accessRequest.grant &&
@@ -127,10 +131,10 @@ const controller = {
         const userResponse = await userService.readUser(accessRequest.userId);
 
         if (userResponse) {
-          const userGroups: Array<Group> = await yarsService.getSubjectGroups(userResponse.sub);
-
           const groups = await yarsService.getGroups(req.currentContext.initiative as Initiative);
           const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
+
+          const userGroups: Array<Group> = await yarsService.getSubjectGroups(userResponse.sub);
 
           // If request is approved then grant or remove access
           if (req.body.approve) {
