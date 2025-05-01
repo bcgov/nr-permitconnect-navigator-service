@@ -274,8 +274,8 @@ function updateQueryParams() {
       style="min-width: 200px"
     />
     <Column
-      field="intakeStatus"
-      header="Status"
+      field="enquiryStatus"
+      header="Enquiry state"
       :sortable="true"
       style="min-width: 150px"
     />
