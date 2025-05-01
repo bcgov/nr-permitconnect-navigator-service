@@ -197,6 +197,11 @@
         "aaiUpdateLabel": "AAI Update"
       }
     },
+    "electrification": {
+      "electrificationView": {
+        "header": "Electrification"
+      }
+    },
     "housing": {
       "contactPageView": {
         "historyTab": "History",
@@ -204,6 +209,12 @@
         "contactPhoneLabel": "Phone",
         "contactPreferredLabel": "Preferred contact method",
         "contactRelationshipLabel": "Relationship to project"
+      },
+      "housingView": {
+        "header": "Housing"
+      },
+      "projectView": {
+        "seePropViewButtonLabel": "See Proponent's View"
       }
     },
     "user": {
@@ -212,6 +223,7 @@
         "confirm": "Confirm",
         "createUser": "Create new user",
         "errorIdpCfg": "Failed to obtain IDP config",
+        "header": "User Management",
         "requestError": "Failed to request access",
         "requestSuccess": "Access requested",
         "revokeAdmin1": "The user will now lose all access to the system.",
