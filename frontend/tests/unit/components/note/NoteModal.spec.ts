@@ -7,7 +7,7 @@ import { shallowMount } from '@vue/test-utils';
 import NoteModal from '@/components/note/NoteModal.vue';
 
 import { StorageKey } from '@/utils/enums/application';
-import { NoteType } from '@/utils/enums/housing';
+import { NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note } from '@/types';
 

@@ -6,8 +6,7 @@ import { enquiryService, housingProjectService, noteService, permitService } fro
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
-import { BringForwardType } from '@/utils/enums/housing';
-import { IntakeStatus } from '@/utils/enums/projectCommon';
+import { BringForwardType, IntakeStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';

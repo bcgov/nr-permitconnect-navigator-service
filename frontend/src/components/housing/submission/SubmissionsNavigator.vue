@@ -22,7 +22,7 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
-import { NoteType } from '@/utils/enums/housing';
+import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 

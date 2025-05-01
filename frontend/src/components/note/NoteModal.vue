@@ -6,8 +6,8 @@ import { mixed, object, string } from 'yup';
 import { DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
-import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/housing';
-import { BringForwardType, NoteType } from '@/utils/enums/housing';
+import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
