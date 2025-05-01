@@ -110,7 +110,7 @@ const controller = {
         });
       }
 
-      res.status(200).json(response);
+      res.status(admin ? 200 : 201).json(response);
     } catch (e: unknown) {
       next(e);
     }
