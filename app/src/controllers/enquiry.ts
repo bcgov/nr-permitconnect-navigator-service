@@ -3,8 +3,7 @@ import { NIL, v4 as uuidv4 } from 'uuid';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityService, contactService, enquiryService, noteService, userService } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { NoteType } from '../utils/enums/housing';
-import { ApplicationStatus, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/projectCommon';
 import { getCurrentSubject, getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';

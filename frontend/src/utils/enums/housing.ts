@@ -2,11 +2,6 @@
  * Housing initiative enums
  */
 
-export enum BringForwardType {
-  UNRESOLVED = 'Unresolved',
-  RESOLVED = 'Resolved'
-}
-
 export enum ContactPreference {
   PHONE_CALL = 'Phone call',
   EMAIL = 'Email',
@@ -21,13 +16,6 @@ export enum IntakeFormCategory {
   PERMITS = 'permits',
   APPLIED_PERMITS = 'appliedPermits',
   INVESTIGATE_PERMIS = 'investigatePermits'
-}
-
-export enum NoteType {
-  GENERAL = 'General',
-  BRING_FORWARD = 'Bring forward',
-  ENQUIRY = 'Enquiry',
-  ROADMAP = 'Roadmap'
 }
 
 export enum NumResidentialUnits {
