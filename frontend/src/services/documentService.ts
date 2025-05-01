@@ -5,6 +5,7 @@ import { appAxios } from './interceptors';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 const PATH = '/document';
+const PROJECT_ID = 'Project ID';
 
 export default {
   /**
@@ -23,11 +24,14 @@ export default {
       }
       const newDocument = new File([document], newDocumentName, { type: document.type });
 
+      // The tagset is used to filter the objects in the bucket
+      const tagset: Array<{ key: string; value: string }> = [{ key: PROJECT_ID, value: activityId }];
+
       // Create COMS object
       comsResponse = await comsService.createObject(
         newDocument,
         {},
-        { bucketId },
+        { bucketId, tagset },
         { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
       );
 

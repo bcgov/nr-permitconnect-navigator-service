@@ -37,6 +37,7 @@ const fileSpy = vi.spyOn(global, 'File');
 // createDocument test data
 const testActivityId = 'testActivityId';
 const testBucketId = 'testBucketId';
+const testTagset = [{ key: 'Project ID', value: testActivityId }];
 const FILE_NAME = 'fileName';
 const testFileData = {
   id: 'fileId',
@@ -79,7 +80,12 @@ describe('noteService test', () => {
       // Testing
       await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
       expect(comsCreateSpy).toHaveBeenCalledTimes(1);
-      expect(comsCreateSpy).toHaveBeenCalledWith(testFile1, {}, { bucketId: testBucketId }, { timeout: 0 });
+      expect(comsCreateSpy).toHaveBeenCalledWith(
+        testFile1,
+        {},
+        { bucketId: testBucketId, tagset: testTagset },
+        { timeout: 0 }
+      );
     });
 
     it('logs uploaded document to DB with right arguments', async () => {
