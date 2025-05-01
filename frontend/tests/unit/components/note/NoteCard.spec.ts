@@ -7,7 +7,7 @@ import { mount } from '@vue/test-utils';
 import NoteCard from '@/components/note/NoteCard.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
-import { BringForwardType, NoteType } from '@/utils/enums/housing';
+import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { AxiosResponse } from 'axios';

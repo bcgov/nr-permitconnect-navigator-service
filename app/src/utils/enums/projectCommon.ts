@@ -9,6 +9,11 @@ export enum ApplicationStatus {
   COMPLETED = 'Completed'
 }
 
+export enum BringForwardType {
+  UNRESOLVED = 'Unresolved',
+  RESOLVED = 'Resolved'
+}
+
 export enum EnquirySubmittedMethod {
   PHONE = 'Phone',
   EMAIL = 'Email',
@@ -25,6 +30,13 @@ export enum IntakeStatus {
   ASSIGNED = 'Assigned',
   COMPLETED = 'Completed',
   DRAFT = 'Draft'
+}
+
+export enum NoteType {
+  GENERAL = 'General',
+  BRING_FORWARD = 'Bring forward',
+  ENQUIRY = 'Enquiry',
+  ROADMAP = 'Roadmap'
 }
 
 export enum SubmissionType {

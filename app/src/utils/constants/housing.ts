@@ -3,9 +3,7 @@
  */
 
 import {
-  BringForwardType,
   ContactPreference,
-  NoteType,
   NumResidentialUnits,
   ProjectApplicant,
   ProjectLocation,
@@ -24,15 +22,11 @@ export const ADDRESS_CODER_QUERY_PARAMS = {
   precisionPoints: 100
 };
 
-export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
-
 export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,
   ContactPreference.EMAIL,
   ContactPreference.EITHER
 ];
-
-export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 
 export const NUM_RESIDENTIAL_UNITS_LIST = [
   NumResidentialUnits.ONE_TO_NINE,
@@ -59,5 +53,3 @@ export const PROJECT_RELATIONSHIP_LIST = [
 ];
 
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
-
-export const QUEUE_PRIORITY = [1, 2, 3];
