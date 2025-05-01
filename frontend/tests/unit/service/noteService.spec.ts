@@ -4,7 +4,7 @@ import { noteService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { BringForwardType } from '@/utils/enums/housing';
+import { BringForwardType } from '@/utils/enums/projectCommon';
 
 // Constants
 const PATH = 'note';

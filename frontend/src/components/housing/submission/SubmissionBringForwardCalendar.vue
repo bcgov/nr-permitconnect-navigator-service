@@ -5,7 +5,7 @@ import { ref, watchEffect } from 'vue';
 import { Column, DataTable, ToggleSwitch } from '@/lib/primevue';
 import { useAuthNStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { NoteType } from '@/utils/enums/housing';
+import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';

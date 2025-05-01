@@ -9,6 +9,11 @@ export enum ApplicationStatus {
   COMPLETED = 'Completed'
 }
 
+export enum BringForwardType {
+  UNRESOLVED = 'Unresolved',
+  RESOLVED = 'Resolved'
+}
+
 export enum DraftCode {
   ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
   HOUSING_PROJECT = 'HOUSING_PROJECT'
@@ -25,6 +30,13 @@ export enum IntakeStatus {
   ASSIGNED = 'Assigned',
   COMPLETED = 'Completed',
   DRAFT = 'Draft'
+}
+
+export enum NoteType {
+  GENERAL = 'General',
+  BRING_FORWARD = 'Bring forward',
+  ENQUIRY = 'Enquiry',
+  ROADMAP = 'Roadmap'
 }
 
 export enum SubmissionType {

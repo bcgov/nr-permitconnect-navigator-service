@@ -2,9 +2,7 @@
  * Housing initiative constants
  */
 import {
-  BringForwardType,
   ContactPreference,
-  NoteType,
   NumResidentialUnits,
   ProjectApplicant,
   ProjectLocation,
@@ -23,8 +21,6 @@ export const ADDRESS_CODER_QUERY_PARAMS = {
   precisionPoints: 100
 };
 
-export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
-
 export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,
   ContactPreference.EMAIL,
@@ -35,8 +31,6 @@ export const HOUSING_ASSISTANCE = {
   email: 'Navigator.Service@gov.bc.ca',
   subject: 'Assistance with Permit Connect Navigator Service'
 };
-
-export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 
 export const NUM_RESIDENTIAL_UNITS_LIST = [
   NumResidentialUnits.ONE_TO_NINE,
