@@ -2799,6 +2799,7 @@ components:
         - electrificationProjectId
         - activityId
         - submittedAt
+        - aaiUpdated
       properties:
         electrificationProjectId:
           type: string
@@ -2854,6 +2855,34 @@ components:
           type: string
           description: The type of submission
           example: Assistance
+        hasEpa:
+          type: string
+          description: Indicates if an EPA document is present
+          example: 'yes'
+        bcEnvironmentAssessNeeded:
+          type: string
+          description: Indicates if BC Environment Assessment is needed
+          example: 'no'
+        megawatts:
+          type: number
+          description: Project capacity in megawatts
+          example: 5.5
+        locationDescription:
+          type: string
+          description: Description of the project location
+          example: Near the main substation
+        aaiUpdated:
+          type: boolean
+          description: Flag indicating if AAI was updated
+          example: false
+        atsClientId:
+          type: integer
+          description: ATS client identifier
+          example: 789078
+        astNotes:
+          type: string
+          description: AST notes
+          example: Initial notes
     DB-Enquiry:
       title: DB Enquiry
       type: object
