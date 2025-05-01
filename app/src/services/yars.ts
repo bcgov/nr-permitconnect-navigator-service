@@ -84,15 +84,17 @@ const service = {
    * @param {string} groupId Group ID to match on
    * @param {string} resourceName Resource name to match on
    * @param {string} actionName Action name to match on
+   * @param {Initiative} initiative Optional initiative code to match on
    * @returns The result of running the findMany operation
    */
-  getGroupPolicyDetails: async (groupId: number, resourceName: string, actionName: string) => {
+  getGroupPolicyDetails: async (groupId: number, resourceName: string, actionName: string, initiative?: Initiative) => {
     try {
       const result = await prisma.group_role_policy_vw.findMany({
         where: {
           group_id: groupId,
           resource_name: resourceName,
-          action_name: actionName
+          action_name: actionName,
+          initiative_code: initiative
         }
       });
 

@@ -66,7 +66,12 @@ export const hasAuthorization = (resource: string, action: string) => {
           } else {
             policyDetails = await Promise.all(
               groups.map((x) => {
-                return yarsService.getGroupPolicyDetails(x.groupId, resource, action);
+                return yarsService.getGroupPolicyDetails(
+                  x.groupId,
+                  resource,
+                  action,
+                  req.currentContext?.initiative as Initiative
+                );
               })
             ).then((x) => x.flat());
           }

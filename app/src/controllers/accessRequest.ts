@@ -1,5 +1,5 @@
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
-import { userService, accessRequestService, yarsService } from '../services';
+import { userService, accessRequestService, yarsService, initiativeService } from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { AccessRequest, Group, User } from '../types';
@@ -15,33 +15,36 @@ const controller = {
       const { accessRequest, user } = req.body;
 
       // Check if the requestee is an admin
-      const admin =
+      const initiative = await initiativeService.getInitiative(req.currentContext.initiative as Initiative);
+      const isAdmin =
         req.currentAuthorization?.groups.some(
-          (group: Group) => group.name === GroupName.DEVELOPER || group.name === GroupName.ADMIN
+          (group: Group) =>
+            group.name === GroupName.DEVELOPER ||
+            (group.name === GroupName.ADMIN && group.initiativeId === initiative.initiativeId)
         ) ?? false;
-      const existingUser = !!user.userId;
 
       // Groups the current user can modify
       const groups = await yarsService.getGroups(req.currentContext.initiative as Initiative);
       const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
       const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
-      if (admin) {
+      if (isAdmin) {
         userAllowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
       }
       const modifiableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
 
       let userResponse;
+      const existingUser = !!user.userId;
 
       if (!user.userId) userResponse = await userService.createUser(user);
       else userResponse = await userService.readUser(user.userId);
 
-      let userGroups: Array<Group> = [];
+      let accessUserGroups: Array<Group> = [];
 
       if (!userResponse) {
         res.status(404).json({ message: 'User not found' });
       } else {
-        userGroups = await yarsService.getSubjectGroups(userResponse.sub);
-        const userInitiativeGroups = userGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
+        accessUserGroups = await yarsService.getSubjectGroups(userResponse.sub);
+        const userInitiativeGroups = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
 
         if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
           res.status(403).json({ message: 'Cannot modify requested group' });
@@ -52,7 +55,7 @@ const controller = {
         if (
           accessRequest.grant &&
           accessRequest.groupId &&
-          userGroups.map((x) => x.groupId).includes(accessRequest.groupId)
+          accessUserGroups.map((x) => x.groupId).includes(accessRequest.groupId)
         ) {
           res.status(409).json({ message: 'User is already assigned this group' });
         }
@@ -69,7 +72,7 @@ const controller = {
 
       if (isGroupUpdate) {
         // Remove all user groups for initiative
-        const groupsToRemove = userGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
+        const groupsToRemove = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
         for (const g of groupsToRemove) {
           response = await yarsService.removeGroup(userResponse?.sub as string, g.groupId);
         }
@@ -84,7 +87,7 @@ const controller = {
           groupId: accessRequest.groupId,
           status: AccessRequestStatus.APPROVED
         };
-      } else if (admin) {
+      } else if (isAdmin) {
         if (accessRequest.grant) {
           await yarsService.assignGroup(req.currentContext.bearerToken, user.sub, accessRequest.groupId);
           // Mock an access request for the response
@@ -98,7 +101,7 @@ const controller = {
           // Remove requested group if provided - otherwise remove all user groups for initiative
           const groupsToRemove = accessRequest.groupId
             ? [accessRequest.groupId]
-            : userGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId).map((x) => x.groupId);
+            : accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId).map((x) => x.groupId);
           for (const groupId of groupsToRemove) {
             response = await yarsService.removeGroup(userResponse?.sub as string, groupId);
           }
@@ -110,7 +113,7 @@ const controller = {
         });
       }
 
-      res.status(admin ? 200 : 201).json(response);
+      res.status(isAdmin ? 200 : 201).json(response);
     } catch (e: unknown) {
       next(e);
     }
