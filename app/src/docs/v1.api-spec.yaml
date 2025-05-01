@@ -18,6 +18,8 @@ security:
 tags:
   - name: Contact
     description: Operations for managing Contacts
+  - name: Electrification Access Request
+    description: Operations for managing Electrification Access Requests
   - name: Electrification Document
     description: Operations for managing Electrification Documents
   - name: Electrification Enquiry
@@ -32,6 +34,8 @@ tags:
     description: Operations for managing Electrification Projects, Drafts, and Statistics
   - name: Electrification Roadmap
     description: Operations for validating Electrification Roadmaps
+  - name: Housing Access Request
+    description: Operations for managing Housing Access Requests
   - name: Housing Document
     description: Operations for managing Housing Documents
   - name: Housing Enquiry
@@ -212,6 +216,98 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/accessRequest:
+    get:
+      summary: Get access requests
+      description: >-
+        Get a list of access requests
+      operationId: getElectrificationAccessRequest
+      tags:
+        - Electrification Access Request
+      responses:
+        '200':
+          description: A list of access requests for the initiative
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create access request
+      description: >-
+        Create a request to grant or revoke a users access
+      operationId: createElectrificationAccessRequest
+      tags:
+        - Electrification Access Request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-AccessRequest'
+      responses:
+        '200':
+          description: Access request processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        '201':
+          description: Access request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /electrification/accessRequest/{accessRequestId}:
+    post:
+      summary: Process access request
+      description: >-
+        Process a request to grant or revoke a users access
+      operationId: processElectrificationAccessRequest
+      tags:
+        - Electrification Access Request
+      parameters:
+        - $ref: '#/components/parameters/Path-AccessRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approve:
+                  type: boolean
+                  example: true
+      responses:
+        '204':
+          description: Returns no content success
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         default:
@@ -1235,6 +1331,98 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/accessRequest:
+    get:
+      summary: Get access requests
+      description: >-
+        Get a list of access requests
+      operationId: getHousingAccessRequest
+      tags:
+        - Housing Access Request
+      responses:
+        '200':
+          description: A list of access requests for the initiative
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create access request
+      description: >-
+        Create a request to grant or revoke a users access
+      operationId: createHousingAccessRequest
+      tags:
+        - Housing Access Request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-AccessRequest'
+      responses:
+        '200':
+          description: Access request processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        '201':
+          description: Access request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/accessRequest/{accessRequestId}:
+    post:
+      summary: Process access request
+      description: >-
+        Process a request to grant or revoke a users access
+      operationId: processHousingAccessRequest
+      tags:
+        - Housing Access Request
+      parameters:
+        - $ref: '#/components/parameters/Path-AccessRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approve:
+                  type: boolean
+                  example: true
+      responses:
+        '204':
+          description: Returns no content success
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
         default:
@@ -2346,6 +2534,14 @@ components:
       schema:
         type: string
         example: Assigned
+    Path-AccessRequestId:
+      in: path
+      name: accessRequestId
+      description: ID of an access request
+      required: true
+      schema:
+        type: string
+        example: 1
     Path-ActivityId:
       in: path
       name: activityId
@@ -2490,6 +2686,36 @@ components:
         format: uuid
         example: b76469a3-896c-4435-aa83-b8b87db6f701
   schemas:
+    DB-AccessRequest:
+      title: DB Access Request
+      type: object
+      required:
+        - accessRequestId
+        - groupId
+        - grant
+      properties:
+        accessRequestId:
+          type: string
+          format: uuid
+          description: The ID of the access request
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        userId:
+          type: string
+          format: uuid
+          description: The ID of the user
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        groupId:
+          type: number
+          description: The ID of the group to grant/revoke
+          example: 1
+        status:
+          type: string
+          description: Status of the access request
+          example: Approved
+        grant:
+          type: boolean
+          description: Should the groupId be granted
+          example: true
     DB-Contact:
       title: DB Contact
       type: object
@@ -3225,6 +3451,16 @@ components:
           type: string
           description: User description for enquiry
           example: This is a description for some enquiry
+    Request-AccessRequest:
+      type: object
+      required:
+        - accessRequest
+        - user
+      properties:
+        accessRequest:
+          $ref: '#/components/schemas/DB-AccessRequest'
+        user:
+          $ref: '#/components/schemas/DB-User'
     Request-CreateEnquiry:
       type: object
       required:
@@ -3925,6 +4161,19 @@ components:
           type: string
           description: Name of the project the note is attached to
           example: The Project
+    Response-Conflict:
+      title: Response Conflict
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/Response-Problem"
+        - type: object
+          properties:
+            status:
+              example: 409
+            title:
+              example: Conflict
+            type:
+              example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/409
     Response-DeletedEnquiry:
       type: object
       allOf:
@@ -4363,6 +4612,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/Response-BadRequest'
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Response-Conflict'
     Error:
       description: Internal Server Error
       content:
