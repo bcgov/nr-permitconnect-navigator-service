@@ -14,7 +14,7 @@ import {
   Select,
   TextArea
 } from '@/components/form';
-import BasicContactInformationCard from '@/components/form/common/BasicContactInformationCard.vue';
+import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
@@ -275,7 +275,7 @@ onBeforeMount(async () => {
             <span class="text-[var(--p-bcblue-900)]">{{ formatDate(project.submittedAt) }}</span>
           </div>
         </div>
-        <BasicContactInformationCard
+        <ContactCardNavForm
           :editable="editable"
           :initial-form-values="initialFormValues"
         />

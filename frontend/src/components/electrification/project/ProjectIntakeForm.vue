@@ -8,7 +8,7 @@ import { useRouter } from 'vue-router';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
-import ContactCard from '@/components/form/common/ContactCard.vue';
+import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import { projectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
@@ -363,7 +363,7 @@ onBeforeMount(async () => {
       {{ VALIDATION_BANNER_TEXT }}
     </Message>
 
-    <ContactCard
+    <ContactCardIntakeForm
       :editable="editable"
       :initial-form-values="initialFormValues"
     />
