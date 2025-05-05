@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
-import { housingProjectService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
+import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject } from '@/types';
 
 // Props
 const { loading, drafts } = defineProps<{
@@ -17,11 +16,15 @@ const { loading, drafts } = defineProps<{
   drafts: Array<any> | undefined;
 }>();
 
+// Injections
+const projectRoute = inject(projectRouteNameKey);
+const projectService = inject(draftableProjectServiceKey);
+
 // Emit
 const emit = defineEmits(['submissionDraft:delete']);
 
 // State
-const selection: Ref<HousingProject | undefined> = ref(undefined);
+const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 
 // Actions
 const confirm = useConfirm();
@@ -36,7 +39,8 @@ function onDelete(draftId: string) {
     acceptClass: 'p-button-danger',
     rejectLabel: t('submissionDraftListProponent.cancel'),
     accept: () => {
-      housingProjectService
+      if (!projectService) throw new Error('No service');
+      projectService
         .deleteDraft(draftId)
         .then(() => {
           emit('submissionDraft:delete', draftId);
@@ -85,7 +89,7 @@ function onDelete(draftId: string) {
         <div :data-draftId="data.draftId">
           <router-link
             :to="{
-              name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
+              name: projectRoute,
               params: { draftId: data.draftId }
             }"
           >
