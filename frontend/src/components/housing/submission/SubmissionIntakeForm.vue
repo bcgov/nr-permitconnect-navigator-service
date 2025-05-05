@@ -21,7 +21,7 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import ContactCard from '@/components/form/common/ContactCard.vue';
+import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
 import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
 import LocationCard from '@/components/form/common/LocationCard.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
@@ -630,7 +630,7 @@ watch(
             {{ VALIDATION_BANNER_TEXT }}
           </Message>
 
-          <ContactCard
+          <ContactCardIntakeForm
             :editable="editable"
             :initial-form-values="initialFormValues"
           />
