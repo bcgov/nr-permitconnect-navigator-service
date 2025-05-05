@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { RadioButton } from '@/lib/primevue';
 import { yarsService } from '@/services';
@@ -12,6 +13,9 @@ import type { Group } from '@/types';
 
 // Emits
 const emit = defineEmits(['userManage:save']);
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const authzStore = useAuthZStore();
@@ -42,9 +46,9 @@ watchEffect(async () => {
     class="app-info-dialog w-3/12"
   >
     <template #header>
-      <span class="p-dialog-title">Manage user role</span>
+      <span class="p-dialog-title">{{ t('userManageModal.header') }}</span>
     </template>
-    <div class="mb-2">Select role</div>
+    <div class="mb-2">{{ t('userManageModal.select') }}</div>
     <div
       v-for="option in selectableGroups"
       :key="option.groupId"
@@ -70,14 +74,14 @@ watchEffect(async () => {
     <div class="flex-auto mt-6">
       <Button
         class="mr-2"
-        label="Save"
+        :label="t('userManageModal.save')"
         type="submit"
         icon="pi pi-check"
         @click="emit('userManage:save', group)"
       />
       <Button
         class="p-button-outlined mr-2"
-        label="Cancel"
+        :label="t('userManageModal.cancel')"
         icon="pi pi-times"
         @click="visible = false"
       />

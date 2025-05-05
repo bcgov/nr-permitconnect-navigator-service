@@ -1,5 +1,5 @@
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
-import { userService, accessRequestService, yarsService, initiativeService } from '../services';
+import { accessRequestService, initiativeService, userService, yarsService } from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { AccessRequest, Group, User } from '../types';

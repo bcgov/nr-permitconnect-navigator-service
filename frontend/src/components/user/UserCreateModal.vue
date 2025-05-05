@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import axios from 'axios';
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, Select, useToast } from '@/lib/primevue';
@@ -8,7 +9,6 @@ import { ssoService, yarsService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 
-import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { Group, User } from '@/types';
 
@@ -18,6 +18,9 @@ const USER_SEARCH_PARAMS: { [key: string]: string } = {
   lastName: 'Last name',
   email: 'Email'
 };
+
+// Composables
+const { t } = useI18n();
 
 // Emits
 const emit = defineEmits(['userCreate:request']);
@@ -104,14 +107,14 @@ watchEffect(async () => {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">Create new user</span>
+      <span class="p-dialog-title">{{ t('userCreateModal.header') }}</span>
     </template>
     <div class="grid grid-cols-12 gap-4 items-center">
       <Select
         v-model="selectedParam"
         class="col-span-3"
         name="searchParam"
-        placeholder="Last name"
+        :placeholder="t('userCreateModal.lastNamePlaceholder')"
         :options="Object.values(USER_SEARCH_PARAMS)"
         @change="searchIdirUsers"
       />
@@ -121,7 +124,7 @@ watchEffect(async () => {
           <InputText
             v-model="searchTag"
             class="w-full"
-            placeholder="Search by first name, last name, or email"
+            :placeholder="t('userCreateModal.searchPlaceholder')"
             autofocus
             @update:model-value="searchIdirUsers"
           />
@@ -142,7 +145,7 @@ watchEffect(async () => {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h5 class="m-0">No users found.</h5>
+          <h5 class="m-0">{{ t('userCreateModal.empty') }}</h5>
         </div>
       </template>
       <template #loading>
@@ -150,22 +153,22 @@ watchEffect(async () => {
       </template>
       <Column
         field="fullName"
-        header="Username"
+        :header="t('userCreateModal.headerFullname')"
         sortable
       />
       <Column
         field="firstName"
-        header="First Name"
+        :header="t('userCreateModal.headerFirstName')"
         sortable
       />
       <Column
         field="lastName"
-        header="Last Name"
+        :header="t('userCreateModal.headerLastName')"
         sortable
       />
       <Column
         field="email"
-        header="Email"
+        :header="t('userCreateModal.headerEmail')"
         sortable
       />
     </DataTable>
@@ -174,13 +177,12 @@ watchEffect(async () => {
       for="assignRole"
       class="font-bold"
     >
-      Assign role
+      {{ t('userCreateModal.assign') }}
     </label>
     <Select
       v-model="selectedGroup"
       class="w-full"
       name="assignRole"
-      label="Assign role"
       :options="selectableGroups"
       option-label="label"
       :disabled="!selectedUser"
@@ -188,7 +190,7 @@ watchEffect(async () => {
     <div class="mt-6">
       <Button
         class="mr-2"
-        label="Request approval"
+        :label="t('userCreateModal.requestApproval')"
         type="submit"
         icon="pi pi-check"
         :disabled="!selectedUser || !selectedGroup"
@@ -200,7 +202,7 @@ watchEffect(async () => {
       />
       <Button
         class="p-button-outlined mr-2"
-        label="Cancel"
+        :label="t('userCreateModal.cancel')"
         icon="pi pi-times"
         @click="visible = false"
       />
