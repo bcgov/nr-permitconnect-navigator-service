@@ -11,12 +11,12 @@ const routes: Array<RouteRecordRaw> = [
     meta: { access: [NavigationPermission.EXT_ELECTRIFICATION], breadcrumb: 'Electrification', requiresAuth: true },
     beforeEnter: [entryRedirect, () => useAppStore().setInitiative(Initiative.ELECTRIFICATION)],
     children: [
-      // {
-      //   path: '',
-      //   name: RouteName.EXT_ELECTRIFICATION,
-      //   component: () => import('../views/external/electrification/HousingView.vue'),
-      //   beforeEnter: accessHandler
-      // },
+      {
+        path: '',
+        name: RouteName.EXT_ELECTRIFICATION,
+        component: () => import('../views/external/electrification/ElectrificationView.vue'),
+        beforeEnter: accessHandler
+      },
       // {
       //   path: 'enquiry',
       //   component: () => import('@/views/GenericView.vue'),
@@ -190,7 +190,7 @@ const routes: Array<RouteRecordRaw> = [
       //       ]
       //     }
       //   ]
-      // },
+      // }
       // {
       //   path: 'guide',
       //   name: RouteName.EXT_ELECTRIFICATION_GUIDE,

@@ -10,6 +10,7 @@ const { contactId } = defineProps<{
   contactId: string;
 }>();
 
+// Providers
 provide(projectServiceKey, electrificationProjectService);
 </script>
 
