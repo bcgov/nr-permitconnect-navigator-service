@@ -1,10 +1,11 @@
-import SubmissionDraftListProponent from '@/components/housing/submission/SubmissionDraftListProponent.vue';
-import { userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+
+import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
+import { userService } from '@/services';
 
 import type { AxiosResponse } from 'axios';
 

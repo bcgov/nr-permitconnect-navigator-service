@@ -33,6 +33,19 @@
   },
   "e": {
     "electrification": {
+      "electrificationView": {
+        "confirmationId": "Project ID",
+        "drafts": "Drafts",
+        "electrification": "Electrification",
+        "lastUpdated": "Last updated",
+        "myProjects": "My projects",
+        "of": "of",
+        "onThisPage": "On this page",
+        "projectState": "Project state",
+        "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
+        "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
+        "submitNewProject": "Submit a new project"
+      },
       "projectConfirmationView": {
         "backToElectrification": "Back to Electrification",
         "header": "Confirmation of Submission",

@@ -28,6 +28,7 @@ const permits: Ref<Array<Permit>> = ref([]);
 const projects: Ref<Array<HousingProject>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
+// Providers
 provide(resourceKey, Resource.HOUSING_PROJECT);
 provide(projectRouteNameKey, RouteName.INT_HOUSING_PROJECT);
 provide(projectServiceKey, housingProjectService);
