@@ -26,12 +26,12 @@ const { t } = useI18n();
           role="heading"
           aria-level="2"
         >
-          {{ t('common.contactCard.header') }}
+          {{ t('common.contactCardIntakeForm.header') }}
         </span>
         <Tooltip
           icon="fa-solid fa-circle-question"
           right
-          :text="t('common.contactCard.contactTooltip')"
+          :text="t('common.contactCardIntakeForm.contactTooltip')"
         />
       </div>
       <Divider type="solid" />

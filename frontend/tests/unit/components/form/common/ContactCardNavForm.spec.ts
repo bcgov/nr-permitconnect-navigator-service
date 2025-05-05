@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import PrimeVue from 'primevue/config';
 
-import BasicContactInformationCard from '@/components/form/common/BasicContactInformationCard.vue';
+import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: vi.fn() }) }));
 
@@ -24,9 +24,9 @@ const wrapperSettingsCard = () => ({
   }
 });
 
-describe('BasicContactInformationCard.vue', () => {
+describe('ContactCardNavForm.vue', () => {
   it('renders without error', () => {
-    const wrapper = shallowMount(BasicContactInformationCard, wrapperSettingsCard());
+    const wrapper = shallowMount(ContactCardNavForm, wrapperSettingsCard());
     expect(wrapper.exists()).toBe(true);
   });
 });
