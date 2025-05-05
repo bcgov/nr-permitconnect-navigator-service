@@ -20,6 +20,7 @@ const { t } = useI18n();
 const contacts: Ref<Array<Contact>> = ref([]);
 const loading: Ref<boolean> = ref(true);
 
+// Providers
 provide(contactInitiativeRouteNameKey, RouteName.INT_ELECTRIFICATION_CONTACT_PAGE);
 
 // Actions

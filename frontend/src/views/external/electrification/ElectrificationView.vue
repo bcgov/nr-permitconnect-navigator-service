@@ -4,16 +4,15 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Tooltip from '@/components/common/Tooltip.vue';
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
 import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { enquiryService, housingProjectService } from '@/services';
+import { electrificationProjectService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject } from '@/types';
+import type { ElectrificationProject } from '@/types';
 
 // Constants
 const PAGE_ROWS = 5;
@@ -24,23 +23,22 @@ const route = useRoute();
 const router = useRouter();
 
 // State
-const drafts: Ref<Array<any>> = ref([]);
-const enquiries: Ref<Array<Enquiry>> = ref([]);
-const projects: Ref<Array<HousingProject>> = ref([]);
-const first: Ref<number> = ref(0);
 const displayedProjects = computed(() => projects.value.slice(first.value, first.value + PAGE_ROWS));
+const drafts: Ref<Array<any>> = ref([]);
+const first: Ref<number> = ref(0);
 const loading: Ref<boolean> = ref(true);
+const projects: Ref<Array<ElectrificationProject>> = ref([]);
 
 // Providers
-provide(projectRouteNameKey, RouteName.EXT_HOUSING_INTAKE_DRAFT);
-provide(draftableProjectServiceKey, housingProjectService);
+provide(projectRouteNameKey, RouteName.EXT_ELECTRIFICATION_INTAKE_DRAFT);
+provide(draftableProjectServiceKey, electrificationProjectService);
 
 // Actions
-function onHousingProjectDraftDelete(draftId: string) {
+function onElectrificationProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
 
-function sortByLastUpdated(a: HousingProject, b: HousingProject) {
+function sortByLastUpdated(a: ElectrificationProject, b: ElectrificationProject) {
   if (a.updatedAt && b.updatedAt) {
     return a.updatedAt > b.updatedAt ? -1 : 1;
   } else {
@@ -64,11 +62,10 @@ watch(
 );
 
 onBeforeMount(async () => {
-  [enquiries.value, projects.value, drafts.value] = (
+  [projects.value, drafts.value] = (
     await Promise.all([
-      enquiryService.getEnquiries(),
-      housingProjectService.searchProjects({ includeDeleted: false }),
-      housingProjectService.getDrafts()
+      electrificationProjectService.searchProjects({ includeDeleted: false }),
+      electrificationProjectService.getDrafts()
     ])
   ).map((r) => r.data);
 
@@ -77,9 +74,6 @@ onBeforeMount(async () => {
 
   drafts.value = drafts.value.map((x, index) => ({ ...x, index: index + 1 }));
 
-  // Filter enquiries to only include enquiries with no relatedActivityId
-  enquiries.value = enquiries.value.filter((enquiry) => !enquiry.relatedActivityId);
-
   loading.value = false;
 });
 </script>
@@ -87,49 +81,39 @@ onBeforeMount(async () => {
 <template>
   <div class="flex flex-col items-center justify-start h-full">
     <div class="flex flex-row items-center w-full justify-between shadow px-4">
-      <h1>{{ t('e.housing.housingView.housing') }}</h1>
+      <h1>{{ t('e.electrification.electrificationView.electrification') }}</h1>
       <img
         class="mr-4"
-        src="@/assets/images/housing_2.png"
+        src="@/assets/images/elec_banner.png"
         width="120"
-        alt="Housing image"
+        alt="Electrification image"
       />
     </div>
 
     <div class="flex flex-row items-center w-full mt-4 mb-9">
-      <div class="font-bold mr-2">{{ t('e.housing.housingView.onThisPage') }}</div>
+      <div class="font-bold mr-2">{{ t('e.electrification.electrificationView.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
       <div>
         <router-link
           :to="{
-            name: RouteName.EXT_HOUSING,
+            name: RouteName.EXT_ELECTRIFICATION,
             hash: '#projects'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#projects' })"
+          @keydown.space.prevent="router.push({ name: RouteName.EXT_ELECTRIFICATION, hash: '#projects' })"
         >
-        {{ t('e.housing.housingView.myProjects') }}</router-link>
+        {{ t('e.electrification.electrificationView.myProjects') }}</router-link>
         |
         <router-link
           :to="{
-            name: RouteName.EXT_HOUSING,
+            name: RouteName.EXT_ELECTRIFICATION,
             hash: '#drafts'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#drafts' })"
+          @keydown.space.prevent="router.push({ name: RouteName.EXT_ELECTRIFICATION, hash: '#drafts' })"
         >
-        {{ t('e.housing.housingView.drafts') }}</router-link>
-        |
-        <router-link
-          :to="{
-            name: RouteName.EXT_HOUSING,
-            hash: '#enquiries'
-          }"
-          class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.EXT_HOUSING, hash: '#enquiries' })"
-        >
-        {{ t('e.housing.housingView.generalEnquiries') }}</router-link>
+        {{ t('e.electrification.electrificationView.drafts') }}</router-link>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
     </div>
@@ -143,16 +127,16 @@ onBeforeMount(async () => {
           id="projects"
           tabindex="-1"
         >
-          {{ t('e.housing.housingView.myProjects') }}
+          {{ t('e.electrification.electrificationView.myProjects') }}
         </h2>
         <Tooltip
           class="pl-2 text-xl"
           right
-          :text="t('e.housing.housingView.projectsTooltip')"
+          :text="t('e.electrification.electrificationView.projectsTooltip')"
         />
       </div>
-      <Button @click="router.push({ name: RouteName.EXT_HOUSING_INTAKE })">
-        {{ t('e.housing.housingView.submitNewProject') }}
+      <Button @click="router.push({ name: RouteName.EXT_ELECTRIFICATION_INTAKE })">
+        {{ t('e.electrification.electrificationView.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
           icon="fa-solid fa-arrow-right"
@@ -165,7 +149,7 @@ onBeforeMount(async () => {
         v-if="!projects.length"
         class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
       >
-        <p class="font-bold">{{ t('e.housing.housingView.projectsEmpty') }}</p>
+        <p class="font-bold">{{ t('e.electrification.electrificationView.projectsEmpty') }}</p>
       </div>
       <div
         v-for="(project, index) in displayedProjects"
@@ -177,25 +161,26 @@ onBeforeMount(async () => {
       >
         <div class="grid grid-cols-12 gap-4">
           <div class="col-span-3 flex items-center">
-            <router-link
+            <!-- TODO: Uncomment when electrification project page is ready -->
+            <!-- <router-link
               class="no-underline"
               :to="{
-                name: RouteName.EXT_HOUSING_PROJECT,
-                params: { projectId: project.housingProjectId }
+                name: RouteName.EXT_ELECTRIFICATION_PROJECT,
+                params: { projectId: project.electrificationProjectId }
               }"
-            >
-              <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
-            </router-link>
+            > -->
+            <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
+            <!-- </router-link> -->
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('e.housing.housingView.projectState') }}: {{ project.applicationStatus }}</p>
+            <p>{{ t('e.electrification.electrificationView.projectState') }}: {{ project.applicationStatus }}</p>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('e.housing.housingView.confirmationId') }}: {{ project.activityId }}</p>
+            <p>{{ t('e.electrification.electrificationView.confirmationId') }}: {{ project.activityId }}</p>
           </div>
           <div class="col-span-3 flex items-center">
             <p>
-              {{ t('e.housing.housingView.lastUpdated') }}:
+              {{ t('e.electrification.electrificationView.lastUpdated') }}:
               {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}
             </p>
           </div>
@@ -207,7 +192,9 @@ onBeforeMount(async () => {
           :rows="PAGE_ROWS"
           :total-records="projects.length"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          :current-page-report-template="`({currentPage} ${t('e.housing.housingView.of')} {totalPages})`"
+          :current-page-report-template="`
+            ({currentPage} ${t('e.electrification.electrificationView.of')} {totalPages})
+          `"
         />
       </div>
     </div>
@@ -221,7 +208,7 @@ onBeforeMount(async () => {
         class="flex font-bold"
         tabindex="-1"
       >
-        {{ t('e.housing.housingView.drafts') }}
+        {{ t('e.electrification.electrificationView.drafts') }}
       </h2>
     </div>
 
@@ -229,42 +216,7 @@ onBeforeMount(async () => {
       <SubmissionDraftListProponent
         :loading="loading"
         :drafts="drafts"
-        @submission-draft:delete="onHousingProjectDraftDelete"
-      />
-    </div>
-
-    <!--
-      Enquiries
-    -->
-    <div class="flex flex-row items-center w-full justify-between">
-      <div class="flex items-center flex-row">
-        <h2
-          id="enquiries"
-          class="font-bold"
-          tabindex="-1"
-        >
-          {{ t('e.housing.housingView.generalEnquiries') }}
-        </h2>
-        <Tooltip
-          class="pl-2 text-xl"
-          right
-          :text="t('e.housing.housingView.enquiriesTooltip')"
-        />
-      </div>
-
-      <Button @click="router.push({ name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE })">
-        {{ t('e.housing.housingView.submitNewEnquiry') }}
-        <font-awesome-icon
-          class="ml-2"
-          icon="fa-solid fa-arrow-right"
-        />
-      </Button>
-    </div>
-
-    <div class="w-full">
-      <EnquiryListProponent
-        :loading="loading"
-        :enquiries="enquiries"
+        @submission-draft:delete="onElectrificationProjectDraftDelete"
       />
     </div>
   </div>
