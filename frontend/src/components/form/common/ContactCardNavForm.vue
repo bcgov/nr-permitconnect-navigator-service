@@ -20,7 +20,7 @@ const { t } = useI18n();
     <div class="flex items-center gap-x-2.5 mb-4">
       <BasicInfo />
       <h3 class="section-header m-0">
-        {{ t('common.basicContactInformationCard.header') }}
+        {{ t('common.ContactCardNavForm.header') }}
       </h3>
     </div>
     <div class="grid grid-cols-3 gap-x-6 gap-y-6">

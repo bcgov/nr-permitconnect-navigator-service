@@ -1,7 +1,7 @@
 import PrimeVue from 'primevue/config';
 
 import { shallowMount } from '@vue/test-utils';
-import ContactCard from '@/components/form/common/ContactCard.vue';
+import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
@@ -37,9 +37,9 @@ const wrapperSettings = () => ({
   }
 });
 
-describe('ContactCard.vue', () => {
+describe('ContactCardIntakeForm.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(ContactCard, wrapperSettings());
+    const wrapper = shallowMount(ContactCardIntakeForm, wrapperSettings());
 
     expect(wrapper).toBeTruthy();
   });
