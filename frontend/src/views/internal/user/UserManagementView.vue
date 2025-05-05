@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import housingBannerImg from '@/assets/images/housing_banner.png';
 import elecBannerImg from '@/assets/images/elec_banner.png';
+import housingBannerImg from '@/assets/images/housing_banner.png';
 import { ProgressLoader } from '@/components/layout';
 import UserCreateModal from '@/components/user/UserCreateModal.vue';
 import UserManageModal from '@/components/user/UserManageModal.vue';
@@ -46,6 +47,9 @@ const REQUEST_ACTION = {
   APPROVE: 'Approve',
   DENY: 'Deny'
 };
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const authzStore = useAuthZStore();
@@ -131,6 +135,7 @@ async function onProcessUserAccessRequest() {
       }
     }
 
+    // TODO: i18n parameterized magic for this string
     toast.success(
       `User's ${userProcessRequestType.value} request has been ${
         approvedAccess || approvedRevocation ? 'approved' : 'denied'
@@ -144,17 +149,17 @@ async function onProcessUserAccessRequest() {
 function onRevoke(userAccessRequest: UserAccessRequest) {
   const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
 
-  const message = admin
-    ? 'The user will now lose all access to the system.'
-    : 'The user will be revoked from the system upon the approval of an admin.';
-  const successMessage = admin ? 'User revoked' : 'Revoke requested';
+  const message = admin ? t('i.user.userManagementView.revokeAdmin1') : t('i.user.userManagementView.revokeAdmin2');
+  const successMessage = admin
+    ? t('i.user.userManagementView.userRevoked')
+    : t('i.user.userManagementView.revokeRequested');
 
   confirm.require({
     message: message,
     header: 'Revoke user',
-    acceptLabel: 'Confirm',
+    acceptLabel: t('i.user.userManagementView.confirm'),
     acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
+    rejectLabel: t('i.user.userManagementView.cancel'),
     rejectProps: { outlined: true },
     accept: async () => {
       try {
@@ -191,7 +196,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           toast.success(successMessage);
         }
       } catch (error) {
-        toast.error(`Error revoking user access: ${error}`);
+        toast.error(`${t('i.user.userManagementView.revokeError')}: ${error}`);
       }
     }
   });
@@ -216,11 +221,11 @@ async function onUserGroupChange(group: Group) {
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === user.userId);
         usersAndAccessRequests.value[idx].user.groups = [group];
 
-        toast.success('User role updated');
+        toast.success(`${t('i.user.userManagementView.updateSuccess')}`);
       }
     }
   } catch (error: any) {
-    toast.error(`Error updating user role, ${error.response.data.message}`);
+    toast.error(`${t('i.user.userManagementView.updateError')}, ${error.response.data.message}`);
   } finally {
     manageUserModalVisible.value = false;
   }
@@ -231,7 +236,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
     loading.value = true;
 
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error('Failed to obtain IDP config');
+    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
 
     user.idp = idpCfg.idp;
 
@@ -260,9 +265,9 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       usersAndAccessRequests.value.push(userAccessRequest);
     }
 
-    toast.success('Access requested');
+    toast.success(`${t('i.user.userManagementView.requestSuccess')}`);
   } catch (error: any) {
-    toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+    toast.error(`${t('i.user.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;
@@ -279,7 +284,7 @@ onBeforeMount(async () => {
 
   try {
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error('Failed to obtain IDP config');
+    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
 
     const users: Array<User> = (
       await userService.searchUsers({
@@ -379,14 +384,14 @@ watchEffect(() => {
     :value="activeTab"
   >
     <TabList>
-      <Tab :value="0">Manage users</Tab>
-      <Tab :value="1">User access requests</Tab>
+      <Tab :value="0">{{ t('i.user.userManagementView.tab0') }}</Tab>
+      <Tab :value="1">{{ t('i.user.userManagementView.tab1') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
         <div class="flex justify-between">
           <Button
-            label="Create new user"
+            :label="t('i.user.userManagementView.createUser')"
             type="submit"
             icon="pi pi-plus"
             @click="createUserModalVisible = true"
@@ -395,7 +400,7 @@ watchEffect(() => {
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters['global'].value"
-              placeholder="Search all"
+              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
               class="search-input"
             />
           </IconField>
@@ -419,7 +424,7 @@ watchEffect(() => {
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters['global'].value"
-              placeholder="Search all"
+              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
               class="search-input"
             />
           </IconField>
@@ -442,7 +447,7 @@ watchEffect(() => {
   <div v-else>
     <div class="flex justify-between">
       <Button
-        label="Create new user"
+        :label="t('i.user.userManagementView.createUser')"
         type="submit"
         icon="pi pi-plus"
         @click="createUserModalVisible = true"
@@ -451,7 +456,7 @@ watchEffect(() => {
         <InputIcon class="pi pi-search" />
         <InputText
           v-model="filters['global'].value"
-          placeholder="Search all"
+          :placeholder="t('i.user.userManagementView.searchPlaceholder')"
           class="search-input"
         />
       </IconField>
