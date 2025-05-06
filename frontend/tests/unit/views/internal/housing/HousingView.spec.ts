@@ -7,6 +7,13 @@ import HousingView from '@/views/internal/housing/HousingView.vue';
 
 import type { AxiosResponse } from 'axios';
 
+// Mock dependencies
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn()
@@ -21,12 +28,14 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
+// Spies
 const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 const getStatisticsSpy = vi.spyOn(housingProjectService, 'getStatistics');
 const listBringForwardSpy = vi.spyOn(noteService, 'listBringForward');
 
+// Mocks
 searchEnquiriesSpy.mockResolvedValue({ data: [] } as AxiosResponse);
 listPermitsSpy.mockResolvedValue({ data: [] } as AxiosResponse);
 searchProjectsSpy.mockResolvedValue({ data: [] } as AxiosResponse);
@@ -50,6 +59,7 @@ const wrapperSettings = () => ({
   }
 });
 
+// Tests
 describe('HousingView.vue', () => {
   it('renders', () => {
     const wrapper = shallowMount(HousingView, wrapperSettings());

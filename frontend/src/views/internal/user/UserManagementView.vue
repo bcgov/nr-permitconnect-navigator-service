@@ -55,7 +55,6 @@ const authzStore = useAuthZStore();
 
 // State
 const activeTab: Ref<number> = ref(Number(0)); // Current selected tab
-
 const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal visible
 const loading: Ref<boolean> = ref(false); // Generic loading flag
 const manageUserModalVisible: Ref<boolean> = ref(false); // Group change modal visible
