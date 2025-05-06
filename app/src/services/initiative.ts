@@ -6,8 +6,8 @@ const service = {
   /**
    * @function getInitiative
    * Create an activity for the given initiative with a unique identifier
-   * @param {string} initiative The initiative ID
-   * @returns {Promise<Activity | null>} The result of running the findFirst operation
+   * @param {string} initiative The initiative code
+   * @returns {Promise<Initiative | null>} The result of running the findFirstOrThrow operation
    */
   getInitiative: async (initiative: Initiative) => {
     const result = await prisma.initiative.findFirstOrThrow({

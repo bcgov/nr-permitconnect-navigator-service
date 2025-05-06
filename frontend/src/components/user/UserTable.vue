@@ -5,7 +5,7 @@ import { Button, Column, DataTable } from '@/lib/primevue';
 import { AccessRequestStatus } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { UserAccessRequest } from '@/types';
+import type { Group, UserAccessRequest } from '@/types';
 
 // Props
 const { usersAndAccessRequests, requestTable = false } = defineProps<{
@@ -80,7 +80,9 @@ function getStatusClass(data: UserAccessRequest) {
       sortable
     >
       <template #body="{ data }">
-        {{ data.user.groups?.length ? data.user.groups.join(', ') : data.accessRequest?.group }}
+        {{
+          data.user.groups?.length ? data.user.groups.map((x: Group) => x.label).join() : data.accessRequest?.groupLabel
+        }}
       </template>
     </Column>
     <Column

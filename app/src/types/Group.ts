@@ -1,5 +1,5 @@
-import type { IStamps } from '@/interfaces';
-import type { GroupName } from '@/utils/enums/application';
+import { IStamps } from '../interfaces/IStamps';
+import { GroupName } from '../utils/enums/application';
 
 export type Group = {
   groupId: number;

@@ -154,6 +154,26 @@
       "projectView": {
         "seePropViewButtonLabel": "See Proponent's View"
       }
+    },
+    "user": {
+      "userManagementView": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "createUser": "Create new user",
+        "errorIdpCfg": "Failed to obtain IDP config",
+        "requestError": "Failed to request access",
+        "requestSuccess": "Access requested",
+        "revokeAdmin1": "The user will now lose all access to the system.",
+        "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
+        "revokeError": "Error revoking user access",
+        "revokeRequested": "Revoke requested",
+        "searchPlaceholder": "Search all",
+        "tab0": "Manage users",
+        "tab1": "User access requests",
+        "updateError": "Error updating user role",
+        "updateSuccess": "User role updated",
+        "userRevoked": "User revoked"
+      }
     }
   },
   "cancelButton": {
@@ -335,5 +355,24 @@
     "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+  },
+  "userCreateModal": {
+    "assign": "Assign role",
+    "cancel": "Cancel",
+    "empty": "No users found.",
+    "header": "Create new user",
+    "headerEmail": "Email",
+    "headerFirstName": "First Name",
+    "headerFullname": "Username",
+    "headerLastName": "Last Name",
+    "lastNamePlaceholder": "Last name",
+    "requestApproval": "Request approval",
+    "searchPlaceholder": "Search by first name, last name, or email"
+  },
+  "userManageModal": {
+    "cancel": "Cancel",
+    "header": "Manage user role",
+    "save": "Save",
+    "select": "Select role"
   }
 }

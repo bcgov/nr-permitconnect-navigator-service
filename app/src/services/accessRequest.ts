@@ -1,16 +1,11 @@
-// import jwt from 'jsonwebtoken';
-// import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { access_request } from '../db/models';
-import { AccessRequestStatus } from '../utils/enums/application';
+import { AccessRequestStatus, Initiative } from '../utils/enums/application';
 
 import type { AccessRequest } from '../types';
 
-/**
- * The User DB Service
- */
 const service = {
   /**
    * @function createUserAccessRequest
@@ -24,12 +19,15 @@ const service = {
       accessRequestId: uuidv4(),
       userId: accessRequest.userId,
       grant: accessRequest.grant,
-      group: accessRequest.group,
+      groupId: accessRequest.groupId,
       status: AccessRequestStatus.PENDING
     };
 
     const accessRequestResponse = await prisma.access_request.create({
-      data: access_request.toPrismaModel(newAccessRequest)
+      data: access_request.toPrismaModel(newAccessRequest),
+      include: {
+        group: true
+      }
     });
 
     return access_request.fromPrismaModel(accessRequestResponse);
@@ -41,10 +39,18 @@ const service = {
    * @param {string} accessRequestId The access request data to retrieve
    * @returns {Promise<object>} The result of running the find operation
    */
-  getAccessRequest: async (accessRequestId: string) => {
+  getAccessRequest: async (initiative: Initiative, accessRequestId: string) => {
     const response = await prisma.access_request.findUnique({
       where: {
-        access_request_id: accessRequestId
+        access_request_id: accessRequestId,
+        group: {
+          initiative: {
+            code: initiative
+          }
+        }
+      },
+      include: {
+        group: true
       }
     });
     return response ? access_request.fromPrismaModel(response) : null;
@@ -55,8 +61,19 @@ const service = {
    * Get all access requests
    * @returns {Promise<object>} The result of running the find operation
    */
-  getAccessRequests: async () => {
-    const response = await prisma.access_request.findMany();
+  getAccessRequests: async (initiative: Initiative) => {
+    const response = await prisma.access_request.findMany({
+      where: {
+        group: {
+          initiative: {
+            code: initiative
+          }
+        }
+      },
+      include: {
+        group: true
+      }
+    });
     return response.map((x) => access_request.fromPrismaModel(x));
   },
 
@@ -71,6 +88,9 @@ const service = {
       data: { ...access_request.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
       where: {
         access_request_id: data.accessRequestId
+      },
+      include: {
+        group: true
       }
     });
 

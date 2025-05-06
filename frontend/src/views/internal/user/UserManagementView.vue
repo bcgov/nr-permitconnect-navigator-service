@@ -1,6 +1,9 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import elecBannerImg from '@/assets/images/elec_banner.png';
+import housingBannerImg from '@/assets/images/housing_banner.png';
 import { ProgressLoader } from '@/components/layout';
 import UserCreateModal from '@/components/user/UserCreateModal.vue';
 import UserManageModal from '@/components/user/UserManageModal.vue';
@@ -21,13 +24,13 @@ import {
   useToast
 } from '@/lib/primevue';
 import { accessRequestService, userService, yarsService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
-import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/enums/application';
+import { IdentityProviderKind, AccessRequestStatus, GroupName, Initiative } from '@/utils/enums/application';
 import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { AccessRequest, User, UserAccessRequest } from '@/types';
+import type { AccessRequest, Group, User, UserAccessRequest } from '@/types';
 
 // Constants
 const PENDING_STATUSES = {
@@ -45,11 +48,15 @@ const REQUEST_ACTION = {
   DENY: 'Deny'
 };
 
+// Composables
+const { t } = useI18n();
+
 // Store
 const authzStore = useAuthZStore();
 
 // State
 const activeTab: Ref<number> = ref(Number(0)); // Current selected tab
+const bannerImg = ref();
 const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal visible
 const loading: Ref<boolean> = ref(false); // Generic loading flag
 const manageUserModalVisible: Ref<boolean> = ref(false); // Group change modal visible
@@ -128,6 +135,7 @@ async function onProcessUserAccessRequest() {
       }
     }
 
+    // TODO: i18n parameterized magic for this string
     toast.success(
       `User's ${userProcessRequestType.value} request has been ${
         approvedAccess || approvedRevocation ? 'approved' : 'denied'
@@ -141,17 +149,17 @@ async function onProcessUserAccessRequest() {
 function onRevoke(userAccessRequest: UserAccessRequest) {
   const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
 
-  const message = admin
-    ? 'The user will now lose all access to the system.'
-    : 'The user will be revoked from the system upon the approval of an admin.';
-  const successMessage = admin ? 'User revoked' : 'Revoke requested';
+  const message = admin ? t('i.user.userManagementView.revokeAdmin1') : t('i.user.userManagementView.revokeAdmin2');
+  const successMessage = admin
+    ? t('i.user.userManagementView.userRevoked')
+    : t('i.user.userManagementView.revokeRequested');
 
   confirm.require({
     message: message,
     header: 'Revoke user',
-    acceptLabel: 'Confirm',
+    acceptLabel: t('i.user.userManagementView.confirm'),
     acceptClass: 'p-button-danger',
-    rejectLabel: 'Cancel',
+    rejectLabel: t('i.user.userManagementView.cancel'),
     rejectProps: { outlined: true },
     accept: async () => {
       try {
@@ -160,18 +168,17 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         if (admin) {
           // Delete subject group
-          const body = {
-            sub: userAccessRequest.user.sub,
-            group: userAccessRequest.user.groups[0]
-          };
-          response = await yarsService.deleteSubjectGroup(body);
+          response = await yarsService.deleteSubjectGroup(
+            userAccessRequest.user.sub,
+            userAccessRequest.user.groups[0].groupId
+          );
         } else {
           // Create user access request
           response = await accessRequestService.createUserAccessRequest({
             user: omittedUser,
             accessRequest: {
               grant: false,
-              group: userAccessRequest.user.groups[0]
+              groupId: userAccessRequest.user.groups[0].groupId
             }
           });
         }
@@ -189,13 +196,13 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           toast.success(successMessage);
         }
       } catch (error) {
-        toast.error(`Error revoking user access: ${error}`);
+        toast.error(`${t('i.user.userManagementView.revokeError')}: ${error}`);
       }
     }
   });
 }
 
-async function onUserGroupChange(group: GroupName) {
+async function onUserGroupChange(group: Group) {
   try {
     const user = selectedUserAccessRequest.value?.user;
     if (user) {
@@ -204,8 +211,9 @@ async function onUserGroupChange(group: GroupName) {
         user: omittedUser,
         accessRequest: {
           userId: user.userId,
-          group: group,
-          grant: true
+          groupId: group.groupId,
+          grant: true,
+          update: true
         }
       });
 
@@ -213,22 +221,22 @@ async function onUserGroupChange(group: GroupName) {
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === user.userId);
         usersAndAccessRequests.value[idx].user.groups = [group];
 
-        toast.success('User role updated');
+        toast.success(`${t('i.user.userManagementView.updateSuccess')}`);
       }
     }
   } catch (error: any) {
-    toast.error(`Error updating user role, ${error.response.data.message}`);
+    toast.error(`${t('i.user.userManagementView.updateError')}, ${error.response.data.message}`);
   } finally {
     manageUserModalVisible.value = false;
   }
 }
 
-async function onCreateUserAccessRequest(user: User, group: GroupName) {
+async function onCreateUserAccessRequest(user: User, group: Group) {
   try {
     loading.value = true;
 
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error('Failed to obtain IDP config');
+    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
 
     user.idp = idpCfg.idp;
 
@@ -238,7 +246,7 @@ async function onCreateUserAccessRequest(user: User, group: GroupName) {
         userId: user.userId,
         grant: true,
         status: AccessRequestStatus.PENDING,
-        group: group
+        groupId: group.groupId
       }
     };
 
@@ -251,14 +259,15 @@ async function onCreateUserAccessRequest(user: User, group: GroupName) {
     } else {
       userAccessRequest.accessRequest = undefined;
       userAccessRequest.user.status = AccessRequestStatus.APPROVED;
-      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = Array<GroupName>();
+      userAccessRequest.user.userId = response.userId;
+      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = Array<Group>();
       userAccessRequest.user.groups.push(group);
       usersAndAccessRequests.value.push(userAccessRequest);
     }
 
-    toast.success('Access requested');
+    toast.success(`${t('i.user.userManagementView.requestSuccess')}`);
   } catch (error: any) {
-    toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+    toast.error(`${t('i.user.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;
@@ -275,14 +284,15 @@ onBeforeMount(async () => {
 
   try {
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error('Failed to obtain IDP config');
+    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
 
     const users: Array<User> = (
       await userService.searchUsers({
         active: true,
         idp: [idpCfg.idp],
         includeUserGroups: true,
-        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id)
+        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
+        initiative: [useAppStore().getInitiative]
       })
     ).data;
     const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
@@ -327,11 +337,31 @@ onBeforeMount(async () => {
     loading.value = false;
   }
 });
+
+watchEffect(() => {
+  switch (useAppStore().getInitiative) {
+    case Initiative.ELECTRIFICATION:
+      bannerImg.value = elecBannerImg;
+      break;
+    case Initiative.HOUSING:
+      bannerImg.value = housingBannerImg;
+      break;
+  }
+});
 </script>
 
 <template>
   <ProgressLoader v-if="loading" />
-  <h1>User Management</h1>
+
+  <div class="flex justify-between">
+    <h1>User Management</h1>
+    <img
+      class="banner-img"
+      :src="bannerImg"
+      alt="Housing image"
+    />
+  </div>
+
   <UserCreateModal
     v-if="createUserModalVisible"
     v-model:visible="createUserModalVisible"
@@ -354,14 +384,14 @@ onBeforeMount(async () => {
     :value="activeTab"
   >
     <TabList>
-      <Tab :value="0">Manage users</Tab>
-      <Tab :value="1">User access requests</Tab>
+      <Tab :value="0">{{ t('i.user.userManagementView.tab0') }}</Tab>
+      <Tab :value="1">{{ t('i.user.userManagementView.tab1') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
         <div class="flex justify-between">
           <Button
-            label="Create new user"
+            :label="t('i.user.userManagementView.createUser')"
             type="submit"
             icon="pi pi-plus"
             @click="createUserModalVisible = true"
@@ -370,7 +400,7 @@ onBeforeMount(async () => {
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters['global'].value"
-              placeholder="Search all"
+              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
               class="search-input"
             />
           </IconField>
@@ -394,7 +424,7 @@ onBeforeMount(async () => {
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="filters['global'].value"
-              placeholder="Search all"
+              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
               class="search-input"
             />
           </IconField>
@@ -417,7 +447,7 @@ onBeforeMount(async () => {
   <div v-else>
     <div class="flex justify-between">
       <Button
-        label="Create new user"
+        :label="t('i.user.userManagementView.createUser')"
         type="submit"
         icon="pi pi-plus"
         @click="createUserModalVisible = true"
@@ -426,7 +456,7 @@ onBeforeMount(async () => {
         <InputIcon class="pi pi-search" />
         <InputText
           v-model="filters['global'].value"
-          placeholder="Search all"
+          :placeholder="t('i.user.userManagementView.searchPlaceholder')"
           class="search-input"
         />
       </IconField>

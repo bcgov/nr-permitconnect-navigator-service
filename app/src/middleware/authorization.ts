@@ -53,17 +53,31 @@ export const hasAuthorization = (resource: string, action: string) => {
         }
 
         // Permission checking for non developers
-        if (!groups.find((x) => x.groupName === GroupName.DEVELOPER)) {
-          const policyDetails = await Promise.all(
-            groups.map((x) => {
-              const initiative = req.currentContext?.initiative as Initiative;
+        if (!groups.find((x) => x.name === GroupName.DEVELOPER)) {
+          let policyDetails;
 
-              return yarsService.getGroupPolicyDetails(x.groupId, initiative, resource, action);
-            })
-          ).then((x) => x.flat());
+          if (req.currentContext.initiative === Initiative.PCNS) {
+            const groupNames = Array.from(new Set(groups.map((x) => x.name)));
+            policyDetails = await Promise.all(
+              groupNames.map((x) => {
+                return yarsService.getPCNSGroupPolicyDetails(x, resource, action);
+              })
+            ).then((x) => x.flat());
+          } else {
+            policyDetails = await Promise.all(
+              groups.map((x) => {
+                return yarsService.getGroupPolicyDetails(
+                  x.groupId,
+                  resource,
+                  action,
+                  req.currentContext?.initiative as Initiative
+                );
+              })
+            ).then((x) => x.flat());
+          }
 
           if (!policyDetails || policyDetails.length === 0) {
-            throw new Error('Invalid policies(s)');
+            throw new Error('Invalid policies');
           }
 
           // Inject policy attributes at global level and matching users groups
@@ -90,7 +104,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         }
 
         // Update current authorization and freeze
-        currentAuthorization.groups = groups.map((x) => x.groupName);
+        currentAuthorization.groups = groups;
         req.currentAuthorization = Object.freeze(currentAuthorization);
       } else {
         throw new Error('No current user');

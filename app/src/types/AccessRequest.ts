@@ -1,10 +1,12 @@
 import { IStamps } from '../interfaces/IStamps';
-import { AccessRequestStatus, GroupName } from '../utils/enums/application';
+import { AccessRequestStatus } from '../utils/enums/application';
 
 export type AccessRequest = {
   accessRequestId: string; // Primary key
   grant: boolean;
-  group: GroupName | null;
+  groupId: number;
+  groupLabel?: string;
   status: AccessRequestStatus;
   userId: string;
+  update?: boolean;
 } & Partial<IStamps>;

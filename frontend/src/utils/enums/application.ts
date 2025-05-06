@@ -112,6 +112,7 @@ export enum RouteName {
   INT_ELECTRIFICATION_PROJECT_ENQUIRY = 'int_electrification_project_enquiry',
   INT_ELECTRIFICATION_PROJECT_PROPONENT = 'int_electrification_project_proponent',
   INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT = 'int_electrification_project_proponent_permit',
+  INT_ELECTRIFICATION_USER_MANAGEMENT = 'int_electrification_user_management',
 
   INT_HOUSING = 'int_housing',
   INT_HOUSING_CONTACT = 'int_housing_contact',
@@ -121,8 +122,8 @@ export enum RouteName {
   INT_HOUSING_PROJECT_ENQUIRY = 'int_housing_project_enquiry',
   INT_HOUSING_PROJECT_PROPONENT = 'int_housing_project_proponent',
   INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_housing_project_proponent_permit',
+  INT_HOUSING_USER_MANAGEMENT = 'int_housing_user_management',
 
-  INT_USER_MANAGEMENT = 'int_user_management',
   /*
    * End Internal route names
    */

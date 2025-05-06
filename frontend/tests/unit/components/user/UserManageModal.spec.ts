@@ -1,12 +1,22 @@
-import UserManageModal from '@/components/user/UserManageModal.vue';
-import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
+import { createTestingPinia } from '@pinia/testing';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
-import type { AxiosResponse } from 'axios';
+
+import UserManageModal from '@/components/user/UserManageModal.vue';
 import { yarsService } from '@/services';
 
+import type { AxiosResponse } from 'axios';
+
+// Mock dependenciefs
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
+// Spies
 const getGroups = vi.spyOn(yarsService, 'getGroups');
 
 getGroups.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
@@ -30,6 +40,7 @@ const wrapperSettings = () => ({
   }
 });
 
+// Tests
 describe('UserManageModal.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();

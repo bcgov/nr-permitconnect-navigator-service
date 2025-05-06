@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import { RadioList } from '@/components/form';
+import { RadioButton } from '@/lib/primevue';
 import { yarsService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { Button, Dialog } from '@/lib/primevue';
 import { GroupName } from '@/utils/enums/application';
 
@@ -13,29 +14,27 @@ import type { Group } from '@/types';
 // Emits
 const emit = defineEmits(['userManage:save']);
 
+// Composables
+const { t } = useI18n();
+
 // Store
 const authzStore = useAuthZStore();
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectableGroups: Ref<Map<string, GroupName>> = ref(new Map());
-const group: Ref<GroupName | undefined> = ref(undefined);
+const selectableGroups: Ref<Array<Group>> = ref([]);
+const group: Ref<Group | undefined> = ref(undefined);
 
 // Actions
-onBeforeMount(async () => {
-  const yarsGroups: Array<Group> = (await yarsService.getGroups()).data;
+watchEffect(async () => {
+  const yarsGroups: Array<Group> = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
 
-  selectableGroups.value = new Map(
-    allowedGroups.map((groupName) => {
-      const group = yarsGroups.find((group) => group.name === groupName);
-      return [group?.label ?? groupName.toLowerCase(), groupName];
-    })
-  );
+  selectableGroups.value = yarsGroups.filter((x) => allowedGroups.includes(x.name));
 });
 </script>
 
@@ -47,27 +46,42 @@ onBeforeMount(async () => {
     class="app-info-dialog w-3/12"
   >
     <template #header>
-      <span class="p-dialog-title">Manage user role</span>
+      <span class="p-dialog-title">{{ t('userManageModal.header') }}</span>
     </template>
-    <div>Select role</div>
-    <RadioList
-      name="role"
-      :bold="false"
-      :options="[...selectableGroups.keys()]"
-      class="mt-4 mb-6"
-      @on-change="(value) => (group = selectableGroups.get(value))"
-    />
-    <div class="flex-auto">
+    <div class="mb-2">{{ t('userManageModal.select') }}</div>
+    <div
+      v-for="option in selectableGroups"
+      :key="option.groupId"
+      class="flex flex-col items-start mb-2"
+    >
+      <div>
+        <RadioButton
+          v-model="group"
+          :aria-describedby="`role-help`"
+          :aria-labelledby="`role-option-${option.groupId}`"
+          name="role"
+          :value="option"
+        />
+        <span
+          :id="`role-option-${option.groupId}`"
+          :for="option"
+          class="ml-2 mb-0"
+        >
+          {{ option.label }}
+        </span>
+      </div>
+    </div>
+    <div class="flex-auto mt-6">
       <Button
         class="mr-2"
-        label="Save"
+        :label="t('userManageModal.save')"
         type="submit"
         icon="pi pi-check"
         @click="emit('userManage:save', group)"
       />
       <Button
         class="p-button-outlined mr-2"
-        label="Cancel"
+        :label="t('userManageModal.cancel')"
         icon="pi pi-times"
         @click="visible = false"
       />
