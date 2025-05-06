@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onBeforeMount, provide, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import ViewHeader from '@/components/common/ViewHeader.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
 import { electrificationProjectService, enquiryService, noteService, permitService } from '@/services';
 import { useAuthZStore } from '@/store';
@@ -11,6 +13,9 @@ import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/key
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, Permit, Statistics } from '@/types';
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const authzStore = useAuthZStore();
@@ -47,14 +52,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <h1>Electrification</h1>
-    <img
-      class="banner-img"
-      src="@/assets/images/elec_banner.png"
-      alt="Electrification image"
-    />
-  </div>
+  <ViewHeader :header="t('i.electrification.electrificationView.header')" />
   <SubmissionsNavigator
     v-if="authzStore.canNavigate(NavigationPermission.INT_ELECTRIFICATION) && !loading"
     v-model:bring-forward="bringForward"
@@ -64,12 +62,3 @@ onBeforeMount(async () => {
     v-model:statistics="statistics"
   />
 </template>
-
-<style lang="scss" scoped>
-.banner-img {
-  max-height: 105px;
-  max-width: 137px;
-  width: auto;
-  height: auto;
-}
-</style>

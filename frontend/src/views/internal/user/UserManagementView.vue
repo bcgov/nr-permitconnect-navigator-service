@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, onBeforeMount, ref, watchEffect } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import elecBannerImg from '@/assets/images/elec_banner.png';
-import housingBannerImg from '@/assets/images/housing_banner.png';
+import ViewHeader from '@/components/common/ViewHeader.vue';
 import { ProgressLoader } from '@/components/layout';
 import UserCreateModal from '@/components/user/UserCreateModal.vue';
 import UserManageModal from '@/components/user/UserManageModal.vue';
@@ -26,7 +25,7 @@ import {
 import { accessRequestService, userService, yarsService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
-import { IdentityProviderKind, AccessRequestStatus, GroupName, Initiative } from '@/utils/enums/application';
+import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -56,7 +55,6 @@ const authzStore = useAuthZStore();
 
 // State
 const activeTab: Ref<number> = ref(Number(0)); // Current selected tab
-const bannerImg = ref();
 const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal visible
 const loading: Ref<boolean> = ref(false); // Generic loading flag
 const manageUserModalVisible: Ref<boolean> = ref(false); // Group change modal visible
@@ -337,30 +335,12 @@ onBeforeMount(async () => {
     loading.value = false;
   }
 });
-
-watchEffect(() => {
-  switch (useAppStore().getInitiative) {
-    case Initiative.ELECTRIFICATION:
-      bannerImg.value = elecBannerImg;
-      break;
-    case Initiative.HOUSING:
-      bannerImg.value = housingBannerImg;
-      break;
-  }
-});
 </script>
 
 <template>
   <ProgressLoader v-if="loading" />
 
-  <div class="flex justify-between">
-    <h1>User Management</h1>
-    <img
-      class="banner-img"
-      :src="bannerImg"
-      alt="Housing image"
-    />
-  </div>
+  <ViewHeader :header="t('i.user.userManagementView.header')" />
 
   <UserCreateModal
     v-if="createUserModalVisible"

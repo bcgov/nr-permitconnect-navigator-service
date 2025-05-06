@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onBeforeMount, provide, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
+import ViewHeader from '@/components/common/ViewHeader.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
 import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore } from '@/store';
@@ -11,6 +13,9 @@ import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/key
 
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const authzStore = useAuthZStore();
@@ -47,14 +52,7 @@ loading.value = false;
 </script>
 
 <template>
-  <div class="flex justify-between">
-    <h1>Housing</h1>
-    <img
-      class="banner-img"
-      src="@/assets/images/housing_banner.png"
-      alt="Housing image"
-    />
-  </div>
+  <ViewHeader :header="t('i.housing.housingView.header')" />
   <SubmissionsNavigator
     v-if="authzStore.canNavigate(NavigationPermission.INT_HOUSING) && !loading"
     v-model:bring-forward="bringForward"
@@ -64,12 +62,3 @@ loading.value = false;
     v-model:statistics="statistics"
   />
 </template>
-
-<style lang="scss" scoped>
-.banner-img {
-  max-height: 105px;
-  max-width: 137px;
-  width: auto;
-  height: auto;
-}
-</style>

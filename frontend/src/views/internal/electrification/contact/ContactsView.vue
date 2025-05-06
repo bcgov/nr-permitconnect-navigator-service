@@ -2,6 +2,7 @@
 import { onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import ViewHeader from '@/components/common/ViewHeader.vue';
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { contactService } from '@/services';
@@ -29,7 +30,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <h1>{{ t('i.contact.contactsView.contactsHeader') }}</h1>
+  <ViewHeader :header="t('i.contact.contactsView.contactsHeader')" />
   <Tabs
     v-if="!loading"
     :value="0"
