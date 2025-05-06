@@ -23,6 +23,7 @@ const service = {
    */
   _tokenToUser: (token: jwt.JwtPayload) => {
     return {
+      bceidBusinessName: token.bceid_business_name,
       sub: token.sub ? token.sub : token.preferred_username,
       firstName: token.given_name ?? token.given_names,
       fullName: token.name ?? token.display_name,
@@ -81,6 +82,7 @@ const service = {
         }
 
         const newUser = {
+          bceidBusinessName: data.bceidBusinessName,
           userId: uuidv4(),
           sub: data.sub,
           fullName: data.fullName,
@@ -299,6 +301,7 @@ const service = {
         }
 
         const obj = {
+          bceidBusinessName: data.bceidBusinessName,
           sub: data.sub,
           fullName: data.fullName,
           email: data.email,

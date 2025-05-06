@@ -11,6 +11,7 @@ type PrismaRelationUser = Omit<Prisma.userGetPayload<typeof _user>, keyof Stamps
 export default {
   toPrismaModel(input: User): PrismaRelationUser {
     return {
+      bceid_business_name: input.bceidBusinessName,
       user_id: input.userId as string,
       idp: input.idp,
       sub: input.sub,
@@ -24,6 +25,7 @@ export default {
 
   fromPrismaModel(input: PrismaRelationUser): User {
     return {
+      bceidBusinessName: input.bceid_business_name,
       userId: input.user_id,
       idp: input.idp,
       sub: input.sub,

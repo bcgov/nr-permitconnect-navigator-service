@@ -1,6 +1,7 @@
 import { IStamps } from '../interfaces/IStamps';
 
 export type User = {
+  bceidBusinessName: string | null;
   userId?: string; // Primary Key
   idp: string | null;
   sub: string;

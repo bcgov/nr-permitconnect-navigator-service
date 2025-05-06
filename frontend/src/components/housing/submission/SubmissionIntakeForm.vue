@@ -684,7 +684,7 @@ watch(
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_LIST"
-                    @on-change="() => setFieldValue('basic.registeredName', null)"
+                    @on-change="() => setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName)"
                   />
                   <AutoComplete
                     v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
