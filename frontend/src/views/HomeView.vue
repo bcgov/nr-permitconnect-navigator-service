@@ -110,6 +110,7 @@ h3 {
 
 .p-button {
   border-width: 2px;
+  width: 12.5rem;
   &:not(.p-button-secondary, .p-button-success, .p-button-info, .p-button-warning, .p-button-help, .p-button-danger) {
     color: var(--p-primary-color);
     &:not(.p-button-outlined, .p-button-text) {
