@@ -170,6 +170,9 @@
       }
     },
     "electrification": {
+      "electrificationView": {
+        "header": "Electrification"
+      },
       "projectForm": {
         "additionalInfoHeader": "Additional information about project",
         "astNotesHeader": "Automated Status Tool (AST) Notes",
@@ -195,11 +198,6 @@
         "submissionTypeLabel": "Submission type",
         "priorityLabel": "Priority",
         "aaiUpdateLabel": "AAI Update"
-      }
-    },
-    "electrification": {
-      "electrificationView": {
-        "header": "Electrification"
       }
     },
     "housing": {
