@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
 
-import housingBannerImg from '@/assets/images/housing_banner.png';
 import elecBannerImg from '@/assets/images/elec_banner.png';
+import housingBannerImg from '@/assets/images/housing_banner.png';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
