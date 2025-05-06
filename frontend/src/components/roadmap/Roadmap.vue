@@ -8,7 +8,7 @@ import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
-import { useConfigStore, useProjectStore } from '@/store';
+import { useAppStore, useConfigStore, useProjectStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
@@ -147,13 +147,15 @@ watchEffect(async () => {
     '{{ navigatorName }}': navigator.fullName
   });
 
+  const initiative = useAppStore().getInitiative.toLowerCase();
+
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
     to: contact?.email,
     cc: undefined,
     bcc: bcc,
-    subject: "Here is your housing project's Permit Roadmap", // eslint-disable-line quotes
+    subject: `Here is your ${initiative} project's Permit Roadmap`,
     bodyType: 'text',
     body: body
   };
