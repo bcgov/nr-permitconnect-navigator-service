@@ -303,23 +303,24 @@ model submission {
 }
 
 model user {
-  user_id           String             @id @db.Uuid
-  idp               String?
-  sub               String             @unique(map: "user_sub_unique")
-  email             String?
-  first_name        String?
-  full_name         String?
-  last_name         String?
-  active            Boolean            @default(true)
-  created_by        String?            @default("00000000-0000-0000-0000-000000000000")
-  created_at        DateTime?          @default(now()) @db.Timestamptz(6)
-  updated_by        String?
-  updated_at        DateTime?          @db.Timestamptz(6)
-  access_request    access_request[]
-  contact           contact[]
-  enquiry           enquiry[]
-  submission        submission[]
-  identity_provider identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
+  user_id             String             @id @db.Uuid
+  idp                 String?
+  sub                 String             @unique(map: "user_sub_unique")
+  email               String?
+  first_name          String?
+  full_name           String?
+  last_name           String?
+  active              Boolean            @default(true)
+  created_by          String?            @default("00000000-0000-0000-0000-000000000000")
+  created_at          DateTime?          @default(now()) @db.Timestamptz(6)
+  updated_by          String?
+  updated_at          DateTime?          @db.Timestamptz(6)
+  bceid_business_name String?
+  access_request      access_request[]
+  contact             contact[]
+  enquiry             enquiry[]
+  submission          submission[]
+  identity_provider   identity_provider? @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
   @@index([sub], map: "user_username_index")

@@ -10,9 +10,13 @@ const _contact = Prisma.validator<Prisma.contactDefaultArgs>()({});
 const _contactWithActivitiesGraph = Prisma.validator<Prisma.contactDefaultArgs>()({
   include: { activity_contact: true }
 });
+const _contactWithBusinessName = Prisma.validator<Prisma.contactDefaultArgs>()({
+  include: { user: { select: { bceid_business_name: true } } }
+});
 
 type PrismaRelationContact = Omit<Prisma.contactGetPayload<typeof _contact>, keyof Stamps>;
 type PrismaGraphContactActivities = Prisma.contactGetPayload<typeof _contactWithActivitiesGraph>;
+type PrismaGraphContactBusinessName = Prisma.contactGetPayload<typeof _contactWithBusinessName>;
 
 export default {
   toPrismaModel(input: Contact): PrismaRelationContact {
@@ -45,6 +49,15 @@ export default {
     const contact = this.fromPrismaModel(input);
     if (contact && input.activity_contact) {
       contact.activityContact = input.activity_contact.map((activity) => activity_contact.fromPrismaModel(activity));
+    }
+
+    return contact;
+  },
+
+  fromPrismaModelWithBusinessName(input: PrismaGraphContactBusinessName): Contact {
+    const contact = this.fromPrismaModel(input);
+    if (contact && input?.user?.bceid_business_name) {
+      contact.bceidBusinessName = input.user.bceid_business_name;
     }
 
     return contact;

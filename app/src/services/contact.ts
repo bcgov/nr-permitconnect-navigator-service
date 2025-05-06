@@ -117,10 +117,17 @@ const service = {
             phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
           }
         ]
+      },
+      include: {
+        user: {
+          select: {
+            bceid_business_name: true
+          }
+        }
       }
     });
 
-    return response ? response.map((x) => contact.fromPrismaModel(x)) : [];
+    return response ? response.map((x) => contact.fromPrismaModelWithBusinessName(x)) : [];
   }
 };
 

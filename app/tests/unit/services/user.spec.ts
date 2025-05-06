@@ -30,6 +30,7 @@ const idirIdentityProvider: IDPType = {
 };
 
 const prismaIdirUser: PrismaUser = {
+  bceid_business_name: null,
   user_id: uuidv4(),
   idp: IdentityProvider.IDIR,
   sub: 'sub',
@@ -45,6 +46,7 @@ const prismaIdirUser: PrismaUser = {
 };
 
 const idirUser: User = {
+  bceidBusinessName: null,
   userId: prismaIdirUser.user_id,
   idp: prismaIdirUser.idp,
   sub: prismaIdirUser.sub,
