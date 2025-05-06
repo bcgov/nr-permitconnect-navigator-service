@@ -9,6 +9,7 @@ import ToastService from 'primevue/toastservice';
 
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import { userService, roadmapService } from '@/services';
+import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
 
@@ -33,6 +34,10 @@ vi.mock('@/store', () => {
           assignedUserId: undefined,
           contacts: []
         })
+      }),
+    useAppStore: () =>
+      vue.reactive({
+        getInitiative: vue.ref(Initiative.HOUSING)
       })
   };
 });
