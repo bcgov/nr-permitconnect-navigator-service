@@ -4,7 +4,7 @@ import { onBeforeMount, ref } from 'vue';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
-import { BasicResponse, Initiative } from '@/utils/enums/application';
+import { BasicResponse } from '@/utils/enums/application';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -24,6 +24,9 @@ type ATSUser = {
 const { submissionOrEnquiry } = defineProps<{
   submissionOrEnquiry: Enquiry | Submission;
 }>();
+
+// Constants
+const ATS_REGION_NAME: string = 'Navigator';
 
 // Emits
 const emit = defineEmits(['atsUserLink:link']);
@@ -57,7 +60,7 @@ async function createATSClient() {
       address: address,
       firstName: submissionOrEnquiry.contacts[0]?.firstName,
       surName: submissionOrEnquiry?.contacts[0]?.lastName,
-      regionName: Initiative.HOUSING,
+      regionName: ATS_REGION_NAME,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
 
