@@ -1,33 +1,17 @@
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
-import { enquiryService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
-import type { AxiosResponse } from 'axios';
-
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
-
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-// Mock dependencies
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
+import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
+import { userService } from '@/services';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
-vi.mock('vue-router', () => ({
-  useRoute: vi.fn(() => ({
-    query: {}
-  })),
-  useRouter: vi.fn(() => ({
-    push: vi.fn()
-  }))
-}));
+import type { AxiosResponse } from 'axios';
 
-const useEnquiryService = vi.spyOn(enquiryService, 'updateIsDeletedFlag');
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+const useUserService = vi.spyOn(userService, 'searchUsers');
+
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
@@ -56,11 +40,11 @@ const testEnquiry = {
   atsClientId: 123456
 };
 
-const testEnquiries = [testEnquiry];
-const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => ({
+useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+
+const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
   props: {
-    enquiries: testEnquiriesProp,
-    loading: loading
+    enquiry: testEnquiryProp
   },
   global: {
     plugins: [
@@ -80,9 +64,13 @@ const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => 
   }
 });
 
-describe('EnquiryListProponent.vue', () => {
+describe('EnquiryCard.vue', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders the component with the provided props', () => {
-    const wrapper = mount(EnquiryListProponent, wrapperSettings());
+    const wrapper = mount(EnquiryCard, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

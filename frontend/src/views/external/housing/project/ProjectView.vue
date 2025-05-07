@@ -6,7 +6,7 @@ import { useRouter } from 'vue-router';
 
 import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
+import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
