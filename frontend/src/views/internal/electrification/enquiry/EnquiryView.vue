@@ -3,9 +3,9 @@ import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
+import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, housingProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';

@@ -1,14 +1,14 @@
-import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
-import { enquiryService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
-import type { AxiosResponse } from 'axios';
-
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
-
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+
+import EnquiryListNavigator from '@/components/projectCommon/enquiry/EnquiryListNavigator.vue';
+import { enquiryService } from '@/services';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+
+import type { AxiosResponse } from 'axios';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
