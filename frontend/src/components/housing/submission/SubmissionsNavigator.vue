@@ -4,10 +4,10 @@ import { storeToRefs } from 'pinia';
 import { inject, onBeforeMount, ref, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import EnquiryListNavigator from '@/components/housing/enquiry/EnquiryListNavigator.vue';
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
+import EnquiryListNavigator from '@/components/projectCommon/enquiry/EnquiryListNavigator.vue';
 import {
   Accordion,
   AccordionContent,
