@@ -1,15 +1,33 @@
-import EnquiryCard from '@/components/housing/enquiry/EnquiryCard.vue';
-import { userService } from '@/services';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+
+import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
+import { enquiryService } from '@/services';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+
 import type { AxiosResponse } from 'axios';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+// Mock dependencies
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
+vi.mock('vue-router', () => ({
+  useRoute: vi.fn(() => ({
+    query: {}
+  })),
+  useRouter: vi.fn(() => ({
+    push: vi.fn()
+  }))
+}));
+
+const useEnquiryService = vi.spyOn(enquiryService, 'updateIsDeletedFlag');
+useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
@@ -38,11 +56,11 @@ const testEnquiry = {
   atsClientId: 123456
 };
 
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-
-const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
+const testEnquiries = [testEnquiry];
+const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => ({
   props: {
-    enquiry: testEnquiryProp
+    enquiries: testEnquiriesProp,
+    loading: loading
   },
   global: {
     plugins: [
@@ -62,13 +80,9 @@ const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
   }
 });
 
-describe('EnquiryCard.vue', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
+describe('EnquiryListProponent.vue', () => {
   it('renders the component with the provided props', () => {
-    const wrapper = mount(EnquiryCard, wrapperSettings());
+    const wrapper = mount(EnquiryListProponent, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });
