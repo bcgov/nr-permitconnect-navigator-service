@@ -205,11 +205,13 @@ const controller = {
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
       let response = await housingProjectService.getHousingProjects();
+
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
           (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
+
       res.status(200).json(response.map((x: HousingProject) => x.activityId));
     } catch (e: unknown) {
       next(e);
