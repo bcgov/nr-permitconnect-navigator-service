@@ -5,6 +5,7 @@ import { Action, GroupName, Initiative, Resource } from '@/utils/enums/applicati
 
 import type { Ref } from 'vue';
 import type { Group, Permission } from '@/types';
+import useAppStore from './appStore';
 
 export enum NavigationPermission {
   /*
@@ -32,52 +33,88 @@ export enum NavigationPermission {
   INT_USER_MANAGEMENT = 'int_user_management'
 }
 
+type NavigationAuthorizationMapT = {
+  initiative: Initiative;
+  group: GroupName;
+  permissions: Array<NavigationPermission>;
+};
+
 const GlobalNavigations = [NavigationPermission.GLO_USER];
 
-const NavigationAuthorizationMap = [
+const NavigationAuthorizationMap: Array<NavigationAuthorizationMapT> = [
+  // Electrification
   {
-    groupName: GroupName.ADMIN,
+    initiative: Initiative.ELECTRIFICATION,
+    group: GroupName.ADMIN,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
-      NavigationPermission.INT_HOUSING,
-      NavigationPermission.INT_USER_MANAGEMENT,
-      ...GlobalNavigations
+      NavigationPermission.INT_USER_MANAGEMENT
     ]
   },
   {
-    groupName: GroupName.NAVIGATOR,
+    initiative: Initiative.ELECTRIFICATION,
+    group: GroupName.NAVIGATOR,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_ELECTRIFICATION]
+  },
+  {
+    initiative: Initiative.ELECTRIFICATION,
+    group: GroupName.NAVIGATOR_READ_ONLY,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_ELECTRIFICATION]
+  },
+  {
+    initiative: Initiative.ELECTRIFICATION,
+    group: GroupName.PROPONENT,
+    permissions: [NavigationPermission.EXT_ELECTRIFICATION]
+  },
+  {
+    initiative: Initiative.ELECTRIFICATION,
+    group: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
+      NavigationPermission.INT_USER_MANAGEMENT
+    ]
+  },
+
+  // Housing
+  {
+    initiative: Initiative.HOUSING,
+    group: GroupName.ADMIN,
+    permissions: [
+      NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_HOUSING,
-      ...GlobalNavigations
+      NavigationPermission.INT_USER_MANAGEMENT
     ]
   },
   {
-    groupName: GroupName.NAVIGATOR_READ_ONLY,
-    permissions: [
-      NavigationPermission.INT_CONTACT,
-      NavigationPermission.INT_ELECTRIFICATION,
-      NavigationPermission.INT_HOUSING,
-      ...GlobalNavigations
-    ]
+    initiative: Initiative.HOUSING,
+    group: GroupName.NAVIGATOR,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING]
   },
   {
-    groupName: GroupName.PROPONENT,
-    permissions: [NavigationPermission.EXT_ELECTRIFICATION, NavigationPermission.EXT_HOUSING, ...GlobalNavigations]
+    initiative: Initiative.HOUSING,
+    group: GroupName.NAVIGATOR_READ_ONLY,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_HOUSING]
   },
   {
-    groupName: GroupName.SUPERVISOR,
+    initiative: Initiative.HOUSING,
+    group: GroupName.PROPONENT,
+    permissions: [NavigationPermission.EXT_ELECTRIFICATION, NavigationPermission.EXT_HOUSING]
+  },
+  {
+    initiative: Initiative.HOUSING,
+    group: GroupName.SUPERVISOR,
     permissions: [
       NavigationPermission.INT_CONTACT,
-      NavigationPermission.INT_ELECTRIFICATION,
       NavigationPermission.INT_HOUSING,
-      NavigationPermission.INT_USER_MANAGEMENT,
-      ...GlobalNavigations
+      NavigationPermission.INT_USER_MANAGEMENT
     ]
   }
 ];
+
+// Add global permissions to all
+NavigationAuthorizationMap.forEach((auth) => auth.permissions.push(...GlobalNavigations));
 
 export type AuthZStoreState = {
   groups: Ref<Array<Group>>;
@@ -109,14 +146,19 @@ export const useAuthZStore = defineStore('authz', () => {
     canNavigate: computed(
       () =>
         (navPerm: NavigationPermission | Array<NavigationPermission>, allowGroupOverride: boolean = true) => {
+          const currentInitiative = useAppStore().getInitiative;
+          const bypassInitiative = currentInitiative === Initiative.PCNS;
+
           const groups =
             allowGroupOverride && state.groupOverride.value
               ? [{ name: state.groupOverride.value } as Group]
               : state.groups.value;
           const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
-          const perms = NavigationAuthorizationMap.filter((p) => groups?.some((g) => g.name === p.groupName)).flatMap(
-            (p) => p.permissions
-          );
+          const perms = NavigationAuthorizationMap.filter((p) =>
+            groups?.some((g) => g.initiativeCode === p.initiative && g.name === p.group)
+          )
+            .filter((p) => bypassInitiative || p.initiative === currentInitiative)
+            .flatMap((p) => p.permissions);
           return groups?.some((g) => g.name === GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
         }
     ),
