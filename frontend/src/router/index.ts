@@ -95,12 +95,13 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: [bootstrap, entryRedirect, accessHandler, () => useAppStore().setInitiative(Initiative.PCNS)],
+    beforeEnter: [bootstrap, () => useAppStore().setInitiative(Initiative.PCNS), entryRedirect, accessHandler],
     children: [
       {
         path: '/',
         name: RouteName.HOME,
         component: () => import('@/views/HomeView.vue'),
+        beforeEnter: [() => useAppStore().setInitiative(Initiative.PCNS)],
         meta: { hideBreadcrumb: true, hideNavbar: true }
       },
       {
