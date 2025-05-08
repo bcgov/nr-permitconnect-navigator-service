@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { boolean, date, mixed, object, string } from 'yup';
 
@@ -20,7 +20,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, housingProjectService, userService } from '@/services';
+import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
@@ -32,6 +32,7 @@ import {
 } from '@/utils/constants/projectCommon';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
@@ -54,6 +55,9 @@ const {
   editable?: boolean;
   enquiry: any;
 }>();
+
+// Injections
+const projectService = inject(projectServiceKey);
 
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
@@ -230,7 +234,7 @@ const onSubmit = async (values: any) => {
     // with linked activity
     if (valuesWithContact.relatedActivityId) {
       valuesWithContact.atsClientId = '';
-      formRef?.value?.setFieldValue('atsClientId', '');
+      formRef?.value?.setFieldValue('atsClientId', null);
     }
     // Generate final enquiry object
     const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
@@ -278,7 +282,9 @@ onBeforeMount(async () => {
     atsClientId: enquiry?.atsClientId,
     user: assigneeOptions.value[0] ?? null
   };
-  projectActivityIds.value = filteredProjectActivityIds.value = (await housingProjectService.getActivityIds()).data;
+
+  if (!projectService) throw new Error('No service');
+  projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.getActivityIds()).data;
 });
 </script>
 
