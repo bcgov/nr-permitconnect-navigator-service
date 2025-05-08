@@ -1,28 +1,29 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteService } from '@/services';
+import { enquiryService, electrificationProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { projectServiceKey } from '@/utils/keys';
 
-import type { Note, HousingProject } from '@/types';
+import type { Note, ElectrificationProject } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
 const {
   enquiryId,
-  housingProjectId,
+  projectId,
   initialTab = '0'
 } = defineProps<{
   enquiryId: string;
-  housingProjectId?: string;
+  projectId?: string;
   initialTab?: string;
 }>();
 
@@ -37,13 +38,16 @@ const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
-const relatedHousingProjects: Ref<HousingProject | undefined> = ref(undefined);
+const relatedElectrificationProject: Ref<ElectrificationProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 
 const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
 });
+
+// Providers
+provide(projectServiceKey, electrificationProjectService);
 
 // Actions
 function onAddNote(note: Note) {
@@ -64,12 +68,12 @@ function onEnquiryFormSaved() {
 
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
-    relatedHousingProjects.value = (
-      await housingProjectService.searchProjects({
+    relatedElectrificationProject.value = (
+      await electrificationProjectService.searchProjects({
         activityId: [getEnquiry?.value?.relatedActivityId]
       })
     ).data[0];
-  } else relatedHousingProjects.value = undefined;
+  } else relatedElectrificationProject.value = undefined;
 }
 
 onBeforeMount(async () => {
@@ -85,9 +89,9 @@ onBeforeMount(async () => {
     updateRelatedEnquiry();
   }
 
-  if (housingProjectId) {
-    const submission = (await housingProjectService.getProject(housingProjectId)).data;
-    projectStore.setProject(submission);
+  if (projectId) {
+    const project = (await electrificationProjectService.getProject(projectId)).data;
+    projectStore.setProject(project);
   }
 
   loading.value = false;
@@ -118,7 +122,7 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <Message
-          v-if="relatedHousingProjects"
+          v-if="relatedElectrificationProject"
           severity="info"
           class="text-center"
           :closable="false"
@@ -126,8 +130,8 @@ onBeforeMount(async () => {
           {{ t('enquiryView.linkedActivity') }}
           <router-link
             :to="{
-              name: RouteName.INT_HOUSING_PROJECT,
-              params: { housingProjectId: relatedHousingProjects.housingProjectId }
+              name: RouteName.INT_ELECTRIFICATION_PROJECT,
+              params: { projectId: relatedElectrificationProject.electrificationProjectId }
             }"
           >
             {{ getEnquiry?.relatedActivityId }}
@@ -135,7 +139,7 @@ onBeforeMount(async () => {
         </Message>
 
         <Message
-          v-if="getEnquiry?.relatedActivityId && !relatedHousingProjects"
+          v-if="getEnquiry?.relatedActivityId && !relatedElectrificationProject"
           severity="error"
           class="text-center"
           :closable="false"
@@ -144,9 +148,9 @@ onBeforeMount(async () => {
         </Message>
         <span v-if="!loading && getEnquiry">
           <EnquiryForm
-            :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
+            :editable="!isCompleted && useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedHousingProjects?.atsClientId"
+            :related-ats-number="relatedElectrificationProject?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>
@@ -158,7 +162,7 @@ onBeforeMount(async () => {
           </div>
           <Button
             aria-label="Add note"
-            :disabled="!isCompleted && !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
+            :disabled="!isCompleted && !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
             @click="noteModalVisible = true"
           >
             <font-awesome-icon

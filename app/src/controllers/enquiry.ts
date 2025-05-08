@@ -40,7 +40,12 @@ const controller = {
 
     const activityId =
       data.activityId ??
-      (await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
+      (
+        await activityService.createActivity(
+          req.currentContext.initiative as Initiative,
+          generateCreateStamps(req.currentContext)
+        )
+      )?.activityId;
 
     let basic;
 
