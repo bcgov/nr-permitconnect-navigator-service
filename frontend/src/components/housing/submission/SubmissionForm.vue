@@ -867,7 +867,7 @@ onBeforeMount(async () => {
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
-          setFieldValue('atsClientId', atsClientResource.clientId?.toString());
+          setFieldValue('atsClientId', atsClientResource.clientId);
         }
       "
     />
@@ -887,7 +887,7 @@ onBeforeMount(async () => {
       @ats-user-link:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientId', atsClientId.toString());
+          setFieldValue('atsClientId', atsClientId);
         }
       "
     />
