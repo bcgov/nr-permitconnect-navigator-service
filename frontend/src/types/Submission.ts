@@ -43,6 +43,7 @@ export type Submission = {
   naturalDisaster: string;
   addedToATS: boolean;
   atsClientId: string | null;
+  atsEnquiryId: string | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   aaiUpdated: boolean;
