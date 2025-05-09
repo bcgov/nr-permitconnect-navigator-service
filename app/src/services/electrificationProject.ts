@@ -126,9 +126,10 @@ const service = {
   /**
    * @function getElectrificationProjects
    * Gets a list of electrification projects
+   * @param {boolean} [includeDeleted=false] Optional boolean to include deleted electrification projects
    * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
    */
-  getElectrificationProjects: async () => {
+  getElectrificationProjects: async (includeDeleted: boolean = false) => {
     try {
       const result = await prisma.electrification_project.findMany({
         include: {
@@ -145,7 +146,8 @@ const service = {
         },
         orderBy: {
           createdAt: 'desc'
-        }
+        },
+        where: includeDeleted ? {} : { activity: { is_deleted: false } }
       });
 
       return result.map((x) => electrification_project.fromPrismaModelWithUser(x));

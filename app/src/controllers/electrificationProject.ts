@@ -5,8 +5,8 @@ import {
   activityService,
   contactService,
   draftService,
-  emailService,
-  electrificationProjectService
+  electrificationProjectService,
+  emailService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -14,14 +14,15 @@ import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
+  Activity,
+  Contact,
   CurrentContext,
   Draft,
-  Email,
   ElectrificationProject,
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
-  StatisticsFilters,
-  Contact
+  Email,
+  StatisticsFilters
 } from '../types';
 
 const controller = {
@@ -65,8 +66,15 @@ const controller = {
 
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await electrificationProjectService.getElectrificationProjects();
-      res.status(200).json(response.map((x) => x.activityId));
+      let response = await electrificationProjectService.getElectrificationProjects();
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter(
+          (x: Activity) => x?.createdBy?.toUpperCase() === req.currentContext?.userId?.toUpperCase()
+        );
+      }
+
+      res.status(200).json(response.map((x: ElectrificationProject) => x.activityId));
     } catch (e: unknown) {
       next(e);
     }

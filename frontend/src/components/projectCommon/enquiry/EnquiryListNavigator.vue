@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -17,11 +17,12 @@ import {
   useToast
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
-import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Resource } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
+import { enquiryRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -35,7 +36,11 @@ const { enquiries } = defineProps<{
   enquiries: Array<Enquiry> | undefined;
 }>();
 
+// Injections
+const enquiryRouteName = inject(enquiryRouteNameKey);
+
 // Composables
+const { t } = useI18n();
 const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
@@ -53,7 +58,9 @@ const FILTER_OPTIONS: Array<FilterOption> = [
 
 // Emit
 const emit = defineEmits(['enquiry:delete']);
+
 // Store
+const appStore = useAppStore();
 const authzStore = useAuthZStore();
 
 // State
@@ -81,9 +88,6 @@ if (route.query.tab === '1') {
 }
 
 // Actions
-
-const { t } = useI18n();
-
 function handleCreateNewActivity() {
   confirm.require({
     header: t('enquiryListNavigator.confirmCreateHeader'),
@@ -93,9 +97,8 @@ function handleCreateNewActivity() {
         const response = (await enquiryService.createEnquiry()).data;
         if (response?.activityId) {
           router.push({
-            name: RouteName.INT_HOUSING_ENQUIRY,
-            params: { enquiryId: response.enquiryId },
-            query: { activityId: response.activityId }
+            name: enquiryRouteName,
+            params: { enquiryId: response.enquiryId }
           });
         }
       } catch (e: any) {
@@ -219,7 +222,7 @@ function updateQueryParams() {
           </IconField>
         </div>
         <Button
-          v-if="authzStore.can(Initiative.HOUSING, Resource.ENQUIRY, Action.CREATE)"
+          v-if="authzStore.can(appStore.getInitiative, Resource.ENQUIRY, Action.CREATE)"
           label="Create submission"
           type="submit"
           icon="pi pi-plus"
@@ -238,7 +241,7 @@ function updateQueryParams() {
         <div :data-activityId="data.activityId">
           <router-link
             :to="{
-              name: RouteName.INT_HOUSING_ENQUIRY,
+              name: enquiryRouteName,
               params: { enquiryId: data.enquiryId }
             }"
           >
@@ -307,7 +310,7 @@ function updateQueryParams() {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Delete enquiry"
-          :disabled="!useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.DELETE)"
+          :disabled="!useAuthZStore().can(appStore.getInitiative, Resource.ENQUIRY, Action.DELETE)"
           @click="
             onDelete(data.enquiryId, data.activityId);
             selection = data;

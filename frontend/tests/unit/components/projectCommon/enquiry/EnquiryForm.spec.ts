@@ -1,15 +1,17 @@
-import { nextTick } from 'vue';
-
-import EnquiryForm from '@/components/housing/enquiry/EnquiryForm.vue';
-import { enquiryService, housingProjectService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
 
+import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
+import { electrificationProjectService, enquiryService, housingProjectService, userService } from '@/services';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { projectServiceKey } from '@/utils/keys';
+
 import type { AxiosResponse } from 'axios';
+import type { IProjectService } from '@/interfaces/IProjectService';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -19,7 +21,8 @@ vi.mock('vue-i18n', () => ({
 
 const searchContactSpy = vi.spyOn(userService, 'searchUsers');
 const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
-const getActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
+const getHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
+const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'getActivityIds');
 
 const currentDate = new Date().toISOString();
 
@@ -58,7 +61,12 @@ vi.mock(import('vue-router'), async (importOriginal) => {
   };
 });
 
-const wrapperSettings = (testEnquiryProp = testEnquiry, editableProp?: boolean, relatedAtsNumberProp?: number) => ({
+const wrapperSettings = (
+  testEnquiryProp = testEnquiry,
+  editableProp?: boolean,
+  relatedAtsNumberProp?: number,
+  projectServiceMock: IProjectService = housingProjectService
+) => ({
   props: {
     editable: editableProp,
     enquiry: testEnquiryProp,
@@ -78,6 +86,9 @@ const wrapperSettings = (testEnquiryProp = testEnquiry, editableProp?: boolean, 
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [projectServiceKey]: projectServiceMock
+    },
     stubs: [
       'font-awesome-icon',
       'router-link',
@@ -97,7 +108,8 @@ describe('EnquiryForm.vue', () => {
     updateEnquirySpy.mockResolvedValue({
       data: { enquiryId: 'enquiry123', activityId: 'activity456' }
     } as AxiosResponse);
-    getActivityIdsSpy.mockResolvedValue({ data: activityIdMockData } as AxiosResponse);
+    getHousingActivityIdsSpy.mockResolvedValue({ data: activityIdMockData } as AxiosResponse);
+    getElectrificationActivityIdsSpy.mockResolvedValue({ data: activityIdMockData } as AxiosResponse);
   });
 
   it('renders the component with the provided props', () => {
@@ -156,14 +168,24 @@ describe('EnquiryForm.vue', () => {
     expect(searchContactSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
   });
 
-  it('gets activity Ids onMount', async () => {
+  it('gets electrification activity Ids onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined, electrificationProjectService));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
-    expect(getActivityIdsSpy).toHaveBeenCalledTimes(1);
-    expect(getActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
+    expect(getElectrificationActivityIdsSpy).toHaveBeenCalledTimes(1);
+    expect(getElectrificationActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
+  });
+
+  it('gets housing activity Ids onMount', async () => {
+    const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined, housingProjectService));
+    await nextTick();
+
+    expect(wrapper.isVisible()).toBeTruthy();
+    expect(getHousingActivityIdsSpy).toHaveBeenCalledTimes(1);
+    expect(getHousingActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
   });
 
   it('there are correct numbers of disabled components when editable prop is false', async () => {
@@ -171,7 +193,7 @@ describe('EnquiryForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-disabled');
-    expect(wrapper.vm.$props?.editable).toBe(false);
+    expect(wrapper.props('editable')).toBe(false);
     expect(elements.length).toBe(9);
   });
 

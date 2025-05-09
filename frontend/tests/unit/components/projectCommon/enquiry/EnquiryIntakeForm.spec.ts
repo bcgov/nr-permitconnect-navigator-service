@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
-import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
+import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
 import { contactService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';

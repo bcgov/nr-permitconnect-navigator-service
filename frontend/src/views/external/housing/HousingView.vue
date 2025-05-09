@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import Tooltip from '@/components/common/Tooltip.vue';
-import EnquiryListProponent from '@/components/housing/enquiry/EnquiryListProponent.vue';
+import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
 import { enquiryService, housingProjectService } from '@/services';

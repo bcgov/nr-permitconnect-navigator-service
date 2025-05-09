@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import EnquiryIntakeForm from '@/components/housing/enquiry/EnquiryIntakeForm.vue';
+import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
 import { permitService, housingProjectService } from '@/services';
 import { useProjectStore, usePermitStore } from '@/store';
 

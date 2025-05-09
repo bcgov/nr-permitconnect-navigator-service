@@ -181,6 +181,15 @@ export function isDebugMode(): boolean {
 export function isEmptyObject(obj: object): boolean {
   return Object.keys(obj).length === 0;
 }
+/**
+ * @function isPlainObject
+ * Checks if the given value is a plain object and not another type or other built in object type
+ * @param {unknown} value The value to check
+ * @returns {boolean} True if the value is a plain object, false otherwise
+ */
+export function isPlainObject(value: unknown): boolean {
+  return typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype;
+}
 
 /**
  * @function isTruthy
@@ -299,7 +308,7 @@ export function setEmptyStringsToNull(data: any): any {
     return data.map(setEmptyStringsToNull);
   }
 
-  if (typeof data === 'object' && data !== null) {
+  if (isPlainObject(data)) {
     return Object.fromEntries(Object.entries(data).map(([k, v]) => [k, setEmptyStringsToNull(v)]));
   }
 

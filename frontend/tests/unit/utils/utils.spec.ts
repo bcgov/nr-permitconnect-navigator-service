@@ -1,4 +1,4 @@
-import { setEmptyStringsToNull } from '@/utils/utils';
+import { isPlainObject, setEmptyStringsToNull } from '@/utils/utils';
 
 describe('utils.ts', () => {
   describe('setEmptyStringsToNull', () => {
@@ -61,6 +61,42 @@ describe('utils.ts', () => {
       const result = setEmptyStringsToNull(original);
       expect(original).toEqual(copy);
       expect(result).toEqual({ foo: null });
+    });
+
+    it('leaves Date instances untouched', () => {
+      const d = new Date('2025-05-08T10:00:00Z');
+      expect(setEmptyStringsToNull(d)).toBe(d);
+    });
+  });
+
+  describe('isPlainObject', () => {
+    it('returns true for a plain object literal', () => {
+      expect(isPlainObject({ foo: 1 })).toBe(true);
+    });
+
+    it('returns false for arrays', () => {
+      expect(isPlainObject(['a', 'b'])).toBe(false);
+    });
+
+    it('returns false for Date objects', () => {
+      expect(isPlainObject(new Date())).toBe(false);
+    });
+
+    it('returns false for Map and Set', () => {
+      expect(isPlainObject(new Map())).toBe(false);
+      expect(isPlainObject(new Set())).toBe(false);
+    });
+
+    it('returns false for class instances', () => {
+      class Person {
+        constructor(public name: string) {}
+      }
+      expect(isPlainObject(new Person('Alice'))).toBe(false);
+    });
+
+    it('returns false for RegExp instances', () => {
+      const re = /foo/i;
+      expect(isPlainObject(re)).toBe(false);
     });
   });
 });

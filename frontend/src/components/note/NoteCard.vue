@@ -5,8 +5,8 @@ import Divider from '@/components/common/Divider.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAuthZStore } from '@/store';
-import { Action, Initiative, Resource } from '@/utils/enums/application';
+import { useAppStore, useAuthZStore } from '@/store';
+import { Action, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -20,6 +20,9 @@ const { editable = true, note } = defineProps<{
 
 // Emits
 const emit = defineEmits(['updateNote', 'deleteNote']);
+
+// Store
+const appStore = useAppStore();
 
 // State
 const noteModalVisible: Ref<boolean> = ref(false);
@@ -53,7 +56,7 @@ onBeforeMount(() => {
         <Button
           class="p-button-outlined"
           aria-label="Edit"
-          :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.UPDATE)"
+          :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
           @click="noteModalVisible = true"
         >
           <font-awesome-icon

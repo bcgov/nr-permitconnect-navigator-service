@@ -2,6 +2,9 @@ import prisma from '../db/dataConnection';
 import { activity } from '../db/models';
 import { generateUniqueActivityId } from '../db/utils/utils';
 import { IStamps } from '../interfaces/IStamps';
+import { Initiative } from '../utils/enums/application';
+
+import type { Activity } from '../types';
 
 const service = {
   /**
@@ -62,6 +65,32 @@ const service = {
     });
 
     return response ? activity.fromPrismaModel(response) : null;
+  },
+
+  /**
+   * @function getActivities
+   * Get a list of activities
+   * @param {string} [initiative] Optional initiative code, if provided, only return activities for that initiative
+   * @param {boolean} [includeDeleted=false] Optional flag to include deleted activities
+   * @returns {Promise<Activity[]>} The result of running the findMany operation
+   */
+  getActivities: async (includeDeleted: boolean = false, initiative?: Initiative): Promise<Activity[]> => {
+    if (!initiative) {
+      const allActivities = await prisma.activity.findMany({
+        where: { is_deleted: includeDeleted ? undefined : false }
+      });
+      return allActivities.map(activity.fromPrismaModel);
+    } else {
+      const response = await prisma.activity.findMany({
+        where: {
+          is_deleted: includeDeleted ? undefined : false,
+          initiative: {
+            code: initiative
+          }
+        }
+      });
+      return response.map(activity.fromPrismaModel);
+    }
   }
 };
 
