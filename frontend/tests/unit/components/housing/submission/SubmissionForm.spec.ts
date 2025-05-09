@@ -14,6 +14,12 @@ import type { Submission, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttri
 import type { AxiosResponse } from 'axios';
 // import { geoJSON } from 'leaflet';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn().mockReturnValue('i18n string')
+  })
+}));
+
 const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
@@ -109,6 +115,7 @@ const testSubmission: Submission = {
   naturalDisaster: 'None',
   addedToATS: true,
   atsClientId: '654321',
+  atsEnquiryId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
