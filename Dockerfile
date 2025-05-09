@@ -4,7 +4,7 @@ ARG BASE_IMAGE=docker.io/node:22.14.0-alpine
 #
 # Build the app
 #
-FROM ${BASE_IMAGE} as app
+FROM ${BASE_IMAGE} AS app
 
 ARG APP_ROOT
 ENV NO_UPDATE_NOTIFIER=true
@@ -23,7 +23,7 @@ RUN npm ci && npm run build
 #
 # Build the frontend
 #
-FROM ${BASE_IMAGE} as frontend
+FROM ${BASE_IMAGE} AS frontend
 
 ARG APP_ROOT
 ENV NO_UPDATE_NOTIFIER=true
