@@ -929,6 +929,7 @@ onBeforeMount(async () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
           setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
         }
       "
     />

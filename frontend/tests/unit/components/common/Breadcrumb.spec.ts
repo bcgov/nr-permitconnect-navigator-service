@@ -37,7 +37,8 @@ const testEnquiry: Enquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientId: '123456'
+  atsClientId: '123456',
+  atsEnquiryId: '654321'
 };
 
 const testProject: Submission = {
@@ -77,6 +78,7 @@ const testProject: Submission = {
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: 'None',
   addedToATS: true,
+  atsEnquiryId: '654321',
   atsClientId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,

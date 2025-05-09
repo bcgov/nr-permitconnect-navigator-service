@@ -50,7 +50,7 @@ const {
   editable = true,
   enquiry
 } = defineProps<{
-  relatedAtsNumber?: string | null;
+  relatedAtsNumber?: string | number | null;
   editable?: boolean;
   enquiry: any;
 }>();
@@ -157,7 +157,7 @@ async function createATSEnquiry(toastMsg: string) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
-      clientId: formRef.value?.values.atsClientId,
+      clientId: formRef.value?.values.atsClientId ?? relatedAtsNumber,
       contactFirstName: formRef.value?.values.contactFirstName,
       contactSurname: formRef.value?.values.contactLastName,
       regionName: ATS_REGION_NAME,
@@ -226,9 +226,23 @@ function onReOpen() {
     header: 'Re-open enquiry?',
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
+    rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
       onSubmit(formRef.value?.values);
+    }
+  });
+}
+
+function onNewATSEnquiry() {
+  confirm.require({
+    message: t('enquiryForm.atsEnquiryConfirmMsg'),
+    header: t('enquiryForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('enquiryForm.confirm'),
+    rejectLabel: t('enquiryForm.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      createATSEnquiry(t('enquiryForm.atsEnquiryPushed'));
     }
   });
 }
@@ -267,8 +281,12 @@ const onSubmit = async (values: any) => {
     // with linked activity
     if (valuesWithContact.relatedActivityId) {
       valuesWithContact.atsClientId = '';
-      valuesWithContact.atsEnquiryId = '';
       formRef?.value?.setFieldValue('atsClientId', '');
+    }
+
+    // Remove ATS enquiry number if no ATS client number & relatedAtsNumber is present
+    if (!valuesWithContact.atsClientId && !relatedAtsNumber) {
+      valuesWithContact.atsEnquiryId = '';
       formRef?.value?.setFieldValue('atsEnquiryId', '');
     }
     // Generate final enquiry object
@@ -485,6 +503,15 @@ onBeforeMount(async () => {
         >
           {{ t('enquiryForm.atsNewClientBtn') }}
         </Button>
+        <Button
+          v-if="!values.atsClientId && relatedAtsNumber && !values.atsEnquiryId"
+          class="grid-col-start-3 col-span-2"
+          aria-label="New ATS enquiry"
+          :disabled="!editable"
+          @click="onNewATSEnquiry()"
+        >
+          {{ t('enquiryForm.atsNewEnquiryBtn') }}
+        </Button>
       </div>
       <Checkbox
         class="col-span-12 mt-2"
@@ -566,6 +593,7 @@ onBeforeMount(async () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
           setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
         }
       "
     />
