@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { Button, Select } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
-import { GroupName } from '@/utils/enums/application';
+import { GroupName, Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 
@@ -15,16 +15,19 @@ type GroupList = { id: string; text: string };
 
 // Store
 const authzStore = useAuthZStore();
-const { getGroupOverride } = storeToRefs(authzStore);
+const { getGroupOverride, getInitiativeOverride } = storeToRefs(authzStore);
 
 const group: Ref<GroupName | undefined> = ref(undefined);
+const initiative: Ref<Initiative | undefined> = ref(undefined);
 
 // Actions
 const { t } = useI18n();
 
-function clearGroup() {
+function clear() {
   authzStore.setGroupOverride(undefined);
+  authzStore.setInitiativeOverride(undefined);
   group.value = undefined;
+  initiative.value = undefined;
 }
 
 function setGroup(e: any) {
@@ -32,31 +35,38 @@ function setGroup(e: any) {
   group.value = e.value;
 }
 
+function setInitiative(e: any) {
+  authzStore.setInitiativeOverride(e.value);
+  initiative.value = e.value;
+}
+
 onBeforeMount(() => {
   group.value = getGroupOverride.value;
+  initiative.value = getInitiativeOverride.value;
 });
 </script>
 
 <template>
-  <div
-    v-if="getGroupOverride"
-    class="px-2 py-1 flex items-center role-override"
-  >
+  <div class="px-2 py-1 flex items-center role-override">
     <p class="m-0 mr-2">Viewing site as:</p>
-    <div class="w-2/12 mr-2">
-      <Select
-        v-model="group"
-        class="w-full"
-        :options="GROUP_NAME_LIST"
-        :option-label="(e: GroupList) => t(`${e.text}`)"
-        :option-value="(e: GroupList) => e.id"
-        @change="(e) => setGroup(e)"
-      />
-    </div>
+    <Select
+      v-model="initiative"
+      class="w-2/12 mr-2"
+      :options="[Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS]"
+      @change="(e) => setInitiative(e)"
+    />
+    <Select
+      v-model="group"
+      class="w-2/12 mr-2"
+      :options="GROUP_NAME_LIST"
+      :option-label="(e: GroupList) => t(`${e.text}`)"
+      :option-value="(e: GroupList) => e.id"
+      @change="(e) => setGroup(e)"
+    />
     <div>
       <Button
         secondary
-        @click="clearGroup"
+        @click="clear"
       >
         End
       </Button>

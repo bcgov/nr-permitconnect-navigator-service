@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
+import useAppStore from './appStore';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { Group, Permission } from '@/types';
-import useAppStore from './appStore';
 
 export enum NavigationPermission {
   /*
@@ -120,6 +120,7 @@ export type AuthZStoreState = {
   groups: Ref<Array<Group>>;
   permissions: Ref<Array<Permission>>;
   groupOverride: Ref<GroupName | undefined>;
+  initiativeOverride: Ref<Initiative | undefined>;
 };
 
 export const useAuthZStore = defineStore('authz', () => {
@@ -127,7 +128,8 @@ export const useAuthZStore = defineStore('authz', () => {
   const state: AuthZStoreState = {
     groups: ref([]),
     permissions: ref([]),
-    groupOverride: ref(undefined)
+    groupOverride: ref(undefined),
+    initiativeOverride: ref(undefined)
   };
 
   // Getters
@@ -150,8 +152,8 @@ export const useAuthZStore = defineStore('authz', () => {
           const bypassInitiative = currentInitiative === Initiative.PCNS;
 
           const groups =
-            allowGroupOverride && state.groupOverride.value
-              ? [{ name: state.groupOverride.value } as Group]
+            allowGroupOverride && state.groupOverride.value && state.initiativeOverride.value
+              ? [{ initiativeCode: state.initiativeOverride.value, name: state.groupOverride.value } as Group]
               : state.groups.value;
           const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
           const perms = NavigationAuthorizationMap.filter((p) =>
@@ -164,6 +166,7 @@ export const useAuthZStore = defineStore('authz', () => {
     ),
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
+    getInitiativeOverride: computed(() => state.initiativeOverride.value),
     isInGroup: computed(
       () => (group: Array<GroupName>) => state.groups.value.some((x) => group.some((g) => g === x.name))
     )
@@ -179,6 +182,10 @@ export const useAuthZStore = defineStore('authz', () => {
     state.groupOverride.value = group;
   }
 
+  function setInitiativeOverride(code: Initiative | undefined) {
+    state.initiativeOverride.value = code;
+  }
+
   return {
     // State
     state: readonly(state),
@@ -188,7 +195,8 @@ export const useAuthZStore = defineStore('authz', () => {
 
     // Actions
     setPermissions,
-    setGroupOverride
+    setGroupOverride,
+    setInitiativeOverride
   };
 });
 
