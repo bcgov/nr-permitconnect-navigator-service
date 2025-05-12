@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { CopyToClipboard } from '@/components/form';
 import { Select } from '@/lib/primevue';
 import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
-import { ButtonMode } from '@/utils/enums/application';
+import { ButtonMode, GroupName, Initiative } from '@/utils/enums/application';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
+
+import type { Ref } from 'vue';
 
 // Types
 type GroupList = { id: string; text: string };
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const authnStore = useAuthNStore();
@@ -17,8 +23,9 @@ const { getAccessToken, getProfile } = storeToRefs(authnStore);
 const { getConfig } = storeToRefs(useConfigStore());
 const authzStore = useAuthZStore();
 
-// Actions
-const { t } = useI18n();
+// State
+const group: Ref<GroupName | undefined> = ref(undefined);
+const initiative: Ref<Initiative | undefined> = ref(undefined);
 </script>
 
 <template>
@@ -35,19 +42,28 @@ const { t } = useI18n();
   <div>
     <div class="flex items-center">
       <p class="m-0 mr-2">Begin viewing site as:</p>
-      <div class="w-2/12 mr-2">
-        <Select
-          class="w-full"
-          :options="GROUP_NAME_LIST"
-          :option-label="(e: GroupList) => t(`${e.text}`)"
-          :option-value="(e: GroupList) => e.id"
-          @change="
-            (e) => {
-              authzStore.setGroupOverride(e.value);
-            }
-          "
-        />
-      </div>
+      <Select
+        v-model="initiative"
+        class="w-2/12 mr-2"
+        :options="[Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS]"
+        @change="
+          (e) => {
+            authzStore.setInitiativeOverride(e.value);
+          }
+        "
+      />
+      <Select
+        v-model="group"
+        class="w-2/12"
+        :options="GROUP_NAME_LIST"
+        :option-label="(e: GroupList) => t(`${e.text}`)"
+        :option-value="(e: GroupList) => e.id"
+        @change="
+          (e) => {
+            authzStore.setGroupOverride(e.value);
+          }
+        "
+      />
     </div>
 
     <div class="flex items-center mt-4">

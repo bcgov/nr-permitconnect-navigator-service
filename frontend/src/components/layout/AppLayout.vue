@@ -16,7 +16,8 @@ const authzStore = useAuthZStore();
         v-if="
           authnStore.getIsAuthenticated &&
           authzStore.canNavigate(NavigationPermission.DEVELOPER, false) &&
-          authzStore.getGroupOverride
+          authzStore.getGroupOverride &&
+          authzStore.getInitiativeOverride
         "
       />
       <Header />
