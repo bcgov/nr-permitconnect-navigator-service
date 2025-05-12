@@ -2,13 +2,13 @@
 import Problem from 'api-problem';
 
 import { yarsService } from '../services';
-import { GroupName, Initiative } from '../utils/enums/application';
+import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 
 /**
  * @function requireSomeGroup
- * Attempt to assign default groups if user has no group
+ * Attempt to assign proponent groups to users with external IDPs
  * Rejects the request if user has no assigned group
  * @param {object} req Express request object
  * @param {object} _res Express response object
@@ -18,31 +18,27 @@ import type { NextFunction, Request, Response } from 'express';
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const idp = (req.currentContext?.tokenPayload as any).identity_provider;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sub = (req.currentContext?.tokenPayload as any).sub;
 
   let groups = await yarsService.getSubjectGroups(sub);
 
-  // Auto assign all PROPONENT groups if user has none
-  if (groups && groups.length === 0) {
-    const e = await yarsService.getGroups(Initiative.ELECTRIFICATION);
-    const h = await yarsService.getGroups(Initiative.HOUSING);
-    const p = await yarsService.getGroups(Initiative.PCNS);
+  if (idp !== IdentityProvider.IDIR) {
+    const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
+    const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
+    await Promise.all(
+      missing.map(async (x) => {
+        const g = await yarsService.getGroups(x);
 
-    await yarsService.assignGroup(
-      req.currentContext.bearerToken,
-      sub,
-      e.find((x) => x.name === GroupName.PROPONENT)?.groupId
+        await yarsService.assignGroup(
+          req.currentContext.bearerToken,
+          sub,
+          g.find((x) => x.name === GroupName.PROPONENT)?.groupId
+        );
+      })
     );
-    await yarsService.assignGroup(
-      req.currentContext.bearerToken,
-      sub,
-      h.find((x) => x.name === GroupName.PROPONENT)?.groupId
-    );
-    await yarsService.assignGroup(
-      req.currentContext.bearerToken,
-      sub,
-      p.find((x) => x.name === GroupName.PROPONENT)?.groupId
-    );
+
     groups = await yarsService.getSubjectGroups(sub);
   }
 

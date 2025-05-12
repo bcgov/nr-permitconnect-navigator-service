@@ -54,7 +54,7 @@ const service = {
    * @function getSubjectGroups
    * Gets groups for the specified identity
    * @param {string} sub Subject to search
-   * @returns {Promise<Group[]>} The result of running the findMany operation
+   * @returns {Promise<Array<Group>>} The result of running the findMany operation
    */
   getSubjectGroups: async (sub: string) => {
     try {
