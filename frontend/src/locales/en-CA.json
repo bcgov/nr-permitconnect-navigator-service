@@ -47,11 +47,23 @@
     "deleteTooltip": "Delete document"
   },
   "enquiryForm": {
+    "atsClientEnquiryPushed": "New client and enquiry pushed to ATS",
+    "atsClientLinkedEnquiryPushed": "Client linked and enquiry pushed to ATS",
+    "atsClientPushed": "New client pushed to ATS",
+    "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
+    "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
+    "atsEnquiryPushed": "New enquiry pushed to ATS",
+    "atsEnquiryPushError": "Error pushing enquiry to ATS",
     "basicInfoHeader": "Basic information",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "client#": "Client #",
+    "enquiry#": "Enquiry #",
     "enquiryDetailHeader": "Enquiry detail",
     "atsHeader": "ATS",
     "atsSearchBtn": "Search ATS",
     "atsNewClientBtn": "New ATS Client",
+    "atsNewEnquiryBtn": "New ATS Enquiry",
     "formSaveBtn": "Save",
     "formReopenBtn": "Re-open enquiry",
     "submittedMethod": "Submitted method"
@@ -266,6 +278,14 @@
     "listEmpty": "Your project submission drafts will be displayed here",
     "of": "of",
     "tableAlt": "A table containing a list of draft submissions"
+  },
+  "submissionForm": {
+    "atsClientEnquiryPushed": "New client and enquiry pushed to ATS",
+    "atsClientLinkedEnquiryPushed": "Client linked and enquiry pushed to ATS",
+    "atsClientPushed": "New client pushed to ATS",
+    "atsEnquiryPushError": "Error pushing enquiry to ATS",
+    "client#": "Client #",
+    "enquiry#": "Enquiry #"
   },
   "submissionIntakeForm": {
     "assistanceMessage": "Assistance requested",

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { boolean, number, object, string } from 'yup';
 
 import { formatDateFilename } from '@/utils/formatters';
@@ -22,7 +23,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { mapService, submissionService, userService } from '@/services';
+import { atsService, mapService, submissionService, userService } from '@/services';
 import { useSubmissionStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
@@ -46,7 +47,7 @@ import {
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Submission, User } from '@/types';
+import type { ATSClientResource, ATSEnquiryResource, Submission, User } from '@/types';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import type { SelectChangeEvent } from 'primevue/select';
 
@@ -61,6 +62,13 @@ const { editable = true, submission } = defineProps<{
   editable?: boolean;
   submission: Submission;
 }>();
+
+// Constants
+const ATS_REGION_NAME: string = 'Navigator';
+const ATS_SUB_REGIONAL_OFFICE: string = 'Navigator';
+const ATS_ENQUIRY_METHOD_CODES = 'PCNS';
+const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
+const ATS_ENQUIRY_PARTNER_AGENCIES = 'Housing';
 
 // Store
 const submissionStore = useSubmissionStore();
@@ -151,7 +159,8 @@ const formSchema = object({
   waitingOn: string().notRequired().max(255).label('waiting on')
 });
 
-// Actions
+//
+const { t } = useI18n();
 const confirm = useConfirm();
 const toast = useToast();
 
@@ -317,6 +326,37 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
   return locationAddressStr;
 }
 
+async function createATSEnquiry(toastMsg: string) {
+  try {
+    const ATSEnquiryData: ATSEnquiryResource = {
+      '@type': 'EnquiryResource',
+      clientId: formRef.value?.values.atsClientId,
+      contactFirstName: formRef.value?.values.contactFirstName,
+      contactSurname: formRef.value?.values.contactLastName,
+      regionName: ATS_REGION_NAME,
+      subRegionalOffice: ATS_SUB_REGIONAL_OFFICE,
+      enquiryFileNumbers: [formRef.value?.values.activityId],
+      enquiryPartnerAgencies: [ATS_ENQUIRY_PARTNER_AGENCIES],
+      enquiryMethodCodes: [ATS_ENQUIRY_METHOD_CODES],
+      notes: formRef.value?.values.projectName,
+
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+    };
+    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    if (response.status === 201) {
+      toast.success(toastMsg);
+      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      formRef.value?.setFieldValue('addedToATS', true);
+    } else {
+      toast.success(t('submissionForm.atsClientPushed'));
+      toast.error(t('submissionForm.atsEnquiryPushError'));
+    }
+  } catch (error) {
+    toast.success(t('submissionForm.atsClientPushed'));
+    toast.error(t('submissionForm.atsEnquiryPushError') + ' ' + error);
+  }
+}
+
 onBeforeMount(async () => {
   if (submission.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [submission.assignedUserId] })).data;
@@ -365,6 +405,7 @@ onBeforeMount(async () => {
     naturalDisaster: submission.naturalDisaster,
     addedToATS: submission.addedToATS,
     atsClientId: submission.atsClientId,
+    atsEnquiryId: submission.atsEnquiryId,
     ltsaCompleted: submission.ltsaCompleted,
     bcOnlineCompleted: submission.bcOnlineCompleted,
     aaiUpdated: submission.aaiUpdated,
@@ -733,7 +774,7 @@ onBeforeMount(async () => {
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
-            <h5 class="mr-2">Client #</h5>
+            <h5 class="mr-2">{{ t('submissionForm.client#') }}</h5>
             <a
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
@@ -745,6 +786,19 @@ onBeforeMount(async () => {
         <input
           type="hidden"
           name="atsClientId"
+        />
+        <div
+          v-if="values.atsEnquiryId"
+          class="col-start-1 col-span-12"
+        >
+          <div class="flex items-center">
+            <h5 class="mr-2">{{ t('submissionForm.enquiry#') }}</h5>
+            {{ values.atsEnquiryId }}
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="atsEnquiryId"
         />
         <Button
           v-if="!values.atsClientId"
@@ -863,6 +917,7 @@ onBeforeMount(async () => {
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
           setFieldValue('atsClientId', atsClientResource.clientId?.toString());
+          createATSEnquiry(t('submissionForm.atsClientLinkedEnquiryPushed'));
         }
       "
     />
@@ -873,16 +928,19 @@ onBeforeMount(async () => {
         () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
+          setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
         }
       "
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
       :submission-or-enquiry="submission"
-      @ats-user-link:link="
+      @ats-user-create:link="
         (atsClientId: string) => {
           atsUserCreateModalVisible = false;
           setFieldValue('atsClientId', atsClientId.toString());
+          createATSEnquiry(t('submissionForm.atsClientEnquiryPushed'));
         }
       "
     />

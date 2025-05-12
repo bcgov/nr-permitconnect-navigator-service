@@ -29,6 +29,7 @@ export type Submission = {
   astUpdated: boolean;
   addedToATS: boolean;
   atsClientId: number | null;
+  atsEnquiryId: number | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   naturalDisaster: string;

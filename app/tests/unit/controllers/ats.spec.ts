@@ -115,6 +115,96 @@ describe('createATSClient', () => {
   });
 });
 
+describe('createATSEnquiry', () => {
+  const next = jest.fn();
+
+  // Mock service calls
+  const createSpy = jest.spyOn(atsService, 'createATSEnquiry');
+
+  it('should return 201 if all good', async () => {
+    const req = {
+      body: {
+        '@type': 'EnquiryResource',
+        clientId: 256432,
+        contactFirstName: 'PCNS BusinessTester',
+        contactSurname: 'k12',
+        regionName: 'Navigator',
+        subRegionalOffice: 'Navigator',
+        enquiryFileNumbers: ['B8D4B783'],
+        enquiryPartnerAgencies: ['Housing'],
+        enquiryMethodCodes: ['PCNS'],
+        notes: 'dsdsa',
+        enquiryTypeCodes: ['Project Intake'],
+        createdBy: 'IDIR\\DONNY'
+      },
+      currentContext: CURRENT_CONTEXT
+    };
+
+    const created = {
+      data: {
+        '@type': 'EnquiryResource',
+        clientId: 256432,
+        contactFirstName: 'PCNS BusinessTester',
+        contactSurname: 'k12',
+        regionName: 'Navigator',
+        subRegionalOffice: 'Navigator',
+        enquiryFileNumbers: ['B8D4B783'],
+        enquiryPartnerAgencies: ['Housing'],
+        enquiryMethodCodes: ['PCNS'],
+        notes: 'dsdsa',
+        enquiryTypeCodes: ['Project Intake'],
+        createdBy: 'IDIR\\DONNY'
+      },
+      status: 201
+    };
+
+    createSpy.mockResolvedValue(created);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await atsController.createATSEnquiry(req as any, res as any, next);
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
+  });
+
+  it('calls next if the ats service fails to create', async () => {
+    const req = {
+      body: {
+        '@type': 'EnquiryResource',
+        clientId: 256432,
+        contactFirstName: 'PCNS BusinessTester',
+        contactSurname: 'k12',
+        regionName: 'Navigator',
+        subRegionalOffice: 'Navigator',
+        enquiryFileNumbers: ['B8D4B783'],
+        enquiryPartnerAgencies: ['Housing'],
+        enquiryMethodCodes: ['PCNS'],
+        notes: 'dsdsa',
+        enquiryTypeCodes: ['Project Intake'],
+        createdBy: 'IDIR\\DONNY'
+      },
+      currentContext: CURRENT_CONTEXT
+    };
+
+    createSpy.mockImplementationOnce(() => {
+      throw new Error();
+    });
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await atsController.createATSEnquiry(req as any, res as any, next);
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith({
+      ...req.body
+    });
+    expect(res.status).toHaveBeenCalledTimes(0);
+    expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+
 describe('searchATSUsers', () => {
   const next = jest.fn();
 

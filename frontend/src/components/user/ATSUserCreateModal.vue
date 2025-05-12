@@ -29,7 +29,7 @@ const { submissionOrEnquiry } = defineProps<{
 const ATS_REGION_NAME: string = 'Navigator';
 
 // Emits
-const emit = defineEmits(['atsUserLink:link']);
+const emit = defineEmits(['atsUserCreate:link']);
 
 // State
 const atsClientId: Ref<string> = ref('');
@@ -69,9 +69,8 @@ async function createATSClient() {
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
       atsClientId.value = response.data.clientId;
-      emit('atsUserLink:link', atsClientId.value);
+      emit('atsUserCreate:link', atsClientId.value);
       visible.value = false;
-      toast.success('New client pushed to ATS');
     } else {
       toast.error('Error pushing client to ATS');
     }
