@@ -241,7 +241,7 @@ const controller = {
       await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
       await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
 
-      res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
+      res.status(201).json(result);
     } catch (e: unknown) {
       next(e);
     }
