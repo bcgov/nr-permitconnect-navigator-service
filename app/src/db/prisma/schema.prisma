@@ -469,6 +469,70 @@ model email_log {
   @@schema("public")
 }
 
+model electrification_project {
+  electrificationProjectId           String                                 @id @map("electrification_project_id") @db.Uuid
+  activityId                         String                                 @map("activity_id")
+  assignedUserId                     String?                                @map("assigned_user_id") @db.Uuid
+  submittedAt                        DateTime                               @map("submitted_at") @db.Timestamptz(6)
+  intakeStatus                       String?                                @map("intake_status")
+  applicationStatus                  String?                                @map("application_status")
+  queuePriority                      Int?                                   @map("queue_priority")
+  projectName                        String?                                @map("project_name")
+  projectDescription                 String?                                @map("project_description")
+  companyNameRegistered              String?                                @map("company_name_registered")
+  bcHydroNumber                      String?                                @map("bc_hydro_number")
+  submissionType                     String?                                @map("submission_type")
+  hasEpa                             String?                                @map("has_epa")
+  bcEnvironmentAssessNeeded          String?                                @map("bc_environment_assess_needed")
+  megawatts                          Decimal?                               @db.Decimal
+  locationDescription                String?                                @map("location_description")
+  aaiUpdated                         Boolean                                @default(false) @map("aai_updated")
+  atsClientId                        Int?                                   @map("ats_client_id")
+  astNotes                           String?                                @map("ast_notes")
+  projectType                        String?                                @map("project_type")
+  projectCategory                    String?                                @map("project_category")
+  createdBy                          String?                                @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt                          DateTime?                              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                          String?                                @map("updated_by")
+  updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
+  activity                           activity                               @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
+  user                               user?                                  @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
+  electrificationProjectCategoryCode electrification_project_category_code? @relation(fields: [projectCategory], references: [code], map: "electrification_project_project_category_foreign")
+  electrificationProjectTypeCode     electrification_project_type_code?     @relation(fields: [projectType], references: [code], map: "electrification_project_project_type_foreign")
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model electrification_project_category_code {
+  code                   String                    @id
+  display                String                    @unique(map: "electrification_project_category_code_display_unique")
+  definition             String
+  active                 Boolean                   @default(true)
+  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?                   @map("updated_by")
+  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrificationProject electrification_project[]
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model electrification_project_type_code {
+  code                   String                    @id
+  display                String                    @unique(map: "electrification_project_type_code_display_unique")
+  definition             String
+  active                 Boolean                   @default(true)
+  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?                   @map("updated_by")
+  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrificationProject electrification_project[]
+
+  @@schema("public")
+}
+
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model housing_project {
@@ -533,38 +597,6 @@ model housing_project {
   @@schema("public")
 }
 
-model electrification_project {
-  electrificationProjectId  String                            @id @map("electrification_project_id") @db.Uuid
-  activityId                String                            @map("activity_id")
-  assignedUserId            String?                           @map("assigned_user_id") @db.Uuid
-  submittedAt               DateTime                          @map("submitted_at") @db.Timestamptz(6)
-  intakeStatus              String?                           @map("intake_status")
-  applicationStatus         String?                           @map("application_status")
-  queuePriority             Int?                              @map("queue_priority")
-  projectName               String?                           @map("project_name")
-  projectDescription        String?                           @map("project_description")
-  companyNameRegistered     String?                           @map("company_name_registered")
-  bcHydroNumber             String?                           @map("bc_hydro_number")
-  submissionType            String?                           @map("submission_type")
-  projectType               electrification_project_type?     @map("project_type")
-  projectCategory           electrification_project_category? @map("project_category")
-  hasEpa                    String?                           @map("has_epa")
-  bcEnvironmentAssessNeeded String?                           @map("bc_environment_assess_needed")
-  megawatts                 Decimal?                          @db.Decimal
-  locationDescription       String?                           @map("location_description")
-  aaiUpdated                Boolean                           @default(false) @map("aai_updated")
-  atsClientId               Int?                              @map("ats_client_id")
-  astNotes                  String?                           @map("ast_notes")
-  createdBy                 String?                           @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                 DateTime?                         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                 String?                           @map("updated_by")
-  updatedAt                 DateTime?                         @map("updated_at") @db.Timestamptz(6)
-  activity                  activity                          @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                      user?                             @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
-
-  @@schema("public")
-}
-
 model permit_type_initiative_xref {
   permit_type_id Int
   initiative_id  String      @db.Uuid
@@ -604,26 +636,6 @@ enum enquiry_submitted_method_enum {
   Email
   Phone
   PCNS
-
-  @@schema("public")
-}
-
-enum electrification_project_category {
-  EXISTING
-  IPP
-  NEW_CALL
-  NEW_TRANSMISSION
-  REMOTE_RENEWABLE
-  SUSTAINMENT
-
-  @@schema("public")
-}
-
-enum electrification_project_type {
-  IPP_SOLAR
-  IPP_WIND
-  NCTL
-  OTHER
 
   @@schema("public")
 }

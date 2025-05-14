@@ -4,6 +4,7 @@ export type { ATSClientResource } from './ATSClientResource';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';
 export type { BringForward } from './BringForward';
 export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';
+export type { Code } from './Code';
 export type { Contact } from './Contact';
 export type { ContactSearchParameters } from './ContactSearchParameters';
 export type { Document } from './Document';

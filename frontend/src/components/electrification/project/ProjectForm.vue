@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { projectFormSchema } from './ProjectFormSchema';
+import { createProjectFormSchema } from './ProjectFormSchema';
 import { AdditionalInfo, AstNote, Electrification, Location } from '@/components/common/icons';
 import {
   CancelButton,
@@ -20,9 +20,8 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService, userService } from '@/services';
-import { useProjectStore } from '@/store';
+import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
-import { PROJECT_CATEGORY_OPTIONS, PROJECT_TYPE_OPTIONS } from '@/utils/constants/electrification';
 import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
@@ -51,6 +50,7 @@ const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
+const { codeValues, enums, options } = useCodeStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -62,6 +62,8 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
+const projectFormSchema = createProjectFormSchema(codeValues, enums);
+
 function emitProjectNameChange(e: Event) {
   emit('input-project-name', (e.target as HTMLInputElement).value);
 }
@@ -295,7 +297,7 @@ onBeforeMount(async () => {
               option-value="value"
               :label="t('i.electrification.projectForm.projectTypeLabel')"
               :disabled="!editable"
-              :options="PROJECT_TYPE_OPTIONS"
+              :options="options.ElectrificationProjectType"
             />
             <InputText
               name="project.bcHydroNumber"
@@ -344,7 +346,7 @@ onBeforeMount(async () => {
               option-value="value"
               :label="t('i.electrification.projectForm.projectCategoryLabel')"
               :disabled="!editable"
-              :options="PROJECT_CATEGORY_OPTIONS"
+              :options="options.ElectrificationProjectCategory"
             />
           </div>
         </Panel>

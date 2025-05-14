@@ -6,7 +6,7 @@ import { RouterView, useRoute } from 'vue-router';
 import Breadcrumb from './components/common/Breadcrumb.vue';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
-import { useAppStore, useAuthNStore, useConfigStore } from '@/store';
+import { useAppStore, useAuthNStore, useCodeStore, useConfigStore } from '@/store';
 import { ToastTimeout } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -25,6 +25,7 @@ onBeforeMount(async () => {
   appStore.beginDeterminateLoading();
   await useConfigStore().init();
   await useAuthNStore().init();
+  await useCodeStore().init();
   appStore.endDeterminateLoading();
   ready.value = true;
 });
