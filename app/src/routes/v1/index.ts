@@ -4,6 +4,7 @@ import { currentContext } from '../../middleware/authentication';
 import { Initiative } from '../../utils/enums/application';
 
 import ats from './ats';
+import code from './code';
 import contact from './contact';
 import docs from './docs';
 import electrification from './electrification';
@@ -19,11 +20,23 @@ router.use(currentContext(Initiative.PCNS));
 // Base v1 Responder
 router.get('/', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/ats', '/contact', '/docs', '/electrification', '/housing', '/reporting', '/sso', '/user', '/yars']
+    endpoints: [
+      '/ats',
+      '/code',
+      '/contact',
+      '/docs',
+      '/electrification',
+      '/housing',
+      '/reporting',
+      '/sso',
+      '/user',
+      '/yars'
+    ]
   });
 });
 
 router.use('/ats', ats);
+router.use('/code', code);
 router.use('/contact', contact);
 router.use('/docs', docs);
 router.use('/electrification', electrification);

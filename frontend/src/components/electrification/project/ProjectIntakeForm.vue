@@ -10,13 +10,11 @@ import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
 import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
-import { projectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
+import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
-import { useConfigStore, useContactStore, useProjectStore } from '@/store';
-import { PROJECT_TYPE_OPTIONS } from '@/utils/constants/electrification';
+import { useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { ProjectType } from '@/utils/enums/electrification';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
 import { setEmptyStringsToNull } from '@/utils/utils';
 
@@ -43,6 +41,7 @@ const VALIDATION_BANNER_TEXT = t('e.electrification.projectIntakeForm.validation
 // Store
 const contactStore = useContactStore();
 const projectStore = useProjectStore();
+const { codeValues, enums, options } = useCodeStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -60,6 +59,8 @@ const validationErrors = computed(() => {
 });
 
 // Actions
+const projectIntakeSchema = createProjectIntakeSchema(codeValues, enums);
+
 function confirmSubmit(data: GenericObject) {
   confirm.require({
     message: t('e.electrification.projectIntakeForm.confirmSubmitMessage'),
@@ -428,10 +429,10 @@ onBeforeMount(async () => {
         <RadioList
           name="project.projectType"
           :disabled="!editable"
-          :options="PROJECT_TYPE_OPTIONS"
+          :options="options.ElectrificationProjectType"
           @on-change="
             (e: string) => {
-              if (e === ProjectType.NCTL || e === ProjectType.OTHER) setFieldValue('bcHydroNumber', null);
+              if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('bcHydroNumber', null);
             }
           "
         />
@@ -439,7 +440,10 @@ onBeforeMount(async () => {
     </Card>
 
     <Card
-      v-if="values.project.projectType === ProjectType.IPP_WIND || values.project.projectType === ProjectType.IPP_SOLAR"
+      v-if="
+        values.project.projectType === enums.ElectrificationProjectType.IPP_WIND ||
+        values.project.projectType === enums.ElectrificationProjectType.IPP_SOLAR
+      "
     >
       <template #title>
         <span
@@ -467,7 +471,7 @@ onBeforeMount(async () => {
           role="heading"
           aria-level="2"
         >
-          <span v-if="values.project.projectType === ProjectType.OTHER">
+          <span v-if="values.project.projectType === enums.ElectrificationProjectType.OTHER">
             {{ t('e.electrification.projectIntakeForm.projectDescriptionCard') }}
           </span>
           <span v-else>

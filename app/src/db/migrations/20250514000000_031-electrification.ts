@@ -203,6 +203,84 @@ export async function up(knex: Knex): Promise<void> {
         return knex('draft_code').insert(items);
       })
 
+      // Create code tables
+      .then(() =>
+        knex.schema.createTable('electrification_project_type_code', (table) => {
+          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to UPPER_SNAKE w/ no double or trailing underscores
+          table.text('display').unique().notNullable();
+          table.text('definition').notNullable();
+          table.boolean('active').notNullable().defaultTo(true);
+          stamps(knex, table);
+        })
+      )
+      .then(() =>
+        knex.schema.createTable('electrification_project_category_code', (table) => {
+          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to UPPER_SNAKE w/ no double or trailing underscores
+          table.text('display').unique().notNullable();
+          table.text('definition').notNullable();
+          table.boolean('active').notNullable().defaultTo(true);
+          stamps(knex, table);
+        })
+      )
+
+      // Seeding code tables
+      // Seeding code tables
+      .then(() => {
+        const types = [
+          {
+            code: 'IPP_HYDRO',
+            display: 'IPP Hydro',
+            definition: 'Independent Power Producer generating electricity from water.'
+          },
+          {
+            code: 'IPP_SOLAR',
+            display: 'IPP Solar',
+            definition: 'Independent Power Producer generating electricity from solar.'
+          },
+          {
+            code: 'IPP_WIND',
+            display: 'IPP Wind',
+            definition: 'Independent Power Producer generating electricity from wind.'
+          },
+          {
+            code: 'OTHER',
+            display: 'Other',
+            definition: 'Any other Electrification project not generating power from solar, water or wind.'
+          }
+        ];
+        return knex('electrification_project_type_code').insert(types);
+      })
+      .then(() => {
+        const categories = [
+          {
+            code: 'IPP',
+            display: 'Independent Power Producer',
+            definition: 'Projects generating renewable electricity independent of BC Hydro\'s "Call for Power".'
+          },
+          {
+            code: 'POWER_2024',
+            display: 'Call for Power 2024',
+            definition: 'Energy projects that successfully participated in the 2024 BC Hydro "Call for Power".'
+          },
+          {
+            code: 'POWER_2025',
+            display: 'Call for Power 2025',
+            definition: 'Energy projects participating in the 2025 BC Hydro "Call for Power".'
+          },
+          {
+            code: 'REMOTE_RENEWABLE',
+            display: 'Remote Community Renewable Project',
+            definition: 'Energy projects in line with the "Remote Community Energy Strategy" for non-integrated areas.'
+          },
+          {
+            code: 'SUSTAINMENT',
+            display: 'BC Hydro Sustainment',
+            definition: 'Projects to upgrade and maintain existing BC Hydro infrastructure.'
+          }
+        ];
+        return knex('electrification_project_category_code').insert(categories);
+      })
+
       // Create public schema tables
       .then(() =>
         knex.schema.createTable('electrification_project', (table) => {
@@ -224,18 +302,6 @@ export async function up(knex: Knex): Promise<void> {
           table.text('company_name_registered');
           table.text('bc_hydro_number');
           table.text('submission_type');
-          table.enu('project_type', ['IPP_SOLAR', 'IPP_WIND', 'NCTL', 'OTHER'], {
-            useNative: true,
-            enumName: 'electrification_project_type'
-          });
-          table.enu(
-            'project_category',
-            ['EXISTING', 'IPP', 'NEW_CALL', 'NEW_TRANSMISSION', 'REMOTE_RENEWABLE', 'SUSTAINMENT'],
-            {
-              useNative: true,
-              enumName: 'electrification_project_category'
-            }
-          );
           table.text('has_epa');
           table.text('bc_environment_assess_needed');
           table.decimal('megawatts', null);
@@ -243,6 +309,18 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('aai_updated').notNullable().defaultTo(false);
           table.integer('ats_client_id');
           table.text('ast_notes');
+          table
+            .text('project_type') // Nullable for nav project creation
+            .references('code')
+            .inTable('electrification_project_type_code')
+            .onUpdate('CASCADE')
+            .onDelete('SET NULL');
+          table
+            .text('project_category') // Nullable for nav project creation
+            .references('code')
+            .inTable('electrification_project_category_code')
+            .onUpdate('CASCADE')
+            .onDelete('SET NULL');
           stamps(knex, table);
         })
       )
@@ -1053,9 +1131,9 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('permit_type_initiative_xref'))
       .then(() => knex.schema.dropTableIfExists('electrification_project'))
 
-      // Drop enums
-      .then(() => knex.schema.raw('DROP TYPE IF EXISTS electrification_project_category'))
-      .then(() => knex.schema.raw('DROP TYPE IF EXISTS electrification_project_type'))
+      // Drop code tables
+      .then(() => knex.schema.dropTableIfExists('electrification_project_type_code'))
+      .then(() => knex.schema.dropTableIfExists('electrification_project_category_code'))
 
       // Delete data
       .then(async () => {

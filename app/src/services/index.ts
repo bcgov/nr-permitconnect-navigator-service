@@ -1,6 +1,7 @@
 export { default as accessRequestService } from './accessRequest';
 export { default as activityService } from './activity';
 export { default as atsService } from './ats';
+export { default as codeService } from './code';
 export { default as comsService } from './coms';
 export { default as contactService } from './contact';
 export { default as documentService } from './document';
