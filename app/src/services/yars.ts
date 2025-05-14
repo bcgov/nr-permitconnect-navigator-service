@@ -54,7 +54,7 @@ const service = {
    * @function getSubjectGroups
    * Gets groups for the specified identity
    * @param {string} sub Subject to search
-   * @returns {Promise<roleId: number>} The result of running the findMany operation
+   * @returns {Promise<Group[]>} The result of running the findMany operation
    */
   getSubjectGroups: async (sub: string) => {
     try {
@@ -63,11 +63,16 @@ const service = {
           sub: sub
         },
         include: {
-          group: true
+          group: {
+            include: {
+              initiative: true
+            }
+          }
         }
       });
 
       return result.map((x) => ({
+        initiativeCode: x.group.initiative.code,
         initiativeId: x.group.initiative_id,
         groupId: x.group_id,
         name: x.group.name as GroupName,
@@ -173,7 +178,7 @@ const service = {
   /**
    * @function getGroups
    * Gets a list of groups for the given initiativeId
-   * @param {number} initiativeId Initiative ID to search
+   * @param {string} initiative Initiative code to search
    * @returns The result of running the findMany operation
    */
   getGroups: async (initiative: Initiative | undefined) => {
