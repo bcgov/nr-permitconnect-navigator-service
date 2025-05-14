@@ -17,12 +17,7 @@ export function createProjectIntakeSchema(
       companyNameRegistered: stringRequiredSchema.label('Business name'),
       projectName: stringRequiredSchema.label('Project name'),
       projectType: stringRequiredSchema.oneOf(codeValues.ElectrificationProjectType).label('Project type'),
-      bcHydroNumber: string().when('projectType', {
-        is: (value: string) =>
-          value === enums.ElectrificationProjectType.IPP_SOLAR || value === enums.ElectrificationProjectType.IPP_WIND,
-        then: (schema) => schema.required().label('BC Hydro Call for Power project number'),
-        otherwise: (schema) => schema.notRequired().nullable().label('BC Hydro Call for Power project number')
-      }),
+      bcHydroNumber: string().notRequired().max(255).nullable().label('BC Hydro Call for Power project number'),
       projectDescription: string().when('projectType', {
         is: enums.ElectrificationProjectType.OTHER,
         then: (schema) => schema.required().label('Project description'),

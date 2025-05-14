@@ -16,11 +16,7 @@ const electrificationIntake = {
   projectType: Joi.string()
     .required()
     .valid(...electrificationProjectTypeCodes),
-  bcHydroNumber: Joi.when('project.projectType', {
-    is: (val: string) => val === ProjectType.IPP_WIND || val === ProjectType.IPP_SOLAR,
-    then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.string().max(255).trim().allow(null)
-  }),
+  bcHydroNumber: Joi.string().max(255).trim().allow(null),
   projectDescription: Joi.when('project.projectType', {
     is: ProjectType.OTHER,
     then: Joi.string().required().max(4000),
