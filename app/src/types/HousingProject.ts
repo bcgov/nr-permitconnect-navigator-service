@@ -12,6 +12,8 @@ export type HousingProject = {
   consentToFeedback: boolean;
   geoJSON: Prisma.JsonValue;
   geomarkUrl: string | null;
+  projectName: string | null;
+  projectDescription: string | null;
   singleFamilyUnits: string | null;
   hasRentalUnits: string | null;
   streetAddress: string | null;

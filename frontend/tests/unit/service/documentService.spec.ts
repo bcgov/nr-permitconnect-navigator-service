@@ -15,6 +15,7 @@ const mockedUuid = `${mockTruncatedId}-0000-0000-0000-000000000000`;
 
 const testActivityId = 'testActivityId';
 const testBucketId = 'testBucketId';
+const testTagset = [{ key: 'Project ID', value: testActivityId }];
 const FILE_NAME = 'fileName';
 const testFileData = {
   id: 'fileId',
@@ -58,23 +59,6 @@ const deleteObjectSpy = vi.spyOn(comsService, 'deleteObject');
 const getObjectSpy = vi.spyOn(comsService, 'getObject');
 const fileSpy = vi.spyOn(global, 'File');
 
-// createDocument test data
-const testActivityId = 'testActivityId';
-const testBucketId = 'testBucketId';
-const testTagset = [{ key: 'Project ID', value: testActivityId }];
-const FILE_NAME = 'fileName';
-const testFileData = {
-  id: 'fileId',
-  name: `${FILE_NAME}.txt`,
-  mimeType: 'text/html',
-  length: 42
-};
-const testFile1 = {
-  name: testFileData.name,
-  type: testFileData.mimeType
-};
-const modifiedFileName = `${FILE_NAME}_${mockTruncatedId}.txt`;
-
 // Tests
 beforeEach(() => {
   setActivePinia(createPinia());
@@ -115,7 +99,12 @@ describe('documentService', () => {
 
           await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
           expect(createObjectSpy).toHaveBeenCalledTimes(1);
-          expect(createObjectSpy).toHaveBeenCalledWith(testFile1, {}, { bucketId: testBucketId }, { timeout: 0 });
+          expect(createObjectSpy).toHaveBeenCalledWith(
+            testFile1,
+            {},
+            { bucketId: testBucketId, tagset: testTagset },
+            { timeout: 0 }
+          );
         });
 
         it('logs uploaded document to DB with right arguments', async () => {

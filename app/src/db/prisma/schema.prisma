@@ -257,6 +257,7 @@ model user {
   created_at              DateTime?                 @default(now()) @db.Timestamptz(6)
   updated_by              String?
   updated_at              DateTime?                 @db.Timestamptz(6)
+  bceid_business_name     String?
   access_request          access_request[]
   contact                 contact[]
   electrification_project electrification_project[]
@@ -525,6 +526,7 @@ model housing_project {
   submission_type                    String?
   consent_to_feedback                Boolean   @default(false)
   geo_json                           Json?     @db.Json
+  geomark_url                        String?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 

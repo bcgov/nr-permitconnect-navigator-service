@@ -7,10 +7,11 @@ import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
-import { permitNoteService, submissionService } from '@/services';
-import { useConfigStore, useSubmissionStore } from '@/store';
+import { electrificationProjectService, housingProjectService, permitNoteService } from '@/services';
+import { useAppStore, useConfigStore, useProjectStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
+import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateLong } from '@/utils/formatters';
-import { PermitNeeded, PermitStatus } from '@/utils/enums/housing';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
@@ -71,25 +72,29 @@ async function onSubmit(data: any, { resetForm }) {
 
 async function emailNotification() {
   const configCC = getConfig.value.ches?.submission?.cc;
-  const project = submissionStore.getSubmission;
+  const project = projectStore.getProject;
   const body = permitNoteNotificationTemplate({
     '{{ contactName }}': project?.contacts[0].firstName,
     '{{ activityId }}': project?.activityId,
     '{{ permitName }}': permit.permitType.name,
     '{{ submittedDate }}': formatDate(permit.submittedDate ?? permit.createdAt),
-    '{{ projectId }}': project?.submissionId,
+    '{{ projectId }}': project?.projectId,
     '{{ permitId }}': permit.permitId
   });
-  let applicantEmail = submissionStore.getSubmission?.contacts[0].email as string;
+  let applicantEmail = project?.contacts[0].email as string;
   let emailData = {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: `Updates for project ${submissionStore.getSubmission?.activityId}, ${permit.permitType.name}`,
+    subject: `Updates for project ${project?.activityId}, ${permit.permitType.name}`,
     bodyType: 'html',
     body: body
   };
-  await submissionService.emailConfirmation(emailData);
+
+  // TODO: Can the service be injected at some level?
+  if (useAppStore().getInitiative === Initiative.ELECTRIFICATION)
+    await electrificationProjectService.emailConfirmation(emailData);
+  else if (useAppStore().getInitiative === Initiative.HOUSING) await housingProjectService.emailConfirmation(emailData);
 }
 </script>
 
