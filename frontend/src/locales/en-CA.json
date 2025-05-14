@@ -54,7 +54,7 @@
         "success": "Your application has been successfully submitted."
       },
       "projectIntakeForm": {
-        "bcHydroNumber": "What is your BC Hydro Call for Power project number?",
+        "bcHydroNumber": "What is your BC Hydro Call for Power project number? (optional)",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "confirmSubmitMessage": "Are you sure you wish to submit this form?",

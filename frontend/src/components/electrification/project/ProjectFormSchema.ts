@@ -52,8 +52,8 @@ export function createProjectFormSchema(
     }),
     projectDescription: string().when('project.projectType', {
       is: enums.ElectrificationProjectType.OTHER,
-      then: (schema) => schema.required().label('Additional information about you project'),
-      otherwise: (schema) => schema.notRequired().nullable().label('Additional information about you project')
+      then: (schema) => schema.required().label('Additional information about your project'),
+      otherwise: (schema) => schema.notRequired().nullable().label('Additional information about your project')
     }),
     submissionState: object({
       applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Project state'),

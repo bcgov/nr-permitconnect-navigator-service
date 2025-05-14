@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
 import { Card } from '@/lib/primevue';
 import { userService } from '@/services';
+import { useAppStore } from '@/store';
 import { formatDateShort } from '@/utils/formatters';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
@@ -14,6 +16,10 @@ import type { Enquiry } from '@/types';
 const { enquiry } = defineProps<{
   enquiry: Enquiry;
 }>();
+
+// Store
+const appStore = useAppStore();
+const { getInitiative } = storeToRefs(appStore);
 
 // State
 const userName: Ref<string> = ref('');
@@ -36,7 +42,10 @@ onBeforeMount(() => {
           <h3 class="mb-0">
             <router-link
               :to="{
-                name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
+                name:
+                  getInitiative === Initiative.ELECTRIFICATION
+                    ? RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY
+                    : RouteName.INT_HOUSING_PROJECT_ENQUIRY,
                 params: { enquiryId: enquiry.enquiryId }
               }"
             >
