@@ -206,7 +206,7 @@ export async function up(knex: Knex): Promise<void> {
       // Create code tables
       .then(() =>
         knex.schema.createTable('electrification_project_type_code', (table) => {
-          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to UPPER_SNAKE w/ no double or trailing underscores
+          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to SCREAMING_SNAKE w/ no double or trailing underscores
           table.text('display').unique().notNullable();
           table.text('definition').notNullable();
           table.boolean('active').notNullable().defaultTo(true);
@@ -215,7 +215,7 @@ export async function up(knex: Knex): Promise<void> {
       )
       .then(() =>
         knex.schema.createTable('electrification_project_category_code', (table) => {
-          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to UPPER_SNAKE w/ no double or trailing underscores
+          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to SCREAMING_SNAKE w/ no double or trailing underscores
           table.text('display').unique().notNullable();
           table.text('definition').notNullable();
           table.boolean('active').notNullable().defaultTo(true);
@@ -223,7 +223,6 @@ export async function up(knex: Knex): Promise<void> {
         })
       )
 
-      // Seeding code tables
       // Seeding code tables
       .then(() => {
         const types = [
