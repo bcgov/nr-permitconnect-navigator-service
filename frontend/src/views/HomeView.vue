@@ -1,25 +1,31 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 
 import { Button, useToast } from '@/lib/primevue';
-import { RouteName } from '@/utils/enums/application';
+import { IdentityProviderKind, RouteName } from '@/utils/enums/application';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 
-// Store
-const router = useRouter();
-
-// State
+// Composables
 const { t } = useI18n();
 const toast = useToast();
+const router = useRouter();
+
+// Store
+const authNStore = useAuthNStore();
+const authZStore = useAuthZStore();
+
+// State
+const isIdirUser = computed(() => authNStore.getUser?.profile.identity_provider === IdentityProviderKind.IDIR);
 
 // Actions
 const toElectrification = (): void => {
-  if (useAuthNStore().getIsAuthenticated) {
-    if (useAuthZStore().canNavigate(NavigationPermission.INT_ELECTRIFICATION))
+  if (authNStore.getIsAuthenticated) {
+    if (authZStore.canNavigate(NavigationPermission.INT_ELECTRIFICATION))
       router.push({ name: RouteName.INT_ELECTRIFICATION });
-    else if (useAuthZStore().canNavigate(NavigationPermission.EXT_ELECTRIFICATION))
+    else if (authZStore.canNavigate(NavigationPermission.EXT_ELECTRIFICATION))
       router.push({ name: RouteName.EXT_ELECTRIFICATION });
     else {
       toast.warn(t('homeView.cantNavigate'));
@@ -30,10 +36,9 @@ const toElectrification = (): void => {
 };
 
 const toHousing = (): void => {
-  if (useAuthNStore().getIsAuthenticated) {
-    if (useAuthZStore().canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
-    else if (useAuthZStore().canNavigate(NavigationPermission.EXT_HOUSING))
-      router.push({ name: RouteName.EXT_HOUSING });
+  if (authNStore.getIsAuthenticated) {
+    if (authZStore.canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
+    else if (authZStore.canNavigate(NavigationPermission.EXT_HOUSING)) router.push({ name: RouteName.EXT_HOUSING });
     else {
       toast.warn(t('homeView.cantNavigate'));
     }
@@ -61,7 +66,11 @@ const toHousing = (): void => {
             />
             {{ t('homeView.housing') }}
           </Button>
-          <Button @click="toElectrification">
+          <!-- TODO: Remove v-if on this button once prop electr. side is finished -->
+          <Button
+            v-if="isIdirUser"
+            @click="toElectrification"
+          >
             <img
               class="mr-4"
               src="@/assets/images/E.Land.Button.svg"

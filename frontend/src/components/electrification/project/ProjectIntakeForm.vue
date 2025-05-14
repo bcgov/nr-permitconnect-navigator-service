@@ -240,7 +240,7 @@ function syncFormAndRoute(actId: string, drftId: string) {
   }
 
   if (actId) {
-    formRef.value?.setFieldValue('activityId', actId);
+    formRef.value?.setFieldValue('project.activityId', actId);
     activityId.value = actId;
   }
 }
@@ -257,8 +257,13 @@ onBeforeMount(async () => {
       response = (await electrificationProjectService.getDraft(draftId)).data;
 
       initialFormValues.value = {
-        ...response.data,
-        activityId: response.activityId
+        contacts: {
+          ...response.data.contacts
+        },
+        project: {
+          ...response.data.project,
+          activityId: response.activityId
+        }
       };
 
       if (response.activityId) {
@@ -439,12 +444,7 @@ onBeforeMount(async () => {
       </template>
     </Card>
 
-    <Card
-      v-if="
-        values.project.projectType === enums.ElectrificationProjectType.IPP_WIND ||
-        values.project.projectType === enums.ElectrificationProjectType.IPP_SOLAR
-      "
-    >
+    <Card>
       <template #title>
         <span
           class="section-header"
