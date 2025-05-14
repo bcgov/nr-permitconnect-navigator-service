@@ -39,12 +39,7 @@ export function createProjectFormSchema(
     locationDescription: string().notRequired().max(4000).label('Location'),
     project: object({
       bcEnvironmentAssessNeeded: string().notRequired().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
-      bcHydroNumber: string().when('projectType', {
-        is: (value: string) =>
-          value === enums.ElectrificationProjectType.IPP_SOLAR || value === enums.ElectrificationProjectType.IPP_WIND,
-        then: (schema) => schema.required().max(255).label('BC Hydro Call for Power project number'),
-        otherwise: (schema) => schema.notRequired().nullable().max(255).label('BC Hydro Call for Power project number')
-      }),
+      bcHydroNumber: string().notRequired().nullable().max(255).label('BC Hydro Call for Power project number'),
       companyNameRegistered: string().notRequired().max(255).label('Company name'),
       hasEpa: string().notRequired().oneOf(YES_NO_LIST).label('Do they have an EPA?'),
       megawatts: number()
