@@ -1,5 +1,6 @@
 export { default as accessRequestController } from './accessRequest';
 export { default as atsController } from './ats';
+export { default as codeController } from './code';
 export { default as contactController } from './contact';
 export { default as documentController } from './document';
 export { default as electrificationProjectController } from './electrificationProject';

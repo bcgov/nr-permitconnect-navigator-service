@@ -1,5 +1,4 @@
 import { Contact } from './Contact';
-import { ProjectTypeT } from '../utils/enums/electrification';
 
 export type ElectrificationProjectIntake = {
   contacts?: Array<Contact>;
@@ -9,7 +8,7 @@ export type ElectrificationProjectIntake = {
     projectName?: string;
     projectDescription?: string;
     companyNameRegistered?: string;
-    projectType?: ProjectTypeT;
+    projectType?: string;
     bcHydroNumber?: string;
     submissionType?: string;
   };

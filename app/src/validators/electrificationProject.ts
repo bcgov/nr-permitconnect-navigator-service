@@ -3,7 +3,7 @@ import Joi from 'joi';
 import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
-import { PROJECT_CATEGORY_LIST, PROJECT_TYPE_LIST } from '../utils/constants/electrification';
+import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectType } from '../utils/enums/electrification';
 import { IntakeStatus } from '../utils/enums/projectCommon';
@@ -15,7 +15,7 @@ const electrificationIntake = {
   companyNameRegistered: Joi.string().required().max(255).trim(),
   projectType: Joi.string()
     .required()
-    .valid(...PROJECT_TYPE_LIST),
+    .valid(...electrificationProjectTypeCodes),
   bcHydroNumber: Joi.when('project.projectType', {
     is: (val: string) => val === ProjectType.IPP_WIND || val === ProjectType.IPP_SOLAR,
     then: Joi.string().required().max(255).trim(),
@@ -80,8 +80,8 @@ const schema = {
       includeUser: Joi.boolean(),
       includeDeleted: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
-      projectType: Joi.array().items(...PROJECT_TYPE_LIST),
-      projectCategory: Joi.array().items(...PROJECT_CATEGORY_LIST)
+      projectType: Joi.array().items(...electrificationProjectTypeCodes),
+      projectCategory: Joi.array().items(...electrificationProjectCategoryCodes)
     })
   },
   updateIsDeletedFlag: {
@@ -99,7 +99,7 @@ const schema = {
         ...electrificationIntake,
         electrificationProjectId: uuidv4.required(),
         projectCategory: Joi.string()
-          .valid(...PROJECT_CATEGORY_LIST)
+          .valid(...electrificationProjectCategoryCodes)
           .allow(null),
         assignedUserId: Joi.when('intakeStatus', {
           is: IntakeStatus.SUBMITTED,
