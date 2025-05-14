@@ -3,7 +3,8 @@ export type ElectrificationProjectSearchParameters = {
   createdBy?: Array<string>;
   intakeStatus?: Array<string>;
   includeUser?: boolean;
-  housingProjectId?: Array<string>;
-  submissionType?: Array<string>;
+  electrificationProjectId?: Array<string>;
+  projectType?: Array<string>;
+  projectCategory?: Array<string>;
   includeDeleted?: boolean;
 };
