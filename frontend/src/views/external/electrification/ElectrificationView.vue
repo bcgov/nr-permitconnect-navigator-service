@@ -7,6 +7,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
+import { useContactStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
@@ -30,10 +31,35 @@ const loading: Ref<boolean> = ref(true);
 const projects: Ref<Array<ElectrificationProject>> = ref([]);
 
 // Providers
-provide(projectRouteNameKey, RouteName.EXT_ELECTRIFICATION_INTAKE_DRAFT);
+provide(projectRouteNameKey, RouteName.EXT_ELECTRIFICATION_INTAKE);
 provide(draftableProjectServiceKey, electrificationProjectService);
 
 // Actions
+async function createIntake() {
+  const contact = useContactStore().getContact;
+  const response = await electrificationProjectService.updateDraft({
+    data: {
+      contacts: {
+        contactId: contact?.contactId,
+        userId: contact?.userId,
+        contactFirstName: contact?.firstName,
+        contactLastName: contact?.lastName,
+        contactEmail: contact?.email,
+        contactPhoneNumber: contact?.phoneNumber,
+        contactApplicantRelationship: contact?.contactApplicantRelationship,
+        contactPreference: contact?.contactPreference
+      }
+    }
+  });
+
+  router.push({
+    name: RouteName.EXT_ELECTRIFICATION_INTAKE,
+    params: {
+      draftId: response.data.draftId
+    }
+  });
+}
+
 function onElectrificationProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
@@ -135,7 +161,7 @@ onBeforeMount(async () => {
           :text="t('e.electrification.electrificationView.projectsTooltip')"
         />
       </div>
-      <Button @click="router.push({ name: RouteName.EXT_ELECTRIFICATION_INTAKE })">
+      <Button @click="createIntake">
         {{ t('e.electrification.electrificationView.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"

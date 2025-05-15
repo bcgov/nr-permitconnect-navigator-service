@@ -58,18 +58,8 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import('@/views/GenericView.vue'),
         children: [
           {
-            path: '',
-            name: RouteName.EXT_ELECTRIFICATION_INTAKE,
-            component: () => import('@/views/external/electrification/project/ProjectIntakeView.vue'),
-            beforeEnter: accessHandler,
-            props: createProps,
-            meta: {
-              breadcrumb: 'Project Intake Form'
-            }
-          },
-          {
             path: ':draftId',
-            name: RouteName.EXT_ELECTRIFICATION_INTAKE_DRAFT,
+            name: RouteName.EXT_ELECTRIFICATION_INTAKE,
             component: () => import('@/views/external/electrification/project/ProjectIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
