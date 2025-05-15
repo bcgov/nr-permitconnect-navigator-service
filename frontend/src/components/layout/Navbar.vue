@@ -1,24 +1,31 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { Menubar } from '@/lib/primevue';
-import { useAppStore, useAuthZStore } from '@/store';
+import { electrificationProjectService, housingProjectService } from '@/services';
+import { useAppStore, useAuthZStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_ASSISTANCE } from '@/utils/constants/housing';
 import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 
 // Types
 type NavItem = {
   label: string;
   route?: string;
+  func?: Function;
   public?: boolean;
   access?: NavigationPermission | Array<NavigationPermission>;
   items?: Array<NavItem>;
   mailTo?: string;
 };
+
+// Composables
+const router = useRouter();
 
 // Store
 const appStore = useAppStore();
@@ -28,6 +35,81 @@ const authzStore = useAuthZStore();
 const items: Ref<Array<NavItem>> = ref([]);
 
 // Actions
+async function createIntake(service: IDraftableProjectService, route: RouteName) {
+  const contact = useContactStore().getContact;
+  const response = await service.updateDraft({
+    data: {
+      contacts: {
+        contactId: contact?.contactId,
+        userId: contact?.userId,
+        contactFirstName: contact?.firstName,
+        contactLastName: contact?.lastName,
+        contactEmail: contact?.email,
+        contactPhoneNumber: contact?.phoneNumber,
+        contactApplicantRelationship: contact?.contactApplicantRelationship,
+        contactPreference: contact?.contactPreference
+      }
+    }
+  });
+
+  router.push({
+    name: route,
+    params: {
+      draftId: response.data.draftId
+    }
+  });
+}
+
+// async function createElectrificationIntake() {
+//   const contact = useContactStore().getContact;
+//   const response = await electrificationProjectService.updateDraft({
+//     data: {
+//       contacts: {
+//         contactId: contact?.contactId,
+//         userId: contact?.userId,
+//         contactFirstName: contact?.firstName,
+//         contactLastName: contact?.lastName,
+//         contactEmail: contact?.email,
+//         contactPhoneNumber: contact?.phoneNumber,
+//         contactApplicantRelationship: contact?.contactApplicantRelationship,
+//         contactPreference: contact?.contactPreference
+//       }
+//     }
+//   });
+
+//   router.push({
+//     name: RouteName.EXT_ELECTRIFICATION_INTAKE,
+//     params: {
+//       draftId: response.data.draftId
+//     }
+//   });
+// }
+
+// async function createHousingIntake() {
+//   const contact = useContactStore().getContact;
+//   const response = await housingProjectService.updateDraft({
+//     data: {
+//       contacts: {
+//         contactId: contact?.contactId,
+//         userId: contact?.userId,
+//         contactFirstName: contact?.firstName,
+//         contactLastName: contact?.lastName,
+//         contactEmail: contact?.email,
+//         contactPhoneNumber: contact?.phoneNumber,
+//         contactApplicantRelationship: contact?.contactApplicantRelationship,
+//         contactPreference: contact?.contactPreference
+//       }
+//     }
+//   });
+
+//   router.push({
+//     name: RouteName.EXT_HOUSING_INTAKE,
+//     params: {
+//       draftId: response.data.draftId
+//     }
+//   });
+// }
+
 watchEffect(() => {
   if (appStore.getInitiative === Initiative.ELECTRIFICATION) {
     items.value = [
@@ -41,7 +123,7 @@ watchEffect(() => {
         items: [
           {
             label: 'Submit an electrification project to the Navigator Service',
-            route: RouteName.EXT_ELECTRIFICATION_INTAKE,
+            func: () => createIntake(electrificationProjectService, RouteName.EXT_ELECTRIFICATION_INTAKE),
             access: NavigationPermission.EXT_ELECTRIFICATION
           }
         ],
@@ -100,7 +182,7 @@ watchEffect(() => {
         items: [
           {
             label: 'Submit a housing project to the Navigator Service',
-            route: RouteName.EXT_HOUSING_INTAKE,
+            func: () => createIntake(housingProjectService, RouteName.EXT_HOUSING_INTAKE),
             access: NavigationPermission.EXT_HOUSING
           },
           {
@@ -200,8 +282,17 @@ watchEffect(() => {
           </a>
         </router-link>
         <a
+          v-else-if="item.func"
+          :target="item.target"
+          v-bind="props.action"
+          @click="item.func"
+        >
+          <span :id="item.label as string">
+            {{ item.label }}
+          </span>
+        </a>
+        <a
           v-else-if="item.mailTo"
-          z
           :href="item.mailTo"
           :target="item.target"
           v-bind="props.action"

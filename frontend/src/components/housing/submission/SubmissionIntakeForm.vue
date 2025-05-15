@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form, FieldArray, ErrorMessage } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -119,28 +119,39 @@ function confirmSubmit(data: GenericObject) {
   });
 }
 
-async function generateActivityId() {
+async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
   try {
-    const response = await housingProjectService.updateDraft({
-      draftId: undefined,
-      activityId: undefined,
-      data: formRef?.value?.values
-    });
+    const configCC = getConfig.value.ches?.submission?.cc;
+    const applicantName = formRef.value?.values.contacts.contactFirstName;
+    const applicantEmail = formRef.value?.values.contacts.contactEmail;
+    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
+    let body: string;
 
-    if (response.data?.activityId && response.data?.draftId) {
-      // Disable the navigation guard temporarily to allow a route change
-      editable.value = false;
-      await nextTick();
-      syncFormAndRoute(response.data.activityId, response.data.draftId);
-      editable.value = true;
-
-      return response.data.activityId;
+    if (forProjectSubmission) {
+      body = confirmationTemplateHousingSubmission({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ housingProjectId }}': subId
+      });
     } else {
-      return undefined;
+      body = confirmationTemplateEnquiry({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ enquiryDescription }}': t('submissionIntakeForm.assistanceMessage'),
+        '{{ enquiryId }}': subId
+      });
     }
-  } catch (error) {
-    toast.error('Failed to generate activity ID');
-    return undefined;
+    const emailData = {
+      from: configCC,
+      to: [applicantEmail],
+      cc: configCC,
+      subject: subject,
+      bodyType: 'html',
+      body: body
+    };
+    await housingProjectService.emailConfirmation(emailData);
+  } catch (e: any) {
+    toast.error('Failed to send confirmation email. ', e);
   }
 }
 
@@ -214,6 +225,19 @@ async function onInvalidSubmit() {
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
 
+// Callback function for FormNavigationGuard
+// Cannot be directly added to the vue router lifecycle or things get out of sync
+async function onBeforeRouteLeaveCallback() {
+  // draftId and activityId are not stored in the draft json until first save
+  // If they do not exist we can safely delete on leave as it means the user hasn't done anything
+  if (draftId && editable.value) {
+    const response = (await housingProjectService.getDraft(draftId)).data;
+    if (response && !response.data.draftId && !response.data.activityId) {
+      await housingProjectService.deleteDraft(draftId);
+    }
+  }
+}
+
 function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
     if (fieldsLength === 0) {
@@ -228,30 +252,31 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Functi
   }
 }
 
-async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
-  autoSaveRef.value?.stopAutoSave();
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
+  if (e?.query?.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    orgBookOptions.value = results
+      .filter((x: { [key: string]: string }) => x.type === 'name')
+      .map((x: { [key: string]: string }) => x?.value);
+  }
+}
 
-  const draftData = omit(data, ['addressSearch']);
-  let response;
+async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
   try {
-    response = await housingProjectService.updateDraft({
+    autoSaveRef.value?.stopAutoSave();
+
+    const draftData = omit(data, ['addressSearch']);
+
+    await housingProjectService.updateDraft({
       draftId: draftId,
       activityId: draftData.activityId,
       data: draftData
     });
 
-    // Disable the navigation guard temporarily to allow a route change
-    editable.value = false;
-    await nextTick();
-    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
-    editable.value = true;
-
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
   } catch (e: any) {
     toast.error('Failed to save draft', e);
   }
-
-  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
 }
 
 async function onSubmit(data: any) {
@@ -279,7 +304,7 @@ async function onSubmit(data: any) {
     };
 
     // Remove empty investigate permit objects
-    const filteredInvestigatePermits = submissionData.investigatePermits.filter(
+    const filteredInvestigatePermits = submissionData.investigatePermits?.filter(
       (x: object) => JSON.stringify(x) !== '{}'
     );
 
@@ -312,66 +337,6 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
-  try {
-    const configCC = getConfig.value.ches?.submission?.cc;
-    const applicantName = formRef.value?.values.contacts.contactFirstName;
-    const applicantEmail = formRef.value?.values.contacts.contactEmail;
-    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
-    let body: string;
-
-    if (forProjectSubmission) {
-      body = confirmationTemplateHousingSubmission({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ housingProjectId }}': subId
-      });
-    } else {
-      body = confirmationTemplateEnquiry({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ enquiryDescription }}': t('submissionIntakeForm.assistanceMessage'),
-        '{{ enquiryId }}': subId
-      });
-    }
-    const emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: configCC,
-      subject: subject,
-      bodyType: 'html',
-      body: body
-    };
-    await housingProjectService.emailConfirmation(emailData);
-  } catch (e: any) {
-    toast.error('Failed to send confirmation email. ', e);
-  }
-}
-
-async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
-  if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
-      .map((x: { [key: string]: string }) => x?.value);
-  }
-}
-
-function syncFormAndRoute(actId: string, drftId: string) {
-  if (drftId) {
-    // Update route query for refreshing
-    router.replace({
-      name: RouteName.EXT_HOUSING_INTAKE_DRAFT,
-      params: { draftId: drftId }
-    });
-  }
-
-  if (actId) {
-    formRef.value?.setFieldValue('activityId', actId);
-    activityId.value = actId;
-  }
-}
-
 onBeforeMount(async () => {
   try {
     // Clearing the document store on page load
@@ -386,6 +351,7 @@ onBeforeMount(async () => {
 
       initialFormValues.value = {
         ...response.data,
+        draftId: response.draftId,
         activityId: response.activityId,
         appliedPermits:
           response.data.appliedPermits?.map((x: Partial<Permit>) => ({
@@ -403,7 +369,7 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       }
     } else {
-      if (housingProjectId && activityId) {
+      if (housingProjectId) {
         response = (await housingProjectService.getProject(housingProjectId)).data;
 
         if (response.activityId) {
@@ -489,25 +455,15 @@ onBeforeMount(async () => {
 
     locationRef.value?.onLatLongInput();
   } catch (e) {
-    router.replace({ name: RouteName.EXT_HOUSING_INTAKE });
+    router.replace({ name: RouteName.EXT_HOUSING });
   }
 });
 
-watch(
-  () => activeStep.value,
-  () => {
-    const isIntake = [RouteName.EXT_HOUSING_INTAKE, RouteName.EXT_HOUSING_INTAKE_DRAFT].includes(
-      router.currentRoute.value.name as RouteName
-    );
-
-    // Trigger autosave on form step change, if it has activityId
-    if (activityId.value && formRef?.value && isIntake) onSaveDraft(formRef?.value?.values, true, false);
-
-    // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-    if (activeStep.value === 2) nextTick().then(() => locationRef?.value?.resizeMap());
-    if (activeStep.value === 3) isSubmittable.value = true;
-  }
-);
+watchEffect(() => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (activeStep.value === 2) nextTick().then(() => locationRef?.value?.resizeMap());
+  if (activeStep.value === 3) isSubmittable.value = true;
+});
 </script>
 
 <template>
@@ -529,7 +485,11 @@ watch(
     @invalid-submit="onInvalidSubmit"
     @submit="confirmSubmit"
   >
-    <FormNavigationGuard v-if="editable" />
+    <FormNavigationGuard
+      v-if="editable"
+      :auto-save-ref="autoSaveRef"
+      :callback="onBeforeRouteLeaveCallback"
+    />
     <FormAutosave
       v-if="editable"
       ref="autoSaveRef"
@@ -1063,9 +1023,8 @@ watch(
                 , etc)
               </label>
               <AdvancedFileUpload
-                :activity-id="values.activityId"
+                :activity-id="activityId"
                 :disabled="!editable"
-                :generate-activity-id="generateActivityId"
               />
             </template>
           </Card>

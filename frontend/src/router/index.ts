@@ -154,23 +154,13 @@ export default function getRouter() {
             });
           }, 500);
         });
-        // TODO: Uncomment when navigating to last location/tab/etc. is fixed
-        // } else if (savedPosition) {
-        //   // Scroll to previous position on forward/back buttons
-        //   return new Promise((resolve) => {
-        //     setTimeout(() => {
-        //       resolve({
-        //         ...savedPosition,
-        //         behavior: 'smooth'
-        //       });
-        //     }, 500);
-        //   });
-      } else {
+      } else if (to.name === from.name) {
         // Do not scroll if same page
-        if (to.name === from.name) return false;
+        return false;
+      } else {
+        // Default scroll to top
+        return { top: 0 };
       }
-      // Default scroll to top
-      return { top: 0 };
     }
   });
 

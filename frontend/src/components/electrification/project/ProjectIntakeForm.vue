@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -72,28 +72,52 @@ function confirmSubmit(data: GenericObject) {
   });
 }
 
-async function generateActivityId() {
+async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
   try {
-    const response = await electrificationProjectService.updateDraft({
-      draftId: undefined,
-      activityId: undefined,
-      data: formRef?.value?.values
-    });
+    const configCC = getConfig.value.ches?.submission?.cc;
+    const applicantName = formRef.value?.values.contacts.contactFirstName;
+    const applicantEmail = formRef.value?.values.contacts.contactEmail;
+    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
+    let body: string;
 
-    if (response.data?.activityId && response.data?.draftId) {
-      // Disable the navigation guard temporarily to allow a route change
-      editable.value = false;
-      await nextTick();
-      syncFormAndRoute(response.data.activityId, response.data.draftId);
-      editable.value = true;
-
-      return response.data.activityId;
+    if (forProjectSubmission) {
+      body = confirmationTemplateElectrificationSubmission({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ projectId }}': subId
+      });
     } else {
-      return undefined;
+      body = confirmationTemplateEnquiry({
+        '{{ contactName }}': applicantName,
+        '{{ activityId }}': actId,
+        '{{ enquiryDescription }}': t('e.electrification.projectIntakeForm.assistanceMessage'),
+        '{{ enquiryId }}': subId
+      });
     }
-  } catch (error) {
-    toast.error(t('e.electrification.projectIntakeForm.failedGenerateActivity'));
-    return undefined;
+    const emailData = {
+      from: configCC,
+      to: [applicantEmail],
+      cc: configCC,
+      subject: subject,
+      bodyType: 'html',
+      body: body
+    };
+    await electrificationProjectService.emailConfirmation(emailData);
+  } catch (e: any) {
+    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), e);
+  }
+}
+
+// Callback function for FormNavigationGuard
+// Cannot be directly added to the vue router lifecycle or things get out of sync
+async function onBeforeRouteLeaveCallback() {
+  // draftId and activityId are not stored in the draft json until first save
+  // If they do not exist we can safely delete on leave as it means the user hasn't done anything
+  if (draftId && editable.value) {
+    const response = (await electrificationProjectService.getDraft(draftId)).data;
+    if (response && !response.data.draftId && !response.data.activityId) {
+      await electrificationProjectService.deleteDraft(draftId);
+    }
   }
 }
 
@@ -101,22 +125,24 @@ async function onInvalidSubmit() {
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
-  autoSaveRef.value?.stopAutoSave();
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
+  if (e?.query?.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    orgBookOptions.value = results
+      .filter((x: { [key: string]: string }) => x.type === 'name')
+      .map((x: { [key: string]: string }) => x?.value);
+  }
+}
 
-  let response;
+async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
   try {
-    response = await electrificationProjectService.updateDraft({
+    autoSaveRef.value?.stopAutoSave();
+
+    await electrificationProjectService.updateDraft({
       draftId: draftId,
       activityId: data.activityId,
       data: data
     });
-
-    // Disable the navigation guard temporarily to allow a route change
-    editable.value = false;
-    await nextTick();
-    syncFormAndRoute(response?.data.activityId, response?.data.draftId);
-    editable.value = true;
 
     if (showToast)
       toast.success(
@@ -127,8 +153,6 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
   } catch (e: any) {
     toast.error(t('e.electrification.projectIntakeForm.failedSaveDraft'), e);
   }
-
-  return { activityId: response?.data.activityId, draftId: response?.data.draftId };
 }
 
 async function onSubmit(data: any) {
@@ -182,66 +206,6 @@ async function onSubmit(data: any) {
   } catch (e: any) {
     toast.error(t('e.electrification.projectIntakeForm.failedSaveIntake'), e);
     editable.value = true;
-  }
-}
-
-async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
-  try {
-    const configCC = getConfig.value.ches?.submission?.cc;
-    const applicantName = formRef.value?.values.contacts.contactFirstName;
-    const applicantEmail = formRef.value?.values.contacts.contactEmail;
-    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
-    let body: string;
-
-    if (forProjectSubmission) {
-      body = confirmationTemplateElectrificationSubmission({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ projectId }}': subId
-      });
-    } else {
-      body = confirmationTemplateEnquiry({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ enquiryDescription }}': t('e.electrification.projectIntakeForm.assistanceMessage'),
-        '{{ enquiryId }}': subId
-      });
-    }
-    const emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: configCC,
-      subject: subject,
-      bodyType: 'html',
-      body: body
-    };
-    await electrificationProjectService.emailConfirmation(emailData);
-  } catch (e: any) {
-    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), e);
-  }
-}
-
-async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
-  if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
-      .map((x: { [key: string]: string }) => x?.value);
-  }
-}
-
-function syncFormAndRoute(actId: string, drftId: string) {
-  if (drftId) {
-    // Update route query for refreshing
-    router.replace({
-      name: RouteName.EXT_ELECTRIFICATION_INTAKE_DRAFT,
-      params: { draftId: drftId }
-    });
-  }
-
-  if (actId) {
-    formRef.value?.setFieldValue('project.activityId', actId);
-    activityId.value = actId;
   }
 }
 
@@ -316,7 +280,7 @@ onBeforeMount(async () => {
       };
     }
   } catch (e) {
-    router.replace({ name: RouteName.EXT_ELECTRIFICATION_INTAKE });
+    router.replace({ name: RouteName.EXT_ELECTRIFICATION });
   }
 });
 </script>
@@ -340,7 +304,11 @@ onBeforeMount(async () => {
     @invalid-submit="onInvalidSubmit"
     @submit="confirmSubmit"
   >
-    <FormNavigationGuard v-if="editable" />
+    <FormNavigationGuard
+      v-if="editable"
+      :auto-save-ref="autoSaveRef"
+      :callback="onBeforeRouteLeaveCallback"
+    />
     <FormAutosave
       v-if="editable"
       ref="autoSaveRef"
@@ -502,9 +470,8 @@ onBeforeMount(async () => {
           {{ t('e.electrification.projectIntakeForm.upload3') }}
         </label>
         <AdvancedFileUpload
-          :activity-id="values.activityId"
+          :activity-id="activityId"
           :disabled="!editable"
-          :generate-activity-id="generateActivityId"
         />
       </template>
     </Card>

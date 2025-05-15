@@ -15,14 +15,12 @@ const {
   activityId = undefined,
   accept = undefined,
   disabled = false,
-  reject = undefined,
-  generateActivityId
+  reject = undefined
 } = defineProps<{
   activityId?: string;
   accept?: string[];
   reject?: string[];
   disabled?: boolean;
-  generateActivityId: () => Promise<string | undefined>;
 }>();
 
 // Store
@@ -56,17 +54,14 @@ const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
 
 const onUpload = async (files: Array<File>) => {
   uploading.value = true;
-  let currentActivityId: string | undefined = activityId;
-
-  currentActivityId = activityId ? activityId : await generateActivityId();
 
   await Promise.allSettled(
     files.map((file: File) => {
       const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
       return new Promise((resolve, reject) => {
-        if (currentActivityId) {
+        if (activityId) {
           documentService
-            .createDocument(sanitizedFile, currentActivityId, getConfig.value.coms.bucketId)
+            .createDocument(sanitizedFile, activityId, getConfig.value.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 response.data.filename = decodeURI(response.data.filename);
