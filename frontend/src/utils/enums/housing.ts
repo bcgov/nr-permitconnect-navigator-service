@@ -2,22 +2,6 @@
  * Housing initiative enums
  */
 
-export enum ContactPreference {
-  PHONE_CALL = 'Phone call',
-  EMAIL = 'Email',
-  EITHER = 'Either'
-}
-
-export enum IntakeFormCategory {
-  BASIC = 'basic',
-  CONTACTS = 'contacts',
-  HOUSING = 'housing',
-  LOCATION = 'location',
-  PERMITS = 'permits',
-  APPLIED_PERMITS = 'appliedPermits',
-  INVESTIGATE_PERMIS = 'investigatePermits'
-}
-
 export enum NumResidentialUnits {
   ONE_TO_NINE = '1-9',
   TEN_TO_FOURTY_NINE = '10-49',
@@ -29,12 +13,6 @@ export enum NumResidentialUnits {
 export enum ProjectApplicant {
   BUSINESS = 'Business',
   INDIVIDUAL = 'Individual'
-}
-
-export enum ProjectRelationship {
-  OWNER = 'Property owner',
-  CONSULTANT = 'Project consultant',
-  OTHER = 'Other'
 }
 
 export enum ProjectLocation {

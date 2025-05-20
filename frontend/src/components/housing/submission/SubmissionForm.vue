@@ -26,15 +26,13 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import {
-  CONTACT_PREFERENCE_LIST,
-  NUM_RESIDENTIAL_UNITS_LIST,
-  PROJECT_RELATIONSHIP_LIST
-} from '@/utils/constants/housing';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
+  CONTACT_PREFERENCE_LIST,
   INTAKE_STATUS_LIST,
   QUEUE_PRIORITY,
+  PROJECT_RELATIONSHIP_LIST,
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/projectCommon';
 import { BasicResponse, IdentityProviderKind, Regex } from '@/utils/enums/application';

@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 
 import BasicInfo from '@/components/common/icons/BasicInfo.vue';
 import { InputMask, InputText, Select } from '@/components/form';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
 // Props
 const { editable = true, initialFormValues } = defineProps<{

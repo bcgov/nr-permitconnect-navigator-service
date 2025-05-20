@@ -1,11 +1,12 @@
-import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
-import { userService } from '@/services';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
-import { IntakeFormCategory } from '@/utils/enums/housing';
+
+import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
+import { userService } from '@/services';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
 

@@ -1,7 +1,8 @@
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse } from '@/utils/enums/application';
-import { IntakeFormCategory, ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
+import { ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
