@@ -256,7 +256,7 @@ const controller = {
         });
       } else {
         const activityId = (
-          await activityService.createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext))
+          await activityService.createActivity(Initiative.ELECTRIFICATION, generateCreateStamps(req.currentContext))
         )?.activityId;
 
         // Create new draft

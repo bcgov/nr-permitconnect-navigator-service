@@ -116,7 +116,7 @@ async function onBeforeRouteLeaveCallback() {
   // If they do not exist we can safely delete on leave as it means the user hasn't done anything
   if (draftId && editable.value) {
     const response = (await electrificationProjectService.getDraft(draftId)).data;
-    if (response && !response.data.draftId && !response.data.activityId) {
+    if (response && !response.data.draftId && !response.data.project.activityId) {
       await electrificationProjectService.deleteDraft(draftId);
     }
   }
@@ -141,7 +141,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
 
     await electrificationProjectService.updateDraft({
       draftId: draftId,
-      activityId: data.activityId,
+      activityId: data.project.activityId,
       data: data
     });
 
@@ -222,6 +222,7 @@ onBeforeMount(async () => {
       response = (await electrificationProjectService.getDraft(draftId)).data;
 
       initialFormValues.value = {
+        draftId: response.draftId,
         contacts: {
           ...response.data.contacts
         },
