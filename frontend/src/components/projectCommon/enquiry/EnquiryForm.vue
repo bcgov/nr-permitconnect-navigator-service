@@ -23,12 +23,13 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
+  CONTACT_PREFERENCE_LIST,
   ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST,
-  INTAKE_STATUS_LIST
+  INTAKE_STATUS_LIST,
+  PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/projectCommon';
 import { IdentityProviderKind, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';

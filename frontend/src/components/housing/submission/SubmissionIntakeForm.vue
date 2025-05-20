@@ -21,10 +21,12 @@ import {
   StepperNavigation,
   TextArea
 } from '@/components/form';
-import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
-import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
-import LocationCard from '@/components/form/common/LocationCard.vue';
-import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import {
+  ContactCardIntakeForm,
+  NaturalDisasterCard,
+  LocationCard,
+  CollectionDisclaimer
+} from '@/components/form/common';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
 import { createProjectIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
@@ -48,9 +50,9 @@ import { useConfigStore, useContactStore, useProjectStore, usePermitStore } from
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { IntakeFormCategory, ProjectApplicant } from '@/utils/enums/housing';
+import { ProjectApplicant } from '@/utils/enums/housing';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
-import { SubmissionType } from '@/utils/enums/projectCommon';
+import { IntakeFormCategory, SubmissionType } from '@/utils/enums/projectCommon';
 import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 

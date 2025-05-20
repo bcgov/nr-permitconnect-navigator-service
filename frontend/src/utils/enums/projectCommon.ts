@@ -14,6 +14,12 @@ export enum BringForwardType {
   RESOLVED = 'Resolved'
 }
 
+export enum ContactPreference {
+  PHONE_CALL = 'Phone call',
+  EMAIL = 'Email',
+  EITHER = 'Either'
+}
+
 export enum DraftCode {
   ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
   HOUSING_PROJECT = 'HOUSING_PROJECT'
@@ -23,6 +29,16 @@ export enum EnquirySubmittedMethod {
   PHONE = 'Phone',
   EMAIL = 'Email',
   PCNS = 'PCNS'
+}
+
+export enum IntakeFormCategory {
+  BASIC = 'basic',
+  CONTACTS = 'contacts',
+  HOUSING = 'housing',
+  LOCATION = 'location',
+  PERMITS = 'permits',
+  APPLIED_PERMITS = 'appliedPermits',
+  INVESTIGATE_PERMIS = 'investigatePermits'
 }
 
 export enum IntakeStatus {
@@ -37,6 +53,12 @@ export enum NoteType {
   BRING_FORWARD = 'Bring forward',
   ENQUIRY = 'Enquiry',
   ROADMAP = 'Roadmap'
+}
+
+export enum ProjectRelationship {
+  OWNER = 'Property owner',
+  CONSULTANT = 'Project consultant',
+  OTHER = 'Other'
 }
 
 export enum SubmissionType {
