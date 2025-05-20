@@ -7,7 +7,7 @@ import { nextTick } from 'vue';
 import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
 
 import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
-import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
+import { createProjectIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import { contactService, documentService, permitService, housingProjectService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
@@ -214,7 +214,7 @@ describe('SubmissionIntakeForm', () => {
     //   }
     // );
 
-    const basicTest = submissionIntakeSchema.validateAt('basic', {
+    const basicTest = createProjectIntakeSchema(['testString3']).validateAt('basic', {
       basic: {
         projectApplicantType: ProjectApplicant.BUSINESS,
         isDevelopedInBC: BasicResponse.NO,
@@ -222,7 +222,7 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const housingTest = submissionIntakeSchema.validateAt('housing', {
+    const housingTest = createProjectIntakeSchema([]).validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -243,7 +243,7 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const locationTest = submissionIntakeSchema.validateAt('location', {
+    const locationTest = createProjectIntakeSchema([]).validateAt('location', {
       location: {
         naturalDisaster: 'Yes',
         projectLocation: 'testString1',
@@ -257,13 +257,13 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const permitsTest = submissionIntakeSchema.validateAt('permits', {
+    const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: BasicResponse.YES
       }
     });
 
-    const appliedPermitsTest = submissionIntakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTest = createProjectIntakeSchema([]).validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: 1,
@@ -292,7 +292,7 @@ describe('SubmissionIntakeForm', () => {
     //   contactPreference: ContactPreference.PHONE_CALL
     // });
 
-    const basicTestFail = submissionIntakeSchema.validateAt('basic', {
+    const basicTestFail = createProjectIntakeSchema([]).validateAt('basic', {
       basic: {
         projectApplicantType: 'testString1',
         isDevelopedInBC: 'testString2',
@@ -300,7 +300,7 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const housingTestFail = submissionIntakeSchema.validateAt('housing', {
+    const housingTestFail = createProjectIntakeSchema([]).validateAt('housing', {
       housing: {
         projectName: 'testString1',
         projectDescription: 'testString2',
@@ -320,7 +320,7 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const locationTestFail = submissionIntakeSchema.validateAt('location', {
+    const locationTestFail = createProjectIntakeSchema([]).validateAt('location', {
       location: {
         projectLocation: '',
         streetAddress: 'testString2',
@@ -333,13 +333,13 @@ describe('SubmissionIntakeForm', () => {
       }
     });
 
-    const permitsTest = submissionIntakeSchema.validateAt('permits', {
+    const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
       permits: {
         hasAppliedProvincialPermits: 123
       }
     });
 
-    const appliedPermitsTestFail = submissionIntakeSchema.validateAt('appliedPermits', {
+    const appliedPermitsTestFail = createProjectIntakeSchema([]).validateAt('appliedPermits', {
       appliedPermits: [
         {
           permitTypeId: '',

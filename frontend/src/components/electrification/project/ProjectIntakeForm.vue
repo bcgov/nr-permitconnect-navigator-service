@@ -57,10 +57,11 @@ const validationErrors = computed(() => {
   if (!formRef?.value?.errors) return [];
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
 });
+const validationSchema = computed(() => {
+  return createProjectIntakeSchema(codeValues, enums, orgBookOptions.value);
+});
 
 // Actions
-const projectIntakeSchema = createProjectIntakeSchema(codeValues, enums);
-
 function confirmSubmit(data: GenericObject) {
   confirm.require({
     message: t('e.electrification.projectIntakeForm.confirmSubmitMessage'),
@@ -300,7 +301,7 @@ onBeforeMount(async () => {
     v-slot="{ isSubmitting, setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="projectIntakeSchema"
+    :validation-schema="validationSchema"
     @invalid-submit="onInvalidSubmit"
     @submit="confirmSubmit"
   >
@@ -359,7 +360,6 @@ onBeforeMount(async () => {
           :bold="false"
           :disabled="!editable"
           :editable="true"
-          :force-selection="true"
           :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
           :suggestions="orgBookOptions"
           @on-complete="onRegisteredNameInput"

@@ -37,7 +37,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['onChange', 'onComplete', 'onInput']);
+const emit = defineEmits(['onComplete']);
 const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 onBeforeMount(() => {
@@ -56,10 +56,11 @@ onBeforeMount(() => {
     </label>
     <AutoComplete
       v-model="value"
+      append-to="body"
       :aria-describedby="`${name}-help`"
       :aria-labelledby="`${name}-label`"
       class="w-full"
-      :class="{ 'p-invalid': errorMessage }"
+      :invalid="!!errorMessage"
       :delay="delay"
       :disabled="disabled"
       :editable="editable"

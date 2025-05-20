@@ -26,7 +26,7 @@ import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vu
 import LocationCard from '@/components/form/common/LocationCard.vue';
 import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
 import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
-import { submissionIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
+import { createProjectIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
 import {
   Accordion,
   AccordionContent,
@@ -103,6 +103,9 @@ const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
   if (!formRef?.value?.errors) return [];
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
+});
+const validationSchema = computed(() => {
+  return createProjectIntakeSchema(orgBookOptions.value);
 });
 
 // Actions
@@ -481,7 +484,7 @@ watchEffect(() => {
     v-slot="{ setFieldValue, errors, meta, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="submissionIntakeSchema"
+    :validation-schema="validationSchema"
     @invalid-submit="onInvalidSubmit"
     @submit="confirmSubmit"
   >
@@ -649,7 +652,6 @@ watchEffect(() => {
                     :bold="false"
                     :disabled="!editable"
                     :editable="true"
-                    :force-selection="true"
                     :placeholder="'Type to search the B.C registered name'"
                     :suggestions="orgBookOptions"
                     @on-complete="onRegisteredNameInput"
