@@ -44,6 +44,7 @@ const testEnquiry = {
   enquiryStatus: ApplicationStatus.NEW,
   contacts: [exampleContact],
   atsClientId: null,
+  atsEnquiryId: null,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
@@ -195,24 +196,5 @@ describe('EnquiryForm.vue', () => {
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.props('editable')).toBe(false);
     expect(elements.length).toBe(9);
-  });
-
-  it('displays ATS number as "Unavailable" when relatedActivityId in enquiry, no relatedAtsNumber prop', async () => {
-    const mountEnquiry = { ...testEnquiry, relatedActivityId: 'testRAId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined));
-    await nextTick();
-
-    const element = wrapper.find('a.no-underline');
-    expect(element.text()).toBe('Unavailable');
-  });
-
-  it('displays correct ATS # when relatedActivityId in enquiry and relatedAtsNumber in prop', async () => {
-    const testAtsNumber = 123456;
-    const mountEnquiry = { ...testEnquiry, relatedActivityId: 'testRAId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, testAtsNumber));
-    await nextTick();
-
-    const element = wrapper.find('a.hover-hand');
-    expect(element.text()).toBe(testAtsNumber.toString());
   });
 });
