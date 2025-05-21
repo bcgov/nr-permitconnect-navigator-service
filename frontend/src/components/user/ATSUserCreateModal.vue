@@ -3,15 +3,12 @@ import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
-import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
-import { atsService } from '@/services';
+import { Button, Column, DataTable, Dialog } from '@/lib/primevue';
 import { useAppStore } from '@/store';
-import { BasicResponse, Initiative } from '@/utils/enums/application';
-import { setEmptyStringsToNull } from '@/utils/utils';
+import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, ElectrificationProject, Enquiry, HousingProject } from '@/types';
-import type { AddressResource } from '@/types/ATSClientResource';
+import type { ElectrificationProject, Enquiry, HousingProject } from '@/types';
 
 // Types
 type ATSUser = {
@@ -27,78 +24,24 @@ const { projectOrEnquiry } = defineProps<{
   projectOrEnquiry: Enquiry | HousingProject | ElectrificationProject;
 }>();
 
-// Constants
-const ATS_REGION_NAME: string = 'Navigator';
-
-// Composables
-const toast = useToast();
-
 // Emits
-const emit = defineEmits(['atsUserLink:link']);
+const emit = defineEmits(['atsUserCreate:link', 'atsUserCreate:create']);
 
 // Store
 const appStore = useAppStore();
 const { getInitiative } = storeToRefs(appStore);
 
 // State
-const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
 const atsUser: Ref<ATSUser | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
 // Actions
-async function createATSClient() {
-  try {
-    loading.value = true;
-
-    // TODO: Remove conditional when prisma db has full mappings
-    const contact =
-      'enquiryId' in projectOrEnquiry || getInitiative.value === Initiative.HOUSING
-        ? projectOrEnquiry.contacts[0]
-        : projectOrEnquiry.activity?.activityContact?.[0]?.contact;
-
-    const address: Partial<AddressResource> = {
-      '@type': 'AddressResource',
-      primaryPhone: contact?.phoneNumber ?? '',
-      email: contact?.email ?? ''
-    };
-
-    if ('streetAddress' in projectOrEnquiry) address.addressLine1 = projectOrEnquiry.streetAddress;
-    if ('locality' in projectOrEnquiry) address.city = projectOrEnquiry.streetAddress;
-    if ('province' in projectOrEnquiry) address.provinceCode = projectOrEnquiry.streetAddress;
-
-    const data = {
-      '@type': 'ClientResource',
-      address: address,
-      firstName: contact?.firstName,
-      surName: contact?.lastName,
-      regionName: ATS_REGION_NAME,
-      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    };
-
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-
-    const response = await atsService.createATSClient(submitData);
-    if (response.status === 201) {
-      atsClientId.value = response.data.clientId;
-      emit('atsUserLink:link', atsClientId.value);
-      visible.value = false;
-      toast.success('New client pushed to ATS');
-    } else {
-      toast.error('Error pushing client to ATS');
-    }
-  } catch (error) {
-    toast.error('Error pushing client to ATS ' + error);
-  } finally {
-    loading.value = false;
-  }
-}
-
 onBeforeMount(() => {
   const locationAddressStr = [
     'streetAddress' in projectOrEnquiry ? projectOrEnquiry.streetAddress : '',
-    'locality' in projectOrEnquiry ? projectOrEnquiry.streetAddress : '',
-    'province' in projectOrEnquiry ? projectOrEnquiry.streetAddress : ''
+    'locality' in projectOrEnquiry ? projectOrEnquiry.locality : '',
+    'province' in projectOrEnquiry ? projectOrEnquiry.province : ''
   ]
     .filter((str) => str?.trim())
     .join(', ');
@@ -176,7 +119,7 @@ onBeforeMount(() => {
           class="p-button-solid mr-4"
           label="Push to ATS"
           icon="pi pi-upload"
-          @click="createATSClient()"
+          @click="emit('atsUserCreate:create')"
         />
         <Button
           class="mr-0"
