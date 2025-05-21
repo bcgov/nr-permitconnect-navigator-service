@@ -26,6 +26,7 @@ const ENQUIRY_DATA: Enquiry = {
   addedToATS: false,
   assignedUserId: null,
   atsClientId: null,
+  atsEnquiryId: null,
   submissionType: 'general',
   submittedAt: '2025-02-28T00:00:00.000Z',
   submittedBy: 'testuser',
