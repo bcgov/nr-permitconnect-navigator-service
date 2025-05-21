@@ -35,6 +35,7 @@ const testProject: ElectrificationProject = {
   multiPermitsNeeded: 'No',
   astNotes: 'Notes',
   atsClientId: null,
+  atsEnquiryId: null,
   aaiUpdated: false,
   contacts: []
 };
