@@ -5,7 +5,7 @@ export type RelLink = {
   method: string;
 };
 
-export type AddressResource = {
+export type ATSAddressResource = {
   '@type': string;
   links: RelLink[];
   addressId: number;
@@ -29,7 +29,7 @@ export type ATSClientResource = {
   '@type': string | undefined;
   links: RelLink[] | undefined;
   clientId: number | undefined;
-  address: AddressResource;
+  address: ATSAddressResource;
   businessOrgCode: string | null;
   firstName: string;
   formattedAddress: string;

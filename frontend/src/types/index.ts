@@ -1,6 +1,8 @@
 export type { ActivityContact } from './ActivityContact';
 export type { AccessRequest } from './AccessRequest';
+export type { ATSAddressResource } from './ATSClientResource';
 export type { ATSClientResource } from './ATSClientResource';
+export type { ATSEnquiryResource } from './ATSEnquiryResource';
 export type { BasicBCeIDAttribute } from './BasicBCeIDAttribute';
 export type { BringForward } from './BringForward';
 export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';

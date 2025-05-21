@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
 
-import type { ATSClientResource } from '@/types';
+import type { ATSClientResource, ATSEnquiryResource } from '@/types';
 
 export default {
   /**
@@ -20,5 +20,12 @@ export default {
    */
   createATSClient(data?: ATSClientResource) {
     return appAxios().post('ats/client', data);
+  },
+  /**
+   * @function createATSEnquiry
+   * @returns {Promise} An axios response
+   */
+  createATSEnquiry(data?: ATSEnquiryResource) {
+    return appAxios().post('ats/enquiry', data);
   }
 };
