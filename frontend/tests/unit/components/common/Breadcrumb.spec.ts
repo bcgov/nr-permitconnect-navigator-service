@@ -37,7 +37,8 @@ const testEnquiry: Enquiry = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   addedToATS: false,
-  atsClientId: 123456
+  atsClientId: 123456,
+  atsEnquiryId: '654321'
 };
 
 const testProject: HousingProject = {
@@ -79,6 +80,7 @@ const testProject: HousingProject = {
   naturalDisaster: 'None',
   addedToATS: true,
   atsClientId: 654321,
+  atsEnquiryId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
