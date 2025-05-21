@@ -8,7 +8,7 @@ import { Action, Resource } from '../../utils/enums/application';
 import { atsValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { ATSClientResource, ATSUserSearchParameters } from '../../types';
+import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -29,6 +29,16 @@ router.post(
   atsValidator.createATSClient,
   (req: Request<never, never, ATSClientResource, never>, res: Response, next: NextFunction): void => {
     atsController.createATSClient(req, res, next);
+  }
+);
+
+/** Creates an enquiry in ATS */
+router.post(
+  '/enquiry',
+  hasAuthorization(Resource.ATS, Action.CREATE),
+  atsValidator.createATSEnquiry,
+  (req: Request<never, never, ATSEnquiryResource, never>, res: Response, next: NextFunction): void => {
+    atsController.createATSEnquiry(req, res, next);
   }
 );
 
