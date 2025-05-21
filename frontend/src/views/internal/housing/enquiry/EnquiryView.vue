@@ -151,7 +151,6 @@ onBeforeMount(async () => {
           <EnquiryForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedHousingProject?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>

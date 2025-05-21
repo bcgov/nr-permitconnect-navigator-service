@@ -24,7 +24,7 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { housingProjectService, mapService, userService } from '@/services';
+import { atsService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -50,7 +50,7 @@ import {
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Contact, HousingProject, User } from '@/types';
+import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, HousingProject, User } from '@/types';
 
 // Interfaces
 interface HousingProjectForm extends HousingProject {
@@ -63,6 +63,13 @@ const { editable = true, housingProject } = defineProps<{
   editable?: boolean;
   housingProject: HousingProject;
 }>();
+
+// Constants
+const ATS_REGION_NAME: string = 'Navigator';
+const ATS_SUB_REGIONAL_OFFICE: string = 'Navigator';
+const ATS_ENQUIRY_METHOD_CODES = 'PCNS';
+const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
+const ATS_ENQUIRY_PARTNER_AGENCIES = 'Housing';
 
 // Composables
 const { t } = useI18n();
@@ -82,6 +89,8 @@ const geoJson = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const searchContactModalVisible: Ref<boolean> = ref(false);
+const shouldCreateATSClient: Ref<boolean> = ref(false);
+const shouldCreateATSEnquiry: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -265,8 +274,31 @@ function setBasicInfo(contact?: Contact) {
   basicInfoManualEntry.value = false;
 }
 
+function onNewATSEnquiry() {
+  confirm.require({
+    message: t('submissionForm.atsEnquiryConfirmMsg'),
+    header: t('submissionForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('submissionForm.confirm'),
+    rejectLabel: t('submissionForm.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      shouldCreateATSEnquiry.value = true;
+    }
+  });
+}
+
 const onSubmit = async (values: any) => {
   try {
+    if (shouldCreateATSClient.value) {
+      values.atsClientId = await createATSClient();
+      values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsClientEnquiryPushed'), values.atsClientId);
+      values.addedToATS = true;
+      shouldCreateATSClient.value = false;
+    } else if (shouldCreateATSEnquiry.value) {
+      values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsEnquiryPushed'));
+      shouldCreateATSEnquiry.value = false;
+      values.addedToATS = true;
+    }
     // Convert contact fields into contacts array object then remove form keys from data
     const valuesWithContact = omit(
       {
@@ -339,6 +371,68 @@ function updateLocationAddress(values: any, setFieldValue?: Function) {
   return locationAddressStr;
 }
 
+async function createATSClient() {
+  try {
+    const address: Partial<ATSAddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: formRef.value?.values.contactPhoneNumber ?? '',
+      email: formRef.value?.values?.contactEmail ?? '',
+      addressLine1: formRef.value?.values.streetAddress,
+      city: formRef.value?.values.locality,
+      provinceCode: formRef.value?.values.province
+    };
+
+    const data = {
+      '@type': 'ClientResource',
+      address: address,
+      firstName: formRef.value?.values.contactFirstName,
+      surName: formRef.value?.values.contactLastName,
+      regionName: ATS_REGION_NAME,
+      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
+    };
+
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createATSClient(submitData);
+    if (response.status === 201) {
+      return response.data.clientId;
+    } else {
+      toast.error(t('submissionForm.atsClientPushError'));
+    }
+  } catch (error) {
+    toast.error(t('submissionForm.atsClientPushError') + ' ' + error);
+  }
+}
+
+async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+  try {
+    const ATSEnquiryData: ATSEnquiryResource = {
+      '@type': 'EnquiryResource',
+      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      contactFirstName: formRef.value?.values.contactFirstName,
+      contactSurname: formRef.value?.values.contactLastName,
+      regionName: ATS_REGION_NAME,
+      subRegionalOffice: ATS_SUB_REGIONAL_OFFICE,
+      enquiryFileNumbers: [formRef.value?.values.activityId],
+      enquiryPartnerAgencies: [ATS_ENQUIRY_PARTNER_AGENCIES],
+      enquiryMethodCodes: [ATS_ENQUIRY_METHOD_CODES],
+      notes: formRef.value?.values.projectName,
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+    };
+    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    if (response.status === 201) {
+      toast.success(toastMsg);
+      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      return response.data.enquiryId;
+    } else {
+      toast.success(t('submissionForm.atsClientPushed'));
+      toast.error(t('submissionForm.atsEnquiryPushError'));
+    }
+  } catch (error) {
+    toast.success(t('submissionForm.atsClientPushed'));
+    toast.error(t('submissionForm.atsEnquiryPushError') + ' ' + error);
+  }
+}
+
 onBeforeMount(async () => {
   if (housingProject.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [housingProject.assignedUserId] })).data;
@@ -387,6 +481,7 @@ onBeforeMount(async () => {
     naturalDisaster: housingProject.naturalDisaster,
     addedToATS: housingProject.addedToATS,
     atsClientId: housingProject.atsClientId,
+    atsEnquiryId: housingProject.atsEnquiryId,
     ltsaCompleted: housingProject.ltsaCompleted,
     bcOnlineCompleted: housingProject.bcOnlineCompleted,
     aaiUpdated: housingProject.aaiUpdated,
@@ -798,7 +893,7 @@ onBeforeMount(async () => {
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
-            <h5 class="mr-2">Client #</h5>
+            <h5 class="mr-2">{{ t('submissionForm.client#') }}</h5>
             <a
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
@@ -811,23 +906,54 @@ onBeforeMount(async () => {
           type="hidden"
           name="atsClientId"
         />
+        <div
+          v-if="values.atsEnquiryId"
+          class="col-start-1 col-span-12"
+        >
+          <div class="flex items-center">
+            <h5 class="mr-2">{{ t('submissionForm.enquiry#') }}</h5>
+            {{ values.atsEnquiryId }}
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="atsEnquiryId"
+        />
         <Button
-          v-if="!values.atsClientId"
+          v-if="!values.atsClientId && !shouldCreateATSClient"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
-          :disabled="!editable"
+          :disabled="!editable || shouldCreateATSEnquiry"
           @click="atsUserLinkModalVisible = true"
         >
-          Search ATS
+          {{ t('submissionForm.atsSearchBtn') }}
         </Button>
         <Button
-          v-if="!values.atsClientId"
+          v-if="!values.atsClientId && !shouldCreateATSClient"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
-          New ATS Client
+          {{ t('submissionForm.atsNewClientBtn') }}
+        </Button>
+        <Button
+          v-if="values.atsClientId && !values.atsEnquiryId && !shouldCreateATSEnquiry"
+          class="grid-col-start-3 col-span-2"
+          aria-label="New ATS enquiry"
+          :disabled="!editable"
+          @click="onNewATSEnquiry()"
+        >
+          {{ t('submissionForm.atsNewEnquiryBtn') }}
+        </Button>
+
+        <Button
+          v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
+          class="grid-col-start-3 col-span-2"
+          aria-label="Waiting for save"
+          :disabled="true"
+        >
+          Waiting for save
         </Button>
       </div>
       <Checkbox
@@ -928,6 +1054,7 @@ onBeforeMount(async () => {
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
           setFieldValue('atsClientId', atsClientResource.clientId);
+          shouldCreateATSEnquiry = true;
         }
       "
     />
@@ -938,16 +1065,19 @@ onBeforeMount(async () => {
         () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
+          setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
+          shouldCreateATSEnquiry = false;
         }
       "
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
       :project-or-enquiry="housingProject"
-      @ats-user-link:link="
-        (atsClientId: string) => {
+      @ats-user-create:create="
+        () => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientId', atsClientId);
+          shouldCreateATSClient = true;
         }
       "
     />
