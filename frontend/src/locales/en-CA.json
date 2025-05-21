@@ -490,6 +490,7 @@
     "atsClientPushError": "Error pushing client to ATS",
     "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
     "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
+    "atsEnquiryPushed": "New enquiry pushed to ATS",
     "atsEnquiryPushError": "Error pushing enquiry to ATS",
     "atsSearchBtn": "Search ATS",
     "atsNewClientBtn": "New ATS Client",
