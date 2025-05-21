@@ -57,10 +57,11 @@ const validationErrors = computed(() => {
   if (!formRef?.value?.errors) return [];
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
 });
+const validationSchema = computed(() => {
+  return createProjectIntakeSchema(codeValues, enums, orgBookOptions.value);
+});
 
 // Actions
-const projectIntakeSchema = createProjectIntakeSchema(codeValues, enums);
-
 function confirmSubmit(data: GenericObject) {
   confirm.require({
     message: t('e.electrification.projectIntakeForm.confirmSubmitMessage'),
@@ -115,7 +116,7 @@ async function onBeforeRouteLeaveCallback() {
   // If they do not exist we can safely delete on leave as it means the user hasn't done anything
   if (draftId && editable.value) {
     const response = (await electrificationProjectService.getDraft(draftId)).data;
-    if (response && !response.data.draftId && !response.data.activityId) {
+    if (response && !response.data.draftId && !response.data.project.activityId) {
       await electrificationProjectService.deleteDraft(draftId);
     }
   }
@@ -140,7 +141,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
 
     await electrificationProjectService.updateDraft({
       draftId: draftId,
-      activityId: data.activityId,
+      activityId: data.project.activityId,
       data: data
     });
 
@@ -221,6 +222,7 @@ onBeforeMount(async () => {
       response = (await electrificationProjectService.getDraft(draftId)).data;
 
       initialFormValues.value = {
+        draftId: response.draftId,
         contacts: {
           ...response.data.contacts
         },
@@ -300,7 +302,7 @@ onBeforeMount(async () => {
     v-slot="{ isSubmitting, setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="projectIntakeSchema"
+    :validation-schema="validationSchema"
     @invalid-submit="onInvalidSubmit"
     @submit="confirmSubmit"
   >
@@ -359,7 +361,6 @@ onBeforeMount(async () => {
           :bold="false"
           :disabled="!editable"
           :editable="true"
-          :force-selection="true"
           :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
           :suggestions="orgBookOptions"
           @on-complete="onRegisteredNameInput"
