@@ -11,7 +11,7 @@ import { enquiryService, housingProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
 
 import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
@@ -48,6 +48,7 @@ const isCompleted = computed(() => {
 });
 
 // Providers
+provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
 provide(projectServiceKey, housingProjectService);
 
 // Actions
