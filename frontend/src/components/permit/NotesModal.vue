@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { object, string } from 'yup';
 
 import { DatePicker, TextArea } from '@/components/form';
 import { Button, Dialog, useToast } from '@/lib/primevue';
-import { electrificationProjectService, housingProjectService, permitNoteService } from '@/services';
-import { useAppStore, useConfigStore, useProjectStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
+import { permitNoteService } from '@/services';
+import { useConfigStore, useProjectStore } from '@/store';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateLong } from '@/utils/formatters';
+import { projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Ref } from 'vue';
@@ -21,6 +21,8 @@ import type { Permit } from '@/types';
 const { permit } = defineProps<{
   permit: Permit;
 }>();
+
+const projectService = inject(projectServiceKey);
 
 // Composables
 const { t } = useI18n();
@@ -91,10 +93,9 @@ async function emailNotification() {
     body: body
   };
 
-  // TODO: Can the service be injected at some level?
-  if (useAppStore().getInitiative === Initiative.ELECTRIFICATION)
-    await electrificationProjectService.emailConfirmation(emailData);
-  else if (useAppStore().getInitiative === Initiative.HOUSING) await housingProjectService.emailConfirmation(emailData);
+  if (!projectService) throw new Error('No service');
+
+  await projectService.emailConfirmation(emailData);
 }
 </script>
 

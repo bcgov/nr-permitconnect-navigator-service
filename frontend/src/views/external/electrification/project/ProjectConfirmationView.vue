@@ -34,15 +34,14 @@ onBeforeMount(async () => {
       {{ t('e.electrification.projectConfirmationView.success') }}
     </Message>
     <h3 class="inline-block my-7 mr-2">{{ t('e.electrification.projectConfirmationView.projectId') }}</h3>
-    <!-- TODO: Uncomment when view is added -->
-    <!-- <router-link
+    <router-link
       :to="{
         name: RouteName.EXT_ELECTRIFICATION_PROJECT,
         params: { projectId: projectId }
       }"
-    > -->
-    <span class="text-2xl">{{ activityId }}</span>
-    <!-- </router-link> -->
+    >
+      <span class="text-2xl">{{ activityId }}</span>
+    </router-link>
     <div>
       {{ t('e.electrification.projectConfirmationView.message') }}
     </div>

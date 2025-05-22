@@ -2,7 +2,7 @@ import PrimeVue from 'primevue/config';
 
 import { shallowMount } from '@vue/test-utils';
 import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({

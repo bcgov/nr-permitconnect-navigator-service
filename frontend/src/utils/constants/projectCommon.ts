@@ -1,9 +1,11 @@
 import {
   ApplicationStatus,
+  ContactPreference,
   BringForwardType,
   EnquirySubmittedMethod,
   IntakeStatus,
   NoteType,
+  ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
 
@@ -15,6 +17,12 @@ export const APPLICATION_STATUS_LIST = [
 ];
 
 export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
+
+export const CONTACT_PREFERENCE_LIST = [
+  ContactPreference.PHONE_CALL,
+  ContactPreference.EMAIL,
+  ContactPreference.EITHER
+];
 
 export const ENQUIRY_SUBMITTED_METHOD = [
   EnquirySubmittedMethod.EMAIL,
@@ -33,6 +41,12 @@ export const ENQUIRY_TYPE_LIST = [
 export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
+
+export const PROJECT_RELATIONSHIP_LIST = [
+  ProjectRelationship.OWNER,
+  ProjectRelationship.CONSULTANT,
+  ProjectRelationship.OTHER
+];
 
 export const QUEUE_PRIORITY = [1, 2, 3];
 

@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 import { email, phoneNumber, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/projectCommon';
 import { Initiative } from '../utils/enums/application';
 
 export const contacts = Joi.array()

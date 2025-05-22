@@ -32,6 +32,49 @@
     }
   },
   "e": {
+    "common": {
+      "enquiryConfirmationView": {
+        "confirmationHeader": "Confirmation of Submission",
+        "confirmationIdLabel": "Enquiry ID",
+        "confirmationBanner": "Your enquiry has been successfully submitted."
+      },
+      "permitStatusView": {
+        "additionalUpdates": "Additional updates",
+        "applicationProgress": "Application progress",
+        "askNav": "Ask my Navigator",
+        "contactNav": "Contact your Navigator for this project for further updates on this application.",
+        "noUpdates": "There are no updates.",
+        "statusDescriptionMeaning": "What does the status mean?",
+        "statusLastVerified": "This status was last verified on",
+        "statusNotVerified": "This status has not yet been verified."
+      },
+      "projectView": {
+        "agency": "Agency",
+        "createdBy": "Created by",
+        "crumbAppsPermits": "Applications and Permits",
+        "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
+        "enquiryID": "Enquiry ID",
+        "latestUpdates": "Latest updates",
+        "listEmpty": "Your project related enquiries will be displayed here.",
+        "noUpdates": "No updates at the moment.",
+        "notNeeded": "Not needed",
+        "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
+        "rangeSeparator": "of",
+        "recommendedPermits": "Recommended permits",
+        "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
+        "relatedEnquiries": "Related enquiries",
+        "status": "Status",
+        "statusNotVerified": "This status has not yet been verified by Navigators",
+        "statusVerified": "Status last verified on",
+        "submittedApplications": "Submitted applications",
+        "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
+        "submittedDate": "Submitted date",
+        "toastEnquiryFailed": "Failed to submit enquiry",
+        "toastProjectLoadFailed": "Unable to load project, please try again later",
+        "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
+        "trackingId": "Tracking ID"
+      }
+    },
     "electrification": {
       "electrificationView": {
         "confirmationId": "Project ID",
@@ -45,6 +88,9 @@
         "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
         "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
         "submitNewProject": "Submit a new project"
+      },
+      "enquiryConfirmationView": {
+        "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
       },
       "projectConfirmationView": {
         "backToElectrification": "Back to Electrification",
@@ -80,15 +126,14 @@
         "upload2": "shape files",
         "upload3": ", etc)",
         "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+      },
+      "projectView": {
+        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Electrification. For questions, please submit a general enquiry."
       }
     },
     "housing": {
       "enquiryConfirmationView": {
-        "confirmationHeader": "Confirmation of Submission",
-        "confirmationIdLabel": "Enquiry ID",
-        "confirmationBanner": "Your enquiry has been successfully submitted.",
-        "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
-        "linkSubmissions": "Back to Housing"
+        "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
       },
       "housingView": {
         "confirmationId": "Project ID",
@@ -113,42 +158,8 @@
         "projectId": "Project ID:",
         "success": "Your application has been successfully submitted."
       },
-      "permitStatusView": {
-        "additionalUpdates": "Additional updates",
-        "applicationProgress": "Application progress",
-        "askNav": "Ask my Navigator",
-        "contactNav": "Contact your Navigator for this project for further updates on this application.",
-        "noUpdates": "There are no updates.",
-        "statusDescriptionMeaning": "What does the status mean?",
-        "statusLastVerified": "This status was last verified on",
-        "statusNotVerified": "This status has not yet been verified."
-      },
       "projectView": {
-        "agency": "Agency",
-        "createdBy": "Created by",
-        "crumbHousing": "Housing",
-        "crumbAppsPermits": "Applications and Permits",
-        "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
-        "enquiryID": "Enquiry ID",
-        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry.",
-        "latestUpdates": "Latest updates",
-        "listEmpty": "Your project related enquiries will be displayed here.",
-        "noUpdates": "No updates at the moment.",
-        "notNeeded": "Not needed",
-        "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
-        "rangeSeparator": "of",
-        "recommendedPermits": "Recommended permits",
-        "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
-        "relatedEnquiries": "Related enquiries",
-        "status": "Status",
-        "statusVerified": "Status last verified on",
-        "submittedApplications": "Submitted applications",
-        "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
-        "submittedDate": "Submitted date",
-        "toastEnquiryFailed": "Failed to submit enquiry",
-        "toastProjectLoadFailed": "Unable to load project, please try again later",
-        "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
-        "trackingId": "Tracking ID"
+        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry."
       }
     }
   },
@@ -297,13 +308,6 @@
     "confirmReopenHeader": "Re-open enquiry?",
     "failedMessage": "Failed to save enquiry"
   },
-  "enquiryConfirmationView": {
-    "confirmationHeader": "Confirmation of Submission",
-    "confirmationIdLabel": "Enquiry ID",
-    "confirmationBanner": "Your enquiry has been successfully submitted.",
-    "confirmationMsg": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
-    "linkSubmissions": "Back to Housing"
-  },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
     "about": "This enquiry is about",
@@ -354,15 +358,6 @@
     "housing": "Housing",
     "pcns": "Permit Connect Services",
     "welcome": "Welcome to the"
-  },
-  "intakeAssistance": {
-    "confirmationHeader": "Confirmation of Assistance Request",
-    "confirmationIdLabel": "Confirmation ID",
-    "confirmationMessage": "Your assistance request has been successfully submitted.",
-    "messagePart1": "A Housing Navigator will review your submission and contact you in 2 business days. Your form has also been saved as draft, you can find it in",
-    "messagePart2": "Please check your email for the confirmatin email and keep the confirmation ID for future reference",
-    "linkHousingSubmissions": "My drafts and previous entries.",
-    "linkSubmissions": "Back to Housing"
   },
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",
@@ -422,13 +417,6 @@
     "loginIDIR": "Login with IDIR",
     "register": "Need an account?",
     "setupBCServicesCard": "Set up a BC Services Card account."
-  },
-  "projectConfirmationView": {
-    "backToHousing": "Back to Housing",
-    "header": "Confirmation of Submission",
-    "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
-    "projectId": "Project ID:",
-    "success": "Your application has been successfully submitted."
   },
   "submissionDraftListProponent": {
     "action": "Action",

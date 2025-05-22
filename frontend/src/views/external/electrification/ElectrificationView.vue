@@ -187,16 +187,15 @@ onBeforeMount(async () => {
       >
         <div class="grid grid-cols-12 gap-4">
           <div class="col-span-3 flex items-center">
-            <!-- TODO: Uncomment when electrification project page is ready -->
-            <!-- <router-link
+            <router-link
               class="no-underline"
               :to="{
                 name: RouteName.EXT_ELECTRIFICATION_PROJECT,
                 params: { projectId: project.electrificationProjectId }
               }"
-            > -->
-            <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
-            <!-- </router-link> -->
+            >
+              <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
+            </router-link>
           </div>
           <div class="col-span-3 flex items-center">
             <p>{{ t('e.electrification.electrificationView.projectState') }}: {{ project.applicationStatus }}</p>

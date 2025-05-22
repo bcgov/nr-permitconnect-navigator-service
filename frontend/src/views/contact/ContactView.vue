@@ -8,7 +8,7 @@ import { FormNavigationGuard, InputText, InputMask, Select } from '@/components/
 import { Button, Card, useToast } from '@/lib/primevue';
 import { contactService } from '@/services';
 import { useContactStore } from '@/store';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { setEmptyStringsToNull } from '@/utils/utils';
 import { emailValidator } from '@/validators/common';
 

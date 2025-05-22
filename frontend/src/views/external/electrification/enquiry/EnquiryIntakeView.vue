@@ -1,18 +1,26 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount, provide, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
 import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
-import { permitService, housingProjectService } from '@/services';
+import { permitService, electrificationProjectService } from '@/services';
 import { useProjectStore, usePermitStore } from '@/store';
+import { RouteName } from '@/utils/enums/application';
+import {
+  enquiryConfirmRouteNameKey,
+  enquiryPermitConfirmRouteNameKey,
+  enquiryProjectConfirmRouteNameKey,
+  enquiryRouteNameKey,
+  projectServiceKey
+} from '@/utils/keys';
 
 import type { Ref } from 'vue';
 
 // Props
-const { enquiryId, housingProjectId, permitId } = defineProps<{
+const { enquiryId, projectId, permitId } = defineProps<{
   enquiryId?: string;
-  housingProjectId?: string;
+  projectId?: string;
   permitId?: string;
 }>();
 
@@ -28,10 +36,17 @@ const { getProject } = storeToRefs(projectStore);
 // State
 const loading: Ref<boolean> = ref(true);
 
+// Providers
+provide(enquiryConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION);
+provide(enquiryPermitConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION);
+provide(enquiryProjectConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION);
+provide(enquiryRouteNameKey, RouteName.EXT_ELECTRIFICATION);
+provide(projectServiceKey, electrificationProjectService);
+
 // Actions
 onBeforeMount(async () => {
-  if (housingProjectId) {
-    const project = (await housingProjectService.getProject(housingProjectId)).data;
+  if (projectId) {
+    const project = (await electrificationProjectService.getProject(projectId)).data;
     projectStore.setProject(project);
   }
 

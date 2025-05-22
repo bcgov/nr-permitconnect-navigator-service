@@ -1,6 +1,7 @@
-import { IntakeFormCategory } from '@/utils/enums/housing';
-import { contactValidator } from '@/validators';
 import { object, string } from 'yup';
+
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { contactValidator } from '@/validators';
 
 import type { CodeName } from '@/store/codeStore';
 

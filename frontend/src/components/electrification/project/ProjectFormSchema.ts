@@ -1,7 +1,7 @@
 import { boolean, number, object, string } from 'yup';
 
 import { YES_NO_LIST } from '@/utils/constants/application';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import {
   APPLICATION_STATUS_LIST,
   INTAKE_STATUS_LIST,

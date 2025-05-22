@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { useI18n } from 'vue-i18n';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
@@ -33,6 +33,7 @@ import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
+import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -77,6 +78,9 @@ const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
+
+// Providers
+provide(projectServiceKey, housingProjectService);
 
 // Actions
 const filteredDocuments = computed(() => {

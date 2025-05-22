@@ -14,6 +14,12 @@ export enum BringForwardType {
   RESOLVED = 'Resolved'
 }
 
+export enum ContactPreference {
+  PHONE_CALL = 'Phone call',
+  EMAIL = 'Email',
+  EITHER = 'Either'
+}
+
 export enum EnquirySubmittedMethod {
   PHONE = 'Phone',
   EMAIL = 'Email',
@@ -37,6 +43,12 @@ export enum NoteType {
   BRING_FORWARD = 'Bring forward',
   ENQUIRY = 'Enquiry',
   ROADMAP = 'Roadmap'
+}
+
+export enum ProjectRelationship {
+  OWNER = 'Property owner',
+  CONSULTANT = 'Project consultant',
+  OTHER = 'Other'
 }
 
 export enum SubmissionType {

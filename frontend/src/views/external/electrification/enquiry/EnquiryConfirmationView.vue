@@ -11,20 +11,20 @@ const { t } = useI18n();
 <template>
   <div>
     <h2 class="mb-9">
-      {{ t('e.housing.enquiryConfirmationView.confirmationHeader') }}
+      {{ t('e.common.enquiryConfirmationView.confirmationHeader') }}
     </h2>
     <Message
       severity="success"
       :closable="false"
     >
-      {{ t('e.housing.enquiryConfirmationView.confirmationBanner') }}
+      {{ t('e.common.enquiryConfirmationView.confirmationBanner') }}
     </Message>
     <div class="mt-9">
-      {{ t('e.housing.enquiryConfirmationView.confirmationMsg') }}
+      {{ t('e.electrification.enquiryConfirmationView.message') }}
     </div>
     <div class="mt-7">
-      <router-link :to="{ name: RouteName.EXT_HOUSING }">
-        {{ t('e.housing.enquiryConfirmationView.linkSubmissions') }}
+      <router-link :to="{ name: RouteName.EXT_ELECTRIFICATION }">
+        {{ t('e.electrification.projectConfirmationView.backToElectrification') }}
       </router-link>
     </div>
   </div>

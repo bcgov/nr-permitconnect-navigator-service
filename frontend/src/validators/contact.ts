@@ -1,6 +1,6 @@
 import { string } from 'yup';
 
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { emailValidator } from '@/validators/common';
 
 const contact = {

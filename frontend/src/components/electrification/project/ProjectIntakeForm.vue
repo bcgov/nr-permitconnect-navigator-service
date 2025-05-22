@@ -8,8 +8,7 @@ import { useRouter } from 'vue-router';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
-import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
-import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
 import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
@@ -241,7 +240,7 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       }
     } else {
-      if (electrificationProjectId && activityId) {
+      if (electrificationProjectId) {
         response = (await electrificationProjectService.getProject(electrificationProjectId)).data;
 
         if (response.activityId) {
@@ -257,18 +256,18 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
-        response = { contacts: [contactStore.getContact] };
+        response = { activity: { activityContact: [{ contact: contactStore.getContact }] } };
       }
 
       initialFormValues.value = {
         contacts: {
-          contactFirstName: response?.contacts[0]?.firstName,
-          contactLastName: response?.contacts[0]?.lastName,
-          contactPhoneNumber: response?.contacts[0]?.phoneNumber,
-          contactEmail: response?.contacts[0]?.email,
-          contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
-          contactPreference: response?.contacts[0]?.contactPreference,
-          contactId: response?.contacts[0]?.contactId
+          contactFirstName: response?.activity?.activityContact?.[0]?.contact?.firstName,
+          contactLastName: response?.activity?.activityContact?.[0]?.contact?.lastName,
+          contactPhoneNumber: response?.activity?.activityContact?.[0]?.contact?.phoneNumber,
+          contactEmail: response?.activity?.activityContact?.[0]?.contact?.email,
+          contactApplicantRelationship: response?.activity?.activityContact?.[0]?.contact?.contactApplicantRelationship,
+          contactPreference: response?.activity?.activityContact?.[0]?.contact?.contactPreference,
+          contactId: response?.activity?.activityContact?.[0]?.contact?.contactId
         },
         project: {
           activityId: response?.activityId,

@@ -2,13 +2,7 @@
  * Housing initiative constants
  */
 
-import {
-  ContactPreference,
-  NumResidentialUnits,
-  ProjectApplicant,
-  ProjectLocation,
-  ProjectRelationship
-} from '../enums/housing';
+import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '../enums/housing';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,
@@ -21,12 +15,6 @@ export const ADDRESS_CODER_QUERY_PARAMS = {
   matchPrecision: 'occupant, unit, site, civic_number, intersection, block, street, locality, province',
   precisionPoints: 100
 };
-
-export const CONTACT_PREFERENCE_LIST = [
-  ContactPreference.PHONE_CALL,
-  ContactPreference.EMAIL,
-  ContactPreference.EITHER
-];
 
 export const NUM_RESIDENTIAL_UNITS_LIST = [
   NumResidentialUnits.ONE_TO_NINE,
@@ -45,11 +33,5 @@ export const ORG_BOOK_QUERY_PARAMS = {
 };
 
 export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
-
-export const PROJECT_RELATIONSHIP_LIST = [
-  ProjectRelationship.OWNER,
-  ProjectRelationship.CONSULTANT,
-  ProjectRelationship.OTHER
-];
 
 export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];

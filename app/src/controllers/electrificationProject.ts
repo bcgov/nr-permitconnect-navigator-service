@@ -69,9 +69,7 @@ const controller = {
       let response = await electrificationProjectService.getElectrificationProjects();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter(
-          (x: Activity) => x?.createdBy?.toUpperCase() === req.currentContext?.userId?.toUpperCase()
-        );
+        response = response.filter((x: Activity) => x?.createdBy === req.currentContext.userId);
       }
 
       res.status(200).json(response.map((x: ElectrificationProject) => x.activityId));
@@ -154,7 +152,12 @@ const controller = {
 
   getDrafts: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await draftService.getDrafts(DraftCode.ELECTRIFICATION_PROJECT);
+      let response = await draftService.getDrafts(DraftCode.ELECTRIFICATION_PROJECT);
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -192,7 +195,12 @@ const controller = {
 
   getElectrificationProjects: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await electrificationProjectService.getElectrificationProjects();
+      let response = await electrificationProjectService.getElectrificationProjects();
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter((x: ElectrificationProject) => x?.createdBy === req.currentContext.userId);
+      }
+
       res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
@@ -205,11 +213,15 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const response = await electrificationProjectService.searchElectrificationProjects({
+      let response = await electrificationProjectService.searchElectrificationProjects({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser),
         includeDeleted: isTruthy(req.query.includeDeleted)
       });
+
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        response = response.filter((x: ElectrificationProject) => x?.createdBy === req.currentContext.userId);
+      }
 
       res.status(200).json(response);
     } catch (e: unknown) {

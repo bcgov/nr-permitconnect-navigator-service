@@ -35,7 +35,7 @@ const service: IDraftableProjectService = {
 
   /**
    * @function emailConfirmation
-   * Send an email with the housing project confirmation data
+   * Send an email with the housing project/enquiry/permit confirmation data
    * @returns {Promise} An axios response
    */
   emailConfirmation(emailData: Email) {

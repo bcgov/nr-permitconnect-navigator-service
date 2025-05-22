@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import { object } from 'yup';
 
 import { contactValidator } from '@/validators';
-import { IntakeFormCategory } from '@/utils/enums/housing';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 

@@ -8,7 +8,7 @@ import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
 import { contactService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/housing';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
 import type { Contact } from '@/types';

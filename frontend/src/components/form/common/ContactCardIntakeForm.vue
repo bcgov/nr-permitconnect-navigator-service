@@ -5,7 +5,7 @@ import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { InputMask, InputText, Select } from '@/components/form';
 import { Card } from '@/lib/primevue';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
 // Props
 const { editable = true, initialFormValues } = defineProps<{
