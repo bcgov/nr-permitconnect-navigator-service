@@ -11,6 +11,7 @@ export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermis
 export const resourceKey = Symbol() as InjectionKey<Resource>;
 
 // RouteNames
+export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<string>;
 export const contactInitiativeRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
