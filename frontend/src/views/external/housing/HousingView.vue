@@ -9,9 +9,15 @@ import SubmissionDraftListProponent from '@/components/projectCommon/submission/
 import { Button, Paginator } from '@/lib/primevue';
 import { enquiryService, housingProjectService } from '@/services';
 import { useContactStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
-import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
+import {
+  draftableProjectServiceKey,
+  enquiryRouteNameKey,
+  navigationPermissionKey,
+  projectRouteNameKey
+} from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject } from '@/types';
@@ -25,16 +31,18 @@ const route = useRoute();
 const router = useRouter();
 
 // State
+const displayedProjects = computed(() => projects.value.slice(first.value, first.value + PAGE_ROWS));
 const drafts: Ref<Array<any>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
-const projects: Ref<Array<HousingProject>> = ref([]);
 const first: Ref<number> = ref(0);
-const displayedProjects = computed(() => projects.value.slice(first.value, first.value + PAGE_ROWS));
 const loading: Ref<boolean> = ref(true);
+const projects: Ref<Array<HousingProject>> = ref([]);
 
 // Providers
-provide(projectRouteNameKey, RouteName.EXT_HOUSING_INTAKE);
 provide(draftableProjectServiceKey, housingProjectService);
+provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_ENQUIRY);
+provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
+provide(projectRouteNameKey, RouteName.EXT_HOUSING_INTAKE);
 
 // Actions
 async function createIntake() {

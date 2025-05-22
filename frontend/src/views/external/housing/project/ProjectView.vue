@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -8,15 +8,15 @@ import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
+import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
+import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-
-import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
+import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { ComputedRef, Ref } from 'vue';
 import type { Contact, Permit } from '@/types';
@@ -42,7 +42,7 @@ const toast = useToast();
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getProject, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
+const { getPermits, getProject, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
@@ -71,6 +71,10 @@ const permitsSubmitted: ComputedRef<Array<Permit>> = computed(() => {
     .sort(permitNameSortFcn)
     .sort(permitBusinessSortFcn);
 });
+
+// Providers
+provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY);
+provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
 
 // Actions
 function permitBusinessSortFcn(a: Permit, b: Permit) {
@@ -114,10 +118,10 @@ onBeforeMount(async () => {
   let enquiriesValue, projectValue: any;
 
   try {
-    [projectValue] = (await Promise.all([housingProjectService.getProject(projectId)])).map((r) => r.data);
+    projectValue = (await housingProjectService.getProject(projectId)).data;
     if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
   } catch {
-    toast.error(t('e.housing.projectView.toastProjectLoadFailed'));
+    toast.error(t('e.common.projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.EXT_HOUSING });
   }
 
@@ -126,7 +130,7 @@ onBeforeMount(async () => {
     const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
     projectStore.setPermits(permitsValue);
   } catch {
-    toast.error(t('e.housing.projectView.toastPermitLoadFailed'));
+    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
   }
   projectStore.setProject(projectValue);
   projectStore.setRelatedEnquiries(enquiriesValue);
@@ -150,7 +154,7 @@ onBeforeMount(async () => {
     class="app-primary-color"
   >
     <div class="disclaimer-block p-8 mt-8">
-      {{ t('e.housing.projectView.disclaimer') }}
+      {{ t('e.common.projectView.disclaimer') }}
     </div>
     <div class="mt-20 flex justify-between">
       <div>
@@ -180,7 +184,7 @@ onBeforeMount(async () => {
             <span class="font-bold">{{ getProject.activityId }}</span>
           </span>
           <span class="mr-4">
-            {{ t('e.housing.projectView.createdBy') }}:
+            {{ t('e.common.projectView.createdBy') }}:
             <span
               v-if="createdBy"
               class="font-bold"
@@ -223,13 +227,13 @@ onBeforeMount(async () => {
       {{ t('e.housing.projectView.inapplicableSubmissionType') }}
     </div>
     <div>
-      <h3 class="mb-8 mt-16">{{ t('e.housing.projectView.recommendedPermits') }}</h3>
+      <h3 class="mb-8 mt-16">{{ t('e.common.projectView.recommendedPermits') }}</h3>
     </div>
     <div
       v-if="!permitsNeeded?.length"
       class="empty-block p-8 mb-2"
     >
-      {{ t('e.housing.projectView.recommendedPermitsDesc') }}
+      {{ t('e.common.projectView.recommendedPermitsDesc') }}
     </div>
     <Card
       v-for="permit in permitsNeeded"
@@ -248,10 +252,10 @@ onBeforeMount(async () => {
       expand-icon="pi pi-chevron-right"
     >
       <AccordionPanel value="0">
-        <AccordionHeader>{{ t('e.housing.projectView.notNeeded') }}</AccordionHeader>
+        <AccordionHeader>{{ t('e.common.projectView.notNeeded') }}</AccordionHeader>
         <AccordionContent>
           <div>
-            {{ t('e.housing.projectView.notNeededDesc') }}
+            {{ t('e.common.projectView.notNeededDesc') }}
           </div>
           <ul class="list-disc mt-4">
             <li
@@ -265,12 +269,12 @@ onBeforeMount(async () => {
         </AccordionContent>
       </AccordionPanel>
     </Accordion>
-    <h3 class="mt-20 mb-8">{{ t('e.housing.projectView.submittedApplications') }}</h3>
+    <h3 class="mt-20 mb-8">{{ t('e.common.projectView.submittedApplications') }}</h3>
     <div
       v-if="!permitsSubmitted.length"
       class="empty-block p-8"
     >
-      {{ t('e.housing.projectView.submittedApplicationsDesc') }}
+      {{ t('e.common.projectView.submittedApplicationsDesc') }}
     </div>
     <router-link
       v-for="permit in permitsSubmitted"
@@ -310,29 +314,29 @@ onBeforeMount(async () => {
                 :auth-status="permit.authStatus"
               />
               <div v-if="permit.statusLastVerified">
-                <span class="label-verified mr-1">{{ t('e.housing.projectView.statusVerified') }}</span>
+                <span class="label-verified mr-1">{{ t('e.common.projectView.statusVerified') }}</span>
                 <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
               </div>
               <div v-else>
-                <span class="label-verified mr-1">{{ t('projectView.statusNotVerified') }}</span>
+                <span class="label-verified mr-1">{{ t('e.common.projectView.statusNotVerified') }}</span>
               </div>
             </div>
             <div class="col-span-3">
-              <div class="label-field">{{ t('e.housing.projectView.trackingId') }}</div>
+              <div class="label-field">{{ t('e.common.projectView.trackingId') }}</div>
               <div class="permit-data">
                 {{ permit?.trackingId }}
               </div>
             </div>
             <div class="col-span-3">
-              <div class="label-field">{{ t('e.housing.projectView.agency') }}</div>
+              <div class="label-field">{{ t('e.common.projectView.agency') }}</div>
               <div class="permit-data">
                 {{ permit?.permitType.agency }}
               </div>
             </div>
             <div class="col-span-6">
-              <div class="label-field">{{ t('e.housing.projectView.latestUpdates') }}</div>
+              <div class="label-field">{{ t('e.common.projectView.latestUpdates') }}</div>
               <div class="permit-data">
-                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('e.housing.projectView.noUpdates') }}
+                {{ permit?.permitNote?.length ? permit?.permitNote[0].note : t('e.common.projectView.noUpdates') }}
               </div>
             </div>
           </div>
@@ -341,12 +345,12 @@ onBeforeMount(async () => {
     </router-link>
     <div>
       <div>
-        <h3 class="mt-20 mb-8">{{ t('e.housing.projectView.relatedEnquiries') }}</h3>
+        <h3 class="mt-20 mb-8">{{ t('e.common.projectView.relatedEnquiries') }}</h3>
       </div>
       <EnquiryListProponent
         :loading="loading"
         :enquiries="getRelatedEnquiries"
-        :submission-id="projectId"
+        :project-id="projectId"
       />
     </div>
   </div>
