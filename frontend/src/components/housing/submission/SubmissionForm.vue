@@ -36,7 +36,7 @@ import {
   PROJECT_RELATIONSHIP_LIST,
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/projectCommon';
-import { BasicResponse, IdentityProviderKind, Regex } from '@/utils/enums/application';
+import { BasicResponse, GroupName, IdentityProviderKind, Initiative, Regex } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import {
@@ -65,11 +65,7 @@ const { editable = true, housingProject } = defineProps<{
 }>();
 
 // Constants
-const ATS_REGION_NAME: string = 'Navigator';
-const ATS_SUB_REGIONAL_OFFICE: string = 'Navigator';
-const ATS_ENQUIRY_METHOD_CODES = 'PCNS';
 const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
-const ATS_ENQUIRY_PARTNER_AGENCIES = 'Housing';
 
 // Composables
 const { t } = useI18n();
@@ -387,7 +383,7 @@ async function createATSClient() {
       address: address,
       firstName: formRef.value?.values.contactFirstName,
       surName: formRef.value?.values.contactLastName,
-      regionName: ATS_REGION_NAME,
+      regionName: GroupName.NAVIGATOR,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
 
@@ -410,11 +406,11 @@ async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
       contactFirstName: formRef.value?.values.contactFirstName,
       contactSurname: formRef.value?.values.contactLastName,
-      regionName: ATS_REGION_NAME,
-      subRegionalOffice: ATS_SUB_REGIONAL_OFFICE,
+      regionName: GroupName.NAVIGATOR,
+      subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
-      enquiryPartnerAgencies: [ATS_ENQUIRY_PARTNER_AGENCIES],
-      enquiryMethodCodes: [ATS_ENQUIRY_METHOD_CODES],
+      enquiryPartnerAgencies: [Initiative.HOUSING],
+      enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.projectName,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
     };
@@ -1049,7 +1045,10 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :project-or-enquiry="housingProject"
+      :f-name="values.contactFirstName"
+      :l-name="values.contactLastName"
+      :phone-number="values.contactPhoneNumber"
+      :email-id="values.contactEmail"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -1073,7 +1072,11 @@ onBeforeMount(async () => {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :project-or-enquiry="housingProject"
+      :address="[values.streetAddress, values.locality, values.province].filter((str) => str?.trim()).join(', ')"
+      :first-name="values.contactFirstName"
+      :last-name="values.contactLastName"
+      :phone="values.contactPhoneNumber"
+      :email="values.contactEmail"
       @ats-user-create:create="
         () => {
           atsUserCreateModalVisible = false;

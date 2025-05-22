@@ -19,18 +19,25 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { electrificationProjectService, userService } from '@/services';
+import { atsService, electrificationProjectService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { IdentityProviderKind, Regex } from '@/utils/enums/application';
+import { BasicResponse, GroupName, IdentityProviderKind, Initiative, Regex } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Contact, ElectrificationProject, User } from '@/types';
+import type {
+  ATSAddressResource,
+  ATSClientResource,
+  ATSEnquiryResource,
+  Contact,
+  ElectrificationProject,
+  User
+} from '@/types';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -42,6 +49,9 @@ const { editable = true, project } = defineProps<{
 const emit = defineEmits<{
   (e: 'input-project-name', newName: string): void;
 }>();
+
+// Constants
+const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
 
 // Composables
 const { t } = useI18n();
@@ -59,6 +69,8 @@ const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const shouldCreateATSClient: Ref<boolean> = ref(false);
+const shouldCreateATSEnquiry: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
@@ -137,10 +149,70 @@ function initilizeFormValues(project: ElectrificationProject) {
 
     // ATS link
     atsClientId: project.atsClientId,
+    atsEnquiryId: project.atsEnquiryId,
 
     // Updates
     aaiUpdated: project.aaiUpdated
   };
+}
+
+async function createATSClient() {
+  try {
+    const address: Partial<ATSAddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
+      email: formRef.value?.values?.contact.email ?? ''
+    };
+
+    const data = {
+      '@type': 'ClientResource',
+      address: address,
+      firstName: formRef.value?.values.contact.firstName,
+      surName: formRef.value?.values.contact.lastName,
+      regionName: GroupName.NAVIGATOR,
+      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
+    };
+
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createATSClient(submitData);
+    if (response.status === 201) {
+      return response.data.clientId;
+    } else {
+      toast.error(t('i.electrification.projectForm.atsClientPushError'));
+    }
+  } catch (error) {
+    toast.error(t('i.electrification.projectForm.atsClientPushError') + ' ' + error);
+  }
+}
+
+async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+  try {
+    const ATSEnquiryData: ATSEnquiryResource = {
+      '@type': 'EnquiryResource',
+      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      contactFirstName: formRef.value?.values.contact.firstName,
+      contactSurname: formRef.value?.values.contact.lastName,
+      regionName: GroupName.NAVIGATOR,
+      subRegionalOffice: GroupName.NAVIGATOR,
+      enquiryFileNumbers: [project.activityId],
+      enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
+      enquiryMethodCodes: [Initiative.PCNS],
+      notes: formRef.value?.values.project.projectName,
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+    };
+    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    if (response.status === 201) {
+      toast.success(toastMsg);
+      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      return response.data.enquiryId;
+    } else {
+      toast.success(t('i.electrification.projectForm.atsClientPushed'));
+      toast.error(t('i.electrification.projectForm.atsEnquiryPushError'));
+    }
+  } catch (error) {
+    toast.success(t('i.electrification.projectForm.atsClientPushed'));
+    toast.error(t('i.electrification.projectForm.atsEnquiryPushError') + ' ' + error);
+  }
 }
 
 function onCancel() {
@@ -200,8 +272,35 @@ function setBasicInfo(contact?: Contact) {
   formRef.value?.setFieldValue('contact.userId', contact?.userId);
 }
 
+function onNewATSEnquiry() {
+  confirm.require({
+    message: t('i.electrification.projectForm.atsEnquiryConfirmMsg'),
+    header: t('i.electrification.projectForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('i.electrification.projectForm.confirm'),
+    rejectLabel: t('i.electrification.projectForm.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      shouldCreateATSEnquiry.value = true;
+    }
+  });
+}
+
 const onSubmit = async (values: any) => {
   try {
+    if (shouldCreateATSClient.value) {
+      values.atsClientId = await createATSClient();
+      values.atsEnquiryId = await createATSEnquiry(
+        t('i.electrification.projectForm.atsClientEnquiryPushed'),
+        values.atsClientId
+      );
+      values.addedToATS = true;
+      shouldCreateATSClient.value = false;
+    } else if (shouldCreateATSEnquiry.value) {
+      values.atsEnquiryId = await createATSEnquiry(t('i.electrification.projectForm.atsEnquiryPushed'));
+      shouldCreateATSEnquiry.value = false;
+      values.addedToATS = true;
+    }
+
     const submitData = omit(
       setEmptyStringsToNull({
         project: {
@@ -216,6 +315,7 @@ const onSubmit = async (values: any) => {
           assignedUserId: values.submissionState.assignedUser?.userId,
           applicationStatus: values.submissionState.applicationStatus,
           atsClientId: parseInt(values.atsClientId) || '',
+          atsEnquiryId: parseInt(values.atsEnquiryId) || '',
           aaiUpdated: values.aaiUpdated
         },
         contacts: [
@@ -474,12 +574,27 @@ onBeforeMount(async () => {
                 {{ values.atsClientId }}
               </a>
             </div>
+            <input
+              type="hidden"
+              name="atsEnquiryId"
+            />
+            <div
+              v-if="values.atsEnquiryId"
+              class="flex items-center"
+            >
+              <p class="text-[var(--p-primary-900)] mr-2">
+                <b>{{ t('i.electrification.projectForm.atsEnquiryIdHeader') }}</b>
+              </p>
+
+              {{ values.atsEnquiryId }}
+            </div>
           </div>
           <div
             v-else
             class="flex flex-col gap-y-6"
           >
             <Button
+              v-if="!values.atsClientId && !shouldCreateATSClient"
               class="ats-button"
               aria-label="Link to ATS"
               outlined
@@ -488,6 +603,7 @@ onBeforeMount(async () => {
               @click="atsUserLinkModalVisible = true"
             />
             <Button
+              v-if="!values.atsClientId && !shouldCreateATSClient"
               class="ats-button"
               aria-label="New ATS client"
               outlined
@@ -495,6 +611,22 @@ onBeforeMount(async () => {
               :disabled="!editable"
               @click="atsUserCreateModalVisible = true"
             />
+            <Button
+              v-if="values.atsClientId && !values.atsEnquiryId && !shouldCreateATSEnquiry"
+              aria-label="New ATS enquiry"
+              :disabled="!editable"
+              @click="onNewATSEnquiry()"
+            >
+              {{ t('enquiryForm.atsNewEnquiryBtn') }}
+            </Button>
+
+            <Button
+              v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
+              aria-label="Waiting for save"
+              :disabled="true"
+            >
+              Waiting for save
+            </Button>
           </div>
         </div>
         <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
@@ -531,11 +663,15 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :project-or-enquiry="project"
+      :f-name="values.contact.firstName"
+      :l-name="values.contact.lastName"
+      :phone-number="values.contact.phoneNumber"
+      :email-id="values.contact.email"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
           setFieldValue('atsClientId', atsClientResource.clientId);
+          shouldCreateATSEnquiry = true;
         }
       "
     />
@@ -546,16 +682,22 @@ onBeforeMount(async () => {
         () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
+          setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
+          shouldCreateATSEnquiry = false;
         }
       "
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :project-or-enquiry="project"
-      @ats-user-link:link="
-        (atsClientId: string) => {
+      :first-name="values.contact.firstName"
+      :last-name="values.contact.lastName"
+      :phone="values.contact.phoneNumber"
+      :email="values.contact.email"
+      @ats-user-create:create="
+        () => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientId', atsClientId);
+          shouldCreateATSClient = true;
         }
       "
     />
