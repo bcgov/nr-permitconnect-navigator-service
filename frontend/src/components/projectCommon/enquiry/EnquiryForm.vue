@@ -20,7 +20,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, enquiryService, housingProjectService, userService } from '@/services';
+import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
@@ -32,7 +32,8 @@ import {
 } from '@/utils/constants/projectCommon';
 import { IdentityProviderKind, Regex, BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { GroupName, Initiative } from '@/utils/enums/application';
+import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
@@ -47,11 +48,7 @@ interface EnquiryForm extends Enquiry {
 }
 
 // Constants
-const ATS_REGION_NAME: string = 'Navigator';
-const ATS_SUB_REGIONAL_OFFICE: string = 'Navigator';
-const ATS_ENQUIRY_METHOD_CODES = 'PCNS';
 const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
-const ATS_ENQUIRY_PARTNER_AGENCIES = 'Housing';
 
 // Props
 const { editable = true, enquiry } = defineProps<{
@@ -61,6 +58,7 @@ const { editable = true, enquiry } = defineProps<{
 
 // Injections
 const projectService = inject(projectServiceKey);
+const atsEnquiryPartnerAgencies = inject(atsEnquiryPartnerAgenciesKey);
 
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
@@ -149,11 +147,11 @@ async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
       contactFirstName: formRef.value?.values.contactFirstName,
       contactSurname: formRef.value?.values.contactLastName,
-      regionName: ATS_REGION_NAME,
-      subRegionalOffice: ATS_SUB_REGIONAL_OFFICE,
+      regionName: GroupName.NAVIGATOR,
+      subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
-      enquiryPartnerAgencies: [ATS_ENQUIRY_PARTNER_AGENCIES],
-      enquiryMethodCodes: [ATS_ENQUIRY_METHOD_CODES],
+      enquiryPartnerAgencies: [atsEnquiryPartnerAgencies ?? ''],
+      enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.enquiryDescription,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
     };
@@ -216,18 +214,26 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
   shouldCreateATSClient.value = false;
   shouldCreateATSEnquiry.value = false;
   if (e.value) {
-    const response = (await housingProjectService.searchProjects({ activityId: [e?.value] })).data;
-    if (response.length > 0) {
-      formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+    if (projectService) {
+      const response = (await projectService.searchProjects({ activityId: [e?.value] })).data;
+      if (response.length > 0) {
+        formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+      }
+    } else {
+      throw new Error('No service');
     }
   }
 }
 
 async function getRelatedATSClientID(activityId: string) {
   formRef.value?.setFieldValue('atsClientId', null);
-  const response = (await housingProjectService.searchProjects({ activityId: [activityId] })).data;
-  if (response.length > 0) {
-    formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+  if (projectService) {
+    const response = (await projectService.searchProjects({ activityId: [activityId] })).data;
+    if (response.length > 0) {
+      formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+    }
+  } else {
+    throw new Error('No service');
   }
 }
 
@@ -372,7 +378,7 @@ async function createATSClient() {
       address: address,
       firstName: formRef.value?.values.contactFirstName,
       surName: formRef.value?.values.contactLastName,
-      regionName: ATS_REGION_NAME,
+      regionName: GroupName.NAVIGATOR,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
 
@@ -381,10 +387,10 @@ async function createATSClient() {
     if (response.status === 201) {
       return response.data.clientId;
     } else {
-      toast.error('Error pushing client to ATS');
+      toast.success(t('enquiryForm.atsClientPushError'));
     }
   } catch (error) {
-    toast.error('Error pushing client to ATS ' + error);
+    toast.error(t('enquiryForm.atsClientPushError') + ' ' + error);
   }
 }
 </script>
@@ -631,7 +637,10 @@ async function createATSClient() {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :project-or-enquiry="enquiry"
+      :f-name="values.contactFirstName"
+      :l-name="values.contactLastName"
+      :phone-number="values.contactPhoneNumber"
+      :email-id="values.contactEmail"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -656,7 +665,10 @@ async function createATSClient() {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :project-or-enquiry="enquiry"
+      :first-name="values.contactFirstName"
+      :last-name="values.contactLastName"
+      :phone="values.contactPhoneNumber"
+      :email="values.contactEmail"
       @ats-user-create:create="
         () => {
           atsUserCreateModalVisible = false;

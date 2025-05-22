@@ -3,6 +3,7 @@ import type { InjectionKey } from 'vue';
 import type { IDraftableProjectService, IProjectService } from '@/interfaces/IProjectService';
 import type { Resource, RouteName } from '@/utils/enums/application';
 
+export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<string>;
 export const contactInitiativeRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const draftableProjectServiceKey = Symbol() as InjectionKey<IDraftableProjectService>;
 export const enquiryRouteNameKey = Symbol() as InjectionKey<RouteName>;
