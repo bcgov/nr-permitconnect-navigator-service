@@ -33,7 +33,7 @@ const testHousingProjectId = 'submission123';
 const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
     permitId: testPermitIdProp,
-    housingProjectId: testHousingProjectIdProp
+    projectId: testHousingProjectIdProp
   },
   global: {
     plugins: [

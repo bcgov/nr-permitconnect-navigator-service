@@ -1,24 +1,28 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
-import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { useAuthZStore } from '@/store/authzStore';
 import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
+import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
 
 // Props
-const { loading, enquiries, submissionId } = defineProps<{
+const { loading, enquiries, projectId } = defineProps<{
   loading: boolean;
   enquiries: Array<Enquiry> | undefined;
-  submissionId?: string | undefined;
+  projectId?: string | undefined;
 }>();
+
+// Injections
+const enquiryRouteName = inject(enquiryRouteNameKey);
+const navigationPermission = inject(navigationPermissionKey);
 
 // Store
 const authZStore = useAuthZStore();
@@ -34,12 +38,12 @@ function getRouteToObject(data: Enquiry) {
   let toObject = {};
   if (enquiries && enquiries[0].relatedActivityId) {
     toObject = {
-      name: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY,
-      params: { enquiryId: data.enquiryId, submissionId }
+      name: enquiryRouteName,
+      params: { enquiryId: data.enquiryId, projectId }
     };
   } else {
     toObject = {
-      name: RouteName.EXT_HOUSING_ENQUIRY,
+      name: enquiryRouteName,
       params: { enquiryId: data.enquiryId }
     };
   }
@@ -85,7 +89,11 @@ function getRouteToObject(data: Enquiry) {
     >
       <template #body="{ data }">
         <div
-          v-if="canNavigate(NavigationPermission.EXT_HOUSING) && data.submittedMethod === EnquirySubmittedMethod.PCNS"
+          v-if="
+            navigationPermission &&
+            canNavigate(navigationPermission) &&
+            data.submittedMethod === EnquirySubmittedMethod.PCNS
+          "
           :data-activityId="data.activityId"
         >
           <router-link :to="getRouteToObject(data)">

@@ -2,8 +2,8 @@
 import { storeToRefs } from 'pinia';
 import { filesize } from 'filesize';
 import { useI18n } from 'vue-i18n';
-import { computed, onBeforeMount, ref } from 'vue';
-// import { useRouter } from 'vue-router';
+import { computed, onBeforeMount, provide, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import ProjectForm from '@/components/electrification/project/ProjectForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
@@ -30,10 +30,10 @@ import {
 } from '@/lib/primevue';
 import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
-import { Action, Initiative, Resource } from '@/utils/enums/application';
-// import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
+import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -60,7 +60,7 @@ const SORT_TYPES = {
 
 // Composables
 const { t } = useI18n();
-// const router = useRouter();
+const router = useRouter();
 
 // Store
 const permitStore = usePermitStore();
@@ -79,6 +79,9 @@ const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
+
+// Providers
+provide(projectServiceKey, electrificationProjectService);
 
 // Actions
 const filteredDocuments = computed(() => {
@@ -183,7 +186,6 @@ onBeforeMount(async () => {
         (Completed)
       </span>
     </h1>
-    <!-- TODO: Uncomment this and imports once prop side is finished
     <Button
       outlined
       @click="
@@ -197,7 +199,7 @@ onBeforeMount(async () => {
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
       {{ t('i.common.projectView.seePropViewButtonLabel') }}
-    </Button> -->
+    </Button>
   </div>
 
   <Tabs :value="activeTab">

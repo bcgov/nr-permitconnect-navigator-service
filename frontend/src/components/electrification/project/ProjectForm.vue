@@ -50,7 +50,7 @@ const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
-const { codeValues, enums, options } = useCodeStore();
+const { codeList, enums, options } = useCodeStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
@@ -62,7 +62,7 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-const projectFormSchema = createProjectFormSchema(codeValues, enums);
+const projectFormSchema = createProjectFormSchema(codeList, enums);
 
 function emitProjectNameChange(e: Event) {
   emit('input-project-name', (e.target as HTMLInputElement).value);

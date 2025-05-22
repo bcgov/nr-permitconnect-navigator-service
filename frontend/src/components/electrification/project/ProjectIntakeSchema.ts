@@ -6,7 +6,7 @@ import { contactValidator } from '@/validators';
 import type { CodeName } from '@/store/codeStore';
 
 export function createProjectIntakeSchema(
-  codeValues: Record<CodeName, string[]>,
+  codeList: Record<CodeName, string[]>,
   enums: Record<CodeName, Record<string, string>>,
   orgBookOptions: Array<string>
 ) {
@@ -19,7 +19,7 @@ export function createProjectIntakeSchema(
         .oneOf(orgBookOptions, 'Business name must be a valid value from the list of suggestions')
         .label('Business name'),
       projectName: string().required().max(255).label('Project name'),
-      projectType: string().required().max(255).oneOf(codeValues.ElectrificationProjectType).label('Project type'),
+      projectType: string().required().max(255).oneOf(codeList.ElectrificationProjectType).label('Project type'),
       bcHydroNumber: string().notRequired().max(255).nullable().label('BC Hydro Call for Power project number'),
       projectDescription: string().when('projectType', {
         is: enums.ElectrificationProjectType.OTHER,
