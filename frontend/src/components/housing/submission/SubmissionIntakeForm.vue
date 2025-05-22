@@ -365,6 +365,11 @@ onBeforeMount(async () => {
           })) ?? []
       };
 
+      // Load org book options if company name is already filled
+      if (response.companyNameRegistered) {
+        orgBookOptions.value = [response.companyNameRegistered];
+      }
+
       if (response.activityId) {
         activityId.value = response.activityId;
         documents = (await documentService.listDocuments(response.activityId)).data;

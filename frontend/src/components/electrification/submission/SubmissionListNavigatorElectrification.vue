@@ -2,7 +2,7 @@
 import { inject } from 'vue';
 
 import { Button, Column } from '@/lib/primevue';
-import { useAppStore, useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore, useCodeStore } from '@/store';
 import { Action } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { projectRouteNameKey, resourceKey } from '@/utils/keys';
@@ -19,6 +19,10 @@ const selection = defineModel<ElectrificationProject | HousingProject | undefine
 // Injections
 const projectResource = inject(resourceKey);
 const projectRoute = inject(projectRouteNameKey);
+
+// Store
+const codeStore = useCodeStore();
+const { codeDisplay } = codeStore;
 </script>
 
 <template>
@@ -72,7 +76,11 @@ const projectRoute = inject(projectRouteNameKey);
     header="Project type"
     :sortable="true"
     style="min-width: 200px"
-  />
+  >
+    <template #body="{ data }">
+      <span>{{ codeDisplay.ElectrificationProjectType[data.projectType] }}</span>
+    </template>
+  </Column>
   <Column
     field="companyNameRegistered"
     header="Company"

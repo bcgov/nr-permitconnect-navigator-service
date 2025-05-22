@@ -120,9 +120,9 @@ export const confirmationTemplateHousingSubmission = (replaceConfig: {
 };
 
 export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
-  const ENQUIRY_URL = replaceConfig.projectId
-    ? `/e/housing/project/${replaceConfig.projectId}/enquiry/${replaceConfig.enquiryId}`
-    : `/e/housing/enquiry/${replaceConfig.enquiryId}`;
+  const ENQUIRY_URL = replaceConfig['{{ projectId }}']
+    ? '/e/{{ initiative }}/project/{{ projectId }}/enquiry/{{ enquiryId }}'
+    : '/e/{{ initiative }}/enquiry/{{ enquiryId }}';
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +

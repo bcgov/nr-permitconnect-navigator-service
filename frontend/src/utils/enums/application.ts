@@ -66,9 +66,6 @@ export enum RouteName {
    * External route names
    */
   EXT_ELECTRIFICATION = 'ext_electrification',
-  EXT_ELECTRIFICATION_ENQUIRY_CONFIRMATION = 'ext_electrification_enquiry_confirmation',
-  EXT_ELECTRIFICATION_ENQUIRY = 'ext_electrification_enquiry',
-  EXT_ELECTRIFICATION_ENQUIRY_INTAKE = 'ext_electrification_enquiry_intake',
   EXT_ELECTRIFICATION_INTAKE = 'ext_electrification_intake',
   EXT_ELECTRIFICATION_INTAKE_CONFIRMATION = 'ext_electrification_intake_confirmation',
   EXT_ELECTRIFICATION_GUIDE = 'ext_electrification_guide',
@@ -79,6 +76,7 @@ export enum RouteName {
   EXT_ELECTRIFICATION_PROJECT_PERMIT = 'ext_electrification_project_permit',
   EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY = 'ext_electrification_project_permit_enquiry',
   EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_permit_enquiry_confirmation',
+  EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY = 'ext_electrification_project_related_enquiry',
 
   EXT_HOUSING = 'ext_housing',
   EXT_HOUSING_ENQUIRY_CONFIRMATION = 'ext_housing_enquiry_confirmation',

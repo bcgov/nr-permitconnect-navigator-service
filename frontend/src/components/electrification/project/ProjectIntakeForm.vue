@@ -40,7 +40,7 @@ const VALIDATION_BANNER_TEXT = t('e.electrification.projectIntakeForm.validation
 // Store
 const contactStore = useContactStore();
 const projectStore = useProjectStore();
-const { codeValues, enums, options } = useCodeStore();
+const { codeList, enums, options } = useCodeStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // State
@@ -57,7 +57,7 @@ const validationErrors = computed(() => {
   else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0].split('[')[0])));
 });
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(codeValues, enums, orgBookOptions.value);
+  return createProjectIntakeSchema(codeList, enums, orgBookOptions.value);
 });
 
 // Actions
@@ -115,7 +115,7 @@ async function onBeforeRouteLeaveCallback() {
   // If they do not exist we can safely delete on leave as it means the user hasn't done anything
   if (draftId && editable.value) {
     const response = (await electrificationProjectService.getDraft(draftId)).data;
-    if (response && !response.data.draftId && !response.data.project.activityId) {
+    if (response && !response.data.draftId && !response.data.project?.activityId) {
       await electrificationProjectService.deleteDraft(draftId);
     }
   }
@@ -231,6 +231,11 @@ onBeforeMount(async () => {
         }
       };
 
+      // Load org book options if company name is already filled
+      if (response.data.project?.companyNameRegistered) {
+        orgBookOptions.value = [response.data.project.companyNameRegistered];
+      }
+
       if (response.activityId) {
         activityId.value = response.activityId;
         documents = (await documentService.listDocuments(response.activityId)).data;
@@ -240,7 +245,7 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       }
     } else {
-      if (electrificationProjectId && activityId) {
+      if (electrificationProjectId) {
         response = (await electrificationProjectService.getProject(electrificationProjectId)).data;
 
         if (response.activityId) {
@@ -256,18 +261,18 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
-        response = { contacts: [contactStore.getContact] };
+        response = { activity: { activityContact: [{ contact: contactStore.getContact }] } };
       }
 
       initialFormValues.value = {
         contacts: {
-          contactFirstName: response?.contacts[0]?.firstName,
-          contactLastName: response?.contacts[0]?.lastName,
-          contactPhoneNumber: response?.contacts[0]?.phoneNumber,
-          contactEmail: response?.contacts[0]?.email,
-          contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
-          contactPreference: response?.contacts[0]?.contactPreference,
-          contactId: response?.contacts[0]?.contactId
+          contactFirstName: response?.activity?.activityContact?.[0]?.contact?.firstName,
+          contactLastName: response?.activity?.activityContact?.[0]?.contact?.lastName,
+          contactPhoneNumber: response?.activity?.activityContact?.[0]?.contact?.phoneNumber,
+          contactEmail: response?.activity?.activityContact?.[0]?.contact?.email,
+          contactApplicantRelationship: response?.activity?.activityContact?.[0]?.contact?.contactApplicantRelationship,
+          contactPreference: response?.activity?.activityContact?.[0]?.contact?.contactPreference,
+          contactId: response?.activity?.activityContact?.[0]?.contact?.contactId
         },
         project: {
           activityId: response?.activityId,

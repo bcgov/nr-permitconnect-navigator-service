@@ -28,7 +28,8 @@ export const useCodeStore = defineStore('code', () => {
 
   // Getters
   const getters = {
-    codeValues: computed<Record<CodeName, string[]>>(() =>
+    // List of codes for each code table
+    codeList: computed<Record<CodeName, string[]>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].map((r) => r.code);
@@ -37,13 +38,20 @@ export const useCodeStore = defineStore('code', () => {
         {} as Record<CodeName, string[]>
       )
     ),
-    displayValues: computed<Record<CodeName, string[]>>(() =>
+    // List of objects for display purposes, { code, display }
+    codeDisplay: computed<Record<CodeName, Record<string, string>>>(() =>
       codeNames.reduce(
         (acc, name) => {
-          acc[name] = state.codes.value[name].map((r) => r.display);
+          acc[name] = state.codes.value[name].reduce(
+            (e, { code, display }) => {
+              e[code] = display;
+              return e;
+            },
+            {} as Record<string, string>
+          );
           return acc;
         },
-        {} as Record<CodeName, string[]>
+        {} as Record<CodeName, Record<string, string>>
       )
     ),
     // Enum like objects for comparisons and validation

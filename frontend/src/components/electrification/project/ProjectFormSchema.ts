@@ -15,7 +15,7 @@ import { emailValidator } from '@/validators/common';
 import type { CodeName } from '@/store/codeStore';
 
 export function createProjectFormSchema(
-  codeValues: Record<CodeName, string[]>,
+  codeList: Record<CodeName, string[]>,
   enums: Record<CodeName, Record<string, string>>
 ) {
   return object({
@@ -44,8 +44,8 @@ export function createProjectFormSchema(
         .positive('Must be a positive number.')
         .label('How man megawatts will it produce?'),
       projectName: string().required().max(255).label('Project name'),
-      projectType: string().required().max(255).oneOf(codeValues.ElectrificationProjectType).label('Project type'),
-      projectCategory: string().notRequired().oneOf(codeValues.ElectrificationProjectCategory).label('Project category')
+      projectType: string().required().max(255).oneOf(codeList.ElectrificationProjectType).label('Project type'),
+      projectCategory: string().notRequired().oneOf(codeList.ElectrificationProjectCategory).label('Project category')
     }),
     projectDescription: string().when('project.projectType', {
       is: enums.ElectrificationProjectType.OTHER,

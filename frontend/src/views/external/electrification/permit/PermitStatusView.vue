@@ -13,15 +13,15 @@ import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateLong } from '@/utils/formatters';
 
-import { contactService, housingProjectService, permitService } from '@/services';
+import { contactService, electrificationProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { User } from '@/types';
 
 // Props
-const { permitId, housingProjectId } = defineProps<{
+const { permitId, projectId } = defineProps<{
   permitId: string;
-  housingProjectId: string;
+  projectId: string;
 }>();
 
 // Composables
@@ -196,7 +196,7 @@ onBeforeMount(async () => {
     permitStore.setPermit(permitData);
 
     if (!getProject.value) {
-      const submission = (await housingProjectService.getProject(housingProjectId)).data;
+      const submission = (await electrificationProjectService.getProject(projectId)).data;
       projectStore.setProject(submission);
     }
 
@@ -271,7 +271,7 @@ onBeforeMount(async () => {
         @keydown.enter.prevent="descriptionModalVisible = true"
         @keydown.space.prevent="descriptionModalVisible = true"
       >
-        {{ t('e.housing.permitStatusView.statusDescriptionMeaning') }}
+        {{ t('e.common.permitStatusView.statusDescriptionMeaning') }}
       </span>
     </div>
     <Card class="permit-tracker-card">
@@ -294,7 +294,7 @@ onBeforeMount(async () => {
               class="mt-8 mb-6"
               :aria-hidden="hideTimelineFromScreenReader"
             >
-              {{ t('e.housing.permitStatusView.applicationProgress') }}
+              {{ t('e.common.permitStatusView.applicationProgress') }}
             </h4>
             <Timeline
               :value="getTimelineStage(getPermit?.authStatus, getPermit?.status)"
@@ -328,35 +328,35 @@ onBeforeMount(async () => {
           <div class="status-verified-message">
             <div v-if="updatedBy">
               <p class="verified-text my-0">
-                {{ t('e.housing.permitStatusView.statusLastVerified') }}
+                {{ t('e.common.permitStatusView.statusLastVerified') }}
                 {{ formatDate(getPermit?.statusLastVerified) }} by
                 {{ updatedBy }}
               </p>
             </div>
             <div v-else>
-              <p class="verified-text my-0">{{ t('e.housing.permitStatusView.statusNotVerified') }}</p>
+              <p class="verified-text my-0">{{ t('e.common.permitStatusView.statusNotVerified') }}</p>
             </div>
           </div>
         </div>
       </template>
     </Card>
     <div class="updates-section">
-      <h4 class="mb-6">{{ t('e.housing.permitStatusView.additionalUpdates') }}</h4>
+      <h4 class="mb-6">{{ t('e.common.permitStatusView.additionalUpdates') }}</h4>
       <div
-        v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+        v-if="canNavigate(NavigationPermission.EXT_ELECTRIFICATION)"
         class="ask-navigator mb-16"
       >
         <Button
           outlined
-          :label="t('e.housing.permitStatusView.askNav')"
+          :label="t('e.common.permitStatusView.askNav')"
           @click="
             router.push({
-              name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-              params: { permitId, housingProjectId }
+              name: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY,
+              params: { permitId, projectId }
             })
           "
         />
-        <p>{{ t('e.housing.permitStatusView.contactNav') }}</p>
+        <p>{{ t('e.common.permitStatusView.contactNav') }}</p>
       </div>
       <div v-if="getPermit?.permitNote && getPermit.permitNote.length > 0">
         <div
@@ -369,7 +369,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div v-else>
-        <p class="text-gray-500">{{ t('e.housing.permitStatusView.noUpdates') }}</p>
+        <p class="text-gray-500">{{ t('e.common.permitStatusView.noUpdates') }}</p>
       </div>
     </div>
   </div>

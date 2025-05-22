@@ -1,22 +1,27 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import Divider from '@/components/common/Divider.vue';
-import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import Tooltip from '@/components/common/Tooltip.vue';
-import CollectionDisclaimer from '@/components/housing/CollectionDisclaimer.vue';
+import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
+import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, housingProjectService } from '@/services';
-import { useConfigStore, useContactStore } from '@/store';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
-import { RouteName } from '@/utils/enums/application';
-import { IntakeFormCategory } from '@/utils/enums/housing';
-import { IntakeStatus } from '@/utils/enums/projectCommon';
+import { enquiryService } from '@/services';
+import { useAppStore, useConfigStore, useContactStore } from '@/store';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
+import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
+import {
+  enquiryConfirmRouteNameKey,
+  enquiryPermitConfirmRouteNameKey,
+  enquiryProjectConfirmRouteNameKey,
+  enquiryRouteNameKey,
+  projectServiceKey
+} from '@/utils/keys';
 import { confirmationTemplateEnquiry } from '@/utils/templates';
 import { omit } from '@/utils/utils';
 import { contactValidator } from '@/validators';
@@ -24,6 +29,7 @@ import { contactValidator } from '@/validators';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { ElectrificationProject, Enquiry, HousingProject, Permit } from '@/types';
+import { Initiative, RouteName } from '@/utils/enums/application';
 
 // Props
 const { enquiryId, project, permit } = defineProps<{
@@ -32,6 +38,13 @@ const { enquiryId, project, permit } = defineProps<{
   permit?: Permit;
 }>();
 
+// Injections
+const enquiryConfirmRouteName = inject(enquiryConfirmRouteNameKey);
+const enquiryPermitConfirmRouteName = inject(enquiryPermitConfirmRouteNameKey);
+const enquiryProjectConfirmRouteName = inject(enquiryProjectConfirmRouteNameKey);
+const enquiryRouteName = inject(enquiryRouteNameKey);
+const projectService = inject(projectServiceKey);
+
 // Composables
 const { t } = useI18n();
 const confirm = useConfirm();
@@ -39,8 +52,10 @@ const router = useRouter();
 const toast = useToast();
 
 // Store
+const appStore = useAppStore();
 const contactStore = useContactStore();
 const { getConfig } = storeToRefs(useConfigStore());
+const { getInitiative } = storeToRefs(appStore);
 
 // State
 const editable: Ref<boolean> = ref(true);
@@ -97,7 +112,8 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     '{{ activityId }}': activityId,
     '{{ enquiryDescription }}': firstTwoSentences.trim(),
     '{{ enquiryId }}': enquiryId,
-    '{{ projectId }}': enquiryId
+    '{{ projectId }}': project?.projectId ?? undefined,
+    '{{ initiative }}': getInitiative.value.toLowerCase()
   });
   let applicantEmail = formRef.value?.values.contactEmail;
   let emailData = {
@@ -108,27 +124,28 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     bodyType: 'html',
     body: body
   };
-  await housingProjectService.emailConfirmation(emailData);
+  if (!projectService) throw new Error('No service');
+  await projectService.emailConfirmation(emailData);
 }
 
 function getEnquiryConfirmationRoute(enquiry: Enquiry) {
   if (isOnlyProjectRelated.value) {
     return {
-      name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
+      name: enquiryProjectConfirmRouteName,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else if (isPermitRelated.value) {
     return {
-      name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
+      name: enquiryPermitConfirmRouteName,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else {
     return {
-      name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+      name: enquiryConfirmRouteName,
       params: {
         enquiryId: enquiry.enquiryId
       }
@@ -164,7 +181,9 @@ async function loadEnquiry() {
       }
     };
   } catch (e: any) {
-    router.replace({ name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE });
+    if (getInitiative.value === Initiative.HOUSING) router.replace({ name: enquiryRouteName });
+    else router.replace({ name: RouteName.EXT_ELECTRIFICATION });
+    toast.error('Failed to load enquiry', e);
   }
 }
 
