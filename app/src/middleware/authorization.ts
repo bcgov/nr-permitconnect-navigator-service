@@ -5,6 +5,7 @@ import { NIL } from 'uuid';
 import {
   documentService,
   draftService,
+  electrificationProjectService,
   enquiryService,
   housingProjectService,
   noteService,
@@ -126,6 +127,7 @@ const paramMap = new Map<string, (id: string) => any>([
   ['draftId', draftService.getDraft],
   ['enquiryId', enquiryService.getEnquiry],
   ['housingProjectId', housingProjectService.getHousingProject],
+  ['electrificationProjectId', electrificationProjectService.getElectrificationProject],
   ['noteId', noteService.getNote],
   ['permitId', permitService.getPermit]
 ]);
@@ -177,9 +179,20 @@ export const hasAccessPermit = (param: string) => {
         if (func) data = await func(id);
 
         if (!data || data?.createdBy !== userId) {
-          const project = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
-          if (!project || project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase())
-            throw new Error('No access');
+          let project;
+          if (req.currentContext?.initiative === Initiative.HOUSING) {
+            project = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
+            if (
+              !project ||
+              project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
+            )
+              throw new Error('No access');
+          } else {
+            project = (
+              await electrificationProjectService.searchElectrificationProjects({ activityId: [data.activityId] })
+            )[0];
+            if (!project || project?.createdBy !== req.currentContext.userId) throw new Error('No access');
+          }
         }
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
