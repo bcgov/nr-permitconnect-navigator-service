@@ -15,4 +15,5 @@ export interface IProject extends Partial<IStamps> {
   astNotes?: string;
   queuePriority?: number;
   atsClientId?: number;
+  atsEnquiryId?: number;
 }

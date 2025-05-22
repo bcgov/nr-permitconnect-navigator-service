@@ -117,6 +117,7 @@ const schema = {
           .valid(...SUBMISSION_TYPE_LIST),
         applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
         atsClientId: Joi.number().integer().min(0).allow(null),
+        atsEnquiryId: Joi.number().integer().min(0).allow(null),
         aaiUpdated: Joi.boolean().required()
       }
     }),
