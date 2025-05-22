@@ -57,14 +57,13 @@ router.get(
 /** Gets electrification project statistics*/
 router.get(
   '/statistics',
-
   electrificationProjectValidator.getStatistics,
   (req: Request<never, never, never, StatisticsFilters>, res: Response, next: NextFunction): void => {
     electrificationProjectController.getStatistics(req, res, next);
   }
 );
 
-/** Gets a list of electrification project drafts */
+/** Gets a electrification project draft */
 router.get(
   '/draft/:draftId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
@@ -74,7 +73,7 @@ router.get(
   }
 );
 
-/** Gets a electrification project draft */
+/** Gets a list of electrification project drafts */
 router.get(
   '/draft',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
@@ -148,7 +147,7 @@ router.delete(
 router.get(
   '/:electrificationProjectId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
-  //hasAccess('electrificationProjectId'), // TODO: Temp fix to check submittedBy in controller until we're off chefs
+  hasAccess('electrificationProjectId'),
   electrificationProjectValidator.getElectrificationProject,
   (req: Request<{ electrificationProjectId: string }>, res: Response, next: NextFunction): void => {
     electrificationProjectController.getElectrificationProject(req, res, next);
