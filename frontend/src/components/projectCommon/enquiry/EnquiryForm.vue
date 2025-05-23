@@ -25,6 +25,7 @@ import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
+  ATS_MANAGING_REGION,
   CONTACT_PREFERENCE_LIST,
   ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST,
@@ -34,7 +35,7 @@ import {
 import { IdentityProviderKind, Regex, BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { GroupName, Initiative } from '@/utils/enums/application';
-import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
+import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
@@ -43,13 +44,11 @@ import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSClientResource, ATSEnquiryResource, Enquiry, User } from '@/types';
 import type { AddressResource } from '@/types/ATSClientResource';
+
 // Interfaces
 interface EnquiryForm extends Enquiry {
   user?: User;
 }
-
-// Constants
-const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
 
 // Props
 const { editable = true, enquiry } = defineProps<{
@@ -60,6 +59,7 @@ const { editable = true, enquiry } = defineProps<{
 // Injections
 const projectService = inject(projectServiceKey);
 const atsEnquiryPartnerAgencies = inject(atsEnquiryPartnerAgenciesKey);
+const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
@@ -141,29 +141,25 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
       contactFirstName: formRef.value?.values.contactFirstName,
       contactSurname: formRef.value?.values.contactLastName,
-      regionName: GroupName.NAVIGATOR,
+      regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
       enquiryPartnerAgencies: [atsEnquiryPartnerAgencies ?? ''],
       enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.enquiryDescription,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+      enquiryTypeCodes: [atsEnquiryTypeCode ?? '']
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
     if (response.status === 201) {
-      toast.success(toastMsg);
-      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      if (!shouldCreateATSClient.value) toast.success(t('enquiryForm.atsEnquiryPushed'));
       return response.data.enquiryId;
-    } else {
-      toast.success(t('enquiryForm.atsClientPushed'));
-      toast.error(t('enquiryForm.atsEnquiryPushError'));
     }
   } catch (error) {
     toast.success(t('enquiryForm.atsClientPushed'));
@@ -268,14 +264,19 @@ function onNewATSEnquiry() {
 const onSubmit = async (values: any) => {
   try {
     if (shouldCreateATSClient.value) {
-      values.atsClientId = await createATSClient();
-      values.atsEnquiryId = await createATSEnquiry(t('enquiryForm.atsClientEnquiryPushed'), values.atsClientId);
-      values.addedToATS = true;
+      const response = await createATSClient();
+      values.atsClientId = response?.atsClientId;
+      values.atsEnquiryId = response?.atsEnquiryId;
+      if (values.atsEnquiryId && values.atsClientId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSClient.value = false;
     } else if (shouldCreateATSEnquiry.value) {
-      values.atsEnquiryId = await createATSEnquiry(t('enquiryForm.atsEnquiryPushed'));
+      values.atsEnquiryId = await createATSEnquiry();
+      if (values.atsEnquiryId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSEnquiry.value = false;
-      values.addedToATS = true;
     }
 
     // Convert contact fields into contacts array object then remove form keys from data
@@ -386,9 +387,10 @@ async function createATSClient() {
     const submitData: ATSClientResource = setEmptyStringsToNull(data);
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
-      return response.data.clientId;
-    } else {
-      toast.success(t('enquiryForm.atsClientPushError'));
+      const atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      if (atsEnquiryId) toast.success(t('enquiryForm.atsClientEnquiryPushed'));
+      else toast.success(t('enquiryForm.atsClientPushed'));
+      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
     }
   } catch (error) {
     toast.error(t('enquiryForm.atsClientPushError') + ' ' + error);
@@ -507,18 +509,19 @@ async function createATSClient() {
 
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
-          v-if="values.atsClientId"
+          v-if="values.atsClientId || shouldCreateATSClient"
           class="col-start-1 col-span-12"
         >
           <div class="col-start-1 col-span-12">
             <div class="flex items-center">
-              <h5 class="mr-2">{{ t('enquiryForm.client#') }}</h5>
+              <h5 class="mr-3">{{ t('enquiryForm.clientId') }}</h5>
               <a
                 class="hover-hand"
                 @click="atsUserDetailsModalVisible = true"
               >
                 {{ values.atsClientId }}
               </a>
+              <span v-if="shouldCreateATSClient">{{ t('enquiryForm.pendingSave') }}</span>
             </div>
           </div>
         </div>
@@ -527,12 +530,13 @@ async function createATSClient() {
           name="atsClientId"
         />
         <div
-          v-if="values.atsEnquiryId"
+          v-if="values.atsEnquiryId || shouldCreateATSEnquiry || shouldCreateATSClient"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
             <h5 class="mr-2">{{ t('enquiryForm.enquiry#') }}</h5>
             {{ values.atsEnquiryId }}
+            <span v-if="shouldCreateATSEnquiry || shouldCreateATSClient">{{ t('enquiryForm.pendingSave') }}</span>
           </div>
         </div>
         <input
@@ -565,15 +569,6 @@ async function createATSClient() {
           @click="onNewATSEnquiry()"
         >
           {{ t('enquiryForm.atsNewEnquiryBtn') }}
-        </Button>
-
-        <Button
-          v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
-          class="grid-col-start-3 col-span-2"
-          aria-label="Waiting for save"
-          :disabled="true"
-        >
-          Waiting for save
         </Button>
       </div>
       <Checkbox

@@ -22,7 +22,13 @@ import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, electrificationProjectService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
-import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
+import {
+  APPLICATION_STATUS_LIST,
+  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
+  ATS_MANAGING_REGION,
+  QUEUE_PRIORITY,
+  SUBMISSION_TYPE_LIST
+} from '@/utils/constants/projectCommon';
 import { BasicResponse, GroupName, IdentityProviderKind, Initiative, Regex } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
@@ -45,7 +51,7 @@ const emit = defineEmits<{
 }>();
 
 // Constants
-const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
+const ATS_ENQUIRY_TYPE_CODE = Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -145,7 +151,8 @@ function initilizeFormValues(project: ElectrificationProject) {
     atsEnquiryId: project.atsEnquiryId,
 
     // Updates
-    aaiUpdated: project.aaiUpdated
+    aaiUpdated: project.aaiUpdated,
+    addedToATS: project.addedToATS
   };
 }
 
@@ -169,38 +176,35 @@ async function createATSClient() {
     const submitData: ATSClientResource = setEmptyStringsToNull(data);
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
-      return response.data.clientId;
-    } else {
-      toast.error(t('i.electrification.projectForm.atsClientPushError'));
+      const atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      if (atsEnquiryId) toast.success(t('i.electrification.projectForm.atsClientEnquiryPushed'));
+      else toast.success(t('i.electrification.projectForm.atsClientPushed'));
+      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
     }
   } catch (error) {
     toast.error(t('i.electrification.projectForm.atsClientPushError') + ' ' + error);
   }
 }
 
-async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
       contactFirstName: formRef.value?.values.contact.firstName,
       contactSurname: formRef.value?.values.contact.lastName,
-      regionName: GroupName.NAVIGATOR,
+      regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [project.activityId],
       enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
       enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.project.projectName,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
     if (response.status === 201) {
-      toast.success(toastMsg);
-      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      if (!shouldCreateATSClient.value) toast.success(t('i.electrification.projectForm.atsEnquiryPushed'));
       return response.data.enquiryId;
-    } else {
-      toast.success(t('i.electrification.projectForm.atsClientPushed'));
-      toast.error(t('i.electrification.projectForm.atsEnquiryPushError'));
     }
   } catch (error) {
     toast.success(t('i.electrification.projectForm.atsClientPushed'));
@@ -269,17 +273,19 @@ function onNewATSEnquiry() {
 const onSubmit = async (values: any) => {
   try {
     if (shouldCreateATSClient.value) {
-      values.atsClientId = await createATSClient();
-      values.atsEnquiryId = await createATSEnquiry(
-        t('i.electrification.projectForm.atsClientEnquiryPushed'),
-        values.atsClientId
-      );
-      values.addedToATS = true;
+      const response = await createATSClient();
+      values.atsClientId = response?.atsClientId;
+      values.atsEnquiryId = response?.atsEnquiryId;
+      if (values.atsEnquiryId && values.atsClientId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSClient.value = false;
     } else if (shouldCreateATSEnquiry.value) {
-      values.atsEnquiryId = await createATSEnquiry(t('i.electrification.projectForm.atsEnquiryPushed'));
+      values.atsEnquiryId = await createATSEnquiry();
+      if (values.atsEnquiryId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSEnquiry.value = false;
-      values.addedToATS = true;
     }
 
     const submitData = omit(
@@ -297,7 +303,8 @@ const onSubmit = async (values: any) => {
           applicationStatus: values.submissionState.applicationStatus,
           atsClientId: parseInt(values.atsClientId) || '',
           atsEnquiryId: parseInt(values.atsEnquiryId) || '',
-          aaiUpdated: values.aaiUpdated
+          aaiUpdated: values.aaiUpdated,
+          addedToATS: values.addedToATS
         },
         contacts: [
           {
@@ -527,7 +534,7 @@ onBeforeMount(async () => {
             {{ t('i.electrification.projectForm.atsHeader') }}
           </h4>
           <div
-            v-if="values.atsClientId"
+            v-if="values.atsClientId || shouldCreateATSClient"
             class="flex flex-col gap-y-3"
           >
             <input
@@ -535,7 +542,7 @@ onBeforeMount(async () => {
               name="atsClientId"
             />
             <div class="flex items-center">
-              <p class="text-[var(--p-primary-900)] mr-2">
+              <p class="text-[var(--p-primary-900)] mr-3">
                 <b>{{ t('i.electrification.projectForm.atsClientIdHeader') }}</b>
               </p>
               <a
@@ -544,13 +551,14 @@ onBeforeMount(async () => {
               >
                 {{ values.atsClientId }}
               </a>
+              <span v-if="shouldCreateATSClient">{{ t('i.electrification.projectForm.pendingSave') }}</span>
             </div>
             <input
               type="hidden"
               name="atsEnquiryId"
             />
             <div
-              v-if="values.atsEnquiryId"
+              v-if="values.atsEnquiryId || shouldCreateATSEnquiry || shouldCreateATSClient"
               class="flex items-center"
             >
               <p class="text-[var(--p-primary-900)] mr-2">
@@ -558,6 +566,9 @@ onBeforeMount(async () => {
               </p>
 
               {{ values.atsEnquiryId }}
+              <span v-if="shouldCreateATSEnquiry || shouldCreateATSClient">
+                {{ t('i.electrification.projectForm.pendingSave') }}
+              </span>
             </div>
           </div>
           <div
@@ -582,28 +593,27 @@ onBeforeMount(async () => {
               :disabled="!editable"
               @click="atsUserCreateModalVisible = true"
             />
-            <Button
-              v-if="values.atsClientId && !values.atsEnquiryId && !shouldCreateATSEnquiry"
-              aria-label="New ATS enquiry"
-              :disabled="!editable"
-              @click="onNewATSEnquiry()"
-            >
-              {{ t('enquiryForm.atsNewEnquiryBtn') }}
-            </Button>
-
-            <Button
-              v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
-              aria-label="Waiting for save"
-              :disabled="true"
-            >
-              Waiting for save
-            </Button>
           </div>
+          <Button
+            v-if="values.atsClientId && !values.atsEnquiryId && !shouldCreateATSEnquiry"
+            class="mt-4"
+            aria-label="New ATS enquiry"
+            :disabled="!editable"
+            @click="onNewATSEnquiry()"
+          >
+            {{ t('enquiryForm.atsNewEnquiryBtn') }}
+          </Button>
         </div>
         <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
           <h4 class="section-header mb-4 mt-0">
             {{ t('i.electrification.projectForm.updatesHeader') }}
           </h4>
+          <Checkbox
+            name="addedToATS"
+            class="mb-4"
+            :label="t('i.electrification.projectForm.atsUpdated')"
+            :disabled="!editable"
+          />
           <Checkbox
             name="aaiUpdated"
             :label="t('i.electrification.projectForm.aaiUpdateLabel')"

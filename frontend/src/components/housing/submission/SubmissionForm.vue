@@ -29,6 +29,8 @@ import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/util
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
+  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
+  ATS_MANAGING_REGION,
   CONTACT_PREFERENCE_LIST,
   INTAKE_STATUS_LIST,
   QUEUE_PRIORITY,
@@ -65,7 +67,7 @@ const { editable = true, housingProject } = defineProps<{
 }>();
 
 // Constants
-const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
+const ATS_ENQUIRY_TYPE_CODE = Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -271,14 +273,19 @@ function onNewATSEnquiry() {
 const onSubmit = async (values: any) => {
   try {
     if (shouldCreateATSClient.value) {
-      values.atsClientId = await createATSClient();
-      values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsClientEnquiryPushed'), values.atsClientId);
-      values.addedToATS = true;
+      const response = await createATSClient();
+      values.atsClientId = response?.atsClientId;
+      values.atsEnquiryId = response?.atsEnquiryId;
+      if (values.atsEnquiryId && values.atsClientId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSClient.value = false;
     } else if (shouldCreateATSEnquiry.value) {
-      values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsEnquiryPushed'));
+      values.atsEnquiryId = await createATSEnquiry();
+      if (values.atsEnquiryId) {
+        values.addedToATS = true;
+      }
       shouldCreateATSEnquiry.value = false;
-      values.addedToATS = true;
     }
     // Convert contact fields into contacts array object then remove form keys from data
     const valuesWithContact = omit(
@@ -373,41 +380,37 @@ async function createATSClient() {
     const submitData: ATSClientResource = setEmptyStringsToNull(data);
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
-      return response.data.clientId;
-    } else {
-      toast.error(t('submissionForm.atsClientPushError'));
+      const atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      if (atsEnquiryId) toast.success(t('submissionForm.atsClientEnquiryPushed'));
+      else toast.success(t('submissionForm.atsClientPushed'));
+      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
     }
   } catch (error) {
     toast.error(t('submissionForm.atsClientPushError') + ' ' + error);
   }
 }
 
-async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
       contactFirstName: formRef.value?.values.contactFirstName,
       contactSurname: formRef.value?.values.contactLastName,
-      regionName: GroupName.NAVIGATOR,
+      regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
       enquiryPartnerAgencies: [Initiative.HOUSING],
       enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.projectName,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
     if (response.status === 201) {
-      toast.success(toastMsg);
-      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      if (!shouldCreateATSClient.value) toast.success(t('submissionForm.atsEnquiryPushed'));
       return response.data.enquiryId;
-    } else {
-      toast.success(t('submissionForm.atsClientPushed'));
-      toast.error(t('submissionForm.atsEnquiryPushError'));
     }
   } catch (error) {
-    toast.success(t('submissionForm.atsClientPushed'));
     toast.error(t('submissionForm.atsEnquiryPushError') + ' ' + error);
   }
 }
@@ -825,17 +828,18 @@ onBeforeMount(async () => {
       <SectionHeader title="ATS" />
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
-          v-if="values.atsClientId"
+          v-if="values.atsClientId || shouldCreateATSClient"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
-            <h5 class="mr-2">{{ t('submissionForm.client#') }}</h5>
+            <h5 class="mr-3">{{ t('submissionForm.clientId') }}</h5>
             <a
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
             >
               {{ values.atsClientId }}
             </a>
+            <span v-if="shouldCreateATSClient">{{ t('submissionForm.pendingSave') }}</span>
           </div>
         </div>
         <input
@@ -843,12 +847,13 @@ onBeforeMount(async () => {
           name="atsClientId"
         />
         <div
-          v-if="values.atsEnquiryId"
+          v-if="values.atsEnquiryId || shouldCreateATSClient || shouldCreateATSEnquiry"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
             <h5 class="mr-2">{{ t('submissionForm.enquiry#') }}</h5>
             {{ values.atsEnquiryId }}
+            <span v-if="shouldCreateATSClient || shouldCreateATSEnquiry">{{ t('submissionForm.pendingSave') }}</span>
           </div>
         </div>
         <input
@@ -881,15 +886,6 @@ onBeforeMount(async () => {
           @click="onNewATSEnquiry()"
         >
           {{ t('submissionForm.atsNewEnquiryBtn') }}
-        </Button>
-
-        <Button
-          v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
-          class="grid-col-start-3 col-span-2"
-          aria-label="Waiting for save"
-          :disabled="true"
-        >
-          Waiting for save
         </Button>
       </div>
       <Checkbox

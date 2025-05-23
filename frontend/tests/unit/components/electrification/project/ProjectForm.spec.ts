@@ -37,6 +37,7 @@ const testProject: ElectrificationProject = {
   atsClientId: null,
   atsEnquiryId: null,
   aaiUpdated: false,
+  addedToATS: false,
   contacts: []
 };
 

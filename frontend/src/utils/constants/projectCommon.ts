@@ -16,6 +16,12 @@ export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.COMPLETED
 ];
 
+export const ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX = ' - Project Intake';
+
+export const ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX = ' - Enquiry Only';
+
+export const ATS_MANAGING_REGION = 'Navigator Services';
+
 export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
 
 export const CONTACT_PREFERENCE_LIST = [

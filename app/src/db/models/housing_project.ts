@@ -68,7 +68,7 @@ export default {
       ast_updated: input.astUpdated,
       added_to_ats: input.addedToATS,
       ats_client_id: input.atsClientId ?? null,
-      ats_enquiry_id: input.atsEnquiryId,
+      ats_enquiry_id: input.atsEnquiryId ?? null,
       ltsa_completed: input.ltsaCompleted,
       bc_online_completed: input.bcOnlineCompleted,
       natural_disaster: input.naturalDisaster === BasicResponse.YES ? true : false,
