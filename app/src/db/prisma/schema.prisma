@@ -497,6 +497,7 @@ model electrification_project {
   updatedBy                          String?                                @map("updated_by")
   updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
   atsEnquiryId                       Int?                                   @map("ats_enquiry_id")
+  addedToATS                         Boolean                                @default(false) @map("added_to_ats")
   activity                           activity                               @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
   user                               user?                                  @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
   electrificationProjectCategoryCode electrification_project_category_code? @relation(fields: [projectCategory], references: [code], map: "electrification_project_project_category_foreign")

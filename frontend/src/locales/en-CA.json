@@ -208,11 +208,12 @@
         "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
         "atsEnquiryPushed": "New enquiry pushed to ATS",
         "atsEnquiryPushError": "Error pushing enquiry to ATS",
-        "atsClientIdHeader": "ATS Client ID",
-        "atsEnquiryIdHeader": "ATS Enquiry ID",
+        "atsClientIdHeader": "Client ID",
+        "atsEnquiryIdHeader": "Enquiry #",
         "atsHeader": "ATS link",
         "atsSearchButton": "Search ATS",
-        "atsNewButton": "New ATS",
+        "atsNewButton": "New ATS Client",
+        "atsUpdated": "ATS updated",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "locationHeader": "Location description",
@@ -233,7 +234,8 @@
         "projectStateLabel": "Project state",
         "submissionTypeLabel": "Submission type",
         "priorityLabel": "Priority",
-        "aaiUpdateLabel": "AAI Update"
+        "aaiUpdateLabel": "AAI update",
+        "pendingSave": "Pending save"
       }
     },
     "housing": {
@@ -334,7 +336,7 @@
     "basicInfoHeader": "Basic information",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "client#": "Client #",
+    "clientId": "Client ID",
     "enquiry#": "Enquiry #",
     "enquiryDetailHeader": "Enquiry detail",
     "atsHeader": "ATS",
@@ -348,7 +350,8 @@
     "reopenAccept": "Confirm",
     "confirmReopenMessage": "Please confirm that you want to re-open this enquiry",
     "confirmReopenHeader": "Re-open enquiry?",
-    "failedMessage": "Failed to save enquiry"
+    "failedMessage": "Failed to save enquiry",
+    "pendingSave": "Pending save"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
@@ -488,9 +491,10 @@
     "atsNewClientBtn": "New ATS Client",
     "atsNewEnquiryBtn": "New ATS Enquiry",
     "cancel": "Cancel",
-    "client#": "Client #",
+    "clientId": "Client ID",
     "confirm": "Confirm",
-    "enquiry#": "Enquiry #"
+    "enquiry#": "Enquiry #",
+    "pendingSave": "Pending save"
   },
   "submissionIntakeForm": {
     "assistanceMessage": "Assistance requested",
