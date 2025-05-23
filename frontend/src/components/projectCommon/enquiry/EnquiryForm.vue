@@ -20,7 +20,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService, userService } from '@/services';
+import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/housing';
@@ -30,34 +30,35 @@ import {
   ENQUIRY_TYPE_LIST,
   INTAKE_STATUS_LIST
 } from '@/utils/constants/projectCommon';
-import { IdentityProviderKind, Regex } from '@/utils/enums/application';
+import { IdentityProviderKind, Regex, BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { GroupName, Initiative } from '@/utils/enums/application';
+import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Enquiry, User } from '@/types';
-
+import type { ATSClientResource, ATSEnquiryResource, Enquiry, User } from '@/types';
+import type { AddressResource } from '@/types/ATSClientResource';
 // Interfaces
 interface EnquiryForm extends Enquiry {
   user?: User;
 }
 
+// Constants
+const ATS_ENQUIRY_TYPE_CODES = 'Project Intake';
+
 // Props
-const {
-  relatedAtsNumber,
-  editable = true,
-  enquiry
-} = defineProps<{
-  relatedAtsNumber?: number | null;
+const { editable = true, enquiry } = defineProps<{
   editable?: boolean;
   enquiry: any;
 }>();
 
 // Injections
 const projectService = inject(projectServiceKey);
+const atsEnquiryPartnerAgencies = inject(atsEnquiryPartnerAgenciesKey);
 
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
@@ -71,6 +72,8 @@ const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const shouldCreateATSClient: Ref<boolean> = ref(false);
+const shouldCreateATSEnquiry: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -111,11 +114,6 @@ const confirm = useConfirm();
 const enquiryStore = useEnquiryStore();
 const toast = useToast();
 
-const displayAtsNumber = computed(() => (values: Enquiry) => {
-  if (values.relatedActivityId) return relatedAtsNumber || 'Unavailable';
-  else return values.atsClientId;
-});
-
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
@@ -142,13 +140,35 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-const showUserLinkModelCheck = (values: Enquiry) => {
-  return relatedAtsNumber || values.atsClientId;
-};
-
-const handleDetailsModalClick = (values: Enquiry) => {
-  if (showUserLinkModelCheck(values)) atsUserDetailsModalVisible.value = true;
-};
+async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
+  try {
+    const ATSEnquiryData: ATSEnquiryResource = {
+      '@type': 'EnquiryResource',
+      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      contactFirstName: formRef.value?.values.contactFirstName,
+      contactSurname: formRef.value?.values.contactLastName,
+      regionName: GroupName.NAVIGATOR,
+      subRegionalOffice: GroupName.NAVIGATOR,
+      enquiryFileNumbers: [formRef.value?.values.activityId],
+      enquiryPartnerAgencies: [atsEnquiryPartnerAgencies ?? ''],
+      enquiryMethodCodes: [Initiative.PCNS],
+      notes: formRef.value?.values.enquiryDescription,
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODES]
+    };
+    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    if (response.status === 201) {
+      toast.success(toastMsg);
+      formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      return response.data.enquiryId;
+    } else {
+      toast.success(t('enquiryForm.atsClientPushed'));
+      toast.error(t('enquiryForm.atsEnquiryPushError'));
+    }
+  } catch (error) {
+    toast.success(t('enquiryForm.atsClientPushed'));
+    toast.error(t('enquiryForm.atsEnquiryPushError') + ' ' + error);
+  }
+}
 
 function onCancel() {
   formRef.value?.resetForm();
@@ -187,12 +207,43 @@ function onRelatedActivityInput(e: IInputEvent) {
   );
 }
 
+async function onRelatedActivityChange(e: SelectChangeEvent) {
+  formRef.value?.setFieldValue('atsClientId', null);
+  formRef.value?.setFieldValue('atsEnquiryId', null);
+  formRef.value?.setFieldValue('addedToATS', false);
+  shouldCreateATSClient.value = false;
+  shouldCreateATSEnquiry.value = false;
+  if (e.value) {
+    if (projectService) {
+      const response = (await projectService.searchProjects({ activityId: [e?.value] })).data;
+      if (response.length > 0) {
+        formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+      }
+    } else {
+      throw new Error('No service');
+    }
+  }
+}
+
+async function getRelatedATSClientID(activityId: string) {
+  formRef.value?.setFieldValue('atsClientId', null);
+  if (projectService) {
+    const response = (await projectService.searchProjects({ activityId: [activityId] })).data;
+    if (response.length > 0) {
+      formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+    }
+  } else {
+    throw new Error('No service');
+  }
+}
+
 function onReOpen() {
   confirm.require({
     message: t('i.common.enquiryForm.confirmReopenMessage'),
     header: t('i.common.enquiryForm.confirmReopenHeader'),
     acceptLabel: t('i.common.enquiryForm.reopenAccept'),
     rejectLabel: t('i.common.enquiryForm.reopenReject'),
+    rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
       onSubmit(formRef.value?.values);
@@ -200,8 +251,33 @@ function onReOpen() {
   });
 }
 
+function onNewATSEnquiry() {
+  confirm.require({
+    message: t('enquiryForm.atsEnquiryConfirmMsg'),
+    header: t('enquiryForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('enquiryForm.confirm'),
+    rejectLabel: t('enquiryForm.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      shouldCreateATSEnquiry.value = true;
+    }
+  });
+}
+
 const onSubmit = async (values: any) => {
   try {
+    if (shouldCreateATSClient.value) {
+      values.atsClientId = await createATSClient();
+      values.atsEnquiryId = await createATSEnquiry(t('enquiryForm.atsClientEnquiryPushed'), values.atsClientId);
+      values.addedToATS = true;
+      shouldCreateATSClient.value = false;
+      shouldCreateATSEnquiry.value = false;
+    } else if (shouldCreateATSEnquiry.value) {
+      values.atsEnquiryId = await createATSEnquiry(t('enquiryForm.atsEnquiryPushed'));
+      shouldCreateATSEnquiry.value = false;
+      values.addedToATS = true;
+    }
+
     // Convert contact fields into contacts array object then remove form keys from data
     const valuesWithContact = omit(
       {
@@ -239,7 +315,6 @@ const onSubmit = async (values: any) => {
     // Generate final enquiry object
     const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
-
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);
     formRef.value?.resetForm({
@@ -256,6 +331,8 @@ const onSubmit = async (values: any) => {
         user: values.user
       }
     });
+    if (submitData?.relatedActivityId) getRelatedATSClientID(submitData?.relatedActivityId);
+
     emit('enquiryForm:saved');
 
     toast.success(t('i.common.form.savedMessage'));
@@ -280,12 +357,43 @@ onBeforeMount(async () => {
     submittedAt: new Date(enquiry?.submittedAt),
     addedToATS: enquiry?.addedToATS,
     atsClientId: enquiry?.atsClientId,
+    atsEnquiryId: enquiry?.atsEnquiryId,
     user: assigneeOptions.value[0] ?? null
   };
+
+  if (enquiry?.relatedActivityId) getRelatedATSClientID(enquiry?.relatedActivityId);
 
   if (!projectService) throw new Error('No service');
   projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.getActivityIds()).data;
 });
+
+async function createATSClient() {
+  try {
+    const address: Partial<AddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: formRef.value?.values.contactPhoneNumber ?? '',
+      email: formRef.value?.values?.contactEmail ?? ''
+    };
+    const data = {
+      '@type': 'ClientResource',
+      address: address,
+      firstName: formRef.value?.values.contactFirstName,
+      surName: formRef.value?.values.contactLastName,
+      regionName: GroupName.NAVIGATOR,
+      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
+    };
+
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createATSClient(submitData);
+    if (response.status === 201) {
+      return response.data.clientId;
+    } else {
+      toast.success(t('enquiryForm.atsClientPushError'));
+    }
+  } catch (error) {
+    toast.error(t('enquiryForm.atsClientPushError') + ' ' + error);
+  }
+}
 </script>
 
 <template>
@@ -331,6 +439,7 @@ onBeforeMount(async () => {
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"
         @on-input="onRelatedActivityInput"
+        @on-change="onRelatedActivityChange"
       />
 
       <EditableSelect
@@ -397,41 +506,67 @@ onBeforeMount(async () => {
       <SectionHeader :title="t('enquiryForm.atsHeader')" />
 
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
-        <div class="col-start-1 col-span-12">
-          <div class="flex items-center">
-            <h5 class="mr-2">Client #</h5>
-            <a
-              :class="{
-                'hover-hand': showUserLinkModelCheck(values as Enquiry),
-                'no-underline': !showUserLinkModelCheck(values as Enquiry)
-              }"
-              @click="handleDetailsModalClick(values as Enquiry)"
-            >
-              {{ displayAtsNumber(values as Enquiry) }}
-            </a>
+        <div
+          v-if="values.atsClientId || shouldCreateATSClient"
+          class="col-start-1 col-span-12"
+        >
+          <div class="col-start-1 col-span-12">
+            <div class="flex items-center">
+              <h5 class="mr-3">{{ t('enquiryForm.clientId') }}</h5>
+              <a
+                class="hover-hand"
+                @click="atsUserDetailsModalVisible = true"
+              >
+                {{ values.atsClientId }}
+              </a>
+              <span v-if="shouldCreateATSClient">{{ t('enquiryForm.pendingSave') }}</span>
+            </div>
           </div>
         </div>
         <input
           type="hidden"
           name="atsClientId"
         />
+        <div
+          v-if="values.atsEnquiryId || shouldCreateATSEnquiry"
+          class="col-start-1 col-span-12"
+        >
+          <div class="flex items-center">
+            <h5 class="mr-2">{{ t('enquiryForm.enquiry#') }}</h5>
+            {{ values.atsEnquiryId }}
+            <span v-if="shouldCreateATSEnquiry">{{ t('enquiryForm.pendingSave') }}</span>
+          </div>
+        </div>
+        <input
+          type="hidden"
+          name="atsEnquiryId"
+        />
         <Button
-          v-if="!values.atsClientId && !values.relatedActivityId"
+          v-if="!values.atsClientId && !shouldCreateATSClient"
           class="col-start-1 col-span-2"
           aria-label="Link to ATS"
-          :disabled="!editable"
+          :disabled="!editable || shouldCreateATSEnquiry"
           @click="atsUserLinkModalVisible = true"
         >
           {{ t('enquiryForm.atsSearchBtn') }}
         </Button>
         <Button
-          v-if="!values.atsClientId && !values.relatedActivityId"
+          v-if="!values.atsClientId && !shouldCreateATSClient"
           class="grid-col-start-3 col-span-2"
           aria-label="New ATS client"
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
         >
           {{ t('enquiryForm.atsNewClientBtn') }}
+        </Button>
+        <Button
+          v-if="values.atsClientId && !values.atsEnquiryId && !shouldCreateATSEnquiry"
+          class="grid-col-start-3 col-span-2"
+          aria-label="New ATS enquiry"
+          :disabled="!editable"
+          @click="onNewATSEnquiry()"
+        >
+          {{ t('enquiryForm.atsNewEnquiryBtn') }}
         </Button>
       </div>
       <Checkbox
@@ -496,32 +631,43 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :project-or-enquiry="enquiry"
+      :f-name="values.contactFirstName"
+      :l-name="values.contactLastName"
+      :phone-number="values.contactPhoneNumber"
+      :email-id="values.contactEmail"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
           setFieldValue('atsClientId', atsClientResource.clientId);
+          shouldCreateATSEnquiry = true;
         }
       "
     />
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
-      :ats-client-id="relatedAtsNumber || values.atsClientId"
-      :disabled="!!values.relatedActivityId || !!relatedAtsNumber"
+      :ats-client-id="values.atsClientId"
+      :disabled="!!values.relatedActivityId"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
+          setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
+          shouldCreateATSEnquiry = false;
         }
       "
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :project-or-enquiry="enquiry"
-      @ats-user-link:link="
-        (atsClientId: string) => {
+      :first-name="values.contactFirstName"
+      :last-name="values.contactLastName"
+      :phone="values.contactPhoneNumber"
+      :email="values.contactEmail"
+      @ats-user-create:create="
+        () => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientId', atsClientId);
+          shouldCreateATSClient = true;
+          shouldCreateATSEnquiry = true;
         }
       "
     />

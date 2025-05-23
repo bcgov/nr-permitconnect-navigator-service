@@ -11,7 +11,7 @@ import { enquiryService, electrificationProjectService, noteService } from '@/se
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
 
 import type { Note, ElectrificationProject } from '@/types';
 import type { Ref } from 'vue';
@@ -47,6 +47,7 @@ const isCompleted = computed(() => {
 });
 
 // Providers
+provide(atsEnquiryPartnerAgenciesKey, Initiative.ELECTRIFICATION);
 provide(projectServiceKey, electrificationProjectService);
 
 // Actions
@@ -150,7 +151,6 @@ onBeforeMount(async () => {
           <EnquiryForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedElectrificationProject?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>
