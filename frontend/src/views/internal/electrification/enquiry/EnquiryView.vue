@@ -9,9 +9,10 @@ import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, electrificationProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
+import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { atsEnquiryPartnerAgenciesKey, projectServiceKey } from '@/utils/keys';
+import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
 import type { Note, ElectrificationProject } from '@/types';
 import type { Ref } from 'vue';
@@ -48,6 +49,7 @@ const isCompleted = computed(() => {
 
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.ELECTRIFICATION);
+provide(atsEnquiryTypeCodeKey, Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
 provide(projectServiceKey, electrificationProjectService);
 
 // Actions

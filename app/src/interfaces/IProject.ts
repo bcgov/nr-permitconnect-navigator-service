@@ -16,4 +16,5 @@ export interface IProject extends Partial<IStamps> {
   queuePriority?: number;
   atsClientId?: number;
   atsEnquiryId?: number;
+  addedToATS: boolean;
 }
