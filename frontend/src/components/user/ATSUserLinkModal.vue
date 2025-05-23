@@ -10,14 +10,14 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
-import { computed } from 'vue';
+import { watchEffect } from 'vue';
 
 // Props
 const { fName, lName, phoneNumber, emailId } = defineProps<{
-  fName: string;
-  lName: string;
-  phoneNumber: string;
-  emailId: string;
+  fName?: string;
+  lName?: string;
+  phoneNumber?: string;
+  emailId?: string;
 }>();
 
 // Composables
@@ -36,19 +36,18 @@ const loading: Ref<boolean> = ref(false);
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
+const firstName: Ref<string> = ref('');
+const lastName: Ref<string> = ref('');
+const phone: Ref<string> = ref('');
+const email: Ref<string> = ref('');
 
-const firstName = computed(() => {
-  return fName;
+watchEffect(() => {
+  firstName.value = fName ?? '';
+  lastName.value = lName ?? '';
+  phone.value = phoneNumber ?? '';
+  email.value = emailId ?? '';
 });
-const lastName = computed(() => {
-  return lName;
-});
-const phone = computed(() => {
-  return phoneNumber;
-});
-const email = computed(() => {
-  return emailId;
-});
+
 // Actions
 async function searchATSUsers() {
   selectedUser.value = undefined;

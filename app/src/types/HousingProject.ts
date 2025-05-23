@@ -21,8 +21,6 @@ export type HousingProject = {
   longitude: number | null;
   relatedPermits: string | null;
   astUpdated: boolean;
-  addedToATS: boolean;
-  atsEnquiryId: number | null;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   naturalDisaster: string;
