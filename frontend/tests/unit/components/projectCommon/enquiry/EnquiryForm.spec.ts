@@ -7,11 +7,12 @@ import { mount } from '@vue/test-utils';
 
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { electrificationProjectService, enquiryService, housingProjectService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
 import type { AxiosResponse } from 'axios';
 import type { IProjectService } from '@/interfaces/IProjectService';
+import type { Enquiry } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -34,7 +35,7 @@ const exampleContact = {
 };
 
 // Example Enquiry object
-const testEnquiry = {
+const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: 'General Inquiry',
@@ -45,6 +46,8 @@ const testEnquiry = {
   contacts: [exampleContact],
   atsClientId: null,
   atsEnquiryId: null,
+  addedToATS: false,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
@@ -52,6 +55,9 @@ const testEnquiry = {
 };
 
 const activityIdMockData = ['activity1', 'activity2'];
+
+const testAtsEnquiryPartnerAgencies = 'Electrification';
+const testAtsEnquiryTypeCode = 'Electrification - Enquiry Only';
 
 vi.mock(import('vue-router'), async (importOriginal) => {
   const actual = await importOriginal();
@@ -65,13 +71,13 @@ vi.mock(import('vue-router'), async (importOriginal) => {
 const wrapperSettings = (
   testEnquiryProp = testEnquiry,
   editableProp?: boolean,
-  relatedAtsNumberProp?: number,
-  projectServiceMock: IProjectService = housingProjectService
+  projectServiceMock: IProjectService = housingProjectService,
+  atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
+  atsEnquiryTypeCode = testAtsEnquiryTypeCode
 ) => ({
   props: {
     editable: editableProp,
-    enquiry: testEnquiryProp,
-    relatedAtsNumber: relatedAtsNumberProp
+    enquiry: testEnquiryProp
   },
   global: {
     plugins: [
@@ -88,7 +94,9 @@ const wrapperSettings = (
       ToastService
     ],
     provide: {
-      [projectServiceKey]: projectServiceMock
+      [projectServiceKey]: projectServiceMock,
+      [atsEnquiryPartnerAgenciesKey]: atsEnquiryPartnerAgencies,
+      [atsEnquiryTypeCodeKey]: atsEnquiryTypeCode
     },
     stubs: [
       'font-awesome-icon',
@@ -171,7 +179,7 @@ describe('EnquiryForm.vue', () => {
 
   it('gets electrification activity Ids onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined, electrificationProjectService));
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, electrificationProjectService));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -181,7 +189,7 @@ describe('EnquiryForm.vue', () => {
 
   it('gets housing activity Ids onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, undefined, housingProjectService));
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, housingProjectService));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -190,7 +198,7 @@ describe('EnquiryForm.vue', () => {
   });
 
   it('there are correct numbers of disabled components when editable prop is false', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false, 123456));
+    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false));
     await nextTick();
 
     const elements = wrapper.findAll('.p-disabled');

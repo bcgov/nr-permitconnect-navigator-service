@@ -12,11 +12,11 @@ import { computed } from 'vue';
 
 // Props
 const { address, firstName, lastName, phone, email } = defineProps<{
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   address?: string;
-  phone: string;
-  email: string;
+  phone?: string;
+  email?: string;
 }>();
 
 // Emits

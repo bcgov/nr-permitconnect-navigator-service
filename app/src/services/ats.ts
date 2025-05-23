@@ -58,7 +58,7 @@ const service = {
   searchATSUsers: async (params?: ATSUserSearchParameters) => {
     try {
       const { data, status } = await atsAxios().get('/clients', { params: params });
-      return { data: data, status };
+      return { data, status };
     } catch (e) {
       if (axios.isAxiosError(e)) {
         return {
@@ -83,7 +83,7 @@ const service = {
   createATSClient: async (atsClient: ATSClientResource) => {
     try {
       const { data, status } = await atsAxios().post('/clients', atsClient);
-      return { data: data, status };
+      return { data, status };
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         return {
@@ -108,7 +108,7 @@ const service = {
   createATSEnquiry: async (atsEnquiry: ATSEnquiryResource) => {
     try {
       const { data, status } = await atsAxios().post('/enquiries', atsEnquiry);
-      return { data: data, status };
+      return { data, status };
     } catch (e: unknown) {
       if (axios.isAxiosError(e)) {
         return {

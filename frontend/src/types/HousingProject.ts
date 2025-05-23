@@ -28,7 +28,6 @@ export type HousingProject = {
   streetAddress: string;
   geomarkUrl: string;
   naturalDisaster: string;
-  addedToATS: boolean;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   waitingOn?: string;

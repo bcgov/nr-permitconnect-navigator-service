@@ -46,7 +46,8 @@ const controller = {
       submissionType: SubmissionType.GUIDANCE,
       intakeStatus: IntakeStatus.SUBMITTED,
       applicationStatus: ApplicationStatus.NEW,
-      aaiUpdated: false
+      aaiUpdated: false,
+      addedToATS: false
     };
 
     return electrificationProjectData;
