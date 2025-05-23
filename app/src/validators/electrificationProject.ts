@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+import atsValidator from './ats';
 import { email, uuidv4 } from './common';
 import { contacts } from './contact';
 import { validate } from '../middleware/validation';
@@ -116,8 +117,7 @@ const schema = {
           .required()
           .valid(...SUBMISSION_TYPE_LIST),
         applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-        atsClientId: Joi.number().integer().min(0).allow(null),
-        atsEnquiryId: Joi.number().integer().min(0).allow(null),
+        ...atsValidator.atsEnquirySubmissionFields,
         aaiUpdated: Joi.boolean().required()
       }
     }),

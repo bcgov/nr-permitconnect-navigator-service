@@ -145,7 +145,8 @@ function initilizeFormValues(project: ElectrificationProject) {
     atsEnquiryId: project.atsEnquiryId,
 
     // Updates
-    aaiUpdated: project.aaiUpdated
+    aaiUpdated: project.aaiUpdated,
+    addedToATS: project.addedToATS
   };
 }
 
@@ -197,6 +198,7 @@ async function createATSEnquiry(toastMsg: string, atsClientId?: number) {
     if (response.status === 201) {
       toast.success(toastMsg);
       formRef.value?.setFieldValue('atsEnquiryId', response.data.enquiryId);
+      formRef.value?.setFieldValue('addedToATS', true);
       return response.data.enquiryId;
     } else {
       toast.success(t('i.electrification.projectForm.atsClientPushed'));
@@ -275,6 +277,7 @@ const onSubmit = async (values: any) => {
       );
       values.addedToATS = true;
       shouldCreateATSClient.value = false;
+      shouldCreateATSEnquiry.value = false;
     } else if (shouldCreateATSEnquiry.value) {
       values.atsEnquiryId = await createATSEnquiry(t('i.electrification.projectForm.atsEnquiryPushed'));
       shouldCreateATSEnquiry.value = false;
@@ -296,7 +299,8 @@ const onSubmit = async (values: any) => {
           applicationStatus: values.submissionState.applicationStatus,
           atsClientId: parseInt(values.atsClientId) || '',
           atsEnquiryId: parseInt(values.atsEnquiryId) || '',
-          aaiUpdated: values.aaiUpdated
+          aaiUpdated: values.aaiUpdated,
+          addedToATS: values.addedToATS
         },
         contacts: [
           {
@@ -526,7 +530,7 @@ onBeforeMount(async () => {
             {{ t('i.electrification.projectForm.atsHeader') }}
           </h4>
           <div
-            v-if="values.atsClientId"
+            v-if="values.atsClientId || shouldCreateATSClient"
             class="flex flex-col gap-y-3"
           >
             <input
@@ -534,7 +538,7 @@ onBeforeMount(async () => {
               name="atsClientId"
             />
             <div class="flex items-center">
-              <p class="text-[var(--p-primary-900)] mr-2">
+              <p class="text-[var(--p-primary-900)] mr-3">
                 <b>{{ t('i.electrification.projectForm.atsClientIdHeader') }}</b>
               </p>
               <a
@@ -543,13 +547,14 @@ onBeforeMount(async () => {
               >
                 {{ values.atsClientId }}
               </a>
+              <span v-if="shouldCreateATSClient">{{ t('i.electrification.projectForm.pendingSave') }}</span>
             </div>
             <input
               type="hidden"
               name="atsEnquiryId"
             />
             <div
-              v-if="values.atsEnquiryId"
+              v-if="values.atsEnquiryId || shouldCreateATSEnquiry"
               class="flex items-center"
             >
               <p class="text-[var(--p-primary-900)] mr-2">
@@ -557,6 +562,7 @@ onBeforeMount(async () => {
               </p>
 
               {{ values.atsEnquiryId }}
+              <span v-if="shouldCreateATSEnquiry">{{ t('i.electrification.projectForm.pendingSave') }}</span>
             </div>
           </div>
           <div
@@ -589,20 +595,18 @@ onBeforeMount(async () => {
             >
               {{ t('enquiryForm.atsNewEnquiryBtn') }}
             </Button>
-
-            <Button
-              v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
-              aria-label="Waiting for save"
-              :disabled="true"
-            >
-              Waiting for save
-            </Button>
           </div>
         </div>
         <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
           <h4 class="section-header mb-4 mt-0">
             {{ t('i.electrification.projectForm.updatesHeader') }}
           </h4>
+          <Checkbox
+            name="addedToATS"
+            class="mb-4"
+            :label="t('i.electrification.projectForm.atsUpdated')"
+            :disabled="!editable"
+          />
           <Checkbox
             name="aaiUpdated"
             :label="t('i.electrification.projectForm.aaiUpdateLabel')"
@@ -668,6 +672,7 @@ onBeforeMount(async () => {
         () => {
           atsUserCreateModalVisible = false;
           shouldCreateATSClient = true;
+          shouldCreateATSEnquiry = true;
         }
       "
     />

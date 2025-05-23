@@ -276,6 +276,7 @@ const onSubmit = async (values: any) => {
       values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsClientEnquiryPushed'), values.atsClientId);
       values.addedToATS = true;
       shouldCreateATSClient.value = false;
+      shouldCreateATSEnquiry.value = false;
     } else if (shouldCreateATSEnquiry.value) {
       values.atsEnquiryId = await createATSEnquiry(t('submissionForm.atsEnquiryPushed'));
       shouldCreateATSEnquiry.value = false;
@@ -826,17 +827,18 @@ onBeforeMount(async () => {
       <SectionHeader title="ATS" />
       <div class="grid grid-cols-subgrid gap-4 col-span-12">
         <div
-          v-if="values.atsClientId"
+          v-if="values.atsClientId || shouldCreateATSClient"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
-            <h5 class="mr-2">{{ t('submissionForm.client#') }}</h5>
+            <h5 class="mr-3">{{ t('submissionForm.clientId') }}</h5>
             <a
               class="hover-hand"
               @click="atsUserDetailsModalVisible = true"
             >
               {{ values.atsClientId }}
             </a>
+            <span v-if="shouldCreateATSClient">{{ t('submissionForm.pendingSave') }}</span>
           </div>
         </div>
         <input
@@ -844,12 +846,13 @@ onBeforeMount(async () => {
           name="atsClientId"
         />
         <div
-          v-if="values.atsEnquiryId"
+          v-if="values.atsEnquiryId || shouldCreateATSEnquiry"
           class="col-start-1 col-span-12"
         >
           <div class="flex items-center">
             <h5 class="mr-2">{{ t('submissionForm.enquiry#') }}</h5>
             {{ values.atsEnquiryId }}
+            <span v-if="shouldCreateATSEnquiry">{{ t('submissionForm.pendingSave') }}</span>
           </div>
         </div>
         <input
@@ -882,15 +885,6 @@ onBeforeMount(async () => {
           @click="onNewATSEnquiry()"
         >
           {{ t('submissionForm.atsNewEnquiryBtn') }}
-        </Button>
-
-        <Button
-          v-if="shouldCreateATSClient || shouldCreateATSEnquiry"
-          class="grid-col-start-3 col-span-2"
-          aria-label="Waiting for save"
-          :disabled="true"
-        >
-          Waiting for save
         </Button>
       </div>
       <Checkbox
@@ -1022,6 +1016,7 @@ onBeforeMount(async () => {
         () => {
           atsUserCreateModalVisible = false;
           shouldCreateATSClient = true;
+          shouldCreateATSEnquiry = true;
         }
       "
     />
