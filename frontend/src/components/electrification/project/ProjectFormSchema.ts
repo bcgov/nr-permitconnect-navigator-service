@@ -14,9 +14,6 @@ import { emailValidator } from '@/validators/common';
 
 import type { CodeName } from '@/store/codeStore';
 
-// Form validation schema
-const stringRequiredSchema = string().required().max(255);
-
 export function createProjectFormSchema(
   codeValues: Record<CodeName, string[]>,
   enums: Record<CodeName, Record<string, string>>
@@ -39,15 +36,15 @@ export function createProjectFormSchema(
     locationDescription: string().notRequired().max(4000).label('Location'),
     project: object({
       bcEnvironmentAssessNeeded: string().notRequired().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
-      bcHydroNumber: string().notRequired().nullable().max(255).label('BC Hydro Call for Power project number'),
+      bcHydroNumber: string().required().max(255).label('BC Hydro Call for Power project number'),
       companyNameRegistered: string().notRequired().max(255).label('Company name'),
       hasEpa: string().notRequired().oneOf(YES_NO_LIST).label('Do they have an EPA?'),
       megawatts: number()
         .notRequired()
         .positive('Must be a positive number.')
         .label('How man megawatts will it produce?'),
-      projectName: stringRequiredSchema.label('Project name'),
-      projectType: stringRequiredSchema.oneOf(codeValues.ElectrificationProjectType).label('Project type'),
+      projectName: string().required().max(255).label('Project name'),
+      projectType: string().required().max(255).oneOf(codeValues.ElectrificationProjectType).label('Project type'),
       projectCategory: string().notRequired().oneOf(codeValues.ElectrificationProjectCategory).label('Project category')
     }),
     projectDescription: string().when('project.projectType', {

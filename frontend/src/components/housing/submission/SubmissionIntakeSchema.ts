@@ -8,7 +8,6 @@ import { array, boolean, mixed, number, object, string } from 'yup';
 
 // Form validation schema
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
-const stringRequiredSchema = string().required().max(255);
 
 export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
   return object({
@@ -34,7 +33,7 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
     }),
     [IntakeFormCategory.HOUSING]: object().shape(
       {
-        projectName: stringRequiredSchema.label('Project name'),
+        projectName: string().required().max(255).label('Project name'),
         projectDescription: string().required().label('Project description'),
         hasRentalUnits: YesNoUnsureSchema.label('Rental units'),
         financiallySupportedBC: YesNoUnsureSchema.label('BC Housing'),
@@ -48,17 +47,17 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
         }),
         indigenousDescription: string().when('financiallySupportedIndigenous', {
           is: (value: string) => value === BasicResponse.YES,
-          then: () => stringRequiredSchema.label('Indigenous housing provider'),
+          then: () => string().required().max(255).label('Indigenous housing provider'),
           otherwise: () => string().nullable()
         }),
         nonProfitDescription: string().when('financiallySupportedNonProfit', {
           is: (value: string) => value === BasicResponse.YES,
-          then: () => stringRequiredSchema.label('Non-profit housing society'),
+          then: () => string().required().max(255).label('Non-profit housing society'),
           otherwise: () => string().nullable()
         }),
         housingCoopDescription: string().when('financiallySupportedHousingCoop', {
           is: (value: string) => value === BasicResponse.YES,
-          then: () => stringRequiredSchema.label('Housing co-operative'),
+          then: () => string().required().max(255).label('Housing co-operative'),
           otherwise: () => string().nullable()
         }),
         singleFamilySelected: boolean().when(['multiFamilySelected', 'otherSelected'], {
@@ -125,17 +124,17 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
       projectLocation: string().required().label('Location'),
       streetAddress: string().when('projectLocation', {
         is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-        then: () => stringRequiredSchema.label('Street address'),
+        then: () => string().required().max(255).label('Street address'),
         otherwise: () => string().nullable()
       }),
       locality: string().when('projectLocation', {
         is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-        then: () => stringRequiredSchema.label('Locality'),
+        then: () => string().required().max(255).label('Locality'),
         otherwise: () => string().nullable()
       }),
       province: string().when('projectLocation', {
         is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-        then: () => stringRequiredSchema.label('Province'),
+        then: () => string().required().max(255).label('Province'),
         otherwise: () => string().nullable()
       }),
       latitude: number().when('projectLocation', {
