@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { computed } from 'vue';
 
 import { Button, useToast } from '@/lib/primevue';
-import { IdentityProviderKind, RouteName } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 import { useAuthNStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 
@@ -16,9 +15,6 @@ const router = useRouter();
 // Store
 const authNStore = useAuthNStore();
 const authZStore = useAuthZStore();
-
-// State
-const isIdirUser = computed(() => authNStore.getUser?.profile.identity_provider === IdentityProviderKind.IDIR);
 
 // Actions
 const toElectrification = (): void => {
@@ -66,11 +62,7 @@ const toHousing = (): void => {
             />
             {{ t('homeView.housing') }}
           </Button>
-          <!-- TODO: Remove v-if on this button once prop electr. side is finished -->
-          <Button
-            v-if="isIdirUser"
-            @click="toElectrification"
-          >
+          <Button @click="toElectrification">
             <img
               class="mr-4"
               src="@/assets/images/E.Land.Button.svg"
