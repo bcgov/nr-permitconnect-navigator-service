@@ -38,6 +38,7 @@ function onDelete(draftId: string) {
     acceptLabel: t('submissionDraftListProponent.confirm'),
     acceptClass: 'p-button-danger',
     rejectLabel: t('submissionDraftListProponent.cancel'),
+    rejectProps: { outlined: true },
     accept: () => {
       if (!projectService) throw new Error('No service');
       projectService

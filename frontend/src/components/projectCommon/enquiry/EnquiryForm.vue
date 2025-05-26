@@ -194,6 +194,7 @@ function onReOpen() {
     header: t('i.common.enquiryForm.confirmReopenHeader'),
     acceptLabel: t('i.common.enquiryForm.reopenAccept'),
     rejectLabel: t('i.common.enquiryForm.reopenReject'),
+    rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
       onSubmit(formRef.value?.values);
