@@ -170,7 +170,7 @@ export function parseIdentityKeyClaims(): Array<string> {
  * Acquires the list of feature flags to be used
  * @returns {object[]} A promise resolving to an object of key values
  */
-export function readFeatureList(): { [key: string]: string } {
+export function readFeatureList(): { [key: string]: unknown } {
   const configDir = '../../config';
   const defaultFile = 'features-default.json';
   const overrideFile = 'features-local.json';
