@@ -12,7 +12,7 @@ import { randomBytes } from 'crypto';
 import { name as appName, version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
 import { DEFAULTCORS } from './src/utils/constants/application';
-import { getGitRevision, readIdpList } from './src/utils/utils';
+import { getGitRevision, readFeatureList, readIdpList } from './src/utils/utils';
 import v1Router from './src/routes/v1';
 
 import type { Request, Response } from 'express';
@@ -101,6 +101,7 @@ appRouter.get('/api', (_req: Request, res: Response): void => {
 appRouter.get('/config', (_req: Request, res: Response, next: (err: unknown) => void): void => {
   try {
     res.status(200).json({
+      features: readFeatureList(),
       ...config.get('frontend'),
       gitRev: state.gitRev,
       idpList: readIdpList(),
