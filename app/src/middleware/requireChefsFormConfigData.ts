@@ -1,6 +1,4 @@
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
-
+import { Problem } from '../utils';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';

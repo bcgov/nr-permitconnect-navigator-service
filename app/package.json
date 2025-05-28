@@ -10,7 +10,6 @@
     "build": "tsc --project tsconfig.build.json",
     "clean:all": "tsx ./deploy-utils.ts clean",
     "clean": "rimraf coverage dist sbin",
-    "debug": "tsx --debug --respawn --transpile-only --rs --watch bin,config,dist ./bin/www",
     "format": "prettier ./src --write",
     "lint": "eslint . **/www* --no-fix --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",
     "lint:fix": "eslint . **/www* --fix --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",

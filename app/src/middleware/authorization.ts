@@ -1,5 +1,3 @@
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
 import { NIL } from 'uuid';
 
 import {
@@ -14,10 +12,11 @@ import {
   yarsService
 } from '../services';
 import { Initiative, GroupName } from '../utils/enums/application';
+import { Problem } from '../utils';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import { CurrentAuthorization } from '../types';
+import type { CurrentAuthorization } from '../types';
 
 /**
  * @function hasAuthorization

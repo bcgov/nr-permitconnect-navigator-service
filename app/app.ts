@@ -4,19 +4,18 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
 import querystring from 'querystring';
 import { randomBytes } from 'crypto';
 
 import { name as appName, version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
 import { DEFAULTCORS } from './src/utils/constants/application';
+import { Problem } from './src/utils';
 import { readIdpList } from './src/utils/utils';
 import v1Router from './src/routes/v1';
 import { state } from './state';
 
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 const log = getLogger(module.filename);
 
@@ -58,11 +57,11 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Block requests until service is ready
-app.use((_req: Request, res: Response, next: () => void): void => {
+app.use((_req: Request, res: Response, next: NextFunction): void => {
   if (state.shutdown) {
-    new Problem(503, { details: 'Server is shutting down' }).send(res);
+    new Problem(503, { detail: 'Server is shutting down' }).send(_req, res);
   } else if (!state.ready) {
-    new Problem(503, { details: 'Server is not ready' }).send(res);
+    new Problem(503, { detail: 'Server is not ready' }).send(_req, res);
   } else {
     next();
   }
@@ -93,7 +92,7 @@ appRouter.get('/api', (_req: Request, res: Response): void => {
 });
 
 // Frontend configuration endpoint
-appRouter.get('/config', (_req: Request, res: Response, next: (err: unknown) => void): void => {
+appRouter.get('/config', (_req: Request, res: Response, next: NextFunction): void => {
   try {
     res.status(200).json({
       features: state.features,
@@ -117,35 +116,43 @@ appRouter.use('/', express.static(join(__dirname, '../dist')));
 // Root level Router
 app.use('/', appRouter);
 
-// Handle 500
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-app.use((err: Problem, _req: Request, res: Response, _next: () => void): void => {
-  if (err.stack) {
-    log.error(err);
-  }
-
-  if (err instanceof Problem) {
-    err.send(res, undefined);
-  } else {
-    new Problem(500, 'Server Error', {
-      detail: err.message ? err.message : err
-    }).send(res);
-  }
-});
-
 // Handle 404
 app.use((req: Request, res: Response): void => {
   if (req.originalUrl.startsWith('/api')) {
-    // Return a 404 problem if attempting to access API
-    new Problem(404, 'Page Not Found', {
-      detail: req.originalUrl
-    }).send(res);
+    new Problem(404).send(req, res);
   } else {
     // Redirect any non-API requests to static frontend with redirect breadcrumb
     const query = querystring.stringify({ ...req.query, r: req.path });
     res.redirect(`/?${query}`);
   }
 });
+
+/**
+ * Handles errors that occur during the request-response lifecycle.
+ * Logs the error stack if available and sends an appropriate response
+ * to the client based on the type of error.
+ * @param err - The error object that was thrown.
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
+ * @param _next - The next middleware function in the stack (unused).
+ */
+export function errorHandler(
+  err: Error,
+  req: Request,
+  res: Response,
+  _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
+): void {
+  if (err.stack) log.error(err);
+
+  if (err instanceof Problem) {
+    err.send(req, res);
+  } else {
+    new Problem(500, { detail: err.message ?? err.toString() }).send(req, res);
+  }
+}
+
+// Handle 500
+app.use(errorHandler);
 
 // Prevent unhandled errors from crashing application
 process.on('unhandledRejection', (err: Error): void => {
