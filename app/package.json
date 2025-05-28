@@ -49,7 +49,7 @@
     "seed:make": "knex seed:make",
     "seed:dev": "knex seed:run --specific=dev_groups.ts",
     "seed": "knex seed:run",
-    "serve": "tsx watch --include ./config/* --include ./dist/* ./bin/www",
+    "serve": "tsx watch --include \"./config/*\" --include \"./dist/*\" ./bin/www --clear-screen=false",
     "start": "tsx ./bin/www",
     "test": "jest --verbose --forceExit --detectOpenHandles",
     "typecheck": "tsc --noEmit"
