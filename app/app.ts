@@ -12,18 +12,13 @@ import { randomBytes } from 'crypto';
 import { name as appName, version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
 import { DEFAULTCORS } from './src/utils/constants/application';
-import { getGitRevision, readIdpList } from './src/utils/utils';
+import { readIdpList } from './src/utils/utils';
 import v1Router from './src/routes/v1';
+import { state } from './state';
 
 import type { Request, Response } from 'express';
 
 const log = getLogger(module.filename);
-
-const state = {
-  gitRev: getGitRevision(),
-  ready: true, // No dependencies so application is always ready
-  shutdown: false
-};
 
 const appRouter = express.Router();
 const app = express();
@@ -101,6 +96,7 @@ appRouter.get('/api', (_req: Request, res: Response): void => {
 appRouter.get('/config', (_req: Request, res: Response, next: (err: unknown) => void): void => {
   try {
     res.status(200).json({
+      features: state.features,
       ...config.get('frontend'),
       gitRev: state.gitRev,
       idpList: readIdpList(),

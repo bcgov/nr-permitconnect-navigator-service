@@ -166,6 +166,27 @@ export function parseIdentityKeyClaims(): Array<string> {
 }
 
 /**
+ * @function readFeatureList
+ * Acquires the list of feature flags to be used
+ * @returns {object[]} A promise resolving to an object of key values
+ */
+export function readFeatureList(): { [key: string]: unknown } {
+  const configDir = '../../config';
+  const defaultFile = 'features-default.json';
+  const overrideFile = 'features-local.json';
+
+  let features;
+
+  if (existsSync(join(__dirname, configDir, overrideFile))) {
+    features = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8'));
+  } else if (existsSync(join(__dirname, configDir, defaultFile))) {
+    features = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8'));
+  }
+
+  return features;
+}
+
+/**
  * @function readIdpList
  * Acquires the list of identity providers to be used
  * @returns {object[]} A promise resolving to an array of idp provider objects
