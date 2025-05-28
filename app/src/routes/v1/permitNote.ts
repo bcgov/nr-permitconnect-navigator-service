@@ -1,5 +1,3 @@
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
 import express from 'express';
 
 import { permitNoteController } from '../../controllers';
@@ -7,6 +5,7 @@ import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
+import { Problem } from '../../utils';
 import { permitNoteValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';

@@ -1,9 +1,8 @@
-// @ts-expect-error api-problem lacks a defined interface; code still works fine
-import Problem from 'api-problem';
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
 import { userService } from '../services';
+import { Problem } from '../utils';
 import { AuthType, Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
