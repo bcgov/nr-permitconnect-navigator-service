@@ -1,3 +1,5 @@
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+
 import { contactService } from '../../../src/services';
 import contactController from '../../../src/controllers/contact';
 import { Request, Response } from 'express';
@@ -54,6 +56,73 @@ const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
 describe('contactController', () => {
   const next = jest.fn();
+
+  describe('deleteContact', () => {
+    const deleteContactSpy = jest.spyOn(contactService, 'deleteContact');
+
+    it('should return 204 if the contact is deleted successfully', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      deleteContactSpy.mockResolvedValue();
+      res.end = jest.fn().mockReturnValue(res);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.deleteContact(req as any, res as unknown as Response, next);
+
+      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
+      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
+      expect(res.status).toHaveBeenCalledWith(204);
+      expect(res.end).toHaveBeenCalledTimes(1);
+      expect(res.json).toHaveBeenCalledTimes(0);
+    });
+
+    it('should return 404 if the contact is not found', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      const notFoundError = new PrismaClientKnownRequestError('Contact not found', {
+        code: 'P2025',
+        clientVersion: '2.19.0'
+      });
+
+      deleteContactSpy.mockRejectedValueOnce(notFoundError);
+      res.end = jest.fn().mockReturnValue(res);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.deleteContact(req as any, res as unknown as Response, next);
+
+      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
+      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith({ message: 'Contact not found' });
+      expect(res.end).toHaveBeenCalledTimes(0);
+    });
+
+    it('calls next if the contact service fails', async () => {
+      const req = {
+        params: { contactId: 'contact123' },
+        currentContext: CURRENT_CONTEXT
+      } as unknown as Request;
+
+      deleteContactSpy.mockImplementationOnce(() => {
+        throw new Error('Service failure');
+      });
+      res.end = jest.fn().mockReturnValue(res);
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await contactController.deleteContact(req as any, res as unknown as Response, next);
+
+      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
+      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
+      expect(res.status).toHaveBeenCalledTimes(0); // response never sent
+      expect(next).toHaveBeenCalledTimes(1); // error bubbled up
+    });
+  });
 
   describe('getContact', () => {
     const getContactSpy = jest.spyOn(contactService, 'getContact');

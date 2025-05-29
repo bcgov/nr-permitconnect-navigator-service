@@ -8,17 +8,9 @@ const service = {
    * @function deleteContact
    * Deletes a specific contact from the PCNS database
    * @param {string} contactId Contact ID
-   * @returns {Promise<boolean>} The result of running the deleteMany operation if count is greater than 0
    */
   deleteContact: async (contactId: string) => {
-    if (!contactId) throw new Error('Contact ID is required for deletion');
-    const response = await prisma.contact.deleteMany({
-      where: {
-        contact_id: contactId
-      }
-    });
-
-    return response.count > 0;
+    await prisma.contact.delete({ where: { contact_id: contactId } });
   },
 
   /**
@@ -34,15 +26,19 @@ const service = {
         contact_id: contactId
       },
       include: {
-        activity_contact: includeActivities
+        activity_contact: {
+          where: {
+            activity: {
+              is_deleted: false
+            }
+          }
+        }
       }
     });
 
-    if (includeActivities) {
-      return result ? contact.fromPrismaModelWithActivities(result) : null;
-    } else {
-      return result ? contact.fromPrismaModel(result) : null;
-    }
+    if (!result) return null;
+
+    return includeActivities ? contact.fromPrismaModelWithActivities(result) : contact.fromPrismaModel(result);
   },
 
   /**
@@ -104,6 +100,7 @@ const service = {
    * @param {string} [params.lastName] Optional lastName string to match on
    * @param {boolean} [params.contactPreference] Optional contactPreference string to match on
    * @param {Initiative} [params.initiative] Optional Initiative to match on
+   * @param {boolean} [params.includeActivities] Optional boolean for whether to include activities
    * @returns {Promise<object>} The result of running the findMany operation
    */
   searchContacts: async (params: ContactSearchParameters) => {
@@ -144,11 +141,16 @@ const service = {
           select: {
             bceid_business_name: true
           }
-        }
+        },
+        ...(params.includeActivities ? { activity_contact: { where: { activity: { is_deleted: false } } } } : {})
       }
     });
 
-    return response ? response.map((x) => contact.fromPrismaModelWithBusinessName(x)) : [];
+    if (!response || response.length === 0) return [];
+
+    return params.includeActivities
+      ? response.map((x) => contact.fromPrismaModelWithBusinessNameAndActivities(x))
+      : response.map((x) => contact.fromPrismaModelWithBusinessName(x));
   }
 };
 

@@ -1,4 +1,5 @@
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
@@ -88,9 +89,10 @@ const wrapperSettings = () => ({
           }
         }),
       PrimeVue,
+      ConfirmationService,
       ToastService
     ],
-    stubs: ['InputText', 'Tabs', 'Tab', 'TabList', 'TabPanel', 'TabPanels', 'ContactHistoryList']
+    stubs: ['Button', 'Card', 'Tabs', 'Tab', 'TabList', 'TabPanel', 'TabPanels', 'ContactHistoryList']
   }
 });
 

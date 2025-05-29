@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import { contactService } from '../services';
 import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils';
 
@@ -8,14 +10,14 @@ const controller = {
   deleteContact: async (req: Request<{ contactId: string }>, res: Response, next: NextFunction) => {
     try {
       const contactId = req.params.contactId;
-      const response = await contactService.deleteContact(contactId);
-
-      if (!response) {
-        return res.status(404).json({ message: 'Contact not found' });
-      }
+      await contactService.deleteContact(contactId);
 
       res.status(204).end();
     } catch (e: unknown) {
+      // P2025 is thrown when a record is not found, https://www.prisma.io/docs/orm/reference/error-reference#p2025
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
       next(e);
     }
   },
@@ -68,7 +70,8 @@ const controller = {
         lastName: req.query.lastName,
         contactApplicantRelationship: req.query.contactApplicantRelationship,
         phoneNumber: req.query.phoneNumber,
-        initiative: req.query.initiative
+        initiative: req.query.initiative,
+        includeActivities: isTruthy(req.query.includeActivities)
       });
       res.status(200).json(response);
     } catch (e: unknown) {

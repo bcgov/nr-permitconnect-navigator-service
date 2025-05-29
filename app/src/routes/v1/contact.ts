@@ -61,6 +61,7 @@ router.put(
 router.delete(
   '/:contactId',
   hasAuthorization(Resource.CONTACT, Action.DELETE),
+  contactValidator.deleteContact,
   (req: Request<{ contactId: string }>, res: Response, next: NextFunction): void => {
     contactController.deleteContact(req, res, next);
   }

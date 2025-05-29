@@ -24,8 +24,15 @@ const loading: Ref<boolean> = ref(true);
 provide(contactInitiativeRouteNameKey, RouteName.INT_HOUSING_CONTACT_PAGE);
 
 // Actions
+function removeContact(contact: Contact) {
+  const idx = contacts.value.findIndex((c) => c.contactId === contact.contactId);
+  if (idx !== -1) contacts.value.splice(idx, 1);
+}
+
 onBeforeMount(async () => {
-  contacts.value = (await contactService.searchContacts({ initiative: useAppStore().getInitiative })).data;
+  contacts.value = (
+    await contactService.searchContacts({ initiative: useAppStore().getInitiative, includeActivities: true })
+  ).data;
   loading.value = false;
 });
 </script>
@@ -44,6 +51,7 @@ onBeforeMount(async () => {
         <ContactsProponentsList
           :loading="loading"
           :contacts="contacts"
+          @contact-deleted="removeContact"
         />
       </TabPanel>
     </TabPanels>

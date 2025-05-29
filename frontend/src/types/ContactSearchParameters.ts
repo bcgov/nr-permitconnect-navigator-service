@@ -10,4 +10,5 @@ export type ContactSearchParameters = {
   phoneNumber?: string;
   userId?: string[];
   initiative?: Initiative;
+  includeActivities?: boolean;
 };

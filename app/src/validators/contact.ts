@@ -52,7 +52,8 @@ const schema = {
         .allow(null),
       initiative: Joi.string()
         .valid(...Object.values(Initiative))
-        .allow(null)
+        .allow(null),
+      includeActivities: Joi.boolean().default(false)
     })
   },
   updateContact: {
@@ -77,6 +78,7 @@ const schema = {
 };
 
 export default {
+  deleteContact: validate(schema.deleteContact),
   getContact: validate(schema.getContact),
   getContactActivities: validate(schema.getContact),
   searchContacts: validate(schema.searchContacts),
