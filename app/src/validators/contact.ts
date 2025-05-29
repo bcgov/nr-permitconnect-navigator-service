@@ -23,6 +23,11 @@ export const contacts = Joi.array()
   .allow(null);
 
 const schema = {
+  deleteContact: {
+    params: Joi.object({
+      contactId: uuidv4.required()
+    })
+  },
   getContact: {
     params: Joi.object({
       contactId: uuidv4.required()
@@ -52,7 +57,7 @@ const schema = {
   },
   updateContact: {
     body: Joi.object({
-      userId: uuidv4.required(),
+      userId: uuidv4.allow(null),
       contactId: uuidv4.required(),
       email: Joi.string().max(255).required(),
       firstName: Joi.string().max(255).required(),
