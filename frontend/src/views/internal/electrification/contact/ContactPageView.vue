@@ -3,7 +3,8 @@ import { provide } from 'vue';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { electrificationProjectService } from '@/services';
-import { projectServiceKey } from '@/utils/keys';
+import { RouteName } from '@/utils/enums/application';
+import { contactInitiativeRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 // Props
 const { contactId } = defineProps<{
@@ -12,6 +13,7 @@ const { contactId } = defineProps<{
 
 // Providers
 provide(projectServiceKey, electrificationProjectService);
+provide(contactInitiativeRouteNameKey, RouteName.INT_ELECTRIFICATION_CONTACT);
 </script>
 
 <template>

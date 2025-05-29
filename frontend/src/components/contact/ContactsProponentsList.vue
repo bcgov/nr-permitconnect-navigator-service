@@ -3,8 +3,20 @@ import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import UpdateContactModal from '@/components/contact/UpdateContactModal.vue';
 import { Spinner } from '@/components/layout';
-import { Column, DataTable, FilterMatchMode, IconField, InputIcon, InputText } from '@/lib/primevue';
+import {
+  Button,
+  Column,
+  DataTable,
+  FilterMatchMode,
+  IconField,
+  InputIcon,
+  InputText,
+  useToast,
+  useConfirm
+} from '@/lib/primevue';
+import { contactService } from '@/services';
 import { contactInitiativeRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
@@ -17,15 +29,26 @@ const { contacts, loading } = defineProps<{
   loading: boolean;
 }>();
 
+// Emits
+const emit = defineEmits<{
+  (e: 'contact-deleted', contact: Contact): void;
+}>();
+
 // Injections
 const contactInitiativeRoute = inject(contactInitiativeRouteNameKey);
 
 // Composables
 const { t } = useI18n();
+const confirmDialog = useConfirm();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 // State
+const filters = ref({
+  global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const historyMap: Ref<Record<string, boolean>> = ref({});
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -34,11 +57,36 @@ const pagination: Ref<Pagination> = ref({
 });
 const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
 const selection: Ref<Contact | undefined> = ref(undefined);
+const updateContactModalVisible: Ref<boolean> = ref(false);
 
 // Actions
-const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
+function onDelete(contact: Contact) {
+  confirmDialog.require({
+    message: t('contactsProponentsList.deleteContactMessage') + contact.firstName + ' ' + contact.lastName,
+    header: t('contactsProponentsList.deleteContactHeader'),
+    acceptLabel: t('contactsProponentsList.confirm'),
+    acceptClass: 'p-button-danger',
+    acceptIcon: 'pi pi-trash',
+    rejectLabel: t('contactsProponentsList.cancel'),
+    rejectIcon: 'pi pi-times',
+    rejectProps: { outlined: true },
+    accept: async () => {
+      try {
+        const response = await contactService.deleteContact(contact.contactId);
+        if (response.status !== 204) {
+          throw new Error();
+        }
+        toast.success(
+          t('contactsProponentsList.deleteContactSuccess'),
+          `${contact.firstName} ${contact.lastName} ${t('contactsProponentsList.deleteContactSuccessMessage')}`
+        );
+        emit('contact-deleted', contact);
+      } catch (e: any) {
+        toast.error(t('contactsProponentsList.deleteContactFailed'), e.message);
+      }
+    }
+  });
+}
 
 function updateQueryParams() {
   router.replace({
@@ -57,6 +105,15 @@ onBeforeMount(() => {
   if (contacts?.length && contacts.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
     rowsPerPageOptions.value.push(contacts.length);
   }
+
+  // Map out contact history for each contact
+  contacts?.forEach(async (contact) => {
+    if (contact.activityContact?.length) {
+      historyMap.value[contact.contactId] = true;
+    } else {
+      historyMap.value[contact.contactId] = false;
+    }
+  });
 
   // If path query pagination params present, read, else set defaults
   pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
@@ -132,45 +189,75 @@ onBeforeMount(() => {
         </IconField>
       </div>
     </template>
-
-    <Column
-      header="Action"
-      style="min-width: 150px"
-    >
-      <template #body="{ data }">
-        <router-link
-          :to="{
-            name: contactInitiativeRoute,
-            params: { contactId: data.contactId }
-          }"
-        >
-          {{ t('contactsProponentsList.contactView') }}
-        </router-link>
-      </template>
-    </Column>
     <Column
       field="firstName"
-      header="First name"
+      :header="t('contactsProponentsList.firstName')"
       :sortable="true"
       style="min-width: 150px"
     />
     <Column
       field="lastName"
-      header="Last name"
+      :header="t('contactsProponentsList.lastName')"
       :sortable="true"
       style="min-width: 150px"
     />
     <Column
       field="email"
-      header="Email"
+      :header="t('contactsProponentsList.email')"
       :sortable="true"
       style="min-width: 150px"
     />
     <Column
       field="phoneNumber"
-      header="Phone"
+      :header="t('contactsProponentsList.phone')"
       :sortable="true"
       style="min-width: 150px"
+    />
+    <Column
+      :header="t('contactsProponentsList.action')"
+      style="min-width: 150px"
+    >
+      <template #body="{ data }">
+        <Button
+          aria-label="View contact"
+          class="p-button-lg p-button-text p-0"
+          @click="
+            () => {
+              router.push({
+                name: contactInitiativeRoute,
+                params: { contactId: data.contactId }
+              });
+            }
+          "
+        >
+          <font-awesome-icon icon="fa fa-eye" />
+        </Button>
+        <Button
+          aria-label="Edit contact"
+          class="p-button-lg p-button-text p-0"
+          :disabled="data.userId"
+          @click="
+            () => {
+              selection = data;
+              updateContactModalVisible = true;
+            }
+          "
+        >
+          <font-awesome-icon icon="fa fa-pen-to-square" />
+        </Button>
+        <Button
+          aria-label="Delete contact"
+          class="p-button-lg p-button-text p-button-danger p-0"
+          :disabled="data.userId || historyMap[data.contactId]"
+          @click="onDelete(data)"
+        >
+          <font-awesome-icon icon="fa fa-trash" />
+        </Button>
+      </template>
+    </Column>
+    <UpdateContactModal
+      v-model:visible="updateContactModalVisible"
+      v-model:contact="selection"
     />
   </DataTable>
 </template>

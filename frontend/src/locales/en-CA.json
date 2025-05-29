@@ -225,13 +225,6 @@
       }
     },
     "housing": {
-      "contactPageView": {
-        "historyTab": "History",
-        "contactEmailLabel": "Email",
-        "contactPhoneLabel": "Phone",
-        "contactPreferredLabel": "Preferred contact method",
-        "contactRelationshipLabel": "Relationship to project"
-      },
       "housingView": {
         "header": "Housing"
       },
@@ -264,23 +257,14 @@
   "cancelButton": {
     "btnText": "Cancel"
   },
-  "contactHistoryList": {
-    "noItems": "No items found."
-  },
-  "contactsProponentsList": {
-    "noItems": "No items found.",
-    "contactView": "View"
-  },
   "collectionDisclaimer": {
     "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact the Navigator Service at"
   },
-  "contactProfileView": {
+  "contactForm": {
     "cancel": "Cancel",
-    "contactProfile": "Contact profile",
     "edit": "Edit",
     "email": "Email",
     "failedToSaveTheForm": "Failed to save the form",
-    "fillOutProfile": "Please fill out your contact profile",
     "firstName": "First name",
     "formSaved": "Form saved",
     "getStarted": "Get started",
@@ -289,6 +273,39 @@
     "preferredContact": "Preferred contact method",
     "relationshipToProject": "Relationship to project",
     "save": "Save"
+  },
+  "contactHistoryList": {
+    "noItems": "No items found."
+  },
+  "contactPage": {
+    "hasHistoryWarningMessage": "This contact is linked to submissions and can't be deleted. To proceed, delete the submissions or update them with a different contact.",
+    "historyTab": "History",
+    "contactEmailLabel": "Contact email",
+    "contactPhoneLabel": "Contact phone",
+    "contactPreferredLabel": "Preferred contact method",
+    "contactRelationshipLabel": "Relationship to project",
+    "deleteButtonLabel": "Delete contact",
+    "deleteContactNotLoaded": "Contact not loaded into Contact Details page",
+    "updateButtonLabel": "Update contact"
+  },
+  "contactProfileView": {
+    "contactProfile": "Contact profile",
+    "fillOutProfile": "Please fill out your contact profile"
+  },
+  "contactsProponentsList": {
+    "action": "Action",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "deleteContactFailed": "Failed to delete contact",
+    "deleteContactHeader": "Delete contact?",
+    "deleteContactMessage": "Please confirm that you want to delete the contact of ",
+    "deleteContactSuccess": "Contact deleted",
+    "deleteContactSuccessMessage": "has been deleted.",
+    "email": "Email",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "noItems": "No items found.",
+    "phone": "Phone"
   },
   "deleteDocument": {
     "deleteTooltip": "Delete document"
@@ -455,6 +472,10 @@
     "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+  },
+  "updateContactModal": {
+    "cancel": "Cancel",
+    "header": "Update Contact"
   },
   "userCreateModal": {
     "assign": "Assign role",

@@ -137,6 +137,28 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a contact
+      description: >-
+        Deletes the contact with the supplied **`contactId`**.  
+        Returns **204 No Content** when the record is deleted.  
+        Returns **404 Not Found** when no matching contact exists.
+      tags:
+        - Contacts
+      operationId: deleteContact   
+      parameters:
+        - $ref: '#/components/parameters/Path-ContactId'
+      responses:
+        '204':
+          description: Contact successfully deleted, empty body
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
   /contact/search:
     get:
       summary: Search contacts

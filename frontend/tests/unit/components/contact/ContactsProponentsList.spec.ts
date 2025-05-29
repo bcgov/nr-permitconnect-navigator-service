@@ -1,9 +1,15 @@
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
+import { contactService } from '@/services';
+import { contactInitiativeRouteNameKey } from '@/utils/keys';
+
+import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -15,6 +21,18 @@ vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({ query: {} })),
   useRouter: vi.fn(() => ({ replace: vi.fn() }))
 }));
+
+vi.spyOn(contactService, 'getContact').mockResolvedValue({
+  data: { activityContact: [] },
+  status: 200,
+  statusText: 'OK',
+  headers: {},
+  config: {
+    headers: {} as AxiosRequestHeaders
+  }
+});
+
+vi.spyOn(contactService, 'deleteContact').mockResolvedValue({ status: 204 } as AxiosResponse);
 
 const testContacts = [
   {
@@ -39,9 +57,14 @@ const wrapperSettings = (loading = false, contacts = testContacts) => ({
             auth: { user: {} }
           }
         }),
-      PrimeVue
+      PrimeVue,
+      ConfirmationService,
+      ToastService
     ],
-    stubs: ['Spinner', 'DataTable', 'Column', 'InputIcon', 'InputText', 'router-link']
+    provide: {
+      [contactInitiativeRouteNameKey]: 'ContactView'
+    },
+    stubs: ['Button', 'DataTable', 'Column', 'FilterMatchMode', 'InputIcon', 'InputText', 'router-link']
   }
 });
 

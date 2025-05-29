@@ -1,4 +1,5 @@
 import type { IStamps } from '@/interfaces';
+import type { ActivityContact } from '@/types';
 
 export type Contact = {
   bceidBusinessName?: string;
@@ -10,4 +11,5 @@ export type Contact = {
   email?: string;
   contactPreference?: string;
   contactApplicantRelationship?: string;
+  activityContact?: ActivityContact[];
 } & Partial<IStamps>;

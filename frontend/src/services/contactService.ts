@@ -25,6 +25,16 @@ export default {
   },
 
   /**
+   * @function deleteContact
+   * Deletes a specific contact
+   * @param contactId
+   * @returns An axios response
+   */
+  deleteContact(contactId: string): Promise<AxiosResponse> {
+    return appAxios().delete(`${PATH}/${contactId}`);
+  },
+
+  /**
    * @function searchContacts
    * Returns a list of users based on the provided filtering parameters
    * @param {SearchUsersOptions} params SearchUsersOptions object containing the data to filter against
