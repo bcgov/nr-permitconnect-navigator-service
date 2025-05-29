@@ -29,7 +29,7 @@ export async function refreshCodeCaches(): Promise<boolean> {
     log.debug('Codes cache refreshed');
     return true;
   } catch (error) {
-    log.debug('Codes cache refresh failed');
+    log.error('Codes cache refresh failed', error);
     return false;
   }
 }
