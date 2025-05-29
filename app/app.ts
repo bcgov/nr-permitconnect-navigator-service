@@ -7,12 +7,12 @@ import { join } from 'path';
 import querystring from 'querystring';
 import { randomBytes } from 'crypto';
 
-import { name as appName, version as appVersion } from './package.json';
+import { version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
-import { DEFAULTCORS } from './src/utils/constants/application';
+import router from './src/routes';
 import { Problem } from './src/utils';
+import { DEFAULTCORS } from './src/utils/constants/application';
 import { readIdpList } from './src/utils/utils';
-import v1Router from './src/routes/v1';
 import { state } from './state';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -21,6 +21,7 @@ const log = getLogger(module.filename);
 
 const appRouter = express.Router();
 const app = express();
+app.disable('x-powered-by');
 app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
@@ -29,10 +30,6 @@ app.set('query parser', 'extended');
 
 app.use((_req, res, next) => {
   res.locals.cspNonce = randomBytes(32).toString('hex');
-  next();
-});
-
-app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
@@ -48,8 +45,9 @@ app.use(
         'script-src': ["'self'", (_req, res: any) => `'nonce-${res.locals.cspNonce}'`] // eslint-disable-line
       }
     }
-  })
-);
+  });
+  next();
+});
 
 // Skip if running tests
 if (process.env.NODE_ENV !== 'test') {
@@ -73,24 +71,6 @@ app.get('/robots.txt', (_req: Request, res: Response): void => {
   res.send('User-agent: *\nDisallow: /');
 });
 
-// Base API Directory
-appRouter.get('/api', (_req: Request, res: Response): void => {
-  if (state.shutdown) {
-    throw new Error('Server shutting down');
-  } else {
-    res.status(200).json({
-      app: {
-        gitRev: state.gitRev,
-        name: appName,
-        nodeVersion: process.version,
-        version: appVersion
-      },
-      endpoints: ['/api/v1'],
-      versions: [1]
-    });
-  }
-});
-
 // Frontend configuration endpoint
 appRouter.get('/config', (_req: Request, res: Response, next: NextFunction): void => {
   try {
@@ -106,8 +86,8 @@ appRouter.get('/config', (_req: Request, res: Response, next: NextFunction): voi
   }
 });
 
-// v1 Router
-appRouter.use(config.get('server.apiPath'), v1Router);
+// Base API Directory
+appRouter.use('/api', router);
 
 // Host the static frontend assets
 // This route assumes being executed from '/sbin'

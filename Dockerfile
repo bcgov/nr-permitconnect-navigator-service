@@ -68,4 +68,4 @@ USER 1001
 RUN npm ci --omit=dev && npm run prisma:generate
 
 EXPOSE ${APP_PORT}
-CMD ["node", "./sbin/bin/www"]
+CMD ["node", "--max-old-space-size=50", "./sbin/server.js"]

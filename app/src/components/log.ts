@@ -39,7 +39,7 @@ const log = createLogger({
   format: format.combine(
     format.errors({ stack: true }), // Force errors to show stacktrace
     format.timestamp(), // Add ISO timestamp to each entry
-    format.json() // Force output to be in JSON format
+    process.env.NODE_ENV === 'production' ? format.json() : format.simple()
   ),
   level: config.get('server.logLevel')
 });
