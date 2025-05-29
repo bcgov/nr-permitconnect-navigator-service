@@ -57,11 +57,11 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 // Block requests until service is ready
-app.use((_req: Request, res: Response, next: NextFunction): void => {
+app.use((req: Request, res: Response, next: NextFunction): void => {
   if (state.shutdown) {
-    new Problem(503, { detail: 'Server is shutting down' }).send(_req, res);
+    new Problem(503, { detail: 'Server is shutting down' }).send(req, res);
   } else if (!state.ready) {
-    new Problem(503, { detail: 'Server is not ready' }).send(_req, res);
+    new Problem(503, { detail: 'Server is not ready' }).send(req, res);
   } else {
     next();
   }
@@ -153,41 +153,5 @@ export function errorHandler(
 
 // Handle 500
 app.use(errorHandler);
-
-// Prevent unhandled errors from crashing application
-process.on('unhandledRejection', (err: Error): void => {
-  if (err && err.stack) {
-    log.error(err);
-  }
-});
-
-// Graceful shutdown support
-process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown);
-process.on('SIGUSR1', shutdown);
-process.on('SIGUSR2', shutdown);
-process.on('exit', () => {
-  log.info('Exiting...');
-});
-
-/**
- * @function shutdown
- * Shuts down this application after at least 3 seconds.
- */
-function shutdown(): void {
-  log.info('Received kill signal. Shutting down...');
-  // Wait 3 seconds before starting cleanup
-  if (!state.shutdown) setTimeout(cleanup, 3000);
-}
-
-/**
- * @function cleanup
- * Cleans up connections in this application.
- */
-function cleanup(): void {
-  log.info('Service no longer accepting traffic');
-  state.shutdown = true;
-  process.exit();
-}
 
 export default app;
