@@ -1,7 +1,10 @@
+import { getLogger } from '../../components/log';
 import prisma from '../../db/dataConnection';
 
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
+
+const log = getLogger(module.filename);
 
 /**
  * Pull the currently‑active codes from the DB and refresh
@@ -23,8 +26,10 @@ export async function refreshCodeCaches(): Promise<boolean> {
       })
     ).map((r) => r.code);
 
+    log.debug('Codes cache refreshed');
     return true;
   } catch (error) {
+    log.debug('Codes cache refresh failed');
     return false;
   }
 }

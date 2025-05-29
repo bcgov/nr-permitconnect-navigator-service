@@ -15,7 +15,7 @@ describe('checkDatabaseHealth', () => {
   it('should return false and log an error when the database is unhealthy', async () => {
     const queryRawSpy = jest.spyOn(prismaMock, '$queryRaw');
 
-    prismaMock.$queryRaw.mockResolvedValue(Promise.reject(new Error('Database error')));
+    prismaMock.$queryRaw.mockRejectedValue(new Error('Database error'));
     const result = await checkDatabaseHealth();
 
     expect(queryRawSpy).toHaveBeenCalledWith(['SELECT 1 AS result']);
@@ -32,6 +32,7 @@ describe('checkDatabaseSchema', () => {
     expect(result).toBe(true);
     expect(freezeSpy).toHaveBeenCalledTimes(1);
     expect(freezeSpy).toHaveBeenCalledWith({
+      schemas: ['public', 'yars'],
       tables: [
         'access_request',
         'activity',
