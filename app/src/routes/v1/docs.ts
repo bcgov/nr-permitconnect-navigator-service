@@ -26,22 +26,44 @@ function getSpec(): OpenAPISpec | undefined {
   return spec;
 }
 
-router.use(
+/** OpenAPI Docs */
+router.get(
+  '/',
   helmet({
     contentSecurityPolicy: {
       directives: {
-        'img-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`, 'https://cdn.redoc.ly'], // eslint-disable-line
-        'media-src': ["'self'", 'data:', (_req, res: any) => `'nonce-${res.locals.cspNonce}'`], // eslint-disable-line
-        'script-src': ['blob:', 'https://cdn.redoc.ly']
+        'connect-src': [
+          "'self'", // eslint-disable-line quotes
+          'https://raw.githubusercontent.com'
+        ],
+        // @ts-expect-error ts(2322)
+        'img-src': [
+          "'self'", // eslint-disable-line quotes
+          'data:',
+          (_req: Request, res: Response): string => `'nonce-${res.locals.cspNonce}'`,
+          'https://cdn.redoc.ly'
+        ],
+        // @ts-expect-error ts(2322)
+        'media-src': [
+          "'self'", // eslint-disable-line quotes
+          'data:',
+          (_req: Request, res: Response): string => `'nonce-${res.locals.cspNonce}'`
+        ],
+        'script-src': [
+          'blob:',
+          "'unsafe-eval'" // eslint-disable-line quotes
+        ],
+        'script-src-elem': [
+          'https://cdn.redoc.ly',
+          "'unsafe-inline'" // eslint-disable-line quotes
+        ]
       }
     }
-  })
+  }),
+  (_req: Request, res: Response): void => {
+    res.send(docs.getDocHTML('v1'));
+  }
 );
-
-/** OpenAPI Docs */
-router.get('/', (_req: Request, res: Response) => {
-  res.send(docs.getDocHTML('v1'));
-});
 
 /** OpenAPI YAML Spec */
 router.get('/api-spec.yaml', (_req: Request, res: Response) => {
