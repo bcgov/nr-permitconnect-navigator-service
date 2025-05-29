@@ -21,6 +21,8 @@ export type IProject = {
   multiPermitsNeeded: string;
   astNotes: string;
   atsClientId: number | null;
+  atsEnquiryId: string | null;
+  addedToATS: boolean;
   aaiUpdated: boolean;
 
   // Joined

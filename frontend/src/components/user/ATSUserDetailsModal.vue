@@ -10,7 +10,7 @@ import type { ATSClientResource } from '@/types';
 
 // Props
 const { atsClientId, disabled = false } = defineProps<{
-  atsClientId: number | null;
+  atsClientId: string | number | null;
   disabled?: boolean;
 }>();
 
