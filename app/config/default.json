@@ -3,7 +3,7 @@
     "apiPath": "api/v1"
   },
   "server": {
-    "apiPath": "/api/v1",
+    "apiPath": "/v1",
     "bodyLimit": "30mb",
     "db": {
       "database": "pcns",
