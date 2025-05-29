@@ -5,6 +5,23 @@ import { Contact, ContactSearchParameters, CurrentContext } from '../types';
 
 const service = {
   /**
+   * @function deleteContact
+   * Deletes a specific contact from the PCNS database
+   * @param {string} contactId Contact ID
+   * @returns {Promise<boolean>} The result of running the deleteMany operation if count is greater than 0
+   */
+  deleteContact: async (contactId: string) => {
+    if (!contactId) throw new Error('Contact ID is required for deletion');
+    const response = await prisma.contact.deleteMany({
+      where: {
+        contact_id: contactId
+      }
+    });
+
+    return response.count > 0;
+  },
+
+  /**
    * @function getContact
    * Gets a specific contact from the PCNS database
    * @param {string} contactId Contact ID
