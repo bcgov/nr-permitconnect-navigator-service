@@ -1,4 +1,6 @@
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
+import ToastService from 'primevue/toastservice';
 import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
@@ -39,9 +41,11 @@ const wrapperSettings = (loading = false, contacts = testContacts) => ({
             auth: { user: {} }
           }
         }),
-      PrimeVue
+      PrimeVue,
+      ConfirmationService,
+      ToastService
     ],
-    stubs: ['Spinner', 'DataTable', 'Column', 'InputIcon', 'InputText', 'router-link']
+    stubs: ['Button', 'DataTable', 'Column', 'FilterMatchMode', 'InputIcon', 'InputText', 'router-link']
   }
 });
 

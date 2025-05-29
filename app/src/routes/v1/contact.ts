@@ -57,4 +57,13 @@ router.put(
   }
 );
 
+/** Delete a specific contact */
+router.delete(
+  '/:contactId',
+  hasAuthorization(Resource.CONTACT, Action.DELETE),
+  (req: Request<{ contactId: string }>, res: Response, next: NextFunction): void => {
+    contactController.deleteContact(req, res, next);
+  }
+);
+
 export default router;

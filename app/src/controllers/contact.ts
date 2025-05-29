@@ -5,6 +5,21 @@ import type { NextFunction, Request, Response } from 'express';
 import type { Contact, ContactSearchParameters } from '../types';
 
 const controller = {
+  deleteContact: async (req: Request<{ contactId: string }>, res: Response, next: NextFunction) => {
+    try {
+      const contactId = req.params.contactId;
+      const response = await contactService.deleteContact(contactId);
+
+      if (!response) {
+        return res.status(404).json({ message: 'Contact not found' });
+      }
+
+      res.status(204).end();
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   getContact: async (
     req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
     res: Response,
