@@ -157,6 +157,7 @@ const controller = {
       let response = await enquiryService.searchEnquiries(
         {
           ...req.query,
+          includeDeleted: isTruthy(req.query.includeDeleted),
           includeUser: isTruthy(req.query.includeUser)
         },
         req.currentContext.initiative as Initiative
