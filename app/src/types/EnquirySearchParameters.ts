@@ -3,5 +3,6 @@ export type EnquirySearchParameters = {
   createdBy?: Array<string>;
   enquiryId?: Array<string>;
   intakeStatus?: Array<string>;
+  includeDeleted?: boolean;
   includeUser?: boolean;
 };
