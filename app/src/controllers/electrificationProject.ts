@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import {
+  activityContactService,
   activityService,
   contactService,
   draftService,
@@ -315,12 +316,23 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      // If Navigator created empty electrification project we need to assign contactIds on save
-      req.body.contacts = req.body.contacts.map((x) => {
-        if (!x.contactId) x.contactId = uuidv4();
-        return x;
-      });
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.project.activityId);
+      if (req.body.contacts) {
+        // Filter out contacts with contactId and assign contactId for the new contacts
+        const newContacts = req.body.contacts
+          .filter((x) => !x.contactId)
+          .map((x) => ({
+            ...x,
+            contactId: x.contactId ?? uuidv4()
+          }));
+        // Insert new contacts into the contact table
+        await contactService.insertContacts(newContacts, req.currentContext);
+        // Remove the contacts without contactId and add newContacts to request
+        req.body.contacts = req.body.contacts.filter((x) => x.contactId).concat(newContacts);
+        // Delete any activity_contact records that doesn't match the activity and contacts in the request
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.project.activityId, req.body.contacts);
+        // Create or update activity_contact with the data from the request
+        await activityContactService.upsertActivityContacts(req.body.project.activityId, req.body.contacts);
+      }
 
       const response = await electrificationProjectService.updateElectrificationProject({
         ...req.body.project,

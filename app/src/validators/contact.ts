@@ -43,7 +43,7 @@ const schema = {
       email: Joi.string().max(255).allow(null),
       firstName: Joi.string().max(255).allow(null),
       lastName: Joi.string().max(255).allow(null),
-      phoneNumber: Joi.number().max(255).allow(null),
+      phoneNumber: Joi.number().allow(null),
       contactApplicantRelationship: Joi.string()
         .allow(null)
         .valid(...PROJECT_RELATIONSHIP_LIST),

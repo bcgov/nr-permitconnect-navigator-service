@@ -88,6 +88,21 @@ const service = {
     });
   },
 
+  insertContacts: async (data: Array<Contact>, currentContext: CurrentContext) => {
+    return await prisma.$transaction(async (trx) => {
+      await Promise.all(
+        data.map(async (x: Contact) => {
+          await trx.contact.create({
+            data: contact.toPrismaModel({
+              ...x,
+              ...generateCreateStamps(currentContext)
+            })
+          });
+        })
+      );
+    });
+  },
+
   /**
    * @function searchContacts
    * Search and filter for specific users
@@ -106,7 +121,7 @@ const service = {
   searchContacts: async (params: ContactSearchParameters) => {
     const response = await prisma.contact.findMany({
       where: {
-        AND: [
+        OR: [
           {
             contact_id: { in: params.contactId }
           },
