@@ -12,7 +12,7 @@ config:
     FRONTEND_OIDC_CLIENTID: nr-permit-connect-navigator-service-5188
     FRONTEND_OPENSTREETMAP_APIPATH: https://tile.openstreetmap.org
     FRONTEND_ORGBOOK_APIPATH: https://orgbook.gov.bc.ca/api/v4
-    SERVER_APIPATH: /api/v1
+    SERVER_APIPATH: /v1
     SERVER_ATS_APIPATH: https://t1api.nrs.gov.bc.ca/ats-api/v1
     SERVER_ATS_TOKENURL: https://t1api.nrs.gov.bc.ca/oauth2/v1/oauth/token?grant_type=client_credentials&disableDeveloperFilter=true&scope=ATS_API.*
     SERVER_BODYLIMIT: 30mb

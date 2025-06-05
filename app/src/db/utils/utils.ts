@@ -36,6 +36,7 @@ export async function checkDatabaseHealth(): Promise<boolean> {
 export async function checkDatabaseSchema(): Promise<boolean> {
   // TODO: Should this be in a different location?
   const expected = Object.freeze({
+    schemas: ['public', 'yars'],
     tables: [
       'access_request',
       'activity',
@@ -61,9 +62,10 @@ export async function checkDatabaseSchema(): Promise<boolean> {
     ]
   });
 
-  const result = Prisma.ModelName;
-  const tables = new Set(Object.keys(result));
+  const schemas = new Set(Prisma.dmmf.datamodel.models.map((x) => x.schema));
+  const tables = new Set(Prisma.dmmf.datamodel.models.map((x) => x.dbName || x.name));
   const matches = {
+    schemas: expected.schemas.every((t) => schemas.has(t)),
     tables: expected.tables.every((t) => tables.has(t))
   };
 
