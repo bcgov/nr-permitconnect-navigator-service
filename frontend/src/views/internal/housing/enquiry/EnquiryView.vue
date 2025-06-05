@@ -9,9 +9,10 @@ import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, housingProjectService, noteService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
+import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { projectServiceKey } from '@/utils/keys';
+import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
 import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
@@ -48,6 +49,8 @@ const isCompleted = computed(() => {
 });
 
 // Providers
+provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
+provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
 provide(projectServiceKey, housingProjectService);
 
 // Actions
@@ -151,7 +154,6 @@ onBeforeMount(async () => {
           <EnquiryForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.ENQUIRY, Action.UPDATE)"
             :enquiry="getEnquiry"
-            :related-ats-number="relatedHousingProject?.atsClientId"
             @enquiry-form:saved="onEnquiryFormSaved"
           />
         </span>
