@@ -1,6 +1,5 @@
 /* eslint-disable no-useless-catch */
 import prisma from '../db/dataConnection';
-import { electrification_project } from '../db/models';
 
 import type { IStamps } from '../interfaces/IStamps';
 import type { ElectrificationProject, ElectrificationProjectSearchParameters } from '../types';
@@ -17,7 +16,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -26,7 +25,7 @@ const service = {
         }
       }
     });
-    return electrification_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -45,7 +44,7 @@ const service = {
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -57,14 +56,14 @@ const service = {
 
       await trx.activity.delete({
         where: {
-          activity_id: del.activityId
+          activityId: del.activityId
         }
       });
 
       return del;
     });
 
-    return electrification_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -107,7 +106,7 @@ const service = {
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -117,7 +116,7 @@ const service = {
         }
       });
 
-      return result ? electrification_project.fromPrismaModelWithContact(result) : null;
+      return result ?? null;
     } catch (e: unknown) {
       throw e;
     }
@@ -135,7 +134,7 @@ const service = {
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -147,10 +146,10 @@ const service = {
         orderBy: {
           createdAt: 'desc'
         },
-        where: includeDeleted ? {} : { activity: { is_deleted: false } }
+        where: includeDeleted ? {} : { activity: { isDeleted: false } }
       });
 
-      return result.map((x) => electrification_project.fromPrismaModelWithUser(x));
+      return result;
     } catch (e: unknown) {
       throw e;
     }
@@ -176,7 +175,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -205,19 +204,15 @@ const service = {
           {
             intakeStatus: { in: params.intakeStatus }
           },
-          params.includeDeleted ? {} : { activity: { is_deleted: false } }
+          params.includeDeleted ? {} : { activity: { isDeleted: false } }
         ]
       }
     });
 
     // Remove soft deleted electrification projects
-    if (!params.includeDeleted) result = result.filter((x) => !x.activity.is_deleted);
+    if (!params.includeDeleted) result = result.filter((x) => !x.activity.isDeleted);
 
-    const electrificationProjects = params.includeUser
-      ? result.map((x) => electrification_project.fromPrismaModelWithUser(x))
-      : result.map((x) => electrification_project.fromPrismaModelWithContact(x));
-
-    return electrificationProjects;
+    return result;
   },
 
   /**
@@ -235,7 +230,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -247,13 +242,13 @@ const service = {
 
     if (deleteElectrificationProject) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
+        data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
         where: {
-          activity_id: deleteElectrificationProject?.activityId
+          activityId: deleteElectrificationProject?.activityId
         }
       });
 
-      return electrification_project.fromPrismaModelWithContact(deleteElectrificationProject);
+      return deleteElectrificationProject;
     }
   },
 
@@ -273,7 +268,7 @@ const service = {
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -282,7 +277,7 @@ const service = {
           }
         }
       });
-      return electrification_project.fromPrismaModelWithContact(result);
+      return result;
     } catch (e: unknown) {
       throw e;
     }
