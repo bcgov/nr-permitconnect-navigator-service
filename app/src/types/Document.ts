@@ -6,5 +6,5 @@ export type Document = {
   filename: string;
   mimeType: string;
   filesize: number;
-  createdByFullName: string | null;
+  createdByFullName?: string | null;
 } & Partial<IStamps>;

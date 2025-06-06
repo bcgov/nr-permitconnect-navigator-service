@@ -17,7 +17,7 @@ const _contactWithBusinessNameAndActivities = Prisma.validator<Prisma.contactDef
   include: { user: { select: { bceid_business_name: true } }, activity_contact: true }
 });
 
-type PrismaRelationContact = Omit<Prisma.contactGetPayload<typeof _contact>, keyof Stamps>;
+export type PrismaRelationContact = Omit<Prisma.contactGetPayload<typeof _contact>, keyof Stamps>;
 type PrismaGraphContactActivities = Prisma.contactGetPayload<typeof _contactWithActivitiesGraph>;
 type PrismaGraphContactBusinessName = Prisma.contactGetPayload<typeof _contactWithBusinessName>;
 type PrismaGraphContactBusinessNameAndActivities = Prisma.contactGetPayload<
