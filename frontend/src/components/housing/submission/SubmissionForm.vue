@@ -22,6 +22,7 @@ import {
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
@@ -49,7 +50,7 @@ import {
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, HousingProject, User } from '@/types';
+import type { ATSClientResource, Contact, HousingProject, User } from '@/types';
 
 // Interfaces
 interface HousingProjectForm extends HousingProject {
@@ -76,9 +77,11 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
+const basicInfoManualEntry: Ref<boolean> = ref(false);
 const geoJson = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const searchContactModalVisible: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -438,73 +441,114 @@ onBeforeMount(async () => {
       />
 
       <SectionHeader title="Basic information" />
-
-      <InputText
-        class="col-span-3"
-        name="contactFirstName"
-        label="First name"
-        :disabled="!editable || !!initialFormValues.contactFirstName"
-      />
-      <InputText
-        class="col-span-3"
-        name="contactLastName"
-        label="Last name"
-        :disabled="!editable || !!initialFormValues.contactLastName"
-      />
-      <InputText
-        class="col-span-3"
-        name="companyNameRegistered"
-        label="Company"
+      <Button
+        class="col-span-2"
+        outlined
+        aria-label="Search Contacts"
         :disabled="!editable"
-        @on-change="
-          (e) => {
-            if (!e.target.value) {
-              setFieldValue('companyNameRegistered', null);
-              setFieldValue('isDevelopedInBC', null);
+        @click="searchContactModalVisible = true"
+      >
+        {{ t('enquiryForm.searchContacts') }}
+      </Button>
+      <div
+        v-if="values.contactId || basicInfoManualEntry"
+        class="grid grid-cols-subgrid gap-4 col-span-12"
+      >
+        <InputText
+          class="col-span-3"
+          name="contactFirstName"
+          label="First name"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <InputText
+          class="col-span-3"
+          name="contactLastName"
+          label="Last name"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <InputText
+          class="col-span-3"
+          name="companyNameRegistered"
+          label="Company"
+          :disabled="!editable"
+          @on-change="
+            (e) => {
+              if (!e.target.value) {
+                setFieldValue('companyNameRegistered', null);
+                setFieldValue('isDevelopedInBC', null);
+              }
             }
+          "
+        />
+        <Select
+          class="col-span-3"
+          name="isDevelopedInBC"
+          label="Company registered in B.C?"
+          :disabled="!editable || !values.companyNameRegistered"
+          :options="YES_NO_LIST"
+        />
+        <Select
+          class="col-span-3"
+          name="contactApplicantRelationship"
+          label="Relationship to project"
+          :disabled="!editable || !basicInfoManualEntry"
+          :options="PROJECT_RELATIONSHIP_LIST"
+        />
+        <Select
+          class="col-span-3"
+          name="contactPreference"
+          label="Preferred contact method"
+          :disabled="!editable || !basicInfoManualEntry"
+          :options="CONTACT_PREFERENCE_LIST"
+        />
+        <InputMask
+          class="col-span-3"
+          name="contactPhoneNumber"
+          mask="(999) 999-9999"
+          label="Contact phone"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <InputText
+          class="col-span-3"
+          name="contactEmail"
+          label="Contact email"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <Select
+          class="col-span-3"
+          name="consentToFeedback"
+          label="Research opt-in"
+          :disabled="!editable"
+          :options="YES_NO_LIST"
+        />
+      </div>
+      <ContactSearchModal
+        v-model:visible="searchContactModalVisible"
+        @contact-search:pick="
+          (contact: Contact) => {
+            searchContactModalVisible = false;
+            console.log('Contact selected:', contact);
+            setFieldValue('contactId', contact.contactId);
+            setFieldValue('contactFirstName', contact.firstName);
+            setFieldValue('contactLastName', contact.lastName);
+            setFieldValue('contactPhoneNumber', contact.phoneNumber);
+            setFieldValue('contactEmail', contact.email);
+            setFieldValue('contactApplicantRelationship', contact.contactApplicantRelationship);
+            setFieldValue('contactPreference', contact.contactPreference);
+            basicInfoManualEntry = false;
           }
         "
-      />
-      <Select
-        class="col-span-3"
-        name="isDevelopedInBC"
-        label="Company registered in B.C?"
-        :disabled="!editable || !values.companyNameRegistered"
-        :options="YES_NO_LIST"
-      />
-      <Select
-        class="col-span-3"
-        name="contactApplicantRelationship"
-        label="Relationship to project"
-        :disabled="!editable"
-        :options="PROJECT_RELATIONSHIP_LIST"
-      />
-      <Select
-        class="col-span-3"
-        name="contactPreference"
-        label="Preferred contact method"
-        :disabled="!editable"
-        :options="CONTACT_PREFERENCE_LIST"
-      />
-      <InputMask
-        class="col-span-3"
-        name="contactPhoneNumber"
-        mask="(999) 999-9999"
-        label="Contact phone"
-        :disabled="!editable || !!initialFormValues.contactPhoneNumber"
-      />
-      <InputText
-        class="col-span-3"
-        name="contactEmail"
-        label="Contact email"
-        :disabled="!editable || !!initialFormValues.contactEmail"
-      />
-      <Select
-        class="col-span-3"
-        name="consentToFeedback"
-        label="Research opt-in"
-        :disabled="!editable"
-        :options="YES_NO_LIST"
+        @contact-search:manual-entry="
+          () => {
+            searchContactModalVisible = false;
+            setFieldValue('contactId', undefined);
+            setFieldValue('contactFirstName', undefined);
+            setFieldValue('contactLastName', undefined);
+            setFieldValue('contactPhoneNumber', undefined);
+            setFieldValue('contactEmail', undefined);
+            basicInfoManualEntry = true;
+          }
+        "
       />
 
       <SectionHeader title="Housing" />

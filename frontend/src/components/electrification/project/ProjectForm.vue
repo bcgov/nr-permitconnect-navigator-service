@@ -281,6 +281,28 @@ onBeforeMount(async () => {
         <ContactCardNavForm
           :editable="editable"
           :initial-form-values="initialFormValues"
+          @contact-card-nav-form:pick="
+            (contact) => {
+              setFieldValue('contact.contactId', contact.contactId);
+              setFieldValue('contact.firstName', contact.firstName);
+              setFieldValue('contact.lastName', contact.lastName);
+              setFieldValue('contact.phoneNumber', contact.phoneNumber);
+              setFieldValue('contact.email', contact.email);
+              setFieldValue('contact.contactApplicantRelationship', contact.contactApplicantRelationship);
+              setFieldValue('contact.contactPreference', contact.contactPreference);
+            }
+          "
+          @contact-card-nav-form:manual-entry="
+            () => {
+              setFieldValue('contact.contactId', undefined);
+              setFieldValue('contact.firstName', undefined);
+              setFieldValue('contact.lastName', undefined);
+              setFieldValue('contact.phoneNumber', undefined);
+              setFieldValue('contact.email', undefined);
+              setFieldValue('contact.contactApplicantRelationship', undefined);
+              setFieldValue('contact.contactPreference', undefined);
+            }
+          "
         />
         <Panel toggleable>
           <template #header>

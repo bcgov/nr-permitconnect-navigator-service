@@ -19,6 +19,7 @@ import {
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
@@ -37,9 +38,10 @@ import { projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, Enquiry, User } from '@/types';
+import type { ATSClientResource, Contact, Enquiry, User } from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -68,10 +70,12 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
+const basicInfoManualEntry: Ref<boolean> = ref(false);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const searchContactModalVisible: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -186,6 +190,8 @@ function onRelatedActivityInput(e: IInputEvent) {
   filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
     id.toUpperCase().includes(e.target.value.toUpperCase())
   );
+  // Revert basic info to initial enquiry contact
+  setBasicInfo();
 }
 
 function onReOpen() {
@@ -200,6 +206,33 @@ function onReOpen() {
       onSubmit(formRef.value?.values);
     }
   });
+}
+
+async function onRelatedActivityChange(e: SelectChangeEvent) {
+  if (e.value) {
+    if (projectService) {
+      const response = (await projectService.searchProjects({ activityId: [e?.value] })).data;
+      if (response.length > 0) {
+        const contact = response[0].contacts[0];
+        // Set basic info to related activity contact
+        setBasicInfo(contact);
+      }
+    } else {
+      throw new Error('No service');
+    }
+  }
+}
+
+// Set basic contact info from enquiry contact if no contact is passed
+function setBasicInfo(contact: Contact = enquiry?.contacts[0]) {
+  formRef.value?.setFieldValue('contactId', contact?.contactId);
+  formRef.value?.setFieldValue('contactFirstName', contact?.firstName ?? undefined);
+  formRef.value?.setFieldValue('contactLastName', contact?.lastName ?? undefined);
+  formRef.value?.setFieldValue('contactPhoneNumber', contact?.phoneNumber);
+  formRef.value?.setFieldValue('contactEmail', contact?.email);
+  formRef.value?.setFieldValue('contactApplicantRelationship', contact?.contactApplicantRelationship);
+  formRef.value?.setFieldValue('contactPreference', contact?.contactPreference);
+  basicInfoManualEntry.value = false;
 }
 
 const onSubmit = async (values: any) => {
@@ -333,6 +366,7 @@ onBeforeMount(async () => {
         :options="filteredProjectActivityIds"
         :get-option-label="(e: string) => e"
         @on-input="onRelatedActivityInput"
+        @on-change="onRelatedActivityChange"
       />
 
       <EditableSelect
@@ -346,45 +380,89 @@ onBeforeMount(async () => {
       <div class="col-span-3" />
 
       <SectionHeader :title="t('enquiryForm.basicInfoHeader')" />
+      <Button
+        v-if="!values.relatedActivityId || !values.contactId"
+        class="col-span-2"
+        outlined
+        aria-label="Search Contacts"
+        :disabled="!editable"
+        @click="searchContactModalVisible = true"
+      >
+        {{ t('enquiryForm.searchContacts') }}
+      </Button>
 
-      <InputText
-        class="col-span-3"
-        name="contactFirstName"
-        label="First name"
-        :disabled="!editable"
-      />
-      <InputText
-        class="col-span-3"
-        name="contactLastName"
-        label="Last name"
-        :disabled="!editable"
-      />
-      <Select
-        class="col-span-3"
-        name="contactApplicantRelationship"
-        label="Relationship to activity"
-        :disabled="!editable"
-        :options="PROJECT_RELATIONSHIP_LIST"
-      />
-      <Select
-        class="col-span-3"
-        name="contactPreference"
-        label="Preferred contact method"
-        :disabled="!editable"
-        :options="CONTACT_PREFERENCE_LIST"
-      />
-      <InputMask
-        class="col-span-3"
-        name="contactPhoneNumber"
-        mask="(999) 999-9999"
-        label="Phone number"
-        :disabled="!editable"
-      />
-      <InputText
-        class="col-span-3"
-        name="contactEmail"
-        label="Contact email"
-        :disabled="!editable"
+      <div
+        v-if="values.contactId || basicInfoManualEntry"
+        class="grid grid-cols-subgrid gap-4 col-span-12"
+      >
+        <InputText
+          class="col-span-3"
+          name="contactFirstName"
+          label="First name"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <InputText
+          class="col-span-3"
+          name="contactLastName"
+          label="Last name"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <Select
+          class="col-span-3"
+          name="contactApplicantRelationship"
+          label="Relationship to activity"
+          :disabled="!editable || !basicInfoManualEntry"
+          :options="PROJECT_RELATIONSHIP_LIST"
+        />
+        <Select
+          class="col-span-3"
+          name="contactPreference"
+          label="Preferred contact method"
+          :disabled="!editable || !basicInfoManualEntry"
+          :options="CONTACT_PREFERENCE_LIST"
+        />
+        <InputMask
+          class="col-span-3"
+          name="contactPhoneNumber"
+          mask="(999) 999-9999"
+          label="Phone number"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+        <InputText
+          class="col-span-3"
+          name="contactEmail"
+          label="Contact email"
+          :disabled="!editable || !basicInfoManualEntry"
+        />
+      </div>
+
+      <ContactSearchModal
+        v-model:visible="searchContactModalVisible"
+        @contact-search:pick="
+          (contact: Contact) => {
+            searchContactModalVisible = false;
+            console.log('Contact selected:', contact);
+            setFieldValue('contactId', contact.contactId);
+            setFieldValue('contactFirstName', contact.firstName);
+            setFieldValue('contactLastName', contact.lastName);
+            setFieldValue('contactPhoneNumber', contact.phoneNumber);
+            setFieldValue('contactEmail', contact.email);
+            setFieldValue('contactApplicantRelationship', contact.contactApplicantRelationship);
+            setFieldValue('contactPreference', contact.contactPreference);
+            basicInfoManualEntry = false;
+          }
+        "
+        @contact-search:manual-entry="
+          () => {
+            searchContactModalVisible = false;
+            setFieldValue('contactId', undefined);
+            setFieldValue('contactFirstName', undefined);
+            setFieldValue('contactLastName', undefined);
+            setFieldValue('contactPhoneNumber', undefined);
+            setFieldValue('contactEmail', undefined);
+            basicInfoManualEntry = true;
+          }
+        "
       />
 
       <SectionHeader :title="t('enquiryForm.enquiryDetailHeader')" />
@@ -420,6 +498,7 @@ onBeforeMount(async () => {
         <Button
           v-if="!values.atsClientId && !values.relatedActivityId"
           class="col-start-1 col-span-2"
+          outlined
           aria-label="Link to ATS"
           :disabled="!editable"
           @click="atsUserLinkModalVisible = true"
@@ -429,6 +508,7 @@ onBeforeMount(async () => {
         <Button
           v-if="!values.atsClientId && !values.relatedActivityId"
           class="grid-col-start-3 col-span-2"
+          outlined
           aria-label="New ATS client"
           :disabled="!editable"
           @click="atsUserCreateModalVisible = true"
