@@ -1,7 +1,8 @@
 {
   "common": {
     "ContactCardNavForm": {
-      "header": "Basic information"
+      "header": "Basic information",
+      "searchContacts": "Search Contacts"
     },
     "contactCardIntakeForm": {
       "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
@@ -184,10 +185,26 @@
         "reopenReject": "Cancel",
         "reopenAccept": "Confirm",
         "confirmReopenMessage": "Please confirm that you want to re-open this project",
-        "confirmReopenHeader": "Re-open project?"
+        "confirmReopenHeader": "Re-open project?",
+        "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
+        "searchContacts": "Search Contacts"
       }
     },
     "contact": {
+      "contactSearchModal": {
+        "cancel": "Cancel",
+        "header": "Search contacts",
+        "noContactsFound": "No contacts found.",
+        "manualEntry": "Manual entry",
+        "multipleContactsBannerDescrition": "If there are multiple contacts of the same proponent, select the contact with the user icon.",
+        "save": "Save",
+        "searchPlaceholder": "Search by First name, Last name, Phone, or Email",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "contactPhone": "Contact phone",
+        "contactEmail": "Contact email",
+        "searchContacts": "Search Contacts"
+      },
       "contactsView": {
         "contactsHeader": "Contacts list",
         "proponentsTab": "Proponents"
@@ -221,7 +238,8 @@
         "projectStateLabel": "Project state",
         "submissionTypeLabel": "Submission type",
         "priorityLabel": "Priority",
-        "aaiUpdateLabel": "AAI Update"
+        "aaiUpdateLabel": "AAI Update",
+        "searchContacts": "Search Contacts"
       }
     },
     "housing": {
@@ -318,12 +336,14 @@
     "atsNewClientBtn": "New ATS Client",
     "formSaveBtn": "Save",
     "formReopenBtn": "Re-open enquiry",
+    "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
     "submittedMethod": "Submitted method",
     "reopenReject": "Cancel",
     "reopenAccept": "Confirm",
     "confirmReopenMessage": "Please confirm that you want to re-open this enquiry",
     "confirmReopenHeader": "Re-open enquiry?",
-    "failedMessage": "Failed to save enquiry"
+    "failedMessage": "Failed to save enquiry",
+    "searchContacts": "Search Contacts"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
