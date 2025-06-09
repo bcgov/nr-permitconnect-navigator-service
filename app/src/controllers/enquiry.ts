@@ -1,7 +1,14 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, contactService, enquiryService, noteService, userService } from '../services';
+import {
+  activityService,
+  activityContactService,
+  contactService,
+  enquiryService,
+  noteService,
+  userService
+} from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/projectCommon';
 import { getCurrentSubject, getCurrentUsername, isTruthy } from '../utils/utils';
@@ -177,14 +184,23 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
-      // Assign contactId if not present
       if (req.body.contacts) {
-        req.body.contacts = req.body.contacts.map((x) => ({
-          ...x,
-          contactId: x.contactId ?? uuidv4()
-        }));
+        // Filter out contacts with contactId and assign contactId for the new contacts
+        const newContacts = req.body.contacts
+          .filter((x) => !x.contactId)
+          .map((x) => ({
+            ...x,
+            contactId: x.contactId ?? uuidv4()
+          }));
+        // Insert new contacts into the contact table
+        await contactService.insertContacts(newContacts, req.currentContext);
+        // Remove the contacts without contactId and add newContacts to request
+        req.body.contacts = req.body.contacts.filter((x) => x.contactId).concat(newContacts);
+        // Delete any activity_contact records that doesn't match the activity and contacts in the request
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.activityId, req.body.contacts);
+        // Create or update activity_contact with the data from the request
+        await activityContactService.upsertActivityContacts(req.body.activityId, req.body.contacts);
       }
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
       const result = await enquiryService.updateEnquiry({
         ...req.body,

@@ -89,6 +89,29 @@ const service = {
   },
 
   /**
+   * @function insertContacts
+   * Inserts multiple contacts into the database, generating IDs and timestamps automatically.
+   * @param data - Array of Contact objects to insert
+   * @param currentContext - Current context containing user information
+   * @returns - {Promise<void>} The result of running the transaction
+   *
+   */
+  insertContacts: async (data: Array<Contact>, currentContext: CurrentContext) => {
+    return await prisma.$transaction(async (trx) => {
+      await Promise.all(
+        data.map(async (x: Contact) => {
+          await trx.contact.create({
+            data: contact.toPrismaModel({
+              ...x,
+              ...generateCreateStamps(currentContext)
+            })
+          });
+        })
+      );
+    });
+  },
+
+  /**
    * @function searchContacts
    * Search and filter for specific users
    * @param {string[]} [params.contactId] Optional array of uuids representing the contact subject
@@ -106,7 +129,7 @@ const service = {
   searchContacts: async (params: ContactSearchParameters) => {
     const response = await prisma.contact.findMany({
       where: {
-        AND: [
+        OR: [
           {
             contact_id: { in: params.contactId }
           },
