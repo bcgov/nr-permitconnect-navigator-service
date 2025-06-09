@@ -1,13 +1,15 @@
-import { enquiryService, contactService } from '../../../src/services';
+import { activityContactService, enquiryService, contactService } from '../../../src/services';
 import enquiryController from '../../../src/controllers/enquiry';
 import { Request, Response } from 'express';
 import { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
 import { Initiative } from '../../../src/utils/enums/application';
 import { EnquirySubmittedMethod, ApplicationStatus } from '../../../src/utils/enums/projectCommon';
 
+import type { Contact } from '../../../src/types';
+
 jest.mock('config');
 
-const CONTACT_DATA = {
+const CONTACT_DATA: Contact = {
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'John',
@@ -336,7 +338,9 @@ describe('enquiryController', () => {
   });
 
   describe('updateEnquiry', () => {
-    const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+    const insertContacts = jest.spyOn(contactService, 'insertContacts');
+    const deleteUnmatchedActivityContacts = jest.spyOn(activityContactService, 'deleteUnmatchedActivityContacts');
+    const upsertActivityContacts = jest.spyOn(activityContactService, 'upsertActivityContacts');
     const updateEnquirySpy = jest.spyOn(enquiryService, 'updateEnquiry');
 
     it('should return 200 if enquiry is updated successfully', async () => {
@@ -349,7 +353,9 @@ describe('enquiryController', () => {
 
       await enquiryController.updateEnquiry(req, res, next);
 
-      expect(upsertContactsSpy).toHaveBeenCalledWith(ENQUIRY_DATA.contacts, CURRENT_CONTEXT, ENQUIRY_DATA.activityId);
+      expect(insertContacts).toHaveBeenCalled();
+      expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
+      expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
       expect(updateEnquirySpy).toHaveBeenCalledWith(expect.objectContaining(ENQUIRY_DATA));
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(ENQUIRY_DATA);
@@ -365,7 +371,9 @@ describe('enquiryController', () => {
 
       await enquiryController.updateEnquiry(req, res, next);
 
-      expect(upsertContactsSpy).toHaveBeenCalledWith(ENQUIRY_DATA.contacts, CURRENT_CONTEXT, ENQUIRY_DATA.activityId);
+      expect(insertContacts).toHaveBeenCalled();
+      expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
+      expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
       expect(updateEnquirySpy).toHaveBeenCalledWith(expect.objectContaining(ENQUIRY_DATA));
       expect(res.status).toHaveBeenCalledWith(404);
       expect(res.json).toHaveBeenCalledWith({ message: 'Enquiry not found' });
@@ -383,7 +391,9 @@ describe('enquiryController', () => {
 
       await enquiryController.updateEnquiry(req, res, next);
 
-      expect(upsertContactsSpy).toHaveBeenCalledWith(ENQUIRY_DATA.contacts, CURRENT_CONTEXT, ENQUIRY_DATA.activityId);
+      expect(insertContacts).toHaveBeenCalled();
+      expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
+      expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
       expect(updateEnquirySpy).toHaveBeenCalledWith(expect.objectContaining(ENQUIRY_DATA));
       expect(next).toHaveBeenCalledTimes(1);
     });

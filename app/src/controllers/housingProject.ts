@@ -15,7 +15,7 @@ import { Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+import { getCurrentUsername, partition, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
@@ -467,21 +467,28 @@ const controller = {
   ) => {
     try {
       if (req.body.contacts) {
-        // Filter out contacts with contactId and assign contactId for the new contacts
-        const newContacts = req.body.contacts
-          .filter((x) => !x.contactId)
-          .map((x) => ({
-            ...x,
-            contactId: x.contactId ?? uuidv4()
-          }));
+        // Match contacts that already have a contactId
+        const matches = (x: Contact) => !!x.contactId;
+
+        // Partition contacts into old and new based on whether they have a contactId
+        const [oldContacts, newContacts] = partition(req.body.contacts, matches);
+
+        // Assign a new contactId to each new contact
+        newContacts.forEach((x) => {
+          x.contactId = uuidv4();
+        });
+
+        // Combine old contacts with new contacts
+        const contacts = oldContacts.concat(newContacts);
+
         // Insert new contacts into the contact table
         await contactService.insertContacts(newContacts, req.currentContext);
-        // Filter out contacts without contactId and add newContacts to request
-        req.body.contacts = req.body.contacts.filter((x) => x.contactId).concat(newContacts);
+
         // Delete any activity_contact records that doesn't match the activity and contacts in the request
-        await activityContactService.deleteUnmatchedActivityContacts(req.body.activityId, req.body.contacts);
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.activityId, contacts);
+
         // Create or update activity_contact with the data from the request
-        await activityContactService.upsertActivityContacts(req.body.activityId, req.body.contacts);
+        await activityContactService.upsertActivityContacts(req.body.activityId, contacts);
       }
 
       const response = await housingProjectService.updateHousingProject({

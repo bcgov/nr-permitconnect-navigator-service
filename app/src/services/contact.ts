@@ -129,7 +129,7 @@ const service = {
   searchContacts: async (params: ContactSearchParameters) => {
     const response = await prisma.contact.findMany({
       where: {
-        OR: [
+        AND: [
           {
             contact_id: { in: params.contactId }
           },
@@ -174,6 +174,42 @@ const service = {
     return params.includeActivities
       ? response.map((x) => contact.fromPrismaModelWithBusinessNameAndActivities(x))
       : response.map((x) => contact.fromPrismaModelWithBusinessName(x));
+  },
+
+  /**
+   * @function matchContacts
+   * Find contacts that match any of the given parameters
+   * @param {string} [email] Optional email string to match on
+   * @param {string} [phoneNumber] Optional phoneNumber string to match on
+   * @param {string} [firstName] Optional firstName string to match on
+   * @param {string} [lastName] Optional lastName string to match on
+   * @returns {Promise<object>} The result of running the findMany operation
+   */
+  matchContacts: async (
+    firstName: string | undefined = undefined,
+    lastName: string | undefined = undefined,
+    email: string | undefined = undefined,
+    phoneNumber: string | undefined = undefined
+  ) => {
+    const response = await prisma.contact.findMany({
+      where: {
+        OR: [
+          {
+            email: { contains: email, mode: 'insensitive' }
+          },
+          {
+            first_name: { contains: firstName, mode: 'insensitive' }
+          },
+          {
+            last_name: { contains: lastName, mode: 'insensitive' }
+          },
+          {
+            phone_number: { contains: phoneNumber, mode: 'insensitive' }
+          }
+        ]
+      }
+    });
+    return response.map((x) => contact.fromPrismaModel(x));
   }
 };
 

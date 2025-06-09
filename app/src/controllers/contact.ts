@@ -54,6 +54,24 @@ const controller = {
     }
   },
 
+  matchContacts: async (
+    req: Request<never, never, never, { firstName?: string; lastName?: string; email?: string; phoneNumber?: string }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await contactService.matchContacts(
+        req.query.firstName,
+        req.query.lastName,
+        req.query.email,
+        req.query.phoneNumber
+      );
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   searchContacts: async (
     req: Request<never, never, never, ContactSearchParameters>,
     res: Response,
