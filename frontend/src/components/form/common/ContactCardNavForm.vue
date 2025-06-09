@@ -10,6 +10,7 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/cons
 
 import type { Ref } from 'vue';
 import type { Contact } from '@/types';
+
 // Props
 const { editable = true, initialFormValues } = defineProps<{
   editable?: boolean;
@@ -45,7 +46,7 @@ function showManualContactHint() {
       <div class="flex items-center gap-x-2.5">
         <BasicInfo />
         <h3 class="section-header m-0">
-          {{ t('common.ContactCardNavForm.header') }}
+          {{ t('common.contactCardNavForm.header') }}
         </h3>
       </div>
       <div>
@@ -57,11 +58,14 @@ function showManualContactHint() {
           class="hover-hand"
           @click="searchContactModalVisible = true"
         >
-          {{ t('common.ContactCardNavForm.searchContacts') }}
+          {{ t('common.contactCardNavForm.searchContacts') }}
         </a>
       </div>
     </div>
-    <div v-if="showManualContactHint()">
+    <div
+      v-if="showManualContactHint()"
+      class="mb-2"
+    >
       <Message
         severity="warn"
         class="text-center"

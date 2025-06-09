@@ -16,15 +16,15 @@ const toast = useToast();
 // Emits
 const emit = defineEmits(['contactSearch:pick', 'contactSearch:manualEntry']);
 
-// Actions
+// Composables
 const { t } = useI18n();
 
 // State
-const searchTag: Ref<string> = ref('');
-const loading: Ref<boolean> = ref(false);
-const hasSearched: Ref<boolean> = ref(false);
-const selectedContact: Ref<Contact | undefined> = ref(undefined);
 const contacts: Ref<Array<Contact>> = ref([]);
+const hasSearched: Ref<boolean> = ref(false);
+const loading: Ref<boolean> = ref(false);
+const searchTag: Ref<string> = ref('');
+const selectedContact: Ref<Contact | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -34,7 +34,7 @@ async function searchContacts() {
   try {
     loading.value = true;
 
-    const response = await contactService.searchContacts(
+    const response = await contactService.matchContacts(
       toNumber(searchTag.value)
         ? { phoneNumber: searchTag.value }
         : { firstName: searchTag.value, lastName: searchTag.value, email: searchTag.value }
@@ -65,6 +65,7 @@ async function searchContacts() {
           v-model="searchTag"
           :placeholder="t('i.contact.contactSearchModal.searchPlaceholder')"
           class="w-full"
+          @keydown.enter="searchContacts"
         />
       </div>
       <Button
@@ -105,9 +106,9 @@ async function searchContacts() {
         <Spinner />
       </template>
       <Column field="userId">
-        <template #body="contact">
+        <template #body="{ data }">
           <font-awesome-icon
-            v-if="contact.data.userId"
+            v-if="data.userId"
             icon="fa-solid fa-user"
             class="app-primary-color"
           />
@@ -134,7 +135,7 @@ async function searchContacts() {
         sortable
       />
     </DataTable>
-    <div class="flex justify-between">
+    <div class="flex justify-between items-center">
       <div>
         <Button
           class="p-button-solid mr-4"

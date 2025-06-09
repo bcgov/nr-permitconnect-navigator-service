@@ -468,7 +468,7 @@ onBeforeMount(async () => {
       </Button>
       <div
         v-if="!values.contactUserId && values.contactId"
-        class="col-span-12"
+        class="col-span-12 mt-2"
       >
         <Message
           severity="warn"

@@ -11,7 +11,7 @@ import {
 } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { isTruthy } from '../utils/utils';
+import { partition, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
@@ -317,21 +317,29 @@ const controller = {
   ) => {
     try {
       if (req.body.contacts) {
-        // Filter out contacts with contactId and assign contactId for the new contacts
-        const newContacts = req.body.contacts
-          .filter((x) => !x.contactId)
-          .map((x) => ({
-            ...x,
-            contactId: x.contactId ?? uuidv4()
-          }));
+        // Predicate function to check if a contact has a contactId.
+        // Used to partition contacts into existing (with contactId) and new (without contactId).
+        const hasContactId = (x: Contact) => !!x.contactId;
+
+        // Partition contacts into existing and new based on whether they have a contactId
+        const [existingContacts, newContacts] = partition(req.body.contacts, hasContactId);
+
+        // Assign a new contactId to each new contact
+        newContacts.forEach((x) => {
+          x.contactId = uuidv4();
+        });
+
+        // Combine existing contacts with new contacts
+        const contacts = existingContacts.concat(newContacts);
+
         // Insert new contacts into the contact table
         await contactService.insertContacts(newContacts, req.currentContext);
-        // Remove the contacts without contactId and add newContacts to request
-        req.body.contacts = req.body.contacts.filter((x) => x.contactId).concat(newContacts);
+
         // Delete any activity_contact records that doesn't match the activity and contacts in the request
-        await activityContactService.deleteUnmatchedActivityContacts(req.body.project.activityId, req.body.contacts);
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.project.activityId, contacts);
+
         // Create or update activity_contact with the data from the request
-        await activityContactService.upsertActivityContacts(req.body.project.activityId, req.body.contacts);
+        await activityContactService.upsertActivityContacts(req.body.project.activityId, contacts);
       }
 
       const response = await electrificationProjectService.updateElectrificationProject({

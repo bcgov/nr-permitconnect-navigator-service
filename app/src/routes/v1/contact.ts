@@ -23,6 +23,16 @@ router.get(
   }
 );
 
+/** Match contacts endpoint */
+router.post(
+  '/match',
+  hasAuthorization(Resource.CONTACT, Action.READ),
+  contactValidator.matchContacts,
+  (req: Request<never, never, ContactSearchParameters, never>, res: Response, next: NextFunction): void => {
+    contactController.matchContacts(req, res, next);
+  }
+);
+
 /** Search contacts endpoint */
 router.get(
   '/search',

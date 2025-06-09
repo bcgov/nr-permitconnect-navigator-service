@@ -1,6 +1,6 @@
 {
   "common": {
-    "ContactCardNavForm": {
+    "contactCardNavForm": {
       "header": "Basic information",
       "searchContacts": "Search Contacts"
     },

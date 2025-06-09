@@ -36,6 +36,14 @@ const schema = {
       includeActivities: Joi.boolean()
     })
   },
+  matchContacts: {
+    query: Joi.object({
+      email: Joi.string().max(255).allow(null),
+      firstName: Joi.string().max(255).allow(null),
+      lastName: Joi.string().max(255).allow(null),
+      phoneNumber: phoneNumber.allow(null)
+    })
+  },
   searchContacts: {
     query: Joi.object({
       userId: Joi.array().items(uuidv4).allow(null),
@@ -43,7 +51,7 @@ const schema = {
       email: Joi.string().max(255).allow(null),
       firstName: Joi.string().max(255).allow(null),
       lastName: Joi.string().max(255).allow(null),
-      phoneNumber: Joi.number().allow(null),
+      phoneNumber: phoneNumber.allow(null),
       contactApplicantRelationship: Joi.string()
         .allow(null)
         .valid(...PROJECT_RELATIONSHIP_LIST),
@@ -81,6 +89,7 @@ export default {
   deleteContact: validate(schema.deleteContact),
   getContact: validate(schema.getContact),
   getContactActivities: validate(schema.getContact),
+  matchContacts: validate(schema.matchContacts),
   searchContacts: validate(schema.searchContacts),
   updateContact: validate(schema.updateContact)
 };

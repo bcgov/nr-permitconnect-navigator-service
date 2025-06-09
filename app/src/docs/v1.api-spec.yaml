@@ -140,12 +140,12 @@ paths:
     delete:
       summary: Delete a contact
       description: >-
-        Deletes the contact with the supplied **`contactId`**.  
-        Returns **204 No Content** when the record is deleted.  
+        Deletes the contact with the supplied **`contactId`**.
+        Returns **204 No Content** when the record is deleted.
         Returns **404 Not Found** when no matching contact exists.
       tags:
         - Contacts
-      operationId: deleteContact   
+      operationId: deleteContact
       parameters:
         - $ref: '#/components/parameters/Path-ContactId'
       responses:
@@ -157,6 +157,53 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /contact/match:
+    post:
+      summary: Match contacts
+      description: Returns a list of contacts if any of the given queries match
+      operationId: matchContacts
+      tags:
+        - Contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: Match by specific email address
+                  example: JaneDoe@email.com
+                firstName:
+                  type: string
+                  description: Match by specific first name
+                  example: Jane
+                lastName:
+                  type: string
+                  description: Match by specific last name
+                  example: Doe
+                phoneNumber:
+                  type: string
+                  description: Match by specific phone number
+                  example: (123) 456-7890
+      responses:
+        '200':
+          description: A list of contacts matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Contact'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
   /contact/search:
