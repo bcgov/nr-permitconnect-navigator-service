@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { ref } from 'vue';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
@@ -9,11 +9,15 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource, ElectrificationProject, Enquiry, HousingProject } from '@/types';
+import type { ATSClientResource } from '@/types';
+import { watchEffect } from 'vue';
 
 // Props
-const { projectOrEnquiry } = defineProps<{
-  projectOrEnquiry: Enquiry | HousingProject | ElectrificationProject;
+const { fName, lName, phoneNumber, emailId } = defineProps<{
+  fName?: string;
+  lName?: string;
+  phoneNumber?: string;
+  emailId?: string;
 }>();
 
 // Composables
@@ -28,14 +32,21 @@ const { getInitiative } = storeToRefs(appStore);
 
 // State
 const atsClientId: Ref<string> = ref('');
-const email: Ref<string> = ref('');
-const firstName: Ref<string> = ref('');
-const lastName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
-const phone: Ref<string> = ref('');
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
+const firstName: Ref<string> = ref('');
+const lastName: Ref<string> = ref('');
+const phone: Ref<string> = ref('');
+const email: Ref<string> = ref('');
+
+watchEffect(() => {
+  firstName.value = fName ?? '';
+  lastName.value = lName ?? '';
+  phone.value = phoneNumber ?? '';
+  email.value = emailId ?? '';
+});
 
 // Actions
 async function searchATSUsers() {
@@ -63,24 +74,6 @@ async function searchATSUsers() {
     loading.value = false;
   }
 }
-
-onBeforeMount(() => {
-  // TODO: Remove conditional when prisma db has full mappings
-  if ('enquiryId' in projectOrEnquiry || getInitiative.value === Initiative.HOUSING) {
-    if (projectOrEnquiry.contacts[0]?.firstName && projectOrEnquiry.contacts[0]?.lastName) {
-      firstName.value = projectOrEnquiry.contacts[0]?.firstName;
-      lastName.value = projectOrEnquiry.contacts[0]?.lastName;
-    }
-  } else {
-    if (
-      projectOrEnquiry.activity?.activityContact?.[0]?.contact?.firstName &&
-      projectOrEnquiry.activity?.activityContact?.[0]?.contact?.lastName
-    ) {
-      firstName.value = projectOrEnquiry.activity?.activityContact?.[0]?.contact?.firstName;
-      lastName.value = projectOrEnquiry.activity?.activityContact?.[0]?.contact?.lastName;
-    }
-  }
-});
 </script>
 
 <template>

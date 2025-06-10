@@ -115,6 +115,7 @@ const testSubmission: HousingProject = {
   naturalDisaster: 'None',
   addedToATS: true,
   atsClientId: 654321,
+  atsEnquiryId: '654321',
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,

@@ -19,18 +19,32 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { electrificationProjectService, userService } from '@/services';
+import { atsService, electrificationProjectService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
-import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { IdentityProviderKind, Regex } from '@/utils/enums/application';
+import {
+  APPLICATION_STATUS_LIST,
+  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
+  ATS_MANAGING_REGION,
+  QUEUE_PRIORITY,
+  SUBMISSION_TYPE_LIST
+} from '@/utils/constants/projectCommon';
+import {
+  ATSCreateTypes,
+  BasicResponse,
+  GroupName,
+  IdentityProviderKind,
+  Initiative,
+  Regex
+} from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, ElectrificationProject, User } from '@/types';
+import type { ATSClientResource, ATSEnquiryResource, ElectrificationProject, User } from '@/types';
+import type { AddressResource } from '@/types/ATSClientResource';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -42,6 +56,9 @@ const { editable = true, project } = defineProps<{
 const emit = defineEmits<{
   (e: 'input-project-name', newName: string): void;
 }>();
+
+// Constants
+const ATS_ENQUIRY_TYPE_CODE = Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -57,6 +74,7 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
+const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
@@ -136,10 +154,69 @@ function initilizeFormValues(project: ElectrificationProject) {
 
     // ATS link
     atsClientId: project.atsClientId,
+    atsEnquiryId: project.atsEnquiryId,
 
     // Updates
-    aaiUpdated: project.aaiUpdated
+    aaiUpdated: project.aaiUpdated,
+    addedToATS: project.addedToATS
   };
+}
+
+async function createATSClient() {
+  try {
+    const address: Partial<AddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
+      email: formRef.value?.values?.contact.email ?? ''
+    };
+
+    const data = {
+      '@type': 'ClientResource',
+      address: address,
+      firstName: formRef.value?.values.contact.firstName,
+      surName: formRef.value?.values.contact.lastName,
+      regionName: GroupName.NAVIGATOR,
+      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
+    };
+
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createATSClient(submitData);
+    if (response.status === 201) {
+      const atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      if (atsEnquiryId) toast.success(t('i.electrification.projectForm.atsClientEnquiryPushed'));
+      else toast.success(t('i.electrification.projectForm.atsClientPushed'));
+      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
+    }
+  } catch (error) {
+    toast.error(t('i.electrification.projectForm.atsClientPushError') + ' ' + error);
+  }
+}
+
+async function createATSEnquiry(atsClientId?: number) {
+  try {
+    const ATSEnquiryData: ATSEnquiryResource = {
+      '@type': 'EnquiryResource',
+      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      contactFirstName: formRef.value?.values.contact.firstName,
+      contactSurname: formRef.value?.values.contact.lastName,
+      regionName: ATS_MANAGING_REGION,
+      subRegionalOffice: GroupName.NAVIGATOR,
+      enquiryFileNumbers: [project.activityId],
+      enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
+      enquiryMethodCodes: [Initiative.PCNS],
+      notes: formRef.value?.values.project.projectName,
+      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
+    };
+    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    if (response.status === 201) {
+      if (atsCreateType.value === ATSCreateTypes.ENQUIRY)
+        toast.success(t('i.electrification.projectForm.atsEnquiryPushed'));
+      return response.data.enquiryId;
+    }
+  } catch (error) {
+    toast.success(t('i.electrification.projectForm.atsClientPushed'));
+    toast.error(t('i.electrification.projectForm.atsEnquiryPushError') + ' ' + error);
+  }
 }
 
 function onCancel() {
@@ -187,8 +264,37 @@ function onReOpen() {
   });
 }
 
+function onNewATSEnquiry() {
+  confirm.require({
+    message: t('i.electrification.projectForm.atsEnquiryConfirmMsg'),
+    header: t('i.electrification.projectForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('i.electrification.projectForm.confirm'),
+    rejectLabel: t('i.electrification.projectForm.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      atsCreateType.value = ATSCreateTypes.ENQUIRY;
+    }
+  });
+}
+
 const onSubmit = async (values: any) => {
   try {
+    if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
+      const response = await createATSClient();
+      values.atsClientId = response?.atsClientId;
+      values.atsEnquiryId = response?.atsEnquiryId;
+      if (values.atsEnquiryId && values.atsClientId) {
+        values.addedToATS = true;
+      }
+      atsCreateType.value = undefined;
+    } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
+      values.atsEnquiryId = await createATSEnquiry();
+      if (values.atsEnquiryId) {
+        values.addedToATS = true;
+      }
+      atsCreateType.value = undefined;
+    }
+
     const submitData = omit(
       setEmptyStringsToNull({
         project: {
@@ -203,7 +309,9 @@ const onSubmit = async (values: any) => {
           assignedUserId: values.submissionState.assignedUser?.userId,
           applicationStatus: values.submissionState.applicationStatus,
           atsClientId: parseInt(values.atsClientId) || '',
-          aaiUpdated: values.aaiUpdated
+          atsEnquiryId: parseInt(values.atsEnquiryId) || '',
+          aaiUpdated: values.aaiUpdated,
+          addedToATS: values.addedToATS
         },
         contacts: [
           {
@@ -433,7 +541,7 @@ onBeforeMount(async () => {
             {{ t('i.electrification.projectForm.atsHeader') }}
           </h4>
           <div
-            v-if="values.atsClientId"
+            v-if="values.atsClientId || atsCreateType !== undefined"
             class="flex flex-col gap-y-3"
           >
             <input
@@ -441,7 +549,7 @@ onBeforeMount(async () => {
               name="atsClientId"
             />
             <div class="flex items-center">
-              <p class="text-[var(--p-primary-900)] mr-2">
+              <p class="text-[var(--p-primary-900)] mr-3">
                 <b>{{ t('i.electrification.projectForm.atsClientIdHeader') }}</b>
               </p>
               <a
@@ -450,6 +558,26 @@ onBeforeMount(async () => {
               >
                 {{ values.atsClientId }}
               </a>
+              <span v-if="atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY">
+                {{ t('i.electrification.projectForm.pendingSave') }}
+              </span>
+            </div>
+            <input
+              type="hidden"
+              name="atsEnquiryId"
+            />
+            <div
+              v-if="values.atsEnquiryId || atsCreateType !== undefined"
+              class="flex items-center"
+            >
+              <p class="text-[var(--p-primary-900)] mr-2">
+                <b>{{ t('i.electrification.projectForm.atsEnquiryIdHeader') }}</b>
+              </p>
+
+              {{ values.atsEnquiryId }}
+              <span v-if="atsCreateType !== undefined">
+                {{ t('i.electrification.projectForm.pendingSave') }}
+              </span>
             </div>
           </div>
           <div
@@ -457,6 +585,7 @@ onBeforeMount(async () => {
             class="flex flex-col gap-y-6"
           >
             <Button
+              v-if="!values.atsClientId && atsCreateType === undefined"
               class="ats-button"
               aria-label="Link to ATS"
               outlined
@@ -465,6 +594,7 @@ onBeforeMount(async () => {
               @click="atsUserLinkModalVisible = true"
             />
             <Button
+              v-if="!values.atsClientId && atsCreateType === undefined"
               class="ats-button"
               aria-label="New ATS client"
               outlined
@@ -473,11 +603,26 @@ onBeforeMount(async () => {
               @click="atsUserCreateModalVisible = true"
             />
           </div>
+          <Button
+            v-if="values.atsClientId && !values.atsEnquiryId && atsCreateType === undefined"
+            class="mt-4"
+            aria-label="New ATS enquiry"
+            :disabled="!editable"
+            @click="onNewATSEnquiry()"
+          >
+            {{ t('enquiryForm.atsNewEnquiryBtn') }}
+          </Button>
         </div>
         <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
           <h4 class="section-header mb-4 mt-0">
             {{ t('i.electrification.projectForm.updatesHeader') }}
           </h4>
+          <Checkbox
+            name="addedToATS"
+            class="mb-4"
+            :label="t('i.electrification.projectForm.atsUpdated')"
+            :disabled="!editable"
+          />
           <Checkbox
             name="aaiUpdated"
             :label="t('i.electrification.projectForm.aaiUpdateLabel')"
@@ -508,11 +653,15 @@ onBeforeMount(async () => {
     </div>
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :project-or-enquiry="project"
+      :f-name="values.contact.firstName"
+      :l-name="values.contact.lastName"
+      :phone-number="values.contact.phoneNumber"
+      :email-id="values.contact.email"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
           setFieldValue('atsClientId', atsClientResource.clientId);
+          atsCreateType = ATSCreateTypes.ENQUIRY;
         }
       "
     />
@@ -523,16 +672,22 @@ onBeforeMount(async () => {
         () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
+          setFieldValue('atsEnquiryId', null);
+          setFieldValue('addedToATS', false);
+          atsCreateType = undefined;
         }
       "
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :project-or-enquiry="project"
-      @ats-user-link:link="
-        (atsClientId: string) => {
+      :first-name="values.contact.firstName"
+      :last-name="values.contact.lastName"
+      :phone="values.contact.phoneNumber"
+      :email="values.contact.email"
+      @ats-user-create:create="
+        () => {
           atsUserCreateModalVisible = false;
-          setFieldValue('atsClientId', atsClientId);
+          atsCreateType = ATSCreateTypes.CLIENT_ENQUIRY;
         }
       "
     />

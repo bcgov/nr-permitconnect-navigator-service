@@ -12,6 +12,11 @@ export enum Action {
   ROLEOVERRIDE = 'ROLEOVERRIDE'
 }
 
+export enum ATSCreateTypes {
+  CLIENT_ENQUIRY = 'CLIENT_ENQUIRY',
+  ENQUIRY = 'ENQUIRY'
+}
+
 export enum BasicResponse {
   YES = 'Yes',
   NO = 'No',

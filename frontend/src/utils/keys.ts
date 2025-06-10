@@ -4,6 +4,10 @@ import type { IDraftableProjectService, IProjectService } from '@/interfaces/IPr
 import type { NavigationPermission } from '@/store/authzStore';
 import type { Resource, RouteName } from '@/utils/enums/application';
 
+// Constants
+export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<string>;
+export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<string>;
+
 // Permissions
 export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermission>;
 
