@@ -89,6 +89,29 @@ const service = {
   },
 
   /**
+   * @function insertContacts
+   * Inserts multiple contacts into the database, generating IDs and timestamps automatically.
+   * @param data - Array of Contact objects to insert
+   * @param currentContext - Current context containing user information
+   * @returns - {Promise<void>} The result of running the transaction
+   *
+   */
+  insertContacts: async (data: Array<Contact>, currentContext: CurrentContext) => {
+    return await prisma.$transaction(async (trx) => {
+      await Promise.all(
+        data.map(async (x: Contact) => {
+          await trx.contact.create({
+            data: contact.toPrismaModel({
+              ...x,
+              ...generateCreateStamps(currentContext)
+            })
+          });
+        })
+      );
+    });
+  },
+
+  /**
    * @function searchContacts
    * Search and filter for specific users
    * @param {string[]} [params.contactId] Optional array of uuids representing the contact subject
@@ -151,6 +174,42 @@ const service = {
     return params.includeActivities
       ? response.map((x) => contact.fromPrismaModelWithBusinessNameAndActivities(x))
       : response.map((x) => contact.fromPrismaModelWithBusinessName(x));
+  },
+
+  /**
+   * @function matchContacts
+   * Find contacts that match any of the given parameters
+   * @param {string} [email] Optional email string to match on
+   * @param {string} [phoneNumber] Optional phoneNumber string to match on
+   * @param {string} [firstName] Optional firstName string to match on
+   * @param {string} [lastName] Optional lastName string to match on
+   * @returns {Promise<object>} The result of running the findMany operation
+   */
+  matchContacts: async (
+    firstName: string | undefined = undefined,
+    lastName: string | undefined = undefined,
+    email: string | undefined = undefined,
+    phoneNumber: string | undefined = undefined
+  ) => {
+    const response = await prisma.contact.findMany({
+      where: {
+        OR: [
+          {
+            email: { contains: email, mode: 'insensitive' }
+          },
+          {
+            first_name: { contains: firstName, mode: 'insensitive' }
+          },
+          {
+            last_name: { contains: lastName, mode: 'insensitive' }
+          },
+          {
+            phone_number: { contains: phoneNumber, mode: 'insensitive' }
+          }
+        ]
+      }
+    });
+    return response.map((x) => contact.fromPrismaModel(x));
   }
 };
 

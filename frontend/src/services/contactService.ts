@@ -35,6 +35,21 @@ export default {
   },
 
   /**
+   * @function matchContacts
+   * Returns a list of contacts if any of the provided filtering parameters match
+   * @param {MatchContactsOptions} params SearchUsersOptions object containing the data to filter against
+   * @returns {Promise<AxiosResponse>} An axios response or empty array
+   */
+  matchContacts(params: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phoneNumber?: string;
+  }): Promise<AxiosResponse> {
+    return appAxios().get(`${PATH}/match`, { params: params });
+  },
+
+  /**
    * @function searchContacts
    * Returns a list of users based on the provided filtering parameters
    * @param {SearchUsersOptions} params SearchUsersOptions object containing the data to filter against

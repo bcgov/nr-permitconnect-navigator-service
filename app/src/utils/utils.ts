@@ -152,6 +152,28 @@ export function parseCSV(value: string): Array<string> {
 }
 
 /**
+ * @function partition
+ * Partitions an array into two array sets depending on conditional
+ * @see {@link https://stackoverflow.com/a/71247432}
+ * @param {Array<T>} arr The array to partition
+ * @param {Function} predicate The predicate function
+ * @returns
+ */
+export function partition<T>(
+  arr: Array<T>,
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  predicate: (v: T, i: number, ar: Array<T>) => boolean
+): [Array<T>, Array<T>] {
+  return arr.reduce(
+    (acc, item, index, array) => {
+      acc[+!predicate(item, index, array)].push(item);
+      return acc;
+    },
+    [[], []] as [Array<T>, Array<T>]
+  );
+}
+
+/**
  * @function parseIdentityKeyClaims
  * Returns an array of strings representing potential identity key claims
  * Array will always end with the last value as 'sub'

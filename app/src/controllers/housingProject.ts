@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import {
+  activityContactService,
   activityService,
   contactService,
   draftService,
@@ -14,7 +15,7 @@ import { Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+import { getCurrentUsername, partition, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type {
@@ -465,13 +466,30 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      // If Navigator created empty housing project we need to assign contactIds on save
-      const contacts = req.body.contacts?.map((x) => {
-        if (!x.contactId) x.contactId = uuidv4();
-        return x;
-      });
+      if (req.body.contacts) {
+        // Match contacts that already have a contactId
+        const matches = (x: Contact) => !!x.contactId;
 
-      if (contacts) await contactService.upsertContacts(contacts, req.currentContext, req.body.activityId);
+        // Partition contacts into old and new based on whether they have a contactId
+        const [oldContacts, newContacts] = partition(req.body.contacts, matches);
+
+        // Assign a new contactId to each new contact
+        newContacts.forEach((x) => {
+          x.contactId = uuidv4();
+        });
+
+        // Combine old contacts with new contacts
+        const contacts = oldContacts.concat(newContacts);
+
+        // Insert new contacts into the contact table
+        await contactService.insertContacts(newContacts, req.currentContext);
+
+        // Delete any activity_contact records that doesn't match the activity and contacts in the request
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.activityId, contacts);
+
+        // Create or update activity_contact with the data from the request
+        await activityContactService.upsertActivityContacts(req.body.activityId, contacts);
+      }
 
       const response = await housingProjectService.updateHousingProject({
         ...req.body,

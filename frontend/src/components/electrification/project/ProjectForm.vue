@@ -30,7 +30,7 @@ import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSClientResource, ElectrificationProject, User } from '@/types';
+import type { ATSClientResource, Contact, ElectrificationProject, User } from '@/types';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -103,7 +103,8 @@ function initilizeFormValues(project: ElectrificationProject) {
       phoneNumber: project?.activity?.activityContact?.[0]?.contact?.phoneNumber,
       email: project?.activity?.activityContact?.[0]?.contact?.email,
       contactApplicantRelationship: project?.activity?.activityContact?.[0]?.contact?.contactApplicantRelationship,
-      contactPreference: project?.activity?.activityContact?.[0]?.contact?.contactPreference
+      contactPreference: project?.activity?.activityContact?.[0]?.contact?.contactPreference,
+      userId: project?.activity?.activityContact?.[0]?.contact?.userId
     },
     project: {
       companyNameRegistered: project.companyNameRegistered,
@@ -185,6 +186,18 @@ function onReOpen() {
       onSubmit(formRef.value?.values);
     }
   });
+}
+
+// Set basic info, clear it if no contact is provided
+function setBasicInfo(contact?: Contact) {
+  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
+  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
+  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
+  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
+  formRef.value?.setFieldValue('contact.email', contact?.email);
+  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
+  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
+  formRef.value?.setFieldValue('contact.userId', contact?.userId);
 }
 
 const onSubmit = async (values: any) => {
@@ -281,6 +294,16 @@ onBeforeMount(async () => {
         <ContactCardNavForm
           :editable="editable"
           :initial-form-values="initialFormValues"
+          @contact-card-nav-form:pick="
+            (contact: Contact) => {
+              setBasicInfo(contact);
+            }
+          "
+          @contact-card-nav-form:manual-entry="
+            () => {
+              setBasicInfo();
+            }
+          "
         />
         <Panel toggleable>
           <template #header>

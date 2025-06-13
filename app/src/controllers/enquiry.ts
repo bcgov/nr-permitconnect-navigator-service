@@ -1,13 +1,20 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { activityService, contactService, enquiryService, noteService, userService } from '../services';
+import {
+  activityService,
+  activityContactService,
+  contactService,
+  enquiryService,
+  noteService,
+  userService
+} from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentSubject, getCurrentUsername, isTruthy } from '../utils/utils';
+import { getCurrentSubject, getCurrentUsername, partition, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
+import type { Contact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
 
 const controller = {
   /**
@@ -177,14 +184,30 @@ const controller = {
 
   updateEnquiry: async (req: Request<never, never, Enquiry>, res: Response, next: NextFunction) => {
     try {
-      // Assign contactId if not present
       if (req.body.contacts) {
-        req.body.contacts = req.body.contacts.map((x) => ({
-          ...x,
-          contactId: x.contactId ?? uuidv4()
-        }));
+        // Match contacts that already have a contactId
+        const matches = (x: Contact) => !!x.contactId;
+
+        // Partition contacts into old and new based on whether they have a contactId
+        const [oldContacts, newContacts] = partition(req.body.contacts, matches);
+
+        // Assign a new contactId to each new contact
+        newContacts.forEach((x) => {
+          x.contactId = uuidv4();
+        });
+
+        // Combine old contacts with new contacts
+        const contacts = oldContacts.concat(newContacts);
+
+        // Insert new contacts into the contact table
+        await contactService.insertContacts(newContacts, req.currentContext);
+
+        // Delete any activity_contact records that doesn't match the activity and contacts in the request
+        await activityContactService.deleteUnmatchedActivityContacts(req.body.activityId, contacts);
+
+        // Create or update activity_contact with the data from the request
+        await activityContactService.upsertActivityContacts(req.body.activityId, contacts);
       }
-      await contactService.upsertContacts(req.body.contacts, req.currentContext, req.body.activityId);
 
       const result = await enquiryService.updateEnquiry({
         ...req.body,
