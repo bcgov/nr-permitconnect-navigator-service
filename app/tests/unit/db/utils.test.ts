@@ -1,5 +1,67 @@
 import { prismaMock } from '../../__mocks__/prismaMock';
-import { checkDatabaseHealth, checkDatabaseSchema } from '../../../src/db/utils/utils';
+import { castInput, checkDatabaseHealth, checkDatabaseSchema, prismaTypeFieldIndex } from '../../../src/db/utils/utils';
+
+import { Prisma } from '@prisma/client';
+
+describe('prismaTypeFieldIndex', () => {
+  it('contains expected scalars and their DateTime fields', () => {
+    expect(prismaTypeFieldIndex).toHaveProperty('DateTime');
+    expect(prismaTypeFieldIndex.DateTime).toHaveProperty('activity');
+    expect(prismaTypeFieldIndex.DateTime.activity).toEqual(expect.arrayContaining(['createdAt', 'updatedAt']));
+
+    for (const [scalar, models] of Object.entries(prismaTypeFieldIndex)) {
+      for (const [modelName, fields] of Object.entries(models)) {
+        const modelMeta = Prisma.dmmf.datamodel.models.find((m) => m.name === modelName);
+        expect(modelMeta).toBeDefined();
+        fields.forEach((f) => {
+          const fieldMeta = modelMeta!.fields.find((fm) => fm.name === f);
+          expect(fieldMeta?.type).toBe(scalar);
+        });
+      }
+    }
+  });
+});
+
+describe('castInput - DateTime', () => {
+  it('converts ISO strings to Date instances', () => {
+    const model = 'activity';
+    const payload: Record<string, unknown> = {
+      createdAt: '2024-01-01T10:00:00Z',
+      updatedAt: '2024-01-02T11:11:11Z',
+      untouched: 'foo'
+    };
+
+    castInput(model, payload, ['DateTime']);
+
+    expect(payload.createdAt).toBeInstanceOf(Date);
+    expect((payload.createdAt as Date).toISOString()).toBe('2024-01-01T10:00:00.000Z');
+    expect(payload.updatedAt).toBeInstanceOf(Date);
+    expect(payload.untouched).toBe('foo');
+  });
+
+  it('is a no-op when model has no DateTime fields', () => {
+    const payload: Record<string, unknown> = { some: 'value' };
+    castInput('NonexistentModel', payload, ['DateTime']);
+    expect(payload.some).toBe('value');
+  });
+
+  it('does nothing for non-object inputs', () => {
+    expect(() => castInput('activity', null, ['DateTime'])).not.toThrow();
+    expect(() => castInput('activity', 123, ['DateTime'])).not.toThrow();
+  });
+});
+
+describe('castInput - Decimal', () => {
+  it('wraps numbers in Prisma.Decimal', () => {
+    const model = 'electrification_project';
+    const payload: Record<string, unknown> = { megawatts: 3.14 };
+
+    castInput(model, payload, ['Decimal']);
+
+    expect(payload.megawatts).toBeInstanceOf(Prisma.Decimal);
+    expect((payload.megawatts as Prisma.Decimal).toNumber()).toBeCloseTo(3.14);
+  });
+});
 
 describe('checkDatabaseHealth', () => {
   it('should return true when the database is healthy', async () => {

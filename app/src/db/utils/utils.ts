@@ -4,11 +4,75 @@ import { v4 as uuidv4 } from 'uuid';
 import prisma from '../../db/dataConnection';
 import { getLogger } from '../../components/log';
 import { activityService } from '../../services';
-import { uuidToActivityId } from '../../utils/utils';
+import { isRecord, uuidToActivityId } from '../../utils/utils';
 
 import type { CurrentContext } from '../../types';
 
 const log = getLogger(module.filename);
+
+/**
+ * @constant inputTypeCasters
+ * A mapping of Prisma types to their input casting functions.
+ * This is used to convert input data to the appropriate Prisma types.
+ * @type {Record<string, { in: (v: unknown) => unknown }>}
+ */
+const inputTypeCasters: Record<string, { in: (v: unknown) => unknown }> = {
+  DateTime: {
+    in: (v) => (typeof v === 'string' ? new Date(v) : v)
+  },
+  Decimal: {
+    in: (v) => (typeof v === 'number' ? new Prisma.Decimal(v) : v)
+  }
+};
+
+/**
+ * @constant prismaTypeFieldIndex
+ * An indexing of Prisma types to their fields in each model.
+ * This is used to identify which fields need to be cast to specific Prisma types.
+ * This index is built at runtime from the Prisma DMMF (Data Model Meta Format).
+ * @type {Record<string, Record<string, string[]>>}
+ */
+export const prismaTypeFieldIndex: Record<string, Record<string, string[]>> = (() => {
+  const index: Record<string, Record<string, string[]>> = {};
+
+  for (const model of Prisma.dmmf.datamodel.models) {
+    for (const field of model.fields) {
+      (index[field.type] ??= {})[model.name] ??= [];
+      index[field.type][model.name].push(field.name);
+    }
+  }
+  return index;
+})();
+
+/**
+ * @function castInput
+ * Cast input data for specific Prisma types in a model.
+ * This function modifies the input data in place, converting fields to their appropriate types.
+ * @param {string} model The model name
+ * @param {unknown} data The input data to cast
+ * @param {string[]} prismaTypes An array of Prisma types to cast
+ * @returns {void}
+ *
+ * @remarks Only runs if the input data is a record (object).
+ *
+ * @see {@link  https://www.prisma.io/docs/orm/prisma-client/special-fields-and-types#working-with-datetime}
+ * @see {@link https://www.prisma.io/docs/orm/prisma-client/special-fields-and-types#working-with-decimal}
+ */
+export function castInput(model: string, data: unknown, prismaTypes: string[]): void {
+  if (!isRecord(data)) return;
+
+  for (const prismaType of prismaTypes) {
+    const fields = prismaTypeFieldIndex[prismaType]?.[model];
+    if (!fields) continue;
+
+    const caster = inputTypeCasters[prismaType]?.in;
+    if (!caster) continue;
+
+    for (const f of fields) {
+      data[f] = caster(data[f]);
+    }
+  }
+}
 
 /**
  * Checks the health of the database by executing a simple query.
