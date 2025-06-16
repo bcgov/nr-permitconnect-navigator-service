@@ -1,6 +1,5 @@
 import prisma from '../db/dataConnection';
-import { contact } from '../db/models';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { generateCreateStamps } from '../db/utils/utils';
 import { Contact, ContactSearchParameters, CurrentContext } from '../types';
 
 const service = {
@@ -10,7 +9,7 @@ const service = {
    * @param {string} contactId Contact ID
    */
   deleteContact: async (contactId: string) => {
-    await prisma.contact.delete({ where: { contact_id: contactId } });
+    await prisma.contact.delete({ where: { contactId } });
   },
 
   /**
@@ -22,23 +21,13 @@ const service = {
    */
   getContact: async (contactId: string, includeActivities: boolean) => {
     const result = await prisma.contact.findFirst({
-      where: {
-        contact_id: contactId
-      },
-      include: {
-        activity_contact: {
-          where: {
-            activity: {
-              is_deleted: false
-            }
-          }
-        }
-      }
+      where: { contactId },
+      include: includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {}
     });
 
     if (!result) return null;
 
-    return includeActivities ? contact.fromPrismaModelWithActivities(result) : contact.fromPrismaModel(result);
+    return result;
   },
 
   /**
@@ -52,34 +41,25 @@ const service = {
       await Promise.all(
         data.map(async (x: Contact) => {
           const response = await trx.contact.upsert({
-            where: {
-              contact_id: x.contactId
-            },
-            update: {
-              ...contact.toPrismaModel({ ...x, ...generateUpdateStamps(currentContext) })
-            },
-            create: {
-              ...contact.toPrismaModel({
-                ...x,
-                ...generateCreateStamps(currentContext)
-              })
-            }
+            where: { contactId: x.contactId },
+            update: x,
+            create: x
           });
 
           if (activityId) {
             await trx.activity_contact.upsert({
               where: {
-                activity_id_contact_id: {
-                  activity_id: activityId,
-                  contact_id: response?.contact_id ?? x.contactId
+                activityId_contactId: {
+                  activityId: activityId,
+                  contactId: response?.contactId ?? x.contactId
                 }
               },
               update: {
                 // Noop, required empty
               },
               create: {
-                activity_id: activityId,
-                contact_id: response?.contact_id ?? x.contactId
+                activityId,
+                contactId: response?.contactId ?? x.contactId
               }
             });
           }
@@ -100,12 +80,8 @@ const service = {
     return await prisma.$transaction(async (trx) => {
       await Promise.all(
         data.map(async (x: Contact) => {
-          await trx.contact.create({
-            data: contact.toPrismaModel({
-              ...x,
-              ...generateCreateStamps(currentContext)
-            })
-          });
+          const contact = { ...x, ...generateCreateStamps(currentContext) };
+          await trx.contact.create({ data: contact });
         })
       );
     });
@@ -128,55 +104,53 @@ const service = {
    * whether to include contacts with deleted activities
    * @returns {Promise<object>} The result of running the findMany operation
    */
-  searchContacts: async (params: ContactSearchParameters) => {
+  searchContacts: async (params: ContactSearchParameters): Promise<Array<Contact>> => {
     const response = await prisma.contact.findMany({
       where: {
         AND: [
           {
-            contact_id: { in: params.contactId }
+            contactId: { in: params.contactId }
           },
           {
-            user_id: { in: params.userId }
+            userId: { in: params.userId }
           },
           {
-            contact_applicant_relationship: { contains: params.contactApplicantRelationship, mode: 'insensitive' }
+            contactApplicantRelationship: { contains: params.contactApplicantRelationship, mode: 'insensitive' }
           },
           {
-            contact_preference: { contains: params.contactPreference, mode: 'insensitive' }
+            contactPreference: { contains: params.contactPreference, mode: 'insensitive' }
           },
           {
             email: { contains: params.email, mode: 'insensitive' }
           },
           {
-            first_name: { contains: params.firstName, mode: 'insensitive' }
+            firstName: { contains: params.firstName, mode: 'insensitive' }
           },
           {
-            last_name: { contains: params.lastName, mode: 'insensitive' }
+            lastName: { contains: params.lastName, mode: 'insensitive' }
           },
           {
-            phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
+            phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
           },
           ...(params.initiative
-            ? [{ activity_contact: { some: { activity: { initiative: { code: params.initiative } } } } }]
+            ? [{ activityContact: { some: { activity: { initiative: { code: params.initiative } } } } }]
             : []),
-          ...(params.hasActivity ? [{ activity_contact: { some: { activity: { is_deleted: false } } } }] : [])
+          ...(params.hasActivity ? [{ activityContact: { some: { activity: { isDeleted: false } } } }] : [])
         ]
       },
       include: {
         user: {
           select: {
-            bceid_business_name: true
+            bceidBusinessName: true
           }
         },
-        ...(params.includeActivities ? { activity_contact: { where: { activity: { is_deleted: false } } } } : {})
+        ...(params.includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {})
       }
     });
 
     if (!response || response.length === 0) return [];
 
-    return params.includeActivities
-      ? response.map((x) => contact.fromPrismaModelWithBusinessNameAndActivities(x))
-      : response.map((x) => contact.fromPrismaModelWithBusinessName(x));
+    return response;
   },
 
   /**
@@ -196,18 +170,18 @@ const service = {
             email: { contains: params.email, mode: 'insensitive' }
           },
           {
-            first_name: { contains: params.firstName, mode: 'insensitive' }
+            firstName: { contains: params.firstName, mode: 'insensitive' }
           },
           {
-            last_name: { contains: params.lastName, mode: 'insensitive' }
+            lastName: { contains: params.lastName, mode: 'insensitive' }
           },
           {
-            phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
+            phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
           }
         ]
       }
     });
-    return response.map((x) => contact.fromPrismaModel(x));
+    return response;
   }
 };
 
