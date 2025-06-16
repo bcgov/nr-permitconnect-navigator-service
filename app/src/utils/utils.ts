@@ -112,6 +112,16 @@ export function getCurrentUsername(currentContext: CurrentContext | undefined): 
 }
 
 /**
+ * @function isRecord
+ * Checks if the given item is a Record (object)
+ * @param {unknown} item The item to check
+ * @returns {boolean} True if the item is a Record and not null, false otherwise
+ */
+export function isRecord(item: unknown): item is Record<string, unknown> {
+  return typeof item === 'object' && item !== null;
+}
+
+/**
  * @function isTruthy
  * Returns true if the element name in the object contains a truthy value
  * @param {object} value The object to evaluate
