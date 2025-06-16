@@ -1,8 +1,8 @@
 import { IStamps } from '../interfaces/IStamps';
-import { ActivityContact } from './ActivityContact';
+// import { ActivityContact } from './ActivityContact';
 
 export type Contact = {
-  bceidBusinessName?: string | null;
+  // bceidBusinessName: string | null;
   contactId: string; // Primary Key
   userId: string | null;
   firstName: string | null;
@@ -11,5 +11,5 @@ export type Contact = {
   email: string | null;
   contactPreference: string | null;
   contactApplicantRelationship: string | null;
-  activityContact?: Array<ActivityContact>;
+  // activityContact: Array<ActivityContact> | null;
 } & Partial<IStamps>;
