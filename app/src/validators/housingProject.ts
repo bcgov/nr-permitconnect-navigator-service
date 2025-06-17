@@ -97,7 +97,7 @@ const schema = {
       relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),
       isDevelopedInBC: Joi.when('companyNameRegistered', {
-        is: Joi.string(),
+        is: Joi.string().required(),
         then: Joi.string()
           .required()
           .valid(...YES_NO_LIST),

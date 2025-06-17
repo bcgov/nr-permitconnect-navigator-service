@@ -1,5 +1,6 @@
 import electrificationProjectController from '../../../src/controllers/electrificationProject';
 import {
+  activityContactService,
   activityService,
   contactService,
   draftService,
@@ -449,7 +450,9 @@ describe('updateElectrificationProject', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
+  const insertContacts = jest.spyOn(contactService, 'insertContacts');
+  const deleteUnmatchedActivityContacts = jest.spyOn(activityContactService, 'deleteUnmatchedActivityContacts');
+  const upsertActivityContacts = jest.spyOn(activityContactService, 'upsertActivityContacts');
   const updateSpy = jest.spyOn(electrificationProjectService, 'updateElectrificationProject');
 
   it('should return 200 if all good', async () => {
@@ -461,13 +464,17 @@ describe('updateElectrificationProject', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updated: any = ELECTRIFICATION_PROJECT_1;
 
-    upsertContacts.mockResolvedValue();
+    insertContacts.mockResolvedValue();
+    deleteUnmatchedActivityContacts.mockResolvedValue();
+    upsertActivityContacts.mockResolvedValue();
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
 
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
+    expect(insertContacts).toHaveBeenCalledTimes(1);
+    expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
+    expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body.project,
@@ -484,7 +491,9 @@ describe('updateElectrificationProject', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    upsertContacts.mockResolvedValue();
+    insertContacts.mockResolvedValue();
+    deleteUnmatchedActivityContacts.mockResolvedValue();
+    upsertActivityContacts.mockResolvedValue();
     updateSpy.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -492,7 +501,9 @@ describe('updateElectrificationProject', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
 
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
+    expect(insertContacts).toHaveBeenCalledTimes(1);
+    expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
+    expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body.project,

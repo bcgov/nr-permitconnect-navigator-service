@@ -12,7 +12,7 @@ import { YES_NO_LIST } from '../utils/constants/application';
 const electrificationIntake = {
   activityId: Joi.string().min(8).max(8).allow(null),
   projectName: Joi.string().required().max(255).trim(),
-  companyNameRegistered: Joi.string().required().max(255).trim(),
+  companyNameRegistered: Joi.string().max(255).trim().allow(null),
   projectType: Joi.string()
     .required()
     .valid(...electrificationProjectTypeCodes),
