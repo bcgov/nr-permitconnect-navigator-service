@@ -2,13 +2,26 @@
 name: Tests
 
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-app:
     name: Unit Tests (App)
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     defaults:
       run:
         working-directory: app
@@ -75,6 +88,9 @@ jobs:
   test-frontend:
     name: Unit Tests (Frontend)
     runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'push' ||
+      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     defaults:
       run:
         working-directory: frontend
