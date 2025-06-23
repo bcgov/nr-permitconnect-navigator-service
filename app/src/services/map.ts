@@ -59,7 +59,6 @@ const service = {
     // convert lat/long for WFS query
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = polygon.map((point: any) => {
-      //@ts-expect-error insufficient type definitions
       return proj4(source, dest, { x: point.lng, y: point.lat });
     });
 

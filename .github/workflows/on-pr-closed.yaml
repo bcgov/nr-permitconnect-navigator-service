@@ -42,7 +42,7 @@ jobs:
         helm uninstall --namespace ${{ env.NAMESPACE_PREFIX }}-dev pr-${{ github.event.number }} --timeout 10m --wait
         oc delete --namespace ${{ env.NAMESPACE_PREFIX }}-dev cm,secret --selector app.kubernetes.io/instance=pr-${{ github.event.number }}
     - name: Remove Release Comment on PR
-      uses: marocchino/sticky-pull-request-comment@v2.9.3
+      uses: marocchino/sticky-pull-request-comment@d2ad0de260ae8b0235ce059e63f2949ba9e05943 # v2.9.3
       with:
         header: release
         delete: true

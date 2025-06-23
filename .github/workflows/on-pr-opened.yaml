@@ -70,7 +70,7 @@ jobs:
         run: |
           kubectl exec $(oc get pods --selector='app.kubernetes.io/instance=pr-${{ github.event.number }},app.kubernetes.io/name=nr-permitconnect-navigator-service' -o custom-columns=POD:.metadata.name --no-headers | head -1) -- sh -c "cd ./sbin && npx knex seed:run --specific=dev_groups.js"
       - name: Release Comment on PR
-        uses: marocchino/sticky-pull-request-comment@v2.9.3
+        uses: marocchino/sticky-pull-request-comment@d2ad0de260ae8b0235ce059e63f2949ba9e05943 # v2.9.3
         if: success()
         with:
           header: release

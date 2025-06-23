@@ -1,5 +1,5 @@
 ARG APP_ROOT=/opt/app-root/src
-ARG BASE_IMAGE=docker.io/node:22.14.0-alpine
+ARG BASE_IMAGE=docker.io/node:22.17.0-alpine
 
 #
 # Build the app
