@@ -40,7 +40,7 @@ model activity {
   electrification_project electrification_project[]
   enquiry                 enquiry[]
   housing_project         housing_project[]
-  note                    note[]
+  note_history            note_history[]
   permit                  permit[]
 
   @@schema("public")
@@ -160,24 +160,6 @@ model knex_migrations {
 model knex_migrations_lock {
   index     Int  @id @default(autoincrement())
   is_locked Int?
-
-  @@schema("public")
-}
-
-model note {
-  note_id             String    @id @db.Uuid
-  activity_id         String
-  note                String    @default("")
-  note_type           String    @default("")
-  title               String    @default("")
-  created_by          String?   @default("00000000-0000-0000-0000-000000000000")
-  created_at          DateTime? @default(now()) @db.Timestamptz(6)
-  updated_by          String?
-  updated_at          DateTime? @db.Timestamptz(6)
-  bring_forward_date  DateTime? @db.Timestamptz(6)
-  bring_forward_state String?
-  is_deleted          Boolean   @default(false)
-  activity            activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
 
   @@schema("public")
 }
@@ -470,68 +452,32 @@ model email_log {
   @@schema("public")
 }
 
-model electrification_project {
-  electrificationProjectId           String                                 @id @map("electrification_project_id") @db.Uuid
-  activityId                         String                                 @map("activity_id")
-  assignedUserId                     String?                                @map("assigned_user_id") @db.Uuid
-  submittedAt                        DateTime                               @map("submitted_at") @db.Timestamptz(6)
-  intakeStatus                       String?                                @map("intake_status")
-  applicationStatus                  String?                                @map("application_status")
-  queuePriority                      Int?                                   @map("queue_priority")
-  projectName                        String?                                @map("project_name")
-  projectDescription                 String?                                @map("project_description")
-  companyNameRegistered              String?                                @map("company_name_registered")
-  bcHydroNumber                      String?                                @map("bc_hydro_number")
-  submissionType                     String?                                @map("submission_type")
-  hasEpa                             String?                                @map("has_epa")
-  bcEnvironmentAssessNeeded          String?                                @map("bc_environment_assess_needed")
-  megawatts                          Decimal?                               @db.Decimal
-  locationDescription                String?                                @map("location_description")
-  aaiUpdated                         Boolean                                @default(false) @map("aai_updated")
-  atsClientId                        Int?                                   @map("ats_client_id")
-  astNotes                           String?                                @map("ast_notes")
-  projectType                        String?                                @map("project_type")
-  projectCategory                    String?                                @map("project_category")
-  createdBy                          String?                                @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                          DateTime?                              @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                          String?                                @map("updated_by")
-  updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
-  atsEnquiryId                       Int?                                   @map("ats_enquiry_id")
-  addedToATS                         Boolean                                @default(false) @map("added_to_ats")
-  activity                           activity                               @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                               user?                                  @relation(fields: [assignedUserId], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
-  electrificationProjectCategoryCode electrification_project_category_code? @relation(fields: [projectCategory], references: [code], map: "electrification_project_project_category_foreign")
-  electrificationProjectTypeCode     electrification_project_type_code?     @relation(fields: [projectType], references: [code], map: "electrification_project_project_type_foreign")
-
-  @@schema("public")
-}
-
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model electrification_project_category_code {
-  code                   String                    @id
-  display                String                    @unique(map: "electrification_project_category_code_display_unique")
-  definition             String
-  active                 Boolean                   @default(true)
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy              String?                   @map("updated_by")
-  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  electrificationProject electrification_project[]
+  code                    String                    @id
+  display                 String                    @unique(map: "electrification_project_category_code_display_unique")
+  definition              String
+  active                  Boolean                   @default(true)
+  createdBy               String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy               String?                   @map("updated_by")
+  updatedAt               DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrification_project electrification_project[]
 
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model electrification_project_type_code {
-  code                   String                    @id
-  display                String                    @unique(map: "electrification_project_type_code_display_unique")
-  definition             String
-  active                 Boolean                   @default(true)
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy              String?                   @map("updated_by")
-  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  electrificationProject electrification_project[]
+  code                    String                    @id
+  display                 String                    @unique(map: "electrification_project_type_code_display_unique")
+  definition              String
+  active                  Boolean                   @default(true)
+  createdBy               String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy               String?                   @map("updated_by")
+  updatedAt               DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrification_project electrification_project[]
 
   @@schema("public")
 }
@@ -597,6 +543,76 @@ model housing_project {
   ats_enquiry_id                     Int?
   activity                           activity  @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                               user?     @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
+
+  @@schema("public")
+}
+
+model note {
+  noteId        String       @id @map("note_id") @db.Uuid
+  noteHistoryId String       @map("note_history_id") @db.Uuid
+  note          String       @default("")
+  createdBy     String?      @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy     String?      @map("updated_by")
+  updatedAt     DateTime?    @map("updated_at") @db.Timestamptz(6)
+  note_history  note_history @relation(fields: [noteHistoryId], references: [noteHistoryId], onDelete: Cascade, map: "note_note_history_id_foreign")
+
+  @@schema("public")
+}
+
+model note_history {
+  noteHistoryId        String    @id @map("note_history_id") @db.Uuid
+  activityId           String    @map("activity_id")
+  type                 String    @default("")
+  title                String    @default("")
+  createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy            String?   @map("updated_by")
+  updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
+  bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
+  bringForwardState    String?   @map("bring_forward_state")
+  isDeleted            Boolean   @default(false) @map("is_deleted")
+  shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
+  escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
+  escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
+  note                 note[]
+  activity             activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
+
+  @@schema("public")
+}
+
+model electrification_project {
+  electrification_project_id            String                                 @id @db.Uuid
+  activity_id                           String
+  assigned_user_id                      String?                                @db.Uuid
+  submitted_at                          DateTime                               @db.Timestamptz(6)
+  intake_status                         String?
+  application_status                    String?
+  queue_priority                        Int?
+  project_name                          String?
+  project_description                   String?
+  company_name_registered               String?
+  bc_hydro_number                       String?
+  submission_type                       String?
+  has_epa                               String?
+  bc_environment_assess_needed          String?
+  megawatts                             Decimal?                               @db.Decimal
+  location_description                  String?
+  aai_updated                           Boolean                                @default(false)
+  ats_client_id                         Int?
+  ast_notes                             String?
+  project_type                          String?
+  project_category                      String?
+  created_by                            String?                                @default("00000000-0000-0000-0000-000000000000")
+  created_at                            DateTime?                              @default(now()) @db.Timestamptz(6)
+  updated_by                            String?
+  updated_at                            DateTime?                              @db.Timestamptz(6)
+  ats_enquiry_id                        Int?
+  added_to_ats                          Boolean                                @default(false)
+  activity                              activity                               @relation(fields: [activity_id], references: [activity_id], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
+  user                                  user?                                  @relation(fields: [assigned_user_id], references: [user_id], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
+  electrification_project_category_code electrification_project_category_code? @relation(fields: [project_category], references: [code], map: "electrification_project_project_category_foreign")
+  electrification_project_type_code     electrification_project_type_code?     @relation(fields: [project_type], references: [code], map: "electrification_project_project_type_foreign")
 
   @@schema("public")
 }
