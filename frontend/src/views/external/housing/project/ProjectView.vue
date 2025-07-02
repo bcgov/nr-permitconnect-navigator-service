@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Divider from '@/components/common/Divider.vue';
-import StatusPill from '@/components/common/StatusPill.vue';
+import AuthorizationStatusPill from '@/components/common/AuthorizationStatusPill.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
@@ -100,7 +100,9 @@ function permitFilter(config: PermitFilterConfig) {
 
   if (submitted) {
     returnArray = returnArray.filter((p) => {
-      return p.authStatus !== PermitAuthorizationStatus.NONE && p.status !== PermitStatus.NEW;
+      return (
+        p.authStatus !== PermitAuthorizationStatus.NONE && p.status !== PermitStatus.NEW && p.needed !== PermitNeeded.NO
+      );
     });
   }
 
@@ -309,7 +311,7 @@ onBeforeMount(async () => {
         <template #content>
           <div class="grid grid-cols-12 gap-4">
             <div class="col-span-12 flex mb-4">
-              <StatusPill
+              <AuthorizationStatusPill
                 class="mr-2"
                 :auth-status="permit.authStatus"
               />
@@ -324,7 +326,7 @@ onBeforeMount(async () => {
             <div class="col-span-3">
               <div class="label-field">{{ t('e.common.projectView.trackingId') }}</div>
               <div class="permit-data">
-                {{ permit?.trackingId }}
+                {{ permit?.permitTracking?.[0].shownToProponent ? permit?.permitTracking?.[0].trackingId : '' }}
               </div>
             </div>
             <div class="col-span-3">
