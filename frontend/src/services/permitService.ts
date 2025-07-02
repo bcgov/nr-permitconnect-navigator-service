@@ -41,6 +41,15 @@ export default {
   },
 
   /**
+   * @function getPermitTypes
+   * @param {Initiative} initiative Initiative type to get permit types for
+   * @returns {Promise} An axios response
+   */
+  getSourceSystems() {
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/sourceSystems`);
+  },
+
+  /**
    * @function listPermits
    * @returns {Promise} An axios response
    */
