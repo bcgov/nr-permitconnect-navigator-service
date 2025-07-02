@@ -21,6 +21,7 @@ export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<RouteNa
 export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const projectRouteNameKey = Symbol() as InjectionKey<RouteName>;
+export const projectViewRouteNameKey = Symbol() as InjectionKey<RouteName>;
 
 // Services
 export const projectServiceKey = Symbol() as InjectionKey<IProjectService>;
