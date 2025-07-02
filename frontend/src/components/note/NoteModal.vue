@@ -1,17 +1,20 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { mixed, object, string } from 'yup';
 
-import { DatePicker, InputText, Select, TextArea } from '@/components/form';
+import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Note } from '@/types';
 import type { SelectChangeEvent } from 'primevue/select';
+import { omit } from '@/utils/utils';
 
 // Props
 const { activityId, note = undefined } = defineProps<{
@@ -22,9 +25,14 @@ const { activityId, note = undefined } = defineProps<{
 // Emits
 const emit = defineEmits(['addNote', 'updateNote', 'deleteNote']);
 
+// Composables
+const { t } = useI18n();
+
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const showBringForward: Ref<boolean> = ref(note?.noteType === NoteType.BRING_FORWARD);
+const header: Ref<string | undefined> = ref(note?.type);
+const showBringForward: Ref<boolean> = ref(note?.type === NoteType.BRING_FORWARD);
+const showProponentToggle: Ref<boolean> = ref(note?.type === NoteType.GENERAL);
 const visible = defineModel<boolean>('visible');
 
 // Default form values
@@ -35,7 +43,7 @@ let initialFormValues: any = {
   createdAt: note?.createdAt ? new Date(note.createdAt) : new Date(),
   note: note?.note,
   noteId: note?.noteId,
-  noteType: note?.noteType ?? NoteType.GENERAL,
+  type: note?.type ?? NoteType.GENERAL,
   title: note?.title
 };
 
@@ -62,7 +70,7 @@ const formSchema = object({
     })
     .label('Bring forward state'),
   note: string().required().label('Note'),
-  noteType: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
+  type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
   title: string().required().max(255, 'Title too long').label('Title')
 });
 
@@ -97,13 +105,20 @@ function onDelete() {
 }
 
 const onNoteTypeChange = (e: SelectChangeEvent) => {
+  header.value = e.value;
+  showBringForward.value = e.value === NoteType.BRING_FORWARD;
+  showProponentToggle.value = e.value === NoteType.GENERAL;
+
+  formRef.value?.setFieldValue('showToProponent', false);
+
+  formRef.value?.setFieldValue('escalateToSupervisor', false);
+  formRef.value?.setFieldValue('escalateToDirector', false);
+
   if (e.value === NoteType.BRING_FORWARD) {
     formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
-    showBringForward.value = true;
   } else {
     formRef.value?.setFieldValue('bringForwardDate', null);
     formRef.value?.setFieldValue('bringForwardState', null);
-    showBringForward.value = false;
   }
 };
 
@@ -112,7 +127,8 @@ const onNoteTypeChange = (e: SelectChangeEvent) => {
 async function onSubmit(data: any, { resetForm }) {
   try {
     if (!note) {
-      const result = (await noteService.createNote({ ...data, activityId: activityId })).data;
+      const b = omit(data, ['createdAt']) as Note;
+      const result = (await noteService.createNote({ ...b, activityId: activityId })).data;
       emit('addNote', result);
       resetForm();
     } else {
@@ -137,104 +153,120 @@ async function onSubmit(data: any, { resetForm }) {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <font-awesome-icon
-        icon="fa-solid fa-plus"
-        fixed-width
-        class="mr-2"
-      />
-      <span class="p-dialog-title">Add note</span>
+      <span class="p-dialog-title">{{ header }} note</span>
     </template>
 
     <Form
       ref="formRef"
-      v-slot="{ handleReset }"
+      v-slot="{ handleReset, values }"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="onSubmit"
     >
-      <div class="grid grid-cols-12 gap-4">
-        <DatePicker
-          class="col-span-6"
-          name="createdAt"
-          label="Date"
-          :disabled="!note"
-          :show-time="true"
-        />
-        <div class="col-span-6" />
-        <Select
-          class="col-span-6"
-          name="noteType"
-          label="Note type"
-          :options="NOTE_TYPE_LIST"
-          @on-change="
-            (e: SelectChangeEvent) => {
-              onNoteTypeChange(e);
-            }
-          "
-        />
-        <DatePicker
-          v-if="showBringForward"
-          class="col-span-6"
-          name="bringForwardDate"
-          label="Bring forward date"
-        />
-        <div
-          v-else
-          class="col-span-6"
-        />
-        <InputText
-          class="col-span-6"
-          name="title"
-          label="Title"
-        />
-        <Select
-          v-if="showBringForward"
-          class="col-span-6"
-          name="bringForwardState"
-          label="Bring forward state"
-          :options="BRING_FORWARD_TYPE_LIST"
-        />
-        <div
-          v-else
-          class="col-span-6"
-        />
-        <TextArea
-          class="col-span-12"
-          name="note"
-          label="Note"
-        />
-        <div class="field col-span-12 flex">
-          <div class="flex-auto">
-            <Button
-              class="mr-2"
-              label="Save"
-              type="submit"
-              icon="pi pi-check"
-            />
-            <Button
-              class="p-button-outlined mr-2"
-              label="Cancel"
-              icon="pi pi-times"
-              @click="
-                () => {
-                  handleReset();
-                  showBringForward = note?.noteType === NoteType.BRING_FORWARD;
-                  visible = false;
+      <div class="grid grid-cols-[3fr_1fr] gap-x-9 mt-4">
+        <div class="flex flex-col gap-y-3">
+          <div class="flex flex-row gap-x-3">
+            <Select
+              class="w-1/2"
+              name="type"
+              label="Note type"
+              :options="NOTE_TYPE_LIST"
+              @on-change="
+                (e: SelectChangeEvent) => {
+                  onNoteTypeChange(e);
                 }
               "
             />
-          </div>
-          <div
-            v-if="note"
-            class="flex justify-content-right"
-          >
-            <Button
-              class="p-button-outlined p-button-danger mr-2"
-              label="Delete"
-              icon="pi pi-trash"
-              @click="onDelete"
+            <DatePicker
+              v-if="showBringForward"
+              class="w-1/2"
+              name="bringForwardDate"
+              label="Bring forward date"
             />
           </div>
+          <InputText
+            name="title"
+            label="Note title"
+          />
+          <TextArea
+            name="note"
+            label="Note"
+          />
+        </div>
+        <div class="flex flex-col gap-y-9">
+          <div class="bg-[var(--p-bcblue-50)]">
+            <div class="flex flex-row gap-x-1">
+              <span>{{ t('noteModal.created') }}:</span>
+              <span class="text-[var(--p-bcblue-900)]">{{ formatDate(values.createdAt.toISOString()) }}</span>
+            </div>
+            <div class="flex flex-row gap-x-1">
+              <span>{{ t('noteModal.lastUpdated') }}:</span>
+              <!-- <span class="text-[var(--p-bcblue-900)]">{{ formatDate(values.updatedAt.toISOString()) }}</span> -->
+            </div>
+            <div
+              v-if="showProponentToggle"
+              class="flex flex-col"
+            >
+              <Checkbox
+                name="shownToProponent"
+                :label="t('noteModal.showProponent')"
+                :bold="false"
+              />
+            </div>
+            <div
+              v-if="showBringForward"
+              class="flex flex-col"
+            >
+              <Checkbox
+                name="escalateToSupervisor"
+                :label="t('noteModal.escalateSupervisor')"
+                :bold="false"
+              />
+              <Checkbox
+                name="escalateToDirector"
+                :label="t('noteModal.escalateDirector')"
+                :bold="false"
+              />
+              <Select
+                name="bringForwardState"
+                label="Bring forward state"
+                :options="BRING_FORWARD_TYPE_LIST"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field col-span-12 flex">
+        <div class="flex-auto">
+          <Button
+            class="mr-2"
+            label="Save"
+            type="submit"
+            icon="pi pi-check"
+          />
+          <Button
+            class="p-button-outlined mr-2"
+            label="Cancel"
+            icon="pi pi-times"
+            @click="
+              () => {
+                handleReset();
+                showBringForward = note?.noteType === NoteType.BRING_FORWARD;
+                visible = false;
+              }
+            "
+          />
+        </div>
+        <div
+          v-if="note"
+          class="flex justify-content-right"
+        >
+          <Button
+            class="p-button-outlined p-button-danger mr-2"
+            label="Delete"
+            icon="pi pi-trash"
+            @click="onDelete"
+          />
         </div>
       </div>
     </Form>
