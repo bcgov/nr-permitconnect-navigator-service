@@ -8,9 +8,11 @@ import type { Permit } from '../../types';
 
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
-const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({ include: { permit_type: true } });
+const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permit_type: true, permit_tracking: { include: { source_system_kind: true } } }
+});
 const _permitWithNotesGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_note: true, permit_type: true }
+  include: { permit_note: true, permit_type: true, permit_tracking: { include: { source_system_kind: true } } }
 });
 
 type PrismaRelationPermit = Omit<Prisma.permitGetPayload<typeof _permit>, 'activity' | keyof Stamps>;
@@ -24,7 +26,6 @@ export default {
       permit_type_id: input.permitTypeId,
       activity_id: input.activityId,
       issued_permit_id: input.issuedPermitId,
-      tracking_id: input.trackingId,
       auth_status: input.authStatus,
       needed: input.needed,
       status: input.status,
@@ -41,7 +42,6 @@ export default {
       activityId: input.activity_id,
       createdAt: input.created_at?.toISOString() ?? null,
       issuedPermitId: input.issued_permit_id,
-      trackingId: input.tracking_id,
       authStatus: input.auth_status,
       needed: input.needed,
       status: input.status,
@@ -50,7 +50,9 @@ export default {
       statusLastVerified: input.status_last_verified?.toISOString() ?? null,
       updatedAt: input.updated_at?.toISOString() ?? null,
       updatedBy: input.updated_by,
-      permitType: permit_type.fromPrismaModel(input.permit_type)
+      permitType: permit_type.fromPrismaModel(input.permit_type),
+      // @ts-expect-error - mapping issue with permit_tracking
+      permitTracking: input?.permit_tracking?.map((x) => ({ ...x, sourceSystemKind: x.source_system_kind }))
     };
   },
 

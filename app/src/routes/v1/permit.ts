@@ -67,6 +67,15 @@ router.get(
   }
 );
 
+// Permit types endpoint
+router.get(
+  '/sourceSystems',
+  hasAuthorization(Resource.PERMIT, Action.READ),
+  (req: Request<never, never, never, { initiative: Initiative }>, res: Response, next: NextFunction): void => {
+    permitController.getSourceSystems(req, res, next);
+  }
+);
+
 // Permit get endpoint
 router.get(
   '/:permitId',

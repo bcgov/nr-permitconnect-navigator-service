@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
 
-import type { ListPermitsOptions, Permit } from '../types';
+import type { ListPermitsOptions, Permit, PermitTracking } from '../types';
 
 const service = {
   /**
@@ -17,15 +17,32 @@ const service = {
    */
   createPermit: async (data: Permit) => {
     try {
-      const newPermit = { ...data, permitId: uuidv4() };
+      const response = await prisma.$transaction(async (trx) => {
+        const newPermit = { ...data, permitId: uuidv4() };
 
-      const create = await prisma.permit.create({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
+        const createResponse = await trx.permit.create({
+          include: {
+            permit_type: true
+          },
+          data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
+        });
+
+        if (data?.permitTracking) {
+          await trx.permit_tracking.createMany({
+            data: data?.permitTracking?.map((x: PermitTracking) => ({
+              permitId: newPermit?.permitId,
+              trackingId: x.trackingId,
+              sourceSystemKindId: x?.sourceSystemKindId,
+              shownToProponent: x?.shownToProponent ?? false,
+              createdBy: data.createdBy,
+              updatedBy: data.updatedBy
+            }))
+          });
+        }
+        return createResponse;
       });
-      return permit.fromPrismaModel(create);
+      //@ts-expect-error - mapping issue with permit_tracking
+      return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;
     }
@@ -46,7 +63,7 @@ const service = {
         permit_id: permitId
       }
     });
-
+    //@ts-expect-error - mapping issue with permit_tracking
     return permit.fromPrismaModel(response);
   },
 
@@ -79,10 +96,11 @@ const service = {
       },
       include: {
         permit_type: true, // If changed reflect in type and model
-        permit_note: { orderBy: { created_at: 'desc' } }
+        permit_note: { orderBy: { created_at: 'desc' } },
+        permit_tracking: true
       }
     });
-
+    //@ts-expect-error - mapping issue with permit_tracking
     return result ? permit.fromPrismaModelWithNotes(result) : null;
   },
 
@@ -121,6 +139,23 @@ const service = {
   },
 
   /**
+   * @function getSourceSystems
+   * Get all Source Systems
+   * @returns {Promise<PermitType[]>} The result of running the findMany operation
+   */
+  getSourceSystems: async () => {
+    const response = await prisma.source_system_code.findMany({
+      include: {
+        source_system_kind_source_system_kind_source_system_codeTosource_system_code: true
+      },
+      orderBy: {
+        acronym: 'asc'
+      }
+    });
+    return response;
+  },
+
+  /**
    * @function listPermits
    * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
    * @param {string} activityId PCNS Activity ID
@@ -130,7 +165,12 @@ const service = {
     const response = await prisma.permit.findMany({
       include: {
         permit_type: true,
-        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false
+        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false,
+        permit_tracking: {
+          include: {
+            source_system_kind: true
+          }
+        }
       },
       where: {
         activity_id: options?.activityId || undefined
@@ -166,7 +206,7 @@ const service = {
           permit_id: data.permitId
         }
       });
-
+      //@ts-expect-error - mapping issue with permit_tracking
       return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;
