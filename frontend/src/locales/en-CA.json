@@ -575,6 +575,13 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "noteModal": {
+    "created": "Created",
+    "escalateDirector": "Escalate to Director",
+    "escalateSupervisor": "Escalate to Supervisor",
+    "lastUpdated": "Last updated",
+    "showProponent": "Show to Proponent"
+  },
   "permitModal": {
     "addTitle": "Add permit",
     "editTitle": "Edit permit"
