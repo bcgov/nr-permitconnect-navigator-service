@@ -49,7 +49,7 @@ const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdPr
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon', 'router-link', 'StatusPill']
+    stubs: ['font-awesome-icon', 'router-link', 'AuthorizationStatusPill']
   }
 });
 

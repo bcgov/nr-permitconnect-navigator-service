@@ -55,7 +55,6 @@ describe('createPermit', () => {
       permitTypeId: 123,
       activityId: 'ACT_ID',
       issuedPermitId: '1',
-      trackingId: '2',
       authStatus: 'ACTIVE',
       needed: 'true',
       status: 'FOO',
@@ -209,8 +208,7 @@ describe('getPermitTypes', () => {
         nameSubtype: null,
         acronym: 'PRT1',
         trackedInATS: true,
-        sourceSystem: null,
-        sourceSystemAcronym: 'SRC'
+        sourceSystemCode: 'CODE'
       }
     ];
 
@@ -242,6 +240,51 @@ describe('getPermitTypes', () => {
     expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('getSourceSystems', () => {
+  const next = jest.fn();
+
+  // Mock service calls
+  const getSourceSystemsSpy = jest.spyOn(permitService, 'getSourceSystems');
+
+  it('should return 200 if all good', async () => {
+    const req = {
+      currentContext: CURRENT_CONTEXT,
+      query: { initiative: Initiative.HOUSING }
+    };
+
+    const sampleSourceSystemCode = {
+      acronym: 'ATS',
+      active: true,
+      code: 'ITSM-5314',
+      definition: 'Authorization Tracking System',
+      display: 'Authorization Tracking System',
+      sourceSystemKind: {
+        description: 'ATS Project Number',
+        kind: null,
+        sourceSystemCode: 'ITSM-5314',
+        sourceSystemKindId: 2,
+        createdAt: '2025-06-18T15:56:00.515Z',
+        createdBy: '00000000-0000-0000-0000-000000000000',
+        updatedAt: null,
+        updatedBy: null
+      },
+      createdAt: '2025-06-18T15:56:00.515Z',
+      createdBy: '00000000-0000-0000-0000-000000000000',
+      updatedAt: null,
+      updatedBy: null
+    };
+    // @ts-expect-error - Mocking a specific return type
+    getSourceSystemsSpy.mockResolvedValue(sampleSourceSystemCode);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await permitController.getSourceSystems(req as any, res as any, next);
+
+    expect(getSourceSystemsSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(sampleSourceSystemCode);
   });
 });
 

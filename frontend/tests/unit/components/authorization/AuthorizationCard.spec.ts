@@ -1,12 +1,13 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import PermitModal from '@/components/permit/PermitModal.vue';
+import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
 import type { AxiosResponse } from 'axios';
 import type { Permit, PermitType } from '@/types';
@@ -27,7 +28,6 @@ vi.mock('vue-router', () => ({
 }));
 
 const currentDate = new Date().toISOString();
-const activityId = 'activityUUID';
 
 const testPermitType: PermitType = {
   permitTypeId: 1,
@@ -52,7 +52,6 @@ const testPermit: Permit = {
   needed: 'yes',
   status: 'status',
   issuedPermitId: 'issued Permit ID',
-  trackingId: 'test tracking ID',
   authStatus: 'test auth status',
   submittedDate: currentDate,
   adjudicationDate: currentDate,
@@ -65,8 +64,7 @@ const testPermit: Permit = {
 
 const wrapperSettings = (testPermitProp = testPermit) => ({
   props: {
-    permit: testPermitProp,
-    activityId
+    permit: testPermitProp
   },
   global: {
     plugins: [
@@ -82,7 +80,10 @@ const wrapperSettings = (testPermitProp = testPermit) => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon']
+    stubs: ['font-awesome-icon'],
+    directives: {
+      Tooltip: Tooltip
+    }
   }
 });
 
@@ -106,9 +107,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('PermitModal', () => {
+describe('AuthorizationCard', () => {
   it('renders component', async () => {
-    const wrapper = mount(PermitModal, wrapperSettings());
+    const wrapper = mount(AuthorizationCard, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });
