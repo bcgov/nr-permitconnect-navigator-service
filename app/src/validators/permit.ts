@@ -9,7 +9,18 @@ const sharedPermitSchema = {
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().min(0).max(255).allow(null),
-  trackingId: Joi.string().min(0).max(255).allow(null),
+  permitTracking: Joi.array()
+    .items(
+      Joi.object({
+        trackingId: Joi.string().allow(null),
+        permitTrackingId: Joi.string().allow(null),
+        shownToProponent: Joi.boolean().allow(null),
+        sourceSystemKindId: Joi.number().allow(null),
+        sourceSystemKind: Joi.object({}).allow(null),
+        permitId: Joi.string().allow(null)
+      })
+    )
+    .allow(null),
   authStatus: Joi.string().max(255).allow(null),
   statusLastVerified: Joi.date().iso().max('now'),
   needed: Joi.string().max(255).required(),

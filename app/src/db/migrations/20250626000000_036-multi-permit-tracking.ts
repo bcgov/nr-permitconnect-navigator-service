@@ -205,10 +205,6 @@ export async function up(knex: Knex): Promise<void> {
             source_system_code: 'ITSM-5314'
           },
           {
-            description: 'ATS Project Number',
-            source_system_code: 'ITSM-5314'
-          },
-          {
             description: 'Application Number',
             source_system_code: 'ITSM-5285'
           },
@@ -303,6 +299,13 @@ export async function up(knex: Knex): Promise<void> {
           table.dropColumn('source_system_acronym');
         })
       )
+      .then(() =>
+        knex.schema.raw(`update public.permit_type
+      set name = case
+        when name = 'Short-term Water use approval' then 'Short-term Water Use Approval'
+        else name
+      end`)
+      )
   );
 }
 
@@ -365,5 +368,13 @@ export async function down(knex: Knex): Promise<void> {
       .then(() => knex.schema.dropTableIfExists('permit_tracking'))
       .then(() => knex.schema.dropTableIfExists('source_system_kind'))
       .then(() => knex.schema.dropTableIfExists('source_system_code'))
+
+      .then(() =>
+        knex.schema.raw(`update public.permit_type
+      set name = case
+        when name = 'Short-term Water Use Approval' then 'Short-term Water use approval'
+        else name
+      end`)
+      )
   );
 }
