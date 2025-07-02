@@ -233,7 +233,10 @@ async function onSubmit(data: any) {
     if (permit) {
       let permitDescription =
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
-      const trackingId = permit.trackingId ? permit.trackingId : t('enquiryIntakeForm.notApplicable');
+      // Obtain the tracking ID that is shown to the proponent
+      const trackingId =
+        permit.permitTracking?.filter((x) => x.shownToProponent)?.[0]?.trackingId ||
+        t('enquiryIntakeForm.notApplicable');
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
       permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
       enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
@@ -320,8 +323,10 @@ onBeforeMount(async () => {
             <span class="text-primary">
               {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
               {{ t('enquiryIntakeForm.trackingId') }}:
-              {{ permit?.trackingId ? permit.trackingId : t('enquiryIntakeForm.notApplicable') }}|
-              {{ t('enquiryIntakeForm.authStatus') }}:
+              {{
+                permit?.permitTracking?.filter((x) => x.shownToProponent)?.[0]?.trackingId ||
+                t('enquiryIntakeForm.notApplicable')
+              }}| {{ t('enquiryIntakeForm.authStatus') }}:
               {{ permit?.authStatus ?? 'No authorization status.' }}
             </span>
           </span>
