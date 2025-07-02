@@ -57,7 +57,21 @@ const routes: Array<RouteRecordRaw> = [
                     component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
-                    meta: { dynamicBreadcrumb: 'enquiry' }
+                    meta: { dynamicBreadcrumb: 'authorization' }
+                  }
+                ]
+              },
+              {
+                path: 'authorization',
+                component: () => import('@/views/GenericView.vue'),
+                children: [
+                  {
+                    path: '',
+                    name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+                    component: () => import('@/views/internal/housing/authorization/AuthorizationView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps,
+                    meta: { dynamicBreadcrumb: 'authorization' }
                   }
                 ]
               },

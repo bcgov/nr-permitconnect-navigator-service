@@ -166,17 +166,49 @@
   },
   "i": {
     "common": {
+      "authorization": {
+        "authorizationForm": {
+          "addAuthorization": "Add authorization",
+          "publish": "Publish",
+          "cancel": "Cancel",
+          "agency": "Agency:",
+          "businessDomain": "Business domain:",
+          "updatedBy": "Updated by:",
+          "lastUpdated": "Last updated:",
+          "updateNoteHistory": "Update note history"
+        },
+        "authorizationCardIntake": {
+          "authorization": "Authorization",
+          "authorizationTypeID": "Authorization type and IDs",
+          "trackingIds": "Tracking IDs",
+          "issuedPermitId": "Issued Permit ID"
+        },
+        "authorizationStatusUpdatesCard": {
+          "statusUpdates": "Status updates",
+          "statusVerifiedDate": "Status verified date",
+          "updateToToday": "Update to today",
+          "authorizationStatus": "Authorization status",
+          "applicationStage": "Application stage",
+          "needed": "Needed",
+          "submittedDate": "Submitted date",
+          "decisionDate": "Decision date",
+          "updateNoteForProponent": "Update note for Proponent"
+        },
+        "authorizationUpdateHistory": {
+          "updateNoteHistory": "Update note history"
+        }
+      },
       "form": {
         "cancelMessage": "Your changes have not been saved.",
         "savedMessage": "Form saved"
       },
       "projectView": {
-        "applicablePermits": "Applicable permits",
+        "applicableAuthorizations": "Applicable authorizations",
         "seePropViewButtonLabel": "See Proponent's View",
         "tabFiles": "Files",
         "tabInformation": "Information",
         "tabNotes": "Notes",
-        "tabPermits": "Permits",
+        "tabAuthorizations": "Authorizations",
         "tabRelatedEnquiries": "Related enquiries",
         "tabRoadmap": "Roadmap"
       },
@@ -455,7 +487,7 @@
     "permitState": "Permit state:",
     "previousUpdates": "Previous Updates",
     "sourceSystem": "Source system:",
-    "statusVerified": "Status verified date:",
+    "statusVerified": "Status verified date",
     "submittedDate": "Submitted date:",
     "trackingId": "Tracking ID:",
     "updatedBy": "Updated by:"
