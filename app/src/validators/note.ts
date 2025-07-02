@@ -2,39 +2,61 @@ import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
+import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon';
 
-const noteBody = {
-  createdAt: Joi.date().required(),
+const noteHistoryBody = {
   activityId: activityId,
   bringForwardDate: Joi.date().iso().allow(null),
-  bringForwardState: Joi.string().min(1).allow(null),
-  note: Joi.string(),
-  noteType: Joi.string().max(255).required(),
-  title: Joi.string().max(255)
+  bringForwardState: Joi.string()
+    .valid(...BRING_FORWARD_TYPE_LIST)
+    .allow(null),
+  escalateToSupervisor: Joi.boolean(),
+  escalateToDirector: Joi.boolean(),
+  noteHistoryId: uuidv4.allow(null),
+  shownToProponent: Joi.boolean(),
+  title: Joi.string().max(255).required(),
+  type: Joi.string().max(255).required()
+};
+
+const noteBody = {
+  noteId: uuidv4.allow(null),
+  noteHistoryId: uuidv4.allow(null),
+  note: Joi.string()
 };
 
 const schema = {
-  createNote: {
-    body: Joi.object(noteBody)
+  createNoteHistory: {
+    body: Joi.object({
+      activityId: activityId,
+      bringForwardDate: Joi.date().iso().allow(null),
+      bringForwardState: Joi.string()
+        .valid(...BRING_FORWARD_TYPE_LIST)
+        .allow(null),
+      escalateToSupervisor: Joi.boolean(),
+      escalateToDirector: Joi.boolean(),
+      note: Joi.string().required(),
+      shownToProponent: Joi.boolean(),
+      title: Joi.string().max(255).required(),
+      type: Joi.string().max(255).required()
+    })
   },
-  listNotes: {
+  listNoteHistory: {
     params: Joi.object({
       activityId: activityId
     })
   },
-  updateNote: {
+  addNote: {
     body: Joi.object({
-      ...noteBody,
-      noteId: uuidv4.required()
+      note: Joi.string().required()
     }),
     params: Joi.object({
-      noteId: uuidv4.required()
+      noteHistoryId: uuidv4.required()
     })
   }
 };
 
 export default {
-  createNote: validate(schema.createNote),
-  listNotes: validate(schema.listNotes),
-  updateNote: validate(schema.updateNote)
+  createNoteHistory: validate(schema.createNoteHistory),
+  listNoteHistory: validate(schema.listNoteHistory),
+  addNote: validate(schema.addNote)
 };
