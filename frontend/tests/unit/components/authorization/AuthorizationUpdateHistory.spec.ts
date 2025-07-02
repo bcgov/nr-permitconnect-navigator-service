@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import PermitCard from '@/components/permit/PermitCard.vue';
+import AuthorizationUpdateHistory from '@/components/common/AuthorizationUpdateHistory.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
@@ -10,7 +10,6 @@ import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 
 import type { AxiosResponse } from 'axios';
-import type { Permit, PermitType } from '@/types';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
@@ -27,46 +26,8 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const currentDate = new Date().toISOString();
-
-const testPermitType: PermitType = {
-  permitTypeId: 1,
-  agency: 'Water, Land and Resource Stewardship',
-  division: 'Forest Resiliency and Archaeology',
-  branch: 'Archaeology',
-  businessDomain: 'Archaeology',
-  type: 'Alteration',
-  family: undefined,
-  name: 'Archaeology Alteration Permit',
-  nameSubtype: undefined,
-  acronym: 'SAP',
-  trackedInATS: false,
-  sourceSystem: 'Archaeology Permit Tracking System',
-  sourceSystemAcronym: 'APTS'
-};
-
-const testPermit: Permit = {
-  permitId: 'permitUUID',
-  permitTypeId: 123,
-  activityId: 'activityUUID',
-  needed: 'yes',
-  status: 'status',
-  issuedPermitId: 'issued Permit ID',
-  trackingId: 'test tracking ID',
-  authStatus: 'test auth status',
-  submittedDate: currentDate,
-  adjudicationDate: currentDate,
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  permitType: testPermitType
-};
-
-const wrapperSettings = (testPermitProp = testPermit) => ({
-  props: {
-    permit: testPermitProp
-  },
+const wrapperSettings = () => ({
+  props: {},
   global: {
     plugins: [
       () =>
@@ -108,9 +69,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('PermitCard', () => {
+describe('AuthorizationUpdateHistory', () => {
   it('renders component', async () => {
-    const wrapper = mount(PermitCard, wrapperSettings());
+    const wrapper = mount(AuthorizationUpdateHistory, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });
