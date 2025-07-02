@@ -727,24 +727,39 @@ model source_system_kind {
 }
 
 model note_history {
-  noteHistoryId        String    @id @map("note_history_id") @db.Uuid
-  activityId           String    @map("activity_id")
-  type                 String    @default("")
-  title                String    @default("")
-  createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy            String?   @map("updated_by")
-  updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
-  bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
-  bringForwardState    String?   @map("bring_forward_state")
-  shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
-  escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
-  escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
-  escalationType       String?   @map("escalation_type") @db.VarChar(255)
-  deletedBy            String?   @map("deleted_by")
-  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(6)
+  noteHistoryId        String                @id @map("note_history_id") @db.Uuid
+  activityId           String                @map("activity_id")
+  type                 String                @default("")
+  title                String                @default("")
+  createdBy            String?               @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy            String?               @map("updated_by")
+  updatedAt            DateTime?             @map("updated_at") @db.Timestamptz(6)
+  bringForwardDate     DateTime?             @map("bring_forward_date") @db.Timestamptz(6)
+  bringForwardState    String?               @map("bring_forward_state")
+  isDeleted            Boolean               @default(false) @map("is_deleted")
+  shownToProponent     Boolean               @default(false) @map("shown_to_proponent")
+  escalateToSupervisor Boolean               @default(false) @map("escalate_to_supervisor")
+  escalateToDirector   Boolean               @default(false) @map("escalate_to_director")
+  escalationType       String?               @map("escalation_type")
   note                 note[]
-  activity             activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "note_activity_id_foreign")
+  activity             activity              @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "note_activity_id_foreign")
+  escalation_type_code escalation_type_code? @relation(fields: [escalationType], references: [code], map: "note_history_escalation_type_foreign")
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model escalation_type_code {
+  code         String         @id
+  display      String         @unique(map: "escalation_type_code_display_unique")
+  definition   String
+  active       Boolean        @default(true)
+  created_by   String?        @default("00000000-0000-0000-0000-000000000000")
+  created_at   DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_by   String?
+  updated_at   DateTime?      @db.Timestamptz(6)
+  note_history note_history[]
 
   @@schema("public")
 }
