@@ -8,39 +8,40 @@ import { Action, Resource } from '../../utils/enums/application';
 import { noteValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Note } from '../../types';
+import type { Note, NoteHistory } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Note create endpoint
+// Note History create endpoint
 router.put(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
-  noteValidator.createNote,
-  (req: Request<never, never, Note>, res: Response, next: NextFunction): void => {
-    noteController.createNote(req, res, next);
+  noteValidator.createNoteHistory,
+  (req: Request<never, never, { noteHistory: NoteHistory; note: Note }>, res: Response, next: NextFunction): void => {
+    noteController.createNoteHistory(req, res, next);
   }
 );
 
+// Note add endpoint
 router.put(
-  '/:noteId',
+  '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
-  hasAccess('noteId'),
-  noteValidator.updateNote,
+  hasAccess('noteHistoryId'),
+  noteValidator.addNote,
   (req: Request<never, never, Note>, res: Response, next: NextFunction): void => {
-    noteController.updateNote(req, res, next);
+    noteController.addNote(req, res, next);
   }
 );
 
-// Note delete endpoint
+// Note History delete endpoint
 router.delete(
-  '/:noteId',
+  '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.DELETE),
-  hasAccess('noteId'),
-  (req: Request<{ noteId: string }>, res: Response, next: NextFunction): void => {
-    noteController.deleteNote(req, res, next);
+  hasAccess('noteHistoryId'),
+  (req: Request<{ noteHistoryId: string }>, res: Response, next: NextFunction): void => {
+    noteController.deleteNoteHistory(req, res, next);
   }
 );
 
@@ -52,13 +53,13 @@ router.get(
   }
 );
 
-// Note list endpoints
+// Note History list endpoint
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),
-  noteValidator.listNotes,
+  noteValidator.listNoteHistory,
   (req: Request<{ activityId: string }>, res: Response, next: NextFunction): void => {
-    noteController.listNotes(req, res, next);
+    noteController.listNoteHistory(req, res, next);
   }
 );
 

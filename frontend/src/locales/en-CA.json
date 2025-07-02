@@ -575,6 +575,30 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "noteModal": {
+    "created": "Created",
+    "escalateDirector": "Escalate to Director",
+    "escalateSupervisor": "Escalate to Supervisor",
+    "lastUpdated": "Last updated",
+    "showProponent": "Show to Proponent"
+  },
+  "permitCard": {
+    "addUpdates": "Add updates",
+    "adjudicationDate": "Adjudication date:",
+    "agency": "Agency:",
+    "businessDomain": "Business domain:",
+    "issuedPermitId": "Issued Permit ID:",
+    "lastUpdated": "Last updated:",
+    "latestUpdate": "Latest update for the client:",
+    "needed": "Needed:",
+    "permitState": "Permit state:",
+    "previousUpdates": "Previous Updates",
+    "sourceSystem": "Source system:",
+    "statusVerified": "Status verified date:",
+    "submittedDate": "Submitted date:",
+    "trackingId": "Tracking ID:",
+    "updatedBy": "Updated by:"
+  },
   "permitModal": {
     "addTitle": "Add permit",
     "editTitle": "Edit permit"

@@ -6,7 +6,7 @@ export type Note = {
   bringForwardDate?: string;
   bringForwardState?: string;
   note: string;
-  noteType: string;
+  type: string;
   title: string;
   isDeleted: boolean;
 } & Partial<IStamps>;
