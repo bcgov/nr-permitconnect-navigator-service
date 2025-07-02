@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import StatusPill from '@/components/common/StatusPill.vue';
+import AuthorizationStatusPill from '@/components/common/AuthorizationStatusPill.vue';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
@@ -226,7 +226,7 @@ onBeforeMount(async () => {
         <div class="info-item">
           <b>Tracking ID:</b>
           <span>
-            {{ getPermit?.trackingId }}
+            {{ getPermit?.permitTracking?.filter((x) => x.shownToProponent)?.[0].trackingId }}
           </span>
         </div>
         <div class="info-item">
@@ -280,7 +280,7 @@ onBeforeMount(async () => {
           class="status-tracker-header py-4 px-6"
           :class="[getStatusBoxState(getPermit?.authStatus).boxClass]"
         >
-          <StatusPill
+          <AuthorizationStatusPill
             :auth-status="getPermit?.authStatus"
             :enlarge="true"
           />
