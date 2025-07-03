@@ -7,10 +7,11 @@ import {
   noteService,
   userService
 } from '../services';
-import { Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { BringForward, Note, NoteHistory } from '../types';
+import type { BringForward, NoteHistory } from '../types';
+import { Initiative } from '../utils/enums/application';
+import { BringForwardType } from '../utils/enums/projectCommon';
 
 const controller = {
   /**
@@ -43,7 +44,8 @@ const controller = {
         note: req.body.note,
         ...stamps
       });
-      res.status(201).json(response);
+
+      return res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -64,74 +66,75 @@ const controller = {
         return res.status(404).json({ message: 'Note not found' });
       }
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
   },
 
   async listBringForward(
-    req: Request<never, never, never, { bringForwardState?: string }>,
+    req: Request<never, never, never, { bringForwardState?: BringForwardType }>,
     res: Response,
     next: NextFunction
   ) {
     try {
-      // let response = new Array<BringForward>();
-      // const notes = await noteService.listBringForward(
-      //   req.currentContext.initiative as Initiative,
-      //   req.query.bringForwardState
-      // );
-      // if (notes && notes.length) {
-      //   const projects = (
-      //     await Promise.all([
-      //       electrificationProjectService.searchElectrificationProjects({
-      //         activityId: notes.map((x) => x.activityId)
-      //       }),
-      //       housingProjectService.searchHousingProjects({
-      //         activityId: notes.map((x) => x.activityId)
-      //       })
-      //     ])
-      //   ).flatMap((x) => x);
+      let response = new Array<BringForward>();
 
-      //   const users = await userService.searchUsers({
-      //     userId: notes
-      //       .map((x) => x.createdBy)
-      //       .filter((x) => !!x)
-      //       .map((x) => x as string)
-      //   });
+      const history = await noteHistoryService.listBringForward(
+        req.currentContext.initiative as Initiative,
+        req.query.bringForwardState
+      );
 
-      //   const enquiries = (
-      //     await Promise.all([
-      //       enquiryService.searchEnquiries(
-      //         {
-      //           activityId: notes.map((x) => x.activityId)
-      //         },
-      //         Initiative.ELECTRIFICATION
-      //       ),
-      //       enquiryService.searchEnquiries(
-      //         {
-      //           activityId: notes.map((x) => x.activityId)
-      //         },
-      //         Initiative.HOUSING
-      //       )
-      //     ])
-      //   ).flatMap((x) => x);
+      if (history && history.length) {
+        const projects = (
+          await Promise.all([
+            electrificationProjectService.searchElectrificationProjects({
+              activityId: history.map((x) => x.activityId)
+            }),
+            housingProjectService.searchHousingProjects({
+              activityId: history.map((x) => x.activityId)
+            })
+          ])
+        ).flatMap((x) => x);
 
-      //   response = notes.map((note) => ({
-      //     activityId: note.activityId,
-      //     noteId: note.noteId as string,
-      //     electrificationProjectId: projects.find((s) => s.activityId === note.activityId)
-      //       ?.electrificationProjectId as string,
-      //     housingProjectId: projects.find((s) => s.activityId === note.activityId)?.housingProjectId as string,
-      //     enquiryId: enquiries.find((s) => s.activityId === note.activityId)?.enquiryId as string,
-      //     title: note.title,
-      //     projectName: projects.find((s) => s.activityId === note.activityId)?.projectName ?? null,
-      //     createdByFullName: users.find((u) => u?.userId === note.createdBy)?.fullName ?? null,
-      //     bringForwardDate: note.bringForwardDate as string
-      //   }));
-      // }
-      //res.status(200).json(response);
-      res.status(200).json([]);
+        const users = await userService.searchUsers({
+          userId: history
+            .map((x) => x.createdBy)
+            .filter((x) => !!x)
+            .map((x) => x as string)
+        });
+
+        const enquiries = (
+          await Promise.all([
+            enquiryService.searchEnquiries(
+              {
+                activityId: history.map((x) => x.activityId)
+              },
+              Initiative.ELECTRIFICATION
+            ),
+            enquiryService.searchEnquiries(
+              {
+                activityId: history.map((x) => x.activityId)
+              },
+              Initiative.HOUSING
+            )
+          ])
+        ).flatMap((x) => x);
+
+        response = history.map((h) => ({
+          activityId: h.activityId,
+          noteId: h.noteHistoryId as string,
+          electrificationProjectId: projects.find((s) => s.activityId === h.activityId)
+            ?.electrificationProjectId as string,
+          housingProjectId: projects.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
+          enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId as string,
+          title: h.title,
+          projectName: projects.find((s) => s.activityId === h.activityId)?.projectName ?? null,
+          createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
+          bringForwardDate: h.bringForwardDate?.toISOString() as string
+        }));
+      }
+      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -144,7 +147,14 @@ const controller = {
   async listNoteHistory(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await noteHistoryService.listNoteHistory(req.params.activityId);
-      res.status(200).json(response);
+
+      // Only return notes flagged as shown when called by proponent
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        const filtered = response.filter((x) => x.shownToProponent);
+        return res.status(200).json(filtered);
+      }
+
+      return res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -152,16 +162,38 @@ const controller = {
 
   /**
    * @function addNote
-   * Adds a new note to an existing history
+   * Updates a note history
+   * Adds a new note to an existing history if one was given
    */
-  async addNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
+  async updateNoteHistory(
+    req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+    res: Response,
+    next: NextFunction
+  ) {
     try {
-      const response = await noteService.createNote({
-        ...req.body,
-        ...generateCreateStamps(req.currentContext)
+      await noteHistoryService.updateNoteHistory({
+        activityId: req.body.activityId,
+        bringForwardDate: req.body.bringForwardDate,
+        bringForwardState: req.body.bringForwardState,
+        escalateToSupervisor: req.body.escalateToSupervisor,
+        escalateToDirector: req.body.escalateToDirector,
+        noteHistoryId: req.params.noteHistoryId,
+        shownToProponent: req.body.shownToProponent,
+        title: req.body.title,
+        type: req.body.type,
+        isDeleted: false,
+        ...generateUpdateStamps(req.currentContext)
       });
 
-      res.status(200).json(response);
+      if (req.body.note) {
+        await noteService.createNote({
+          noteHistoryId: req.params.noteHistoryId,
+          note: req.body.note,
+          ...generateCreateStamps(req.currentContext)
+        });
+      }
+
+      return res.status(200).json(await noteHistoryService.getNoteHistory(req.params.noteHistoryId));
     } catch (e: unknown) {
       next(e);
     }
