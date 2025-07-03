@@ -71,6 +71,7 @@
         "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
         "submittedDate": "Submitted date",
         "toastEnquiryFailed": "Failed to submit enquiry",
+        "toastNoteHistoryLoadFailed": "Unable to load notes for this project, please try again later",
         "toastProjectLoadFailed": "Unable to load project, please try again later",
         "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
         "trackingId": "Tracking ID"
@@ -443,11 +444,19 @@
     "logout": "Log out"
   },
   "noteModal": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
     "created": "Created",
-    "escalateDirector": "Escalate to Director",
-    "escalateSupervisor": "Escalate to Supervisor",
+    "deleteHeader": "Confirm delete",
+    "deleteMessage": "Please confirm that you want to delete the selected note.",
+    "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
+    "escalateToDirector": "Escalate to Director",
+    "escalateToSupervisor": "Escalate to Supervisor",
     "lastUpdated": "Last updated",
-    "showProponent": "Show to Proponent"
+    "noteDeleted": "Note deleted",
+    "noteDeleteFailed": "Failed to delete note",
+    "showProponent": "Show to Proponent",
+    "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
   },
   "permitCard": {
     "addUpdates": "Add updates",
