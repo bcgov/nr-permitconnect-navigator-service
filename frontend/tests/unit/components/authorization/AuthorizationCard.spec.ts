@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
+import AuthorizationCard from '@/components/permit/AuthorizationCard.vue';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';

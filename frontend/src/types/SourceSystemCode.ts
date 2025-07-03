@@ -7,5 +7,5 @@ export type SourceSystemCode = {
   code: string;
   definition: string;
   display: string;
-  sourceSystemKind: SourceSystemKind;
+  source_system_kind_source_system_kind_source_system_codeTosource_system_code: Array<SourceSystemKind>;
 } & Partial<IStamps>;

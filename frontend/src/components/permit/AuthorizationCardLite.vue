@@ -2,12 +2,10 @@
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/common/AuthorizationStatusPill.vue';
-import StatusPill from '@/components/common/StatusPill.vue';
+import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { PermitAuthorizationStatus } from '@/utils/enums/permit';
-import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
@@ -52,7 +50,7 @@ watchEffect(() => {
           />
           <Button
             class="p-button-outlined size-fit"
-            :label="t('permitCard.more')"
+            :label="t('authorizationCardLite.more')"
           />
         </div>
       </div>

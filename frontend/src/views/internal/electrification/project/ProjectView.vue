@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
-import AuthorizationCardLite from '@/components/common/AuthorizationCardLite.vue';
+import AuthorizationCard from '@/components/permit/AuthorizationCard.vue';
+import AuthorizationCardLite from '@/components/permit/AuthorizationCardLite.vue';
 import ProjectForm from '@/components/electrification/project/ProjectForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
@@ -479,19 +479,29 @@ onBeforeMount(async () => {
           <AuthorizationCard
             :editable="!isCompleted"
             :permit="permit"
+            @authorization-card:more="
+              router.push({
+                name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+                query: {
+                  activityId: activityId,
+                  projectId: projectId,
+                  permitId: permit.permitId
+                }
+              })
+            "
           />
         </div>
         <!-- Authorizations with needed = under investigation -->
         <div
           v-if="authsUnderInvestigation.length > 0"
-          class="my-8"
+          class="mb-8 mt-16"
         >
-          <h4>{{ t('i.common.projectView.underInvestigation') }}</h4>
+          <h4 class="mb-6">{{ t('i.common.projectView.underInvestigation') }}</h4>
           <div
             v-for="(permit, index) in authsUnderInvestigation"
             :key="permit.permitId"
             :index="index"
-            class="mb-6 mt-6"
+            class="my-2"
           >
             <AuthorizationCardLite
               :editable="!isCompleted"
@@ -502,14 +512,14 @@ onBeforeMount(async () => {
         <!-- Authorizations with needed = Yes & stage = Pre-submission -->
         <div
           v-if="authsNeeded.length > 0"
-          class="my-8"
+          class="mb-8 mt-16"
         >
-          <h4>{{ t('i.common.projectView.needed') }}</h4>
+          <h4 class="mb-6">{{ t('i.common.projectView.needed') }}</h4>
           <div
             v-for="(permit, index) in authsNeeded"
             :key="permit.permitId"
             :index="index"
-            class="mb-6 mt-6"
+            class="my-2"
           >
             <AuthorizationCardLite
               :editable="!isCompleted"
@@ -520,14 +530,14 @@ onBeforeMount(async () => {
         <!--Authorizations when its Status=Approved, Denied, Cancelled, Withdrawn OR Abandoned.-->
         <div
           v-if="authsCompleted.length > 0"
-          class="my-8"
+          class="mb-8 mt-16"
         >
-          <h4>{{ t('i.common.projectView.completed') }}</h4>
+          <h4 class="mb-6">{{ t('i.common.projectView.completed') }}</h4>
           <div
             v-for="(permit, index) in authsCompleted"
             :key="permit.permitId"
             :index="index"
-            class="mb-6 mt-6"
+            class="my-2"
           >
             <AuthorizationCardLite
               :editable="!isCompleted"
@@ -538,14 +548,14 @@ onBeforeMount(async () => {
         <!--Authorizations when needed = NO-->
         <div
           v-if="authsNotNeeded.length > 0"
-          class="my-8"
+          class="mb-8 mt-16"
         >
-          <h4>{{ t('i.common.projectView.notNeeded') }}</h4>
+          <h4 class="mb-6">{{ t('i.common.projectView.notNeeded') }}</h4>
           <div
             v-for="(permit, index) in authsNotNeeded"
             :key="permit.permitId"
             :index="index"
-            class="mb-6 mt-6"
+            class="my-2"
           >
             <AuthorizationCardLite
               :editable="!isCompleted"
