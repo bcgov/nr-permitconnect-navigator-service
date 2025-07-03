@@ -14,7 +14,7 @@ import { Action, Initiative, Resource, RouteName } from '@/utils/enums/applicati
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
-import type { Note, ElectrificationProject } from '@/types';
+import type { Note, ElectrificationProject, NoteHistory } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
@@ -34,7 +34,7 @@ const { t } = useI18n();
 // Store
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
-const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
+const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -53,16 +53,16 @@ provide(atsEnquiryTypeCodeKey, Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_COD
 provide(projectServiceKey, electrificationProjectService);
 
 // Actions
-function onAddNote(note: Note) {
-  enquiryStore.addNote(note, true);
+function onAddNote(note: NoteHistory) {
+  enquiryStore.addNoteHistory(note, true);
 }
 
-const onDeleteNote = (note: Note) => {
-  enquiryStore.removeNote(note);
+const onDeleteNote = (note: NoteHistory) => {
+  enquiryStore.removeNoteHistory(note);
 };
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  enquiryStore.updateNote(oldNote, newNote);
+const onUpdateNote = (history: NoteHistory, newNote: Note) => {
+  enquiryStore.updateNoteHistory(history, newNote);
 };
 
 function onEnquiryFormSaved() {
@@ -82,12 +82,12 @@ async function updateRelatedEnquiry() {
 onBeforeMount(async () => {
   if (enquiryId) {
     const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-    const notes = (await noteService.listNotes(enquiry.activityId)).data;
+    const notes = (await noteService.listNoteHistory(enquiry.activityId)).data;
 
     activityId.value = enquiry.activityId;
 
     enquiryStore.setEnquiry(enquiry);
-    enquiryStore.setNotes(notes);
+    enquiryStore.setNoteHistory(notes);
 
     updateRelatedEnquiry();
   }
@@ -160,7 +160,7 @@ onBeforeMount(async () => {
       <TabPanel :value="1">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
           </div>
           <Button
             aria-label="Add note"
@@ -175,14 +175,14 @@ onBeforeMount(async () => {
           </Button>
         </div>
         <div
-          v-for="(note, index) in getNotes"
-          :key="note.noteId"
+          v-for="(history, index) in getNoteHistory"
+          :key="history.noteHistoryId"
           :index="index"
           class="col-span-12"
         >
           <NoteCard
             :editable="!isCompleted"
-            :note="note"
+            :note-history="history"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"
           />
