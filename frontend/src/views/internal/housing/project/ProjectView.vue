@@ -66,7 +66,7 @@ const router = useRouter();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
-const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
+const { getDocuments, getProject, getNoteHistory, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -118,11 +118,11 @@ const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: Note) => projectStore.addNote(note, true);
+const onAddNote = (note: Note) => projectStore.addNoteHistory(note, true);
 
-const onDeleteNote = (note: Note) => projectStore.removeNote(note);
+const onDeleteNote = (note: Note) => projectStore.removeNoteHistory(note);
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => projectStore.updateNote(oldNote, newNote);
+const onUpdateNote = (history: Note, newNote: Note) => projectStore.updateNoteHistory(history, newNote);
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
@@ -134,7 +134,7 @@ onBeforeMount(async () => {
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
       documentService.listDocuments(project.activityId),
-      noteService.listNotes(project.activityId),
+      noteService.listNoteHistory(project.activityId),
       permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
       enquiryService.listRelatedEnquiries(project.activityId)
     ])
@@ -147,7 +147,7 @@ onBeforeMount(async () => {
 
   projectStore.setProject(project);
   projectStore.setDocuments(documents);
-  projectStore.setNotes(notes);
+  projectStore.setNoteHistory(notes);
   projectStore.setPermits(permits);
   projectStore.setRelatedEnquiries(relatedEnquiries);
 
@@ -435,7 +435,7 @@ onBeforeMount(async () => {
       <TabPanel :value="3">
         <div class="flex items-center pb-5">
           <div class="grow">
-            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
           </div>
           <Button
             aria-label="Add note"
@@ -450,14 +450,14 @@ onBeforeMount(async () => {
           </Button>
         </div>
         <div
-          v-for="(note, index) in getNotes"
-          :key="note.noteId"
+          v-for="(noteHistory, index) in getNoteHistory"
+          :key="noteHistory.noteHistoryId"
           :index="index"
           class="mb-6"
         >
           <NoteCard
             :editable="!isCompleted"
-            :note="note"
+            :note-history="noteHistory"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"
           />

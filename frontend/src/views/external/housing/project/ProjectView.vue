@@ -7,15 +7,24 @@ import { useRouter } from 'vue-router';
 import Divider from '@/components/common/Divider.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
-import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionHeader,
+  AccordionPanel,
+  Button,
+  Card,
+  Dialog,
+  useToast
+} from '@/lib/primevue';
+import { contactService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { SubmissionType } from '@/utils/enums/projectCommon';
-import { formatDate } from '@/utils/formatters';
+import { formatDate, formatDateLong } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { ComputedRef, Ref } from 'vue';
@@ -42,12 +51,13 @@ const toast = useToast();
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getPermits, getProject, getRelatedEnquiries } = storeToRefs(projectStore);
+const { getNoteHistory, getPermits, getProject, getRelatedEnquiries } = storeToRefs(projectStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
+const noteHistoryVisible: Ref<boolean> = ref(false);
 
 const permitsNeeded: ComputedRef<Array<Permit>> = computed(() => {
   return permitFilter({
@@ -132,6 +142,15 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.projectView.toastPermitLoadFailed'));
   }
+
+  try {
+    const activityId = projectValue.activityId;
+    const noteHistory = (await noteService.listNoteHistory(activityId)).data;
+    projectStore.setNoteHistory(noteHistory);
+  } catch {
+    toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
+  }
+
   projectStore.setProject(projectValue);
   projectStore.setRelatedEnquiries(enquiriesValue);
 
@@ -218,6 +237,27 @@ onBeforeMount(async () => {
           })
         "
       />
+    </div>
+
+    <div
+      v-if="getNoteHistory.length"
+      class="bg-[var(--p-green-100)] p-4"
+    >
+      <div class="grid grid-cols-6 gap-4 items-center">
+        <div class="font-bold">Please be aware!</div>
+        <div class="font-bold">
+          Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+        </div>
+        <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
+        <div class="flex justify-end">
+          <Button
+            class="p-button-sm header-btn"
+            label="View all"
+            outlined
+            @click="noteHistoryVisible = true"
+          />
+        </div>
+      </div>
     </div>
 
     <div
@@ -354,6 +394,29 @@ onBeforeMount(async () => {
       />
     </div>
   </div>
+
+  <Dialog
+    v-model:visible="noteHistoryVisible"
+    :draggable="false"
+    :modal="true"
+    class="app-info-dialog w-6/12"
+  >
+    <template #header>
+      <span class="p-dialog-title">Please be aware!</span>
+    </template>
+
+    <div
+      v-for="history of getNoteHistory"
+      :key="history.noteHistoryId"
+      class="mb-5"
+    >
+      <div class="flex flex-col">
+        <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
+        <div class="font-bold">{{ history.title }}</div>
+        <div>{{ history.note[0].note }}</div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <style scoped lang="scss">

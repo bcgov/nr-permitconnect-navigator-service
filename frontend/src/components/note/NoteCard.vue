@@ -10,12 +10,12 @@ import { Action, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Note } from '@/types';
+import type { Note, NoteHistory } from '@/types';
 
 // Props
-const { editable = true, note } = defineProps<{
+const { editable = true, noteHistory } = defineProps<{
   editable?: boolean;
-  note: Note;
+  noteHistory: NoteHistory;
 }>();
 
 // Emits
@@ -30,8 +30,8 @@ const userName: Ref<string> = ref('');
 
 // Actions
 onBeforeMount(() => {
-  if (note.createdBy) {
-    userService.searchUsers({ userId: [note.createdBy] }).then((res) => {
+  if (noteHistory.createdBy) {
+    userService.searchUsers({ userId: [noteHistory.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';
     });
   }
@@ -39,17 +39,17 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <Card :id="note.noteId">
+  <Card :id="noteHistory.noteHistoryId">
     <template #title>
       <div class="flex items-center">
         <div class="grow">
           <h3 class="mb-0">
-            {{ note.title }}
+            {{ noteHistory.title }}
             <span
-              v-if="note.bringForwardState"
+              v-if="noteHistory.bringForwardState"
               data-test="bf-title"
             >
-              {{ `(${note.bringForwardState})` }}
+              {{ `(${noteHistory.bringForwardState})` }}
             </span>
           </h3>
         </div>
@@ -75,7 +75,7 @@ onBeforeMount(() => {
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
               <span class="key font-bold">Date:</span>
-              {{ note.createdAt ? formatDateShort(note.createdAt) : undefined }}
+              {{ noteHistory.createdAt ? formatDateShort(noteHistory.createdAt) : undefined }}
             </p>
           </div>
         </div>
@@ -93,37 +93,37 @@ onBeforeMount(() => {
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
               <span class="key font-bold">Note type:</span>
-              {{ note.noteType }}
+              {{ noteHistory.type }}
             </p>
           </div>
         </div>
         <div
-          v-if="note.bringForwardDate"
+          v-if="noteHistory.bringForwardDate"
           class="col-span-12 md:col-span-6 lg:col-span-3"
         >
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
               <span class="key font-bold">Bring forward date:</span>
-              {{ note.bringForwardDate ? formatDate(note.bringForwardDate) : '' }}
+              {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
             </p>
           </div>
         </div>
-        <p class="col-span-12 mt-0 mb-0 note-content">{{ note.note }}</p>
+        <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0].note }}</p>
       </div>
     </template>
   </Card>
 
   <NoteModal
-    v-if="note && noteModalVisible"
+    v-if="noteHistory && noteModalVisible"
     v-model:visible="noteModalVisible"
-    :activity-id="note.activityId"
-    :note="note"
+    :activity-id="noteHistory.activityId"
+    :note-history="noteHistory"
     @delete-note="
       (note: Note) => {
         emit('deleteNote', note);
       }
     "
-    @update-note="(oldNote: Note, newNote: Note) => emit('updateNote', oldNote, newNote)"
+    @update-note="(history: NoteHistory, newNote: Note) => emit('updateNote', history, newNote)"
   />
 </template>
 

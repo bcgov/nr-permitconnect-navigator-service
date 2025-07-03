@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { mixed, object, string } from 'yup';
 
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
-import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
-import { formatDate } from '@/utils/formatters';
+import { formatDate, formatTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Note } from '@/types';
+import type { NoteHistory } from '@/types';
 import type { SelectChangeEvent } from 'primevue/select';
 import { omit } from '@/utils/utils';
 
 // Props
-const { activityId, note = undefined } = defineProps<{
+const { activityId, noteHistory = undefined } = defineProps<{
   activityId: string;
-  note?: Note;
+  noteHistory?: NoteHistory;
 }>();
 
 // Emits
@@ -30,21 +30,22 @@ const { t } = useI18n();
 
 // State
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const header: Ref<string | undefined> = ref(note?.type);
-const showBringForward: Ref<boolean> = ref(note?.type === NoteType.BRING_FORWARD);
-const showProponentToggle: Ref<boolean> = ref(note?.type === NoteType.GENERAL);
 const visible = defineModel<boolean>('visible');
+
+const shownToProponent = computed(() => formRef.value?.values.shownToProponent);
 
 // Default form values
 let initialFormValues: any = {
-  activityId: note?.activityId,
-  bringForwardDate: note?.bringForwardDate ? new Date(note.bringForwardDate) : null,
-  bringForwardState: note?.bringForwardState ?? null,
-  createdAt: note?.createdAt ? new Date(note.createdAt) : new Date(),
-  note: note?.note,
-  noteId: note?.noteId,
-  type: note?.type ?? NoteType.GENERAL,
-  title: note?.title
+  activityId: noteHistory?.activityId,
+  bringForwardDate: noteHistory?.bringForwardDate ? new Date(noteHistory.bringForwardDate) : null,
+  bringForwardState: noteHistory?.bringForwardState ?? null,
+  shownToProponent: noteHistory?.shownToProponent,
+  escalateToSupervisor: noteHistory?.escalateToSupervisor,
+  escalateToDirector: noteHistory?.escalateToDirector,
+  createdAt: noteHistory?.createdAt ? new Date(noteHistory.createdAt) : new Date(),
+  noteHistoryId: noteHistory?.noteHistoryId,
+  type: noteHistory?.type ?? NoteType.GENERAL,
+  title: noteHistory?.title
 };
 
 // Form validation schema
@@ -79,22 +80,22 @@ const confirm = useConfirm();
 const toast = useToast();
 
 function onDelete() {
-  if (note) {
+  if (noteHistory) {
     confirm.require({
-      message: 'Please confirm that you want to delete the selected note.',
-      header: 'Confirm delete',
-      acceptLabel: 'Confirm',
+      message: t(shownToProponent.value ? 'noteModal.deleteMessageIfShown' : 'noteModal.deleteMessage'),
+      header: t('noteModal.deleteHeader'),
+      acceptLabel: t('noteModal.confirm'),
       acceptClass: 'p-button-danger',
-      rejectLabel: 'Cancel',
+      rejectLabel: t('noteModal.cancel'),
       rejectProps: { outlined: true },
       accept: () => {
         noteService
-          .deleteNote(note?.noteId as string)
+          .deleteNoteHistory(noteHistory?.noteHistoryId as string)
           .then(() => {
-            emit('deleteNote', note as Note);
-            toast.success('Note deleted');
+            emit('deleteNote', noteHistory as NoteHistory);
+            toast.success(t('noteModal.noteDeleted'));
           })
-          .catch((e: any) => toast.error('Failed to delete note', e.message))
+          .catch((e: any) => toast.error(t('noteModal.noteDeleteFailed'), e.message))
           .finally(() => {
             visible.value = false;
             formRef.value?.resetForm();
@@ -105,11 +106,7 @@ function onDelete() {
 }
 
 const onNoteTypeChange = (e: SelectChangeEvent) => {
-  header.value = e.value;
-  showBringForward.value = e.value === NoteType.BRING_FORWARD;
-  showProponentToggle.value = e.value === NoteType.GENERAL;
-
-  formRef.value?.setFieldValue('showToProponent', false);
+  formRef.value?.setFieldValue('shownToProponent', false);
 
   formRef.value?.setFieldValue('escalateToSupervisor', false);
   formRef.value?.setFieldValue('escalateToDirector', false);
@@ -126,15 +123,15 @@ const onNoteTypeChange = (e: SelectChangeEvent) => {
 // resetForm is an automatic binding https://vee-validate.logaretm.com/v4/guide/components/handling-forms/
 async function onSubmit(data: any, { resetForm }) {
   try {
-    if (!note) {
-      const b = omit(data, ['createdAt']) as Note;
-      const result = (await noteService.createNote({ ...b, activityId: activityId })).data;
+    if (!noteHistory) {
+      const body = omit(data, ['createdAt']) as NoteHistory;
+      const result = (await noteService.createNoteHistory({ ...body, activityId: activityId, note: data.note })).data;
       emit('addNote', result);
       resetForm();
     } else {
-      const result = (await noteService.updateNote({ ...data, activityId: activityId })).data;
-      emit('updateNote', note, result);
-      initialFormValues = data;
+      const result = (await noteService.addNote(data.noteHistoryId, data.note)).data;
+      emit('updateNote', noteHistory, result);
+      //initialFormValues = data;
     }
     toast.success('Note saved');
   } catch (e: any) {
@@ -153,8 +150,16 @@ async function onSubmit(data: any, { resetForm }) {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">{{ header }} note</span>
+      <span class="p-dialog-title">{{ formRef?.values.type }}</span>
     </template>
+
+    <Message
+      v-if="shownToProponent"
+      severity="success"
+      :closable="false"
+    >
+      {{ t('noteModal.shownToProponentBanner') }}
+    </Message>
 
     <Form
       ref="formRef"
@@ -178,7 +183,7 @@ async function onSubmit(data: any, { resetForm }) {
               "
             />
             <DatePicker
-              v-if="showBringForward"
+              v-if="formRef?.values.type === NoteType.BRING_FORWARD"
               class="w-1/2"
               name="bringForwardDate"
               label="Bring forward date"
@@ -201,10 +206,10 @@ async function onSubmit(data: any, { resetForm }) {
             </div>
             <div class="flex flex-row gap-x-1">
               <span>{{ t('noteModal.lastUpdated') }}:</span>
-              <!-- <span class="text-[var(--p-bcblue-900)]">{{ formatDate(values.updatedAt.toISOString()) }}</span> -->
+              <span class="text-[var(--p-bcblue-900)]">{{ formatDate(values.updatedAt) }}</span>
             </div>
             <div
-              v-if="showProponentToggle"
+              v-if="formRef?.values.type === NoteType.GENERAL"
               class="flex flex-col"
             >
               <Checkbox
@@ -214,17 +219,17 @@ async function onSubmit(data: any, { resetForm }) {
               />
             </div>
             <div
-              v-if="showBringForward"
+              v-if="formRef?.values.type === NoteType.BRING_FORWARD"
               class="flex flex-col"
             >
               <Checkbox
                 name="escalateToSupervisor"
-                :label="t('noteModal.escalateSupervisor')"
+                :label="t('noteModal.escalateToSupervisor')"
                 :bold="false"
               />
               <Checkbox
                 name="escalateToDirector"
-                :label="t('noteModal.escalateDirector')"
+                :label="t('noteModal.escalateToDirector')"
                 :bold="false"
               />
               <Select
@@ -233,6 +238,19 @@ async function onSubmit(data: any, { resetForm }) {
                 :options="BRING_FORWARD_TYPE_LIST"
               />
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-y-2 my-9">
+        <div
+          v-for="note in noteHistory?.note"
+          :key="note.noteId"
+          class="bg-[var(--p-bcblue-50)] p-2"
+        >
+          <div class="flex flex-row gap-x-1">
+            <span class="text-[var(--p-bcblue-900)]">{{ formatDate(note.createdAt) }}:</span>
+            {{ note.note }}
+            <span class="text-[var(--p-greyscale-600)]">{{ formatTime(note.createdAt) }} {{ note.createdBy }}</span>
           </div>
         </div>
       </div>
@@ -251,14 +269,13 @@ async function onSubmit(data: any, { resetForm }) {
             @click="
               () => {
                 handleReset();
-                showBringForward = note?.noteType === NoteType.BRING_FORWARD;
                 visible = false;
               }
             "
           />
         </div>
         <div
-          v-if="note"
+          v-if="noteHistory"
           class="flex justify-content-right"
         >
           <Button

@@ -43,7 +43,8 @@ const controller = {
         note: req.body.note,
         ...stamps
       });
-      res.status(201).json(response);
+
+      return res.status(201).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -64,7 +65,7 @@ const controller = {
         return res.status(404).json({ message: 'Note not found' });
       }
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -131,7 +132,7 @@ const controller = {
       //   }));
       // }
       //res.status(200).json(response);
-      res.status(200).json([]);
+      return res.status(200).json([]);
     } catch (e: unknown) {
       next(e);
     }
@@ -144,7 +145,14 @@ const controller = {
   async listNoteHistory(req: Request<{ activityId: string }>, res: Response, next: NextFunction) {
     try {
       const response = await noteHistoryService.listNoteHistory(req.params.activityId);
-      res.status(200).json(response);
+
+      // Only return notes flagged as shown when called by proponent
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        const filtered = response.filter((x) => x.shownToProponent);
+        return res.status(200).json(filtered);
+      }
+
+      return res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }
@@ -154,14 +162,15 @@ const controller = {
    * @function addNote
    * Adds a new note to an existing history
    */
-  async addNote(req: Request<never, never, Note>, res: Response, next: NextFunction) {
+  async addNote(req: Request<{ noteHistoryId: string }, never, Note>, res: Response, next: NextFunction) {
     try {
       const response = await noteService.createNote({
-        ...req.body,
+        noteHistoryId: req.params.noteHistoryId,
+        note: req.body.note,
         ...generateCreateStamps(req.currentContext)
       });
 
-      res.status(200).json(response);
+      return res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

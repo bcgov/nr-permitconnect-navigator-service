@@ -45,6 +45,21 @@ const service = {
   },
 
   /**
+   * @function getNoteHistory
+   * Get a specifc note history
+   * @param {string} noteHistoryId ID of the note history to get
+   * @returns {Promise<NoteHistory>} The result of running the findFirstOrThrow operation
+   */
+  getNoteHistory: async (noteHistoryId: string) => {
+    const result = await prisma.note_history.findFirstOrThrow({
+      where: {
+        noteHistoryId: noteHistoryId
+      }
+    });
+    return result;
+  },
+
+  /**
    * @function listNoteHistory
    * Retrieve a list of note histories and the corresponding notes associated with a given activity
    * @param {string} activityId PCNS Activity ID
@@ -60,7 +75,7 @@ const service = {
         createdAt: 'desc'
       },
       include: {
-        note: true
+        note: { orderBy: { createdAt: 'desc' } }
       }
     });
 

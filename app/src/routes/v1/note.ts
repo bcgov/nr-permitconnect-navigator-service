@@ -19,7 +19,7 @@ router.put(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
   noteValidator.createNoteHistory,
-  (req: Request<never, never, { noteHistory: NoteHistory; note: Note }>, res: Response, next: NextFunction): void => {
+  (req: Request<never, never, NoteHistory & { note: string }>, res: Response, next: NextFunction): void => {
     noteController.createNoteHistory(req, res, next);
   }
 );
@@ -30,7 +30,7 @@ router.put(
   hasAuthorization(Resource.NOTE, Action.UPDATE),
   hasAccess('noteHistoryId'),
   noteValidator.addNote,
-  (req: Request<never, never, Note>, res: Response, next: NextFunction): void => {
+  (req: Request<{ noteHistoryId: string }, never, Note>, res: Response, next: NextFunction): void => {
     noteController.addNote(req, res, next);
   }
 );
@@ -45,6 +45,7 @@ router.delete(
   }
 );
 
+// Note History list bring forward endpoint
 router.get(
   '/bringForward',
   hasAuthorization(Resource.NOTE, Action.READ),
@@ -53,7 +54,7 @@ router.get(
   }
 );
 
-// Note History list endpoint
+// Note History list general endpoint
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),
