@@ -4,7 +4,7 @@ import { computed, readonly, ref } from 'vue';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 
 import type { Ref } from 'vue';
-import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, Permit } from '@/types';
+import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, NoteHistory, Permit } from '@/types';
 
 // Types
 export type ProjectType = ElectrificationProject | HousingProject | undefined;
@@ -12,7 +12,7 @@ export type ProjectType = ElectrificationProject | HousingProject | undefined;
 export type ProjectStoreState = {
   documents: Ref<Array<Document>>;
   relatedEnquiries: Ref<Array<Enquiry>>;
-  notes: Ref<Array<Note>>;
+  noteHistory: Ref<Array<NoteHistory>>;
   permits: Ref<Array<Permit>>;
   project: Ref<ProjectType>;
 };
@@ -22,7 +22,7 @@ export const useProjectStore = defineStore('project', () => {
   const state: ProjectStoreState = {
     documents: ref([]),
     relatedEnquiries: ref([]),
-    notes: ref([]),
+    noteHistory: ref([]),
     permits: ref([]),
     project: ref(undefined)
   };
@@ -93,7 +93,7 @@ export const useProjectStore = defineStore('project', () => {
         .sort(permitBusinessSortFcn);
     }),
     getDocuments: computed(() => state.documents.value),
-    getNotes: computed(() => state.notes.value),
+    getNoteHistory: computed(() => state.noteHistory.value),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
     getProject: computed(() => state.project.value)
@@ -120,22 +120,22 @@ export const useProjectStore = defineStore('project', () => {
     state.documents.value = data;
   }
 
-  function addNote(data: Note, prepend: boolean = false) {
-    if (prepend) state.notes.value.unshift(data);
-    else state.notes.value.push(data);
+  function addNoteHistory(data: NoteHistory, prepend: boolean = false) {
+    if (prepend) state.noteHistory.value.unshift(data);
+    else state.noteHistory.value.push(data);
   }
 
-  function removeNote(data: Note) {
-    state.notes.value = state.notes.value.filter((x) => x.noteId !== data.noteId);
+  function removeNoteHistory(data: NoteHistory) {
+    state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNotes(data: Array<Note>) {
-    state.notes.value = data;
+  function setNoteHistory(data: Array<NoteHistory>) {
+    state.noteHistory.value = data;
   }
 
-  function updateNote(oldData: Note, newData: Note) {
-    const idx = state.notes.value.findIndex((x: Note) => x.noteId === oldData.noteId);
-    if (idx >= 0) state.notes.value[idx] = newData;
+  function updateNoteHistory(data: NoteHistory) {
+    const idx = state.noteHistory.value.findIndex((x: NoteHistory) => x.noteHistoryId === data.noteHistoryId);
+    if (idx >= 0) state.noteHistory.value[idx] = data;
   }
 
   function addPermit(data: Permit) {
@@ -174,7 +174,7 @@ export const useProjectStore = defineStore('project', () => {
   function reset() {
     state.documents.value = [];
     state.relatedEnquiries.value = [];
-    state.notes.value = [];
+    state.noteHistory.value = [];
     state.permits.value = [];
     state.project.value = undefined;
   }
@@ -190,10 +190,10 @@ export const useProjectStore = defineStore('project', () => {
     addDocument,
     removeDocument,
     setDocuments,
-    addNote,
-    removeNote,
-    setNotes,
-    updateNote,
+    addNoteHistory,
+    removeNoteHistory,
+    setNoteHistory,
+    updateNoteHistory,
     addPermit,
     removePermit,
     setPermits,

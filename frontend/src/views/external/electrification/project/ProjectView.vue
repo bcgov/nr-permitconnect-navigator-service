@@ -45,6 +45,7 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
+const noteHistoryVisible: Ref<boolean> = ref(false);
 
 // Providers
 provide(enquiryRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY);
@@ -87,6 +88,15 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.projectView.toastPermitLoadFailed'));
   }
+
+  try {
+    const activityId = projectValue.activityId;
+    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
+    projectStore.setPermits(permitsValue);
+  } catch {
+    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
+  }
+
   projectStore.setProject(projectValue);
   projectStore.setRelatedEnquiries(enquiriesValue);
 
@@ -137,6 +147,30 @@ onBeforeMount(async () => {
     <Tabs
       :value="activeTab"
       class="mt-3"
+    <div
+      v-if="getNoteHistory.length"
+      class="bg-[var(--p-green-100)] p-4"
+    >
+      <div class="grid grid-cols-6 gap-4 items-center">
+        <div class="font-bold">Please be aware!</div>
+        <div class="font-bold">
+          Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+        </div>
+        <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
+        <div class="flex justify-end">
+          <Button
+            class="p-button-sm header-btn"
+            label="View all"
+            outlined
+            @click="noteHistoryVisible = true"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="getProject?.submissionType === SubmissionType.INAPPLICABLE"
+      class="inapplicable-block p-4 mt-12"
     >
       <TabList>
         <Tab :value="0">
@@ -251,6 +285,29 @@ onBeforeMount(async () => {
       </TabPanels>
     </Tabs>
   </div>
+
+  <Dialog
+    v-model:visible="noteHistoryVisible"
+    :draggable="false"
+    :modal="true"
+    class="app-info-dialog w-6/12"
+  >
+    <template #header>
+      <span class="p-dialog-title">Please be aware!</span>
+    </template>
+
+    <div
+      v-for="history of getNoteHistory"
+      :key="history.noteHistoryId"
+      class="mb-5"
+    >
+      <div class="flex flex-col">
+        <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
+        <div class="font-bold">{{ history.title }}</div>
+        <div>{{ history.note[0].note }}</div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <style scoped lang="scss">

@@ -83,7 +83,7 @@ async function updateRelatedEnquiry() {
 onBeforeMount(async () => {
   if (enquiryId) {
     const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-    const notes = (await noteService.listNotes(enquiry.activityId)).data;
+    const notes = (await noteService.listNoteHistory(enquiry.activityId)).data;
 
     activityId.value = enquiry.activityId;
 
