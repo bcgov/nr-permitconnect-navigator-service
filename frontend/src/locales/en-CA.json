@@ -324,6 +324,27 @@
       }
     }
   },
+  "authorizationCard": {
+    "addUpdates": "Add updates",
+    "adjudicationDate": "Adjudication date:",
+    "agency": "Agency:",
+    "businessDomain": "Business domain:",
+    "issuedPermitId": "Issued Permit ID:",
+    "lastUpdated": "Last updated:",
+    "latestUpdate": "Latest update for the client:",
+    "more": "More",
+    "needed": "Needed:",
+    "permitState": "Permit state:",
+    "previousUpdates": "Previous Updates",
+    "sourceSystem": "Source system:",
+    "statusVerified": "Status verified date",
+    "submittedDate": "Submitted date:",
+    "trackingId": "Tracking ID:",
+    "updatedBy": "Updated by:"
+  },
+  "authorizationCardLite": {
+    "more": "More"
+  },
   "cancelButton": {
     "btnText": "Cancel"
   },
@@ -479,24 +500,6 @@
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"
-  },
-  "permitCard": {
-    "addUpdates": "Add updates",
-    "adjudicationDate": "Adjudication date:",
-    "agency": "Agency:",
-    "businessDomain": "Business domain:",
-    "issuedPermitId": "Issued Permit ID:",
-    "lastUpdated": "Last updated:",
-    "latestUpdate": "Latest update for the client:",
-    "more": "More",
-    "needed": "Needed:",
-    "permitState": "Permit state:",
-    "previousUpdates": "Previous Updates",
-    "sourceSystem": "Source system:",
-    "statusVerified": "Status verified date",
-    "submittedDate": "Submitted date:",
-    "trackingId": "Tracking ID:",
-    "updatedBy": "Updated by:"
   },
   "permitModal": {
     "addTitle": "Add permit",

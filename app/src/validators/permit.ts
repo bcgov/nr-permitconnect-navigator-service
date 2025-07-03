@@ -2,25 +2,15 @@ import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
+import { permitTrackingSchema } from './permitTracking';
 import { permitTypeSchema } from './permitType';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
-  issuedPermitId: Joi.string().min(0).max(255).allow(null),
-  permitTracking: Joi.array()
-    .items(
-      Joi.object({
-        trackingId: Joi.string().allow(null),
-        permitTrackingId: Joi.string().allow(null),
-        shownToProponent: Joi.boolean().allow(null),
-        sourceSystemKindId: Joi.number().allow(null),
-        sourceSystemKind: Joi.object({}).allow(null),
-        permitId: Joi.string().allow(null)
-      })
-    )
-    .allow(null),
+  issuedPermitId: Joi.string().allow(null),
+  permitTracking: permitTrackingSchema,
   authStatus: Joi.string().max(255).allow(null),
   statusLastVerified: Joi.date().iso().max('now'),
   needed: Joi.string().max(255).required(),

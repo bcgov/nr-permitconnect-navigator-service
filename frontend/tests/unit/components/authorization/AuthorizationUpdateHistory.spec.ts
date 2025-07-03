@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import AuthorizationUpdateHistory from '@/components/common/AuthorizationUpdateHistory.vue';
+import AuthorizationUpdateHistory from '@/components/permit/AuthorizationUpdateHistory.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';

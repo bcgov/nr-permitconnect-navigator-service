@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import AuthorizationStatusPill from '@/components/common/AuthorizationStatusPill.vue';
+import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
 import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
