@@ -35,14 +35,14 @@ product_information:
 product_technology_information:
   backend_frameworks:
     - name: Express
-      version: 4.18.3
+      version: 5.1.0
     - name: Other
       version: knex 3.1.0
     - name: Other
       version: jest 29.7.0
   backend_languages_version:
     - name: TypeScript
-      version: 5.8.2
+      version: 5.8.3
   ci_cd_tools:
     - GitHub-Actions
     - Helm
@@ -50,20 +50,20 @@ product_technology_information:
     - Postgresql
   frontend_frameworks:
     - name: Vue
-      version: 3.5.13
+      version: 3.5.17
     - name: Other
       version: Pinia 3.0.1
     - name: Other
       version: Primevue 4.3.3
     - name: Other
-      version: oidc-client-ts 3.2.0
+      version: oidc-client-ts 3.3.0
     - name: Other
-      version: Vite 6.0.1
+      version: Vite 6.3.5
     - name: Other
       version: vitest 3.1.1
   frontend_languages:
     - name: TypeScript
-      version: 5.8.2
+      version: 5.8.3
   hosting_platforms:
     - Private-Cloud-Openshift
   other_tools: Jira On-Prem, Figma, Miro
