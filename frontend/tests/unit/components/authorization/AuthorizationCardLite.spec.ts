@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
+import AuthorizationCardLite from '@/components/common/AuthorizationCardLite.vue';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -103,7 +103,7 @@ afterEach(() => {
 
 describe('AuthorizationCard', () => {
   it('renders component', async () => {
-    const wrapper = mount(AuthorizationCard, wrapperSettings());
+    const wrapper = mount(AuthorizationCardLite, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

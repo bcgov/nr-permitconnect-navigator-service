@@ -203,14 +203,19 @@
         "savedMessage": "Form saved"
       },
       "projectView": {
+        "addAuthorization": "Add authorization",
         "applicableAuthorizations": "Applicable authorizations",
+        "completed": "Completed",
+        "needed": "Needed",
+        "notNeeded": "Not needed",
         "seePropViewButtonLabel": "See Proponent's View",
         "tabFiles": "Files",
         "tabInformation": "Information",
         "tabNotes": "Notes",
         "tabAuthorizations": "Authorizations",
         "tabRelatedEnquiries": "Related enquiries",
-        "tabRoadmap": "Roadmap"
+        "tabRoadmap": "Roadmap",
+        "underInvestigation": "Under investigation"
       },
       "projectForm": {
         "failedMessage": "Failed to save project",
@@ -483,6 +488,7 @@
     "issuedPermitId": "Issued Permit ID:",
     "lastUpdated": "Last updated:",
     "latestUpdate": "Latest update for the client:",
+    "more": "More",
     "needed": "Needed:",
     "permitState": "Permit state:",
     "previousUpdates": "Previous Updates",

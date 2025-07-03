@@ -5,11 +5,12 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
+import AuthorizationCardLite from '@/components/common/AuthorizationCardLite.vue';
 import ProjectForm from '@/components/electrification/project/ProjectForm.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
-import AuthorizationCard from '@/components/common/AuthorizationCard.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
@@ -30,6 +31,7 @@ import {
 import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
@@ -111,6 +113,29 @@ const filteredDocuments = computed(() => {
       break;
   }
   return tempDocuments;
+});
+
+const authsUnderInvestigation = computed(() => {
+  return getPermits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION);
+});
+
+const authsNeeded = computed(() => {
+  return getPermits.value.filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW);
+});
+
+const authsCompleted = computed(() => {
+  return getPermits.value.filter(
+    (p) =>
+      ![
+        PermitAuthorizationStatus.NONE,
+        PermitAuthorizationStatus.IN_REVIEW,
+        PermitAuthorizationStatus.PENDING
+      ].includes(p.authStatus as PermitAuthorizationStatus)
+  );
+});
+
+const authsNotNeeded = computed(() => {
+  return getPermits.value.filter((p) => p.needed === PermitNeeded.NO);
 });
 
 const isCompleted = computed(() => {
@@ -437,19 +462,96 @@ onBeforeMount(async () => {
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            Add authorization
+            {{ t('i.common.projectView.addAuthorization') }}
           </Button>
         </div>
+        <!-- On going Authorizations -->
         <div
-          v-for="(permit, index) in getPermits"
+          v-for="(permit, index) in getPermits.filter((p) =>
+            [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
+              p.authStatus as PermitAuthorizationStatus
+            )
+          )"
           :key="permit.permitId"
           :index="index"
-          class="mb-6"
+          class="mb-6 mt-6"
         >
           <AuthorizationCard
             :editable="!isCompleted"
             :permit="permit"
           />
+        </div>
+        <!-- Authorizations with needed = under investigation -->
+        <div
+          v-if="authsUnderInvestigation.length > 0"
+          class="my-8"
+        >
+          <h4>{{ t('i.common.projectView.underInvestigation') }}</h4>
+          <div
+            v-for="(permit, index) in authsUnderInvestigation"
+            :key="permit.permitId"
+            :index="index"
+            class="mb-6 mt-6"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+            />
+          </div>
+        </div>
+        <!-- Authorizations with needed = Yes & stage = Pre-submission -->
+        <div
+          v-if="authsNeeded.length > 0"
+          class="my-8"
+        >
+          <h4>{{ t('i.common.projectView.needed') }}</h4>
+          <div
+            v-for="(permit, index) in authsNeeded"
+            :key="permit.permitId"
+            :index="index"
+            class="mb-6 mt-6"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+            />
+          </div>
+        </div>
+        <!--Authorizations when its Status=Approved, Denied, Cancelled, Withdrawn OR Abandoned.-->
+        <div
+          v-if="authsCompleted.length > 0"
+          class="my-8"
+        >
+          <h4>{{ t('i.common.projectView.completed') }}</h4>
+          <div
+            v-for="(permit, index) in authsCompleted"
+            :key="permit.permitId"
+            :index="index"
+            class="mb-6 mt-6"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+            />
+          </div>
+        </div>
+        <!--Authorizations when needed = NO-->
+        <div
+          v-if="authsNotNeeded.length > 0"
+          class="my-8"
+        >
+          <h4>{{ t('i.common.projectView.notNeeded') }}</h4>
+          <div
+            v-for="(permit, index) in authsNotNeeded"
+            :key="permit.permitId"
+            :index="index"
+            class="mb-6 mt-6"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+            />
+          </div>
         </div>
       </TabPanel>
       <TabPanel :value="3">
