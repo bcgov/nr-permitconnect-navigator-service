@@ -10,10 +10,10 @@ import type { Document, ElectrificationProject, Enquiry, HousingProject, NoteHis
 export type ProjectType = ElectrificationProject | HousingProject | undefined;
 
 export type ProjectStoreState = {
-  documents: Ref<Array<Document>>;
-  relatedEnquiries: Ref<Array<Enquiry>>;
-  noteHistory: Ref<Array<NoteHistory>>;
-  permits: Ref<Array<Permit>>;
+  documents: Ref<Document[]>;
+  relatedEnquiries: Ref<Enquiry[]>;
+  noteHistory: Ref<NoteHistory[]>;
+  permits: Ref<Permit[]>;
   project: Ref<ProjectType>;
 };
 

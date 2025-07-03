@@ -595,11 +595,19 @@
     "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
   },
   "noteModal": {
+    "cancel": "Cancel",
+    "confirm": "Confirm",
     "created": "Created",
-    "escalateDirector": "Escalate to Director",
-    "escalateSupervisor": "Escalate to Supervisor",
+    "deleteHeader": "Confirm delete",
+    "deleteMessage": "Please confirm that you want to delete the selected note.",
+    "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
+    "escalateToDirector": "Escalate to Director",
+    "escalateToSupervisor": "Escalate to Supervisor",
     "lastUpdated": "Last updated",
-    "showProponent": "Show to Proponent"
+    "noteDeleted": "Note deleted",
+    "noteDeleteFailed": "Failed to delete note",
+    "showProponent": "Show to Proponent",
+    "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
   },
   "permitCard": {
     "addUpdates": "Add updates",
