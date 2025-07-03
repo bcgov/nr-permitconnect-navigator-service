@@ -255,36 +255,40 @@ describe('getSourceSystems', () => {
       query: { initiative: Initiative.HOUSING }
     };
 
-    const sampleSourceSystemCode = {
-      acronym: 'ATS',
-      active: true,
-      code: 'ITSM-5314',
-      definition: 'Authorization Tracking System',
-      display: 'Authorization Tracking System',
-      sourceSystemKind: {
-        description: 'ATS Project Number',
-        kind: null,
-        sourceSystemCode: 'ITSM-5314',
-        sourceSystemKindId: 2,
-        createdAt: '2025-06-18T15:56:00.515Z',
+    const sampleSourceSystemCodes = [
+      {
+        code: 'ITSM-5285',
+        display: 'Archaeology Permit Tracking System',
+        definition: 'Archaeology Permit Tracking System',
+        active: true,
+        acronym: 'APTS',
         createdBy: '00000000-0000-0000-0000-000000000000',
-        updatedAt: null,
-        updatedBy: null
-      },
-      createdAt: '2025-06-18T15:56:00.515Z',
-      createdBy: '00000000-0000-0000-0000-000000000000',
-      updatedAt: null,
-      updatedBy: null
-    };
-    // @ts-expect-error - Mocking a specific return type
-    getSourceSystemsSpy.mockResolvedValue(sampleSourceSystemCode);
+        createdAt: new Date(),
+        updatedBy: '',
+        updatedAt: new Date(),
+        source_system_kind_source_system_kind_source_system_codeTosource_system_code: [
+          {
+            sourceSystemKindId: 2,
+            kind: '',
+            description: 'Application Number',
+            sourceSystemCode: 'ITSM-5285',
+            createdBy: '00000000-0000-0000-0000-000000000000',
+            createdAt: new Date(),
+            updatedBy: '',
+            updatedAt: new Date()
+          }
+        ]
+      }
+    ];
+
+    getSourceSystemsSpy.mockResolvedValue(sampleSourceSystemCodes);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await permitController.getSourceSystems(req as any, res as any, next);
 
     expect(getSourceSystemsSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(sampleSourceSystemCode);
+    expect(res.json).toHaveBeenCalledWith(sampleSourceSystemCodes);
   });
 });
 

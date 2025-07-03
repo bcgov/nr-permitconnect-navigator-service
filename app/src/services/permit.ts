@@ -41,7 +41,7 @@ const service = {
         }
         return createResponse;
       });
-      //@ts-expect-error - mapping issue with permit_tracking
+
       return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;
@@ -63,7 +63,7 @@ const service = {
         permit_id: permitId
       }
     });
-    //@ts-expect-error - mapping issue with permit_tracking
+
     return permit.fromPrismaModel(response);
   },
 
@@ -97,11 +97,11 @@ const service = {
       include: {
         permit_type: true, // If changed reflect in type and model
         permit_note: { orderBy: { created_at: 'desc' } },
-        permit_tracking: true
+        permit_tracking: { include: { source_system_kind: true } }
       }
     });
-    //@ts-expect-error - mapping issue with permit_tracking
-    return result ? permit.fromPrismaModelWithNotes(result) : null;
+
+    return result ? permit.fromPrismaModelWithNotesTracking(result) : null;
   },
 
   /**
@@ -183,10 +183,10 @@ const service = {
     });
 
     if (options?.includeNotes) {
-      return response.map((x) => permit.fromPrismaModelWithNotes(x));
+      return response.map((x) => permit.fromPrismaModelWithNotesTracking(x));
     }
 
-    return response.map((x) => permit.fromPrismaModel(x));
+    return response.map((x) => permit.fromPrismaModelWithTracking(x));
   },
 
   /**
@@ -206,7 +206,6 @@ const service = {
           permit_id: data.permitId
         }
       });
-      //@ts-expect-error - mapping issue with permit_tracking
       return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;

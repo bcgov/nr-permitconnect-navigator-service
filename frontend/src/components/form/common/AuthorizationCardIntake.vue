@@ -10,7 +10,12 @@ import { permitService } from '@/services';
 import { usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { SourceSystemKind } from '@/types';
+import type { SourceSystemCode, SourceSystemKind } from '@/types';
+
+// Types
+type sourceSystemKindWithAcronym = SourceSystemKind & {
+  sourceSystemAcronym?: string;
+};
 
 // Emits
 const emit = defineEmits(['update:uncheckShownToProponent']);
@@ -23,7 +28,7 @@ const permitStore = usePermitStore();
 const { getPermitTypes, getSourceSystems } = storeToRefs(permitStore);
 
 // State
-const sourceSystemKinds: Array<SourceSystemKind> = [];
+const sourceSystemKindsWithAcronym: Array<sourceSystemKindWithAcronym> = [];
 
 // Actions
 onMounted(async () => {
@@ -36,11 +41,11 @@ onMounted(async () => {
     const sourceSystems = (await permitService.getSourceSystems()).data;
     permitStore.setSourceSystems(sourceSystems);
   }
-  getSourceSystems.value.forEach((sourceSystem: any) => {
+  getSourceSystems.value.forEach((sourceSystem: SourceSystemCode) => {
     sourceSystem?.source_system_kind_source_system_kind_source_system_codeTosource_system_code.forEach(
-      (sourceSystemKind: any) => {
+      (sourceSystemKind: sourceSystemKindWithAcronym) => {
         sourceSystemKind.sourceSystemAcronym = sourceSystem.acronym;
-        sourceSystemKinds.push(sourceSystemKind);
+        sourceSystemKindsWithAcronym.push(sourceSystemKind);
       }
     );
   });
@@ -77,7 +82,7 @@ onMounted(async () => {
               <Select
                 :name="`permitTracking[${idx}].sourceSystemKindId`"
                 placeholder="Select an ID"
-                :options="sourceSystemKinds"
+                :options="sourceSystemKindsWithAcronym"
                 :option-label="(e) => `${e.description}, ${e.sourceSystemAcronym}`"
                 option-value="sourceSystemKindId"
               />

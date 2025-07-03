@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Divider from '@/components/common/Divider.vue';
-import AuthorizationStatusPill from '@/components/common/AuthorizationStatusPill.vue';
+import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, permitService } from '@/services';

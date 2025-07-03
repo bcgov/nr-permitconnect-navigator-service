@@ -4,11 +4,11 @@ import { Form } from 'vee-validate';
 import { inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { date, object, string } from 'yup';
+import { array, date, boolean, number, object, string } from 'yup';
 
 import AuthorizationCardIntake from '@/components/form/common/AuthorizationCardIntake.vue';
 import AuthorizationStatusUpdatesCard from '@/components/form/common/AuthorizationStatusUpdatesCard.vue';
-import AuthorizationUpdateHistory from '@/components/common/AuthorizationUpdateHistory.vue';
+import AuthorizationUpdateHistory from '@/components/permit/AuthorizationUpdateHistory.vue';
 import { Button, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
@@ -45,7 +45,9 @@ const projectService = inject(projectServiceKey);
 // Actions
 const initialFormValues = {
   // ...other fields,
-  permitTracking: [{ sourceSystemKindId: undefined, trackingId: '', shownToProponent: false }]
+  permitTracking: [{ sourceSystemKindId: undefined, trackingId: '', shownToProponent: false }],
+  authStatus: PermitAuthorizationStatus.NONE,
+  status: PermitStatus.NEW
 };
 
 async function onSubmit(data: any) {
@@ -62,10 +64,12 @@ async function onSubmit(data: any) {
     const result = (await permitService.createPermit({ ...permitData, activityId: activityId })).data;
     projectStore.addPermit(result);
 
-    await permitNoteService.createPermitNote({
-      permitId: result.permitId,
-      note: permitNote
-    });
+    // Prevent creating notes if the above call fails or if the note is empty
+    if (result?.permitId && permitNote?.trim().length > 0)
+      await permitNoteService.createPermitNote({
+        permitId: result.permitId,
+        note: permitNote
+      });
 
     // Send email to the user if permit is needed
     if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
@@ -118,6 +122,13 @@ const formSchema = object({
   authorizationType: object().required().label('Authorization type'),
   needed: string().required().label('Needed'),
   status: string().required().oneOf(PERMIT_STATUS_LIST).label('Application stage'),
+  permitTracking: array().of(
+    object({
+      sourceSystemKindId: number().required().label('Tracking ID type'),
+      trackingId: string().max(255).required().label('Tracking ID'),
+      shownToProponent: boolean().oneOf([true, false]).default(false).label('Shown to proponent')
+    })
+  ),
   authStatus: string()
     .required()
     .oneOf(PERMIT_AUTHORIZATION_STATUS_LIST)
@@ -172,10 +183,6 @@ const formSchema = object({
           });
         }
       "
-    />
-    <input
-      type="hidden"
-      name="shownToProponentCount"
     />
     <AuthorizationStatusUpdatesCard
       initial-form-values=""
