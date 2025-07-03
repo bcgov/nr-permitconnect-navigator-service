@@ -1,3 +1,4 @@
+// Authorization Status
 export enum PermitAuthorizationStatus {
   ISSUED = 'Approved',
   PENDING = 'Pending client action',
@@ -28,6 +29,7 @@ export enum PermitNeeded {
   NO = 'No'
 }
 
+// Status - Application Stage
 export enum PermitStatus {
   NEW = 'Pre-submission',
   APPLIED = 'Application submission',
