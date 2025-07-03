@@ -44,10 +44,7 @@ watchEffect(() => {
           <div class="mb-4">
             <h4 class="mb-0">{{ permit.permitType?.name }}</h4>
           </div>
-          <div
-            v-if="permit.statusLastVerified"
-            class="mb-10"
-          >
+          <div class="mb-10">
             <span class="font-bold">
               {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
             </span>
@@ -92,7 +89,7 @@ watchEffect(() => {
           <div class="flex justify-end">
             <Button
               class="p-button-outlined mr-4 mb-4 size-fit"
-              label="More"
+              :label="t('permitCard.more')"
             />
           </div>
         </div>
