@@ -166,19 +166,56 @@
   },
   "i": {
     "common": {
+      "authorization": {
+        "authorizationForm": {
+          "addAuthorization": "Add authorization",
+          "publish": "Publish",
+          "cancel": "Cancel",
+          "agency": "Agency:",
+          "businessDomain": "Business domain:",
+          "updatedBy": "Updated by:",
+          "lastUpdated": "Last updated:",
+          "updateNoteHistory": "Update note history"
+        },
+        "authorizationCardIntake": {
+          "authorization": "Authorization",
+          "authorizationTypeID": "Authorization type and IDs",
+          "trackingIds": "Tracking IDs",
+          "issuedPermitId": "Issued Permit ID"
+        },
+        "authorizationStatusUpdatesCard": {
+          "statusUpdates": "Status updates",
+          "statusVerifiedDate": "Status verified date",
+          "updateToToday": "Update to today",
+          "authorizationStatus": "Authorization status",
+          "applicationStage": "Application stage",
+          "needed": "Needed",
+          "submittedDate": "Submitted date",
+          "decisionDate": "Decision date",
+          "updateNoteForProponent": "Update note for Proponent"
+        },
+        "authorizationUpdateHistory": {
+          "updateNoteHistory": "Update note history"
+        }
+      },
       "form": {
         "cancelMessage": "Your changes have not been saved.",
         "savedMessage": "Form saved"
       },
       "projectView": {
-        "applicablePermits": "Applicable permits",
+        "addAuthorization": "Add authorization",
+        "applicableAuthorizations": "Applicable authorizations",
+        "completed": "Completed",
+        "needed": "Needed",
+        "notNeeded": "Not needed",
         "seePropViewButtonLabel": "See Proponent's View",
         "tabFiles": "Files",
         "tabInformation": "Information",
         "tabNotes": "Notes",
-        "tabPermits": "Permits",
+        "tabAuthorizations": "Authorizations",
         "tabRelatedEnquiries": "Related enquiries",
-        "tabRoadmap": "Roadmap"
+        "tabRoadmap": "Roadmap",
+        "underInvestigation": "Under investigation"
       },
       "projectForm": {
         "failedMessage": "Failed to save project",
@@ -285,6 +322,27 @@
         "userRevoked": "User revoked"
       }
     }
+  },
+  "authorizationCard": {
+    "addUpdates": "Add updates",
+    "adjudicationDate": "Adjudication date:",
+    "agency": "Agency:",
+    "businessDomain": "Business domain:",
+    "issuedPermitId": "Issued Permit ID:",
+    "lastUpdated": "Last updated:",
+    "latestUpdate": "Latest update for the client:",
+    "more": "More",
+    "needed": "Needed:",
+    "permitState": "Permit state:",
+    "previousUpdates": "Previous Updates",
+    "sourceSystem": "Source system:",
+    "statusVerified": "Status verified date",
+    "submittedDate": "Submitted date:",
+    "trackingId": "Tracking ID:",
+    "updatedBy": "Updated by:"
+  },
+  "authorizationCardLite": {
+    "more": "More"
   },
   "cancelButton": {
     "btnText": "Cancel"
@@ -441,23 +499,6 @@
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"
-  },
-  "permitCard": {
-    "addUpdates": "Add updates",
-    "adjudicationDate": "Adjudication date:",
-    "agency": "Agency:",
-    "businessDomain": "Business domain:",
-    "issuedPermitId": "Issued Permit ID:",
-    "lastUpdated": "Last updated:",
-    "latestUpdate": "Latest update for the client:",
-    "needed": "Needed:",
-    "permitState": "Permit state:",
-    "previousUpdates": "Previous Updates",
-    "sourceSystem": "Source system:",
-    "statusVerified": "Status verified date:",
-    "submittedDate": "Submitted date:",
-    "trackingId": "Tracking ID:",
-    "updatedBy": "Updated by:"
   },
   "permitModal": {
     "addTitle": "Add permit",

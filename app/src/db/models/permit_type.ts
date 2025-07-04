@@ -22,8 +22,7 @@ export default {
       name_subtype: input.nameSubtype,
       acronym: input.acronym,
       tracked_in_ats: input.trackedInATS,
-      source_system: input.sourceSystem,
-      source_system_acronym: input.sourceSystemAcronym
+      source_system_code: input.sourceSystemCode
     };
   },
 
@@ -40,8 +39,7 @@ export default {
       nameSubtype: input.name_subtype,
       acronym: input.acronym,
       trackedInATS: input.tracked_in_ats,
-      sourceSystem: input.source_system,
-      sourceSystemAcronym: input.source_system_acronym
+      sourceSystemCode: input.source_system_code
     };
   }
 };

@@ -61,6 +61,19 @@ const controller = {
     }
   },
 
+  getSourceSystems: async (
+    req: Request<never, never, never, { initiative: Initiative }>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    try {
+      const response = await permitService.getSourceSystems();
+      res.status(200).json(response);
+    } catch (e: unknown) {
+      next(e);
+    }
+  },
+
   async listPermits(req: Request<never, never, never, Partial<ListPermitsOptions>>, res: Response, next: NextFunction) {
     try {
       const options: ListPermitsOptions = {
