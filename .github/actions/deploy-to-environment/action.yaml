@@ -39,7 +39,16 @@ runs:
         openshift_token: ${{ inputs.openshift_token }}
         insecure_skip_tls_verify: true
         namespace: ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
-
+    - uses: bcgov/action-crunchy@v1.2.2
+      name: Deploy Crunchy
+      id: deploy_crunchy
+      with:
+        oc_namespace: ${{ inputs.namespace_prefix }}
+        oc_token: ${{ inputs.openshift_token }}
+        environment: ${{ inputs.namespace_environment }}
+        values_file: charts/crunchy/values.yml
+        # triggers: ${{ inputs.db_triggers }}
+        triggers: ('charts/crunchy/')
     - name: Helm Deploy
       shell: bash
       run: >-
