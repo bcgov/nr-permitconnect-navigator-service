@@ -11,7 +11,7 @@ import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { AxiosResponse } from 'axios';
-import type { Note } from '@/types';
+import type { Note, NoteHistory } from '@/types';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
@@ -35,52 +35,49 @@ const currentDate = new Date().toISOString();
 const tomorrowDate = new Date(new Date().setDate(new Date().getDate() + 1)).toISOString();
 const yesterdayDate = new Date(new Date().setDate(new Date().getDate() - 1)).toISOString();
 
-const testNote: Note = {
-  noteId: 'noteUUID',
-  activityId: 'activityUUID',
-  note: 'note contents text',
-  noteType: NoteType.GENERAL,
-  title: 'note contents title',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  isDeleted: false
+const TEST_NOTE: Note = {
+  noteId: '123',
+  noteHistoryId: '123',
+  note: 'some text',
+  createdBy: 'user',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
 };
 
-const testNoteUnresolved: Note = {
-  noteId: 'noteUUID',
-  activityId: 'activityUUID',
+const TEST_NOTE_HISTORY: NoteHistory = {
+  activityId: '123',
+  bringForwardDate: null,
+  bringForwardState: null,
+  escalateToDirector: false,
+  escalateToSupervisor: false,
+  isDeleted: false,
+  note: [TEST_NOTE],
+  noteHistoryId: '123',
+  type: NoteType.GENERAL,
+  title: 'Title',
+  shownToProponent: false,
+  createdBy: 'user',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
+};
+
+const TEST_NOTE_HISTORY_UNRESOLVED: NoteHistory = {
+  ...TEST_NOTE_HISTORY,
   bringForwardDate: tomorrowDate,
-  bringForwardState: BringForwardType.UNRESOLVED,
-  note: 'note contents text',
-  noteType: NoteType.BRING_FORWARD,
-  title: 'note contents title',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  isDeleted: false
+  bringForwardState: BringForwardType.UNRESOLVED
 };
 
-const testNoteResolved: Note = {
-  noteId: 'noteUUID',
-  activityId: 'activityUUID',
+const TEST_NOTE_HISTORY_RESOLVED: NoteHistory = {
+  ...TEST_NOTE_HISTORY,
   bringForwardDate: yesterdayDate,
-  bringForwardState: BringForwardType.RESOLVED,
-  note: 'note contents text',
-  noteType: NoteType.BRING_FORWARD,
-  title: 'note contents title',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  isDeleted: false
+  bringForwardState: BringForwardType.RESOLVED
 };
 
-const wrapperSettings = (testNoteProp = testNote) => ({
+const wrapperSettings = (testNoteHistoryProp = TEST_NOTE_HISTORY) => ({
   props: {
-    note: testNoteProp
+    noteHistory: testNoteHistoryProp
   },
   global: {
     plugins: [
@@ -128,12 +125,12 @@ describe('noteCard test', () => {
 
   it('does not retrieve username when createdBy is empty', async () => {
     const alteredTestNote = {
-      ...testNote,
+      ...TEST_NOTE_HISTORY,
       createdBy: ''
     };
     const wrapper = mount(NoteCard, {
       props: {
-        note: alteredTestNote
+        noteHistory: alteredTestNote
       },
       global: {
         plugins: [emptyTestPinia(), PrimeVue, ConfirmationService, ToastService],
@@ -141,12 +138,12 @@ describe('noteCard test', () => {
       }
     });
     expect(useUserService).not.toHaveBeenCalled();
-    expect(wrapper.get('h3').text()).toBe(testNote.title);
+    expect(wrapper.get('h3').text()).toBe(TEST_NOTE_HISTORY.title);
   });
 
   it('displays note title', async () => {
     const wrapper = mount(NoteCard, wrapperSettings());
-    expect(wrapper.get('h3').text()).toBe(testNote.title);
+    expect(wrapper.get('h3').text()).toBe(TEST_NOTE_HISTORY.title);
   });
 
   it('displays p tags for general notes', async () => {
@@ -157,33 +154,33 @@ describe('noteCard test', () => {
     expect(pTag.length).toBe(4);
     expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
     expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${testNote.noteType}`);
-    expect(pTag[3].text()).toBe(testNote.note);
+    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY.type}`);
+    expect(pTag[3].text()).toBe(TEST_NOTE_HISTORY.note[0].note);
   });
 
   it('displays p tags for unresolved notes', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings(testNoteUnresolved));
+    const wrapper = mount(NoteCard, wrapperSettings(TEST_NOTE_HISTORY_UNRESOLVED));
     const pTag = wrapper.findAll('p');
 
-    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${testNoteUnresolved.bringForwardState})`);
+    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState})`);
     expect(pTag.length).toBe(5);
     expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
     expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${testNoteUnresolved.noteType}`);
+    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY_UNRESOLVED.type}`);
     expect(pTag[3].text()).toBe(`Bring forward date: ${formatDate(tomorrowDate)}`);
-    expect(pTag[4].text()).toBe(testNoteUnresolved.note);
+    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0].note);
   });
 
   it('displays p tags for resolved notes', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings(testNoteResolved));
+    const wrapper = mount(NoteCard, wrapperSettings(TEST_NOTE_HISTORY_RESOLVED));
     const pTag = wrapper.findAll('p');
 
-    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${testNoteResolved.bringForwardState})`);
+    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_RESOLVED.bringForwardState})`);
     expect(pTag.length).toBe(5);
     expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
     expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${testNoteResolved.noteType}`);
+    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY_RESOLVED.type}`);
     expect(pTag[3].text()).toBe(`Bring forward date: ${formatDate(yesterdayDate)}`);
-    expect(pTag[4].text()).toBe(testNoteResolved.note);
+    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0].note);
   });
 });
