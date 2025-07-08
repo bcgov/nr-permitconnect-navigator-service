@@ -1,47 +1,15 @@
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import {
-  activityService,
-  activityContactService,
-  contactService,
-  enquiryService,
-  noteService,
-  userService
-} from '../services';
+import { activityService, activityContactService, contactService, enquiryService } from '../services';
 import { Initiative } from '../utils/enums/application';
-import { ApplicationStatus, IntakeStatus, NoteType, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentSubject, getCurrentUsername, partition, isTruthy } from '../utils/utils';
+import { ApplicationStatus, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { getCurrentUsername, partition, isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Contact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
 
 const controller = {
-  /**
-   * @deprecated Not used anywhere
-   */
-  createRelatedNote: async (req: Request, data: Enquiry) => {
-    if (data.relatedActivityId) {
-      const activity = await activityService.getActivity(data.relatedActivityId);
-      if (activity) {
-        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
-
-        await noteService.createNote({
-          activityId: data.relatedActivityId,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, max-len
-          note: `Added by ${getCurrentUsername(req.currentContext)}\nEnquiry #${data.activityId}\n${data.enquiryDescription}`,
-          noteType: NoteType.ENQUIRY,
-          title: 'Enquiry',
-          bringForwardDate: null,
-          bringForwardState: null,
-          createdAt: new Date().toISOString(),
-          createdBy: userId,
-          isDeleted: false
-        });
-      }
-    }
-  },
-
   generateEnquiryData: async (req: Request<never, never, EnquiryIntake>, intakeStatus: string) => {
     const data = req.body;
 

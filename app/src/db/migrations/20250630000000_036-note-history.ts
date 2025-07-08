@@ -107,10 +107,6 @@ export async function down(knex: Knex): Promise<void> {
           WHERE nh.note_history_id = n.note_history_id;`);
       })
 
-      // Drop public schema tables
-      .then(() => knex.schema.dropTableIfExists('permit_type_initiative_xref'))
-      .then(() => knex.schema.dropTableIfExists('electrification_project'))
-
       // Drop note triggers
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_note_trigger ON note'))
       .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS before_update_note_trigger ON note'))
@@ -130,7 +126,7 @@ export async function down(knex: Knex): Promise<void> {
       )
 
       // Rename pkey constraint
-      .then(() => knex.schema.raw(' ALTER TABLE public.note_history RENAME CONSTRAINT note_history_pkey TO note_pkey'))
+      .then(() => knex.schema.raw('ALTER TABLE public.note_history RENAME CONSTRAINT note_history_pkey TO note_pkey'))
 
       // Rename note_history back to note
       .then(() => knex.schema.renameTable('note_history', 'note'))

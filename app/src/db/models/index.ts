@@ -8,7 +8,6 @@ export { default as email_log } from './email_log';
 export { default as enquiry } from './enquiry';
 export { default as housing_project } from './housing_project';
 export { default as identity_provider } from './identity_provider';
-export { default as note } from './note';
 export { default as permit } from './permit';
 export { default as permit_note } from './permit_note';
 export { default as permit_type } from './permit_type';

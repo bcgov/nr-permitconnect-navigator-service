@@ -29,7 +29,7 @@ const service = {
    * @function deleteNoteHistory
    * Soft deletes a note history by marking is as deleted
    * @param {string} noteHistoryId ID of the note history to delete
-   * @returns {Promise<Note>} The result of running the update operation
+   * @returns {Promise<NoteHistory>} The result of running the update operation
    */
   deleteNoteHistory: async (noteHistoryId: string, updateStamp: Partial<IStamps>) => {
     const result = await prisma.note_history.update({

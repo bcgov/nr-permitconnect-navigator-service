@@ -118,11 +118,11 @@ const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: NoteHistory) => projectStore.addNoteHistory(note, true);
+const onAddNote = (history: NoteHistory) => projectStore.addNoteHistory(history, true);
 
-const onDeleteNote = (note: NoteHistory) => projectStore.removeNoteHistory(note);
+const onDeleteNote = (history: NoteHistory) => projectStore.removeNoteHistory(history);
 
-const onUpdateNote = (history: NoteHistory, newNote: Note) => projectStore.updateNoteHistory(history, newNote);
+const onUpdateNote = (history: NoteHistory) => projectStore.updateNoteHistory(history);
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;

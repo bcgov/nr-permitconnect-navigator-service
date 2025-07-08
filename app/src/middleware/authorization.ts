@@ -7,7 +7,6 @@ import {
   enquiryService,
   housingProjectService,
   noteHistoryService,
-  noteService,
   permitService,
   userService,
   yarsService
