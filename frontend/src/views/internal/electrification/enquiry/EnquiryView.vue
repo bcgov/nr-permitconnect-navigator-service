@@ -53,16 +53,16 @@ provide(atsEnquiryTypeCodeKey, Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_COD
 provide(projectServiceKey, electrificationProjectService);
 
 // Actions
-function onAddNote(note: NoteHistory) {
-  enquiryStore.addNoteHistory(note, true);
+function onAddNote(history: NoteHistory) {
+  enquiryStore.addNoteHistory(history, true);
 }
 
-const onDeleteNote = (note: NoteHistory) => {
-  enquiryStore.removeNoteHistory(note);
+const onDeleteNote = (history: NoteHistory) => {
+  enquiryStore.removeNoteHistory(history);
 };
 
-const onUpdateNote = (history: NoteHistory, newNote: Note) => {
-  enquiryStore.updateNoteHistory(history, newNote);
+const onUpdateNote = (history: NoteHistory) => {
+  enquiryStore.updateNoteHistory(history);
 };
 
 function onEnquiryFormSaved() {
