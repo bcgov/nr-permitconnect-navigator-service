@@ -1,5 +1,5 @@
 import { generateCreateStamps } from '../db/utils/utils';
-import { comsService, emailService, noteService } from '../services';
+import { comsService, emailService, noteHistoryService, noteService } from '../services';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Email, EmailAttachment } from '../types';
@@ -64,15 +64,22 @@ const controller = {
           });
         }
 
-        await noteService.createNote({
+        const history = await noteHistoryService.createNoteHistory({
           activityId: req.body.activityId,
-          note: noteBody,
-          noteType: 'Roadmap',
+          type: 'Roadmap',
           title: 'Sent roadmap',
           bringForwardDate: null,
           bringForwardState: null,
+          escalateToSupervisor: false,
+          escalateToDirector: false,
+          shownToProponent: false,
           isDeleted: false,
           ...generateCreateStamps(req.currentContext)
+        });
+
+        await noteService.createNote({
+          noteHistoryId: history.noteHistoryId,
+          note: noteBody
         });
       }
 

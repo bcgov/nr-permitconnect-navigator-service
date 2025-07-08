@@ -39,13 +39,13 @@ const controller = {
         ...stamps
       });
 
-      const response = await noteService.createNote({
+      const note = await noteService.createNote({
         noteHistoryId: history.noteHistoryId,
         note: req.body.note,
         ...stamps
       });
 
-      return res.status(201).json(response);
+      return res.status(201).json({ ...history, note: [note] });
     } catch (e: unknown) {
       next(e);
     }
