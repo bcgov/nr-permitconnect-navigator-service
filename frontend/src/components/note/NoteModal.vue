@@ -8,13 +8,11 @@ import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/
 import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
+import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { NoteHistory } from '@/types';
-import type { SelectChangeEvent } from 'primevue/select';
-import { omit } from '@/utils/utils';
 
 // Props
 const { activityId, noteHistory = undefined } = defineProps<{
@@ -122,7 +120,7 @@ async function onSubmit(data: any) {
       emit('addNote', result);
     } else {
       const result = (
-        await noteService.addNote(data.noteHistoryId, { ...body, activityId: activityId, note: data.note })
+        await noteService.updateNoteHistory(data.noteHistoryId, { ...body, activityId: activityId, note: data.note })
       ).data;
       emit('updateNote', result);
     }

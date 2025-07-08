@@ -4,22 +4,49 @@ import { noteService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { BringForwardType } from '@/utils/enums/projectCommon';
+import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
+
+import type { Note, NoteHistory } from '@/types';
 
 // Constants
 const PATH = 'note';
 
-const TEST_NOTE = {
-  noteId: 'noteUUID',
-  activityId: 'activityUUID',
-  note: 'note contents text',
-  noteType: 'Note Type',
-  title: 'note contents title',
-  createdBy: 'testCreatedBy',
+const TEST_NOTE: Note = {
+  noteId: '123',
+  noteHistoryId: '123',
+  note: 'some text',
+  createdBy: 'user',
   createdAt: new Date().toISOString(),
-  updatedBy: 'testUpdatedAt',
-  updatedAt: new Date().toISOString(),
-  isDeleted: false
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
+};
+
+const TEST_NOTE_HISTORY: NoteHistory = {
+  activityId: '123',
+  bringForwardDate: null,
+  bringForwardState: null,
+  escalateToDirector: false,
+  escalateToSupervisor: false,
+  isDeleted: false,
+  note: [
+    {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: 'some text',
+      createdBy: 'user',
+      createdAt: new Date().toISOString(),
+      updatedBy: 'user',
+      updatedAt: new Date().toISOString()
+    }
+  ],
+  noteHistoryId: '123',
+  type: NoteType.GENERAL,
+  title: 'Title',
+  shownToProponent: false,
+  createdBy: 'user',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
 };
 
 // Mocks
@@ -59,21 +86,26 @@ describe('noteService', () => {
         appStore.setInitiative(initiative);
       });
 
-      describe('createNote', () => {
+      describe('createNoteHistory', () => {
         it('calls with given data', () => {
-          noteService.createNote(TEST_NOTE);
+          noteService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as any);
 
           expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_NOTE);
+          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
+            ...TEST_NOTE_HISTORY,
+            note: 'text'
+          });
         });
       });
 
       describe('deleteNote', () => {
         it('calls with given data', () => {
-          noteService.deleteNote(TEST_NOTE.noteId);
+          noteService.deleteNoteHistory(TEST_NOTE_HISTORY.noteHistoryId as string);
 
           expect(deleteSpy).toHaveBeenCalledTimes(1);
-          expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_NOTE.noteId}`);
+          expect(deleteSpy).toHaveBeenCalledWith(
+            `${initiative.toLowerCase()}/${PATH}/${TEST_NOTE_HISTORY.noteHistoryId}`
+          );
         });
       });
 
@@ -108,7 +140,7 @@ describe('noteService', () => {
 
       describe('listNotes', () => {
         it('retrieves note list', () => {
-          noteService.listNotes('testUUID');
+          noteService.listNoteHistory('testUUID');
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/testUUID`);
@@ -117,10 +149,16 @@ describe('noteService', () => {
 
       describe('updateNote', () => {
         it('calls with given data', () => {
-          noteService.updateNote(TEST_NOTE);
+          noteService.updateNoteHistory(
+            TEST_NOTE_HISTORY.noteHistoryId as string,
+            { ...TEST_NOTE_HISTORY, note: 'text' } as any
+          );
 
           expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_NOTE.noteId}`, TEST_NOTE);
+          expect(putSpy).toHaveBeenCalledWith(
+            `${initiative.toLowerCase()}/${PATH}/${TEST_NOTE_HISTORY.noteHistoryId}`,
+            { ...TEST_NOTE_HISTORY, note: 'text' }
+          );
         });
       });
     }
