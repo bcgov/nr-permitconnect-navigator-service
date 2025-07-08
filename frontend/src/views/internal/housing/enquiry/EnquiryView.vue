@@ -13,10 +13,10 @@ import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectC
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
+import { toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { HousingProject, NoteHistory } from '@/types';
-import { toTitleCase } from '@/utils/utils';
 
 // Props
 const {
