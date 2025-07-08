@@ -1,6 +1,5 @@
 import { roadmapController } from '../../../src/controllers';
-import { comsService, emailService, noteService } from '../../../src/services';
-import type { Note } from '../../../src/types';
+import { comsService, emailService, noteHistoryService, noteService } from '../../../src/services';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -32,6 +31,7 @@ describe('send', () => {
   const getObjectSpy = jest.spyOn(comsService, 'getObject');
   const getObjectsSpy = jest.spyOn(comsService, 'getObjects');
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
+  const createHistorySpy = jest.spyOn(noteHistoryService, 'createNoteHistory');
 
   it('should return 201 if all good', async () => {
     const req = {
@@ -48,16 +48,31 @@ describe('send', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const noteCreate: Note = {
-      activityId: '123-123',
-      note: 'Some message text',
-      noteType: 'Roadmap',
-      title: 'Sent roadmap',
+    const createdHistory = {
+      activityId: req.body.activityId,
       bringForwardDate: null,
       bringForwardState: null,
-      createdAt: new Date().toISOString(),
-      createdBy: 'abc-123',
-      isDeleted: false
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      noteHistoryId: '123',
+      shownToProponent: false,
+      title: 'Roadmap',
+      type: 'Sent roadmap',
+      isDeleted: false,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    const createdNote = {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: req.body.emailData.body,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
     };
 
     const emailResponse = {
@@ -65,7 +80,8 @@ describe('send', () => {
       status: 201
     };
 
-    createNoteSpy.mockResolvedValue(noteCreate);
+    createHistorySpy.mockResolvedValue(createdHistory);
+    createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -99,21 +115,37 @@ describe('send', () => {
       status: 201
     };
 
-    const noteCreate: Note = {
-      activityId: '123-123',
-      note: 'Some message text',
-      noteType: 'Roadmap',
-      title: 'Sent roadmap',
+    const createdHistory = {
+      activityId: req.body.activityId,
       bringForwardDate: null,
       bringForwardState: null,
-      createdAt: new Date().toISOString(),
-      createdBy: 'abc-123',
-      isDeleted: false
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      noteHistoryId: '123',
+      shownToProponent: false,
+      title: 'Sent roadmap',
+      type: 'Roadmap',
+      isDeleted: false,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    const createdNote = {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: req.body.emailData.body,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
     };
 
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-    createNoteSpy.mockResolvedValue(noteCreate);
+    createHistorySpy.mockResolvedValue(createdHistory);
+    createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -123,10 +155,22 @@ describe('send', () => {
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
+    expect(createHistorySpy).toHaveBeenCalledTimes(1);
+    expect(createHistorySpy).toHaveBeenCalledWith({
+      activityId: req.body.activityId,
+      bringForwardDate: null,
+      bringForwardState: null,
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      shownToProponent: false,
+      title: createdHistory.title,
+      type: createdHistory.type,
+      isDeleted: false,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: createdHistory.createdBy
+    });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ ...noteCreate, createdAt: expect.stringMatching(isoPattern) })
-    );
+    expect(createNoteSpy).toHaveBeenCalledWith({ noteHistoryId: createdNote.noteHistoryId, note: createdNote.note });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
   });
@@ -180,6 +224,35 @@ describe('send', () => {
       status: 201
     };
 
+    const createdHistory = {
+      activityId: req.body.activityId,
+      bringForwardDate: null,
+      bringForwardState: null,
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      noteHistoryId: '123',
+      shownToProponent: false,
+      title: 'Roadmap',
+      type: 'Sent roadmap',
+      isDeleted: false,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    const createdNote = {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: req.body.emailData.body,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    createHistorySpy.mockResolvedValue(createdHistory);
+    createNoteSpy.mockResolvedValue(createdNote);
     getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockResolvedValue(getObjectResponse);
     emailSpy.mockResolvedValue(emailResponse);
@@ -234,6 +307,35 @@ describe('send', () => {
       status: 201
     };
 
+    const createdHistory = {
+      activityId: req.body.activityId,
+      bringForwardDate: null,
+      bringForwardState: null,
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      noteHistoryId: '123',
+      shownToProponent: false,
+      title: 'Roadmap',
+      type: 'Sent roadmap',
+      isDeleted: false,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    const createdNote = {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: req.body.emailData.body,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    createHistorySpy.mockResolvedValue(createdHistory);
+    createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -296,21 +398,37 @@ describe('send', () => {
       status: 200
     };
 
-    const noteCreate: Note = {
-      activityId: '123-123',
-      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`,
-      noteType: 'Roadmap',
-      title: 'Sent roadmap',
+    const createdHistory = {
+      activityId: req.body.activityId,
       bringForwardDate: null,
       bringForwardState: null,
-      createdAt: new Date().toISOString(),
-      createdBy: 'abc-123',
-      isDeleted: false
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      noteHistoryId: '123',
+      shownToProponent: false,
+      title: 'Sent roadmap',
+      type: 'Roadmap',
+      isDeleted: false,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
+    };
+
+    const createdNote = {
+      noteId: '123',
+      noteHistoryId: '123',
+      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`,
+      createdAt: new Date(),
+      createdBy: req.currentContext.userId,
+      updatedAt: null,
+      updatedBy: null
     };
 
     const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-    createNoteSpy.mockResolvedValue(noteCreate);
+    createHistorySpy.mockResolvedValue(createdHistory);
+    createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
     getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockResolvedValue(getObjectResponse);
@@ -325,10 +443,22 @@ describe('send', () => {
     expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
+    expect(createHistorySpy).toHaveBeenCalledTimes(1);
+    expect(createHistorySpy).toHaveBeenCalledWith({
+      activityId: req.body.activityId,
+      bringForwardDate: null,
+      bringForwardState: null,
+      escalateToSupervisor: false,
+      escalateToDirector: false,
+      shownToProponent: false,
+      title: createdHistory.title,
+      type: createdHistory.type,
+      isDeleted: false,
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: createdHistory.createdBy
+    });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ ...noteCreate, createdAt: expect.stringMatching(isoPattern) })
-    );
+    expect(createNoteSpy).toHaveBeenCalledWith({ noteHistoryId: createdNote.noteHistoryId, note: createdNote.note });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
   });

@@ -25,7 +25,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const useEnquiryService = vi.spyOn(enquiryService, 'getEnquiry');
-const useNoteService = vi.spyOn(noteService, 'listNotes');
+const useNoteService = vi.spyOn(noteService, 'listNoteHistory');
 
 useNoteService.mockResolvedValue({ data: { activityId: 'activity456' } } as AxiosResponse);
 useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123' } } as AxiosResponse);

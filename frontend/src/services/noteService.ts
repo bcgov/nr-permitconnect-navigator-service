@@ -18,8 +18,8 @@ export default {
    * @function deleteNoteHistory
    * @returns {Promise} An axios response
    */
-  async deleteNoteHistory(noteId: string) {
-    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteId}`);
+  async deleteNoteHistory(noteHistoryId: string) {
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`);
   },
 
   /**

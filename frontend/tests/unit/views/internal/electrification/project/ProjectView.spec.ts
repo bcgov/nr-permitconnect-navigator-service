@@ -26,7 +26,7 @@ vi.mock('vue-router', () => ({
 
 const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
-const listNotesSpy = vi.spyOn(noteService, 'listNotes');
+const listNotesSpy = vi.spyOn(noteService, 'listNoteHistory');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
