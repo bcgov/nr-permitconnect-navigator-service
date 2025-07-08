@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import NoteCard from '@/components/note/NoteCard.vue';
@@ -14,9 +14,8 @@ import { Action, Initiative, Resource, RouteName } from '@/utils/enums/applicati
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
-import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
-import { provide } from 'vue';
+import type { HousingProject, NoteHistory } from '@/types';
 
 // Props
 const {
@@ -35,7 +34,7 @@ const { t } = useI18n();
 // Store
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
-const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
+const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -54,16 +53,16 @@ provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIR
 provide(projectServiceKey, housingProjectService);
 
 // Actions
-function onAddNote(note: Note) {
-  enquiryStore.addNote(note, true);
+function onAddNote(history: NoteHistory) {
+  enquiryStore.addNoteHistory(history, true);
 }
 
-const onDeleteNote = (note: Note) => {
-  enquiryStore.removeNote(note);
+const onDeleteNote = (history: NoteHistory) => {
+  enquiryStore.removeNoteHistory(history);
 };
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  enquiryStore.updateNote(oldNote, newNote);
+const onUpdateNote = (history: NoteHistory) => {
+  enquiryStore.updateNoteHistory(history);
 };
 
 function onEnquiryFormSaved() {
@@ -88,7 +87,7 @@ onBeforeMount(async () => {
     activityId.value = enquiry.activityId;
 
     enquiryStore.setEnquiry(enquiry);
-    enquiryStore.setNotes(notes);
+    enquiryStore.setNoteHistory(notes);
 
     updateRelatedEnquiry();
   }
@@ -161,7 +160,7 @@ onBeforeMount(async () => {
       <TabPanel :value="1">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
           </div>
           <Button
             aria-label="Add note"
@@ -176,14 +175,14 @@ onBeforeMount(async () => {
           </Button>
         </div>
         <div
-          v-for="(note, index) in getNotes"
-          :key="note.noteId"
+          v-for="(history, index) in getNoteHistory"
+          :key="history.noteHistoryId"
           :index="index"
           class="col-span-12"
         >
           <NoteCard
             :editable="!isCompleted"
-            :note="note"
+            :note-history="history"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"
           />

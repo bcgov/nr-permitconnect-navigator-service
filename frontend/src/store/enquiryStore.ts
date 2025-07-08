@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Enquiry, Note, NoteHistory } from '@/types';
+import type { Enquiry, NoteHistory } from '@/types';
 
 export type EnquiryStoreState = {
   noteHistory: Ref<Array<NoteHistory>>;
@@ -37,9 +37,9 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     state.noteHistory.value = data;
   }
 
-  function updateNoteHistory(history: NoteHistory, newData: Note) {
-    const idx = state.noteHistory.value.findIndex((x: NoteHistory) => x.noteHistoryId === history.noteHistoryId);
-    if (idx >= 0) state.noteHistory.value[idx].note.unshift(newData);
+  function updateNoteHistory(data: NoteHistory) {
+    const idx = state.noteHistory.value.findIndex((x: NoteHistory) => x.noteHistoryId === data.noteHistoryId);
+    if (idx >= 0) state.noteHistory.value[idx] = data;
   }
 
   /* Enquiries */
