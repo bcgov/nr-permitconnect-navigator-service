@@ -8,7 +8,6 @@ export default {
    * Retrieves all source system kinds
    * @returns {Promise<data | null>} The result of calling code api
    */
-
   getSourceSystemKinds() {
     return appAxios().get(path);
   }

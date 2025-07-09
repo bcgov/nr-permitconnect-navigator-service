@@ -6,9 +6,9 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { array, date, boolean, number, object, string } from 'yup';
 
-import AuthorizationCardIntake from '@/components/form/common/AuthorizationCardIntake.vue';
-import AuthorizationStatusUpdatesCard from '@/components/form/common/AuthorizationStatusUpdatesCard.vue';
-import AuthorizationUpdateHistory from '@/components/permit/AuthorizationUpdateHistory.vue';
+import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
+import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
+import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { Button, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
@@ -30,12 +30,12 @@ const { activityId, projectId } = defineProps<{
 const AUTHORIZATION_TAB = '2';
 
 // Composables
-const router = useRouter();
 const { t } = useI18n();
+const router = useRouter();
+const projectStore = useProjectStore();
 const toast = useToast();
 
 // Store
-const projectStore = useProjectStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // Providers
@@ -74,7 +74,7 @@ async function onSubmit(data: any) {
     // Send email to the user if permit is needed
     if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
 
-    toast.success(t('i.common.authorization.authorizationForm.permitSaved'));
+    toast.success(t('authorization.authorizationForm.permitSaved'));
 
     router.push({
       name: projectRouteName,
@@ -84,7 +84,7 @@ async function onSubmit(data: any) {
       }
     });
   } catch (e: any) {
-    toast.error(t('i.common.authorization.authorizationForm.permitSaveFailed'), e.message);
+    toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
   }
 }
 async function emailNotification(data?: any) {
@@ -115,56 +115,45 @@ async function emailNotification(data?: any) {
 const formSchema = object({
   permitNote: string().when('status', {
     is: (status: string) => status !== PermitStatus.NEW && status !== undefined,
-    then: (schema) => schema.required(t('i.common.authorization.authorizationForm.noteRequired')),
+    then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired')),
     otherwise: () => string().notRequired()
   }),
-  authorizationType: object().required().label(t('i.common.authorization.authorizationForm.authorizationType')),
-  needed: string().required().label(t('i.common.authorization.authorizationForm.needed')),
-  status: string()
-    .required()
-    .oneOf(PERMIT_STATUS_LIST)
-    .label(t('i.common.authorization.authorizationForm.applicationStage')),
+  authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
+  needed: string().required().label(t('authorization.authorizationForm.needed')),
+  status: string().required().oneOf(PERMIT_STATUS_LIST).label(t('authorization.authorizationForm.applicationStage')),
   permitTracking: array().of(
     object({
-      sourceSystemKindId: number().required().label(t('i.common.authorization.authorizationForm.trackingIdType')),
-      trackingId: string().max(255).required().label(t('i.common.authorization.authorizationForm.trackingId')),
+      sourceSystemKindId: number().required().label(t('authorization.authorizationForm.trackingIdType')),
+      trackingId: string().max(255).required().label(t('authorization.authorizationForm.trackingId')),
       shownToProponent: boolean()
         .oneOf([true, false])
         .default(false)
-        .label(t('i.common.authorization.authorizationForm.shownToProponent'))
+        .label(t('authorization.authorizationForm.shownToProponent'))
     })
   ),
   authStatus: string()
     .required()
     .oneOf(PERMIT_AUTHORIZATION_STATUS_LIST)
-    .label(t('i.common.authorization.authorizationForm.authorizationStatus'))
-    .test(
-      'valid-auth-status',
-      t('i.common.authorization.authorizationForm.authStatusConditionNewNone'),
-      function (value) {
-        const { status } = this.parent;
-        return (
-          (status === PermitStatus.NEW && value === PermitAuthorizationStatus.NONE) ||
-          (status !== PermitStatus.NEW && value !== PermitAuthorizationStatus.NONE)
-        );
-      }
-    )
-    .test(
-      'valid-auth-status',
-      t('i.common.authorization.authorizationForm.authStatusConditionInProPre'),
-      function (value) {
-        const { status } = this.parent;
-        return status !== PermitStatus.COMPLETED || value !== PermitAuthorizationStatus.IN_REVIEW;
-      }
-    ),
+    .label(t('authorization.authorizationForm.authorizationStatus'))
+    .test('valid-auth-status', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
+      const { status } = this.parent;
+      return (
+        (status === PermitStatus.NEW && value === PermitAuthorizationStatus.NONE) ||
+        (status !== PermitStatus.NEW && value !== PermitAuthorizationStatus.NONE)
+      );
+    })
+    .test('valid-auth-status', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
+      const { status } = this.parent;
+      return status !== PermitStatus.COMPLETED || value !== PermitAuthorizationStatus.IN_REVIEW;
+    }),
   submittedDate: date()
-    .max(new Date(), t('i.common.authorization.authorizationForm.submittedDateFutureError'))
+    .max(new Date(), t('authorization.authorizationForm.submittedDateFutureError'))
     .nullable()
-    .label(t('i.common.authorization.authorizationForm.submittedDate')),
+    .label(t('authorization.authorizationForm.submittedDate')),
   adjudicationDate: date()
-    .max(new Date(), t('i.common.authorization.authorizationForm.adjudicationDateFutureError'))
+    .max(new Date(), t('authorization.authorizationForm.adjudicationDateFutureError'))
     .nullable()
-    .label(t('i.common.authorization.authorizationForm.adjudicationDate'))
+    .label(t('authorization.authorizationForm.adjudicationDate'))
 });
 </script>
 
@@ -176,7 +165,7 @@ const formSchema = object({
     :validation-schema="formSchema"
     @submit="onSubmit"
   >
-    <h3 class="mt-4">{{ t('i.common.authorization.authorizationForm.addAuthorization') }}</h3>
+    <h3 class="mt-4">{{ t('authorization.authorizationForm.addAuthorization') }}</h3>
 
     <AuthorizationCardIntake
       initial-form-values=""
@@ -201,13 +190,13 @@ const formSchema = object({
     <div class="mt-8">
       <Button
         class="mr-2"
-        :label="t('i.common.authorization.authorizationForm.publish')"
+        :label="t('authorization.authorizationForm.publish')"
         type="submit"
         icon="pi pi-check"
       />
       <Button
         class="p-button-outlined mr-2"
-        :label="t('i.common.authorization.authorizationForm.cancel')"
+        :label="t('authorization.authorizationForm.cancel')"
         icon="pi pi-times"
         @click="
           router.push({
@@ -222,10 +211,10 @@ const formSchema = object({
     </div>
 
     <div class="grid grid-cols-4 gap-x-6 gap-y-6 authorization-details-block px-2 py-3 mt-8">
-      <div class="font-bold">{{ t('i.common.authorization.authorizationForm.agency') }}</div>
-      <div class="font-bold">{{ t('i.common.authorization.authorizationForm.businessDomain') }}</div>
-      <div class="font-bold">{{ t('i.common.authorization.authorizationForm.updatedBy') }}</div>
-      <div class="font-bold">{{ t('i.common.authorization.authorizationForm.lastUpdated') }}</div>
+      <div class="font-bold">{{ t('authorization.authorizationForm.agency') }}</div>
+      <div class="font-bold">{{ t('authorization.authorizationForm.businessDomain') }}</div>
+      <div class="font-bold">{{ t('authorization.authorizationForm.updatedBy') }}</div>
+      <div class="font-bold">{{ t('authorization.authorizationForm.lastUpdated') }}</div>
     </div>
     <AuthorizationUpdateHistory
       initial-form-values=""
