@@ -156,6 +156,7 @@ onBeforeMount(async () => {
       :value="activeTab"
       class="mt-3"
     >
+<<<<<<< HEAD
       <TabList>
         <Tab :value="0">
           <font-awesome-icon
@@ -179,6 +180,20 @@ onBeforeMount(async () => {
             :created-by="createdByName"
             :activity-id="getProject.activityId"
             @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+=======
+      <div class="grid grid-cols-6 gap-4 items-center">
+        <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
+        <div class="font-bold">
+          Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+        </div>
+        <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
+        <div class="flex justify-end">
+          <Button
+            class="p-button-sm header-btn"
+            label="View all"
+            outlined
+            @click="noteHistoryVisible = true"
+>>>>>>> 70d7db9c (Additional changes from review)
           />
 
           <div
@@ -299,7 +314,7 @@ onBeforeMount(async () => {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">Please be aware!</span>
+      <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
     </template>
 
     <div
