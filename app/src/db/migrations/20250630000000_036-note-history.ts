@@ -90,8 +90,8 @@ export async function up(knex: Knex): Promise<void> {
 }
 
 export async function down(knex: Knex): Promise<void> {
-  return Promise.resolve().then(() =>
-    knex.schema
+  return (
+    Promise.resolve()
       // Add note column back to note_history
       .then(() =>
         knex.schema.alterTable('note_history', function (table) {

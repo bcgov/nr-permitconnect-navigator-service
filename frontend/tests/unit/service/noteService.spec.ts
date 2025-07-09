@@ -28,17 +28,7 @@ const TEST_NOTE_HISTORY: NoteHistory = {
   escalateToDirector: false,
   escalateToSupervisor: false,
   isDeleted: false,
-  note: [
-    {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: 'some text',
-      createdBy: 'user',
-      createdAt: new Date().toISOString(),
-      updatedBy: 'user',
-      updatedAt: new Date().toISOString()
-    }
-  ],
+  note: [TEST_NOTE],
   noteHistoryId: '123',
   type: NoteType.GENERAL,
   title: 'Title',
