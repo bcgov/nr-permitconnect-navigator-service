@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 
 import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
@@ -101,9 +101,9 @@ afterEach(() => {
 });
 
 // Currently, modal functionality hidden behind Primevue component Dialog
-describe('NoteModal', () => {
+describe('NoteHistoryModal', () => {
   it('renders', () => {
-    const wrapper = shallowMount(NoteModal, wrapperSettings());
+    const wrapper = shallowMount(NoteHistoryModal, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

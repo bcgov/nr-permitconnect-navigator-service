@@ -2,10 +2,10 @@ import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../db/dataConnection';
 import { IStamps } from '../interfaces/IStamps';
-
-import type { NoteHistory } from '../types';
 import { BringForwardType } from '../utils/enums/projectCommon';
 import { Initiative } from '../utils/enums/application';
+
+import type { NoteHistory } from '../types';
 
 const service = {
   /**

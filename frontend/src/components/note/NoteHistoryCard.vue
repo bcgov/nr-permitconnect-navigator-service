@@ -2,7 +2,7 @@
 import { onBeforeMount, ref } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
@@ -72,7 +72,7 @@ onBeforeMount(() => {
       <div class="grid grid-cols-4 gap-4">
         <p>
           <span class="key font-bold">Date:</span>
-          {{ noteHistory.createdAt ? formatDateShort(noteHistory.createdAt) : undefined }}
+          {{ formatDateShort(noteHistory.createdAt) }}
         </p>
         <p>
           <span class="key font-bold">Author:</span>
@@ -93,7 +93,7 @@ onBeforeMount(() => {
     </template>
   </Card>
 
-  <NoteModal
+  <NoteHistoryModal
     v-if="noteHistory && noteModalVisible"
     v-model:visible="noteModalVisible"
     :activity-id="noteHistory.activityId"
