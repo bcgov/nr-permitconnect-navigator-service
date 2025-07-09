@@ -324,7 +324,7 @@ onBeforeMount(async () => {
               {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
               {{ t('enquiryIntakeForm.trackingId') }}:
               {{
-                permit?.permitTracking?.filter((x) => x.shownToProponent)?.[0]?.trackingId ||
+                permit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId ||
                 t('enquiryIntakeForm.notApplicable')
               }}| {{ t('enquiryIntakeForm.authStatus') }}:
               {{ permit?.authStatus ?? 'No authorization status.' }}

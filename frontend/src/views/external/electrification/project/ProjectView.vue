@@ -328,7 +328,7 @@ onBeforeMount(async () => {
             <div class="col-span-3">
               <div class="label-field">{{ t('e.common.projectView.trackingId') }}</div>
               <div class="permit-data">
-                {{ permit?.permitTracking?.[0].shownToProponent ? permit?.permitTracking?.[0].trackingId : '' }}
+                {{ permit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId }}
               </div>
             </div>
             <div class="col-span-3">

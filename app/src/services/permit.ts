@@ -139,23 +139,6 @@ const service = {
   },
 
   /**
-   * @function getSourceSystems
-   * Get all Source Systems
-   * @returns {Promise<PermitType[]>} The result of running the findMany operation
-   */
-  getSourceSystems: async () => {
-    const response = await prisma.source_system_code.findMany({
-      include: {
-        source_system_kind_source_system_kind_source_system_codeTosource_system_code: true
-      },
-      orderBy: {
-        acronym: 'asc'
-      }
-    });
-    return response;
-  },
-
-  /**
    * @function listPermits
    * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
    * @param {string} activityId PCNS Activity ID

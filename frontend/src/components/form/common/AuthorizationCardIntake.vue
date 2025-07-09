@@ -2,20 +2,16 @@
 import { storeToRefs } from 'pinia';
 import { FieldArray } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import { Checkbox, InputText, Select } from '@/components/form';
 import { Button, Panel } from '@/lib/primevue';
-import { permitService } from '@/services';
-import { usePermitStore } from '@/store';
+import { permitService, sourceSystemKindService } from '@/services';
+import { useCodeStore, usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { SourceSystemCode, SourceSystemKind } from '@/types';
-
-// Types
-type sourceSystemKindWithAcronym = SourceSystemKind & {
-  sourceSystemAcronym?: string;
-};
+import type { Ref } from 'vue';
+import type { SourceSystemKind } from '@/types';
 
 // Emits
 const emit = defineEmits(['update:uncheckShownToProponent']);
@@ -24,11 +20,13 @@ const emit = defineEmits(['update:uncheckShownToProponent']);
 const { t } = useI18n();
 
 // Store
+const codeStore = useCodeStore();
+const { codeDisplay } = codeStore;
 const permitStore = usePermitStore();
-const { getPermitTypes, getSourceSystems } = storeToRefs(permitStore);
+const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
-const sourceSystemKindsWithAcronym: Array<sourceSystemKindWithAcronym> = [];
+const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 
 // Actions
 onMounted(async () => {
@@ -37,18 +35,7 @@ onMounted(async () => {
     permitStore.setPermitTypes(permitTypes);
   }
 
-  if (getSourceSystems.value.length === 0) {
-    const sourceSystems = (await permitService.getSourceSystems()).data;
-    permitStore.setSourceSystems(sourceSystems);
-  }
-  getSourceSystems.value.forEach((sourceSystem: SourceSystemCode) => {
-    sourceSystem?.source_system_kind_source_system_kind_source_system_codeTosource_system_code.forEach(
-      (sourceSystemKind: sourceSystemKindWithAcronym) => {
-        sourceSystemKind.sourceSystemAcronym = sourceSystem.acronym;
-        sourceSystemKindsWithAcronym.push(sourceSystemKind);
-      }
-    );
-  });
+  sourceSystemKinds.value = (await sourceSystemKindService.getSourceSystemKinds()).data;
 });
 </script>
 
@@ -72,7 +59,7 @@ onMounted(async () => {
         v-slot="{ fields, push, remove }"
         name="permitTracking"
       >
-        <div ref="investigatePermitsContainer">
+        <div>
           <div
             v-for="(tracking, idx) in fields"
             :key="idx"
@@ -82,8 +69,8 @@ onMounted(async () => {
               <Select
                 :name="`permitTracking[${idx}].sourceSystemKindId`"
                 placeholder="Select an ID"
-                :options="sourceSystemKindsWithAcronym"
-                :option-label="(e) => `${e.description}, ${e.sourceSystemAcronym}`"
+                :options="sourceSystemKinds"
+                :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
                 option-value="sourceSystemKindId"
               />
               <InputText

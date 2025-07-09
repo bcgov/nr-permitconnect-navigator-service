@@ -4,7 +4,7 @@ import { provide } from 'vue';
 import AuthorizationForm from '@/components/form/common/AuthorizationForm.vue';
 import { housingProjectService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
-import { projectViewRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 const {
   editable = true,
@@ -17,7 +17,7 @@ const {
 }>();
 
 // Providers
-provide(projectViewRouteNameKey, RouteName.INT_HOUSING_PROJECT);
+provide(projectRouteNameKey, RouteName.INT_HOUSING_PROJECT);
 provide(projectServiceKey, housingProjectService);
 </script>
 

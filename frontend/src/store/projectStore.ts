@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+
 import type { Ref } from 'vue';
 import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, Permit } from '@/types';
 
@@ -27,6 +29,30 @@ export const useProjectStore = defineStore('project', () => {
 
   // Getters
   const getters = {
+    getAuthsOnGoing: computed(() =>
+      state.permits.value.filter((p) =>
+        [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
+          p.authStatus as PermitAuthorizationStatus
+        )
+      )
+    ),
+    getAuthsUnderInvestigation: computed(() =>
+      state.permits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION)
+    ),
+    getAuthsNeeded: computed(() =>
+      state.permits.value.filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW)
+    ),
+    getAuthsCompleted: computed(() =>
+      state.permits.value.filter(
+        (p) =>
+          ![
+            PermitAuthorizationStatus.NONE,
+            PermitAuthorizationStatus.IN_REVIEW,
+            PermitAuthorizationStatus.PENDING
+          ].includes(p.authStatus as PermitAuthorizationStatus)
+      )
+    ),
+    getAuthsNotNeeded: computed(() => state.permits.value.filter((p) => p.needed === PermitNeeded.NO)),
     getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),

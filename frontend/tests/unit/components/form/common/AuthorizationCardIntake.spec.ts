@@ -2,7 +2,7 @@ import { createTestingPinia } from '@pinia/testing';
 import { shallowMount } from '@vue/test-utils';
 
 import AuthorizationCardIntake from '@/components/form/common/AuthorizationCardIntake.vue';
-import { permitService } from '@/services';
+import { permitService, sourceSystemKindService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -12,30 +12,18 @@ import Tooltip from 'primevue/tooltip';
 import type { AxiosResponse } from 'axios';
 
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-const getSourceSystemsSpy = vi.spyOn(permitService, 'getSourceSystems');
+const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
-const sampleSourceSystemCode = {
-  acronym: 'ATS',
-  active: true,
-  code: 'ITSM-5314',
-  definition: 'Authorization Tracking System',
-  display: 'Authorization Tracking System',
-  sourceSystemKind: {
-    description: 'ATS Project Number',
-    kind: null,
-    sourceSystemCode: 'ITSM-5314',
-    sourceSystemKindId: 2,
-    createdAt: '2025-06-18T15:56:00.515Z',
-    createdBy: '00000000-0000-0000-0000-000000000000',
-    updatedAt: null,
-    updatedBy: null
-  },
+const sampleSourceSystemKind = {
+  description: 'ATS Project Number',
+  kind: null,
+  sourceSystemCode: 'ITSM-5314',
+  sourceSystemKindId: 2,
   createdAt: '2025-06-18T15:56:00.515Z',
   createdBy: '00000000-0000-0000-0000-000000000000',
   updatedAt: null,
   updatedBy: null
 };
-
 const permitTypesList = [
   {
     permitTypeId: 123,
@@ -105,7 +93,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  getSourceSystemsSpy.mockResolvedValue({ data: [sampleSourceSystemCode] } as AxiosResponse);
+  getSourceSystemKindsSpy.mockResolvedValue({ data: [sampleSourceSystemKind] } as AxiosResponse);
   getPermitTypesSpy.mockResolvedValue({ data: permitTypesList } as AxiosResponse);
 });
 

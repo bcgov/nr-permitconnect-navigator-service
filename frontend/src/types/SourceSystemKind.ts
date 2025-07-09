@@ -3,6 +3,6 @@ import type { IStamps } from '@/interfaces';
 export type SourceSystemKind = {
   description: string;
   kind?: string;
-  sourceSystemCode: string;
+  sourceSystem: string;
   sourceSystemKindId: number;
 } & Partial<IStamps>;
