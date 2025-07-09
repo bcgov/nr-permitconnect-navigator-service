@@ -31,7 +31,6 @@ import {
 import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
@@ -66,8 +65,19 @@ const router = useRouter();
 // Store
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
-const { getPermitTypes, getSourceSystems } = storeToRefs(permitStore);
-const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
+const { getPermitTypes } = storeToRefs(permitStore);
+const {
+  getAuthsCompleted,
+  getAuthsNeeded,
+  getAuthsNotNeeded,
+  getAuthsOnGoing,
+  getAuthsUnderInvestigation,
+  getDocuments,
+  getProject,
+  getNotes,
+  getPermits,
+  getRelatedEnquiries
+} = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -114,29 +124,6 @@ const filteredDocuments = computed(() => {
   return tempDocuments;
 });
 
-const authsUnderInvestigation = computed(() => {
-  return getPermits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION);
-});
-
-const authsNeeded = computed(() => {
-  return getPermits.value.filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW);
-});
-
-const authsCompleted = computed(() => {
-  return getPermits.value.filter(
-    (p) =>
-      ![
-        PermitAuthorizationStatus.NONE,
-        PermitAuthorizationStatus.IN_REVIEW,
-        PermitAuthorizationStatus.PENDING
-      ].includes(p.authStatus as PermitAuthorizationStatus)
-  );
-});
-
-const authsNotNeeded = computed(() => {
-  return getPermits.value.filter((p) => p.needed === PermitNeeded.NO);
-});
-
 const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
@@ -177,11 +164,6 @@ onBeforeMount(async () => {
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(Initiative.HOUSING)).data;
     permitStore.setPermitTypes(permitTypes);
-  }
-
-  if (getSourceSystems.value.length === 0) {
-    const sourceSystems = (await permitService.getSourceSystems()).data;
-    permitStore.setSourceSystems(sourceSystems);
   }
 
   loading.value = false;
@@ -452,11 +434,7 @@ onBeforeMount(async () => {
         </div>
         <!-- On going Authorizations -->
         <div
-          v-for="(permit, index) in getPermits.filter((p) =>
-            [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
-              p.authStatus as PermitAuthorizationStatus
-            )
-          )"
+          v-for="(permit, index) in getAuthsOnGoing"
           :key="permit.permitId"
           :index="index"
           class="mb-6 mt-6"
@@ -468,12 +446,12 @@ onBeforeMount(async () => {
         </div>
         <!-- Authorizations with needed = under investigation -->
         <div
-          v-if="authsUnderInvestigation.length > 0"
+          v-if="getAuthsUnderInvestigation.length > 0"
           class="mb-8 mt-16"
         >
           <h4 class="mb-6">{{ t('i.common.projectView.underInvestigation') }}</h4>
           <div
-            v-for="(permit, index) in authsUnderInvestigation"
+            v-for="(permit, index) in getAuthsUnderInvestigation"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -486,12 +464,12 @@ onBeforeMount(async () => {
         </div>
         <!-- Authorizations with needed = Yes & stage = Pre-submission -->
         <div
-          v-if="authsNeeded.length > 0"
+          v-if="getAuthsNeeded.length > 0"
           class="mb-8 mt-16"
         >
           <h4 class="mb-6">{{ t('i.common.projectView.needed') }}</h4>
           <div
-            v-for="(permit, index) in authsNeeded"
+            v-for="(permit, index) in getAuthsNeeded"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -504,12 +482,12 @@ onBeforeMount(async () => {
         </div>
         <!--Authorizations when its Status=Approved, Denied, Cancelled, Withdrawn OR Abandoned.-->
         <div
-          v-if="authsCompleted.length > 0"
+          v-if="getAuthsCompleted.length > 0"
           class="mb-8 mt-16"
         >
           <h4 class="mb-6">{{ t('i.common.projectView.completed') }}</h4>
           <div
-            v-for="(permit, index) in authsCompleted"
+            v-for="(permit, index) in getAuthsCompleted"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -522,12 +500,12 @@ onBeforeMount(async () => {
         </div>
         <!--Authorizations when needed = NO-->
         <div
-          v-if="authsNotNeeded.length > 0"
+          v-if="getAuthsNotNeeded.length > 0"
           class="mb-8 mt-16"
         >
           <h4 class="mb-6">{{ t('i.common.projectView.notNeeded') }}</h4>
           <div
-            v-for="(permit, index) in authsNotNeeded"
+            v-for="(permit, index) in getAuthsNotNeeded"
             :key="permit.permitId"
             :index="index"
             class="my-2"

@@ -29,7 +29,6 @@ const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 const listNotesSpy = vi.spyOn(noteService, 'listNotes');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
-const getSourceSystemsSpy = vi.spyOn(permitService, 'getSourceSystems');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
 
 getProjectSpy.mockResolvedValue({
@@ -47,31 +46,6 @@ listRelatedEnquiriesSpy.mockResolvedValue({
   data: { enquiryId: 'enquiry123', activityId: 'activity456' }
 } as AxiosResponse);
 getPermitTypesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
-getSourceSystemsSpy.mockResolvedValue({
-  data: [
-    {
-      acronym: 'ATS',
-      active: true,
-      code: 'ITSM-5314',
-      definition: 'Authorization Tracking System',
-      display: 'Authorization Tracking System',
-      sourceSystemKind: {
-        description: 'ATS Project Number',
-        kind: null,
-        sourceSystemCode: 'ITSM-5314',
-        sourceSystemKindId: 2,
-        createdAt: '2025-06-18T15:56:00.515Z',
-        createdBy: '00000000-0000-0000-0000-000000000000',
-        updatedAt: null,
-        updatedBy: null
-      },
-      createdAt: '2025-06-18T15:56:00.515Z',
-      createdBy: '00000000-0000-0000-0000-000000000000',
-      updatedAt: null,
-      updatedBy: null
-    }
-  ]
-} as AxiosResponse);
 
 const testProjectId = 'proj1';
 const wrapperSettings = (initialTabProp = '0', projectIdProp = testProjectId) => ({

@@ -208,7 +208,7 @@ describe('getPermitTypes', () => {
         nameSubtype: null,
         acronym: 'PRT1',
         trackedInATS: true,
-        sourceSystemCode: 'CODE'
+        sourceSystem: 'CODE'
       }
     ];
 
@@ -240,55 +240,6 @@ describe('getPermitTypes', () => {
     expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledTimes(0);
     expect(next).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('getSourceSystems', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const getSourceSystemsSpy = jest.spyOn(permitService, 'getSourceSystems');
-
-  it('should return 200 if all good', async () => {
-    const req = {
-      currentContext: CURRENT_CONTEXT,
-      query: { initiative: Initiative.HOUSING }
-    };
-
-    const sampleSourceSystemCodes = [
-      {
-        code: 'ITSM-5285',
-        display: 'Archaeology Permit Tracking System',
-        definition: 'Archaeology Permit Tracking System',
-        active: true,
-        acronym: 'APTS',
-        createdBy: '00000000-0000-0000-0000-000000000000',
-        createdAt: new Date(),
-        updatedBy: '',
-        updatedAt: new Date(),
-        source_system_kind_source_system_kind_source_system_codeTosource_system_code: [
-          {
-            sourceSystemKindId: 2,
-            kind: '',
-            description: 'Application Number',
-            sourceSystemCode: 'ITSM-5285',
-            createdBy: '00000000-0000-0000-0000-000000000000',
-            createdAt: new Date(),
-            updatedBy: '',
-            updatedAt: new Date()
-          }
-        ]
-      }
-    ];
-
-    getSourceSystemsSpy.mockResolvedValue(sampleSourceSystemCodes);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.getSourceSystems(req as any, res as any, next);
-
-    expect(getSourceSystemsSpy).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(sampleSourceSystemCodes);
   });
 });
 

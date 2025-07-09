@@ -5,7 +5,7 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
-import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
+import AuthorizationStatusDescriptionModal from '@/components/permit/AuthorizationStatusDescriptionModal.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
@@ -226,7 +226,7 @@ onBeforeMount(async () => {
         <div class="info-item">
           <b>Tracking ID:</b>
           <span>
-            {{ getPermit?.permitTracking?.filter((x) => x.shownToProponent)?.[0].trackingId }}
+            {{ getPermit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId }}
           </span>
         </div>
         <div class="info-item">
@@ -373,7 +373,7 @@ onBeforeMount(async () => {
       </div>
     </div>
   </div>
-  <PermitStatusDescriptionModal
+  <AuthorizationStatusDescriptionModal
     v-model:visible="descriptionModalVisible"
     dismissable-mask
   />

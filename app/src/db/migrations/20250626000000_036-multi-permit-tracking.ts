@@ -12,7 +12,6 @@ export async function up(knex: Knex): Promise<void> {
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
-        table.text('acronym').notNullable();
         stamps(knex, table);
       })
 
@@ -21,7 +20,7 @@ export async function up(knex: Knex): Promise<void> {
         table.text('kind');
         table.text('description');
         table
-          .text('source_system_code')
+          .text('source_system')
           .notNullable()
           .references('code')
           .inTable('source_system_code')
@@ -53,8 +52,12 @@ export async function up(knex: Knex): Promise<void> {
 
       // Alter public schema tables
       .alterTable('permit_type', (table) => {
+        table.dropColumn('source_system');
+      })
+
+      .alterTable('permit_type', (table) => {
         table
-          .text('source_system_code')
+          .text('source_system')
           .nullable()
           .references('code')
           .inTable('source_system_code')
@@ -105,93 +108,78 @@ export async function up(knex: Knex): Promise<void> {
         return knex('source_system_code').insert([
           {
             code: 'ITSM-5314',
-            display: 'Authorization Tracking System',
-            definition: 'Authorization Tracking System',
-            acronym: 'ATS'
+            display: 'ATS',
+            definition: 'Authorization Tracking System'
           },
           {
             code: 'ITSM-5285',
-            display: 'Archaeology Permit Tracking System',
-            definition: 'Archaeology Permit Tracking System',
-            acronym: 'APTS'
+            display: 'APTS',
+            definition: 'Archaeology Permit Tracking System'
           },
           {
             code: 'ITSM-5364',
-            display: 'Contaminated Sites Application Tracking System',
-            definition: 'Contaminated Sites Application Tracking System',
-            acronym: 'CATS'
+            display: 'CATS',
+            definition: 'Contaminated Sites Application Tracking System'
           },
           // {
           //   code: '', // TODO: Not in Jira Assets. Transportation permits will have no associated system
-          //   display: 'Electronic Development Approvals System',
+          //   display: 'eDAS',
           //   definition: 'Electronic Development Approvals System',
-          //   acronym: 'eDAS',
           // },
           {
             code: 'ITSM-5527',
-            display: 'eLicensing BC',
-            definition: 'eLicensing BC',
-            acronym: 'ELIC'
+            display: 'ELIC',
+            definition: 'eLicensing BC'
           },
           {
             code: 'ITSM-5939',
-            display: 'Electronic Park Use Permit System',
-            definition: 'Electronic Park Use Permit System',
-            acronym: 'PPA'
+            display: 'PPA',
+            definition: 'Electronic Park Use Permit System'
           },
           {
             code: 'ITSM-5644',
-            display: 'Forest Tenure Administration',
-            definition: 'Forest Tenure Administration',
-            acronym: 'FTA'
+            display: 'FTA',
+            definition: 'Forest Tenure Administration'
           },
           {
             code: 'ITSM-5816',
-            display: 'Mines Digital Services',
-            definition: 'Mines Digital Services',
-            acronym: 'MDS'
+            display: 'MDS',
+            definition: 'Mines Digital Services'
           },
           {
             code: 'ITSM-5963',
-            display: 'Riparian Areas Regulation Notification System',
-            definition: 'Riparian Areas Regulation Notification System',
-            acronym: 'RAR'
+            display: 'RAR',
+            definition: 'Riparian Areas Regulation Notification System'
           },
           {
             code: 'ITSM-6004',
-            display: 'Resource Roads System',
-            definition: 'Resource Roads System',
-            acronym: 'RRS'
+            display: 'RRS',
+            definition: 'Resource Roads System'
           },
           {
             code: 'ITSM-6030',
-            display: 'Site Information System',
-            definition: 'Site Information System',
-            acronym: 'SITE'
+            display: 'SITE',
+            definition: 'Site Information System'
           },
           {
             code: 'ITSM-6072',
-            display: 'Tantalis',
-            definition: 'Tantalis',
-            acronym: 'TANTALIS'
+            display: 'TANTALIS',
+            definition: 'Tantalis'
           },
           {
             code: 'ITSM-6117',
-            display: 'Virtual FrontCounter BC (e-Licensing)',
-            definition: 'Virtual FrontCounter BC (e-Licensing)',
-            acronym: 'VFCBC'
+            display: 'VFCBC',
+            definition: 'Virtual FrontCounter BC (e-Licensing)'
           },
           {
             code: 'ITSM-5528',
-            display: 'Environmental Management Application',
-            definition: 'Environmental Management Application',
-            acronym: 'EMA'
+            display: 'EMA',
+            definition: 'Environmental Management Application'
           },
           {
             code: 'ITSM-6197',
-            display: 'Water Management Application',
-            definition: 'Water Management Application',
-            acronym: 'WMA'
+            display: 'WMA',
+            definition: 'Water Management Application'
           }
         ]);
       })
@@ -202,71 +190,71 @@ export async function up(knex: Knex): Promise<void> {
         return knex('source_system_kind').insert([
           {
             description: 'Project Number',
-            source_system_code: 'ITSM-5314'
+            source_system: 'ITSM-5314'
           },
           {
             description: 'Application Number',
-            source_system_code: 'ITSM-5285'
+            source_system: 'ITSM-5285'
           },
           {
             description: 'Permit Number',
-            source_system_code: 'ITSM-5285'
+            source_system: 'ITSM-5285'
           },
           {
             description: 'Application ID',
-            source_system_code: 'ITSM-5364'
+            source_system: 'ITSM-5364'
           },
           // {
           //   description: 'File Number',
-          //   source_system_code: '' // eDAS - not in Jira Assets
+          //   source_system: '' // eDAS - not in Jira Assets
           // }
           {
             description: 'Authorization Number',
-            source_system_code: 'ITSM-5939'
+            source_system: 'ITSM-5939'
           },
           {
             description: 'Forest File ID',
-            source_system_code: 'ITSM-5644'
+            source_system: 'ITSM-5644'
           },
           {
             description: 'Tracking Number',
-            source_system_code: 'ITSM-5816'
+            source_system: 'ITSM-5816'
           },
           {
             description: 'Tracking Number',
-            source_system_code: 'ITSM-5527'
+            source_system: 'ITSM-5527'
           },
           {
             description: 'Forest File ID',
-            source_system_code: 'ITSM-6004'
+            source_system: 'ITSM-6004'
           },
           {
             description: 'Site ID',
-            source_system_code: 'ITSM-6030'
+            source_system: 'ITSM-6030'
           },
           {
             description: 'Business Area File Number',
-            source_system_code: 'ITSM-6072'
+            source_system: 'ITSM-6072'
           },
           {
             description: 'Tracking Number',
-            source_system_code: 'ITSM-6117'
+            source_system: 'ITSM-6117'
           },
           {
             description: 'Authorization Number',
-            source_system_code: 'ITSM-5528'
+            source_system: 'ITSM-5528'
           },
           {
             description: 'Tracking Number',
-            source_system_code: 'ITSM-5528'
+            source_system: 'ITSM-5528'
           },
           {
             description: 'File Number',
-            source_system_code: 'ITSM-6197'
+            source_system: 'ITSM-6197'
           },
           {
             description: 'Job Number',
-            source_system_code: 'ITSM-6197'
+            source_system: 'ITSM-6197'
           }
         ]);
       })
@@ -280,10 +268,26 @@ export async function up(knex: Knex): Promise<void> {
 
       // Update permit_type to FK to new source_system_code
       .then(async () => {
-        await knex.raw(`UPDATE public.permit_type SET (source_system_code) =
+        await knex.raw(`UPDATE public.permit_type SET (source_system) =
           (SELECT code
           FROM public.source_system_code
-          WHERE source_system_code.acronym = public.permit_type.source_system_acronym);`);
+          WHERE source_system_code.display = public.permit_type.source_system_acronym);`);
+      })
+
+      .then(async () => {
+        await knex.raw(`UPDATE public.permit_type SET (source_system) =
+          (SELECT code
+          FROM public.source_system_code
+          WHERE source_system_code.display = 'RAR')
+          WHERE public.permit_type.source_system_acronym = 'RARN';`);
+      })
+
+      .then(async () => {
+        await knex.raw(`UPDATE public.permit_type SET (source_system) =
+          (SELECT code
+          FROM public.source_system_code
+          WHERE source_system_code.display = 'PPA')
+          WHERE public.permit_type.source_system_acronym = 'EPUPS';`);
       })
 
       // Drop old columns
@@ -295,16 +299,15 @@ export async function up(knex: Knex): Promise<void> {
 
       .then(() =>
         knex.schema.alterTable('permit_type', function (table) {
-          table.dropColumn('source_system');
           table.dropColumn('source_system_acronym');
         })
       )
+
       .then(() =>
         knex.schema.raw(`update public.permit_type
-      set name = case
-        when name = 'Short-term Water use approval' then 'Short-term Water Use Approval'
-        else name
-      end`)
+          set name = 'Short-term Water Use Approval'
+          where name = 'Short-term Water use approval'
+        `)
       )
   );
 }
@@ -315,7 +318,7 @@ export async function down(knex: Knex): Promise<void> {
       // Add columns
       .then(() =>
         knex.schema.alterTable('permit_type', function (table) {
-          table.text('source_system');
+          table.text('source_system_code');
           table.text('source_system_acronym');
         })
       )
@@ -328,11 +331,24 @@ export async function down(knex: Knex): Promise<void> {
 
       // Update permit_type to old source name/acronym
       .then(async () => {
-        await knex.raw(`UPDATE public.permit_type SET (source_system, source_system_acronym) =
-          (SELECT display, acronym
+        await knex.raw(`UPDATE public.permit_type SET (source_system_code, source_system_acronym) =
+          (SELECT definition, display
           FROM public.source_system_code
-          WHERE source_system_code.code = public.permit_type.source_system_code);`);
+          WHERE source_system_code.code = public.permit_type.source_system);`);
       })
+
+      // Drop fk column then rename remade column to correct name
+      .then(() =>
+        knex.schema.alterTable('permit_type', function (table) {
+          table.dropColumn('source_system');
+        })
+      )
+
+      .then(() =>
+        knex.schema.alterTable('permit_type', function (table) {
+          table.renameColumn('source_system_code', 'source_system');
+        })
+      )
 
       // Add permit tracking ids back
       .then(() =>
@@ -357,13 +373,6 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.raw('DROP TRIGGER IF EXISTS before_update_source_system_code_trigger ON source_system_code')
       )
 
-      // Alter public schema tables
-      .then(() =>
-        knex.schema.alterTable('permit_type', function (table) {
-          table.dropColumn('source_system_code');
-        })
-      )
-
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('permit_tracking'))
       .then(() => knex.schema.dropTableIfExists('source_system_kind'))
@@ -371,10 +380,9 @@ export async function down(knex: Knex): Promise<void> {
 
       .then(() =>
         knex.schema.raw(`update public.permit_type
-      set name = case
-        when name = 'Short-term Water Use Approval' then 'Short-term Water use approval'
-        else name
-      end`)
+          set name = 'Short-term Water use approval'
+          where name = 'Short-term Water Use Approval'
+      `)
       )
   );
 }
