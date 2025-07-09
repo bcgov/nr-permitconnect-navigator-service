@@ -7,8 +7,7 @@ import { onMounted, ref } from 'vue';
 import { Checkbox, InputText, Select } from '@/components/form';
 import { Button, Panel } from '@/lib/primevue';
 import { permitService, sourceSystemKindService } from '@/services';
-import { useCodeStore, usePermitStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
+import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 
 import type { Ref } from 'vue';
 import type { SourceSystemKind } from '@/types';
@@ -18,11 +17,12 @@ const emit = defineEmits(['update:uncheckShownToProponent']);
 
 // Composables
 const { t } = useI18n();
+const codeStore = useCodeStore();
+const permitStore = usePermitStore();
 
 // Store
-const codeStore = useCodeStore();
+
 const { codeDisplay } = codeStore;
-const permitStore = usePermitStore();
 const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
@@ -31,7 +31,7 @@ const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 // Actions
 onMounted(async () => {
   if (getPermitTypes.value.length === 0) {
-    const permitTypes = (await permitService.getPermitTypes(Initiative.HOUSING)).data;
+    const permitTypes = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
     permitStore.setPermitTypes(permitTypes);
   }
 
@@ -42,18 +42,18 @@ onMounted(async () => {
 <template>
   <Panel toggleable>
     <template #header>
-      <h3>{{ t('i.common.authorization.authorizationCardIntake.authorizationTypeID') }}</h3>
+      <h3>{{ t('authorization.authorizationCardIntake.authorizationTypeID') }}</h3>
     </template>
     <div>
       <Select
         name="authorizationType"
-        :label="t('i.common.authorization.authorizationCardIntake.authorization')"
-        placeholder="Select an authorization"
+        :label="t('authorization.authorizationCardIntake.authorization')"
+        :placeholder="t('authorization.authorizationCardIntake.selectAuthorization')"
         :options="getPermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
       />
       <div class="mt-5 mb-3 font-bold text-[var(--p-bcblue-900)]">
-        {{ t('i.common.authorization.authorizationCardIntake.trackingIds') }}
+        {{ t('authorization.authorizationCardIntake.trackingIds') }}
       </div>
       <FieldArray
         v-slot="{ fields, push, remove }"
@@ -68,19 +68,19 @@ onMounted(async () => {
             <div class="grid grid-cols-3 gap-x-6 gap-y-6 mt-2">
               <Select
                 :name="`permitTracking[${idx}].sourceSystemKindId`"
-                placeholder="Select an ID"
+                :placeholder="t('authorization.authorizationCardIntake.selectId')"
                 :options="sourceSystemKinds"
                 :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
                 option-value="sourceSystemKindId"
               />
               <InputText
                 :name="`permitTracking[${idx}].trackingId`"
-                placeholder="Type the number"
+                :placeholder="t('authorization.authorizationCardIntake.typeNumber')"
               />
               <div class="flex">
                 <Checkbox
                   :name="`permitTracking[${idx}].shownToProponent`"
-                  label="Show to Proponent"
+                  :label="t('authorization.authorizationCardIntake.shownToProponent')"
                   :checked="`permitTracking[${idx}].shownToProponent`"
                   @change="emit('update:uncheckShownToProponent', idx)"
                 />
@@ -104,14 +104,14 @@ onMounted(async () => {
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            Add an ID
+            {{ t('authorization.authorizationCardIntake.addId') }}
           </Button>
         </div>
       </FieldArray>
       <div class="grid grid-cols-3 gap-x-6 gap-y-6 mt-6">
         <InputText
           name="issuedPermitId"
-          :label="t('i.common.authorization.authorizationCardIntake.issuedPermitId')"
+          :label="t('authorization.authorizationCardIntake.issuedPermitId')"
         />
       </div>
     </div>

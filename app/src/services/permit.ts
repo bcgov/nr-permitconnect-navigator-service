@@ -97,7 +97,7 @@ const service = {
       include: {
         permit_type: true, // If changed reflect in type and model
         permit_note: { orderBy: { created_at: 'desc' } },
-        permit_tracking: { include: { source_system_kind: true } }
+        permit_tracking: { include: { sourceSystemKind: true } }
       }
     });
 
@@ -151,7 +151,7 @@ const service = {
         permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false,
         permit_tracking: {
           include: {
-            source_system_kind: true
+            sourceSystemKind: true
           }
         }
       },

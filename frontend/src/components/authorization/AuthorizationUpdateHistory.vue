@@ -7,7 +7,7 @@ const { t } = useI18n();
 
 <template>
   <div class="gap-x-6 gap-y-6 update-history px-5 pt-5 mt-4 py-5">
-    <h5>{{ t('i.common.authorization.authorizationForm.updateNoteHistory') }}</h5>
+    <h5>{{ t('authorization.authorizationForm.updateNoteHistory') }}</h5>
   </div>
 </template>
 <style lang="scss" scoped>

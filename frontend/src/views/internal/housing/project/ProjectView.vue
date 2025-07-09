@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import AuthorizationCard from '@/components/permit/AuthorizationCard.vue';
-import AuthorizationCardLite from '@/components/permit/AuthorizationCardLite.vue';
+import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
+import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
@@ -418,8 +418,7 @@ onBeforeMount(async () => {
             @click="
               router.push({
                 name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
-                query: {
-                  activityId: activityId,
+                params: {
                   projectId: projectId
                 }
               })

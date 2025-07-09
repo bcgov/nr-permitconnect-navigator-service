@@ -5,7 +5,7 @@ export type PermitTracking = {
   permitTrackingId?: string; // Primary Key
   permitId?: string;
   shownToProponent?: boolean;
-  sourceSystemKind?: SourceSystemKind; // Foreign Key
-  sourceSystemKindId?: number;
+  sourceSystemKind?: SourceSystemKind;
+  sourceSystemKindId?: number; // Foreign Key
   trackingId?: string;
 } & Partial<IStamps>;

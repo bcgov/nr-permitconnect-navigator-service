@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
-import AuthorizationStatusDescriptionModal from '@/components/permit/AuthorizationStatusDescriptionModal.vue';
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import { Button, Card, Timeline, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';

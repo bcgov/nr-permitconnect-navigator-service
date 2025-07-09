@@ -16,7 +16,7 @@ const { t } = useI18n();
   <Panel toggleable>
     <template #header>
       <h3 class="section-header m-0">
-        {{ t('i.common.authorization.authorizationStatusUpdatesCard.statusUpdates') }}
+        {{ t('authorization.authorizationStatusUpdatesCard.statusUpdates') }}
       </h3>
     </template>
     <div>
@@ -24,11 +24,11 @@ const { t } = useI18n();
         <div>
           <div class="flex justify-between mb-2">
             <div class="font-bold text-[var(--p-bcblue-900)]">
-              {{ t('i.common.authorization.authorizationStatusUpdatesCard.statusVerifiedDate') }}
+              {{ t('authorization.authorizationStatusUpdatesCard.statusVerifiedDate') }}
             </div>
             <div class="cursor-pointer">
               <a @click="emit('update:setVerifiedDate')">
-                {{ t('i.common.authorization.authorizationStatusUpdatesCard.updateToToday') }}
+                {{ t('authorization.authorizationStatusUpdatesCard.updateToToday') }}
               </a>
             </div>
           </div>
@@ -40,14 +40,14 @@ const { t } = useI18n();
         <div>
           <Select
             name="authStatus"
-            :label="t('i.common.authorization.authorizationStatusUpdatesCard.authorizationStatus')"
+            :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
             :options="PERMIT_AUTHORIZATION_STATUS_LIST"
           />
         </div>
         <div>
           <Select
             name="status"
-            :label="t('i.common.authorization.authorizationStatusUpdatesCard.applicationStage')"
+            :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
             :options="PERMIT_STATUS_LIST"
           />
         </div>
@@ -56,28 +56,28 @@ const { t } = useI18n();
         <div>
           <Select
             name="needed"
-            :label="t('i.common.authorization.authorizationStatusUpdatesCard.needed')"
+            :label="t('authorization.authorizationStatusUpdatesCard.needed')"
             :options="PERMIT_NEEDED_LIST"
           />
         </div>
         <div>
           <DatePicker
             name="submittedDate"
-            :label="t('i.common.authorization.authorizationStatusUpdatesCard.submittedDate')"
+            :label="t('authorization.authorizationStatusUpdatesCard.submittedDate')"
             :max-date="new Date()"
           />
         </div>
         <div>
           <DatePicker
             name="adjudicationDate"
-            :label="t('i.common.authorization.authorizationStatusUpdatesCard.decisionDate')"
+            :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
             :max-date="new Date()"
           />
         </div>
       </div>
       <div class="mt-4">
         <TextArea
-          :label="t('i.common.authorization.authorizationStatusUpdatesCard.updateNoteForProponent')"
+          :label="t('authorization.authorizationStatusUpdatesCard.updateNoteForProponent')"
           class="col-span-12"
           name="permitNote"
         />

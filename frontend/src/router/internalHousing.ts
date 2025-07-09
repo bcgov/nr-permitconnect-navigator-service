@@ -57,7 +57,7 @@ const routes: Array<RouteRecordRaw> = [
                     component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
-                    meta: { dynamicBreadcrumb: 'authorization' }
+                    meta: { dynamicBreadcrumb: 'enquiry' }
                   }
                 ]
               },

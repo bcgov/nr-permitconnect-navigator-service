@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { shallowMount } from '@vue/test-utils';
 
-import AuthorizationForm from '@/components/form/common/AuthorizationForm.vue';
+import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';

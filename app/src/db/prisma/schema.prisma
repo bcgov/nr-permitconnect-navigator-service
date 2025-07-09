@@ -626,23 +626,23 @@ model permit_tracking {
   updatedBy          String?             @map("updated_by")
   updatedAt          DateTime?           @map("updated_at") @db.Timestamptz(6)
   permit             permit              @relation(fields: [permitId], references: [permit_id], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
-  source_system_kind source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
+  sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
 
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model source_system_code {
-  code               String               @id
-  display            String               @unique(map: "source_system_code_display_unique")
-  definition         String
-  active             Boolean              @default(true)
-  createdBy          String?              @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy          String?              @map("updated_by")
-  updatedAt          DateTime?            @map("updated_at") @db.Timestamptz(6)
-  permit_type        permit_type[]
-  source_system_kind source_system_kind[]
+  code             String               @id
+  display          String               @unique(map: "source_system_code_display_unique")
+  definition       String
+  active           Boolean              @default(true)
+  createdBy        String?              @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt        DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy        String?              @map("updated_by")
+  updatedAt        DateTime?            @map("updated_at") @db.Timestamptz(6)
+  permitType       permit_type[]
+  sourceSystemKind source_system_kind[]
 
   @@schema("public")
 }
@@ -656,8 +656,8 @@ model source_system_kind {
   createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?            @map("updated_by")
   updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
-  permit_tracking    permit_tracking[]
-  source_system_code source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
+  permitTracking     permit_tracking[]
+  sourceSystemCode   source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 
   @@schema("public")
 }

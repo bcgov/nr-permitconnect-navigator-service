@@ -1,13 +1,13 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
-
-import AuthorizationUpdateHistory from '@/components/permit/AuthorizationUpdateHistory.vue';
-import { userService } from '@/services';
-import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+
+import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
+import { userService } from '@/services';
+import { StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
 

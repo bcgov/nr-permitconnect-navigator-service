@@ -1,30 +1,56 @@
 <script setup lang="ts">
-import { provide } from 'vue';
+import { storeToRefs } from 'pinia';
+import { onBeforeMount, provide, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import AuthorizationForm from '@/components/form/common/AuthorizationForm.vue';
+import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
+import { useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
+import { useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
-const {
-  editable = true,
-  activityId,
-  projectId
-} = defineProps<{
+import type { Ref } from 'vue';
+
+const { editable = true, projectId } = defineProps<{
   editable?: boolean;
-  activityId: string;
   projectId: string;
 }>();
+
+// State
+const activityId: Ref<string> = ref('');
+
+// Composables
+const { t } = useI18n();
+const toast = useToast();
+const projectStore = useProjectStore();
+
+// Store
+const { getProject } = storeToRefs(projectStore);
 
 // Providers
 provide(projectRouteNameKey, RouteName.INT_ELECTRIFICATION_PROJECT);
 provide(projectServiceKey, electrificationProjectService);
+
+onBeforeMount(async () => {
+  try {
+    if (!getProject.value) {
+      const project = (await electrificationProjectService.getProject(projectId)).data;
+      projectStore.setProject(project);
+    }
+    if (getProject.value?.activityId) {
+      activityId.value = getProject.value.activityId;
+    }
+  } catch {
+    toast.error(t('i.electrification.authorization.authorizationView.projectPermitLoadError'));
+  }
+});
 </script>
 
 <template>
   <AuthorizationForm
     :editable="editable"
-    :activity-id="activityId"
     :project-id="projectId"
+    :activity-id="activityId"
   />
 </template>

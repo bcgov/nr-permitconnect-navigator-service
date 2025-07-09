@@ -39,9 +39,12 @@ export const useProjectStore = defineStore('project', () => {
     getAuthsUnderInvestigation: computed(() =>
       state.permits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION)
     ),
-    getAuthsNeeded: computed(() =>
-      state.permits.value.filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW)
-    ),
+    getAuthsNeeded: computed(() => {
+      return state.permits.value
+        .filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW)
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
     getAuthsCompleted: computed(() =>
       state.permits.value.filter(
         (p) =>
@@ -52,7 +55,23 @@ export const useProjectStore = defineStore('project', () => {
           ].includes(p.authStatus as PermitAuthorizationStatus)
       )
     ),
-    getAuthsNotNeeded: computed(() => state.permits.value.filter((p) => p.needed === PermitNeeded.NO)),
+    getAuthsNotNeeded: computed(() => {
+      return state.permits.value
+        .filter((p) => p.needed === PermitNeeded.NO)
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
+    getAuthsSubmitted: computed(() => {
+      return state.permits.value
+        .filter(
+          (p) =>
+            p.authStatus !== PermitAuthorizationStatus.NONE &&
+            p.status !== PermitStatus.NEW &&
+            p.needed !== PermitNeeded.NO
+        )
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
     getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
@@ -61,6 +80,14 @@ export const useProjectStore = defineStore('project', () => {
   };
 
   // Actions
+  function permitBusinessSortFcn(a: Permit, b: Permit) {
+    return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
+  }
+
+  function permitNameSortFcn(a: Permit, b: Permit) {
+    return a.permitType.name > b.permitType.name ? 1 : -1;
+  }
+
   function addDocument(data: Document) {
     state.documents.value.push(data);
   }
