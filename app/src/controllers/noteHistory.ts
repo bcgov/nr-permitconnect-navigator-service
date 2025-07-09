@@ -7,11 +7,11 @@ import {
   noteService,
   userService
 } from '../services';
+import { Initiative } from '../utils/enums/application';
+import { BringForwardType } from '../utils/enums/projectCommon';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { BringForward, NoteHistory } from '../types';
-import { Initiative } from '../utils/enums/application';
-import { BringForwardType } from '../utils/enums/projectCommon';
 
 const controller = {
   /**
@@ -23,29 +23,22 @@ const controller = {
     res: Response,
     next: NextFunction
   ) {
+    const { note, ...history } = req.body;
+
     try {
-      const stamps = generateCreateStamps(req.currentContext);
-
-      const history = await noteHistoryService.createNoteHistory({
-        activityId: req.body.activityId,
-        bringForwardDate: req.body.bringForwardDate,
-        bringForwardState: req.body.bringForwardState,
-        escalateToSupervisor: req.body.escalateToSupervisor,
-        escalateToDirector: req.body.escalateToDirector,
-        shownToProponent: req.body.shownToProponent,
-        title: req.body.title,
-        type: req.body.type,
+      const historyRes = await noteHistoryService.createNoteHistory({
+        ...history,
         isDeleted: false,
-        ...stamps
+        ...generateCreateStamps(req.currentContext)
       });
 
-      const note = await noteService.createNote({
-        noteHistoryId: history.noteHistoryId,
-        note: req.body.note,
-        ...stamps
+      const noteRes = await noteService.createNote({
+        noteHistoryId: historyRes.noteHistoryId,
+        note: note,
+        ...generateCreateStamps(req.currentContext)
       });
 
-      return res.status(201).json({ ...history, note: [note] });
+      return res.status(201).json({ ...historyRes, note: [noteRes] });
     } catch (e: unknown) {
       next(e);
     }
@@ -170,25 +163,20 @@ const controller = {
     res: Response,
     next: NextFunction
   ) {
+    const { note, ...history } = req.body;
+
     try {
       await noteHistoryService.updateNoteHistory({
-        activityId: req.body.activityId,
-        bringForwardDate: req.body.bringForwardDate,
-        bringForwardState: req.body.bringForwardState,
-        escalateToSupervisor: req.body.escalateToSupervisor,
-        escalateToDirector: req.body.escalateToDirector,
+        ...history,
         noteHistoryId: req.params.noteHistoryId,
-        shownToProponent: req.body.shownToProponent,
-        title: req.body.title,
-        type: req.body.type,
         isDeleted: false,
         ...generateUpdateStamps(req.currentContext)
       });
 
-      if (req.body.note) {
+      if (note) {
         await noteService.createNote({
           noteHistoryId: req.params.noteHistoryId,
-          note: req.body.note,
+          note: note,
           ...generateCreateStamps(req.currentContext)
         });
       }
