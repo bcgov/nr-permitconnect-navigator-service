@@ -8,8 +8,8 @@ import { useRouter } from 'vue-router';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
-import NoteCard from '@/components/note/NoteCard.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import PermitCard from '@/components/permit/PermitCard.vue';
 import PermitModal from '@/components/permit/PermitModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
@@ -37,7 +37,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, HousingProject, Note, NoteHistory } from '@/types';
+import type { Document, HousingProject, NoteHistory } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -455,7 +455,7 @@ onBeforeMount(async () => {
           :index="index"
           class="mb-6"
         >
-          <NoteCard
+          <NoteHistoryCard
             :editable="!isCompleted"
             :note-history="noteHistory"
             @delete-note="onDeleteNote"
@@ -463,7 +463,7 @@ onBeforeMount(async () => {
           />
         </div>
 
-        <NoteModal
+        <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"

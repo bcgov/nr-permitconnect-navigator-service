@@ -244,7 +244,7 @@ onBeforeMount(async () => {
       class="bg-[var(--p-green-100)] p-4"
     >
       <div class="grid grid-cols-6 gap-4 items-center">
-        <div class="font-bold">Please be aware!</div>
+        <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
         <div class="font-bold">
           Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
         </div>
@@ -402,7 +402,7 @@ onBeforeMount(async () => {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">Please be aware!</span>
+      <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
     </template>
 
     <div
