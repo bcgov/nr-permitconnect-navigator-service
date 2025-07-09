@@ -221,25 +221,25 @@ model permit_note {
 }
 
 model permit_type {
-  permit_type_id                                                        Int                           @id @default(autoincrement())
-  agency                                                                String
-  division                                                              String?
-  branch                                                                String?
-  business_domain                                                       String
-  type                                                                  String
-  family                                                                String?
-  name                                                                  String
-  name_subtype                                                          String?
-  acronym                                                               String?
-  tracked_in_ats                                                        Boolean                       @default(false)
-  created_by                                                            String?                       @default("00000000-0000-0000-0000-000000000000")
-  created_at                                                            DateTime?                     @default(now()) @db.Timestamptz(6)
-  updated_by                                                            String?
-  updated_at                                                            DateTime?                     @db.Timestamptz(6)
-  source_system_code                                                    String?
-  permit                                                                permit[]
-  source_system_code_permit_type_source_system_codeTosource_system_code source_system_code?           @relation("permit_type_source_system_codeTosource_system_code", fields: [source_system_code], references: [code], onDelete: Cascade, map: "permit_type_source_system_code_foreign")
-  permit_type_initiative_xref                                           permit_type_initiative_xref[]
+  permit_type_id              Int                           @id @default(autoincrement())
+  agency                      String
+  division                    String?
+  branch                      String?
+  business_domain             String
+  type                        String
+  family                      String?
+  name                        String
+  name_subtype                String?
+  acronym                     String?
+  tracked_in_ats              Boolean                       @default(false)
+  created_by                  String?                       @default("00000000-0000-0000-0000-000000000000")
+  created_at                  DateTime?                     @default(now()) @db.Timestamptz(6)
+  updated_by                  String?
+  updated_at                  DateTime?                     @db.Timestamptz(6)
+  source_system               String?
+  permit                      permit[]
+  source_system_code          source_system_code?           @relation(fields: [source_system], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
+  permit_type_initiative_xref permit_type_initiative_xref[]
 
   @@unique([agency, division, branch, name], map: "permit_type_agency_division_branch_name_unique")
   @@schema("public")
@@ -633,32 +633,31 @@ model permit_tracking {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model source_system_code {
-  code                                                                         String               @id
-  display                                                                      String               @unique(map: "source_system_code_display_unique")
-  definition                                                                   String
-  active                                                                       Boolean              @default(true)
-  acronym                                                                      String
-  createdBy                                                                    String?              @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                                                                    DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                                                                    String?              @map("updated_by")
-  updatedAt                                                                    DateTime?            @map("updated_at") @db.Timestamptz(6)
-  permit_type_permit_type_source_system_codeTosource_system_code               permit_type[]        @relation("permit_type_source_system_codeTosource_system_code")
-  source_system_kind_source_system_kind_source_system_codeTosource_system_code source_system_kind[] @relation("source_system_kind_source_system_codeTosource_system_code")
+  code               String               @id
+  display            String               @unique(map: "source_system_code_display_unique")
+  definition         String
+  active             Boolean              @default(true)
+  createdBy          String?              @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt          DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy          String?              @map("updated_by")
+  updatedAt          DateTime?            @map("updated_at") @db.Timestamptz(6)
+  permit_type        permit_type[]
+  source_system_kind source_system_kind[]
 
   @@schema("public")
 }
 
 model source_system_kind {
-  sourceSystemKindId                                                           Int                @id @default(autoincrement()) @map("source_system_kind_id")
-  kind                                                                         String?
-  description                                                                  String?
-  sourceSystemCode                                                             String             @map("source_system_code")
-  createdBy                                                                    String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt                                                                    DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                                                                    String?            @map("updated_by")
-  updatedAt                                                                    DateTime?          @map("updated_at") @db.Timestamptz(6)
-  permit_tracking                                                              permit_tracking[]
-  source_system_code_source_system_kind_source_system_codeTosource_system_code source_system_code @relation("source_system_kind_source_system_codeTosource_system_code", fields: [sourceSystemCode], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_code_foreign")
+  sourceSystemKindId Int                @id @default(autoincrement()) @map("source_system_kind_id")
+  kind               String?
+  description        String?
+  sourceSystem       String             @map("source_system")
+  createdBy          String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy          String?            @map("updated_by")
+  updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
+  permit_tracking    permit_tracking[]
+  source_system_code source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 
   @@schema("public")
 }

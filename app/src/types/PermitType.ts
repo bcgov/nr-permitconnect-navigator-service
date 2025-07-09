@@ -10,7 +10,7 @@ export type PermitType = {
   family: string | null;
   name: string;
   nameSubtype: string | null;
-  sourceSystemCode: string | null;
+  sourceSystem: string | null;
   trackedInATS: boolean;
   type: string;
 } & Partial<IStamps>;

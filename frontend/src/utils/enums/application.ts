@@ -110,7 +110,7 @@ export enum RouteName {
   INT_ELECTRIFICATION_CONTACT_PAGE = 'int_electrification_contact_page',
   INT_ELECTRIFICATION_ENQUIRY = 'int_electrification_enquiry',
   INT_ELECTRIFICATION_PROJECT = 'int_electrification_project',
-  INT_ELECTRIFICATION_PROJECT_AUTHORIZATION = 'int_electrification_authorization',
+  INT_ELECTRIFICATION_PROJECT_AUTHORIZATION = 'int_electrification_project_authorization',
   INT_ELECTRIFICATION_PROJECT_ENQUIRY = 'int_electrification_project_enquiry',
   INT_ELECTRIFICATION_PROJECT_PROPONENT = 'int_electrification_project_proponent',
   INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT = 'int_electrification_project_proponent_permit',

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import PermitStatusDescriptionModal from '@/components/permit/PermitStatusDescriptionModal.vue';
+import AuthorizationStatusDescriptionModal from '@/components/permit/AuthorizationStatusDescriptionModal.vue';
 import PrimeVue from 'primevue/config';
 
 beforeEach(() => {
@@ -11,9 +11,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('PermitStatusDescriptionModal.vue', () => {
+describe('AuthorizationStatusDescriptionModal.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(PermitStatusDescriptionModal, {
+    const wrapper = shallowMount(AuthorizationStatusDescriptionModal, {
       global: {
         plugins: [PrimeVue]
       }

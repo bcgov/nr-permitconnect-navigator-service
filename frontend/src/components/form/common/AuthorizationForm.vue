@@ -15,7 +15,7 @@ import { useConfigStore, useProjectStore } from '@/store';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { formatDate } from '@/utils/formatters';
-import { projectViewRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
 
 import type { Permit } from '@/types';
@@ -39,7 +39,7 @@ const projectStore = useProjectStore();
 const { getConfig } = storeToRefs(useConfigStore());
 
 // Providers
-const projectViewRouteName = inject(projectViewRouteNameKey);
+const projectRouteName = inject(projectRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Actions
@@ -74,17 +74,17 @@ async function onSubmit(data: any) {
     // Send email to the user if permit is needed
     if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
 
-    toast.success('Permit saved');
+    toast.success(t('i.common.authorization.authorizationForm.permitSaved'));
 
     router.push({
-      name: projectViewRouteName,
+      name: projectRouteName,
       params: { projectId: projectId },
       query: {
         initialTab: '2'
       }
     });
   } catch (e: any) {
-    toast.error('Failed to save permit', e.message);
+    toast.error(t('i.common.authorization.authorizationForm.permitSaveFailed'), e.message);
   }
 }
 async function emailNotification(data?: any) {
@@ -115,27 +115,32 @@ async function emailNotification(data?: any) {
 const formSchema = object({
   permitNote: string().when('status', {
     is: (status: string) => status !== PermitStatus.NEW && status !== undefined,
-    then: (schema) =>
-      schema.required('The status of this application has changed. Please add an update for the proponent.'),
+    then: (schema) => schema.required(t('i.common.authorization.authorizationForm.noteRequired')),
     otherwise: () => string().notRequired()
   }),
-  authorizationType: object().required().label('Authorization type'),
-  needed: string().required().label('Needed'),
-  status: string().required().oneOf(PERMIT_STATUS_LIST).label('Application stage'),
+  authorizationType: object().required().label(t('i.common.authorization.authorizationForm.authorizationType')),
+  needed: string().required().label(t('i.common.authorization.authorizationForm.needed')),
+  status: string()
+    .required()
+    .oneOf(PERMIT_STATUS_LIST)
+    .label(t('i.common.authorization.authorizationForm.applicationStage')),
   permitTracking: array().of(
     object({
-      sourceSystemKindId: number().required().label('Tracking ID type'),
-      trackingId: string().max(255).required().label('Tracking ID'),
-      shownToProponent: boolean().oneOf([true, false]).default(false).label('Shown to proponent')
+      sourceSystemKindId: number().required().label(t('i.common.authorization.authorizationForm.trackingIdType')),
+      trackingId: string().max(255).required().label(t('i.common.authorization.authorizationForm.trackingId')),
+      shownToProponent: boolean()
+        .oneOf([true, false])
+        .default(false)
+        .label(t('i.common.authorization.authorizationForm.shownToProponent'))
     })
   ),
   authStatus: string()
     .required()
     .oneOf(PERMIT_AUTHORIZATION_STATUS_LIST)
-    .label('Authorization status')
+    .label(t('i.common.authorization.authorizationForm.authorizationStatus'))
     .test(
       'valid-auth-status',
-      'Authorization status can only be "None" if the authorization state is "Pre-submission".',
+      t('i.common.authorization.authorizationForm.authStatusConditionNewNone'),
       function (value) {
         const { status } = this.parent;
         return (
@@ -146,17 +151,20 @@ const formSchema = object({
     )
     .test(
       'valid-auth-status',
-      'Authorization status cannot be "In progress" if the authorization state is "Post-decision".',
+      t('i.common.authorization.authorizationForm.authStatusConditionInProPre'),
       function (value) {
         const { status } = this.parent;
         return status !== PermitStatus.COMPLETED || value !== PermitAuthorizationStatus.IN_REVIEW;
       }
     ),
-  submittedDate: date().max(new Date(), 'Submitted date cannot be in the future').nullable().label('Submitted date'),
-  adjudicationDate: date()
-    .max(new Date(), 'Adjudication date cannot be in the future')
+  submittedDate: date()
+    .max(new Date(), t('i.common.authorization.authorizationForm.submittedDateFutureError'))
     .nullable()
-    .label('Adjudication date')
+    .label(t('i.common.authorization.authorizationForm.submittedDate')),
+  adjudicationDate: date()
+    .max(new Date(), t('i.common.authorization.authorizationForm.adjudicationDateFutureError'))
+    .nullable()
+    .label(t('i.common.authorization.authorizationForm.adjudicationDate'))
 });
 </script>
 
@@ -203,7 +211,7 @@ const formSchema = object({
         icon="pi pi-times"
         @click="
           router.push({
-            name: projectViewRouteName,
+            name: projectRouteName,
             params: { projectId: projectId },
             query: {
               initialTab: AUTHORIZATION_TAB
