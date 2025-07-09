@@ -3,9 +3,9 @@ import { sourceSystemKindService } from '../services';
 import type { Request, Response, NextFunction } from 'express';
 
 const controller = {
-  getSourceSystemkinds: async (req: Request, res: Response, next: NextFunction) => {
+  getSourceSystemKinds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const response = await sourceSystemKindService.getSourceSystemkinds();
+      const response = await sourceSystemKindService.getSourceSystemKinds();
       res.status(200).json(response);
     } catch (e) {
       next(e);

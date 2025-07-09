@@ -65,6 +65,9 @@ const validationErrors: Ref<string[]> = ref([]);
 
 const isOnlyProjectRelated: Ref<boolean> = computed(() => Boolean(project && !permit));
 const isPermitRelated: Ref<boolean> = computed(() => Boolean(permit));
+const trackingId: Ref<string> = computed(() => {
+  return permit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId || t('enquiryIntakeForm.notApplicable');
+});
 
 // Form validation schema
 const formSchema = object({
@@ -234,11 +237,8 @@ async function onSubmit(data: any) {
       let permitDescription =
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
       // Obtain the tracking ID that is shown to the proponent
-      const trackingId =
-        permit.permitTracking?.filter((x) => x.shownToProponent)?.[0]?.trackingId ||
-        t('enquiryIntakeForm.notApplicable');
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
-      permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
+      permitDescription = permitDescription + trackingId.value + '\n' + authStatus + '\n\n';
       enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
       formRef.value?.setFieldValue('basic.enquiryDescription', enquiryData.basic.enquiryDescription);
     }
@@ -322,11 +322,7 @@ onBeforeMount(async () => {
             {{ t('enquiryIntakeForm.about') }}
             <span class="text-primary">
               {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
-              {{ t('enquiryIntakeForm.trackingId') }}:
-              {{
-                permit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId ||
-                t('enquiryIntakeForm.notApplicable')
-              }}| {{ t('enquiryIntakeForm.authStatus') }}:
+              {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
               {{ permit?.authStatus ?? 'No authorization status.' }}
             </span>
           </span>

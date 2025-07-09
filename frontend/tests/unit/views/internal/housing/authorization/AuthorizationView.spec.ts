@@ -1,5 +1,6 @@
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import AuthorizationView from '@/views/internal/housing/authorization/AuthorizationView.vue';
@@ -36,7 +37,8 @@ const wrapperSettings = () => ({
             }
           }
         }),
-      PrimeVue
+      PrimeVue,
+      ToastService
     ],
     stubs: ['font-awesome-icon', 'router-link']
   }

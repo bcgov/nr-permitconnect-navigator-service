@@ -14,10 +14,10 @@ const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
   include: { permit_type: true }
 });
 const _permitWithNotesTrackingGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_note: true, permit_type: true, permit_tracking: { include: { source_system_kind: true } } }
+  include: { permit_note: true, permit_type: true, permit_tracking: { include: { sourceSystemKind: true } } }
 });
 const _permitWithTrackingGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_type: true, permit_tracking: { include: { source_system_kind: true } } }
+  include: { permit_type: true, permit_tracking: { include: { sourceSystemKind: true } } }
 });
 
 type PrismaRelationPermit = Omit<Prisma.permitGetPayload<typeof _permit>, 'activity' | keyof Stamps>;
@@ -73,8 +73,8 @@ export default {
     const permit = this.fromPrismaModel(input);
     if (permit && input.permit_tracking) {
       permit.permitTracking = input.permit_tracking.map((x) => {
-        const { source_system_kind, ...rest } = x;
-        return { sourceSystemKind: source_system_kind, ...rest } as PermitTracking;
+        const { sourceSystemKind, ...rest } = x;
+        return { sourceSystemKind: sourceSystemKind, ...rest } as PermitTracking;
       });
     }
 

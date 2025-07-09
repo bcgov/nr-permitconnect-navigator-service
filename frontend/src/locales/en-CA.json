@@ -166,54 +166,6 @@
   },
   "i": {
     "common": {
-      "authorization": {
-        "authorizationForm": {
-          "addAuthorization": "Add authorization",
-          "adjudicationDate": "Adjudication date",
-          "adjudicationDateFutureError": "Adjudication date cannot be in the future",
-          "applicationStage": "Application stage",
-          "authorizationType": "Authorization type",
-          "authorizationStatus": "Authorization status",
-          "authStatusConditionNewNone": "Authorization status can only be 'None' if the authorization state is 'Pre-submission'.",
-          "authStatusConditionInProPre": "Authorization status cannot be 'In progress' if the authorization state is 'Post-decision'.",
-          "agency": "Agency:",
-          "businessDomain": "Business domain:",
-          "cancel": "Cancel",
-          "lastUpdated": "Last updated:",
-          "needed": "Needed",
-          "noteRequired": "The status of this application has changed. Please add an update for the proponent.",
-          "permitSaved": "Permit saved",
-          "permitSaveFailed": "Failed to save permit",
-          "publish": "Publish",
-          "shownToProponent": "Shown to proponent",
-          "submittedDate": "Submitted date",
-          "submittedDateFutureError": "Submitted date cannot be in the future",
-          "trackingId": "Tracking ID",
-          "trackingIdType": "Tracking ID type",
-          "updatedBy": "Updated by:",
-          "updateNoteHistory": "Update note history"
-        },
-        "authorizationCardIntake": {
-          "authorization": "Authorization",
-          "authorizationTypeID": "Authorization type and IDs",
-          "trackingIds": "Tracking IDs",
-          "issuedPermitId": "Issued Permit ID"
-        },
-        "authorizationStatusUpdatesCard": {
-          "statusUpdates": "Status updates",
-          "statusVerifiedDate": "Status verified date",
-          "updateToToday": "Update to today",
-          "authorizationStatus": "Authorization status",
-          "applicationStage": "Application stage",
-          "needed": "Needed",
-          "submittedDate": "Submitted date",
-          "decisionDate": "Decision date",
-          "updateNoteForProponent": "Update note for Proponent"
-        },
-        "authorizationUpdateHistory": {
-          "updateNoteHistory": "Update note history"
-        }
-      },
       "form": {
         "cancelMessage": "Your changes have not been saved.",
         "savedMessage": "Form saved"
@@ -264,6 +216,11 @@
       }
     },
     "electrification": {
+      "authorization": {
+        "authorizationView": {
+          "projectPermitLoadError": "Unable to load permit or project, please try again later"
+        }
+      },
       "electrificationView": {
         "header": "Electrification"
       },
@@ -311,6 +268,11 @@
       }
     },
     "housing": {
+      "authorization": {
+        "authorizationView": {
+          "projectPermitLoadError": "Unable to load permit or project, please try again later"
+        }
+      },
       "housingView": {
         "header": "Housing"
       },
@@ -340,26 +302,66 @@
       }
     }
   },
-  "authorizationCard": {
-    "addUpdates": "Add updates",
-    "adjudicationDate": "Adjudication date:",
-    "agency": "Agency:",
-    "businessDomain": "Business domain:",
-    "issuedPermitId": "Issued Permit ID:",
-    "lastUpdated": "Last updated:",
-    "latestUpdate": "Latest update for the client:",
-    "more": "More",
-    "needed": "Needed:",
-    "permitState": "Permit state:",
-    "previousUpdates": "Previous Updates",
-    "sourceSystem": "Source system:",
-    "statusVerified": "Status verified date",
-    "submittedDate": "Submitted date:",
-    "trackingId": "Tracking ID:",
-    "updatedBy": "Updated by:"
-  },
-  "authorizationCardLite": {
-    "more": "More"
+  "authorization": {
+    "authorizationCard": {
+      "more": "More",
+      "statusVerified": "Status verified date"
+    },
+    "authorizationCardLite": {
+      "more": "More"
+    },
+    "authorizationForm": {
+      "addAuthorization": "Add authorization",
+      "adjudicationDate": "Adjudication date",
+      "adjudicationDateFutureError": "Adjudication date cannot be in the future",
+      "applicationStage": "Application stage",
+      "authorizationType": "Authorization type",
+      "authorizationStatus": "Authorization status",
+      "authStatusConditionNewNone": "Authorization status can only be 'None' if the authorization state is 'Pre-submission'.",
+      "authStatusConditionInProPre": "Authorization status cannot be 'In progress' if the authorization state is 'Post-decision'.",
+      "agency": "Agency:",
+      "businessDomain": "Business domain:",
+      "cancel": "Cancel",
+      "lastUpdated": "Last updated:",
+      "needed": "Needed",
+      "noteRequired": "The status of this application has changed. Please add an update for the proponent.",
+      "permitSaved": "Permit saved",
+      "permitSaveFailed": "Failed to save permit",
+      "publish": "Publish",
+      "shownToProponent": "Shown to proponent",
+      "submittedDate": "Submitted date",
+      "submittedDateFutureError": "Submitted date cannot be in the future",
+      "trackingId": "Tracking ID",
+      "trackingIdType": "Tracking ID type",
+      "updatedBy": "Updated by:",
+      "updateNoteHistory": "Update note history"
+    },
+    "authorizationCardIntake": {
+      "addId": "Add an ID",
+      "authorization": "Authorization",
+      "authorizationTypeID": "Authorization type and IDs",
+      "deleteTrackingId": "Delete tracking ID",
+      "trackingIds": "Tracking IDs",
+      "issuedPermitId": "Issued Permit ID",
+      "selectAuthorization": "Select an authorization",
+      "selectId": "Select an ID",
+      "shownToProponent": "Show to Proponent",
+      "typeNumber": "Type the number"
+    },
+    "authorizationStatusUpdatesCard": {
+      "statusUpdates": "Status updates",
+      "statusVerifiedDate": "Status verified date",
+      "updateToToday": "Update to today",
+      "authorizationStatus": "Authorization status",
+      "applicationStage": "Application stage",
+      "needed": "Needed",
+      "submittedDate": "Submitted date",
+      "decisionDate": "Decision date",
+      "updateNoteForProponent": "Update note for Proponent"
+    },
+    "authorizationUpdateHistory": {
+      "updateNoteHistory": "Update note history"
+    }
   },
   "cancelButton": {
     "btnText": "Cancel"
@@ -520,11 +522,6 @@
   "permitModal": {
     "addTitle": "Add permit",
     "editTitle": "Edit permit"
-  },
-  "permitNotesModal": {
-    "title": "Add updates",
-    "notePlaceholder": "Please try to keep the note concise, ideally under 60 words.",
-    "noUpdates": "There are no updates."
   },
   "oidcLoginView": {
     "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",

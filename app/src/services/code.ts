@@ -13,6 +13,9 @@ const service = {
       }
     });
     const SourceSystem = await prisma.source_system_code.findMany({
+      where: {
+        active: true
+      },
       orderBy: {
         display: 'asc'
       }

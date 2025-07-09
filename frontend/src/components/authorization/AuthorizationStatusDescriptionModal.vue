@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import { Dialog } from '@/lib/primevue';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
 
