@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import NoteCard from '@/components/note/NoteCard.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
@@ -117,9 +117,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('noteCard test', () => {
+describe('NoteHistoryCard', () => {
   it('renders component', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings());
+    const wrapper = mount(NoteHistoryCard, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 
@@ -128,7 +128,7 @@ describe('noteCard test', () => {
       ...TEST_NOTE_HISTORY,
       createdBy: ''
     };
-    const wrapper = mount(NoteCard, {
+    const wrapper = mount(NoteHistoryCard, {
       props: {
         noteHistory: alteredTestNote
       },
@@ -142,12 +142,12 @@ describe('noteCard test', () => {
   });
 
   it('displays note title', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings());
+    const wrapper = mount(NoteHistoryCard, wrapperSettings());
     expect(wrapper.get('h3').text()).toBe(TEST_NOTE_HISTORY.title);
   });
 
   it('displays p tags for general notes', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings());
+    const wrapper = mount(NoteHistoryCard, wrapperSettings());
     const pTag = wrapper.findAll('p');
 
     expect(wrapper.find('[data-test="bf-title"]').exists()).toBe(false);
@@ -159,7 +159,7 @@ describe('noteCard test', () => {
   });
 
   it('displays p tags for unresolved notes', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings(TEST_NOTE_HISTORY_UNRESOLVED));
+    const wrapper = mount(NoteHistoryCard, wrapperSettings(TEST_NOTE_HISTORY_UNRESOLVED));
     const pTag = wrapper.findAll('p');
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState})`);
@@ -172,7 +172,7 @@ describe('noteCard test', () => {
   });
 
   it('displays p tags for resolved notes', async () => {
-    const wrapper = mount(NoteCard, wrapperSettings(TEST_NOTE_HISTORY_RESOLVED));
+    const wrapper = mount(NoteHistoryCard, wrapperSettings(TEST_NOTE_HISTORY_RESOLVED));
     const pTag = wrapper.findAll('p');
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_RESOLVED.bringForwardState})`);

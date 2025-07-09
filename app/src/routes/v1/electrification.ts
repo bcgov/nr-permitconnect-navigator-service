@@ -7,7 +7,7 @@ import accessRequest from './accessRequest';
 import document from './document';
 import electrificationProject from './electrificationProject';
 import enquiry from './enquiry';
-import note from './note';
+import noteHistory from './noteHistory';
 import permit from './permit';
 import roadmap from './roadmap';
 
@@ -25,7 +25,7 @@ router.use('/accessRequest', accessRequest);
 router.use('/document', document);
 router.use('/project', electrificationProject);
 router.use('/enquiry', enquiry);
-router.use('/note', note);
+router.use('/note', noteHistory);
 router.use('/permit', permit);
 router.use('/roadmap', roadmap);
 

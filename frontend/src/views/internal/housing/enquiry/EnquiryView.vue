@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import NoteCard from '@/components/note/NoteCard.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, housingProjectService, noteService } from '@/services';
@@ -180,14 +180,14 @@ onBeforeMount(async () => {
           :index="index"
           class="col-span-12"
         >
-          <NoteCard
+          <NoteHistoryCard
             :editable="!isCompleted"
             :note-history="history"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"
           />
         </div>
-        <NoteModal
+        <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
