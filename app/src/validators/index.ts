@@ -5,7 +5,7 @@ export { default as documentValidator } from './document';
 export { default as electrificationProjectValidator } from './electrificationProject';
 export { default as enquiryValidator } from './enquiry';
 export { default as housingProjectValidator } from './housingProject';
-export { default as noteValidator } from './note';
+export { default as noteHistoryValidator } from './noteHistory';
 export { default as permitValidator } from './permit';
 export { default as permitNoteValidator } from './permitNote';
 export { default as roadmapValidator } from './roadmap';

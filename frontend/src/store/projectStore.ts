@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, NoteHistory, Permit } from '@/types';
+import type { Document, ElectrificationProject, Enquiry, HousingProject, NoteHistory, Permit } from '@/types';
 
 // Types
 export type ProjectType = ElectrificationProject | HousingProject | undefined;

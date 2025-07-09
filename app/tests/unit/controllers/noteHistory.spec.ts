@@ -1,4 +1,4 @@
-import { noteController } from '../../../src/controllers';
+import { noteHistoryController } from '../../../src/controllers';
 import {
   electrificationProjectService,
   enquiryService,
@@ -98,7 +98,7 @@ describe('createNoteHistory', () => {
     createNoteSpy.mockResolvedValue(createdNote);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.createNoteHistory(req as any, res as any, next);
+    await noteHistoryController.createNoteHistory(req as any, res as any, next);
 
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith({
@@ -112,14 +112,14 @@ describe('createNoteHistory', () => {
       type: req.body.type,
       isDeleted: false,
       createdAt: expect.stringMatching(isoPattern),
-      createdBy: CURRENT_CONTEXT.userId
+      createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith({
       noteHistoryId: createdHistory.noteHistoryId,
       note: req.body.note,
       createdAt: expect.stringMatching(isoPattern),
-      createdBy: CURRENT_CONTEXT.userId
+      createdBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
@@ -131,7 +131,7 @@ describe('createNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.createNoteHistory(req as any, res as any, next);
+    await noteHistoryController.createNoteHistory(req as any, res as any, next);
 
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledTimes(0);
@@ -172,7 +172,7 @@ describe('deleteNoteHistory', () => {
     deleteHistorySpy.mockResolvedValue(deletedNoteHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.deleteNoteHistory(req as any, res as any, next);
+    await noteHistoryController.deleteNoteHistory(req as any, res as any, next);
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
@@ -189,7 +189,7 @@ describe('deleteNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.deleteNoteHistory(req as any, res as any, next);
+    await noteHistoryController.deleteNoteHistory(req as any, res as any, next);
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
@@ -273,7 +273,7 @@ describe('listBringForward', () => {
     searchEnquiries.mockResolvedValue(enquiriesList as any);
     searchUsersSpy.mockResolvedValue(userList as any);
 
-    await noteController.listBringForward(req as any, res as any, next);
+    await noteHistoryController.listBringForward(req as any, res as any, next);
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     expect(listSpy).toHaveBeenCalledTimes(1);
@@ -306,7 +306,7 @@ describe('listBringForward', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.listBringForward(req as any, res as any, next);
+    await noteHistoryController.listBringForward(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
@@ -363,7 +363,7 @@ describe('listNoteHistory', () => {
     listSpy.mockResolvedValue(noteList);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.listNoteHistory(req as any, res as any, next);
+    await noteHistoryController.listNoteHistory(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -434,7 +434,7 @@ describe('listNoteHistory', () => {
     listSpy.mockResolvedValue(noteList);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.listNoteHistory(req as any, res as any, next);
+    await noteHistoryController.listNoteHistory(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -448,7 +448,7 @@ describe('listNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.listNoteHistory(req as any, res as any, next);
+    await noteHistoryController.listNoteHistory(req as any, res as any, next);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -520,7 +520,7 @@ describe('updateNoteHistory', () => {
     updateNoteHistorySpy.mockResolvedValue(updatedHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.updateNoteHistory(req as any, res as any, next);
+    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith({
@@ -547,7 +547,7 @@ describe('updateNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.updateNoteHistory(req as any, res as any, next);
+    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith({
@@ -607,7 +607,7 @@ describe('updateNoteHistory', () => {
     updateNoteHistorySpy.mockResolvedValue(updatedHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteController.updateNoteHistory(req as any, res as any, next);
+    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith({

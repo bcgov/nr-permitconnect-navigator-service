@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import NoteCard from '@/components/note/NoteCard.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { enquiryService, electrificationProjectService, noteService } from '@/services';
@@ -14,7 +14,7 @@ import { Action, Initiative, Resource, RouteName } from '@/utils/enums/applicati
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
-import type { Note, ElectrificationProject, NoteHistory } from '@/types';
+import type { ElectrificationProject, NoteHistory } from '@/types';
 import type { Ref } from 'vue';
 
 // Props
@@ -180,14 +180,14 @@ onBeforeMount(async () => {
           :index="index"
           class="col-span-12"
         >
-          <NoteCard
+          <NoteHistoryCard
             :editable="!isCompleted"
             :note-history="history"
             @delete-note="onDeleteNote"
             @update-note="onUpdateNote"
           />
         </div>
-        <NoteModal
+        <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"

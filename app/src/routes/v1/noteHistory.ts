@@ -1,12 +1,12 @@
 import express from 'express';
 
-import { noteController } from '../../controllers';
+import { noteHistoryController } from '../../controllers';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { BringForwardType } from '../../utils/enums/projectCommon';
-import { noteValidator } from '../../validators';
+import { noteHistoryValidator } from '../../validators';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { NoteHistory } from '../../types';
@@ -19,24 +19,24 @@ router.use(requireSomeGroup);
 router.put(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
-  noteValidator.createNoteHistory,
+  noteHistoryValidator.createNoteHistory,
   (req: Request<never, never, NoteHistory & { note: string }>, res: Response, next: NextFunction): void => {
-    noteController.createNoteHistory(req, res, next);
+    noteHistoryController.createNoteHistory(req, res, next);
   }
 );
 
-// Note add endpoint
+// Note History update endpoint
 router.put(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
   hasAccess('noteHistoryId'),
-  noteValidator.updateNoteHistory,
+  noteHistoryValidator.updateNoteHistory,
   (
     req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
     res: Response,
     next: NextFunction
   ): void => {
-    noteController.updateNoteHistory(req, res, next);
+    noteHistoryController.updateNoteHistory(req, res, next);
   }
 );
 
@@ -46,7 +46,7 @@ router.delete(
   hasAuthorization(Resource.NOTE, Action.DELETE),
   hasAccess('noteHistoryId'),
   (req: Request<{ noteHistoryId: string }>, res: Response, next: NextFunction): void => {
-    noteController.deleteNoteHistory(req, res, next);
+    noteHistoryController.deleteNoteHistory(req, res, next);
   }
 );
 
@@ -59,7 +59,7 @@ router.get(
     res: Response,
     next: NextFunction
   ): void => {
-    noteController.listBringForward(req, res, next);
+    noteHistoryController.listBringForward(req, res, next);
   }
 );
 
@@ -67,9 +67,9 @@ router.get(
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),
-  noteValidator.listNoteHistory,
+  noteHistoryValidator.listNoteHistory,
   (req: Request<{ activityId: string }>, res: Response, next: NextFunction): void => {
-    noteController.listNoteHistory(req, res, next);
+    noteHistoryController.listNoteHistory(req, res, next);
   }
 );
 

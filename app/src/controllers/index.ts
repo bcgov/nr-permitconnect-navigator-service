@@ -7,7 +7,7 @@ export { default as electrificationProjectController } from './electrificationPr
 export { default as enquiryController } from './enquiry';
 export { default as housingProjectController } from './housingProject';
 export { default as mapController } from './map';
-export { default as noteController } from './note';
+export { default as noteHistoryController } from './noteHistory';
 export { default as permitController } from './permit';
 export { default as permitNoteController } from './permitNote';
 export { default as reportingController } from './reporting';
