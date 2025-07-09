@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { shallowMount } from '@vue/test-utils';
 
-import AuthorizationCardIntake from '@/components/form/common/AuthorizationCardIntake.vue';
+import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import { permitService, sourceSystemKindService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';

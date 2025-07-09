@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import AuthorizationStatusDescriptionModal from '@/components/permit/AuthorizationStatusDescriptionModal.vue';
+import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import PrimeVue from 'primevue/config';
 
 beforeEach(() => {

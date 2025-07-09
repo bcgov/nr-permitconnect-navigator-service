@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
 import { userService } from '@/services';
@@ -22,6 +22,8 @@ const { t } = useI18n();
 
 // State
 const cardUpdatedBy: Ref<string> = ref('');
+const trackingNotShownToProponent = computed(() => permit.permitTracking?.filter((pt) => !pt.shownToProponent));
+const trackingShownToProponent = computed(() => permit.permitTracking?.find((pt) => pt.shownToProponent));
 
 // Actions
 watchEffect(() => {
@@ -48,7 +50,7 @@ watchEffect(() => {
             <span class="font-bold">
               {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
             </span>
-            <span class="ml-2 text-xs">{{ t('authorizationCard.statusVerified') }}</span>
+            <span class="ml-2 text-xs">{{ t('authorization.authorizationCard.statusVerified') }}</span>
           </div>
           <div class="flex gap-2">
             <span :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
@@ -72,15 +74,24 @@ watchEffect(() => {
         <div class="bg-[var(--p-bcblue-50)] grid grid-rows-[2fr_1fr]">
           <div class="mt-2">
             <div
-              v-for="permitTracking in permit?.permitTracking"
-              :key="permitTracking.permitTrackingId"
+              v-if="trackingShownToProponent"
               class="ml-5 mt-2 flex items-center"
             >
               <font-awesome-icon
-                v-if="permitTracking.shownToProponent"
                 class="mr-2"
                 icon="fa-solid fa-eye"
               />
+              <span class="font-bold">
+                {{ trackingShownToProponent?.sourceSystemKind?.description }}
+              </span>
+              :
+              {{ trackingShownToProponent?.trackingId }}
+            </div>
+            <div
+              v-for="permitTracking in trackingNotShownToProponent"
+              :key="permitTracking.permitTrackingId"
+              class="ml-5 mt-2 flex items-center"
+            >
               <span class="font-bold">{{ permitTracking.sourceSystemKind?.description }}</span>
               :
               {{ permitTracking?.trackingId }}
@@ -89,7 +100,7 @@ watchEffect(() => {
           <div class="flex justify-end items-end">
             <Button
               class="p-button-outlined mr-4 mb-4 size-fit"
-              :label="t('authorizationCard.more')"
+              :label="t('authorization.authorizationCard.more')"
             />
           </div>
         </div>

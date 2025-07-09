@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, provide, ref } from 'vue';
+import { onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import Divider from '@/components/common/Divider.vue';
-import AuthorizationStatusPill from '@/components/permit/AuthorizationStatusPill.vue';
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { Accordion, AccordionContent, AccordionHeader, AccordionPanel, Button, Card, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
@@ -13,20 +13,12 @@ import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
-import type { ComputedRef, Ref } from 'vue';
-import type { Contact, Permit } from '@/types';
-
-// Types
-type PermitFilterConfig = {
-  permitNeeded?: string;
-  permitStatus?: string;
-  submitted?: boolean;
-};
+import type { Ref } from 'vue';
+import type { Contact } from '@/types';
 
 // Props
 const { projectId } = defineProps<{
@@ -42,73 +34,19 @@ const toast = useToast();
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getPermits, getProject, getRelatedEnquiries } = storeToRefs(projectStore);
+const { getAuthsNeeded, getAuthsNotNeeded, getAuthsSubmitted, getProject, getRelatedEnquiries } =
+  storeToRefs(projectStore);
 
 // State
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 
-const permitsNeeded: ComputedRef<Array<Permit>> = computed(() => {
-  return permitFilter({
-    permitNeeded: PermitNeeded.YES,
-    permitStatus: PermitStatus.NEW
-  })
-    .sort(permitNameSortFcn)
-    .sort(permitBusinessSortFcn);
-});
-const permitsNotNeeded: ComputedRef<Array<Permit>> = computed(() => {
-  return permitFilter({
-    permitNeeded: PermitNeeded.NO
-  })
-    .sort(permitNameSortFcn)
-    .sort(permitBusinessSortFcn);
-});
-const permitsSubmitted: ComputedRef<Array<Permit>> = computed(() => {
-  return permitFilter({
-    submitted: true
-  })
-    .sort(permitNameSortFcn)
-    .sort(permitBusinessSortFcn);
-});
-
 // Providers
 provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY);
 provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
 
 // Actions
-function permitBusinessSortFcn(a: Permit, b: Permit) {
-  return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
-}
-
-function permitNameSortFcn(a: Permit, b: Permit) {
-  return a.permitType.name > b.permitType.name ? 1 : -1;
-}
-
-function permitFilter(config: PermitFilterConfig) {
-  const { permitNeeded, permitStatus, submitted } = config;
-  const permits = getPermits.value;
-  let returnArray: Array<any> = permits;
-
-  if (permitNeeded) {
-    returnArray = returnArray.filter((p) => p.needed === permitNeeded);
-  }
-
-  if (permitStatus) {
-    returnArray = returnArray.filter((p) => p.status === permitStatus);
-  }
-
-  if (submitted) {
-    returnArray = returnArray.filter((p) => {
-      return (
-        p.authStatus !== PermitAuthorizationStatus.NONE && p.status !== PermitStatus.NEW && p.needed !== PermitNeeded.NO
-      );
-    });
-  }
-
-  return returnArray as Array<Permit>;
-}
-
 function navigateToSubmissionIntakeView() {
   router.push({
     name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
@@ -232,13 +170,13 @@ onBeforeMount(async () => {
       <h3 class="mb-8 mt-16">{{ t('e.common.projectView.recommendedPermits') }}</h3>
     </div>
     <div
-      v-if="!permitsNeeded?.length"
+      v-if="!getAuthsNeeded?.length"
       class="empty-block p-8 mb-2"
     >
       {{ t('e.common.projectView.recommendedPermitsDesc') }}
     </div>
     <Card
-      v-for="permit in permitsNeeded"
+      v-for="permit in getAuthsNeeded"
       :key="permit.permitId"
       class="app-primary-color permit-card mb-2"
     >
@@ -247,7 +185,7 @@ onBeforeMount(async () => {
       </template>
     </Card>
     <Accordion
-      v-if="permitsNotNeeded?.length"
+      v-if="getAuthsNotNeeded?.length"
       class="app-primary-color"
       :value="undefined"
       collapse-icon="pi pi-chevron-up"
@@ -261,7 +199,7 @@ onBeforeMount(async () => {
           </div>
           <ul class="list-disc mt-4">
             <li
-              v-for="permit in permitsNotNeeded"
+              v-for="permit in getAuthsNotNeeded"
               :key="permit.permitId"
               class="ml-12"
             >
@@ -273,13 +211,13 @@ onBeforeMount(async () => {
     </Accordion>
     <h3 class="mt-20 mb-8">{{ t('e.common.projectView.submittedApplications') }}</h3>
     <div
-      v-if="!permitsSubmitted.length"
+      v-if="!getAuthsSubmitted.length"
       class="empty-block p-8"
     >
       {{ t('e.common.projectView.submittedApplicationsDesc') }}
     </div>
     <router-link
-      v-for="permit in permitsSubmitted"
+      v-for="permit in getAuthsSubmitted"
       :id="permit.permitId"
       :key="permit.permitId"
       :to="{

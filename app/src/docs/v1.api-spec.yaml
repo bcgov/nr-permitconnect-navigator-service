@@ -52,6 +52,8 @@ tags:
     description: Operations for validating Housing Roadmaps
   - name: Reporting
     description: Operations for performings actions related to reporting
+  - name: Source System Kind
+    description: Operations for source system kinds
   - name: User
     description: Operations for managing users
 paths:
@@ -2577,6 +2579,22 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
+  /sourceSystemKind:
+    get:
+      summary: List source system kinds
+      description: Gets a list of all the source system kinds
+      operationId: getSourceSystemKinds
+      tags:
+        - Source System Kind
+      responses:
+        '200':
+          description: Source System Kinds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-SourceSystemKind'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /user:
     get:
       summary: Search users
@@ -3449,6 +3467,25 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
+    DB-SourceSystemKind:
+      type: object
+      properties:
+        sourceSystemKindId:
+          type: number
+          description: ID for the source system kind
+          example: 1
+        kind:
+          type: string
+          description: Source system kind
+          example: Project Number
+        description:
+          type: string
+          description: Source system kind description
+          example: Project Number
+        sourceSystem:
+          type: string
+          description: Source system code
+          example: ITSM-5314
     DB-User:
       type: object
       properties:
