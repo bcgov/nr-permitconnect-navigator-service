@@ -40,6 +40,7 @@ const TEST_NOTE_HISTORY: NoteHistory = {
   bringForwardState: null,
   escalateToDirector: false,
   escalateToSupervisor: false,
+  escalationType: null,
   isDeleted: false,
   note: [TEST_NOTE],
   noteHistoryId: '123',
