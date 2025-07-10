@@ -7,7 +7,7 @@ import { mixed, object, string } from 'yup';
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
-import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { BRING_FORWARD_TYPE_LIST, ESCALATION_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
 
@@ -39,6 +39,7 @@ let initialFormValues: any = {
   shownToProponent: noteHistory?.shownToProponent,
   escalateToSupervisor: noteHistory?.escalateToSupervisor,
   escalateToDirector: noteHistory?.escalateToDirector,
+  escalationType: noteHistory?.escalationType,
   noteHistoryId: noteHistory?.noteHistoryId,
   type: noteHistory?.type ?? NoteType.GENERAL,
   title: noteHistory?.title
@@ -48,8 +49,8 @@ let initialFormValues: any = {
 const formSchema = object({
   bringForwardDate: mixed()
     .nullable()
-    .when('noteType', {
-      is: (noteType: string) => noteType === NoteType.BRING_FORWARD,
+    .when('type', {
+      is: (type: string) => type === NoteType.BRING_FORWARD,
       then: (schema) =>
         schema.test(
           'bring forward required',
@@ -60,8 +61,8 @@ const formSchema = object({
     })
     .label('Bring forward date'),
   bringForwardState: mixed()
-    .when('noteType', {
-      is: (noteType: string) => noteType === NoteType.BRING_FORWARD,
+    .when('type', {
+      is: (type: string) => type === NoteType.BRING_FORWARD,
       then: () => string().oneOf(BRING_FORWARD_TYPE_LIST),
       otherwise: () => mixed().nullable()
     })
@@ -113,6 +114,7 @@ async function onSubmit(data: any) {
       body.bringForwardState = null;
       body.escalateToSupervisor = false;
       body.escalateToDirector = false;
+      body.escalationType = null;
     }
 
     if (!noteHistory) {
@@ -154,7 +156,7 @@ async function onSubmit(data: any) {
 
     <Form
       ref="formRef"
-      v-slot="{ handleReset }"
+      v-slot="{ handleReset, values }"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="onSubmit"
@@ -169,7 +171,7 @@ async function onSubmit(data: any) {
               :options="NOTE_TYPE_LIST"
             />
             <DatePicker
-              v-if="formRef?.values.type === NoteType.BRING_FORWARD"
+              v-if="values.type === NoteType.BRING_FORWARD"
               class="w-1/2"
               name="bringForwardDate"
               label="Bring forward date"
@@ -197,7 +199,7 @@ async function onSubmit(data: any) {
               <span class="text-[var(--p-bcblue-900)]">{{ formatDate(noteHistory?.updatedAt) }}</span>
             </div>
             <div
-              v-if="formRef?.values.type === NoteType.GENERAL"
+              v-if="values.type === NoteType.GENERAL"
               class="flex flex-col"
             >
               <Checkbox
@@ -207,7 +209,7 @@ async function onSubmit(data: any) {
               />
             </div>
             <div
-              v-if="formRef?.values.type === NoteType.BRING_FORWARD"
+              v-if="values.type === NoteType.BRING_FORWARD"
               class="flex flex-col"
             >
               <Checkbox
@@ -220,6 +222,16 @@ async function onSubmit(data: any) {
                 :label="t('noteModal.escalateToDirector')"
                 :bold="false"
               />
+              <div
+                v-if="values.escalateToSupervisor || values.escalateToDirector"
+                class="flex flex-col"
+              >
+                <Select
+                  name="escalationType"
+                  label="Escalation type"
+                  :options="ESCALATION_TYPE_LIST"
+                />
+              </div>
               <Select
                 name="bringForwardState"
                 label="Bring forward state"
