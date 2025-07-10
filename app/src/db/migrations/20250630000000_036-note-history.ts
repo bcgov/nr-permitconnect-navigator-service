@@ -15,6 +15,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('shown_to_proponent').notNullable().defaultTo(false);
           table.boolean('escalate_to_supervisor').notNullable().defaultTo(false);
           table.boolean('escalate_to_director').notNullable().defaultTo(false);
+          table.string('escalation_type');
           table.renameColumn('note_id', 'note_history_id');
           table.renameColumn('note_type', 'type');
         })
@@ -119,6 +120,7 @@ export async function down(knex: Knex): Promise<void> {
         knex.schema.alterTable('note_history', function (table) {
           table.renameColumn('type', 'note_type');
           table.renameColumn('note_history_id', 'note_id');
+          table.dropColumn('escalation_type');
           table.dropColumn('escalate_to_director');
           table.dropColumn('escalate_to_supervisor');
           table.dropColumn('shown_to_proponent');
