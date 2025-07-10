@@ -560,27 +560,6 @@ model note {
   @@schema("public")
 }
 
-model note_history {
-  noteHistoryId        String    @id @map("note_history_id") @db.Uuid
-  activityId           String    @map("activity_id")
-  type                 String    @default("")
-  title                String    @default("")
-  createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy            String?   @map("updated_by")
-  updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
-  bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
-  bringForwardState    String?   @map("bring_forward_state")
-  isDeleted            Boolean   @default(false) @map("is_deleted")
-  shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
-  escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
-  escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
-  note                 note[]
-  activity             activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
-
-  @@schema("public")
-}
-
 model electrification_project {
   electrificationProjectId           String                                 @id @map("electrification_project_id") @db.Uuid
   activityId                         String                                 @map("activity_id")
@@ -628,6 +607,28 @@ model permit_type_initiative_xref {
   permit_type    permit_type @relation(fields: [permit_type_id], references: [permit_type_id], onDelete: Cascade, map: "permit_type_initiative_xref_permit_type_id_foreign")
 
   @@id([permit_type_id, initiative_id])
+  @@schema("public")
+}
+
+model note_history {
+  noteHistoryId        String    @id @map("note_history_id") @db.Uuid
+  activityId           String    @map("activity_id")
+  type                 String    @default("")
+  title                String    @default("")
+  createdBy            String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt            DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy            String?   @map("updated_by")
+  updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
+  bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
+  bringForwardState    String?   @map("bring_forward_state")
+  isDeleted            Boolean   @default(false) @map("is_deleted")
+  shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
+  escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
+  escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
+  escalationType       String?   @map("escalation_type") @db.VarChar(255)
+  note                 note[]
+  activity             activity  @relation(fields: [activityId], references: [activity_id], onDelete: Cascade, map: "note_activity_id_foreign")
+
   @@schema("public")
 }
 
