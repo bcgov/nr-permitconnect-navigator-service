@@ -8,9 +8,10 @@ import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/
 import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
 import { noteService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, ESCALATION_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { NoteType } from '@/utils/enums/projectCommon';
+import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { NoteHistory } from '@/types';
 
@@ -133,6 +134,12 @@ async function onSubmit(data: any) {
     visible.value = false;
   }
 }
+
+function onTypeChange(e: SelectChangeEvent) {
+  if (e.value === NoteType.BRING_FORWARD) {
+    formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
+  }
+}
 </script>
 
 <template>
@@ -169,6 +176,7 @@ async function onSubmit(data: any) {
               name="type"
               label="Note type"
               :options="NOTE_TYPE_LIST"
+              @on-change="onTypeChange"
             />
             <DatePicker
               v-if="values.type === NoteType.BRING_FORWARD"
