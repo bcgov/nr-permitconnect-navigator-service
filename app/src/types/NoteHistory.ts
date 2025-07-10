@@ -7,6 +7,7 @@ export type NoteHistory = {
   bringForwardState: string | null;
   escalateToDirector: boolean;
   escalateToSupervisor: boolean;
+  escalationType: string | null;
   shownToProponent: boolean;
   isDeleted: boolean;
   title: string;
