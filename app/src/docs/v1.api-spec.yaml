@@ -703,8 +703,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note:
     put:
-      summary: Create a note
-      operationId: createElectrificationNote
+      summary: Create a note history
+      operationId: createElectrificationNoteHistory
       tags:
         - Electrification Note
       requestBody:
@@ -712,14 +712,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-Notes'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '201':
-          description: Note created successfully
+          description: Note history created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -728,27 +728,27 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/note/{noteId}:
+  /electrification/note/{noteHistoryId}:
     put:
-      summary: Update a note
-      operationId: updateElectrificationNote
+      summary: Update a note history
+      operationId: updateElectrificationNoteHistory
       tags:
-        - Housing Note
+        - Electrification Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Note'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '200':
-          description: Note updated successfully
+          description: Note history updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -760,20 +760,20 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a note
-      description: Soft deletes a note by marking isDeleted true
-      operationId: deleteElectrificationNote
+      summary: Delete a note history
+      description: Soft deletes a note history by marking isDeleted true
+      operationId: deleteElectrificationNoteHistory
       tags:
         - Electrification Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       responses:
         '200':
-          description: Note deleted successfully
+          description: Note history deleted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -784,8 +784,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note/bringForward:
     get:
-      summary: List notes with bring forward type
-      description: Retrieve a list of notes with the Bring forward type given
+      summary: List note histories with bring forward type
+      description: Retrieve a list of note histories with the Bring forward type given
       operationId: listElectrificationBringForward
       tags:
         - Electrification Note
@@ -793,7 +793,7 @@ paths:
         - $ref: '#/components/parameters/Query-BringForwardState'
       responses:
         '200':
-          description: A list of bring forward notes
+          description: A list of bring forward note histories
           content:
             application/json:
               schema:
@@ -808,8 +808,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note/list/{activityId}:
     get:
-      summary: List notes by Activity ID
-      description: Return a list of notes that have the given Activity ID
+      summary: List note histories by Activity ID
+      description: Return a list of note histories that have the given Activity ID
       operationId: listElectrificationNotes
       tags:
         - Electrification Note
@@ -817,13 +817,13 @@ paths:
         - $ref: '#/components/parameters/Path-ActivityId'
       responses:
         '200':
-          description: A list of notes for the specified activity
+          description: A list of note histories for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-Note'
+                  $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1785,8 +1785,8 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note:
     put:
-      summary: Create a note
-      operationId: createHousingNote
+      summary: Create a note history
+      operationId: createHousingNoteHistory
       tags:
         - Housing Note
       requestBody:
@@ -1794,14 +1794,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-Notes'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '201':
-          description: Note created successfully
+          description: Note history created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1810,27 +1810,27 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housing/note/{noteId}:
+  /housing/note/{noteHistoryId}:
     put:
-      summary: Update a note
-      operationId: updateHousingNote
+      summary: Update a note history
+      operationId: updateHousingNoteHistory
       tags:
         - Housing Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Note'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '200':
-          description: Note updated successfully
+          description: Note history updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1842,20 +1842,20 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a note
-      description: Soft deletes a note by marking isDeleted true
-      operationId: deleteHousingNote
+      summary: Delete a note history
+      description: Soft deletes a note history by marking isDeleted true
+      operationId: deleteHousingNoteHistory
       tags:
         - Housing Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       responses:
         '200':
-          description: Note deleted successfully
+          description: Note history deleted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1866,8 +1866,8 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note/bringForward:
     get:
-      summary: List notes with bring forward type
-      description: Retrieve a list of notes with the Bring forward type given
+      summary: List note histories with bring forward type
+      description: Retrieve a list of note histories with the Bring forward type given
       operationId: listHousingBringForward
       tags:
         - Housing Note
@@ -1875,7 +1875,7 @@ paths:
         - $ref: '#/components/parameters/Query-BringForwardState'
       responses:
         '200':
-          description: A list of bring forward notes
+          description: A list of bring forward note histories
           content:
             application/json:
               schema:
@@ -1890,22 +1890,22 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note/list/{activityId}:
     get:
-      summary: List notes by Activity ID
-      description: Return a list of notes that have the given Activity ID
-      operationId: lisHousingtNotes
+      summary: List note histories by Activity ID
+      description: Return a list of note histories that have the given Activity ID
+      operationId: lisHousingtNoteHistory
       tags:
         - Housing Note
       parameters:
         - $ref: '#/components/parameters/Path-ActivityId'
       responses:
         '200':
-          description: A list of notes for the specified activity
+          description: A list of note histories for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-Note'
+                  $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -2616,10 +2616,10 @@ components:
         type: string
         format: uuid
         example: da5c5031-0e84-4234-7766-1ba846997482
-    Path-NoteId:
+    Path-NoteHistoryId:
       in: path
-      name: noteId
-      description: UUID of a Note
+      name: noteHistoryId
+      description: UUID of a Note History
       required: true
       schema:
         type: string
@@ -3159,11 +3159,8 @@ components:
       type: object
       required:
         - noteId
-        - activityId
-        - isDeleted
+        - noteHistoryId
         - note
-        - noteType
-        - title
         - createdBy
         - createdAt
         - updatedBy
@@ -3174,15 +3171,58 @@ components:
           description: UUID of a note
           format: uuid
           example: 17e5c858-66c1-49ba-bb2e-2b286525f532
+        noteHistoryId:
+          type: string
+          description: UUID of a note history
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
         note:
           type: string
           description: The note text
-          example: this is a note about something in the project
+          example: Some new note text
+        createdAt:
+          type: string
+          format: date-time
+          description: Date time for when the note was created
+          example: '2024-08-14T07:00:00.000Z'
+        createdBy:
+          type: string
+          description: UUID for the user that created the note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date time for when the note was last updated
+          example: '2024-08-14T07:00:00.000Z'
+        updatedBy:
+          type: string
+          description: UUID for user that last updated the note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+    DB-NoteHistory:
+      title: DB Note History
+      type: object
+      required:
+        - noteHistoryId
+        - activityId
+        - type
+        - title
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+      properties:
+        noteHistoryId:
+          type: string
+          description: UUID of a note history
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
         activityId:
           type: string
           description: The ID of the activity the note is associated with
           example: 2DE67F13
-        noteType:
+        type:
           type: string
           description: Type of note
           example: Bring forward
@@ -3203,24 +3243,40 @@ components:
           type: boolean
           description: Deletion flag
           example: false
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          description: A reason for the escalation
+          example: Time-sensitive
         createdAt:
           type: string
           format: date-time
-          description: Date time for when note is to be brought forward
+          description: Date time for when the note history was created
           example: '2024-08-14T07:00:00.000Z'
         createdBy:
           type: string
-          description: UUID for user that created note
+          description: UUID for the user that created the note history
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
         updatedAt:
           type: string
           format: date-time
-          description: Date time for when note was updated
+          description: Date time for when the note history was last updated
           example: '2024-08-14T07:00:00.000Z'
         updatedBy:
           type: string
-          description: UUID for user that updated note
+          description: UUID for user that last updated the note history
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
     DB-Permit:
@@ -3565,27 +3621,23 @@ components:
           type: number
           description: The size of the document in bytes
           example: 7414
-    Request-Notes:
-      title: Request Notes
+    Request-NoteHistory:
+      title: Request Note History
       type: object
       required:
-        - note
         - activityId
-        - noteType
+        - type
         - title
-        - bringForwardDate
-        - bringForwardState
+        - createdBy
         - createdAt
+        - updatedBy
+        - updatedAt
       properties:
-        note:
-          type: string
-          description: The note text
-          example: this is a note about something in the project
         activityId:
           type: string
           description: The ID of the activity the note is associated with
           example: 2DE67F13
-        noteType:
+        type:
           type: string
           description: Type of note
           example: Bring forward
@@ -3596,17 +3648,36 @@ components:
         bringForwardDate:
           type: string
           format: date-time
-          description: date time for when note is to be brought forward
+          description: Date time for when note is to be brought forward
           example: '2029-08-14T07:00:00.000Z'
         bringForwardState:
           type: string
-          description: state of a bring forward tyoe note
+          description: State of a bring forward tyoe note
           example: Unresolved
-        createdAt:
+        isDeleted:
+          type: boolean
+          description: Deletion flag
+          example: false
+        note:
           type: string
-          format: date-time
-          description: date time for when note is to be brought forward
-          example: '2024-08-14T07:00:00.000Z'
+          description: Optional note to add to the history
+          example: Some new note text
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          description: A reason for the escalation
+          example: Time-sensitive
     Request-Permit:
       title: Request Permit
       type: object
@@ -4318,6 +4389,17 @@ components:
           type: string
           format: uuid
           example: b76469a3-896c-4435-aa83-b8b87db6f701
+    Response-NoteHistory:
+      title: Response Note History Details
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DB-NoteHistory'
+        - type: object
+          properties:
+            note:
+              type: array
+              items:
+                $ref: "#/components/schemas/DB-Note"
     Response-Error:
       title: Response Error
       type: object
