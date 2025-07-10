@@ -168,7 +168,7 @@ function onTypeChange(e: SelectChangeEvent) {
 
     <Form
       ref="formRef"
-      v-slot="{ handleReset }"
+      v-slot="{ handleReset, values }"
       :initial-values="initialFormValues"
       :validation-schema="formSchema"
       @submit="onSubmit"
