@@ -70,6 +70,7 @@ const controller = {
           bringForwardState: null,
           escalateToSupervisor: false,
           escalateToDirector: false,
+          escalationType: null,
           shownToProponent: false,
           isDeleted: false,
           ...generateCreateStamps(req.currentContext)
