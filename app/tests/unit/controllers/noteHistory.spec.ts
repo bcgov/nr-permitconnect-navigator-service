@@ -73,6 +73,7 @@ describe('createNoteHistory', () => {
       bringForwardState: req.body.bringForwardState,
       escalateToSupervisor: req.body.escalateToSupervisor,
       escalateToDirector: req.body.escalateToDirector,
+      escalationType: null,
       noteHistoryId: '123',
       shownToProponent: req.body.shownToProponent,
       title: req.body.title,
@@ -158,6 +159,7 @@ describe('deleteNoteHistory', () => {
       bringForwardState: null,
       escalateToDirector: false,
       escalateToSupervisor: false,
+      escalationType: null,
       isDeleted: false,
       noteHistoryId: '123',
       shownToProponent: false,
@@ -224,6 +226,7 @@ describe('listBringForward', () => {
         bringForwardState: BringForwardType.UNRESOLVED,
         escalateToSupervisor: false,
         escalateToDirector: false,
+        escalationType: null,
         note: [
           {
             noteId: '123',
@@ -337,6 +340,7 @@ describe('listNoteHistory', () => {
         bringForwardState: BringForwardType.UNRESOLVED,
         escalateToSupervisor: false,
         escalateToDirector: false,
+        escalationType: null,
         note: [
           {
             noteId: '123',
@@ -381,6 +385,7 @@ describe('listNoteHistory', () => {
         bringForwardState: BringForwardType.UNRESOLVED,
         escalateToSupervisor: false,
         escalateToDirector: false,
+        escalationType: null,
         note: [
           {
             noteId: '123',
@@ -408,6 +413,7 @@ describe('listNoteHistory', () => {
         bringForwardState: BringForwardType.UNRESOLVED,
         escalateToSupervisor: false,
         escalateToDirector: false,
+        escalationType: null,
         note: [
           {
             noteId: '1234',
@@ -472,6 +478,7 @@ describe('updateNoteHistory', () => {
       bringForwardState: null,
       escalateToSupervisor: false,
       escalateToDirector: false,
+      escalationType: null,
       note: undefined as string | undefined,
       shownToProponent: false,
       title: 'Title',
@@ -490,6 +497,7 @@ describe('updateNoteHistory', () => {
       bringForwardState: req.body.bringForwardState,
       escalateToSupervisor: req.body.escalateToSupervisor,
       escalateToDirector: req.body.escalateToDirector,
+      escalationType: req.body.escalationType,
       noteHistoryId: req.params.noteHistoryId,
       shownToProponent: req.body.shownToProponent,
       title: req.body.title,
@@ -529,6 +537,7 @@ describe('updateNoteHistory', () => {
       bringForwardState: req.body.bringForwardState,
       escalateToSupervisor: req.body.escalateToSupervisor,
       escalateToDirector: req.body.escalateToDirector,
+      escalationType: req.body.escalationType,
       noteHistoryId: req.params.noteHistoryId,
       shownToProponent: req.body.shownToProponent,
       title: req.body.title,
@@ -556,6 +565,7 @@ describe('updateNoteHistory', () => {
       bringForwardState: req.body.bringForwardState,
       escalateToSupervisor: req.body.escalateToSupervisor,
       escalateToDirector: req.body.escalateToDirector,
+      escalationType: req.body.escalationType,
       noteHistoryId: req.params.noteHistoryId,
       shownToProponent: req.body.shownToProponent,
       title: req.body.title,
@@ -577,6 +587,7 @@ describe('updateNoteHistory', () => {
       bringForwardState: req.body.bringForwardState,
       escalateToSupervisor: req.body.escalateToSupervisor,
       escalateToDirector: req.body.escalateToDirector,
+      escalationType: req.body.escalationType,
       noteHistoryId: req.params.noteHistoryId,
       shownToProponent: req.body.shownToProponent,
       title: req.body.title,
