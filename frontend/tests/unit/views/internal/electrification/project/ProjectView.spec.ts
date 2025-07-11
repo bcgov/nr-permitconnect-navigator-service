@@ -4,7 +4,13 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { documentService, enquiryService, electrificationProjectService, noteService, permitService } from '@/services';
+import {
+  documentService,
+  enquiryService,
+  electrificationProjectService,
+  noteHistoryService,
+  permitService
+} from '@/services';
 import ProjectView from '@/views/internal/electrification/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -26,7 +32,7 @@ vi.mock('vue-router', () => ({
 
 const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
-const listNotesSpy = vi.spyOn(noteService, 'listNoteHistory');
+const listNotesSpy = vi.spyOn(noteHistoryService, 'listNoteHistories');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
