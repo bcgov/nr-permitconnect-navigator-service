@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 
 import ViewHeader from '@/components/common/ViewHeader.vue';
 import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
-import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
@@ -45,7 +45,7 @@ onBeforeMount(async () => {
         intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
       }),
       housingProjectService.getStatistics(),
-      noteService.listBringForward(BringForwardType.UNRESOLVED)
+      noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)
     ])
   ).map((r) => r.data);
 });
