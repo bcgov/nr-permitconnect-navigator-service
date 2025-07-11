@@ -30,7 +30,7 @@ import {
   TabPanel,
   TabPanels
 } from '@/lib/primevue';
-import { documentService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { documentService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
@@ -39,7 +39,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, HousingProject, NoteHistory } from '@/types';
+import type { Document, HousingProject } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -130,12 +130,6 @@ const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAddNote = (note: NoteHistory) => projectStore.addNoteHistory(note, true);
-
-const onDeleteNote = (note: NoteHistory) => projectStore.removeNoteHistory(note);
-
-const onUpdateNote = (history: NoteHistory) => projectStore.updateNoteHistory(history);
-
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
@@ -156,7 +150,7 @@ onBeforeMount(async () => {
   const [documents, notes, permits, relatedEnquiries] = (
     await Promise.all([
       documentService.listDocuments(project.activityId),
-      noteService.listNoteHistory(project.activityId),
+      noteHistoryService.listNoteHistories(project.activityId),
       permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
       enquiryService.listRelatedEnquiries(project.activityId)
     ])
@@ -559,8 +553,8 @@ onBeforeMount(async () => {
           <NoteHistoryCard
             :editable="!isCompleted"
             :note-history="noteHistory"
-            @delete-note="onDeleteNote"
-            @update-note="onUpdateNote"
+            @delete-note-history="(e) => projectStore.removeNoteHistory(e)"
+            @update-note-history="(e) => projectStore.updateNoteHistory(e)"
           />
         </div>
 
@@ -568,7 +562,7 @@ onBeforeMount(async () => {
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @add-note="onAddNote"
+          @create-note-history="(e) => projectStore.addNoteHistory(e, true)"
         />
       </TabPanel>
       <TabPanel :value="4">

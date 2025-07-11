@@ -33,10 +33,10 @@ export default {
   },
 
   /**
-   * @function listNoteHistory
+   * @function listNoteHistories
    * @returns {Promise} An axios response
    */
-  async listNoteHistory(activityId: string) {
+  async listNoteHistories(activityId: string) {
     return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
   },
 

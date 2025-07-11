@@ -90,7 +90,7 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const noteHistory = (await noteService.listNoteHistory(activityId)).data;
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
     projectStore.setNoteHistory(noteHistory);
   } catch {
     toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
