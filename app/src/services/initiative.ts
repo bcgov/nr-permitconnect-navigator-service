@@ -15,7 +15,7 @@ const service = {
         code: initiative
       }
     });
-    return { initiativeId: result.initiative_id, code: result.code, label: result.label };
+    return { initiativeId: result.initiativeId, code: result.code, label: result.label };
   }
 };
 

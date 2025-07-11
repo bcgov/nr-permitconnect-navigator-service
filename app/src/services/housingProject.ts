@@ -1,10 +1,8 @@
-/* eslint-disable no-useless-catch */
 import axios from 'axios';
 import config from 'config';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../db/dataConnection';
-import { housing_project } from '../db/models';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { ApplicationStatus } from '../utils/enums/projectCommon';
 import { getChefsApiKey } from '../utils/utils';
@@ -32,21 +30,19 @@ const service = {
   /**
    * @function createHousingProject
    * Creates a new housing project
-   * @returns {Promise<Partial<HousingProject>>} The result of running the transaction
+   * @returns {Promise<HousingProject>} The result of running the transaction
    */
-  createHousingProject: async (data: Partial<HousingProject>) => {
-    const s = housing_project.toPrismaModel(data as HousingProject);
+  createHousingProject: async (data: HousingProject) => {
     const response = await prisma.housing_project.create({
       data: {
-        ...s,
-        geo_json: s.geo_json as Prisma.InputJsonValue,
-        created_at: data.createdAt,
-        created_by: data.createdBy
+        ...data,
+        geoJson: data.geoJson as Prisma.InputJsonValue,
+        naturalDisaster: data.naturalDisaster === BasicResponse.YES ? true : false
       },
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -55,7 +51,7 @@ const service = {
         }
       }
     });
-    return housing_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -74,49 +70,49 @@ const service = {
 
       await trx.activity.createMany({
         data: housingProjects.map((x) => ({
-          activity_id: x.activityId as string,
-          initiative_id: initiative.initiative_id,
-          is_deleted: false
+          activityId: x.activityId as string,
+          initiativeId: initiative.initiativeId,
+          isDeleted: false
         }))
       });
 
       await trx.housing_project.createMany({
         data: housingProjects.map((x) => ({
-          housing_project_id: x.housingProjectId as string,
-          activity_id: x.activityId as string,
-          application_status: ApplicationStatus.NEW,
-          company_name_registered: x.companyNameRegistered,
-          financially_supported: x.financiallySupported,
-          financially_supported_bc: x.financiallySupportedBC,
-          financially_supported_indigenous: x.financiallySupportedIndigenous,
-          financially_supported_non_profit: x.financiallySupportedNonProfit,
-          financially_supported_housing_coop: x.financiallySupportedHousingCoop,
-          has_applied_provincial_permits: x.hasAppliedProvincialPermits,
-          housing_coop_description: x.housingCoopDescription,
-          indigenous_description: x.indigenousDescription,
-          project_applicant_type: x.projectApplicantType,
-          is_developed_in_bc: x.isDevelopedInBC,
-          intake_status: x.intakeStatus,
-          location_pids: x.locationPIDs,
+          housingProjectId: x.housingProjectId as string,
+          activityId: x.activityId as string,
+          applicationStatus: ApplicationStatus.NEW,
+          companyNameRegistered: x.companyNameRegistered,
+          financiallySupported: x.financiallySupported,
+          financiallySupportedBc: x.financiallySupportedBc,
+          financiallySupportedIndigenous: x.financiallySupportedIndigenous,
+          financiallySupportedNonProfit: x.financiallySupportedNonProfit,
+          financiallySupportedHousingCoop: x.financiallySupportedHousingCoop,
+          hasAppliedProvincialPermits: x.hasAppliedProvincialPermits,
+          housingCoopDescription: x.housingCoopDescription,
+          indigenousDescription: x.indigenousDescription,
+          projectApplicantType: x.projectApplicantType,
+          isDevelopedInBc: x.isDevelopedInBC,
+          intakeStatus: x.intakeStatus,
+          locationPids: x.locationPids,
           latitude: parseFloat(x.latitude as unknown as string),
           locality: x.locality,
           longitude: parseFloat(x.longitude as unknown as string),
-          natural_disaster: x.naturalDisaster === BasicResponse.YES ? true : false,
-          non_profit_description: x.nonProfitDescription,
-          project_location: x.projectLocation,
-          project_name: x.projectName,
-          project_description: x.projectDescription,
+          naturalDisaster: x.naturalDisaster === BasicResponse.YES ? true : false,
+          nonProfitDescription: x.nonProfitDescription,
+          projectLocation: x.projectLocation,
+          projectName: x.projectName,
+          projectDescription: x.projectDescription,
           province: x.province,
-          queue_priority: x.queuePriority,
-          rental_units: x.rentalUnits?.toString(),
-          single_family_units: x.singleFamilyUnits,
-          multi_family_units: x.multiFamilyUnits,
-          other_units: x.otherUnits,
-          other_units_description: x.otherUnitsDescription,
-          has_rental_units: x.hasRentalUnits,
-          street_address: x.streetAddress,
-          submitted_at: new Date(x.submittedAt ?? Date.now()),
-          submitted_by: x.submittedBy as string
+          queuePriority: x.queuePriority,
+          rentalUnits: x.rentalUnits?.toString(),
+          singleFamilyUnits: x.singleFamilyUnits,
+          multiFamilyUnits: x.multiFamilyUnits,
+          otherUnits: x.otherUnits,
+          otherUnitsDescription: x.otherUnitsDescription,
+          hasRentalUnits: x.hasRentalUnits,
+          streetAddress: x.streetAddress,
+          submittedAt: new Date(x.submittedAt ?? Date.now()),
+          submittedBy: x.submittedBy as string
         }))
       });
     });
@@ -133,12 +129,12 @@ const service = {
     const response = await prisma.$transaction(async (trx) => {
       const del = await trx.housing_project.delete({
         where: {
-          housing_project_id: housingProjectId
+          housingProjectId
         },
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -150,14 +146,14 @@ const service = {
 
       await trx.activity.delete({
         where: {
-          activity_id: del.activity_id
+          activityId: del.activityId
         }
       });
 
       return del;
     });
 
-    return housing_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -167,14 +163,10 @@ const service = {
    * @returns {Promise<any>} The result of running the get operation
    */
   getFormExport: async (formId: string) => {
-    try {
-      const response = await chefsAxios(formId).get(`forms/${formId}/export`, {
-        params: { format: 'json', type: 'submissions' }
-      });
-      return response.data;
-    } catch (e: unknown) {
-      throw e;
-    }
+    const response = await chefsAxios(formId).get(`forms/${formId}/export`, {
+      params: { format: 'json', type: 'submissions' }
+    });
+    return response.data;
   },
 
   /**
@@ -209,28 +201,24 @@ const service = {
    * @returns {Promise<HousingProject | null>} The result of running the findFirst operation
    */
   getHousingProject: async (housingProjectId: string) => {
-    try {
-      const result = await prisma.housing_project.findFirst({
-        where: {
-          housing_project_id: housingProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.housing_project.findFirst({
+      where: {
+        housingProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
+      }
+    });
 
-      return result ? housing_project.fromPrismaModelWithContact(result) : null;
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -240,30 +228,26 @@ const service = {
    * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
    */
   getHousingProjects: async (includeDeleted: boolean = false) => {
-    try {
-      const result = await prisma.housing_project.findMany({
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.housing_project.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
-          },
-          user: true
+          }
         },
-        orderBy: {
-          created_at: 'desc'
-        },
-        where: includeDeleted ? {} : { activity: { is_deleted: false } }
-      });
+        user: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      where: includeDeleted ? {} : { activity: { isDeleted: false } }
+    });
 
-      return result.map((x) => housing_project.fromPrismaModelWithUser(x));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /* eslint-disable max-len */
@@ -285,7 +269,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -297,33 +281,29 @@ const service = {
       where: {
         AND: [
           {
-            activity_id: { in: params.activityId }
+            activityId: { in: params.activityId }
           },
           {
-            created_by: { in: params.createdBy }
+            createdBy: { in: params.createdBy }
           },
           {
-            housing_project_id: { in: params.housingProjectId }
+            housingProjectId: { in: params.housingProjectId }
           },
           {
-            submission_type: { in: params.submissionType }
+            submissionType: { in: params.submissionType }
           },
           {
-            intake_status: { in: params.intakeStatus }
+            intakeStatus: { in: params.intakeStatus }
           },
-          params.includeDeleted ? {} : { activity: { is_deleted: false } }
+          params.includeDeleted ? {} : { activity: { isDeleted: false } }
         ]
       }
     });
 
     // Remove soft deleted housing projects
-    if (!params.includeDeleted) result = result.filter((x) => !x.activity.is_deleted);
+    if (!params.includeDeleted) result = result.filter((x) => !x.activity.isDeleted);
 
-    const housingProjects = params.includeUser
-      ? result.map((x) => housing_project.fromPrismaModelWithUser(x))
-      : result.map((x) => housing_project.fromPrismaModelWithContact(x));
-
-    return housingProjects;
+    return result;
   },
 
   /**
@@ -336,12 +316,12 @@ const service = {
   updateIsDeletedFlag: async (housingProjectId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteHousingProject = await prisma.housing_project.findUnique({
       where: {
-        housing_project_id: housingProjectId
+        housingProjectId
       },
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -353,12 +333,12 @@ const service = {
 
     if (deleteHousingProject) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
+        data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
         where: {
-          activity_id: deleteHousingProject?.activity_id
+          activityId: deleteHousingProject?.activityId
         }
       });
-      return housing_project.fromPrismaModelWithContact(deleteHousingProject);
+      return deleteHousingProject;
     }
   },
 
@@ -369,34 +349,28 @@ const service = {
    * @returns {Promise<HousingProject | null>} The result of running the update operation
    */
   updateHousingProject: async (data: HousingProject) => {
-    try {
-      const s = housing_project.toPrismaModel(data);
-      const result = await prisma.housing_project.update({
-        data: {
-          ...s,
-          geo_json: s.geo_json as Prisma.InputJsonValue,
-          updated_at: data.updatedAt,
-          updated_by: data.updatedBy
-        },
-        where: {
-          housing_project_id: data.housingProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.housing_project.update({
+      data: {
+        ...data,
+        geoJson: data.geoJson as Prisma.InputJsonValue,
+        naturalDisaster: data.naturalDisaster === BasicResponse.YES ? true : false
+      },
+      where: {
+        housingProjectId: data.housingProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
-      return housing_project.fromPrismaModelWithContact(result);
-    } catch (e: unknown) {
-      throw e;
-    }
+      }
+    });
+    return result;
   }
 };
 

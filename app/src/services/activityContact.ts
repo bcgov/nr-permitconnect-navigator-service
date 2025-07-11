@@ -1,7 +1,6 @@
 import prisma from '../db/dataConnection';
 
 import type { Contact } from '../types';
-import activity_contact from '../db/models/activity_contact';
 
 const service = {
   /**
@@ -14,8 +13,8 @@ const service = {
     const requestContactIds = contacts.map((c) => c.contactId);
     await prisma.activity_contact.deleteMany({
       where: {
-        activity_id: activityId,
-        contact_id: {
+        activityId: activityId,
+        contactId: {
           notIn: requestContactIds
         }
       }
@@ -33,22 +32,18 @@ const service = {
         contacts.map(async (x: Contact) => {
           await trx.activity_contact.upsert({
             where: {
-              activity_id_contact_id: {
-                activity_id: activityId,
-                contact_id: x.contactId
+              activityId_contactId: {
+                activityId: activityId,
+                contactId: x.contactId
               }
             },
             update: {
-              ...activity_contact.toPrismaModel({
-                activityId: activityId,
-                contactId: x.contactId
-              })
+              activityId: activityId,
+              contactId: x.contactId
             },
             create: {
-              ...activity_contact.toPrismaModel({
-                activityId: activityId,
-                contactId: x.contactId
-              })
+              activityId: activityId,
+              contactId: x.contactId
             }
           });
         })

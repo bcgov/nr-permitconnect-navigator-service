@@ -8,7 +8,7 @@ const controller = {
       const housingProject = await housingProjectService.getHousingProject(req.params.housingProjectId);
 
       let response;
-      if (housingProject?.geoJSON) response = await mapService.getPIDs(housingProject?.geoJSON);
+      if (housingProject?.geoJson) response = await mapService.getPIDs(housingProject.geoJson);
 
       res.status(200).json(response);
     } catch (e: unknown) {

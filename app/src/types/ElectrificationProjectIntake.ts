@@ -5,11 +5,11 @@ export type ElectrificationProjectIntake = {
   draftId?: string;
   project: {
     activityId?: string;
-    projectName?: string;
-    projectDescription?: string;
-    companyNameRegistered?: string;
-    projectType?: string;
-    bcHydroNumber?: string;
+    projectName: string | null;
+    projectDescription: string | null;
+    companyNameRegistered: string | null;
+    projectType: string | null;
+    bcHydroNumber: string | null;
     submissionType?: string;
   };
 };

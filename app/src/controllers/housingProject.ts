@@ -49,7 +49,7 @@ const controller = {
       // 2. Supports Rental Units
       housingProject.hasRentalUnits === 'Yes' ||
       // 3. Social Housing
-      housingProject.financiallySupportedBC === 'Yes' ||
+      housingProject.financiallySupportedBc === 'Yes' ||
       // 4. Indigenous Led
       housingProject.financiallySupportedIndigenous === 'Yes';
 

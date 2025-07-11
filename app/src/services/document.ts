@@ -1,6 +1,6 @@
 import prisma from '../db/dataConnection';
-import { document } from '../db/models';
 import { IStamps } from '../interfaces/IStamps';
+import { Document } from '../types';
 
 const service = {
   /**
@@ -23,26 +23,26 @@ const service = {
   ) => {
     const response = await prisma.document.create({
       data: {
-        document_id: documentId,
-        activity_id: activityId,
+        documentId: documentId,
+        activityId: activityId,
         filename: filename,
-        mime_type: mimeType,
+        mimeType: mimeType,
         filesize: filesize,
-        created_at: createStamp.createdAt,
-        created_by: createStamp.createdBy
+        createdAt: createStamp.createdAt,
+        createdBy: createStamp.createdBy
       }
     });
-    const doc = document.fromPrismaModel(response);
-    if (response.created_by) {
+    const doc: Document = response;
+    if (response.createdBy) {
       // getting uploaded by information for the new document
       const user = await prisma.user.findFirst({
         where: {
-          user_id: response.created_by
+          userId: response.createdBy
         }
       });
-      doc.createdByFullName = user ? `${user.full_name}` : '';
+      doc.createdByFullName = user ? `${user.fullName}` : '';
     }
-    return doc;
+    return response;
   },
 
   /**
@@ -52,13 +52,9 @@ const service = {
    * @returns {Promise<Document | null>} The result of running the delete operation
    */
   deleteDocument: async (documentId: string) => {
-    const response = await prisma.document.delete({
-      where: {
-        document_id: documentId
-      }
-    });
+    const response = await prisma.document.delete({ where: { documentId } });
 
-    return document.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -67,14 +63,10 @@ const service = {
    * @param {string} documentId Document ID
    * @returns {Promise<PermitType[]>} The result of running the findFirst operation
    */
-  getDocument: async (documentId: string) => {
-    const result = await prisma.document.findFirst({
-      where: {
-        document_id: documentId
-      }
-    });
+  getDocument: async (documentId: string): Promise<Document | null> => {
+    const result = await prisma.document.findFirst({ where: { documentId } });
 
-    return result ? document.fromPrismaModel(result) : null;
+    return result ?? null;
   },
 
   /**
@@ -86,23 +78,24 @@ const service = {
   listDocuments: async (activityId: string) => {
     const response = await prisma.document.findMany({
       where: {
-        activity_id: activityId
+        activityId
       },
       orderBy: {
-        created_at: 'asc'
+        createdAt: 'asc'
       }
     });
 
-    const documents = response.map((x) => document.fromPrismaModel(x));
+    const documents = response;
     if (documents && Array.isArray(documents)) {
       for (let i = 0; i < documents.length; i++) {
-        if (documents[i].createdBy) {
+        const document: Document = documents[i];
+        if (document.createdBy) {
           const user = await prisma.user.findFirst({
             where: {
-              user_id: documents[i].createdBy as string
+              userId: document.createdBy as string
             }
           });
-          documents[i].createdByFullName = user ? user.full_name : '';
+          document.createdByFullName = user ? user.fullName : '';
         }
       }
     }

@@ -21,23 +21,6 @@ if (!prisma) {
     errorFormat: 'pretty',
     datasourceUrl: datasourceUrl
   }).$extends({
-    query: {
-      electrification_project: {
-        create({ args, query }) {
-          args.data.submittedAt = new Date(args.data.submittedAt ?? Date.now());
-          args.data.createdAt = args.data.createdAt ? new Date(args.data.createdAt) : null;
-          return query(args);
-        },
-        update({ args, query }) {
-          args.data.submittedAt =
-            args.data.submittedAt instanceof String ? new Date(args.data.submittedAt as string) : args.data.submittedAt;
-
-          args.data.updatedAt =
-            args.data.updatedAt instanceof String ? new Date(args.data.updatedAt as string) : args.data.updatedAt;
-          return query(args);
-        }
-      }
-    },
     result: {
       electrification_project: {
         projectId: {
@@ -45,31 +28,13 @@ if (!prisma) {
           compute(data: { electrificationProjectId: string }) {
             return data.electrificationProjectId;
           }
-        },
-        submittedAt: {
-          needs: { submittedAt: true },
-          compute(data: { submittedAt: Date }) {
-            return new Date(data.submittedAt).toISOString();
-          }
-        },
-        createdAt: {
-          needs: { createdAt: true },
-          compute(data: { createdAt: Date }) {
-            return new Date(data.createdAt).toISOString();
-          }
-        },
-        updatedAt: {
-          needs: { updatedAt: true },
-          compute(data: { updatedAt: Date }) {
-            return data.updatedAt ? new Date(data.updatedAt).toISOString() : null;
-          }
         }
       },
       housing_project: {
         projectId: {
-          needs: { housing_project_id: true },
-          compute(data: { housing_project_id: string }) {
-            return data.housing_project_id;
+          needs: { housingProjectId: true },
+          compute(data: { housingProjectId: string }) {
+            return data.housingProjectId;
           }
         }
       }

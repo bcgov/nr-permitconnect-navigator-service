@@ -1,10 +1,8 @@
 import prisma from '../db/dataConnection';
-import { activity } from '../db/models';
 import { generateUniqueActivityId } from '../db/utils/utils';
 import { IStamps } from '../interfaces/IStamps';
+import { Activity } from '../types';
 import { Initiative } from '../utils/enums/application';
-
-import type { Activity } from '../types';
 
 const service = {
   /**
@@ -15,23 +13,19 @@ const service = {
    */
   createActivity: async (initiative: string, createStamp: Partial<IStamps>) => {
     const response = await prisma.$transaction(async (trx) => {
-      const initiativeResult = await trx.initiative.findFirstOrThrow({
-        where: {
-          code: initiative
-        }
-      });
+      const initiativeResult = await trx.initiative.findFirstOrThrow({ where: { code: initiative } });
 
       return await trx.activity.create({
         data: {
-          activity_id: await generateUniqueActivityId(),
-          initiative_id: initiativeResult.initiative_id,
-          created_at: createStamp.createdAt,
-          created_by: createStamp.createdBy
+          activityId: await generateUniqueActivityId(),
+          initiativeId: initiativeResult.initiativeId,
+          createdAt: createStamp.createdAt,
+          createdBy: createStamp.createdBy
         }
       });
     });
 
-    return activity.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -42,13 +36,9 @@ const service = {
    * @returns {Promise<Activity | null>} The result of running the findFirst operation
    */
   deleteActivity: async (activityId: string) => {
-    const response = await prisma.activity.delete({
-      where: {
-        activity_id: activityId
-      }
-    });
+    const response = await prisma.activity.delete({ where: { activityId } });
 
-    return activity.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -58,13 +48,9 @@ const service = {
    * @returns {Promise<Activity | null>} The result of running the findFirst operation
    */
   getActivity: async (activityId: string) => {
-    const response = await prisma.activity.findFirst({
-      where: {
-        activity_id: activityId
-      }
-    });
+    const response = await prisma.activity.findFirst({ where: { activityId } });
 
-    return response ? activity.fromPrismaModel(response) : null;
+    return response ?? null;
   },
 
   /**
@@ -77,19 +63,19 @@ const service = {
   getActivities: async (includeDeleted: boolean = false, initiative?: Initiative): Promise<Activity[]> => {
     if (!initiative) {
       const allActivities = await prisma.activity.findMany({
-        where: { is_deleted: includeDeleted ? undefined : false }
+        where: { isDeleted: includeDeleted ? undefined : false }
       });
-      return allActivities.map(activity.fromPrismaModel);
+      return allActivities;
     } else {
       const response = await prisma.activity.findMany({
         where: {
-          is_deleted: includeDeleted ? undefined : false,
+          isDeleted: includeDeleted ? undefined : false,
           initiative: {
             code: initiative
           }
         }
       });
-      return response.map(activity.fromPrismaModel);
+      return response;
     }
   }
 };

@@ -2,8 +2,6 @@ import { IStamps } from '../interfaces/IStamps';
 import { Contact } from './Contact';
 import { EnquirySubmittedMethod } from '../utils/enums/projectCommon';
 
-import type { User } from './User';
-
 export type Enquiry = {
   enquiryId: string; // Primary key
   activityId: string;
@@ -21,5 +19,4 @@ export type Enquiry = {
   waitingOn: string | null;
   contacts: Array<Contact>;
   submittedMethod: EnquirySubmittedMethod;
-  user: User | null;
 } & Partial<IStamps>;
