@@ -10,8 +10,11 @@ import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import Divider from '@/components/common/Divider.vue';
+import StatusPill from '@/components/common/StatusPill.vue';
+import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
+import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
@@ -98,7 +101,7 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const noteHistory = (await noteService.listNoteHistory(activityId)).data;
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
     projectStore.setNoteHistory(noteHistory);
   } catch {
     toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
@@ -151,7 +154,6 @@ onBeforeMount(async () => {
       :value="activeTab"
       class="mt-3"
     >
-<<<<<<< HEAD
       <TabList>
         <Tab :value="0">
           <font-awesome-icon
@@ -175,32 +177,13 @@ onBeforeMount(async () => {
             :created-by="createdByName"
             :activity-id="getProject.activityId"
             @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
-=======
-      <div class="grid grid-cols-6 gap-4 items-center">
-        <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
-        <div class="font-bold">
-          Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
-        </div>
-        <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
-        <div class="flex justify-end">
-          <Button
-            class="p-button-sm header-btn"
-            label="View all"
-            outlined
-            @click="noteHistoryVisible = true"
->>>>>>> 70d7db9c (Additional changes from review)
           />
-
-          <div class="disclaimer-block p-8 mt-8">
-            {{ t('e.common.projectView.disclaimer') }}
-          </div>
-
           <div
             v-if="getNoteHistory.length"
             class="bg-[var(--p-green-100)] p-4"
           >
             <div class="grid grid-cols-6 gap-4 items-center">
-              <div class="font-bold">Please be aware!</div>
+              <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
               <div class="font-bold">
                 Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
               </div>
@@ -215,8 +198,9 @@ onBeforeMount(async () => {
               </div>
             </div>
           </div>
-          <div>
-            <h3 class="mb-8 mt-16">{{ t('e.common.projectView.recommendedPermits') }}</h3>
+
+          <div class="disclaimer-block p-8 mt-8">
+            {{ t('e.common.projectView.disclaimer') }}
           </div>
 
           <div>

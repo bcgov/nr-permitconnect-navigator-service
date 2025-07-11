@@ -6,7 +6,7 @@ import { mixed, object, string } from 'yup';
 
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
-import { noteService } from '@/services';
+import { noteHistoryService } from '@/services';
 import { BRING_FORWARD_TYPE_LIST, ESCALATION_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
@@ -22,7 +22,7 @@ const { activityId, noteHistory = undefined } = defineProps<{
 }>();
 
 // Emits
-const emit = defineEmits(['addNote', 'updateNote', 'deleteNote']);
+const emit = defineEmits(['createNoteHistory', 'updateNoteHistory', 'deleteNoteHistory']);
 
 // Composables
 const { t } = useI18n();
@@ -81,19 +81,19 @@ function onDelete() {
   if (noteHistory) {
     confirm.require({
       message: t(shownToProponent.value ? 'noteModal.deleteMessageIfShown' : 'noteModal.deleteMessage'),
-      header: t('noteModal.deleteHeader'),
-      acceptLabel: t('noteModal.confirm'),
+      header: t('noteHistoryModal.deleteHeader'),
+      acceptLabel: t('noteHistoryModal.confirm'),
       acceptClass: 'p-button-danger',
-      rejectLabel: t('noteModal.cancel'),
+      rejectLabel: t('noteHistoryModal.cancel'),
       rejectProps: { outlined: true },
       accept: () => {
-        noteService
+        noteHistoryService
           .deleteNoteHistory(noteHistory?.noteHistoryId as string)
           .then(() => {
-            emit('deleteNote', noteHistory as NoteHistory);
-            toast.success(t('noteModal.noteDeleted'));
+            emit('deleteNoteHistory', noteHistory as NoteHistory);
+            toast.success(t('noteHistoryModal.noteDeleted'));
           })
-          .catch((e: any) => toast.error(t('noteModal.noteDeleteFailed'), e.message))
+          .catch((e: any) => toast.error(t('noteHistoryModal.noteDeleteFailed'), e.message))
           .finally(() => {
             visible.value = false;
             formRef.value?.resetForm();
@@ -119,13 +119,18 @@ async function onSubmit(data: any) {
     }
 
     if (!noteHistory) {
-      const result = (await noteService.createNoteHistory({ ...body, activityId: activityId, note: data.note })).data;
-      emit('addNote', result);
+      const result = (await noteHistoryService.createNoteHistory({ ...body, activityId: activityId, note: data.note }))
+        .data;
+      emit('createNoteHistory', result);
     } else {
       const result = (
-        await noteService.updateNoteHistory(data.noteHistoryId, { ...body, activityId: activityId, note: data.note })
+        await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
+          ...body,
+          activityId: activityId,
+          note: data.note
+        })
       ).data;
-      emit('updateNote', result);
+      emit('updateNoteHistory', result);
     }
     toast.success('Note saved');
   } catch (e: any) {
@@ -158,7 +163,7 @@ function onTypeChange(e: SelectChangeEvent) {
       severity="success"
       :closable="false"
     >
-      {{ t('noteModal.shownToProponentBanner') }}
+      {{ t('noteHistoryModal.shownToProponentBanner') }}
     </Message>
 
     <Form
@@ -197,13 +202,13 @@ function onTypeChange(e: SelectChangeEvent) {
         <div class="flex flex-col gap-y-9">
           <div class="bg-[var(--p-bcblue-50)]">
             <div class="flex flex-row gap-x-1">
-              <span>{{ t('noteModal.created') }}:</span>
+              <span>{{ t('noteHistoryModal.created') }}:</span>
               <span class="text-[var(--p-bcblue-900)]">
                 {{ formatDate(noteHistory?.createdAt || new Date().toISOString()) }}
               </span>
             </div>
             <div class="flex flex-row gap-x-1">
-              <span>{{ t('noteModal.lastUpdated') }}:</span>
+              <span>{{ t('noteHistoryModal.lastUpdated') }}:</span>
               <span class="text-[var(--p-bcblue-900)]">{{ formatDate(noteHistory?.updatedAt) }}</span>
             </div>
             <div
@@ -212,7 +217,7 @@ function onTypeChange(e: SelectChangeEvent) {
             >
               <Checkbox
                 name="shownToProponent"
-                :label="t('noteModal.showProponent')"
+                :label="t('noteHistoryModal.showProponent')"
                 :bold="false"
               />
             </div>
@@ -222,12 +227,12 @@ function onTypeChange(e: SelectChangeEvent) {
             >
               <Checkbox
                 name="escalateToSupervisor"
-                :label="t('noteModal.escalateToSupervisor')"
+                :label="t('noteHistoryModal.escalateToSupervisor')"
                 :bold="false"
               />
               <Checkbox
                 name="escalateToDirector"
-                :label="t('noteModal.escalateToDirector')"
+                :label="t('noteHistoryModal.escalateToDirector')"
                 :bold="false"
               />
               <div

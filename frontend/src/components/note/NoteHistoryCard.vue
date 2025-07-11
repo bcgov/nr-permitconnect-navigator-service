@@ -19,7 +19,7 @@ const { editable = true, noteHistory } = defineProps<{
 }>();
 
 // Emits
-const emit = defineEmits(['updateNote', 'deleteNote']);
+const emit = defineEmits(['updateNoteHistory', 'deleteNoteHistory']);
 
 // Store
 const appStore = useAppStore();
@@ -100,10 +100,10 @@ onBeforeMount(() => {
     :note-history="noteHistory"
     @delete-note="
       (note: Note) => {
-        emit('deleteNote', note);
+        emit('deleteNoteHistory', note);
       }
     "
-    @update-note="(history: NoteHistory) => emit('updateNote', history)"
+    @update-note="(history: NoteHistory) => emit('updateNoteHistory', history)"
   />
 </template>
 

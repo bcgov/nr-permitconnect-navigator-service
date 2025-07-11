@@ -8,8 +8,8 @@ export type NoteHistory = {
   escalateToDirector: boolean;
   escalateToSupervisor: boolean;
   escalationType: string | null;
-  shownToProponent: boolean;
   isDeleted: boolean;
+  shownToProponent: boolean;
   title: string;
   type: string;
 } & Partial<IStamps>;
