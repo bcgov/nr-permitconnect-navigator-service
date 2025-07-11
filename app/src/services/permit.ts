@@ -6,7 +6,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
 
-import type { ListPermitsOptions, Permit } from '../types';
+import type { ListPermitsOptions, Permit, PermitTracking } from '../types';
 
 const service = {
   /**
@@ -17,15 +17,32 @@ const service = {
    */
   createPermit: async (data: Permit) => {
     try {
-      const newPermit = { ...data, permitId: uuidv4() };
+      const response = await prisma.$transaction(async (trx) => {
+        const newPermit = { ...data, permitId: uuidv4() };
 
-      const create = await prisma.permit.create({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
+        const createResponse = await trx.permit.create({
+          include: {
+            permit_type: true
+          },
+          data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
+        });
+
+        if (data?.permitTracking) {
+          await trx.permit_tracking.createMany({
+            data: data?.permitTracking?.map((x: PermitTracking) => ({
+              permitId: newPermit?.permitId,
+              trackingId: x.trackingId,
+              sourceSystemKindId: x?.sourceSystemKindId,
+              shownToProponent: x?.shownToProponent ?? false,
+              createdBy: data.createdBy,
+              updatedBy: data.updatedBy
+            }))
+          });
+        }
+        return createResponse;
       });
-      return permit.fromPrismaModel(create);
+
+      return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;
     }
@@ -79,11 +96,12 @@ const service = {
       },
       include: {
         permit_type: true, // If changed reflect in type and model
-        permit_note: { orderBy: { created_at: 'desc' } }
+        permit_note: { orderBy: { created_at: 'desc' } },
+        permit_tracking: { include: { sourceSystemKind: true } }
       }
     });
 
-    return result ? permit.fromPrismaModelWithNotes(result) : null;
+    return result ? permit.fromPrismaModelWithNotesTracking(result) : null;
   },
 
   /**
@@ -130,7 +148,12 @@ const service = {
     const response = await prisma.permit.findMany({
       include: {
         permit_type: true,
-        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false
+        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false,
+        permit_tracking: {
+          include: {
+            sourceSystemKind: true
+          }
+        }
       },
       where: {
         activity_id: options?.activityId || undefined
@@ -143,10 +166,10 @@ const service = {
     });
 
     if (options?.includeNotes) {
-      return response.map((x) => permit.fromPrismaModelWithNotes(x));
+      return response.map((x) => permit.fromPrismaModelWithNotesTracking(x));
     }
 
-    return response.map((x) => permit.fromPrismaModel(x));
+    return response.map((x) => permit.fromPrismaModelWithTracking(x));
   },
 
   /**
@@ -166,7 +189,6 @@ const service = {
           permit_id: data.permitId
         }
       });
-
       return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;

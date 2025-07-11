@@ -31,7 +31,6 @@ const TEST_PERMIT_1: Permit = {
   permitTypeId: 0,
   activityId: 'activityId',
   issuedPermitId: 'issuedPermitId',
-  trackingId: 'trackingId',
   authStatus: 'authStatus',
   needed: 'needed',
   status: 'status',

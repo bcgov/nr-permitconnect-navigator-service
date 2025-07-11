@@ -17,6 +17,7 @@ export { default as noteService } from './note';
 export { default as permitService } from './permit';
 export { default as permitNoteService } from './permitNote';
 export { default as reportingService } from './reporting';
+export { default as sourceSystemKindService } from './sourceSystemKind';
 export { default as ssoService } from './sso';
 export { default as userService } from './user';
 export { default as yarsService } from './yars';

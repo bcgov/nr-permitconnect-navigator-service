@@ -179,13 +179,13 @@ describe('createHousingProject', () => {
         appliedPermits: [
           {
             permitTypeId: 1,
-            trackingId: '123',
+            permitTracking: [{ trackingId: '123' }],
             status: PermitStatus.APPLIED,
             submittedDate: now
           },
           {
             permitTypeId: 3,
-            trackingId: '456',
+            permitTracking: [{ trackingId: '456' }],
             status: PermitStatus.APPLIED,
             submittedDate: now
           }
@@ -217,7 +217,7 @@ describe('createHousingProject', () => {
       expect.objectContaining({
         permitTypeId: 1,
         activityId: '00000000',
-        trackingId: '123',
+        permitTracking: [{ trackingId: '123' }],
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
@@ -227,7 +227,7 @@ describe('createHousingProject', () => {
       expect.objectContaining({
         permitTypeId: 3,
         activityId: '00000000',
-        trackingId: '456',
+        permitTracking: [{ trackingId: '456' }],
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
@@ -532,7 +532,6 @@ describe('submitDraft', () => {
       expect.objectContaining({
         permitTypeId: 1,
         activityId: '00000000',
-        trackingId: '123',
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
@@ -542,7 +541,6 @@ describe('submitDraft', () => {
       expect.objectContaining({
         permitTypeId: 3,
         activityId: '00000000',
-        trackingId: '456',
         status: PermitStatus.APPLIED,
         submittedDate: now
       })

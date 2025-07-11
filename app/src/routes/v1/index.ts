@@ -11,6 +11,7 @@ import electrification from './electrification';
 import housing from './housing';
 import reporting from './reporting';
 import sso from './sso';
+import sourceSystemKind from './sourceSystemKind';
 import user from './user';
 import yars from './yars';
 
@@ -29,6 +30,7 @@ router.get('/', (_req, res) => {
       '/housing',
       '/reporting',
       '/sso',
+      '/sourceSystemKind',
       '/user',
       '/yars'
     ]
@@ -43,6 +45,7 @@ router.use('/electrification', electrification);
 router.use('/housing', housing);
 router.use('/reporting', reporting);
 router.use('/sso', sso);
+router.use('/sourceSystemKind', sourceSystemKind);
 router.use('/user', user);
 router.use('/yars', yars);
 

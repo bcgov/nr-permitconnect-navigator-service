@@ -12,6 +12,7 @@ export { default as permitController } from './permit';
 export { default as permitNoteController } from './permitNote';
 export { default as reportingController } from './reporting';
 export { default as roadmapController } from './roadmap';
+export { default as sourceSystemKindController } from './sourceSystemKind';
 export { default as ssoController } from './sso';
 export { default as userController } from './user';
 export { default as yarsController } from './yars';

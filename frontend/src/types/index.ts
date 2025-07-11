@@ -30,6 +30,7 @@ export type { Permit } from './Permit';
 export type { PermitNote } from './PermitNote';
 export type { PermitForm } from './PermitForm';
 export type { PermitType } from './PermitType';
+export type { SourceSystemKind } from './SourceSystemKind';
 export type { Statistics } from './Statistics';
 export type { User } from './User';
 export type { UserAccessRequest } from './UserAccessRequest';

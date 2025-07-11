@@ -1,18 +1,14 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import PermitCard from '@/components/permit/PermitCard.vue';
-import { userService } from '@/services';
+import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 
-import type { AxiosResponse } from 'axios';
 import type { Permit, PermitType } from '@/types';
-
-const useUserService = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -52,7 +48,6 @@ const testPermit: Permit = {
   needed: 'yes',
   status: 'status',
   issuedPermitId: 'issued Permit ID',
-  trackingId: 'test tracking ID',
   authStatus: 'test auth status',
   submittedDate: currentDate,
   adjudicationDate: currentDate,
@@ -100,17 +95,15 @@ beforeEach(() => {
   );
 
   vi.clearAllMocks();
-
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 });
 
 afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('PermitCard', () => {
+describe('AuthorizationCard', () => {
   it('renders component', async () => {
-    const wrapper = mount(PermitCard, wrapperSettings());
+    const wrapper = mount(AuthorizationCard, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

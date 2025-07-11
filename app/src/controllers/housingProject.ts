@@ -137,7 +137,6 @@ const controller = {
         permitId: x.permitId,
         permitTypeId: x.permitTypeId,
         activityId: activityId as string,
-        trackingId: x.trackingId,
         status: PermitStatus.APPLIED,
         needed: PermitNeeded.YES,
         statusLastVerified: null,
@@ -145,7 +144,8 @@ const controller = {
         authStatus: PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: x.submittedDate,
         adjudicationDate: null,
-        permitType: null
+        permitType: null,
+        permitTracking: x.permitTracking
       }));
     }
 

@@ -117,7 +117,6 @@ const testPermit: Permit = {
   needed: 'yes',
   status: 'status',
   issuedPermitId: 'issued Permit ID',
-  trackingId: 'test tracking ID',
   authStatus: 'test auth status',
   submittedDate: currentDate,
   adjudicationDate: currentDate,

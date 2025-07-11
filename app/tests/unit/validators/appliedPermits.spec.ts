@@ -27,8 +27,8 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.COMPLETED,
-      submittedDate: '2021-01-01',
-      trackingId: 'test'
+      permitTracking: [{ trackingId: '123' }],
+      submittedDate: '2021-01-01'
     };
     const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeUndefined();
@@ -38,8 +38,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: 'Test',
-      submittedDate: '2021-01-01',
-      trackingId: 'test'
+      submittedDate: '2021-01-01'
     };
     const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
@@ -49,8 +48,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.APPLIED,
-      submittedDate: 'not-a-date',
-      trackingId: 'test'
+      submittedDate: 'not-a-date'
     };
     const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();
@@ -60,8 +58,7 @@ describe('appliedPermitsSchema', () => {
     const appliedPermits = {
       permitTypeId: 123,
       status: PermitStatus.APPLIED,
-      submittedDate: new Date(Date.now() + 1000).toISOString(),
-      trackingId: 'test'
+      submittedDate: new Date(Date.now() + 1000).toISOString()
     };
     const result = appliedPermit.validate(appliedPermits);
     expect(result.error).toBeDefined();

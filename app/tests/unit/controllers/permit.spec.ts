@@ -55,7 +55,6 @@ describe('createPermit', () => {
       permitTypeId: 123,
       activityId: 'ACT_ID',
       issuedPermitId: '1',
-      trackingId: '2',
       authStatus: 'ACTIVE',
       needed: 'true',
       status: 'FOO',
@@ -209,8 +208,7 @@ describe('getPermitTypes', () => {
         nameSubtype: null,
         acronym: 'PRT1',
         trackedInATS: true,
-        sourceSystem: null,
-        sourceSystemAcronym: 'SRC'
+        sourceSystem: 'CODE'
       }
     ];
 
