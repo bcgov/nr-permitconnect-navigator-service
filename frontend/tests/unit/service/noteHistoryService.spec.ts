@@ -1,6 +1,6 @@
 import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
 
-import { noteService } from '@/services';
+import { noteHistoryService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
@@ -66,7 +66,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('noteService', () => {
+describe('noteHistoryService', () => {
   let appStore: StoreGeneric;
 
   describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
@@ -79,7 +79,7 @@ describe('noteService', () => {
 
       describe('createNoteHistory', () => {
         it('calls with given data', () => {
-          noteService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as any);
+          noteHistoryService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as any);
 
           expect(putSpy).toHaveBeenCalledTimes(1);
           expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
@@ -91,7 +91,7 @@ describe('noteService', () => {
 
       describe('deleteNote', () => {
         it('calls with given data', () => {
-          noteService.deleteNoteHistory(TEST_NOTE_HISTORY.noteHistoryId as string);
+          noteHistoryService.deleteNoteHistory(TEST_NOTE_HISTORY.noteHistoryId as string);
 
           expect(deleteSpy).toHaveBeenCalledTimes(1);
           expect(deleteSpy).toHaveBeenCalledWith(
@@ -102,7 +102,7 @@ describe('noteService', () => {
 
       describe('listBringForward', () => {
         it('does not include state when given no parameter', () => {
-          noteService.listBringForward();
+          noteHistoryService.listBringForward();
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
@@ -111,7 +111,7 @@ describe('noteService', () => {
         });
 
         it('adds Unresolved to query when given as parameter', () => {
-          noteService.listBringForward(BringForwardType.UNRESOLVED);
+          noteHistoryService.listBringForward(BringForwardType.UNRESOLVED);
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
@@ -120,7 +120,7 @@ describe('noteService', () => {
         });
 
         it('adds Resolved to query when given as parameter', () => {
-          noteService.listBringForward(BringForwardType.RESOLVED);
+          noteHistoryService.listBringForward(BringForwardType.RESOLVED);
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
@@ -131,7 +131,7 @@ describe('noteService', () => {
 
       describe('listNotes', () => {
         it('retrieves note list', () => {
-          noteService.listNoteHistory('testUUID');
+          noteHistoryService.listNoteHistories('testUUID');
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/testUUID`);
@@ -140,7 +140,7 @@ describe('noteService', () => {
 
       describe('updateNote', () => {
         it('calls with given data', () => {
-          noteService.updateNoteHistory(
+          noteHistoryService.updateNoteHistory(
             TEST_NOTE_HISTORY.noteHistoryId as string,
             { ...TEST_NOTE_HISTORY, note: 'text' } as any
           );
