@@ -2,7 +2,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import { shallowMount } from '@vue/test-utils';
 
-import { enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import HousingView from '@/views/internal/housing/HousingView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -33,7 +33,7 @@ const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 const getStatisticsSpy = vi.spyOn(housingProjectService, 'getStatistics');
-const listBringForwardSpy = vi.spyOn(noteService, 'listBringForward');
+const listBringForwardSpy = vi.spyOn(noteHistoryService, 'listBringForward');
 
 // Mocks
 searchEnquiriesSpy.mockResolvedValue({ data: [] } as AxiosResponse);
