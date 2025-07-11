@@ -1,6 +1,4 @@
-/* eslint-disable no-useless-catch */
 import prisma from '../db/dataConnection';
-import { enquiry } from '../db/models';
 import { IStamps } from '../interfaces/IStamps';
 import { Initiative } from '../utils/enums/application';
 
@@ -14,11 +12,11 @@ const service = {
    */
   createEnquiry: async (data: Partial<Enquiry>) => {
     const response = await prisma.enquiry.create({
-      data: { ...enquiry.toPrismaModel(data as Enquiry), created_at: data.createdAt, created_by: data.createdBy },
+      data: { ...enquiry.toPrismaModel(data as Enquiry), createdAt: data.createdAt, createdBy: data.createdBy },
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -28,7 +26,7 @@ const service = {
       }
     });
 
-    return enquiry.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -42,20 +40,20 @@ const service = {
     const response = await prisma.$transaction(async (trx) => {
       const del = await trx.enquiry.delete({
         where: {
-          enquiry_id: enquiryId
+          enquiryId
         }
       });
 
       await trx.activity.delete({
         where: {
-          activity_id: del.activity_id
+          activityId: del.activityId
         }
       });
 
       return del;
     });
 
-    return enquiry.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -64,32 +62,28 @@ const service = {
    * @returns {Promise<(Enquiry | null)[]>} The result of running the findMany operation
    */
   getEnquiries: async () => {
-    try {
-      // fetch all enquiries with activity not deleted
-      const result = await prisma.enquiry.findMany({
-        where: {
-          activity: {
-            is_deleted: false
-          }
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    // fetch all enquiries with activity not deleted
+    const result = await prisma.enquiry.findMany({
+      where: {
+        activity: {
+          isDeleted: false
+        }
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
-          },
-          user: true
-        }
-      });
+          }
+        },
+        user: true
+      }
+    });
 
-      return result.map((x) => enquiry.fromPrismaModelWithUser(x));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -99,28 +93,24 @@ const service = {
    * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
    */
   getEnquiry: async (enquiryId: string) => {
-    try {
-      const result = await prisma.enquiry.findFirst({
-        where: {
-          enquiry_id: enquiryId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.enquiry.findFirst({
+      where: {
+        enquiryId: enquiryId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
+      }
+    });
 
-      return result ? enquiry.fromPrismaModelWithContact(result) : null;
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -136,55 +126,47 @@ const service = {
    * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
    */
   searchEnquiries: async (params: EnquirySearchParameters, initiative: Initiative) => {
-    try {
-      const result = await prisma.enquiry.findMany({
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
-              },
-              initiative: true
-            }
-          },
-          user: params.includeUser
-        },
-        where: {
-          AND: [
-            {
-              activity: {
-                initiative: {
-                  code: initiative
-                }
+    const result = await prisma.enquiry.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             },
-            {
-              activity_id: { in: params.activityId }
-            },
-            {
-              created_by: { in: params.createdBy }
-            },
-            {
-              enquiry_id: { in: params.enquiryId }
-            },
-            {
-              intake_status: { in: params.intakeStatus }
-            },
-            params.includeDeleted ? {} : { activity: { is_deleted: false } }
-          ]
-        }
-      });
+            initiative: true
+          }
+        },
+        user: params.includeUser
+      },
+      where: {
+        AND: [
+          {
+            activity: {
+              initiative: {
+                code: initiative
+              }
+            }
+          },
+          {
+            activityId: { in: params.activityId }
+          },
+          {
+            createdBy: { in: params.createdBy }
+          },
+          {
+            enquiryId: { in: params.enquiryId }
+          },
+          {
+            intakeStatus: { in: params.intakeStatus }
+          },
+          params.includeDeleted ? {} : { activity: { isDeleted: false } }
+        ]
+      }
+    });
 
-      const enquiries = params.includeUser
-        ? result.map((x) => enquiry.fromPrismaModelWithUser(x))
-        : result.map((x) => enquiry.fromPrismaModelWithContact(x));
-
-      return enquiries;
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -194,20 +176,16 @@ const service = {
    * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
    */
   getRelatedEnquiries: async (activityId: string) => {
-    try {
-      const result = await prisma.enquiry.findMany({
-        where: {
-          related_activity_id: activityId
-        },
-        orderBy: {
-          created_at: 'asc'
-        }
-      });
+    const result = await prisma.enquiry.findMany({
+      where: {
+        relatedActivityId: activityId
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
 
-      return result.map((x) => enquiry.fromPrismaModel(x));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -217,29 +195,25 @@ const service = {
    * @returns {Promise<Enquiry | null>} The result of running the update operation
    */
   updateEnquiry: async (data: Enquiry) => {
-    try {
-      const result = await prisma.enquiry.update({
-        data: { ...enquiry.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
-        where: {
-          enquiry_id: data.enquiryId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.enquiry.update({
+      data: data,
+      where: {
+        enquiryId: data.enquiryId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
+      }
+    });
 
-      return enquiry.fromPrismaModelWithContact(result);
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -252,12 +226,12 @@ const service = {
   updateIsDeletedFlag: async (enquiryId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
     const deleteEnquiry = await prisma.enquiry.findUnique({
       where: {
-        enquiry_id: enquiryId
+        enquiryId: enquiryId
       },
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -268,12 +242,12 @@ const service = {
     });
     if (deleteEnquiry) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
+        data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
         where: {
-          activity_id: deleteEnquiry.activity_id
+          activityId: deleteEnquiry.activityId
         }
       });
-      return enquiry.fromPrismaModelWithContact(deleteEnquiry);
+      return deleteEnquiry;
     }
   }
 };
