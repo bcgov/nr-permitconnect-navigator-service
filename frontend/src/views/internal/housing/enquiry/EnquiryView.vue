@@ -7,7 +7,7 @@ import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
@@ -53,17 +53,17 @@ provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIR
 provide(projectServiceKey, housingProjectService);
 
 // Actions
-function onAddNote(history: NoteHistory) {
+function onCreateNoteHistory(history: NoteHistory) {
   enquiryStore.addNoteHistory(history, true);
 }
 
-const onDeleteNote = (history: NoteHistory) => {
+function onDeleteNoteHistory(history: NoteHistory) {
   enquiryStore.removeNoteHistory(history);
-};
+}
 
-const onUpdateNote = (history: NoteHistory) => {
+function onUpdateNoteHistory(history: NoteHistory) {
   enquiryStore.updateNoteHistory(history);
-};
+}
 
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
@@ -82,7 +82,7 @@ async function updateRelatedEnquiry() {
 onBeforeMount(async () => {
   if (enquiryId) {
     const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-    const notes = (await noteService.listNoteHistory(enquiry.activityId)).data;
+    const notes = (await noteHistoryService.listNoteHistories(enquiry.activityId)).data;
 
     activityId.value = enquiry.activityId;
 
@@ -183,15 +183,15 @@ onBeforeMount(async () => {
           <NoteHistoryCard
             :editable="!isCompleted"
             :note-history="history"
-            @delete-note="onDeleteNote"
-            @update-note="onUpdateNote"
+            @delete-note-history="onDeleteNoteHistory"
+            @update-note-history="onUpdateNoteHistory"
           />
         </div>
         <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @add-note="onAddNote"
+          @create-note-history="onCreateNoteHistory"
         />
       </TabPanel>
     </TabPanels>

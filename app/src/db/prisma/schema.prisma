@@ -454,30 +454,30 @@ model email_log {
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model electrification_project_category_code {
-  code                    String                    @id
-  display                 String                    @unique(map: "electrification_project_category_code_display_unique")
-  definition              String
-  active                  Boolean                   @default(true)
-  createdBy               String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy               String?                   @map("updated_by")
-  updatedAt               DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  electrification_project electrification_project[]
+  code                   String                    @id
+  display                String                    @unique(map: "electrification_project_category_code_display_unique")
+  definition             String
+  active                 Boolean                   @default(true)
+  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?                   @map("updated_by")
+  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrificationProject electrification_project[]
 
   @@schema("public")
 }
 
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 model electrification_project_type_code {
-  code                    String                    @id
-  display                 String                    @unique(map: "electrification_project_type_code_display_unique")
-  definition              String
-  active                  Boolean                   @default(true)
-  createdBy               String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt               DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy               String?                   @map("updated_by")
-  updatedAt               DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  electrification_project electrification_project[]
+  code                   String                    @id
+  display                String                    @unique(map: "electrification_project_type_code_display_unique")
+  definition             String
+  active                 Boolean                   @default(true)
+  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?                   @map("updated_by")
+  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  electrificationProject electrification_project[]
 
   @@schema("public")
 }

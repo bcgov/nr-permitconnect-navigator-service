@@ -17,7 +17,7 @@ import {
   Dialog,
   useToast
 } from '@/lib/primevue';
-import { contactService, enquiryService, housingProjectService, noteService, permitService } from '@/services';
+import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
@@ -145,7 +145,7 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const noteHistory = (await noteService.listNoteHistory(activityId)).data;
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
     projectStore.setNoteHistory(noteHistory);
   } catch {
     toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
