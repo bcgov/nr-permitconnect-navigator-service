@@ -1,9 +1,8 @@
-/* eslint-disable no-useless-catch */
-
 import { comsService } from '.';
 import prisma from '../db/dataConnection';
-import { Group } from '../types/Group';
 import { Initiative, GroupName, Action } from '../utils/enums/application';
+
+import type { Group } from '../types';
 
 const service = {
   /**
@@ -16,38 +15,34 @@ const service = {
    * @returns {Promise<{sub: string; roleId: number;}>} The result of running the create operation
    */
   assignGroup: async (bearerToken: string | undefined, sub: string, groupId?: number) => {
-    try {
-      const groupResult = await prisma.group.findFirstOrThrow({
-        where: {
-          group_id: groupId
-        }
-      });
-
-      const result = await prisma.subject_group.create({
-        data: {
-          sub: sub,
-          group_id: groupResult.group_id
-        }
-      });
-
-      const comsPermsMap = new Map<GroupName, Array<Action>>([
-        [GroupName.PROPONENT, [Action.CREATE]],
-        [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-        [GroupName.NAVIGATOR_READ_ONLY, [Action.READ]],
-        [GroupName.SUPERVISOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-        [GroupName.ADMIN, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-        [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]
-      ]);
-
-      const comsPerms = comsPermsMap.get(groupResult.name as GroupName);
-      if (comsPerms && bearerToken) {
-        await comsService.createBucket(bearerToken, comsPerms);
+    const groupResult = await prisma.group.findFirstOrThrow({
+      where: {
+        groupId
       }
+    });
 
-      return { sub: result.sub, roleId: result.group_id };
-    } catch (e: unknown) {
-      throw e;
+    const result = await prisma.subject_group.create({
+      data: {
+        sub: sub,
+        groupId: groupResult.groupId
+      }
+    });
+
+    const comsPermsMap = new Map<GroupName, Array<Action>>([
+      [GroupName.PROPONENT, [Action.CREATE]],
+      [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+      [GroupName.NAVIGATOR_READ_ONLY, [Action.READ]],
+      [GroupName.SUPERVISOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+      [GroupName.ADMIN, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
+      [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]
+    ]);
+
+    const comsPerms = comsPermsMap.get(groupResult.name as GroupName);
+    if (comsPerms && bearerToken) {
+      await comsService.createBucket(bearerToken, comsPerms);
     }
+
+    return { sub: result.sub, roleId: result.groupId };
   },
 
   /**
@@ -57,30 +52,26 @@ const service = {
    * @returns {Promise<Array<Group>>} The result of running the findMany operation
    */
   getSubjectGroups: async (sub: string) => {
-    try {
-      const result = await prisma.subject_group.findMany({
-        where: {
-          sub: sub
-        },
-        include: {
-          group: {
-            include: {
-              initiative: true
-            }
+    const result = await prisma.subject_group.findMany({
+      where: {
+        sub: sub
+      },
+      include: {
+        group: {
+          include: {
+            initiative: true
           }
         }
-      });
+      }
+    });
 
-      return result.map((x) => ({
-        initiativeCode: x.group.initiative.code,
-        initiativeId: x.group.initiative_id,
-        groupId: x.group_id,
-        name: x.group.name as GroupName,
-        label: x.group.label
-      })) as Array<Group>;
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      initiativeCode: x.group.initiative.code,
+      initiativeId: x.group.initiativeId,
+      groupId: x.groupId,
+      name: x.group.name as GroupName,
+      label: x.group.label
+    })) as Array<Group>;
   },
 
   /**
@@ -93,28 +84,24 @@ const service = {
    * @returns The result of running the findMany operation
    */
   getGroupPolicyDetails: async (groupId: number, resourceName: string, actionName: string, initiative?: Initiative) => {
-    try {
-      const result = await prisma.group_role_policy_vw.findMany({
-        where: {
-          group_id: groupId,
-          resource_name: resourceName,
-          action_name: actionName,
-          initiative_code: initiative
-        }
-      });
+    const result = await prisma.group_role_policy_vw.findMany({
+      where: {
+        groupId: groupId,
+        resourceName: resourceName,
+        actionName: actionName,
+        initiativeCode: initiative
+      }
+    });
 
-      return result.map((x) => ({
-        groupId: x.group_id,
-        initiativeCode: x.initiative_code,
-        groupName: x.group_name,
-        roleName: x.role_name,
-        policyId: x.policy_id,
-        resourceName: x.resource_name,
-        actionName: x.action_name
-      }));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      groupId: x.groupId,
+      initiativeCode: x.initiativeCode,
+      groupName: x.groupName,
+      roleName: x.roleName,
+      policyId: x.policyId,
+      resourceName: x.resourceName,
+      actionName: x.actionName
+    }));
   },
 
   /**
@@ -126,28 +113,24 @@ const service = {
    * @returns The result of running the findMany operation
    */
   getPCNSGroupPolicyDetails: async (groupName: string, resourceName: string, actionName: string) => {
-    try {
-      const result = await prisma.group_role_policy_vw.findMany({
-        where: {
-          initiative_code: Initiative.PCNS,
-          group_name: groupName,
-          resource_name: resourceName,
-          action_name: actionName
-        }
-      });
+    const result = await prisma.group_role_policy_vw.findMany({
+      where: {
+        initiativeCode: Initiative.PCNS,
+        groupName: groupName,
+        resourceName: resourceName,
+        actionName: actionName
+      }
+    });
 
-      return result.map((x) => ({
-        groupId: x.group_id,
-        initiativeCode: x.initiative_code,
-        groupName: x.group_name,
-        roleName: x.role_name,
-        policyId: x.policy_id,
-        resourceName: x.resource_name,
-        actionName: x.action_name
-      }));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      groupId: x.groupId,
+      initiativeCode: x.initiativeCode,
+      groupName: x.groupName,
+      roleName: x.roleName,
+      policyId: x.policyId,
+      resourceName: x.resourceName,
+      actionName: x.actionName
+    }));
   },
 
   /**
@@ -157,22 +140,18 @@ const service = {
    * @returns The result of running the findMany operation
    */
   getGroupPermissions: async (groupId: number) => {
-    try {
-      const result = await prisma.group_role_policy_vw.findMany({
-        where: {
-          group_id: groupId
-        }
-      });
+    const result = await prisma.group_role_policy_vw.findMany({
+      where: {
+        groupId
+      }
+    });
 
-      return result.map((x) => ({
-        group: x.group_name,
-        initiative: x.initiative_code,
-        resource: x.resource_name,
-        action: x.action_name
-      }));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      group: x.groupName,
+      initiative: x.initiativeCode,
+      resource: x.resourceName,
+      action: x.actionName
+    }));
   },
 
   /**
@@ -182,28 +161,24 @@ const service = {
    * @returns The result of running the findMany operation
    */
   getGroups: async (initiative: Initiative | undefined) => {
-    try {
-      const i = await prisma.initiative.findFirstOrThrow({
-        where: {
-          code: initiative
-        }
-      });
+    const i = await prisma.initiative.findFirstOrThrow({
+      where: {
+        code: initiative
+      }
+    });
 
-      const result = await prisma.group.findMany({
-        where: {
-          initiative_id: i.initiative_id
-        }
-      });
+    const result = await prisma.group.findMany({
+      where: {
+        initiativeId: i.initiativeId
+      }
+    });
 
-      return result.map((x) => ({
-        groupId: x.group_id,
-        initiativeId: x.initiative_id,
-        name: x.name as GroupName,
-        label: x.label
-      }));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      groupId: x.groupId,
+      initiativeId: x.initiativeId,
+      name: x.name as GroupName,
+      label: x.label
+    }));
   },
 
   /**
@@ -213,45 +188,37 @@ const service = {
    * @returns The result of running the findMany operation
    */
   getPolicyAttributes: async (policyId: number) => {
-    try {
-      const result = await prisma.policy_attribute.findMany({
-        where: {
-          policy_id: policyId
-        },
-        include: {
-          attribute: {
-            include: {
-              attribute_group: true
-            }
+    const result = await prisma.policy_attribute.findMany({
+      where: {
+        policyId
+      },
+      include: {
+        attribute: {
+          include: {
+            attributeGroup: true
           }
         }
-      });
+      }
+    });
 
-      return result.map((x) => ({
-        attributeId: x.attribute.attribute_id,
-        attributeName: x.attribute.name,
-        groupId: x.attribute.attribute_group.map((x) => x.group_id)
-      }));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result.map((x) => ({
+      attributeId: x.attribute.attributeId,
+      attributeName: x.attribute.name,
+      groupId: x.attribute.attributeGroup.map((x) => x.groupId)
+    }));
   },
 
   removeGroup: async (sub: string, groupId: number) => {
-    try {
-      const result = await prisma.subject_group.delete({
-        where: {
-          sub_group_id: {
-            sub: sub,
-            group_id: groupId
-          }
+    const result = await prisma.subject_group.delete({
+      where: {
+        sub_groupId: {
+          sub: sub,
+          groupId: groupId
         }
-      });
+      }
+    });
 
-      return { sub: result.sub, roleId: result.group_id };
-    } catch (e: unknown) {
-      throw e;
-    }
+    return { sub: result.sub, roleId: result.groupId };
   }
 };
 

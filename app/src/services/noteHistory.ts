@@ -77,7 +77,7 @@ const service = {
         bringForwardState: state,
         isDeleted: false,
         activity: {
-          is_deleted: false,
+          isDeleted: false,
           initiative: {
             code: initiative
           }
