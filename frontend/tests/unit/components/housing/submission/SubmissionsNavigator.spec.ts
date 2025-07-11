@@ -3,7 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { enquiryService, permitService, noteService, housingProjectService } from '@/services';
+import { enquiryService, permitService, noteHistoryService, housingProjectService } from '@/services';
 import { StorageKey, Resource } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
@@ -25,7 +25,7 @@ vi.mock('vue-router', () => ({
 const getProjects = vi.spyOn(housingProjectService, 'getProjects');
 const getEnquiries = vi.spyOn(enquiryService, 'getEnquiries');
 const listPermits = vi.spyOn(permitService, 'listPermits');
-const listBringForward = vi.spyOn(noteService, 'listBringForward');
+const listBringForward = vi.spyOn(noteHistoryService, 'listBringForward');
 const searchProjects = vi.spyOn(housingProjectService, 'searchProjects');
 const getStatistics = vi.spyOn(housingProjectService, 'getStatistics');
 

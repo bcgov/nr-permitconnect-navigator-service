@@ -4,12 +4,18 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 
 import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 
-import type { Note } from '@/types';
+import type { Note, NoteHistory } from '@/types';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -17,25 +23,40 @@ vi.mock('vue-router', () => ({
     replace: vi.fn()
   })
 }));
-const currentDate = new Date().toISOString();
 
-const testNote: Note = {
-  noteId: 'noteUUID',
-  activityId: 'activityUUID',
-  note: 'note contents text',
-  noteType: NoteType.GENERAL,
-  title: 'note contents title',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  isDeleted: false
+const TEST_NOTE: Note = {
+  noteId: '123',
+  noteHistoryId: '123',
+  note: 'some text',
+  createdBy: 'user',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
+};
+
+const TEST_NOTE_HISTORY: NoteHistory = {
+  activityId: '123',
+  bringForwardDate: null,
+  bringForwardState: null,
+  escalateToDirector: false,
+  escalateToSupervisor: false,
+  escalationType: null,
+  isDeleted: false,
+  note: [TEST_NOTE],
+  noteHistoryId: '123',
+  type: NoteType.GENERAL,
+  title: 'Title',
+  shownToProponent: false,
+  createdBy: 'user',
+  createdAt: new Date().toISOString(),
+  updatedBy: 'user',
+  updatedAt: new Date().toISOString()
 };
 
 const wrapperSettings = () => ({
   props: {
     activityId: '123',
-    note: testNote
+    noteHistory: TEST_NOTE_HISTORY
   },
   global: {
     plugins: [
@@ -81,9 +102,9 @@ afterEach(() => {
 });
 
 // Currently, modal functionality hidden behind Primevue component Dialog
-describe('NoteModal', () => {
+describe('NoteHistoryModal', () => {
   it('renders', () => {
-    const wrapper = shallowMount(NoteModal, wrapperSettings());
+    const wrapper = shallowMount(NoteHistoryModal, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

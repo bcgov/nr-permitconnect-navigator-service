@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { enquiryService, noteService } from '@/services';
+import { enquiryService, noteHistoryService } from '@/services';
 import EnquiryView from '@/views/internal/electrification/enquiry/EnquiryView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -25,7 +25,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const useEnquiryService = vi.spyOn(enquiryService, 'getEnquiry');
-const useNoteService = vi.spyOn(noteService, 'listNotes');
+const useNoteService = vi.spyOn(noteHistoryService, 'listNoteHistories');
 
 useNoteService.mockResolvedValue({ data: { activityId: 'activity456' } } as AxiosResponse);
 useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123' } } as AxiosResponse);

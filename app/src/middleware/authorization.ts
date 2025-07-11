@@ -6,7 +6,7 @@ import {
   electrificationProjectService,
   enquiryService,
   housingProjectService,
-  noteService,
+  noteHistoryService,
   permitService,
   userService,
   yarsService
@@ -127,7 +127,7 @@ const paramMap = new Map<string, (id: string) => any>([
   ['enquiryId', enquiryService.getEnquiry],
   ['housingProjectId', housingProjectService.getHousingProject],
   ['electrificationProjectId', electrificationProjectService.getElectrificationProject],
-  ['noteId', noteService.getNote],
+  ['noteHistoryId', noteHistoryService.getNoteHistory],
   ['permitId', permitService.getPermit]
 ]);
 

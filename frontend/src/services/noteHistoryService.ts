@@ -1,25 +1,25 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { Note } from '@/types';
+import type { NoteHistory } from '@/types';
 
 const PATH = 'note';
 
 export default {
   /**
-   * @function createNote
+   * @function createNoteHistory
    * @returns {Promise} An axios response
    */
-  createNote(data: Note) {
+  createNoteHistory(data: NoteHistory & { note: string }) {
     return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**
-   * @function deleteNote
+   * @function deleteNoteHistory
    * @returns {Promise} An axios response
    */
-  async deleteNote(noteId: string) {
-    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteId}`);
+  async deleteNoteHistory(noteHistoryId: string) {
+    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`);
   },
 
   /**
@@ -33,18 +33,18 @@ export default {
   },
 
   /**
-   * @function listNotes
+   * @function listNoteHistories
    * @returns {Promise} An axios response
    */
-  async listNotes(activityId: string) {
+  async listNoteHistories(activityId: string) {
     return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
   },
 
   /**
-   * @function updateNote
+   * @function updateNoteHistory
    * @returns {Promise} An axios response
    */
-  async updateNote(note: Note) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${note.noteId}`, note);
+  async updateNoteHistory(noteHistoryId: string, data: NoteHistory & { note: string }) {
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`, data);
   }
 };
