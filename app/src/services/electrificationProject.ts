@@ -1,6 +1,4 @@
-/* eslint-disable no-useless-catch */
 import prisma from '../db/dataConnection';
-import { electrification_project } from '../db/models';
 
 import type { IStamps } from '../interfaces/IStamps';
 import type { ElectrificationProject, ElectrificationProjectSearchParameters } from '../types';
@@ -17,7 +15,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -26,7 +24,7 @@ const service = {
         }
       }
     });
-    return electrification_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -45,7 +43,7 @@ const service = {
         include: {
           activity: {
             include: {
-              activity_contact: {
+              activityContact: {
                 include: {
                   contact: true
                 }
@@ -57,14 +55,14 @@ const service = {
 
       await trx.activity.delete({
         where: {
-          activity_id: del.activityId
+          activityId: del.activityId
         }
       });
 
       return del;
     });
 
-    return electrification_project.fromPrismaModelWithContact(response);
+    return response;
   },
 
   /**
@@ -98,29 +96,25 @@ const service = {
    * @param {string} electrificationProjectId PCNS electrification project ID
    * @returns {Promise<ElectrificationProject | null>} The result of running the findFirst operation
    */
-  getElectrificationProject: async (electrificationProjectId: string) => {
-    try {
-      const result = await prisma.electrification_project.findFirst({
-        where: {
-          electrificationProjectId: electrificationProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+  getElectrificationProject: async (electrificationProjectId: string): Promise<ElectrificationProject | null> => {
+    const result = await prisma.electrification_project.findFirst({
+      where: {
+        electrificationProjectId: electrificationProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
+      }
+    });
 
-      return result ? electrification_project.fromPrismaModelWithContact(result) : null;
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /**
@@ -130,30 +124,26 @@ const service = {
    * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
    */
   getElectrificationProjects: async (includeDeleted: boolean = false) => {
-    try {
-      const result = await prisma.electrification_project.findMany({
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.electrification_project.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
-          },
-          user: true
+          }
         },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        where: includeDeleted ? {} : { activity: { is_deleted: false } }
-      });
+        user: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      where: includeDeleted ? {} : { activity: { isDeleted: false } }
+    });
 
-      return result.map((x) => electrification_project.fromPrismaModelWithUser(x));
-    } catch (e: unknown) {
-      throw e;
-    }
+    return result;
   },
 
   /* eslint-disable max-len */
@@ -176,7 +166,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -205,19 +195,15 @@ const service = {
           {
             intakeStatus: { in: params.intakeStatus }
           },
-          params.includeDeleted ? {} : { activity: { is_deleted: false } }
+          params.includeDeleted ? {} : { activity: { isDeleted: false } }
         ]
       }
     });
 
     // Remove soft deleted electrification projects
-    if (!params.includeDeleted) result = result.filter((x) => !x.activity.is_deleted);
+    if (!params.includeDeleted) result = result.filter((x) => !x.activity.isDeleted);
 
-    const electrificationProjects = params.includeUser
-      ? result.map((x) => electrification_project.fromPrismaModelWithUser(x))
-      : result.map((x) => electrification_project.fromPrismaModelWithContact(x));
-
-    return electrificationProjects;
+    return result;
   },
 
   /**
@@ -235,7 +221,7 @@ const service = {
       include: {
         activity: {
           include: {
-            activity_contact: {
+            activityContact: {
               include: {
                 contact: true
               }
@@ -247,13 +233,13 @@ const service = {
 
     if (deleteElectrificationProject) {
       await prisma.activity.update({
-        data: { is_deleted: isDeleted, updated_at: updateStamp.updatedAt, updated_by: updateStamp.updatedBy },
+        data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
         where: {
-          activity_id: deleteElectrificationProject?.activityId
+          activityId: deleteElectrificationProject?.activityId
         }
       });
 
-      return electrification_project.fromPrismaModelWithContact(deleteElectrificationProject);
+      return deleteElectrificationProject;
     }
   },
 
@@ -264,28 +250,24 @@ const service = {
    * @returns {Promise<ElectrificationProject | null>} The result of running the update operation
    */
   updateElectrificationProject: async (data: ElectrificationProject) => {
-    try {
-      const result = await prisma.electrification_project.update({
-        data: data,
-        where: {
-          electrificationProjectId: data.electrificationProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activity_contact: {
-                include: {
-                  contact: true
-                }
+    const result = await prisma.electrification_project.update({
+      data: data,
+      where: {
+        electrificationProjectId: data.electrificationProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
               }
             }
           }
         }
-      });
-      return electrification_project.fromPrismaModelWithContact(result);
-    } catch (e: unknown) {
-      throw e;
-    }
+      }
+    });
+    return result;
   }
 };
 

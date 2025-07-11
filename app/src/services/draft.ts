@@ -1,5 +1,4 @@
 import prisma from '../db/dataConnection';
-import { draft } from '../db/models';
 import { DraftCode } from '../utils/enums/projectCommon';
 
 import type { Draft } from '../types';
@@ -14,16 +13,16 @@ const service = {
   createDraft: async (data: Draft) => {
     const result = await prisma.draft.create({
       data: {
-        draft_id: data.draftId,
-        activity_id: data.activityId,
-        draft_code: data.draftCode,
+        draftId: data.draftId,
+        activityId: data.activityId,
+        draftCode: data.draftCode,
         data: data.data,
-        created_at: data.createdAt,
-        created_by: data.createdBy
+        createdAt: data.createdAt,
+        createdBy: data.createdBy
       }
     });
 
-    return draft.fromPrismaModel(result);
+    return result;
   },
 
   /**
@@ -33,13 +32,9 @@ const service = {
    * @returns {Promise<Draft>} The result of running the delete operation
    */
   deleteDraft: async (draftId: string) => {
-    const result = await prisma.draft.delete({
-      where: {
-        draft_id: draftId
-      }
-    });
+    const result = await prisma.draft.delete({ where: { draftId } });
 
-    return draft.fromPrismaModel(result);
+    return result;
   },
 
   /**
@@ -49,13 +44,9 @@ const service = {
    * @returns {Promise<Partial<Draft> | null>} The result of running the findFirst operation
    */
   getDraft: async (draftId: string) => {
-    const result = await prisma.draft.findFirst({
-      where: {
-        draft_id: draftId
-      }
-    });
+    const result = await prisma.draft.findFirst({ where: { draftId } });
 
-    return result ? draft.fromPrismaModel(result) : null;
+    return result ?? null;
   },
 
   /**
@@ -65,9 +56,9 @@ const service = {
    * @returns {Promise<Partial<Draft>[]>} The result of running the findMany operation
    */
   getDrafts: async (draftCode?: DraftCode) => {
-    const result = await prisma.draft.findMany({ where: { draft_code: draftCode } });
+    const result = await prisma.draft.findMany({ where: { draftCode } });
 
-    return result.map((x) => draft.fromPrismaModel(x));
+    return result;
   },
 
   /**
@@ -78,13 +69,11 @@ const service = {
    */
   updateDraft: async (data: Draft) => {
     const result = await prisma.draft.update({
-      data: { data: data.data, updated_at: data?.updatedAt, updated_by: data?.updatedBy },
-      where: {
-        draft_id: data.draftId
-      }
+      data: { data: data.data, updatedAt: data?.updatedAt, updatedBy: data?.updatedBy },
+      where: { draftId: data.draftId }
     });
 
-    return draft.fromPrismaModel(result);
+    return result;
   }
 };
 

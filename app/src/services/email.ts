@@ -110,10 +110,10 @@ const service = {
     return await prisma.$transaction(async (trx) => {
       return await trx.email_log.createMany({
         data: recipients.map((recipient) => ({
-          email_log_id: uuidv4(),
-          msg_id: data?.messages?.[0].msgId,
+          emailLogId: uuidv4(),
+          msgId: data?.messages?.[0].msgId,
           to: recipient,
-          tx_id: data?.txId,
+          txId: data?.txId,
           http_status: status
         }))
       });
