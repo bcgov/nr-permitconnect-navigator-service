@@ -77,14 +77,14 @@ export async function checkDatabaseSchema(): Promise<boolean> {
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
     createdBy: currentContext?.userId ?? null,
-    createdAt: new Date().toISOString()
+    createdAt: new Date()
   };
 }
 
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
     updatedBy: (currentContext?.userId as string) ?? null,
-    updatedAt: new Date().toISOString()
+    updatedAt: new Date()
   };
 }
 

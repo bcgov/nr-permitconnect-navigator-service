@@ -42,12 +42,26 @@ const controller = {
       ...data.project,
       electrificationProjectId: uuidv4(),
       activityId: activityId,
-      submittedAt: new Date().toISOString(),
+      submittedAt: new Date(),
       submissionType: SubmissionType.GUIDANCE,
       intakeStatus: IntakeStatus.SUBMITTED,
       applicationStatus: ApplicationStatus.NEW,
       aaiUpdated: false,
-      addedToATS: false
+      addedToAts: false,
+      projectCategory: null,
+      locationDescription: null,
+      hasEpa: null,
+      megawatts: null,
+      bcEnvironmentAssessNeeded: null,
+      assignedUserId: null,
+      astNotes: null,
+      queuePriority: null,
+      atsClientId: null,
+      atsEnquiryId: null,
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null
     };
 
     return electrificationProjectData;

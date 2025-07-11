@@ -1,6 +1,6 @@
 export interface IStamps {
   createdBy: string | null;
-  createdAt: string | null;
+  createdAt: Date | null;
   updatedBy: string | null;
-  updatedAt: string | null;
+  updatedAt: Date | null;
 }

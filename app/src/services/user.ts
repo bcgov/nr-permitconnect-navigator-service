@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
-import { identity_provider, user } from '../db/models';
 import { contactService } from '../services';
 
 import type { Contact, User, UserSearchParameters } from '../types';
@@ -49,7 +48,7 @@ const service = {
       createdBy: NIL
     };
 
-    const response = trxWrapper(etrx).identity_provider.create({ data: identity_provider.toPrismaModel(obj) });
+    const response = trxWrapper(etrx).identity_provider.create({ data: obj });
 
     return response;
   },
@@ -74,7 +73,7 @@ const service = {
       });
 
       if (exists) {
-        response = user.fromPrismaModel(exists);
+        response = exists;
       } else {
         if (data.idp) {
           const identityProvider = await service.readIdp(data.idp, trx);
@@ -95,12 +94,12 @@ const service = {
         };
 
         const createResponse = await trx.user.create({
-          data: user.toPrismaModel(newUser)
+          data: newUser
         });
 
         // TS hiccuping on the internal function
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        response = user.fromPrismaModel(createResponse);
+        response = createResponse;
       }
     };
 
@@ -130,7 +129,7 @@ const service = {
       }
     });
 
-    return user && user.user_id ? user.user_id : defaultValue;
+    return user && user.userId ? user.userId : defaultValue;
   },
 
   /**
@@ -166,7 +165,7 @@ const service = {
       if (!oldUser) {
         return await service.createUser(newUser, trx);
       } else {
-        return await service.updateUser(oldUser.user_id, newUser, trx);
+        return await service.updateUser(oldUser.userId, newUser, trx);
       }
     });
 
@@ -208,7 +207,7 @@ const service = {
       }
     });
 
-    return identity_provider.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -221,11 +220,11 @@ const service = {
   readUser: async (userId: string) => {
     const response = await prisma.user.findUnique({
       where: {
-        user_id: userId
+        userId
       }
     });
 
-    return response ? user.fromPrismaModel(response) : null;
+    return response;
   },
 
   /**
@@ -246,7 +245,7 @@ const service = {
       where: {
         AND: [
           {
-            user_id: { in: params.userId }
+            userId: { in: params.userId }
           },
           {
             idp: { in: params.idp, mode: 'insensitive' }
@@ -258,13 +257,13 @@ const service = {
             email: { contains: params.email, mode: 'insensitive' }
           },
           {
-            first_name: { contains: params.firstName, mode: 'insensitive' }
+            firstName: { contains: params.firstName, mode: 'insensitive' }
           },
           {
-            full_name: { contains: params.fullName, mode: 'insensitive' }
+            fullName: { contains: params.fullName, mode: 'insensitive' }
           },
           {
-            last_name: { contains: params.lastName, mode: 'insensitive' }
+            lastName: { contains: params.lastName, mode: 'insensitive' }
           },
           {
             active: params.active
@@ -273,7 +272,7 @@ const service = {
       }
     });
 
-    return response.map((x) => user.fromPrismaModel(x)).filter((x) => x.userId !== NIL);
+    return response.map((x) => x.userId !== NIL);
   },
 
   /**
@@ -314,13 +313,13 @@ const service = {
 
         // TODO: Add support for updating userId primary key in the event it changes
         const updateResponse = await trx?.user.update({
-          data: { ...user.toPrismaModel(obj), updated_by: obj.updatedBy },
+          data: obj,
           where: {
-            user_id: userId
+            userId
           }
         });
 
-        if (updateResponse) response = user.fromPrismaModel(updateResponse);
+        if (updateResponse) response = updateResponse;
       };
 
       // Call with proper transaction

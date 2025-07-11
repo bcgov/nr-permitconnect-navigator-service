@@ -1,7 +1,4 @@
-/* eslint-disable no-useless-catch */
-
 import prisma from '../db/dataConnection';
-import { permit, permit_type } from '../db/models';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
@@ -16,19 +13,15 @@ const service = {
    * @returns {Promise<Permit | null>} The result of running the create operation
    */
   createPermit: async (data: Permit) => {
-    try {
-      const newPermit = { ...data, permitId: uuidv4() };
+    const newPermit = { ...data, permitId: uuidv4() };
 
-      const create = await prisma.permit.create({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
-      });
-      return permit.fromPrismaModel(create);
-    } catch (e: unknown) {
-      throw e;
-    }
+    const create = await prisma.permit.create({
+      include: {
+        permitType: true
+      },
+      data: { ...newPermit, createdBy: data.createdBy, updatedBy: data.updatedBy }
+    });
+    return create;
   },
 
   /**
@@ -40,14 +33,14 @@ const service = {
   deletePermit: async (permitId: string) => {
     const response = await prisma.permit.delete({
       include: {
-        permit_type: true
+        permitType: true
       },
       where: {
-        permit_id: permitId
+        permitId
       }
     });
 
-    return permit.fromPrismaModel(response);
+    return response;
   },
 
   /**
@@ -59,7 +52,7 @@ const service = {
   deletePermitsByActivity: async (activityId: string) => {
     const response = await prisma.permit.deleteMany({
       where: {
-        activity_id: activityId
+        activityId: activityId
       }
     });
 
@@ -75,15 +68,15 @@ const service = {
   getPermit: async (permitId: string) => {
     const result = await prisma.permit.findFirst({
       where: {
-        permit_id: permitId
+        permitId: permitId
       },
       include: {
-        permit_type: true, // If changed reflect in type and model
-        permit_note: { orderBy: { created_at: 'desc' } }
+        permitType: true, // If changed reflect in type and model
+        permitNote: { orderBy: { createdAt: 'desc' } }
       }
     });
 
-    return result ? permit.fromPrismaModelWithNotes(result) : null;
+    return result;
   },
 
   /**
@@ -94,18 +87,18 @@ const service = {
   getPermitTypes: async (initiative: Initiative) => {
     const initiativeResult = await prisma.initiative.findFirstOrThrow({
       include: {
-        permit_type_initiative_xref: {
+        permitTypeInitiativeXref: {
           include: {
-            permit_type: true
+            permitType: true
           },
           orderBy: [
             {
-              permit_type: {
-                business_domain: 'asc'
+              permitType: {
+                businessDomain: 'asc'
               }
             },
             {
-              permit_type: {
+              permitType: {
                 name: 'asc'
               }
             }
@@ -117,7 +110,7 @@ const service = {
       }
     });
 
-    return initiativeResult.permit_type_initiative_xref.map((y) => permit_type.fromPrismaModel(y.permit_type));
+    return initiativeResult.permitTypeInitiativeXref.map((y) => y.permitType);
   },
 
   /**
@@ -129,24 +122,20 @@ const service = {
   listPermits: async (options?: ListPermitsOptions) => {
     const response = await prisma.permit.findMany({
       include: {
-        permit_type: true,
-        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false
+        permitType: true,
+        permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false
       },
       where: {
-        activity_id: options?.activityId || undefined
+        activityId: options?.activityId || undefined
       },
       orderBy: {
-        permit_type: {
+        permitType: {
           name: 'asc'
         }
       }
     });
 
-    if (options?.includeNotes) {
-      return response.map((x) => permit.fromPrismaModelWithNotes(x));
-    }
-
-    return response.map((x) => permit.fromPrismaModel(x));
+    return response;
   },
 
   /**
@@ -156,21 +145,17 @@ const service = {
    * @returns {Promise<Permit | null>} The result of running the update operation
    */
   updatePermit: async (data: Permit) => {
-    try {
-      const response = await prisma.permit.update({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
-        where: {
-          permit_id: data.permitId
-        }
-      });
+    const response = await prisma.permit.update({
+      include: {
+        permitType: true
+      },
+      data: data,
+      where: {
+        permitId: data.permitId
+      }
+    });
 
-      return permit.fromPrismaModel(response);
-    } catch (e: unknown) {
-      throw e;
-    }
+    return response;
   }
 };
 

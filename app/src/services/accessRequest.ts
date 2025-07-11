@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../db/dataConnection';
-import { access_request } from '../db/models';
 import { AccessRequestStatus, Initiative } from '../utils/enums/application';
 
 import type { AccessRequest } from '../types';
@@ -24,13 +23,13 @@ const service = {
     };
 
     const accessRequestResponse = await prisma.access_request.create({
-      data: access_request.toPrismaModel(newAccessRequest),
+      data: newAccessRequest,
       include: {
         group: true
       }
     });
 
-    return access_request.fromPrismaModel(accessRequestResponse);
+    return accessRequestResponse;
   },
 
   /**
@@ -42,7 +41,7 @@ const service = {
   getAccessRequest: async (initiative: Initiative, accessRequestId: string) => {
     const response = await prisma.access_request.findUnique({
       where: {
-        access_request_id: accessRequestId,
+        accessRequestId: accessRequestId,
         group: {
           initiative: {
             code: initiative
@@ -53,7 +52,8 @@ const service = {
         group: true
       }
     });
-    return response ? access_request.fromPrismaModel(response) : null;
+
+    return response;
   },
 
   /**
@@ -74,7 +74,8 @@ const service = {
         group: true
       }
     });
-    return response.map((x) => access_request.fromPrismaModel(x));
+
+    return response;
   },
 
   /**
@@ -85,16 +86,16 @@ const service = {
    */
   updateAccessRequest: async (data: AccessRequest) => {
     const result = await prisma.access_request.update({
-      data: { ...access_request.toPrismaModel(data), updated_at: data.updatedAt, updated_by: data.updatedBy },
+      data: { ...data, updatedAt: data.updatedAt, updatedBy: data.updatedBy },
       where: {
-        access_request_id: data.accessRequestId
+        accessRequestId: data.accessRequestId
       },
       include: {
         group: true
       }
     });
 
-    return access_request.fromPrismaModel(result);
+    return result;
   }
 };
 
