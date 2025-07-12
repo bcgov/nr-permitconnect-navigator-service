@@ -34,7 +34,7 @@ export type { ListPermitsOptions } from './ListPermitsOptions';
 export type { Middleware } from './Middleware';
 export type { Note } from './Note';
 export type { NoteHistory } from './NoteHistory';
-export type { Permit } from './Permit';
+export type { Permit, PermitWithType, PermitWithRelations } from './Permit';
 export type { PermitNote } from './PermitNote';
 export type { PermitType } from './PermitType';
 export type { StatisticsFilters } from './StatisticsFilters';
