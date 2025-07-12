@@ -3,34 +3,33 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
 
-import type { ListPermitsOptions, Permit } from '../types';
+import type { ListPermitsOptions, Permit, PermitType, PermitWithRelations, PermitWithType } from '../types';
 
 const service = {
   /**
-   * @function createPermit
-   * Creates a Permit
-   * @param {Permit} data Permit object
-   * @returns {Promise<Permit | null>} The result of running the create operation
+   * Create a Permit
+   * @param data - The Permit object to create
+   * @returns A Promise that resolves to the created resource
    */
-  createPermit: async (data: Permit) => {
+  createPermit: async (data: Permit): Promise<PermitWithRelations> => {
     const newPermit = { ...data, permitId: uuidv4() };
 
     const create = await prisma.permit.create({
       include: {
-        permitType: true
+        permitType: true,
+        permitNote: true
       },
-      data: { ...newPermit, createdBy: data.createdBy, updatedBy: data.updatedBy }
+      data: newPermit
     });
     return create;
   },
 
   /**
-   * @function deletePermit
    * Delete a permit
-   * @param {string} permitId Permit ID
-   * @returns {Promise<Permit>} The result of running the delete operation
+   * @param permitId - The ID of the Permit to delete
+   * @returns A Promise that resolves to the deleted resource
    */
-  deletePermit: async (permitId: string) => {
+  deletePermit: async (permitId: string): Promise<PermitWithType> => {
     const response = await prisma.permit.delete({
       include: {
         permitType: true
@@ -44,12 +43,11 @@ const service = {
   },
 
   /**
-   * @function deletePermitByActivity
-   * Delete a permit
-   * @param {string} activityId Activity ID to remove permits from
-   * @returns {number} The result of running the deleteMany operation
+   * Delete permits associated to an activity
+   * @param activityId - The ID of the activity to delete all permits from
+   * @returns A Promise that resolves to the number of deleted resource
    */
-  deletePermitsByActivity: async (activityId: string) => {
+  deletePermitsByActivity: async (activityId: string): Promise<number> => {
     const response = await prisma.permit.deleteMany({
       where: {
         activityId: activityId
@@ -60,18 +58,17 @@ const service = {
   },
 
   /**
-   * @function getPermit
    * Get a permit
-   * @param {string} permitId Permit ID
-   * @returns {Promise<Permit>} The result of running the findFirst operation
+   * @param permitId - The ID of the permit to retrieve
+   * @returns A Promise that resolves to the permit for the given permitId
    */
-  getPermit: async (permitId: string) => {
-    const result = await prisma.permit.findFirst({
+  getPermit: async (permitId: string): Promise<PermitWithRelations> => {
+    const result = await prisma.permit.findFirstOrThrow({
       where: {
         permitId: permitId
       },
       include: {
-        permitType: true, // If changed reflect in type and model
+        permitType: true,
         permitNote: { orderBy: { createdAt: 'desc' } }
       }
     });
@@ -80,11 +77,35 @@ const service = {
   },
 
   /**
-   * @function getPermitTypes
-   * Get all Permit types for the given initiative
-   * @returns {Promise<PermitType[]>} The result of running the findMany operation
+   * Retrieve all permits matching the search parameters
+   * @param options - The search parameters
+   * @returns A Promise that resolves to the permits matching the given options
    */
-  getPermitTypes: async (initiative: Initiative) => {
+  listPermits: async (options?: ListPermitsOptions): Promise<PermitWithRelations[]> => {
+    const response = await prisma.permit.findMany({
+      include: {
+        permitType: true,
+        permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false
+      },
+      where: {
+        activityId: options?.activityId || undefined
+      },
+      orderBy: {
+        permitType: {
+          name: 'asc'
+        }
+      }
+    });
+
+    return response;
+  },
+
+  /**
+   * Get all Permit types for the given initiative
+   * @param initiative - The initiative for which the permit types belong to
+   * @returns A Promise that resolves to the permit types for the given initiative
+   */
+  listPermitTypes: async (initiative: Initiative): Promise<PermitType[]> => {
     const initiativeResult = await prisma.initiative.findFirstOrThrow({
       include: {
         permitTypeInitiativeXref: {
@@ -114,37 +135,11 @@ const service = {
   },
 
   /**
-   * @function listPermits
-   * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
-   * @param {string} activityId PCNS Activity ID
-   * @returns {Promise<Permit[]>} The result of running the findMany operation
+   * Update a Permit
+   * @param data - The Permit object to update
+   * @returns A Promise that resolves to the updated resource
    */
-  listPermits: async (options?: ListPermitsOptions) => {
-    const response = await prisma.permit.findMany({
-      include: {
-        permitType: true,
-        permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false
-      },
-      where: {
-        activityId: options?.activityId || undefined
-      },
-      orderBy: {
-        permitType: {
-          name: 'asc'
-        }
-      }
-    });
-
-    return response;
-  },
-
-  /**
-   * @function upsertPermit
-   * Upsert a Permit
-   * @param {Permit} data Permit object
-   * @returns {Promise<Permit | null>} The result of running the update operation
-   */
-  updatePermit: async (data: Permit) => {
+  updatePermit: async (data: Permit): Promise<PermitWithType> => {
     const response = await prisma.permit.update({
       include: {
         permitType: true

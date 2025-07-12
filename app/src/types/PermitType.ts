@@ -1,17 +1,5 @@
-import { IStamps } from '../interfaces/IStamps';
+import { Prisma } from '@prisma/client';
 
-export type PermitType = {
-  permitTypeId: number; // Primary Key
-  acronym: string | null;
-  agency: string;
-  branch: string | null;
-  businessDomain: string;
-  division: string | null;
-  family: string | null;
-  infoUrl: string | null;
-  name: string;
-  nameSubtype: string | null;
-  sourceSystem: string | null;
-  trackedInATS: boolean;
-  type: string;
-} & Partial<IStamps>;
+const permitType = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
+
+export type PermitType = Prisma.permit_typeGetPayload<typeof permitType>;
