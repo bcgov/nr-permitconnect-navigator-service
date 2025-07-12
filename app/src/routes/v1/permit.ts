@@ -52,7 +52,7 @@ router.get(
   '/types',
   hasAuthorization(Resource.PERMIT, Action.READ),
   (req: Request<never, never, never, { initiative: Initiative }>, res: Response, next: NextFunction): void => {
-    permitController.getPermitTypes(req, res, next);
+    permitController.listPermitTypes(req, res, next);
   }
 );
 
