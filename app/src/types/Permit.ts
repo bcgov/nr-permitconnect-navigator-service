@@ -1,15 +1,15 @@
-import { IStamps } from '../interfaces/IStamps';
+import { Prisma } from '@prisma/client';
 
-export type Permit = {
-  permitId: string; // Primary Key
-  permitTypeId: number;
-  activityId: string;
-  issuedPermitId: string | null;
-  trackingId: string | null;
-  authStatus: string | null;
-  needed: string | null;
-  status: string | null;
-  submittedDate: string | null;
-  adjudicationDate: string | null;
-  statusLastVerified: string | null;
-} & Partial<IStamps>;
+const permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
+
+const permitWithType = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permitType: true }
+});
+
+const permitWithRelations = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permitNote: true, permitType: true }
+});
+
+export type Permit = Prisma.permitGetPayload<typeof permit>;
+export type PermitWithType = Prisma.permitGetPayload<typeof permitWithType>;
+export type PermitWithRelations = Prisma.permitGetPayload<typeof permitWithRelations>;
