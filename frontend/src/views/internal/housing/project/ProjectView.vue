@@ -28,7 +28,14 @@ import {
   TabPanel,
   TabPanels
 } from '@/lib/primevue';
-import { documentService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
+import {
+  documentService,
+  enquiryService,
+  housingProjectService,
+  noteHistoryService,
+  permitService,
+  userService
+} from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
@@ -37,7 +44,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, Enquiry, HousingProject, NoteHistory } from '@/types';
+import type { Document, Enquiry, HousingProject, NoteHistory, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -84,6 +91,8 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
+const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
+const permitModalVisible: Ref<boolean> = ref(false);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
@@ -181,6 +190,23 @@ onBeforeMount(async () => {
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(Initiative.HOUSING)).data;
     permitStore.setPermitTypes(permitTypes);
+  }
+
+  // Batch lookup the users who have created notes
+  const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
+    noteHistoryId: x.noteHistoryId,
+    createdBy: x.createdBy
+  }));
+
+  if (noteHistoryCreatedByUsers.length) {
+    const noteHistoryUsers = await userService.searchUsers({
+      userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+    });
+
+    noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
+      noteHistoryId: x.noteHistoryId as string,
+      createdByFullname: noteHistoryUsers.data.find((user: User) => user.userId === x.createdBy).fullName
+    }));
   }
 
   loading.value = false;
@@ -555,18 +581,24 @@ onBeforeMount(async () => {
             Add note
           </Button>
         </div>
-        <div
-          v-for="(noteHistory, index) in getNoteHistory"
-          :key="noteHistory.noteHistoryId"
-          :index="index"
-          class="mb-6"
-        >
-          <NoteHistoryCard
-            :editable="!isCompleted"
-            :note-history="noteHistory"
-            @delete-note-history="onDeleteNoteHistory"
-            @update-note-history="onUpdateNoteHistory"
-          />
+        <div v-if="!loading">
+          <div
+            v-for="(noteHistory, index) in getNoteHistory"
+            :key="noteHistory.noteHistoryId"
+            :index="index"
+            class="mb-6"
+          >
+            <NoteHistoryCard
+              :editable="!isCompleted"
+              :note-history="noteHistory"
+              :created-by-full-name="
+                noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
+                  ?.createdByFullname
+              "
+              @delete-note-history="(e) => projectStore.removeNoteHistory(e)"
+              @update-note-history="(e) => projectStore.updateNoteHistory(e)"
+            />
+          </div>
         </div>
 
         <NoteHistoryModal
