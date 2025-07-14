@@ -10,12 +10,17 @@ import { Action, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateShort } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
-import type { Note, NoteHistory } from '@/types';
+import type { NoteHistory } from '@/types';
 
 // Props
-const { editable = true, noteHistory } = defineProps<{
+const {
+  editable = true,
+  noteHistory,
+  createdByFullName = undefined
+} = defineProps<{
   editable?: boolean;
   noteHistory: NoteHistory;
+  createdByFullName?: string;
 }>();
 
 // Emits
@@ -26,11 +31,11 @@ const appStore = useAppStore();
 
 // State
 const noteModalVisible: Ref<boolean> = ref(false);
-const userName: Ref<string> = ref('');
+const userName: Ref<string | undefined> = ref(createdByFullName);
 
 // Actions
 onBeforeMount(() => {
-  if (noteHistory.createdBy) {
+  if (!userName.value && noteHistory.createdBy) {
     userService.searchUsers({ userId: [noteHistory.createdBy] }).then((res) => {
       userName.value = res?.data.length ? res?.data[0].fullName : '';
     });
@@ -98,12 +103,12 @@ onBeforeMount(() => {
     v-model:visible="noteModalVisible"
     :activity-id="noteHistory.activityId"
     :note-history="noteHistory"
-    @delete-note="
-      (note: Note) => {
-        emit('deleteNoteHistory', note);
+    @delete-note-history="
+      (history: NoteHistory) => {
+        emit('deleteNoteHistory', history);
       }
     "
-    @update-note="(history: NoteHistory) => emit('updateNoteHistory', history)"
+    @update-note-history="(history: NoteHistory) => emit('updateNoteHistory', history)"
   />
 </template>
 

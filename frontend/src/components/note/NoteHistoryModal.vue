@@ -80,7 +80,7 @@ const toast = useToast();
 function onDelete() {
   if (noteHistory) {
     confirm.require({
-      message: t(shownToProponent.value ? 'noteModal.deleteMessageIfShown' : 'noteModal.deleteMessage'),
+      message: t(shownToProponent.value ? 'noteHistoryModal.deleteMessageIfShown' : 'noteHistoryModal.deleteMessage'),
       header: t('noteHistoryModal.deleteHeader'),
       acceptLabel: t('noteHistoryModal.confirm'),
       acceptClass: 'p-button-danger',
