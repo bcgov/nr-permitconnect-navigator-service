@@ -140,7 +140,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: Enquiry) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 

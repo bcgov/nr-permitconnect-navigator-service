@@ -3,7 +3,6 @@ import type { AxiosResponse } from 'axios';
 
 export interface IProjectService {
   createProject(data?: any): Promise<AxiosResponse<any, any>>;
-  deleteProject(projectId: string): Promise<AxiosResponse<any, any>>;
   emailConfirmation(emailData: Email): Promise<AxiosResponse<any, any>>;
   getActivityIds(): Promise<AxiosResponse<any, any>>;
   getProjects(): Promise<AxiosResponse<any, any>>;
