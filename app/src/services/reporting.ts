@@ -1,8 +1,7 @@
 import prisma from '../db/dataConnection';
 
-const service = {
-  getElectrificationProjectPermitData: async () => {
-    const result = await prisma.$queryRaw`
+export const getElectrificationProjectPermitData = async () => {
+  const result = await prisma.$queryRaw`
     select project_name,
       c.first_name,
       c.last_name,
@@ -40,11 +39,11 @@ const service = {
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
     where a.is_deleted = false`;
 
-    return result;
-  },
+  return result;
+};
 
-  getHousingProjectPermitData: async () => {
-    const result = await prisma.$queryRaw`
+export const getHousingProjectPermitData = async () => {
+  const result = await prisma.$queryRaw`
     select project_name,
       case
         when hp.consent_to_feedback then 'Yes'
@@ -91,8 +90,5 @@ const service = {
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
     where a.is_deleted = false`;
 
-    return result;
-  }
+  return result;
 };
-
-export default service;
