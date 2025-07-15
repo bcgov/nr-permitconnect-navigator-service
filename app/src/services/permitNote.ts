@@ -1,23 +1,20 @@
-import prisma from '../db/dataConnection';
 import { v4 as uuidv4 } from 'uuid';
 
-import type { PermitNote } from '../types';
+import prisma from '../db/dataConnection';
 
-const service = {
-  /**
-   * @function createPermitNote
-   * Creates a Permit Note
-   * @param {PermitNote} data Permit Note object
-   * @returns {Promise<PermitNote | null>} The result of running the create operation
-   */
-  createPermitNote: async (data: PermitNote) => {
-    const newPermitNote = { ...data, permitNoteId: uuidv4() };
+import type { PermitNote, PermitNoteBase } from '../types';
 
-    const create = await prisma.permit_note.create({
-      data: { ...newPermitNote, createdBy: data.createdBy }
-    });
-    return create;
-  }
+/**
+ * Create a permit note
+ * @param data - The permit note object to create
+ * @returns A Promise that resolves to the created resource
+ */
+export const createPermitNote = async (data: PermitNoteBase): Promise<PermitNote> => {
+  const newPermitNote = { ...data, permitNoteId: uuidv4() };
+
+  const create = await prisma.permit_note.create({
+    data: { ...newPermitNote, createdBy: data.createdBy }
+  });
+
+  return create;
 };
-
-export default service;
