@@ -48,66 +48,62 @@ function ssoAxios(): AxiosInstance {
   return ssoAxios;
 }
 
-const service = {
-  searchIdirUsers: async (params?: IdirSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  searchBasicBceidUsers: async (params?: BceidSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  searchBusinessBceidUsers: async (params?: BceidSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
+export const searchIdirUsers = async (params?: IdirSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
     }
   }
 };
 
-export default service;
+export const searchBasicBceidUsers = async (params?: BceidSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};
+
+export const searchBusinessBceidUsers = async (params?: BceidSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};
