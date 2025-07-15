@@ -1,20 +1,13 @@
-import { housingProjectService, mapService } from '../services';
+import { getHousingProject } from '../services/housingProject';
+import { getPIDs } from '../services/map';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
-const controller = {
-  getPIDs: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
-    try {
-      const housingProject = await housingProjectService.getHousingProject(req.params.housingProjectId);
+export const getPIDsController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
+  const housingProject = await getHousingProject(req.params.housingProjectId);
 
-      let response;
-      if (housingProject?.geoJson) response = await mapService.getPIDs(housingProject.geoJson);
+  let response;
+  if (housingProject?.geoJson) response = await getPIDs(housingProject.geoJson);
 
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+  res.status(200).json(response);
 };
-
-export default controller;
