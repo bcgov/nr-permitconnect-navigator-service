@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { permitNoteController } from '../../controllers';
+import { createPermitNoteController } from '../../controllers/permitNote';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
@@ -8,7 +8,7 @@ import { Action, Resource } from '../../utils/enums/application';
 import { Problem } from '../../utils';
 import { permitNoteValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request } from 'express';
 import type { PermitNote } from '../../types';
 
 const router = express.Router();
@@ -20,9 +20,7 @@ router.put(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
   permitNoteValidator.createPermitNote,
-  (req: Request<never, never, PermitNote>, res: Response, next: NextFunction): void => {
-    permitNoteController.createPermitNote(req, res, next);
-  }
+  createPermitNoteController
 );
 
 // Permit note update endpoint
