@@ -1,3 +1,4 @@
+import { document } from '@prisma/client';
 import prisma from '../db/dataConnection';
 import { IStamps } from '../interfaces/IStamps';
 import { Document } from '../types';
@@ -32,7 +33,8 @@ const service = {
         createdBy: createStamp.createdBy
       }
     });
-    const doc: Document = response;
+
+    const doc = response;
     if (response.createdBy) {
       // getting uploaded by information for the new document
       const user = await prisma.user.findFirst({
@@ -63,10 +65,10 @@ const service = {
    * @param {string} documentId Document ID
    * @returns {Promise<PermitType[]>} The result of running the findFirst operation
    */
-  getDocument: async (documentId: string): Promise<Document | null> => {
-    const result = await prisma.document.findFirst({ where: { documentId } });
+  getDocument: async (documentId: string): Promise<document> => {
+    const result = await prisma.document.findFirstOrThrow({ where: { documentId } });
 
-    return result ?? null;
+    return result;
   },
 
   /**
@@ -88,7 +90,7 @@ const service = {
     const documents = response;
     if (documents && Array.isArray(documents)) {
       for (let i = 0; i < documents.length; i++) {
-        const document: Document = documents[i];
+        const document = documents[i];
         if (document.createdBy) {
           const user = await prisma.user.findFirst({
             where: {

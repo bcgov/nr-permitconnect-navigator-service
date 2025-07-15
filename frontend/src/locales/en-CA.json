@@ -50,13 +50,10 @@
       },
       "projectView": {
         "agency": "Agency",
-<<<<<<< HEAD
         "askMyNavigator": "Ask my Navigator",
         "completedAuths": "Completed authorizations",
-=======
         "beAware": "Please be aware!",
         "createdBy": "Created by",
->>>>>>> 70d7db9c (Additional changes from review)
         "crumbAppsPermits": "Applications and Permits",
         "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
         "emptyCompletedAuths": "You have no completed or closed authorizations at this time.",

@@ -3,6 +3,7 @@ import { IStamps } from '../interfaces/IStamps';
 import { Initiative } from '../utils/enums/application';
 
 import type { Enquiry, EnquirySearchParameters } from '../types';
+import { enquiry } from '@prisma/client';
 
 const service = {
   /**
@@ -12,7 +13,7 @@ const service = {
    */
   createEnquiry: async (data: Partial<Enquiry>) => {
     const response = await prisma.enquiry.create({
-      data: { ...enquiry.toPrismaModel(data as Enquiry), createdAt: data.createdAt, createdBy: data.createdBy },
+      data: data,
       include: {
         activity: {
           include: {
@@ -123,9 +124,9 @@ const service = {
    * @param {boolean}  [params.includeDeleted] Optional bool representing if deleted enquiries should be included
    * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
    * @param {Initiative} [initiative] Initiative to search in
-   * @returns {Promise<(Submission | null)[]>} The result of running the findMany operation
+   * @returns {Promise<Enquiry[]>} The result of running the findMany operation
    */
-  searchEnquiries: async (params: EnquirySearchParameters, initiative: Initiative) => {
+  searchEnquiries: async (params: EnquirySearchParameters, initiative: Initiative): Promise<enquiry[]> => {
     const result = await prisma.enquiry.findMany({
       include: {
         activity: {

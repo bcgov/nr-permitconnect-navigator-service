@@ -99,15 +99,6 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('deleteProject', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.deleteProject(TEST_ID);
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
-    });
-  });
-
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
       housingProjectService.deleteDraft(TEST_ID);

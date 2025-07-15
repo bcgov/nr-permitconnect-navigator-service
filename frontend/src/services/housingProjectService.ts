@@ -18,14 +18,6 @@ const service: IDraftableProjectService = {
   },
 
   /**
-   * @function deleteProject
-   * @returns {Promise} An axios response
-   */
-  deleteProject(projectId: string) {
-    return appAxios().delete(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`);
-  },
-
-  /**
    * @function deleteDraft
    * @returns {Promise} An axios response
    */

@@ -5,6 +5,9 @@ import { AccessRequestStatus, Initiative } from '../utils/enums/application';
 
 import type { AccessRequest } from '../types';
 
+import { $Enums } from '@prisma/client';
+import type { access_request } from '@prisma/client';
+
 const service = {
   /**
    * @function createUserAccessRequest
@@ -38,7 +41,7 @@ const service = {
    * @param {string} accessRequestId The access request data to retrieve
    * @returns {Promise<object>} The result of running the find operation
    */
-  getAccessRequest: async (initiative: Initiative, accessRequestId: string) => {
+  getAccessRequest: async (initiative: Initiative, accessRequestId: string): Promise<access_request | null> => {
     const response = await prisma.access_request.findUnique({
       where: {
         accessRequestId: accessRequestId,

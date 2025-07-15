@@ -5,16 +5,15 @@ import { IStamps } from '../interfaces/IStamps';
 import { BringForwardType } from '../utils/enums/projectCommon';
 import { Initiative } from '../utils/enums/application';
 
-import type { NoteHistory } from '../types';
+import type { NoteHistory, NoteHistoryBase } from '../types';
 
 const service = {
   /**
-   * @function createNoteHistory
-   * Creates a note history
-   * @param {NoteHistory} data Note history object
-   * @returns {Promise<NoteHistory>} The result of running the create operation
+   * Create a note history
+   * @param data - The note history object to create
+   * @returns A Promise that resolves to the created resource
    */
-  createNoteHistory: async (data: NoteHistory) => {
+  createNoteHistory: async (data: NoteHistoryBase): Promise<NoteHistory> => {
     const response = await prisma.note_history.create({
       data: {
         ...data,
@@ -26,12 +25,11 @@ const service = {
   },
 
   /**
-   * @function deleteNoteHistory
    * Soft deletes a note history by marking is as deleted
-   * @param {string} noteHistoryId ID of the note history to delete
-   * @returns {Promise<NoteHistory>} The result of running the update operation
+   * @param noteHistoryId - The ID of the note history to delete
+   * @returns A Promise that resolves to the deleted resource
    */
-  deleteNoteHistory: async (noteHistoryId: string, updateStamp: Partial<IStamps>) => {
+  deleteNoteHistory: async (noteHistoryId: string, updateStamp: Partial<IStamps>): Promise<NoteHistory> => {
     const result = await prisma.note_history.update({
       where: {
         noteHistoryId: noteHistoryId
@@ -47,12 +45,11 @@ const service = {
   },
 
   /**
-   * @function getNoteHistory
-   * Get a specifc note history
-   * @param {string} noteHistoryId ID of the note history to get
-   * @returns {Promise<NoteHistory>} The result of running the findFirstOrThrow operation
+   * Get a note history
+   * @param noteHistoryId - The ID of the note history to retrieve
+   * @returns A Promise that resolves to the created resource
    */
-  getNoteHistory: async (noteHistoryId: string) => {
+  getNoteHistory: async (noteHistoryId: string): Promise<NoteHistory> => {
     const result = await prisma.note_history.findFirstOrThrow({
       where: {
         noteHistoryId: noteHistoryId
@@ -65,13 +62,15 @@ const service = {
   },
 
   /**
-   * @function listBringForward
-   * Retrieve a list of note histories by the given state
-   * @param {Initiative} initiative PCNS initiative type
-   * @param {BringForwardType} state The BringForwardType to list
-   * @returns {Promise<NoteHistory[]>} The result of running the findMany operation
+   * Retrieve a list of bring forward type note histories by the given state
+   * @param initiative - The initiative for which the note history belongs to
+   * @param state - The state to search for
+   * @returns A Promise that resolves to the note histories for the given parameters
    */
-  listBringForward: async (initiative: Initiative, state: BringForwardType = BringForwardType.UNRESOLVED) => {
+  listBringForward: async (
+    initiative: Initiative,
+    state: BringForwardType = BringForwardType.UNRESOLVED
+  ): Promise<NoteHistory[]> => {
     const response = await prisma.note_history.findMany({
       where: {
         bringForwardState: state,
@@ -100,7 +99,13 @@ const service = {
    * @param {string} activityId PCNS Activity ID
    * @returns {Promise<NoteHistory[]>} The result of running the findMany operation
    */
-  listNoteHistory: async (activityId: string, isDeleted: boolean = false) => {
+  /**
+   * Get all note histories for the given activity
+   * @param activityId - The ID of the activity the note histories belong to
+   * @param isDeleted - Boolean flag represented if soft deleted note histories are to be included
+   * @returns A Promise that resolves to the permit types for the given initiative
+   */
+  listNoteHistory: async (activityId: string, isDeleted: boolean = false): Promise<NoteHistory[]> => {
     const response = await prisma.note_history.findMany({
       where: {
         activityId: activityId,
@@ -118,12 +123,11 @@ const service = {
   },
 
   /**
-   * @function updateNoteHistory
-   * Updates a note history
-   * @param {NoteHistory} data Note history data to update
-   * @returns {Promise<NoteHistory>} The result of running the update operation
+   * Update a note history
+   * @param data - The note history to update
+   * @returns A Promise that resolves to the updated resource
    */
-  updateNoteHistory: async (data: NoteHistory) => {
+  updateNoteHistory: async (data: NoteHistoryBase): Promise<NoteHistory> => {
     const response = await prisma.note_history.update({
       data: data,
       where: {

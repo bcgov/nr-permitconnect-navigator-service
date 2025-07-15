@@ -88,6 +88,13 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
   };
 }
 
+export function generateNullUpdateStamps() {
+  return {
+    updatedBy: null,
+    updatedAt: null
+  };
+}
+
 /**
  * @function generateUniqueActivityId
  * Generate a new activityId, which are truncated UUIDs

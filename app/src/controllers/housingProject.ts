@@ -12,7 +12,7 @@ import {
   permitService,
   permitTrackingService
 } from '../services';
-import { Initiative } from '../utils/enums/application';
+import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -86,7 +86,7 @@ const controller = {
       basic = {
         consentToFeedback: data.basic.consentToFeedback ?? false,
         projectApplicantType: data.basic.projectApplicantType,
-        isDevelopedInBC: data.basic.isDevelopedInBC,
+        isDevelopedInBc: data.basic.isDevelopedInBC,
         companyNameRegistered: data.basic.registeredName
       };
     }
@@ -100,7 +100,7 @@ const controller = {
         otherUnitsDescription: data.housing.otherUnitsDescription,
         otherUnits: data.housing.otherUnits,
         hasRentalUnits: data.housing.hasRentalUnits,
-        financiallySupportedBC: data.housing.financiallySupportedBC,
+        financiallySupportedBc: data.housing.financiallySupportedBC,
         financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
         financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
         financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
@@ -113,7 +113,7 @@ const controller = {
 
     if (data.location) {
       location = {
-        naturalDisaster: data.location.naturalDisaster,
+        naturalDisaster: data.location.naturalDisaster === BasicResponse.YES ? true : false,
         projectLocation: data.location.projectLocation,
         projectLocationDescription: data.location.projectLocationDescription,
         geomarkUrl: data.location.geomarkUrl,
@@ -145,8 +145,10 @@ const controller = {
         authStatus: PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: x.submittedDate,
         adjudicationDate: null,
-        permitType: null,
-        permitTracking: x.permitTracking
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null
       }));
     }
 
@@ -163,7 +165,10 @@ const controller = {
         authStatus: PermitAuthorizationStatus.NONE,
         submittedDate: null,
         adjudicationDate: null,
-        permitType: null
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null
       }));
     }
 
@@ -176,12 +181,32 @@ const controller = {
         ...permits,
         housingProjectId: uuidv4(),
         activityId: activityId,
-        submittedAt: data.submittedAt ?? new Date().toISOString(),
+        submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         submittedBy: getCurrentUsername(currentContext),
         intakeStatus: IntakeStatus.SUBMITTED,
         applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
-        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE
+        submissionType: data?.submissionType ?? SubmissionType.GUIDANCE,
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        aaiUpdated: false,
+        assignedUserId: null,
+        locationPids: null,
+        queuePriority: null,
+        relatedPermits: null,
+        astNotes: null,
+        astUpdated: false,
+        addedToAts: false,
+        atsClientId: null,
+        ltsaCompleted: false,
+        bcOnlineCompleted: false,
+        financiallySupported: false,
+        waitingOn: null,
+        checkProvincialPermits: null,
+        geoJson: {},
+        atsEnquiryId: null
       } as HousingProject,
       appliedPermits,
       investigatePermits
@@ -207,15 +232,15 @@ const controller = {
 
   getActivityIds: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await housingProjectService.getHousingProjects();
+      let response: HousingProject[] = await housingProjectService.getHousingProjects();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 
-      res.status(200).json(response.map((x: HousingProject) => x.activityId));
+      res.status(200).json(response.map((x) => x.activityId));
     } catch (e: unknown) {
       next(e);
     }
@@ -235,7 +260,7 @@ const controller = {
         await contactService.upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
 
       // Create new housing project
-      const result = await housingProjectService.createHousingProject({
+      const result: HousingProject = await housingProjectService.createHousingProject({
         ...housingProject,
         ...generateCreateStamps(req.currentContext)
       });
@@ -268,23 +293,9 @@ const controller = {
     }
   },
 
-  deleteHousingProject: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
-    try {
-      const response = await housingProjectService.deleteHousingProject(req.params.housingProjectId);
-
-      if (!response) {
-        return res.status(404).json({ message: 'Housing Project not found' });
-      }
-
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   deleteDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await draftService.deleteDraft(req.params.draftId);
+      const response: Draft = await draftService.deleteDraft(req.params.draftId);
 
       if (!response) {
         return res.status(404).json({ message: 'Housing Project draft not found' });
@@ -298,7 +309,7 @@ const controller = {
 
   getDraft: async (req: Request<{ draftId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await draftService.getDraft(req.params.draftId);
+      const response: Draft = await draftService.getDraft(req.params.draftId);
 
       res.status(200).json(response);
     } catch (e: unknown) {
@@ -308,7 +319,7 @@ const controller = {
 
   getDrafts: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await draftService.getDrafts(DraftCode.HOUSING_PROJECT);
+      let response: Draft[] = await draftService.getDrafts(DraftCode.HOUSING_PROJECT);
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
@@ -331,7 +342,7 @@ const controller = {
 
   getHousingProject: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response = await housingProjectService.getHousingProject(req.params.housingProjectId);
+      const response: HousingProject = await housingProjectService.getHousingProject(req.params.housingProjectId);
 
       if (!response) {
         return res.status(404).json({ message: 'Housing Project not found' });
@@ -356,11 +367,11 @@ const controller = {
 
   getHousingProjects: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      let response = await housingProjectService.getHousingProjects();
+      let response: HousingProject[] = await housingProjectService.getHousingProjects();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 
@@ -376,7 +387,7 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      let response = await housingProjectService.searchHousingProjects({
+      let response: HousingProject[] = await housingProjectService.searchHousingProjects({
         ...req.query,
         includeUser: isTruthy(req.query.includeUser),
         includeDeleted: isTruthy(req.query.includeDeleted)
@@ -384,7 +395,7 @@ const controller = {
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         response = response.filter(
-          (x: HousingProject) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
+          (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
         );
       }
 
@@ -406,7 +417,7 @@ const controller = {
         await contactService.upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
 
       // Create new housing project
-      const result = await housingProjectService.createHousingProject({
+      const result: HousingProject = await housingProjectService.createHousingProject({
         ...housingProject,
         ...generateCreateStamps(req.currentContext)
       });
@@ -446,7 +457,7 @@ const controller = {
     try {
       const update = req.body.draftId && req.body.activityId;
 
-      let response;
+      let response: Draft;
 
       if (update) {
         // Update draft
@@ -481,7 +492,7 @@ const controller = {
     next: NextFunction
   ) => {
     try {
-      const response = await housingProjectService.updateIsDeletedFlag(
+      const response: HousingProject = await housingProjectService.updateIsDeletedFlag(
         req.params.housingProjectId,
         req.body.isDeleted,
         generateUpdateStamps(req.currentContext)
@@ -529,7 +540,7 @@ const controller = {
         await activityContactService.upsertActivityContacts(req.body.activityId, contacts);
       }
 
-      const response = await housingProjectService.updateHousingProject({
+      const response: HousingProject = await housingProjectService.updateHousingProject({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });

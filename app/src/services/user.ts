@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { Prisma } from '@prisma/client';
+import { Prisma, user } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import prisma from '../db/dataConnection';
@@ -256,7 +256,7 @@ const service = {
    * @param {boolean} [params.active] Optional boolean on user active status
    * @returns {Promise<object>} The result of running the find operation
    */
-  searchUsers: async (params: UserSearchParameters) => {
+  searchUsers: async (params: UserSearchParameters): Promise<user[]> => {
     const response = await prisma.user.findMany({
       where: {
         AND: [
@@ -288,7 +288,7 @@ const service = {
       }
     });
 
-    return response.map((x) => x.userId !== NIL);
+    return response.filter((x) => x.userId !== NIL);
   },
 
   /**

@@ -118,17 +118,6 @@ router.put(
   }
 );
 
-/** Hard deletes a housing project */
-router.delete(
-  '/:housingProjectId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),
-  hasAccess('housingProjectId'),
-  housingProjectValidator.deleteHousingProject,
-  (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction): void => {
-    housingProjectController.deleteHousingProject(req, res, next);
-  }
-);
-
 /** Hard deletes a housing project draft */
 router.delete(
   '/draft/:draftId',

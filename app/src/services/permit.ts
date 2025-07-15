@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
 
-import type { ListPermitsOptions, Permit, PermitType, PermitWithRelations, PermitWithType } from '../types';
+import type { ListPermitsOptions, Permit, PermitBase, PermitType } from '../types';
 
 const service = {
   /**
@@ -11,13 +11,12 @@ const service = {
    * @param data - The Permit object to create
    * @returns A Promise that resolves to the created resource
    */
-  createPermit: async (data: Permit): Promise<PermitWithRelations> => {
+  createPermit: async (data: PermitBase): Promise<Permit> => {
     const newPermit = { ...data, permitId: uuidv4() };
 
     const create = await prisma.permit.create({
       include: {
-        permitType: true,
-        permitNote: true
+        permitType: true
       },
       data: newPermit
     });
@@ -29,9 +28,10 @@ const service = {
    * @param permitId - The ID of the Permit to delete
    * @returns A Promise that resolves to the deleted resource
    */
-  deletePermit: async (permitId: string): Promise<PermitWithType> => {
+  deletePermit: async (permitId: string): Promise<Permit> => {
     const response = await prisma.permit.delete({
       include: {
+        permitNote: true,
         permitType: true
       },
       where: {
@@ -62,7 +62,7 @@ const service = {
    * @param permitId - The ID of the permit to retrieve
    * @returns A Promise that resolves to the permit for the given permitId
    */
-  getPermit: async (permitId: string): Promise<PermitWithRelations> => {
+  getPermit: async (permitId: string): Promise<Permit> => {
     const result = await prisma.permit.findFirstOrThrow({
       where: {
         permitId: permitId
@@ -81,7 +81,7 @@ const service = {
    * @param options - The search parameters
    * @returns A Promise that resolves to the permits matching the given options
    */
-  listPermits: async (options?: ListPermitsOptions): Promise<PermitWithRelations[]> => {
+  listPermits: async (options?: ListPermitsOptions): Promise<Permit[]> => {
     const response = await prisma.permit.findMany({
       include: {
         permitType: true,
@@ -139,7 +139,7 @@ const service = {
    * @param data - The Permit object to update
    * @returns A Promise that resolves to the updated resource
    */
-  updatePermit: async (data: Permit): Promise<PermitWithType> => {
+  updatePermit: async (data: PermitBase): Promise<Permit> => {
     const response = await prisma.permit.update({
       include: {
         permitType: true
