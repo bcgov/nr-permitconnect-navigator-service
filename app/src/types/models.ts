@@ -44,6 +44,10 @@ const identityProviderBase = Prisma.validator<Prisma.identity_providerDefaultArg
 export type IdentityProviderBase = Prisma.identity_providerGetPayload<typeof identityProviderBase>;
 export type IdentityProvider = IdentityProviderBase;
 
+const initiativeBase = Prisma.validator<Prisma.initiativeDefaultArgs>()({});
+export type InitiativeBase = Prisma.initiativeGetPayload<typeof initiativeBase>;
+export type Initiative = InitiativeBase;
+
 const noteBase = Prisma.validator<Prisma.noteDefaultArgs>()({});
 export type NoteBase = Prisma.noteGetPayload<typeof noteBase>;
 export type Note = NoteBase;

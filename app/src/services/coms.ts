@@ -23,30 +23,29 @@ function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
   return instance;
 }
 
-const service = {
-  /**
-   * @function createBucket
-   * Creates a bucket record. Bucket should exist in S3. If the set of bucket, endpoint and key match
-   * an existing record, the user will be added to that existing bucket with the provided permissions
-   * instead of generating a new bucket record.
-   * This endpoint can be used to grant the current user permission to upload to a new or existing bucket.
-   * @param {string} bearerToken The bearer token of the authorized user
-   * @param {Action[]} permissions An array of permissions to grant the user
-   */
-  async createBucket(bearerToken: string, permissions: Array<Action>) {
-    const { data } = await comsAxios({
-      headers: { Authorization: `Bearer ${bearerToken}` }
-    }).put('/bucket', {
-      accessKeyId: config.get('server.objectStorage.accessKeyId'),
-      bucket: config.get('server.objectStorage.bucket'),
-      bucketName: 'PCNS',
-      endpoint: config.get('server.objectStorage.endpoint'),
-      secretAccessKey: config.get('server.objectStorage.secretAccessKey'),
-      key: config.get('server.objectStorage.key'),
-      permCodes: permissions
-    });
-    return data;
-  },
+/**
+ * @function createBucket
+ * Creates a bucket record. Bucket should exist in S3. If the set of bucket, endpoint and key match
+ * an existing record, the user will be added to that existing bucket with the provided permissions
+ * instead of generating a new bucket record.
+ * This endpoint can be used to grant the current user permission to upload to a new or existing bucket.
+ * @param {string} bearerToken The bearer token of the authorized user
+ * @param {Action[]} permissions An array of permissions to grant the user
+ */
+export const createBucket = async (bearerToken: string, permissions: Array<Action>) => {
+  const { data } = await comsAxios({
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  }).put('/bucket', {
+    accessKeyId: config.get('server.objectStorage.accessKeyId'),
+    bucket: config.get('server.objectStorage.bucket'),
+    bucketName: 'PCNS',
+    endpoint: config.get('server.objectStorage.endpoint'),
+    secretAccessKey: config.get('server.objectStorage.secretAccessKey'),
+    key: config.get('server.objectStorage.key'),
+    permCodes: permissions
+  });
+  return data;
+};
 
   /**
    * Get an object
@@ -64,5 +63,3 @@ const service = {
     return { status, headers, data };
   }
 };
-
-export default service;

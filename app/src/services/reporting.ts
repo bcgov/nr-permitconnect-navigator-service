@@ -42,8 +42,8 @@ const service = {
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by ep.activity_id asc`;
 
-    return result;
-  },
+  return result;
+};
 
   getHousingProjectPermitData: async () => {
     const result = await prisma.$queryRaw`
@@ -95,8 +95,5 @@ const service = {
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by hp.activity_id asc`;
 
-    return result;
-  }
+  return result;
 };
-
-export default service;
