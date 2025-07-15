@@ -1,21 +1,13 @@
 import { generateCreateStamps } from '../db/utils/utils';
-import { permitNoteService } from '../services';
+import { createPermitNote } from '../services/permitNote';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import type { PermitNote } from '../types';
 
-const controller = {
-  createPermitNote: async (req: Request<never, never, PermitNote>, res: Response, next: NextFunction) => {
-    try {
-      const response = await permitNoteService.createPermitNote({
-        ...req.body,
-        ...generateCreateStamps(req.currentContext)
-      });
-      res.status(201).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+export const createPermitNoteController = async (req: Request<never, never, PermitNote>, res: Response) => {
+  const response = await createPermitNote({
+    ...req.body,
+    ...generateCreateStamps(req.currentContext)
+  });
+  res.status(201).json(response);
 };
-
-export default controller;
