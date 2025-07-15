@@ -85,7 +85,7 @@ const controller = {
       let response = await electrificationProjectService.getElectrificationProjects();
 
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        response = response.filter((x: Activity) => x?.createdBy === req.currentContext.userId);
+        response = response.filter((x) => x?.createdBy === req.currentContext.userId);
       }
 
       res.status(200).json(response.map((x: ElectrificationProject) => x.activityId));
@@ -117,26 +117,6 @@ const controller = {
       });
 
       res.status(201).json(result);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  deleteElectrificationProject: async (
-    req: Request<{ electrificationProjectId: string }>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await electrificationProjectService.deleteElectrificationProject(
-        req.params.electrificationProjectId
-      );
-
-      if (!response) {
-        return res.status(404).json({ message: 'Electrification Project not found' });
-      }
-
-      res.status(200).json(response);
     } catch (e: unknown) {
       next(e);
     }

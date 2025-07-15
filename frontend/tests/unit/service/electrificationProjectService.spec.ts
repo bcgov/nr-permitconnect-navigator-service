@@ -99,15 +99,6 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('deleteProject', () => {
-    it('calls correct endpoint', () => {
-      electrificationProjectService.deleteProject(testID);
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
-    });
-  });
-
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
       electrificationProjectService.deleteDraft(testID);

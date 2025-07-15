@@ -3,13 +3,13 @@ import config from 'config';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../db/dataConnection';
-import { BasicResponse, Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus } from '../utils/enums/projectCommon';
 import { getChefsApiKey } from '../utils/utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { IStamps } from '../interfaces/IStamps';
-import type { HousingProject, HousingProjectSearchParameters } from '../types';
+import type { HousingProject, HousingProjectBase, HousingProjectSearchParameters } from '../types';
 
 /**
  * @function chefsAxios
@@ -32,12 +32,11 @@ const service = {
    * Creates a new housing project
    * @returns {Promise<HousingProject>} The result of running the transaction
    */
-  createHousingProject: async (data: HousingProject) => {
+  createHousingProject: async (data: HousingProjectBase): Promise<HousingProject> => {
     const response = await prisma.housing_project.create({
       data: {
         ...data,
-        geoJson: data.geoJson as Prisma.InputJsonValue,
-        naturalDisaster: data.naturalDisaster === BasicResponse.YES ? true : false
+        geoJson: data.geoJson as Prisma.InputJsonValue
       },
       include: {
         activity: {
@@ -91,13 +90,13 @@ const service = {
           housingCoopDescription: x.housingCoopDescription,
           indigenousDescription: x.indigenousDescription,
           projectApplicantType: x.projectApplicantType,
-          isDevelopedInBc: x.isDevelopedInBC,
+          isDevelopedInBc: x.isDevelopedInBc,
           intakeStatus: x.intakeStatus,
           locationPids: x.locationPids,
           latitude: parseFloat(x.latitude as unknown as string),
           locality: x.locality,
           longitude: parseFloat(x.longitude as unknown as string),
-          naturalDisaster: x.naturalDisaster === BasicResponse.YES ? true : false,
+          naturalDisaster: x.naturalDisaster,
           nonProfitDescription: x.nonProfitDescription,
           projectLocation: x.projectLocation,
           projectName: x.projectName,
@@ -116,44 +115,6 @@ const service = {
         }))
       });
     });
-  },
-
-  /**
-   * @function deleteHousingProject
-   * Deletes the housing project, followed by the associated activity
-   * This action will cascade delete across all linked items
-   * @param {string} housingProjectId Hosuing Project ID
-   * @returns {Promise<HousingProject>} The result of running the delete operation
-   */
-  deleteHousingProject: async (housingProjectId: string) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const del = await trx.housing_project.delete({
-        where: {
-          housingProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activityContact: {
-                include: {
-                  contact: true
-                }
-              }
-            }
-          }
-        }
-      });
-
-      await trx.activity.delete({
-        where: {
-          activityId: del.activityId
-        }
-      });
-
-      return del;
-    });
-
-    return response;
   },
 
   /**
@@ -200,8 +161,8 @@ const service = {
    * @param {string} housingProjectId PCNS housing project ID
    * @returns {Promise<HousingProject | null>} The result of running the findFirst operation
    */
-  getHousingProject: async (housingProjectId: string) => {
-    const result = await prisma.housing_project.findFirst({
+  getHousingProject: async (housingProjectId: string): Promise<HousingProject> => {
+    const result = await prisma.housing_project.findFirstOrThrow({
       where: {
         housingProjectId
       },
@@ -227,7 +188,7 @@ const service = {
    * @param {boolean} [includeDeleted=false] Optional boolean to include deleted housing projects
    * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
    */
-  getHousingProjects: async (includeDeleted: boolean = false) => {
+  getHousingProjects: async (includeDeleted: boolean = false): Promise<HousingProject[]> => {
     const result = await prisma.housing_project.findMany({
       include: {
         activity: {
@@ -264,7 +225,7 @@ const service = {
    * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
    */
   /* eslint-enable max-len */
-  searchHousingProjects: async (params: HousingProjectSearchParameters) => {
+  searchHousingProjects: async (params: HousingProjectSearchParameters): Promise<HousingProject[]> => {
     let result = await prisma.housing_project.findMany({
       include: {
         activity: {
@@ -313,8 +274,12 @@ const service = {
    * @param {string} isDeleted flag
    * @returns {Promise<HousingProject>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (housingProjectId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
-    const deleteHousingProject = await prisma.housing_project.findUnique({
+  updateIsDeletedFlag: async (
+    housingProjectId: string,
+    isDeleted: boolean,
+    updateStamp: Partial<IStamps>
+  ): Promise<HousingProject> => {
+    const deleteHousingProject = await prisma.housing_project.findUniqueOrThrow({
       where: {
         housingProjectId
       },
@@ -338,8 +303,9 @@ const service = {
           activityId: deleteHousingProject?.activityId
         }
       });
-      return deleteHousingProject;
     }
+
+    return deleteHousingProject;
   },
 
   /**
@@ -348,12 +314,11 @@ const service = {
    * @param {HousingProject} data Housing project to update
    * @returns {Promise<HousingProject | null>} The result of running the update operation
    */
-  updateHousingProject: async (data: HousingProject) => {
+  updateHousingProject: async (data: HousingProjectBase): Promise<HousingProject> => {
     const result = await prisma.housing_project.update({
       data: {
         ...data,
-        geoJson: data.geoJson as Prisma.InputJsonValue,
-        naturalDisaster: data.naturalDisaster === BasicResponse.YES ? true : false
+        geoJson: data.geoJson as Prisma.InputJsonValue
       },
       where: {
         housingProjectId: data.housingProjectId

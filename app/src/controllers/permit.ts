@@ -4,12 +4,12 @@ import { Initiative } from '../utils/enums/application';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { ListPermitsOptions, Permit, PermitType, PermitWithRelations, PermitWithType } from '../types';
+import type { ListPermitsOptions, Permit, PermitType } from '../types';
 
 const controller = {
   createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const response: PermitWithRelations = await permitService.createPermit({
+      const response: Permit = await permitService.createPermit({
         ...req.body,
         ...generateCreateStamps(req.currentContext),
         ...generateUpdateStamps(req.currentContext)
@@ -23,7 +23,7 @@ const controller = {
 
   deletePermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response: PermitWithType = await permitService.deletePermit(req.params.permitId);
+      const response: Permit = await permitService.deletePermit(req.params.permitId);
 
       res.status(200).json(response);
     } catch (e: unknown) {
@@ -33,7 +33,7 @@ const controller = {
 
   getPermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
     try {
-      const response: PermitWithRelations = await permitService.getPermit(req.params.permitId);
+      const response: Permit = await permitService.getPermit(req.params.permitId);
 
       res.status(200).json(response);
     } catch (e: unknown) {
@@ -52,7 +52,7 @@ const controller = {
         includeNotes: isTruthy(req.query.includeNotes)
       };
 
-      const response: PermitWithRelations[] = await permitService.listPermits(options);
+      const response: Permit[] = await permitService.listPermits(options);
 
       res.status(200).json(response);
     } catch (e: unknown) {
@@ -76,7 +76,7 @@ const controller = {
 
   upsertPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const response: PermitWithType = await permitService.updatePermit({
+      const response: Permit = await permitService.updatePermit({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });
