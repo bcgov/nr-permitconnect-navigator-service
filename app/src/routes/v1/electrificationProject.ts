@@ -121,17 +121,6 @@ router.put(
   }
 );
 
-/** Hard deletes a electrification project */
-router.delete(
-  '/:electrificationProjectId',
-  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.DELETE),
-  hasAccess('electrificationProjectId'),
-  electrificationProjectValidator.deleteElectrificationProject,
-  (req: Request<{ electrificationProjectId: string }>, res: Response, next: NextFunction): void => {
-    electrificationProjectController.deleteElectrificationProject(req, res, next);
-  }
-);
-
 /** Hard deletes a electrification project draft */
 router.delete(
   '/draft/:draftId',

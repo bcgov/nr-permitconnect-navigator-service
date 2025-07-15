@@ -1,7 +1,12 @@
+import { electrification_project } from '@prisma/client';
 import prisma from '../db/dataConnection';
 
 import type { IStamps } from '../interfaces/IStamps';
-import type { ElectrificationProject, ElectrificationProjectSearchParameters } from '../types';
+import type {
+  ElectrificationProject,
+  ElectrificationProjectBase,
+  ElectrificationProjectSearchParameters
+} from '../types';
 
 const service = {
   /**
@@ -9,7 +14,7 @@ const service = {
    * Creates a new electrification project
    * @returns {Promise<Partial<ElectrificationProject>>} The result of running the transaction
    */
-  createElectrificationProject: async (data: ElectrificationProject) => {
+  createElectrificationProject: async (data: ElectrificationProjectBase): Promise<ElectrificationProject> => {
     const response = await prisma.electrification_project.create({
       data: data,
       include: {
@@ -24,44 +29,6 @@ const service = {
         }
       }
     });
-    return response;
-  },
-
-  /**
-   * @function deleteElectrificationProject
-   * Deletes the electrification project, followed by the associated activity
-   * This action will cascade delete across all linked items
-   * @param {string} electrificationProjectId Hosuing Project ID
-   * @returns {Promise<ElectrificationProject>} The result of running the delete operation
-   */
-  deleteElectrificationProject: async (electrificationProjectId: string) => {
-    const response = await prisma.$transaction(async (trx) => {
-      const del = await trx.electrification_project.delete({
-        where: {
-          electrificationProjectId: electrificationProjectId
-        },
-        include: {
-          activity: {
-            include: {
-              activityContact: {
-                include: {
-                  contact: true
-                }
-              }
-            }
-          }
-        }
-      });
-
-      await trx.activity.delete({
-        where: {
-          activityId: del.activityId
-        }
-      });
-
-      return del;
-    });
-
     return response;
   },
 
@@ -96,8 +63,8 @@ const service = {
    * @param {string} electrificationProjectId PCNS electrification project ID
    * @returns {Promise<ElectrificationProject | null>} The result of running the findFirst operation
    */
-  getElectrificationProject: async (electrificationProjectId: string): Promise<ElectrificationProject | null> => {
-    const result = await prisma.electrification_project.findFirst({
+  getElectrificationProject: async (electrificationProjectId: string): Promise<ElectrificationProject> => {
+    const result = await prisma.electrification_project.findFirstOrThrow({
       where: {
         electrificationProjectId: electrificationProjectId
       },
@@ -123,7 +90,7 @@ const service = {
    * @param {boolean} [includeDeleted=false] Optional boolean to include deleted electrification projects
    * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
    */
-  getElectrificationProjects: async (includeDeleted: boolean = false) => {
+  getElectrificationProjects: async (includeDeleted: boolean = false): Promise<ElectrificationProject[]> => {
     const result = await prisma.electrification_project.findMany({
       include: {
         activity: {
@@ -161,7 +128,9 @@ const service = {
    * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
    */
   /* eslint-enable max-len */
-  searchElectrificationProjects: async (params: ElectrificationProjectSearchParameters) => {
+  searchElectrificationProjects: async (
+    params: ElectrificationProjectSearchParameters
+  ): Promise<ElectrificationProject[]> => {
     let result = await prisma.electrification_project.findMany({
       include: {
         activity: {
@@ -213,8 +182,12 @@ const service = {
    * @param {string} isDeleted flag
    * @returns {Promise<ElectrificationProject>} The result of running the delete operation
    */
-  updateIsDeletedFlag: async (electrificationProjectId: string, isDeleted: boolean, updateStamp: Partial<IStamps>) => {
-    const deleteElectrificationProject = await prisma.electrification_project.findUnique({
+  updateIsDeletedFlag: async (
+    electrificationProjectId: string,
+    isDeleted: boolean,
+    updateStamp: Partial<IStamps>
+  ): Promise<ElectrificationProject> => {
+    const deleteElectrificationProject = await prisma.electrification_project.findUniqueOrThrow({
       where: {
         electrificationProjectId: electrificationProjectId
       },
@@ -238,9 +211,9 @@ const service = {
           activityId: deleteElectrificationProject?.activityId
         }
       });
-
-      return deleteElectrificationProject;
     }
+
+    return deleteElectrificationProject;
   },
 
   /**
@@ -249,7 +222,7 @@ const service = {
    * @param {ElectrificationProject} data Electrification project to update
    * @returns {Promise<ElectrificationProject | null>} The result of running the update operation
    */
-  updateElectrificationProject: async (data: ElectrificationProject) => {
+  updateElectrificationProject: async (data: ElectrificationProjectBase): Promise<ElectrificationProject> => {
     const result = await prisma.electrification_project.update({
       data: data,
       where: {

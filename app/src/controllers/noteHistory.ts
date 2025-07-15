@@ -1,4 +1,6 @@
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { v4 as uuidv4 } from 'uuid';
+
+import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 import {
   electrificationProjectService,
   enquiryService,
@@ -11,7 +13,7 @@ import { Initiative } from '../utils/enums/application';
 import { BringForwardType } from '../utils/enums/projectCommon';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { BringForward, NoteHistory } from '../types';
+import type { BringForward, Note, NoteHistory } from '../types';
 
 const controller = {
   /**
@@ -26,16 +28,18 @@ const controller = {
     const { note, ...history } = req.body;
 
     try {
-      const historyRes = await noteHistoryService.createNoteHistory({
+      const historyRes: NoteHistory = await noteHistoryService.createNoteHistory({
         ...history,
         isDeleted: false,
         ...generateCreateStamps(req.currentContext)
       });
 
-      const noteRes = await noteService.createNote({
+      const noteRes: Note = await noteService.createNote({
+        noteId: uuidv4(),
         noteHistoryId: historyRes.noteHistoryId,
         note: note,
-        ...generateCreateStamps(req.currentContext)
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
       });
 
       return res.status(201).json({ ...historyRes, note: [noteRes] });
@@ -50,7 +54,7 @@ const controller = {
    */
   async deleteNoteHistory(req: Request<{ noteHistoryId: string }>, res: Response, next: NextFunction) {
     try {
-      const response = await noteHistoryService.deleteNoteHistory(
+      const response: NoteHistory = await noteHistoryService.deleteNoteHistory(
         req.params.noteHistoryId,
         generateUpdateStamps(req.currentContext)
       );
@@ -73,22 +77,20 @@ const controller = {
     try {
       let response = new Array<BringForward>();
 
-      const history = await noteHistoryService.listBringForward(
+      const history: NoteHistory[] = await noteHistoryService.listBringForward(
         req.currentContext.initiative as Initiative,
         req.query.bringForwardState
       );
 
       if (history && history.length) {
-        const projects = (
-          await Promise.all([
-            electrificationProjectService.searchElectrificationProjects({
-              activityId: history.map((x) => x.activityId)
-            }),
-            housingProjectService.searchHousingProjects({
-              activityId: history.map((x) => x.activityId)
-            })
-          ])
-        ).flatMap((x) => x);
+        const [elecProj, housingProj] = await Promise.all([
+          electrificationProjectService.searchElectrificationProjects({
+            activityId: history.map((x) => x.activityId)
+          }),
+          housingProjectService.searchHousingProjects({
+            activityId: history.map((x) => x.activityId)
+          })
+        ]);
 
         const users = await userService.searchUsers({
           userId: history
@@ -117,12 +119,15 @@ const controller = {
         response = history.map((h) => ({
           activityId: h.activityId,
           noteId: h.noteHistoryId as string,
-          electrificationProjectId: projects.find((s) => s.activityId === h.activityId)
+          electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)
             ?.electrificationProjectId as string,
-          housingProjectId: projects.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
+          housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
           enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId as string,
           title: h.title,
-          projectName: projects.find((s) => s.activityId === h.activityId)?.projectName ?? null,
+          projectName:
+            elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
+            housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
+            null,
           createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
           bringForwardDate: h.bringForwardDate?.toISOString() as string
         }));
@@ -154,7 +159,7 @@ const controller = {
   },
 
   /**
-   * @function addNote
+   * @function updateNoteHistory
    * Updates a note history
    * Adds a new note to an existing history if one was given
    */
@@ -176,8 +181,10 @@ const controller = {
       if (note) {
         await noteService.createNote({
           noteHistoryId: req.params.noteHistoryId,
+          noteId: uuidv4(),
           note: note,
-          ...generateCreateStamps(req.currentContext)
+          ...generateCreateStamps(req.currentContext),
+          ...generateNullUpdateStamps()
         });
       }
 

@@ -26,7 +26,7 @@ const controller = {
       type UserWithGroup = User & { groups?: Array<Group> };
 
       // Inject found users with their groups if necessary
-      let userWithGroups: Array<UserWithGroup> = response;
+      let userWithGroups: UserWithGroup[] = response;
 
       if (reqGroup?.length || isTruthy(req.query.includeUserGroups)) {
         for (const user of userWithGroups) {
