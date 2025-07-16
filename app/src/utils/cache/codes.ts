@@ -3,11 +3,17 @@ import { transactionWrapper } from '../../db/utils/transactionWrapper';
 import { listAllCodeTables } from '../../services/code';
 
 import type { PrismaTransactionClient } from '../../db/dataConnection';
-import type { ElectrificationProjectCategoryCode, ElectrificationProjectTypeCode, SourceSystemCode } from '../../types';
+import type {
+  ElectrificationProjectCategoryCode,
+  ElectrificationProjectTypeCode,
+  EscalationTypeCode,
+  SourceSystemCode
+} from '../../types';
 
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
 export let sourceSystemCodes: string[] = [];
+export let escalationTypeCodes: string[] = [];
 
 const log = getLogger(module.filename);
 
@@ -20,6 +26,7 @@ export async function refreshCodeCaches(): Promise<boolean> {
     const codeTables = await transactionWrapper<{
       ElectrificationProjectType: ElectrificationProjectTypeCode[];
       ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
+      EscalationType: EscalationTypeCode[];
       SourceSystem: SourceSystemCode[];
     }>(async (tx: PrismaTransactionClient) => {
       return await listAllCodeTables(tx);
@@ -27,6 +34,7 @@ export async function refreshCodeCaches(): Promise<boolean> {
 
     electrificationProjectTypeCodes = codeTables.ElectrificationProjectType.map((r) => r.code);
     electrificationProjectCategoryCodes = codeTables.ElectrificationProjectCategory.map((r) => r.code);
+    escalationTypeCodes = codeTables.EscalationType.map((r) => r.code);
     sourceSystemCodes = codeTables.SourceSystem.map((r) => r.code);
 
     log.debug('Codes cache refreshed');
