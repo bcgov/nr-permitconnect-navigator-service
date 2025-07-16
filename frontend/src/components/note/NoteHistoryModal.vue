@@ -7,7 +7,8 @@ import { mixed, object, string } from 'yup';
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Dialog, Message, useConfirm, useToast } from '@/lib/primevue';
 import { noteHistoryService } from '@/services';
-import { BRING_FORWARD_TYPE_LIST, ESCALATION_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { useCodeStore } from '@/store';
+import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
 
@@ -25,6 +26,7 @@ const { activityId, noteHistory = undefined } = defineProps<{
 const emit = defineEmits(['createNoteHistory', 'updateNoteHistory', 'deleteNoteHistory']);
 
 // Composables
+const { options } = useCodeStore();
 const { t } = useI18n();
 
 // State
@@ -110,6 +112,7 @@ async function onSubmit(data: any) {
     // Force some data based on the type of note
     if (body.type === NoteType.BRING_FORWARD) {
       body.shownToProponent = false;
+      if (!body.escalateToSupervisor && !body.escalateToDirector) body.escalationType = null;
     } else {
       body.bringForwardDate = null;
       body.bringForwardState = null;
@@ -242,7 +245,9 @@ function onTypeChange(e: SelectChangeEvent) {
                 <Select
                   name="escalationType"
                   label="Escalation type"
-                  :options="ESCALATION_TYPE_LIST"
+                  option-label="label"
+                  option-value="value"
+                  :options="options.EscalationType"
                 />
               </div>
               <Select

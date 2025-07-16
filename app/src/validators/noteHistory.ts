@@ -2,7 +2,8 @@ import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
-import { BRING_FORWARD_TYPE_LIST, ESCALATION_TYPE_LIST } from '../utils/constants/projectCommon';
+import { escalationTypeCodes } from '../utils/cache/codes';
+import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon';
 
 const schema = {
   createNoteHistory: {
@@ -15,7 +16,7 @@ const schema = {
       escalateToSupervisor: Joi.boolean(),
       escalateToDirector: Joi.boolean(),
       escalationType: Joi.string()
-        .valid(...ESCALATION_TYPE_LIST)
+        .valid(...escalationTypeCodes)
         .allow(null),
       note: Joi.string().required(),
       shownToProponent: Joi.boolean(),
@@ -38,7 +39,7 @@ const schema = {
       escalateToSupervisor: Joi.boolean(),
       escalateToDirector: Joi.boolean(),
       escalationType: Joi.string()
-        .valid(...ESCALATION_TYPE_LIST)
+        .valid(...escalationTypeCodes)
         .allow(null),
       note: Joi.string().allow(null),
       noteHistoryId: uuidv4.allow(null),

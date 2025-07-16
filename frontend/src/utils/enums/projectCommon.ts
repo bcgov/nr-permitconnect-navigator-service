@@ -31,13 +31,6 @@ export enum EnquirySubmittedMethod {
   PCNS = 'PCNS'
 }
 
-export enum EscalationType {
-  PROPONENT = 'Proponent related',
-  MINISTRY = 'Ministry Related',
-  TIME_SENSITIVE = 'Time-sensitive',
-  OTHER = 'Other'
-}
-
 export enum IntakeFormCategory {
   BASIC = 'basic',
   CONTACTS = 'contacts',
