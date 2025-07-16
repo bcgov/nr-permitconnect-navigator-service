@@ -4,7 +4,7 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { activityContactService, activityService, contactService, enquiryService } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentUsername, partition, isTruthy } from '../utils/utils';
+import { getCurrentUsername, isTruthy, partition } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Contact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
