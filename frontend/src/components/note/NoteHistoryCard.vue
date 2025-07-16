@@ -30,7 +30,7 @@ const emit = defineEmits(['updateNoteHistory', 'deleteNoteHistory']);
 const appStore = useAppStore();
 
 // State
-const noteModalVisible: Ref<boolean> = ref(false);
+const noteHistoryModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string | undefined> = ref(createdByFullName);
 
 // Actions
@@ -72,13 +72,39 @@ onBeforeMount(() => {
             Edit
           </Button>
         </div>
-        <Divider type="solid" />
-      </template>
-      <template #content>
-        <div class="grid grid-cols-4 gap-4">
-          <p>
-            <span class="key font-bold">Date:</span>
-            {{ formatDateShort(noteHistory.createdAt) }}
+        <Button
+          class="p-button-outlined"
+          aria-label="Edit"
+          :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
+          @click="noteHistoryModalVisible = true"
+        >
+          <font-awesome-icon
+            class="pr-2"
+            icon="fa-solid fa-edit"
+          />
+          Edit
+        </Button>
+      </div>
+      <Divider type="solid" />
+    </template>
+    <template #content>
+      <div class="grid grid-cols-4 gap-4">
+        <p>
+          <span class="key font-bold">Date:</span>
+          {{ formatDateShort(noteHistory.createdAt) }}
+        </p>
+        <p>
+          <span class="key font-bold">Author:</span>
+          {{ userName }}
+        </p>
+        <p>
+          <span class="key font-bold">Note type:</span>
+          {{ noteHistory.type }}
+        </p>
+        <div>
+          <p v-if="noteHistory.bringForwardDate">
+            <span class="key font-bold">Bring forward date:</span>
+            {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
           </p>
           <p>
             <span class="key font-bold">Author:</span>
@@ -101,9 +127,9 @@ onBeforeMount(() => {
 
   <NoteHistoryModal
       v-if="noteHistory"
-      v-model:visible="noteModalVisible"
-      :activity-id="noteHistory.activityId"
-      :note-history="noteHistory"
+    v-model:visible="noteHistoryModalVisible"
+    :activity-id="noteHistory.activityId"
+    :note-history="noteHistory"
     @delete-note-history="
       (history: NoteHistory) => {
         emit('deleteNoteHistory', history);

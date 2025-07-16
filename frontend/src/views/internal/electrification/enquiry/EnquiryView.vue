@@ -7,7 +7,7 @@ import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, electrificationProjectService, noteHistoryService, userService } from '@/services';
+import { electrificationProjectService, enquiryService, noteHistoryService, userService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
@@ -106,13 +106,15 @@ onBeforeMount(async () => {
   }));
 
   if (noteHistoryCreatedByUsers.length) {
-    const noteHistoryUsers = await userService.searchUsers({
-      userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
-    });
+    const noteHistoryUsers = (
+      await userService.searchUsers({
+        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+      })
+    ).data;
 
     noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
       noteHistoryId: x.noteHistoryId as string,
-      createdByFullname: noteHistoryUsers.data.find((user: User) => user.userId === x.createdBy).fullName
+      createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
     }));
   }
 

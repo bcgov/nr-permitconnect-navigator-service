@@ -591,6 +591,8 @@
     "lastUpdated": "Last updated",
     "noteDeleted": "Note deleted",
     "noteDeleteFailed": "Failed to delete note",
+    "noteSaved": "Note saved",
+    "noteSaveFailed": "Failed to save note",
     "showProponent": "Show to Proponent",
     "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
   },

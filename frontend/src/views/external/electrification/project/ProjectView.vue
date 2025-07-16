@@ -99,10 +99,10 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    projectStore.setPermits(permitsValue);
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+    projectStore.setNoteHistory(noteHistory);
   } catch {
-    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
+    toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
   }
 
   projectStore.setProject(projectValue);
