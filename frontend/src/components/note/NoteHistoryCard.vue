@@ -30,7 +30,7 @@ const emit = defineEmits(['updateNoteHistory', 'deleteNoteHistory']);
 const appStore = useAppStore();
 
 // State
-const noteModalVisible: Ref<boolean> = ref(false);
+const noteHistoryModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string | undefined> = ref(createdByFullName);
 
 // Actions
@@ -62,7 +62,7 @@ onBeforeMount(() => {
           class="p-button-outlined"
           aria-label="Edit"
           :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-          @click="noteModalVisible = true"
+          @click="noteHistoryModalVisible = true"
         >
           <font-awesome-icon
             class="pr-2"
@@ -99,8 +99,8 @@ onBeforeMount(() => {
   </Card>
 
   <NoteHistoryModal
-    v-if="noteHistory && noteModalVisible"
-    v-model:visible="noteModalVisible"
+    v-if="noteHistory && noteHistoryModalVisible"
+    v-model:visible="noteHistoryModalVisible"
     :activity-id="noteHistory.activityId"
     :note-history="noteHistory"
     @delete-note-history="

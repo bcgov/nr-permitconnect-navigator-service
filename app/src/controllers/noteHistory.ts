@@ -65,6 +65,10 @@ const controller = {
     }
   },
 
+  /**
+   * @function listBringForward
+   * Get a list of all note histories with the bring forward type matching the given state
+   */
   async listBringForward(
     req: Request<never, never, never, { bringForwardState?: BringForwardType }>,
     res: Response,
@@ -154,7 +158,7 @@ const controller = {
   },
 
   /**
-   * @function addNote
+   * @function updateNoteHistory
    * Updates a note history
    * Adds a new note to an existing history if one was given
    */

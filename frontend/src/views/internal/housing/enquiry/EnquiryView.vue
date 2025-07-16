@@ -93,13 +93,15 @@ onBeforeMount(async () => {
   }));
 
   if (noteHistoryCreatedByUsers.length) {
-    const noteHistoryUsers = await userService.searchUsers({
-      userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
-    });
+    const noteHistoryUsers = (
+      await userService.searchUsers({
+        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+      })
+    ).data;
 
     noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
       noteHistoryId: x.noteHistoryId as string,
-      createdByFullname: noteHistoryUsers.data.find((user: User) => user.userId === x.createdBy).fullName
+      createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
     }));
   }
 
@@ -203,7 +205,7 @@ onBeforeMount(async () => {
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @create-note-history="(e) => projectStore.addNoteHistory(e, true)"
+          @create-note-history="(e) => enquiryStore.addNoteHistory(e, true)"
         />
       </TabPanel>
     </TabPanels>
