@@ -556,7 +556,7 @@ model note {
   createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy     String?      @map("updated_by")
   updatedAt     DateTime?    @map("updated_at") @db.Timestamptz(6)
-  note_history  note_history @relation(fields: [noteHistoryId], references: [noteHistoryId], onDelete: Cascade, map: "note_note_history_id_foreign")
+  noteHistory   note_history @relation(fields: [noteHistoryId], references: [noteHistoryId], onDelete: Cascade, map: "note_note_history_id_foreign")
 
   @@schema("public")
 }

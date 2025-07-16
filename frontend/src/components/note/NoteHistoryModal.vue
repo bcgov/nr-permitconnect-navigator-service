@@ -105,7 +105,7 @@ function onDelete() {
 
 async function onSubmit(data: any) {
   try {
-    const body = data;
+    const body = { ...data };
 
     // Force some data based on the type of note
     if (body.type === NoteType.BRING_FORWARD) {
@@ -132,9 +132,9 @@ async function onSubmit(data: any) {
       ).data;
       emit('updateNoteHistory', result);
     }
-    toast.success('Note saved');
+    toast.success(t('noteHistoryModal.noteSaved'));
   } catch (e: any) {
-    toast.error('Failed to save note', e.message);
+    toast.error(t('noteHistoryModal.noteSaveFailed'), e.message);
   } finally {
     visible.value = false;
   }

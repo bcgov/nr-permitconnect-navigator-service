@@ -810,7 +810,7 @@ paths:
     get:
       summary: List note histories by Activity ID
       description: Return a list of note histories that have the given Activity ID
-      operationId: listElectrificationNotes
+      operationId: listElectrificationNoteHistory
       tags:
         - Electrification Note
       parameters:
@@ -1892,7 +1892,7 @@ paths:
     get:
       summary: List note histories by Activity ID
       description: Return a list of note histories that have the given Activity ID
-      operationId: lisHousingtNoteHistory
+      operationId: listHousingNoteHistory
       tags:
         - Housing Note
       parameters:
