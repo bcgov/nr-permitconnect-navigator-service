@@ -17,7 +17,13 @@ import {
   Dialog,
   useToast
 } from '@/lib/primevue';
-import { contactService, enquiryService, electrificationProjectService, permitService } from '@/services';
+import {
+  contactService,
+  enquiryService,
+  electrificationProjectService,
+  permitService,
+  noteHistoryService
+} from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
@@ -146,10 +152,10 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    projectStore.setPermits(permitsValue);
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+    projectStore.setNoteHistory(noteHistory);
   } catch {
-    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
+    toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
   }
 
   projectStore.setProject(projectValue);
