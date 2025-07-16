@@ -8,7 +8,7 @@ import document from './document';
 import enquiry from './enquiry';
 import housingProject from './housingProject';
 import map from './map';
-import note from './note';
+import noteHistory from './noteHistory';
 import permit from './permit';
 import roadmap from './roadmap';
 
@@ -27,7 +27,7 @@ router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/project', housingProject);
 router.use('/map', map);
-router.use('/note', note);
+router.use('/note', noteHistory);
 router.use('/permit', permit);
 router.use('/roadmap', roadmap);
 

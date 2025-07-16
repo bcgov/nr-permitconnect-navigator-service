@@ -1,22 +1,21 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import NoteCard from '@/components/note/NoteCard.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService, userService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
-import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
-import { provide } from 'vue';
+import type { HousingProject, User } from '@/types';
 
 // Props
 const {
@@ -35,7 +34,7 @@ const { t } = useI18n();
 // Store
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
-const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
+const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -43,6 +42,7 @@ const activityId: Ref<string | undefined> = ref(undefined);
 const relatedHousingProject: Ref<HousingProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
+const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
 const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
@@ -54,18 +54,6 @@ provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIR
 provide(projectServiceKey, housingProjectService);
 
 // Actions
-function onAddNote(note: Note) {
-  enquiryStore.addNote(note, true);
-}
-
-const onDeleteNote = (note: Note) => {
-  enquiryStore.removeNote(note);
-};
-
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  enquiryStore.updateNote(oldNote, newNote);
-};
-
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
 }
@@ -83,12 +71,12 @@ async function updateRelatedEnquiry() {
 onBeforeMount(async () => {
   if (enquiryId) {
     const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-    const notes = (await noteService.listNotes(enquiry.activityId)).data;
+    const notes = (await noteHistoryService.listNoteHistories(enquiry.activityId)).data;
 
     activityId.value = enquiry.activityId;
 
     enquiryStore.setEnquiry(enquiry);
-    enquiryStore.setNotes(notes);
+    enquiryStore.setNoteHistory(notes);
 
     updateRelatedEnquiry();
   }
@@ -96,6 +84,25 @@ onBeforeMount(async () => {
   if (projectId) {
     const project = (await housingProjectService.getProject(projectId)).data;
     projectStore.setProject(project);
+  }
+
+  // Batch lookup the users who have created notes
+  const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
+    noteHistoryId: x.noteHistoryId,
+    createdBy: x.createdBy
+  }));
+
+  if (noteHistoryCreatedByUsers.length) {
+    const noteHistoryUsers = (
+      await userService.searchUsers({
+        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+      })
+    ).data;
+
+    noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
+      noteHistoryId: x.noteHistoryId as string,
+      createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
+    }));
   }
 
   loading.value = false;
@@ -161,7 +168,7 @@ onBeforeMount(async () => {
       <TabPanel :value="1">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
           </div>
           <Button
             aria-label="Add note"
@@ -175,24 +182,30 @@ onBeforeMount(async () => {
             Add note
           </Button>
         </div>
-        <div
-          v-for="(note, index) in getNotes"
-          :key="note.noteId"
-          :index="index"
-          class="col-span-12"
-        >
-          <NoteCard
-            :editable="!isCompleted"
-            :note="note"
-            @delete-note="onDeleteNote"
-            @update-note="onUpdateNote"
-          />
+        <div v-if="!loading">
+          <div
+            v-for="(noteHistory, index) in getNoteHistory"
+            :key="noteHistory.noteHistoryId"
+            :index="index"
+            class="col-span-12"
+          >
+            <NoteHistoryCard
+              :editable="!isCompleted"
+              :note-history="noteHistory"
+              :created-by-full-name="
+                noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
+                  ?.createdByFullname
+              "
+              @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
+              @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
+            />
+          </div>
         </div>
-        <NoteModal
+        <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @add-note="onAddNote"
+          @create-note-history="(e) => enquiryStore.addNoteHistory(e, true)"
         />
       </TabPanel>
     </TabPanels>

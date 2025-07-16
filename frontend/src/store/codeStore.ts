@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
-import type { Ref } from 'vue';
-import type { Code } from '@/types';
 import { codeService } from '@/services';
 
+import type { Ref } from 'vue';
+import type { Code } from '@/types';
+
 // Add new code tables here, name refers to returns from service call
-const codeNames = ['ElectrificationProjectCategory', 'ElectrificationProjectType'] as const;
+const codeNames = ['ElectrificationProjectCategory', 'ElectrificationProjectType', 'EscalationType'] as const;
 
 export type CodeName = (typeof codeNames)[number];
 export type CodeMap = Record<CodeName, Code[]>;

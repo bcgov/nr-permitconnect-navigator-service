@@ -12,8 +12,13 @@ const service = {
         active: true
       }
     });
+    const EscalationType = await prisma.escalation_type_code.findMany({
+      where: {
+        active: true
+      }
+    });
 
-    return { ElectrificationProjectType, ElectrificationProjectCategory };
+    return { ElectrificationProjectType, ElectrificationProjectCategory, EscalationType };
   }
 };
 

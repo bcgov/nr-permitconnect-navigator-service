@@ -13,6 +13,7 @@ export { default as enquiryService } from './enquiry';
 export { default as housingProjectService } from './housingProject';
 export { default as initiativeService } from './initiative';
 export { default as mapService } from './map';
+export { default as noteHistoryService } from './noteHistory';
 export { default as noteService } from './note';
 export { default as permitService } from './permit';
 export { default as permitNoteService } from './permitNote';
