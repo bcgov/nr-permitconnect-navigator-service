@@ -7,6 +7,7 @@ import {
 import { getInitiative } from '../services/initiative';
 import { createUser, readUser } from '../services/user';
 import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars';
+import { Problem } from '../utils';
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 
 import type { Request, Response } from 'express';
@@ -14,7 +15,7 @@ import type { AccessRequest, Group, User } from '../types';
 
 // Request to create user & access
 export const createUserAccessRequestController = async (
-  req: Request<never, never, { accessRequest: AccessRequest; user: User }>,
+  req: Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
   res: Response
 ) => {
   const { accessRequest, user } = req.body;
@@ -46,29 +47,29 @@ export const createUserAccessRequestController = async (
   let accessUserGroups: Array<Group> = [];
 
   if (!userResponse) {
-    res.status(404).json({ message: 'User not found' });
+    throw new Problem(404, { detail: 'User not found' });
   } else {
     accessUserGroups = await getSubjectGroups(userResponse.sub);
     const userInitiativeGroups = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
 
     if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
-      res.status(403).json({ message: 'Cannot modify requested group' });
+      throw new Problem(403, { detail: 'Cannot modify requested group' });
     }
     if (!accessRequest.update && userInitiativeGroups.length) {
-      return res.status(409).json({ message: 'User already exists' });
+      throw new Problem(409, { detail: 'User already exists' });
     }
     if (
       accessRequest.grant &&
       accessRequest.groupId &&
       accessUserGroups.map((x) => x.groupId).includes(accessRequest.groupId)
     ) {
-      res.status(409).json({ message: 'User is already assigned this group' });
+      throw new Problem(409, { detail: 'User is already assigned this group' });
     }
     if (userResponse.idp !== IdentityProvider.IDIR) {
-      res.status(409).json({ message: 'User must be an IDIR user to be assigned this group' });
+      throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
     }
     if (accessRequest.grant && !accessRequest.groupId) {
-      res.status(422).json({ message: 'Must provide a group to grant' });
+      throw new Problem(422, { detail: 'Must provide a group to grant' });
     }
   }
 
@@ -140,13 +141,13 @@ export const processUserAccessRequestController = async (
       if (req.body.approve) {
         if (accessRequest.grant) {
           if (!accessRequest.groupId) {
-            return res.status(422).json({ message: 'Must provided a role to grant' });
+            throw new Problem(422, { detail: 'Must provided a role to grant' });
           }
           if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
-            return res.status(409).json({ message: 'User is already assigned this role' });
+            throw new Problem(409, { detail: 'User is already assigned this role' });
           }
           if (userResponse.idp !== IdentityProvider.IDIR) {
-            return res.status(409).json({ message: 'User must be an IDIR user to be assigned this role' });
+            throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
           }
 
           await assignGroup(undefined, userResponse.sub, accessRequest.groupId);
@@ -168,8 +169,9 @@ export const processUserAccessRequestController = async (
         await updateAccessRequest(accessRequest);
       }
     } else {
-      return res.status(404).json({ message: 'User does not exist' });
+      throw new Problem(404, { detail: 'User does not exist' });
     }
+
     res.status(204).end();
   }
 };
