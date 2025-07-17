@@ -1,4 +1,3 @@
-import { electrification_project } from '@prisma/client';
 import prisma from '../db/dataConnection';
 
 import type { IStamps } from '../interfaces/IStamps';
@@ -38,7 +37,7 @@ export const createElectrificationProject = async (
  * Gets a set of electrification project related statistics
  * @returns {Promise<object>} The result of running the query
  */
-export const getStatistics = async (filters: {
+export const getElectrificationProjectStatistics = async (filters: {
   dateFrom: string;
   dateTo: string;
   monthYear: string;
@@ -184,13 +183,13 @@ export const searchElectrificationProjects = async (
 };
 
 /**
- * @function updateIsDeletedFlag
+ * @function updateElectrificationProjectIsDeletedFlag
  * Updates is_deleted flag for the corresponding activity
  * @param {string} electrificationProjectId Electrification project ID
  * @param {string} isDeleted flag
  * @returns {Promise<ElectrificationProject>} The result of running the delete operation
  */
-export const updateIsDeletedFlag = async (
+export const updateElectrificationProjectIsDeletedFlag = async (
   electrificationProjectId: string,
   isDeleted: boolean,
   updateStamp: Partial<IStamps>

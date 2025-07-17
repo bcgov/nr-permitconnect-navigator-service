@@ -7,7 +7,7 @@ import {
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController,
-  updateIsDeletedFlagController
+  updateEnquiryIsDeletedFlagController
 } from '../../controllers/enquiry';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -64,7 +64,7 @@ router.patch(
   hasAuthorization(Resource.ENQUIRY, Action.DELETE),
   hasAccess('enquiryId'),
   enquiryValidator.updateIsDeletedFlag,
-  updateIsDeletedFlagController
+  updateEnquiryIsDeletedFlagController
 );
 
 export default router;

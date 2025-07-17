@@ -1,5 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
-
 import prisma from '../db/dataConnection';
 import { IStamps } from '../interfaces/IStamps';
 import { BringForwardType } from '../utils/enums/projectCommon';
@@ -14,10 +12,7 @@ import type { NoteHistory, NoteHistoryBase } from '../types';
  */
 export const createNoteHistory = async (data: NoteHistoryBase): Promise<NoteHistory> => {
   const response = await prisma.note_history.create({
-    data: {
-      ...data,
-      noteHistoryId: uuidv4()
-    }
+    data
   });
 
   return response;

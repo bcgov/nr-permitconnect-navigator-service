@@ -1,7 +1,7 @@
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
-import { userService } from '../services';
+import { login } from '../services/user';
 import { Problem } from '../utils';
 import { AuthType, Initiative } from '../utils/enums/application';
 
@@ -58,7 +58,7 @@ export const currentContext = (initiative: Initiative) => {
           if (isValid) {
             currentContext.bearerToken = bearerToken;
             currentContext.tokenPayload = isValid as jwt.JwtPayload;
-            const user = await userService.login(currentContext.tokenPayload);
+            const user = await login(currentContext.tokenPayload);
 
             if (user && user.userId) currentContext.userId = user.userId;
             else throw new Error('Failed to log user in');

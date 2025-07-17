@@ -1,4 +1,4 @@
-import { yarsService } from '../services';
+import { assignGroup, getGroups, getSubjectGroups } from '../services/yars';
 import { Problem } from '../utils';
 import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 
@@ -20,24 +20,20 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const sub = (req.currentContext?.tokenPayload as any).sub;
 
-  let groups = await yarsService.getSubjectGroups(sub);
+  let groups = await getSubjectGroups(sub);
 
   if (idp !== IdentityProvider.IDIR) {
     const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
     const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
     await Promise.all(
       missing.map(async (x) => {
-        const g = await yarsService.getGroups(x);
+        const g = await getGroups(x);
 
-        await yarsService.assignGroup(
-          req.currentContext.bearerToken,
-          sub,
-          g.find((x) => x.name === GroupName.PROPONENT)?.groupId
-        );
+        await assignGroup(req.currentContext.bearerToken, sub, g.find((x) => x.name === GroupName.PROPONENT)?.groupId);
       })
     );
 
-    groups = await yarsService.getSubjectGroups(sub);
+    groups = await getSubjectGroups(sub);
   }
 
   if (groups.length === 0) {

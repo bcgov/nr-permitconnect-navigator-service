@@ -1,5 +1,4 @@
-import type { CurrentAuthorization } from '../types/CurrentAuthorization';
-import type { CurrentContext } from '../types/CurrentContext';
+import { CurrentAuthorization, CurrentContext } from '../types';
 
 declare module 'express-serve-static-core' {
   export interface Request {
