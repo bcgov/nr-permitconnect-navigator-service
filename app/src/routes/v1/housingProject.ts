@@ -3,18 +3,18 @@ import express from 'express';
 import {
   createHousingProjectController,
   deleteDraftController,
-  emailConfirmationController,
-  getActivityIdsController,
+  emailHousingProjectConfirmationController,
+  getHousingProjectActivityIdsController,
   getDraftController,
   getDraftsController,
   getHousingProjectController,
   getHousingProjectsController,
-  getStatisticsController,
+  getHousingProjectStatisticsController,
   searchHousingProjectsController,
-  submitDraftController,
-  updateDraftController,
+  submitHousingProjectDraftController,
+  updateHousingProjectDraftController,
   updateHousingProjectController,
-  updateIsDeletedFlagController
+  updateHousingProjectIsDeletedFlagController
 } from '../../controllers/housingProject';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -30,7 +30,11 @@ router.use(requireSomeGroup);
 router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectsController);
 
 /** Get a list of all the activityIds */
-router.get('/activityIds', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getActivityIdsController);
+router.get(
+  '/activityIds',
+  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
+  getHousingProjectActivityIdsController
+);
 
 /** Search housing projects */
 router.get(
@@ -45,7 +49,7 @@ router.get(
   '/statistics',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
   housingProjectValidator.getStatistics,
-  getStatisticsController
+  getHousingProjectStatisticsController
 );
 
 /** Gets a list of housing project drafts */
@@ -60,14 +64,14 @@ router.get(
 router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
-router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), updateDraftController);
+router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), updateHousingProjectDraftController);
 
 /** Creates or updates an intake and set status to Submitted */
 router.put(
   '/draft/submit',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.createHousingProject,
-  submitDraftController
+  submitHousingProjectDraftController
 );
 
 // Send an email with the confirmation of housing project
@@ -75,7 +79,7 @@ router.put(
   '/email',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.emailConfirmation,
-  emailConfirmationController
+  emailHousingProjectConfirmationController
 );
 
 /** Creates a blank housing project */
@@ -120,7 +124,7 @@ router.patch(
   hasAccess('housingProjectId'),
   housingProjectValidator.updateIsDeletedFlag,
 
-  updateIsDeletedFlagController
+  updateHousingProjectIsDeletedFlagController
 );
 
 export default router;

@@ -35,7 +35,7 @@ export const createEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
  * @param {string} enquiryId Enquiry ID
  * @returns {Promise<Enquiry>} The result of running the delete operation
  */
-export const eleteEnquiry = async (enquiryId: string): Promise<Enquiry> => {
+export const deleteEnquiry = async (enquiryId: string): Promise<Enquiry> => {
   const response = await prisma.$transaction(async (trx) => {
     const del = await trx.enquiry.delete({
       where: {
@@ -216,13 +216,13 @@ export const updateEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
 };
 
 /**
- * @function updateIsDeletedFlag
+ * @function updateEnquiryIsDeletedFlag
  * Updates is_deleted flag for the corresponding activity
  * @param {string} enquiryId Enquiry ID
  * @param {string} isDeleted flag
  * @returns {Promise<Enquiry>} The result of running the delete operation
  */
-export const updateIsDeletedFlag = async (
+export const updateEnquiryIsDeletedFlag = async (
   enquiryId: string,
   isDeleted: boolean,
   updateStamp: Partial<IStamps>

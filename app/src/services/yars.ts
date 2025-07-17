@@ -1,4 +1,4 @@
-import { comsService } from '.';
+import { createBucket } from './coms';
 import prisma from '../db/dataConnection';
 import { Initiative, GroupName, Action } from '../utils/enums/application';
 
@@ -38,7 +38,7 @@ export const assignGroup = async (bearerToken: string | undefined, sub: string, 
 
   const comsPerms = comsPermsMap.get(groupResult.name as GroupName);
   if (comsPerms && bearerToken) {
-    await comsService.createBucket(bearerToken, comsPerms);
+    await createBucket(bearerToken, comsPerms);
   }
 
   return { sub: result.sub, roleId: result.groupId };

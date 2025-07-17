@@ -130,11 +130,11 @@ export const getFormExport = async (formId: string) => {
 };
 
 /**
- * @function getStatistics
+ * @function getHousingProjectStatistics
  * Gets a set of housing project related statistics
  * @returns {Promise<object>} The result of running the query
  */
-export const getStatistics = async (filters: {
+export const getHousingProjectStatistics = async (filters: {
   dateFrom: string;
   dateTo: string;
   monthYear: string;
@@ -270,13 +270,13 @@ export const searchHousingProjects = async (params: HousingProjectSearchParamete
 };
 
 /**
- * @function updateIsDeletedFlag
+ * @function updateHousingProjectIsDeletedFlag
  * Updates is_deleted flag for the corresponding activity
  * @param {string} housingProjectId Housing project ID
  * @param {string} isDeleted flag
  * @returns {Promise<HousingProject>} The result of running the delete operation
  */
-export const updateIsDeletedFlag = async (
+export const updateHousingProjectIsDeletedFlag = async (
   housingProjectId: string,
   isDeleted: boolean,
   updateStamp: Partial<IStamps>

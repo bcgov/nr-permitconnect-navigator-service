@@ -1,4 +1,6 @@
-import { generateCreateStamps } from '../db/utils/utils';
+import { v4 as uuidv4 } from 'uuid';
+
+import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject, getObjects } from '../services/coms';
 import { email } from '../services/email';
 import { createNote } from '../services/note';
@@ -67,6 +69,7 @@ export const sendRoadmapController = async (
     }
 
     const history = await createNoteHistory({
+      noteHistoryId: uuidv4(),
       activityId: req.body.activityId,
       type: 'Roadmap',
       title: 'Sent roadmap',
@@ -77,12 +80,16 @@ export const sendRoadmapController = async (
       escalationType: null,
       shownToProponent: false,
       isDeleted: false,
-      ...generateCreateStamps(req.currentContext)
+      ...generateCreateStamps(req.currentContext),
+      ...generateNullUpdateStamps()
     });
 
     await createNote({
+      noteId: uuidv4(),
       noteHistoryId: history.noteHistoryId,
-      note: noteBody
+      note: noteBody,
+      ...generateCreateStamps(req.currentContext),
+      ...generateNullUpdateStamps()
     });
   }
 

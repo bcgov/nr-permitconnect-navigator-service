@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
+import { NIL, v4 as uuidv4 } from 'uuid';
 
 import prisma from '../../db/dataConnection';
 import { getLogger } from '../../components/log';
-import { activityService } from '../../services';
+import { getActivity } from '../../services/activity';
 import { uuidToActivityId } from '../../utils/utils';
 
 import type { CurrentContext } from '../../types';
@@ -106,8 +106,14 @@ export async function generateUniqueActivityId() {
 
   do {
     id = uuidToActivityId(uuidv4());
-    queryResult = await activityService.getActivity(id);
+    queryResult = await getActivity(id);
   } while (queryResult);
 
   return id;
+}
+
+export function jsonToPrismaInputJson(json: Prisma.JsonValue) {
+  if (json === null) return null as unknown as Prisma.JsonNullValueInput;
+
+  return json as Prisma.InputJsonValue;
 }

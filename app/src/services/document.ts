@@ -32,16 +32,6 @@ export const createDocument = async (
     }
   });
 
-  const doc = response;
-  if (response.createdBy) {
-    // getting uploaded by information for the new document
-    const user = await prisma.user.findFirst({
-      where: {
-        userId: response.createdBy
-      }
-    });
-    doc.createdByFullName = user ? `${user.fullName}` : '';
-  }
   return response;
 };
 
@@ -85,19 +75,5 @@ export const listDocuments = async (activityId: string): Promise<Document[]> => 
     }
   });
 
-  const documents = response;
-  if (documents && Array.isArray(documents)) {
-    for (let i = 0; i < documents.length; i++) {
-      const document = documents[i];
-      if (document.createdBy) {
-        const user = await prisma.user.findFirst({
-          where: {
-            userId: document.createdBy as string
-          }
-        });
-        document.createdByFullName = user ? user.fullName : '';
-      }
-    }
-  }
-  return documents;
+  return response;
 };

@@ -20,9 +20,10 @@ export const deleteContactController = async (
     // TODO: Handle Prisma errors at app level
     // P2025 is thrown when a record is not found, https://www.prisma.io/docs/orm/reference/error-reference#p2025
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      return res.status(404).json({ message: 'Contact not found' });
+      res.status(404).json({ message: 'Contact not found' });
+    } else {
+      next(e);
     }
-    next(e);
   }
 };
 
@@ -33,11 +34,6 @@ export const getContactController = async (
   const contactId = req.params.contactId;
   const includeActivities = isTruthy(req.query.includeActivities) ?? false;
   const response = await getContact(contactId, includeActivities);
-
-  if (!response) {
-    return res.status(404).json({ message: 'Contact not found' });
-  }
-
   res.status(200).json(response);
 };
 

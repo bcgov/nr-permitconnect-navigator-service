@@ -44,7 +44,7 @@ export const createNoteHistoryController = async (
     ...generateNullUpdateStamps()
   });
 
-  return res.status(201).json({ ...historyRes, note: [noteRes] });
+  res.status(201).json({ ...historyRes, note: [noteRes] });
 };
 
 /**
@@ -57,7 +57,7 @@ export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: 
     generateUpdateStamps(req.currentContext)
   );
 
-  return res.status(200).json(response);
+  res.status(200).json(response);
 };
 
 export const listBringForwardController = async (
@@ -133,10 +133,10 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
   // Only return notes flagged as shown when called by proponent
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     const filtered = response.filter((x) => x.shownToProponent);
-    return res.status(200).json(filtered);
+    res.status(200).json(filtered);
+  } else {
+    res.status(200).json(response);
   }
-
-  return res.status(200).json(response);
 };
 
 /**
@@ -167,5 +167,5 @@ export const updateNoteHistoryController = async (
     });
   }
 
-  return res.status(200).json(await getNoteHistory(req.params.noteHistoryId));
+  res.status(200).json(await getNoteHistory(req.params.noteHistoryId));
 };

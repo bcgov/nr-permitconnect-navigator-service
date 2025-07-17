@@ -124,11 +124,10 @@ export function errorHandler(
   res: Response,
   _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
-  if (err.stack) log.error(err);
-
   if (err instanceof Problem) {
     err.send(req, res);
   } else {
+    if (err.stack) log.error(err);
     new Problem(500, { detail: err.message ?? err.toString() }).send(req, res);
   }
 }

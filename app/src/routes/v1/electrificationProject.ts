@@ -2,19 +2,19 @@ import express from 'express';
 
 import {
   createElectrificationProjectController,
-  deleteDraftController,
-  emailConfirmationController,
-  getActivityIdsController,
-  getDraftController,
-  getDraftsController,
+  deleteElectrificationProjectDraftController,
+  emailElectrificationProjectConfirmationController,
+  getElectrificationProjectActivityIdsController,
+  getElectrificationProjectDraftController,
+  getElectrificationProjectDraftsController,
   getElectrificationProjectController,
   getElectrificationProjectsController,
-  getStatisticsController,
+  getElectrificationProjectStatisticsController,
   searchElectrificationProjectsController,
-  submitDraftController,
-  updateDraftController,
+  submitElectrificationProjectDraftController,
+  updateElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  updateIsDeletedFlagController
+  updateElectrificationProjectIsDeletedFlagController
 } from '../../controllers/electrificationProject';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -30,7 +30,11 @@ router.use(requireSomeGroup);
 router.get('/', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), getElectrificationProjectsController);
 
 /** Get a list of all the activityIds */
-router.get('/activityIds', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), getActivityIdsController);
+router.get(
+  '/activityIds',
+  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+  getElectrificationProjectActivityIdsController
+);
 
 /** Search electrification projects */
 router.get(
@@ -41,28 +45,36 @@ router.get(
 );
 
 /** Gets electrification project statistics*/
-router.get('/statistics', electrificationProjectValidator.getStatistics, getStatisticsController);
+router.get('/statistics', electrificationProjectValidator.getStatistics, getElectrificationProjectStatisticsController);
 
 /** Gets a electrification project draft */
 router.get(
   '/draft/:draftId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
   hasAccess('draftId'),
-  getDraftController
+  getElectrificationProjectDraftController
 );
 
 /** Gets a list of electrification project drafts */
-router.get('/draft', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), getDraftsController);
+router.get(
+  '/draft',
+  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+  getElectrificationProjectDraftsController
+);
 
 /** Creates or updates an intake and set status to Draft */
-router.put('/draft', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE), updateDraftController);
+router.put(
+  '/draft',
+  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
+  updateElectrificationProjectDraftController
+);
 
 /** Creates or updates an intake and set status to Submitted */
 router.put(
   '/draft/submit',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   electrificationProjectValidator.createElectrificationProject,
-  submitDraftController
+  submitElectrificationProjectDraftController
 );
 
 // Send an email with the confirmation of electrification project
@@ -70,7 +82,7 @@ router.put(
   '/email',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   electrificationProjectValidator.emailConfirmation,
-  emailConfirmationController
+  emailElectrificationProjectConfirmationController
 );
 
 /** Creates a blank electrification project */
@@ -87,7 +99,7 @@ router.delete(
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.DELETE),
   hasAccess('draftId'),
   electrificationProjectValidator.deleteDraft,
-  deleteDraftController
+  deleteElectrificationProjectDraftController
 );
 
 /** Gets a specific electrification project */
@@ -114,7 +126,7 @@ router.patch(
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.DELETE),
   hasAccess('electrificationProjectId'),
   electrificationProjectValidator.updateIsDeletedFlag,
-  updateIsDeletedFlagController
+  updateElectrificationProjectIsDeletedFlagController
 );
 
 export default router;

@@ -11,10 +11,10 @@ import {
   createElectrificationProject,
   getElectrificationProject,
   getElectrificationProjects,
-  getStatistics,
+  getElectrificationProjectStatistics,
   searchElectrificationProjects,
   updateElectrificationProject,
-  updateIsDeletedFlag
+  updateElectrificationProjectIsDeletedFlag
 } from '../services/electrificationProject';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -78,12 +78,15 @@ const generateElectrificationProjectData = async (
  * @function emailConfirmation
  * Send an email with the confirmation of electrification project
  */
-export const emailConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
+export const emailElectrificationProjectConfirmationController = async (
+  req: Request<never, never, Email>,
+  res: Response
+) => {
   const { data, status } = await email(req.body);
   res.status(status).json(data);
 };
 
-export const getActivityIdsController = async (req: Request, res: Response) => {
+export const getElectrificationProjectActivityIdsController = async (req: Request, res: Response) => {
   let response = await getElectrificationProjects();
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -99,7 +102,15 @@ export const createElectrificationProjectController = async (
 ) => {
   // TODO: Remove when create PUT calls get switched to POST
   if (req.body === undefined) {
-    req.body = { project: {} };
+    req.body = {
+      project: {
+        projectName: null,
+        projectDescription: null,
+        companyNameRegistered: null,
+        projectType: null,
+        bcHydroNumber: null
+      }
+    };
   }
   const electrificationProject = await generateElectrificationProjectData(req.body, req.currentContext);
 
@@ -115,18 +126,18 @@ export const createElectrificationProjectController = async (
   res.status(201).json(result);
 };
 
-export const deleteDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   const response = await deleteDraft(req.params.draftId);
   res.status(200).json(response);
 };
 
-export const getDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+export const getElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   const response = await getDraft(req.params.draftId);
 
   res.status(200).json(response);
 };
 
-export const getDraftsController = async (req: Request, res: Response) => {
+export const getElectrificationProjectDraftsController = async (req: Request, res: Response) => {
   let response = await getDrafts(DraftCode.ELECTRIFICATION_PROJECT);
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -136,8 +147,11 @@ export const getDraftsController = async (req: Request, res: Response) => {
   res.status(200).json(response);
 };
 
-export const getStatisticsController = async (req: Request<never, never, never, StatisticsFilters>, res: Response) => {
-  const response = await getStatistics(req.query);
+export const getElectrificationProjectStatisticsController = async (
+  req: Request<never, never, never, StatisticsFilters>,
+  res: Response
+) => {
+  const response = await getElectrificationProjectStatistics(req.query);
   res.status(200).json(response[0]);
 };
 
@@ -146,11 +160,6 @@ export const getElectrificationProjectController = async (
   res: Response
 ) => {
   const response = await getElectrificationProject(req.params.electrificationProjectId);
-
-  if (!response) {
-    return res.status(404).json({ message: 'Electrification Project not found' });
-  }
-
   res.status(200).json(response);
 };
 
@@ -181,7 +190,7 @@ export const searchElectrificationProjectsController = async (
   res.status(200).json(response);
 };
 
-export const submitDraftController = async (
+export const submitElectrificationProjectDraftController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
   res: Response
 ) => {
@@ -202,7 +211,7 @@ export const submitDraftController = async (
   res.status(201).json({ activityId: result.activityId, electrificationProjectId: result.electrificationProjectId });
 };
 
-export const updateDraftController = async (req: Request<never, never, Draft>, res: Response) => {
+export const updateElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
   let response;
@@ -231,20 +240,15 @@ export const updateDraftController = async (req: Request<never, never, Draft>, r
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
 };
 
-export const updateIsDeletedFlagController = async (
+export const updateElectrificationProjectIsDeletedFlagController = async (
   req: Request<{ electrificationProjectId: string }, never, { isDeleted: boolean }>,
   res: Response
 ) => {
-  const response = await updateIsDeletedFlag(
+  const response = await updateElectrificationProjectIsDeletedFlag(
     req.params.electrificationProjectId,
     req.body.isDeleted,
     generateUpdateStamps(req.currentContext)
   );
-
-  if (!response) {
-    return res.status(404).json({ message: 'Electrification Project not found' });
-  }
-
   res.status(200).json(response);
 };
 
@@ -282,10 +286,6 @@ export const updateElectrificationProjectController = async (
     ...req.body.project,
     ...generateUpdateStamps(req.currentContext)
   });
-
-  if (!response) {
-    return res.status(404).json({ message: 'Electrification Project not found' });
-  }
 
   res.status(200).json(response);
 };

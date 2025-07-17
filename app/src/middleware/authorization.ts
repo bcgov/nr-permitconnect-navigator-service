@@ -1,16 +1,19 @@
 import { NIL } from 'uuid';
 
+import { getDocument } from '../services/document';
+import { getDraft } from '../services/draft';
+import { getElectrificationProject, searchElectrificationProjects } from '../services/electrificationProject';
+import { getEnquiry } from '../services/enquiry';
+import { getHousingProject, searchHousingProjects } from '../services/housingProject';
+import { getNoteHistory } from '../services/noteHistory';
+import { getPermit } from '../services/permit';
+import { getCurrentUserId } from '../services/user';
 import {
-  documentService,
-  draftService,
-  electrificationProjectService,
-  enquiryService,
-  housingProjectService,
-  noteHistoryService,
-  permitService,
-  userService,
-  yarsService
-} from '../services';
+  getGroupPolicyDetails,
+  getPCNSGroupPolicyDetails,
+  getPolicyAttributes,
+  getSubjectGroups
+} from '../services/yars';
 import { Initiative, GroupName } from '../utils/enums/application';
 import { Problem } from '../utils';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
@@ -37,7 +40,7 @@ export const hasAuthorization = (resource: string, action: string) => {
       };
 
       if (req.currentContext) {
-        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
+        const userId = await getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         if (!userId) {
           throw new Error('Invalid user');
@@ -46,7 +49,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const sub = (req.currentContext?.tokenPayload as any).sub;
 
-        const groups = await yarsService.getSubjectGroups(sub);
+        const groups = await getSubjectGroups(sub);
 
         if (groups.length === 0) {
           throw new Error('Invalid group(s)');
@@ -60,18 +63,13 @@ export const hasAuthorization = (resource: string, action: string) => {
             const groupNames = Array.from(new Set(groups.map((x) => x.name)));
             policyDetails = await Promise.all(
               groupNames.map((x) => {
-                return yarsService.getPCNSGroupPolicyDetails(x, resource, action);
+                return getPCNSGroupPolicyDetails(x, resource, action);
               })
             ).then((x) => x.flat());
           } else {
             policyDetails = await Promise.all(
               groups.map((x) => {
-                return yarsService.getGroupPolicyDetails(
-                  x.groupId,
-                  resource,
-                  action,
-                  req.currentContext?.initiative as Initiative
-                );
+                return getGroupPolicyDetails(x.groupId, resource, action, req.currentContext?.initiative as Initiative);
               })
             ).then((x) => x.flat());
           }
@@ -83,7 +81,7 @@ export const hasAuthorization = (resource: string, action: string) => {
           // Inject policy attributes at global level and matching users groups
           const policyAttributes = await Promise.all(
             policyDetails.map((x) => {
-              return yarsService.getPolicyAttributes(x.policyId as number);
+              return getPolicyAttributes(x.policyId as number);
             })
           ).then((x) => x.flat());
 
@@ -122,13 +120,13 @@ export const hasAuthorization = (resource: string, action: string) => {
 // Maps a param key to a callback function
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const paramMap = new Map<string, (id: string) => any>([
-  ['documentId', documentService.getDocument],
-  ['draftId', draftService.getDraft],
-  ['enquiryId', enquiryService.getEnquiry],
-  ['housingProjectId', housingProjectService.getHousingProject],
-  ['electrificationProjectId', electrificationProjectService.getElectrificationProject],
-  ['noteHistoryId', noteHistoryService.getNoteHistory],
-  ['permitId', permitService.getPermit]
+  ['documentId', getDocument],
+  ['draftId', getDraft],
+  ['enquiryId', getEnquiry],
+  ['housingProjectId', getHousingProject],
+  ['electrificationProjectId', getElectrificationProject],
+  ['noteHistoryId', getNoteHistory],
+  ['permitId', getPermit]
 ]);
 
 /**
@@ -146,7 +144,7 @@ export const hasAccess = (param: string) => {
     try {
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         const id = req.params[param];
-        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
+        const userId = await getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         let data;
         const func = paramMap.get(param);
@@ -171,7 +169,7 @@ export const hasAccessPermit = (param: string) => {
     try {
       if (req.currentAuthorization?.attributes.includes('scope:self')) {
         const id = req.params[param];
-        const userId = await userService.getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
+        const userId = await getCurrentUserId(getCurrentSubject(req.currentContext), NIL);
 
         let data;
         const func = paramMap.get(param);
@@ -180,16 +178,14 @@ export const hasAccessPermit = (param: string) => {
         if (!data || data?.createdBy !== userId) {
           let project;
           if (req.currentContext?.initiative === Initiative.HOUSING) {
-            project = (await housingProjectService.searchHousingProjects({ activityId: [data.activityId] }))[0];
+            project = (await searchHousingProjects({ activityId: [data.activityId] }))[0];
             if (
               !project ||
               project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
             )
               throw new Error('No access');
           } else {
-            project = (
-              await electrificationProjectService.searchElectrificationProjects({ activityId: [data.activityId] })
-            )[0];
+            project = (await searchElectrificationProjects({ activityId: [data.activityId] }))[0];
             if (!project || project?.createdBy !== req.currentContext.userId) throw new Error('No access');
           }
         }

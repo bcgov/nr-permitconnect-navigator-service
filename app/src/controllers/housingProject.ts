@@ -2,19 +2,17 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { createActivity } from '../services/activity';
-import { deleteUnmatchedActivityContacts, upsertActivityContacts } from '../services/activityContact';
-import { insertContacts, upsertContacts } from '../services/contact';
+import { upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
-import { getRelatedEnquiries } from '../services/enquiry';
 import {
   createHousingProject,
   getHousingProject,
   getHousingProjects,
-  getStatistics,
+  getHousingProjectStatistics,
   searchHousingProjects,
   updateHousingProject,
-  updateIsDeletedFlag
+  updateHousingProjectIsDeletedFlag
 } from '../services/housingProject';
 import { createPermit } from '../services/permit';
 
@@ -22,11 +20,11 @@ import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentUsername, partition, isTruthy } from '../utils/utils';
+import { Problem } from '../utils';
+import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type {
-  Contact,
   CurrentContext,
   Draft,
   Email,
@@ -226,12 +224,12 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
  * @function emailConfirmation
  * Send an email with the confirmation of housing project
  */
-export const emailConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
+export const emailHousingProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
   const { data, status } = await email(req.body);
   res.status(status).json(data);
 };
 
-export const getActivityIdsController = async (req: Request, res: Response) => {
+export const getHousingProjectActivityIdsController = async (req: Request, res: Response) => {
   let response: HousingProject[] = await getHousingProjects();
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -290,8 +288,11 @@ export const getDraftsController = async (req: Request, res: Response) => {
   res.status(200).json(response);
 };
 
-export const getStatisticsController = async (req: Request<never, never, never, StatisticsFilters>, res: Response) => {
-  const response = await getStatistics(req.query);
+export const getHousingProjectStatisticsController = async (
+  req: Request<never, never, never, StatisticsFilters>,
+  res: Response
+) => {
+  const response = await getHousingProjectStatistics(req.query);
   res.status(200).json(response[0]);
 };
 
@@ -300,13 +301,8 @@ export const getHousingProjectController = async (req: Request<{ housingProjectI
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     if (response?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()) {
-      res.status(403).send();
+      throw new Problem(403);
     }
-  }
-
-  if (response?.activityId) {
-    const relatedEnquiries = await getRelatedEnquiries(response.activityId);
-    if (relatedEnquiries.length) response.relatedEnquiries = relatedEnquiries.map((x) => x.activityId).join(', ');
   }
 
   res.status(200).json(response);
@@ -343,7 +339,10 @@ export const searchHousingProjectsController = async (
   res.status(200).json(response);
 };
 
-export const submitDraftController = async (req: Request<never, never, HousingProjectIntake>, res: Response) => {
+export const submitHousingProjectDraftController = async (
+  req: Request<never, never, HousingProjectIntake>,
+  res: Response
+) => {
   const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
     req.body,
     req.currentContext
@@ -368,7 +367,7 @@ export const submitDraftController = async (req: Request<never, never, HousingPr
   res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
 };
 
-export const updateDraftController = async (req: Request<never, never, Draft>, res: Response) => {
+export const updateHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
   let response: Draft;
@@ -396,11 +395,11 @@ export const updateDraftController = async (req: Request<never, never, Draft>, r
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
 };
 
-export const updateIsDeletedFlagController = async (
+export const updateHousingProjectIsDeletedFlagController = async (
   req: Request<{ housingProjectId: string }, never, { isDeleted: boolean }>,
   res: Response
 ) => {
-  const response: HousingProject = await updateIsDeletedFlag(
+  const response: HousingProject = await updateHousingProjectIsDeletedFlag(
     req.params.housingProjectId,
     req.body.isDeleted,
     generateUpdateStamps(req.currentContext)
@@ -409,44 +408,11 @@ export const updateIsDeletedFlagController = async (
   res.status(200).json(response);
 };
 
-export const updateHousingProjectController = async (
-  req: Request<never, never, HousingProject & { contacts: Array<Contact> }>,
-  res: Response
-) => {
-  if (req.body.contacts) {
-    // Predicate function to check if a contact has a contactId.
-    // Used to partition contacts into existing (with contactId) and new (without contactId).
-    const hasContactId = (x: Contact) => !!x.contactId;
-
-    // Partition contacts into existing and new based on whether they have a contactId
-    const [existingContacts, newContacts] = partition(req.body.contacts, hasContactId);
-
-    // Assign a new contactId to each new contact
-    newContacts.forEach((x) => {
-      x.contactId = uuidv4();
-    });
-
-    // Combine existing contacts with new contacts
-    const contacts = existingContacts.concat(newContacts);
-
-    // Insert new contacts into the contact table
-    await insertContacts(newContacts, req.currentContext);
-
-    // Delete any activity_contact records that doesn't match the activity and contacts in the request
-    await deleteUnmatchedActivityContacts(req.body.activityId, contacts);
-
-    // Create or update activity_contact with the data from the request
-    await upsertActivityContacts(req.body.activityId, contacts);
-  }
-
+export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {
   const response: HousingProject = await updateHousingProject({
     ...req.body,
     ...generateUpdateStamps(req.currentContext)
   });
-
-  if (!response) {
-    return res.status(404).json({ message: 'Housing Project not found' });
-  }
 
   res.status(200).json(response);
 };
