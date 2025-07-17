@@ -1,5 +1,5 @@
 import { getLogger } from '../../components/log';
-import prisma from '../../db/dataConnection';
+import { listAllCodeTables } from '../../services/code';
 
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
@@ -12,19 +12,10 @@ const log = getLogger(module.filename);
  */
 export async function refreshCodeCaches(): Promise<boolean> {
   try {
-    electrificationProjectTypeCodes = (
-      await prisma.electrification_project_type_code.findMany({
-        where: { active: true },
-        select: { code: true }
-      })
-    ).map((r) => r.code);
+    const codeTables = await listAllCodeTables();
 
-    electrificationProjectCategoryCodes = (
-      await prisma.electrification_project_category_code.findMany({
-        where: { active: true },
-        select: { code: true }
-      })
-    ).map((r) => r.code);
+    electrificationProjectTypeCodes = codeTables.ElectrificationProjectType.map((r) => r.code);
+    electrificationProjectCategoryCodes = codeTables.ElectrificationProjectCategory.map((r) => r.code);
 
     log.debug('Codes cache refreshed');
     return true;

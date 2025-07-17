@@ -1,4 +1,5 @@
 import prisma from '../db/dataConnection';
+import { jsonToPrismaInputJson } from '../db/utils/utils';
 import { DraftCode } from '../utils/enums/projectCommon';
 
 import type { Draft, DraftBase } from '../types';
@@ -15,7 +16,7 @@ export const createDraft = async (data: DraftBase): Promise<Draft> => {
       draftId: data.draftId,
       activityId: data.activityId,
       draftCode: data.draftCode,
-      data: data.data,
+      data: jsonToPrismaInputJson(data.data),
       createdAt: data.createdAt,
       createdBy: data.createdBy
     }
@@ -32,7 +33,6 @@ export const createDraft = async (data: DraftBase): Promise<Draft> => {
  */
 export const deleteDraft = async (draftId: string): Promise<Draft> => {
   const result = await prisma.draft.delete({ where: { draftId } });
-
   return result;
 };
 
@@ -44,8 +44,7 @@ export const deleteDraft = async (draftId: string): Promise<Draft> => {
  */
 export const getDraft = async (draftId: string): Promise<Draft> => {
   const result = await prisma.draft.findFirstOrThrow({ where: { draftId } });
-
-  return result ?? null;
+  return result;
 };
 
 /**
@@ -56,7 +55,6 @@ export const getDraft = async (draftId: string): Promise<Draft> => {
  */
 export const getDrafts = async (draftCode?: DraftCode): Promise<Draft[]> => {
   const result = await prisma.draft.findMany({ where: { draftCode } });
-
   return result;
 };
 
@@ -68,7 +66,7 @@ export const getDrafts = async (draftCode?: DraftCode): Promise<Draft[]> => {
  */
 export const updateDraft = async (data: DraftBase): Promise<Draft> => {
   const result = await prisma.draft.update({
-    data: data,
+    data: { ...data, data: jsonToPrismaInputJson(data.data) },
     where: { draftId: data.draftId }
   });
 
