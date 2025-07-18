@@ -12,9 +12,14 @@ import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 
-const { editable = true, projectId } = defineProps<{
+const {
+  editable = true,
+  projectId,
+  permitId
+} = defineProps<{
   editable?: boolean;
   projectId: string;
+  permitId?: string;
 }>();
 
 // State
@@ -52,5 +57,6 @@ onBeforeMount(async () => {
     :editable="editable"
     :project-id="projectId"
     :activity-id="activityId"
+    :authorization-id="permitId"
   />
 </template>

@@ -304,6 +304,8 @@
   },
   "authorization": {
     "authorizationCard": {
+      "clickToCopy": "Click to copy",
+      "copiedToClipboard": "Copied to clipboard",
       "more": "More",
       "statusVerified": "Status verified date"
     },
@@ -315,6 +317,8 @@
       "adjudicationDate": "Adjudication date",
       "adjudicationDateFutureError": "Adjudication date cannot be in the future",
       "applicationStage": "Application stage",
+      "authDeleted": "Authorization deleted",
+      "authDeletionError": "Error deleting authorization",
       "authorizationType": "Authorization type",
       "authorizationStatus": "Authorization status",
       "authStatusConditionNewNone": "Authorization status can only be 'None' if the authorization state is 'Pre-submission'.",
@@ -322,6 +326,9 @@
       "agency": "Agency:",
       "businessDomain": "Business domain:",
       "cancel": "Cancel",
+      "delete": "Delete",
+      "deleteAuth": "Delete authorization?",
+      "deleteAuthMessage": "Deleting this permit will remove it on the Proponent’s side as well. Please confirm that you want to delete this permit.",
       "lastUpdated": "Last updated:",
       "needed": "Needed",
       "noteRequired": "The status of this application has changed. Please add an update for the proponent.",

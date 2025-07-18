@@ -15,6 +15,9 @@ const { permit } = defineProps<{
   permit: Permit;
 }>();
 
+// Emits
+const emit = defineEmits(['authorizationCard:more']);
+
 // Composables
 const { t } = useI18n();
 
@@ -51,6 +54,7 @@ watchEffect(() => {
           <Button
             class="p-button-outlined size-fit"
             :label="t('authorization.authorizationCardLite.more')"
+            @click="emit('authorizationCard:more')"
           />
         </div>
       </div>

@@ -3,7 +3,7 @@ import { formatDate, formatDateFilename, formatDateLong, toKebabCase } from '@/u
 describe('formatters.ts', () => {
   describe('formatDate', () => {
     it('returns the expected date format', () => {
-      expect(formatDate(new Date(2023, 10, 1).toISOString())).toEqual('November 1 2023');
+      expect(formatDate(new Date(2023, 10, 1).toISOString())).toEqual('November 1, 2023');
     });
 
     it('returns empty string if given no value', () => {

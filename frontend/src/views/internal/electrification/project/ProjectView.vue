@@ -175,6 +175,18 @@ onBeforeMount(async () => {
 
   loading.value = false;
 });
+
+function toAuthorization(authId: string) {
+  router.push({
+    name: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
+    params: {
+      projectId: projectId
+    },
+    query: {
+      permitId: authId
+    }
+  });
+}
 </script>
 
 <template>
@@ -456,6 +468,7 @@ onBeforeMount(async () => {
           <AuthorizationCard
             :editable="!isCompleted"
             :permit="permit"
+            @authorization-card:more="toAuthorization(permit.permitId)"
           />
         </div>
         <!-- Authorizations with needed = under investigation -->
@@ -473,6 +486,7 @@ onBeforeMount(async () => {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
+              @authorization-card:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -491,6 +505,7 @@ onBeforeMount(async () => {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
+              @authorization-card:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -509,6 +524,7 @@ onBeforeMount(async () => {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
+              @authorization-card:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -527,6 +543,7 @@ onBeforeMount(async () => {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
+              @authorization-card:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>

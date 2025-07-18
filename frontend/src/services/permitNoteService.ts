@@ -20,13 +20,5 @@ export default {
    */
   deletePermitNote(permitNoteId: string) {
     return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${permitNoteId}`);
-  },
-
-  /**
-   * @function updatePermit
-   * @returns {Promise} An axios response
-   */
-  updatePermit(data: PermitNote) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${data.permitNoteId}`, data);
   }
 };

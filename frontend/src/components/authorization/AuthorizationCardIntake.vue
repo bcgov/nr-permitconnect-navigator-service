@@ -12,6 +12,11 @@ import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 import type { Ref } from 'vue';
 import type { SourceSystemKind } from '@/types';
 
+// Props
+const { editMode } = defineProps<{
+  editMode?: boolean;
+}>();
+
 // Emits
 const emit = defineEmits(['update:uncheckShownToProponent']);
 
@@ -40,7 +45,10 @@ onMounted(async () => {
 </script>
 
 <template>
-  <Panel toggleable>
+  <Panel
+    toggleable
+    :collapsed="editMode"
+  >
     <template #header>
       <h3>{{ t('authorization.authorizationCardIntake.authorizationTypeID') }}</h3>
     </template>
@@ -65,6 +73,10 @@ onMounted(async () => {
             :key="idx"
             :index="idx"
           >
+            <input
+              type="hidden"
+              name="permitTrackingId"
+            />
             <div class="grid grid-cols-3 gap-x-6 gap-y-6 mt-2">
               <Select
                 :name="`permitTracking[${idx}].sourceSystemKindId`"
