@@ -1,4 +1,4 @@
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
+import { generateUpdateStamps } from '../db/utils/utils';
 import { permitService } from '../services';
 import { isTruthy } from '../utils/utils';
 
@@ -7,19 +7,6 @@ import type { ListPermitsOptions, Permit } from '../types';
 import { Initiative } from '../utils/enums/application';
 
 const controller = {
-  createPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
-    try {
-      const response = await permitService.createPermit({
-        ...req.body,
-        ...generateCreateStamps(req.currentContext),
-        ...generateUpdateStamps(req.currentContext)
-      });
-      res.status(201).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
   deletePermit: async (req: Request<{ permitId: string }>, res: Response, next: NextFunction) => {
     try {
       const response = await permitService.deletePermit(req.params.permitId);
@@ -75,9 +62,9 @@ const controller = {
     }
   },
 
-  updatePermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
+  upsertPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const response = await permitService.updatePermit({
+      const response = await permitService.upsertPermit({
         ...req.body,
         ...generateUpdateStamps(req.currentContext)
       });

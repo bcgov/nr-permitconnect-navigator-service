@@ -30,20 +30,9 @@ router.get(
 router.put(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
-  permitValidator.createPermit,
+  permitValidator.upsertPermit,
   (req: Request<never, never, Permit>, res: Response, next: NextFunction): void => {
-    permitController.createPermit(req, res, next);
-  }
-);
-
-// Permit update endpoint
-router.put(
-  '/:permitId',
-  hasAuthorization(Resource.PERMIT, Action.UPDATE),
-  hasAccess('permitId'),
-  permitValidator.updatePermit,
-  (req: Request<never, never, Permit>, res: Response, next: NextFunction): void => {
-    permitController.updatePermit(req, res, next);
+    permitController.upsertPermit(req, res, next);
   }
 );
 
