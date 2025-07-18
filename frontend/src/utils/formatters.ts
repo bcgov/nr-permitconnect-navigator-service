@@ -22,7 +22,7 @@ function _dateFnsFormat(value: string | undefined | null, formatter: string) {
  * @returns {String} A string representation of `value`
  */
 export function formatDate(value: string | undefined | null) {
-  return value ? _dateFnsFormat(value, 'MMMM d yyyy') : '';
+  return value ? _dateFnsFormat(value, 'MMMM d, yyyy') : '';
 }
 
 /**
@@ -52,7 +52,7 @@ export function formatDateLong(value: string | undefined | null) {
  * @returns {String} A string representation of `value`
  */
 export function formatDateTime(value: string | undefined | null) {
-  return _dateFnsFormat(value, 'MMMM d yyyy, h:mm a');
+  return _dateFnsFormat(value, 'MMMM d, yyyy, h:mm a');
 }
 
 /**
