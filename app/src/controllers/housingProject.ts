@@ -240,8 +240,8 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.upsertPermit(x)));
+      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.upsertPermit(x)));
 
       res.status(201).json(result);
     } catch (e: unknown) {
@@ -393,8 +393,8 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(appliedPermits.map((x: Permit) => permitService.upsertPermit(x)));
+      await Promise.all(investigatePermits.map((x: Permit) => permitService.upsertPermit(x)));
 
       // Delete old draft
       if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);

@@ -10,45 +10,6 @@ import type { ListPermitsOptions, Permit, PermitTracking } from '../types';
 
 const service = {
   /**
-   * @function createPermit
-   * Creates a Permit
-   * @param {Permit} data Permit object
-   * @returns {Promise<Permit | null>} The result of running the create operation
-   */
-  createPermit: async (data: Permit) => {
-    try {
-      const response = await prisma.$transaction(async (trx) => {
-        const newPermit = { ...data, permitId: uuidv4() };
-
-        const createResponse = await trx.permit.create({
-          include: {
-            permit_type: true
-          },
-          data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
-        });
-
-        if (data?.permitTracking) {
-          await trx.permit_tracking.createMany({
-            data: data?.permitTracking?.map((x: PermitTracking) => ({
-              permitId: newPermit?.permitId,
-              trackingId: x.trackingId,
-              sourceSystemKindId: x?.sourceSystemKindId,
-              shownToProponent: x?.shownToProponent ?? false,
-              createdBy: data.createdBy,
-              updatedBy: data.updatedBy
-            }))
-          });
-        }
-        return createResponse;
-      });
-
-      return permit.fromPrismaModel(response);
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
-  /**
    * @function deletePermit
    * Delete a permit
    * @param {string} permitId Permit ID
@@ -173,22 +134,79 @@ const service = {
   },
 
   /**
-   * @function updatePermit
-   * Updates a Permit
+   * @function upsertPermit
+   * Upsert a Permit
    * @param {Permit} data Permit object
    * @returns {Promise<Permit | null>} The result of running the update operation
    */
-  updatePermit: async (data: Permit) => {
+  upsertPermit: async (data: Permit) => {
     try {
-      const response = await prisma.permit.update({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
-        where: {
-          permit_id: data.permitId
+      const permitDataWithId = { ...data, permitId: data.permitId || uuidv4() };
+
+      // Upsert the permit
+      const response = await prisma.$transaction(async (trx) => {
+        const response = await trx.permit.upsert({
+          include: {
+            permit_type: true
+          },
+          where: {
+            permit_id: permitDataWithId.permitId
+          },
+          update: { ...permit.toPrismaModel(permitDataWithId), updated_by: permitDataWithId.updatedBy },
+          create: {
+            ...permit.toPrismaModel({ ...permitDataWithId }),
+            created_by: permitDataWithId.createdBy,
+            updated_by: permitDataWithId.updatedBy
+          }
+        });
+
+        // Delete any permit tracking that is not in the new data
+        await trx.permit_tracking.deleteMany({
+          where: {
+            permitId: permitDataWithId.permitId,
+            permitTrackingId: {
+              notIn: permitDataWithId.permitTracking
+                ?.map((x: PermitTracking) => x.permitTrackingId)
+                .filter((x) => x) as number[]
+            }
+          }
+        });
+
+        // Upsert the permit tracking
+        if (permitDataWithId.permitTracking?.length) {
+          await Promise.all(
+            permitDataWithId.permitTracking.map(async (x: PermitTracking) => {
+              if (x.permitTrackingId) {
+                await trx.permit_tracking.update({
+                  where: {
+                    permitTrackingId: x.permitTrackingId
+                  },
+                  data: {
+                    permitId: permitDataWithId.permitId,
+                    trackingId: x.trackingId,
+                    sourceSystemKindId: x?.sourceSystemKindId,
+                    shownToProponent: x?.shownToProponent ?? false,
+                    updatedBy: permitDataWithId.updatedBy
+                  }
+                });
+              } else {
+                await trx.permit_tracking.create({
+                  data: {
+                    permitId: permitDataWithId.permitId,
+                    trackingId: x.trackingId,
+                    sourceSystemKindId: x?.sourceSystemKindId,
+                    shownToProponent: x?.shownToProponent ?? false,
+                    createdBy: permitDataWithId.createdBy,
+                    updatedBy: permitDataWithId.updatedBy
+                  }
+                });
+              }
+            })
+          );
         }
+        return response;
       });
+
       return permit.fromPrismaModel(response);
     } catch (e: unknown) {
       throw e;

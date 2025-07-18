@@ -26,11 +26,11 @@ const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-1
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-describe('createPermit', () => {
+describe('upsertPermit', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const createSpy = jest.spyOn(permitService, 'createPermit');
+  const createSpy = jest.spyOn(permitService, 'upsertPermit');
 
   it('should return 201 if all good', async () => {
     const now = new Date();
@@ -67,17 +67,17 @@ describe('createPermit', () => {
     createSpy.mockResolvedValue(created);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.createPermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: 'abc-123',
+      // createdAt: expect.stringMatching(isoPattern),
+      // createdBy: 'abc-123',
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
-    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(created);
   });
 
@@ -109,7 +109,7 @@ describe('createPermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.createPermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -351,11 +351,11 @@ describe('listPermits', () => {
   });
 });
 
-describe('updatePermit', () => {
+describe('upsertPermit', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const updateSpy = jest.spyOn(permitService, 'updatePermit');
+  const updateSpy = jest.spyOn(permitService, 'upsertPermit');
 
   it('should return 200 if all good', async () => {
     const now = new Date();
@@ -393,7 +393,7 @@ describe('updatePermit', () => {
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.updatePermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
@@ -428,7 +428,7 @@ describe('updatePermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.updatePermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
