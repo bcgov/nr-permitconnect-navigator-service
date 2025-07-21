@@ -29,6 +29,34 @@ const idirIdentityProvider: IDPType = {
   active: true
 };
 
+const prismaBceidUser: PrismaUser = {
+  bceid_business_name: null,
+  user_id: uuidv4(),
+  idp: IdentityProvider.BCEID,
+  sub: 'sub',
+  email: 'test@email.com',
+  first_name: 'BCeID User',
+  full_name: 'BCeID User',
+  last_name: null,
+  active: true,
+  created_at: new Date(),
+  created_by: NIL,
+  updated_at: null,
+  updated_by: null
+};
+
+const bceidUser: User = {
+  bceidBusinessName: null,
+  userId: prismaBceidUser.user_id,
+  idp: prismaBceidUser.idp,
+  sub: prismaBceidUser.sub,
+  email: prismaBceidUser.email,
+  firstName: prismaBceidUser.first_name,
+  fullName: prismaBceidUser.full_name,
+  lastName: prismaBceidUser.last_name,
+  active: prismaBceidUser.active
+};
+
 const prismaIdirUser: PrismaUser = {
   bceid_business_name: null,
   user_id: uuidv4(),
@@ -55,6 +83,15 @@ const idirUser: User = {
   fullName: prismaIdirUser.full_name,
   lastName: prismaIdirUser.last_name,
   active: prismaIdirUser.active
+};
+
+const bceidToken = {
+  sub: prismaBceidUser.sub,
+  given_name: prismaBceidUser.first_name,
+  name: prismaBceidUser.full_name,
+  family_name: prismaBceidUser.last_name,
+  email: prismaBceidUser.email,
+  identity_provider: prismaBceidUser.idp
 };
 
 const idirToken = {
@@ -239,6 +276,70 @@ describe('user service', () => {
       expect(updateUserSpy).toHaveBeenCalledTimes(1);
       expect(searchContactsSpy).toHaveBeenCalledTimes(0);
       expect(upsertContactsSpy).toHaveBeenCalledTimes(0);
+    });
+
+    it('splits the BCeID first name into first/last for contact', async () => {
+      const updateUserSpy = jest.spyOn(userService, 'updateUser');
+      const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+
+      prismaMock.user.findFirst.mockResolvedValueOnce(prismaBceidUser);
+      updateUserSpy.mockResolvedValueOnce(bceidUser);
+      await userService.login(bceidToken);
+
+      expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
+      expect(upsertContactsSpy).toHaveBeenCalledWith(
+        [
+          {
+            contactId: expect.stringMatching(uuidv4Pattern),
+            userId: bceidUser.userId as string,
+            firstName: 'BCeID',
+            lastName: 'User',
+            email: bceidUser.email,
+            phoneNumber: null,
+            contactApplicantRelationship: null,
+            contactPreference: null
+          }
+        ],
+        { userId: bceidUser.userId }
+      );
+    });
+
+    it('defaults contact lastName to a single whitespace', async () => {
+      const updateUserSpy = jest.spyOn(userService, 'updateUser');
+      const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+
+      const prismaBlankNameUser = { ...prismaBceidUser };
+      prismaBlankNameUser.first_name = 'Blank';
+      prismaBlankNameUser.last_name = null;
+
+      const blankNameUser = { ...bceidUser };
+      blankNameUser.firstName = 'Blank';
+      blankNameUser.lastName = null;
+
+      const blankToken = { ...bceidToken };
+      blankToken.given_name = 'Blank';
+      blankToken.family_name = null;
+
+      prismaMock.user.findFirst.mockResolvedValueOnce(prismaBlankNameUser);
+      updateUserSpy.mockResolvedValueOnce(blankNameUser);
+      await userService.login(blankToken);
+
+      expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
+      expect(upsertContactsSpy).toHaveBeenCalledWith(
+        [
+          {
+            contactId: expect.stringMatching(uuidv4Pattern),
+            userId: bceidUser.userId as string,
+            firstName: 'Blank',
+            lastName: ' ',
+            email: bceidUser.email,
+            phoneNumber: null,
+            contactApplicantRelationship: null,
+            contactPreference: null
+          }
+        ],
+        { userId: bceidUser.userId }
+      );
     });
 
     it('returns the user', async () => {
