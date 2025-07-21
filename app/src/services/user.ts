@@ -5,6 +5,7 @@ import { v4 as uuidv4, NIL } from 'uuid';
 import prisma from '../db/dataConnection';
 import { identity_provider, user } from '../db/models';
 import { contactService } from '../services';
+import { IdentityProvider } from '../utils/enums/application';
 
 import type { Contact, User, UserSearchParameters } from '../types';
 
@@ -176,11 +177,26 @@ const service = {
         userId: [response.userId as string]
       });
       if (!oldContact.length) {
+        // BCeID crams the entire name into firstName
+        // Parse first word into first name and rest into last name
+        // This does not guarantee name correctness, but a null last name breaks ATS
+        let firstNameOverride: string | undefined = undefined,
+          lastNameOverride: string | undefined = undefined;
+        if ([IdentityProvider.BCEID, IdentityProvider.BCEIDBUSINESS].includes(newUser.idp)) {
+          const split = newUser.firstName.indexOf(' ');
+          if (split > 0) {
+            firstNameOverride = newUser.firstName.substring(0, split);
+            lastNameOverride = newUser.firstName.substring(split + 1);
+          } else {
+            firstNameOverride = newUser.firstName;
+          }
+        }
+
         const newContact: Contact = {
           contactId: uuidv4(),
           userId: response.userId as string,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
+          firstName: firstNameOverride ?? newUser.firstName,
+          lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options
           email: newUser.email,
           phoneNumber: null,
           contactApplicantRelationship: null,
