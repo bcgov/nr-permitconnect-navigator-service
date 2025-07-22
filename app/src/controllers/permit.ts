@@ -1,5 +1,7 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { generateUpdateStamps } from '../db/utils/utils';
-import { permitService } from '../services';
+import { permitService, permitTrackingService } from '../services';
 import { isTruthy } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -64,10 +66,13 @@ const controller = {
 
   upsertPermit: async (req: Request<never, never, Permit>, res: Response, next: NextFunction) => {
     try {
-      const response = await permitService.upsertPermit({
+      const permitDataWithId = {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
-      });
+        ...generateUpdateStamps(req.currentContext),
+        permitId: req.body.permitId || uuidv4()
+      };
+      const response = await permitService.upsertPermit(permitDataWithId);
+      await permitTrackingService.upsertPermitTracking(permitDataWithId);
 
       if (!response) {
         return res.status(404).json({ message: 'Permit not found' });

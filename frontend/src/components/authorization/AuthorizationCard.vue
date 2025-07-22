@@ -93,14 +93,14 @@ function toCopy(toCopy: string) {
               <span
                 v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
                 class="cursor-pointer"
-                @click="toCopy(trackingShownToProponent?.trackingId as string)"
+                @click="toCopy(trackingShownToProponent.trackingId as string)"
               >
                 <span class="font-bold">
-                  {{ trackingShownToProponent?.sourceSystemKind?.description }}
+                  {{ trackingShownToProponent.sourceSystemKind?.description }}
                 </span>
                 :
 
-                {{ trackingShownToProponent?.trackingId }}
+                {{ trackingShownToProponent.trackingId }}
               </span>
             </div>
             <div
@@ -111,11 +111,11 @@ function toCopy(toCopy: string) {
               <span
                 v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
                 class="cursor-pointer"
-                @click="toCopy(permitTracking?.trackingId as string)"
+                @click="toCopy(permitTracking.trackingId as string)"
               >
                 <span class="font-bold">{{ permitTracking.sourceSystemKind?.description }}</span>
                 :
-                {{ permitTracking?.trackingId }}
+                {{ permitTracking.trackingId }}
               </span>
             </div>
           </div>

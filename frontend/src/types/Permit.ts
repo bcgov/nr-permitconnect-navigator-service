@@ -10,8 +10,8 @@ export type Permit = {
   authStatus?: string;
   issuedPermitId?: string;
   needed?: string;
-  permitNote?: Array<PermitNote>;
-  permitTracking?: Array<PermitTracking>;
+  permitNote: Array<PermitNote>;
+  permitTracking: Array<PermitTracking>;
   permitType: PermitType;
   permitTypeId: number;
   status?: string;
