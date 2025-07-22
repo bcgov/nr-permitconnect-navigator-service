@@ -916,7 +916,7 @@ paths:
               $ref: '#/components/schemas/Request-Permit'
       responses:
         '200':
-          description: Permit upserted successfully
+          description: Permit updated successfully
           content:
             application/json:
               schema:

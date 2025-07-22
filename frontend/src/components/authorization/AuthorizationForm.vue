@@ -9,6 +9,7 @@ import { array, date, boolean, number, object, string } from 'yup';
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
+import { FormNavigationGuard } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
@@ -44,10 +45,12 @@ const { getProject, getPermits } = storeToRefs(projectStore);
 
 // State
 const authorization: Ref<Permit | undefined> = ref(undefined);
+const authorizationNotes: Ref<Array<PermitNote>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const authorizationNotes: Ref<Array<PermitNote> | undefined> = ref([]);
+const expandPanel: Ref<boolean> = ref(false);
 const updatedBy: Ref<User | undefined> = ref(undefined);
+const disableFormNavigationGuard: Ref<boolean> = ref(false);
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
@@ -56,6 +59,8 @@ const projectService = inject(projectServiceKey);
 // Actions
 
 async function onSubmit(data: any) {
+  disableFormNavigationGuard.value = true;
+
   const { authorizationType, permitNote, permitTracking, ...rest } = data;
   const permitData = {
     ...rest,
@@ -83,7 +88,7 @@ async function onSubmit(data: any) {
 
     router.push({
       name: projectRouteName,
-      params: { projectId: projectId },
+      params: { projectId },
       query: {
         initialTab: '2'
       }
@@ -123,10 +128,10 @@ function onDelete() {
   confirmDialog.require({
     message: t('authorization.authorizationForm.deleteAuthMessage'),
     header: t('authorization.authorizationForm.deleteAuth'),
-    acceptLabel: t('contactsProponentsList.confirm'),
+    acceptLabel: t('authorization.authorizationForm.confirm'),
     acceptClass: 'p-button-danger',
     acceptIcon: 'pi pi-trash',
-    rejectLabel: t('contactsProponentsList.cancel'),
+    rejectLabel: t('authorization.authorizationForm.cancel'),
     rejectIcon: 'pi pi-times',
     rejectProps: { outlined: true },
     accept: async () => {
@@ -135,7 +140,7 @@ function onDelete() {
         toast.success(t('authorization.authorizationForm.authDeleted'));
         router.push({
           name: projectRouteName,
-          params: { projectId: projectId },
+          params: { projectId },
           query: {
             initialTab: AUTHORIZATION_TAB
           }
@@ -194,21 +199,18 @@ const formSchema = object({
 function initializeFormValues() {
   if (authorizationId) {
     authorization.value = getPermits.value.find((p) => p.permitId === authorizationId) as Permit;
-    authorizationNotes.value = authorization.value.permitNote || [];
+    authorizationNotes.value = authorization.value.permitNote;
     if (authorization.value) {
       initialFormValues.value = {
         authorizationType: authorization.value.permitType,
         adjudicationDate: authorization.value.adjudicationDate ? new Date(authorization.value.adjudicationDate) : null,
         submittedDate: authorization.value.submittedDate ? new Date(authorization.value.submittedDate) : null,
-        /* eslint-disable indent */
-        permitTracking: authorization.value.permitTracking?.length
-          ? authorization.value.permitTracking.map((tracking) => ({
-              permitTrackingId: tracking.permitTrackingId,
-              sourceSystemKindId: tracking.sourceSystemKind?.sourceSystemKindId,
-              trackingId: tracking.trackingId,
-              shownToProponent: tracking.shownToProponent
-            }))
-          : undefined,
+        permitTracking: authorization.value.permitTracking.map((tracking) => ({
+          permitTrackingId: tracking.permitTrackingId,
+          sourceSystemKindId: tracking.sourceSystemKind?.sourceSystemKindId,
+          trackingId: tracking.trackingId,
+          shownToProponent: tracking.shownToProponent
+        })),
         issuedPermitId: authorization.value.issuedPermitId,
         statusLastVerified: authorization.value.statusLastVerified
           ? new Date(authorization.value.statusLastVerified)
@@ -219,7 +221,32 @@ function initializeFormValues() {
         permitId: authorization.value?.permitId
       };
     }
+  } else {
+    // Set default values
+    initialFormValues.value = {
+      authStatus: PermitAuthorizationStatus.NONE,
+      status: PermitStatus.NEW
+    };
   }
+}
+
+function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  // Scrolls to the top-most error
+  let first: Element | null = null;
+
+  for (let error of errors) {
+    let el = document.querySelector(`[name="${error}"]`);
+    let rect = el?.getBoundingClientRect();
+
+    if (rect) {
+      if (!first) first = el;
+      else if (rect.top < first.getBoundingClientRect().top) first = el;
+    }
+  }
+
+  first?.scrollIntoView({ behavior: 'smooth' });
 }
 
 onBeforeMount(async () => {
@@ -236,8 +263,10 @@ onBeforeMount(async () => {
     ref="formRef"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
+    @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
+    <FormNavigationGuard v-if="!disableFormNavigationGuard" />
     <input
       type="hidden"
       name="permitId"
@@ -249,7 +278,7 @@ onBeforeMount(async () => {
     <AuthorizationCardIntake
       initial-form-values=""
       :editable="true"
-      :edit-mode="authorizationId ? true : false"
+      :expand-panel="authorizationId && !expandPanel ? true : false"
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
@@ -274,6 +303,7 @@ onBeforeMount(async () => {
           :label="t('authorization.authorizationForm.publish')"
           type="submit"
           icon="pi pi-check"
+          @click="expandPanel = true"
         />
         <Button
           class="p-button-outlined mr-2"
@@ -282,7 +312,7 @@ onBeforeMount(async () => {
           @click="
             router.push({
               name: projectRouteName,
-              params: { projectId: projectId },
+              params: { projectId },
               query: {
                 initialTab: AUTHORIZATION_TAB
               }
@@ -299,8 +329,11 @@ onBeforeMount(async () => {
       />
     </div>
 
-    <div class="grid grid-cols-4 gap-x-6 gap-y-6 authorization-details-block pl-6 py-3 mt-8">
-      <div class="flex justify-center">
+    <div
+      v-if="authorizationId"
+      class="grid grid-cols-4 gap-x-6 gap-y-6 authorization-details-block pl-6 py-3 mt-8"
+    >
+      <div class="flex">
         <span class="font-bold mr-2">
           {{ t('authorization.authorizationForm.agency') }}
         </span>
@@ -320,6 +353,7 @@ onBeforeMount(async () => {
       </div>
     </div>
     <AuthorizationUpdateHistory
+      v-if="authorizationId"
       initial-form-values=""
       :editable="true"
       class="mt-6"

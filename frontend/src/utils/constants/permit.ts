@@ -16,7 +16,7 @@ export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIG
 export const PERMIT_STATUS_LIST = [
   PermitStatus.NEW,
   PermitStatus.APPLIED,
-  PermitStatus.COMPLETED,
   PermitStatus.TECHNICAL_REVIEW,
-  PermitStatus.PENDING
+  PermitStatus.PENDING,
+  PermitStatus.COMPLETED
 ];

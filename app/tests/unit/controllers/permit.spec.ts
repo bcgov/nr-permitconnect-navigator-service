@@ -45,7 +45,9 @@ describe('upsertPermit', () => {
         needed: 'true',
         status: 'FOO',
         submittedDate: now,
-        adjudicationDate: now
+        adjudicationDate: now,
+        createdAt: new Date().toISOString(),
+        createdBy: 'abc-123'
       },
       currentContext: CURRENT_CONTEXT
     };
@@ -72,8 +74,9 @@ describe('upsertPermit', () => {
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
-      // createdAt: expect.stringMatching(isoPattern),
-      // createdBy: 'abc-123',
+      createdAt: expect.stringMatching(isoPattern),
+      createdBy: 'abc-123',
+      permitId: expect.any(String),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -114,6 +117,7 @@ describe('upsertPermit', () => {
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.any(String),
       createdAt: expect.stringMatching(isoPattern),
       createdBy: 'abc-123',
       updatedAt: expect.stringMatching(isoPattern),
@@ -398,6 +402,7 @@ describe('upsertPermit', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.any(String),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -433,6 +438,7 @@ describe('upsertPermit', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.any(String),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });

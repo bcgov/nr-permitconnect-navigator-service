@@ -9,7 +9,8 @@ import {
   emailService,
   enquiryService,
   housingProjectService,
-  permitService
+  permitService,
+  permitTrackingService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
@@ -240,8 +241,26 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.upsertPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.upsertPermit(x)));
+      await Promise.all(
+        appliedPermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
+      await Promise.all(
+        investigatePermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
 
       res.status(201).json(result);
     } catch (e: unknown) {
@@ -393,8 +412,26 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map((x: Permit) => permitService.upsertPermit(x)));
-      await Promise.all(investigatePermits.map((x: Permit) => permitService.upsertPermit(x)));
+      await Promise.all(
+        appliedPermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
+      await Promise.all(
+        investigatePermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
 
       // Delete old draft
       if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);

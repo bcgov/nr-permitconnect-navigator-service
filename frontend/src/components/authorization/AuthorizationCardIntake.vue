@@ -13,8 +13,8 @@ import type { Ref } from 'vue';
 import type { SourceSystemKind } from '@/types';
 
 // Props
-const { editMode } = defineProps<{
-  editMode?: boolean;
+const { expandPanel } = defineProps<{
+  expandPanel?: boolean;
 }>();
 
 // Emits
@@ -47,7 +47,7 @@ onMounted(async () => {
 <template>
   <Panel
     toggleable
-    :collapsed="editMode"
+    :collapsed="expandPanel"
   >
     <template #header>
       <h3>{{ t('authorization.authorizationCardIntake.authorizationTypeID') }}</h3>

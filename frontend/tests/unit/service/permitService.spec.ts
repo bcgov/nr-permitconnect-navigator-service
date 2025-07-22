@@ -36,7 +36,9 @@ const TEST_PERMIT_1: Permit = {
   status: 'status',
   submittedDate: new Date().toISOString(),
   adjudicationDate: new Date().toISOString(),
-  permitType: TEST_PERMIT_TYPE
+  permitType: TEST_PERMIT_TYPE,
+  permitNote: [],
+  permitTracking: []
 };
 
 // Mocks
@@ -77,6 +79,9 @@ describe('permitService', () => {
       beforeEach(() => {
         appStore = useAppStore();
         appStore.setInitiative(initiative);
+      });
+      afterEach(() => {
+        upsertPermitSpy.mockReset();
       });
 
       it('calls creates a permit', async () => {
@@ -123,14 +128,14 @@ describe('permitService', () => {
         expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
       });
 
-      // it('calls put permit with wrong object type', async () => {
-      //   const modifiedPermit = {} as any;
-      //   delete modifiedPermit.permitTypeId;
+      it('calls put permit with wrong object type', async () => {
+        upsertPermitSpy.mockRejectedValue(new Error('Invalid permit object'));
+        const modifiedPermit = {} as any;
+        delete modifiedPermit.permitTypeId;
 
-      //   await permitService.upsertPermit(modifiedPermit);
-      //   expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
-      //   expect(upsertPermitSpy).toThrow();
-      // });
+        await expect(permitService.upsertPermit(modifiedPermit)).rejects.toThrow();
+        expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
+      });
 
       it('calls get permit', async () => {
         await permitService.listPermits({ activityId: TEST_ID });

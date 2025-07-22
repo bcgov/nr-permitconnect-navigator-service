@@ -55,7 +55,9 @@ const testPermit: Permit = {
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
-  permitType: testPermitType
+  permitType: testPermitType,
+  permitNote: [],
+  permitTracking: []
 };
 
 const wrapperSettings = (testPermitProp = testPermit) => ({

@@ -486,7 +486,7 @@ function toAuthorization(authId: string) {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
-              @authorization-card:more="toAuthorization(permit.permitId)"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -505,7 +505,7 @@ function toAuthorization(authId: string) {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
-              @authorization-card:more="toAuthorization(permit.permitId)"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -524,7 +524,7 @@ function toAuthorization(authId: string) {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
-              @authorization-card:more="toAuthorization(permit.permitId)"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
@@ -543,7 +543,7 @@ function toAuthorization(authId: string) {
             <AuthorizationCardLite
               :editable="!isCompleted"
               :permit="permit"
-              @authorization-card:more="toAuthorization(permit.permitId)"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
