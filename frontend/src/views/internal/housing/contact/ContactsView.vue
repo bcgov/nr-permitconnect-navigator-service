@@ -31,7 +31,11 @@ function removeContact(contact: Contact) {
 
 onBeforeMount(async () => {
   contacts.value = (
-    await contactService.searchContacts({ initiative: useAppStore().getInitiative, includeActivities: true })
+    await contactService.searchContacts({
+      initiative: useAppStore().getInitiative,
+      includeActivities: true,
+      hasActivity: true
+    })
   ).data;
   loading.value = false;
 });

@@ -6,6 +6,7 @@ export type ContactSearchParameters = {
   contactId?: string[];
   email?: string;
   firstName?: string;
+  hasActivity?: boolean;
   lastName?: string;
   phoneNumber?: string;
   userId?: string[];
