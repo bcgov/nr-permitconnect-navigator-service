@@ -5,5 +5,4 @@ export type HousingProjectSearchParameters = {
   includeUser?: boolean;
   housingProjectId?: Array<string>;
   submissionType?: Array<string>;
-  includeDeleted?: boolean;
 };

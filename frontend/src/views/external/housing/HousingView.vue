@@ -134,7 +134,7 @@ onBeforeMount(async () => {
     await Promise.all([
       permitService.listPermits(),
       enquiryService.getEnquiries(),
-      housingProjectService.searchProjects({ includeDeleted: false }),
+      housingProjectService.searchProjects(),
       housingProjectService.getDrafts()
     ])
   ).map((r) => r.data);

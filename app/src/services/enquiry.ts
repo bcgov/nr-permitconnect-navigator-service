@@ -119,7 +119,6 @@ export const getEnquiry = async (enquiryId: string): Promise<Enquiry> => {
  * @param {string[]} [params.createdBy] Optional array of uuids representing users who created enquiries
  * @param {string[]} [params.enquiryId] Optional array of uuids representing the enquiry ID
  * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
- * @param {boolean}  [params.includeDeleted] Optional bool representing if deleted enquiries should be included
  * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
  * @param {Initiative} [initiative] Initiative to search in
  * @returns {Promise<Enquiry[]>} The result of running the findMany operation
@@ -159,8 +158,7 @@ export const searchEnquiries = async (params: EnquirySearchParameters, initiativ
         },
         {
           intakeStatus: { in: params.intakeStatus }
-        },
-        params.includeDeleted ? {} : { activity: { isDeleted: false } }
+        }
       ]
     }
   });

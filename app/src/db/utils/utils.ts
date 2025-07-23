@@ -76,14 +76,14 @@ export async function checkDatabaseSchema(): Promise<boolean> {
 
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
-    createdBy: currentContext?.userId ?? null,
+    createdBy: currentContext?.userId ?? NIL,
     createdAt: new Date()
   };
 }
 
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
-    updatedBy: (currentContext?.userId as string) ?? null,
+    updatedBy: (currentContext?.userId as string) ?? NIL,
     updatedAt: new Date()
   };
 }
@@ -106,13 +106,15 @@ export async function generateUniqueActivityId() {
 
   do {
     id = uuidToActivityId(uuidv4());
-    queryResult = await getActivity(id);
+    // No op any errors, 404 is potentially expected here
+    queryResult = await getActivity(id).catch(() => {});
   } while (queryResult);
 
   return id;
 }
 
 export function jsonToPrismaInputJson(json: Prisma.JsonValue) {
+  console.log(json);
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
 
   return json as Prisma.InputJsonValue;

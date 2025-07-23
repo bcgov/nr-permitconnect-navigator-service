@@ -75,7 +75,6 @@ const schema = {
       createdBy: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
-      includeDeleted: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
       projectType: Joi.array().items(...electrificationProjectTypeCodes),
       projectCategory: Joi.array().items(...electrificationProjectCategoryCodes)

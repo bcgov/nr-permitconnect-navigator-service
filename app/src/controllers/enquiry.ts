@@ -107,7 +107,6 @@ export const searchEnquiriesController = async (
   let response = await searchEnquiries(
     {
       ...req.query,
-      includeDeleted: isTruthy(req.query.includeDeleted),
       includeUser: isTruthy(req.query.includeUser)
     },
     req.currentContext.initiative as Initiative

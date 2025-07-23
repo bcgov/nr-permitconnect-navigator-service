@@ -123,7 +123,7 @@ onBeforeMount(async () => {
   [authorizations.value, projects.value, drafts.value] = (
     await Promise.all([
       permitService.listPermits(),
-      electrificationProjectService.searchProjects({ includeDeleted: false }),
+      electrificationProjectService.searchProjects(),
       electrificationProjectService.getDrafts()
     ])
   ).map((r) => r.data);
