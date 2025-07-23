@@ -5,6 +5,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon'
 
 import type { AccessRequest, Contact, Permit, User } from './models';
 import type { IStamps } from '../interfaces/IStamps';
+import { Prisma } from '@prisma/client';
 
 type AddressResource = {
   '@type': string;
@@ -189,7 +190,6 @@ export type ElectrificationProjectSearchParameters = {
   projectCategory?: Array<string>;
   intakeStatus?: Array<string>;
   includeUser?: boolean;
-  includeDeleted?: boolean;
 };
 
 export type Email = {
@@ -236,7 +236,6 @@ export type EnquirySearchParameters = {
   createdBy?: Array<string>;
   enquiryId?: Array<string>;
   intakeStatus?: Array<string>;
-  includeDeleted?: boolean;
   includeUser?: boolean;
 };
 
@@ -258,7 +257,7 @@ export type HousingProjectIntake = {
   basic?: {
     consentToFeedback?: boolean;
     projectApplicantType?: string | null;
-    isDevelopedInBC?: string | null;
+    isDevelopedInBc?: string | null;
     registeredName?: string;
   };
 
@@ -270,7 +269,7 @@ export type HousingProjectIntake = {
     otherUnitsDescription?: string;
     otherUnits?: string | null;
     hasRentalUnits?: string | null;
-    financiallySupportedBC?: string | null;
+    financiallySupportedBc?: string | null;
     financiallySupportedIndigenous?: string | null;
     financiallySupportedNonProfit?: string | null;
     financiallySupportedHousingCoop?: string | null;
@@ -285,7 +284,7 @@ export type HousingProjectIntake = {
     projectLocation?: string;
     projectLocationDescription?: string;
     geomarkUrl?: string | null;
-    geoJSON?: string | null;
+    geoJson: Prisma.JsonValue;
     ltsaPIDLookup?: string;
     latitude?: number | null;
     longitude?: number | null;
@@ -310,7 +309,6 @@ export type HousingProjectSearchParameters = {
   submissionType?: Array<string>;
   intakeStatus?: Array<string>;
   includeUser?: boolean;
-  includeDeleted?: boolean;
 };
 
 export type IdirSearchParameters = {

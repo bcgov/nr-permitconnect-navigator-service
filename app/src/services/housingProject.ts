@@ -3,6 +3,7 @@ import config from 'config';
 import { Prisma } from '@prisma/client';
 
 import prisma from '../db/dataConnection';
+import { jsonToPrismaInputJson } from '../db/utils/utils';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus } from '../utils/enums/projectCommon';
 import { getChefsApiKey } from '../utils/utils';
@@ -189,10 +190,9 @@ export const getHousingProject = async (housingProjectId: string): Promise<Housi
 /**
  * @function getHousingProjects
  * Gets a list of housing projects
- * @param {boolean} [includeDeleted=false] Optional boolean to include deleted housing projects
  * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
  */
-export const getHousingProjects = async (includeDeleted: boolean = false): Promise<HousingProject[]> => {
+export const getHousingProjects = async (): Promise<HousingProject[]> => {
   const result = await prisma.housing_project.findMany({
     include: {
       activity: {
@@ -208,8 +208,7 @@ export const getHousingProjects = async (includeDeleted: boolean = false): Promi
     },
     orderBy: {
       createdAt: 'desc'
-    },
-    where: includeDeleted ? {} : { activity: { isDeleted: false } }
+    }
   });
 
   return result;
@@ -223,12 +222,11 @@ export const getHousingProjects = async (includeDeleted: boolean = false): Promi
  * @param {string[]} [params.housingProjectId] Optional array of uuids representing the housing project ID
  * @param {string[]} [params.submissionType] Optional array of strings representing the housing submission type
  * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
- * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted housing projects should be included
  * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
  * @returns {Promise<(HousingProject | null)[]>} The result of running the findMany operation
  */
 export const searchHousingProjects = async (params: HousingProjectSearchParameters): Promise<HousingProject[]> => {
-  let result = await prisma.housing_project.findMany({
+  const result = await prisma.housing_project.findMany({
     include: {
       activity: {
         include: {
@@ -257,14 +255,10 @@ export const searchHousingProjects = async (params: HousingProjectSearchParamete
         },
         {
           intakeStatus: { in: params.intakeStatus }
-        },
-        params.includeDeleted ? {} : { activity: { isDeleted: false } }
+        }
       ]
     }
   });
-
-  // Remove soft deleted housing projects
-  if (!params.includeDeleted) result = result.filter((x) => !x.activity.isDeleted);
 
   return result;
 };
@@ -317,10 +311,11 @@ export const updateHousingProjectIsDeletedFlag = async (
  * @returns {Promise<HousingProject | null>} The result of running the update operation
  */
 export const updateHousingProject = async (data: HousingProjectBase): Promise<HousingProject> => {
+  const { activityId, ...rest } = data;
   const result = await prisma.housing_project.update({
     data: {
-      ...data,
-      geoJson: data.geoJson as Prisma.InputJsonValue
+      ...rest,
+      geoJson: jsonToPrismaInputJson(data.geoJson)
     },
     where: {
       housingProjectId: data.housingProjectId
