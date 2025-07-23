@@ -36,7 +36,6 @@ const schema = {
       createdBy: Joi.array().items(Joi.string()),
       enquiryId: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(Joi.string()),
-      includeDeleted: Joi.boolean(),
       includeUser: Joi.boolean()
     })
   },

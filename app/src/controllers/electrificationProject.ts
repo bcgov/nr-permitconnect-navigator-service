@@ -179,8 +179,7 @@ export const searchElectrificationProjectsController = async (
 ) => {
   let response = await searchElectrificationProjects({
     ...req.query,
-    includeUser: isTruthy(req.query.includeUser),
-    includeDeleted: isTruthy(req.query.includeDeleted)
+    includeUser: isTruthy(req.query.includeUser)
   });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {

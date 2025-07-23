@@ -6,5 +6,4 @@ export type ElectrificationProjectSearchParameters = {
   electrificationProjectId?: Array<string>;
   projectType?: Array<string>;
   projectCategory?: Array<string>;
-  includeDeleted?: boolean;
 };

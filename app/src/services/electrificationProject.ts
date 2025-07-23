@@ -92,12 +92,9 @@ export const getElectrificationProject = async (electrificationProjectId: string
 /**
  * @function getElectrificationProjects
  * Gets a list of electrification projects
- * @param {boolean} [includeDeleted=false] Optional boolean to include deleted electrification projects
  * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
  */
-export const getElectrificationProjects = async (
-  includeDeleted: boolean = false
-): Promise<ElectrificationProject[]> => {
+export const getElectrificationProjects = async (): Promise<ElectrificationProject[]> => {
   const result = await prisma.electrification_project.findMany({
     include: {
       activity: {
@@ -113,8 +110,7 @@ export const getElectrificationProjects = async (
     },
     orderBy: {
       createdAt: 'desc'
-    },
-    where: includeDeleted ? {} : { activity: { isDeleted: false } }
+    }
   });
 
   return result;
@@ -130,7 +126,6 @@ export const getElectrificationProjects = async (
  * @param {string[]} [params.projectType] Optional array of strings representing the electrification project type
  * @param {string[]} [params.projectCategory] Optional array of strings representing the electrification project category
  * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
- * @param {boolean}  [params.includeDeleted] Optional bool representing whether deleted electrification projects should be included
  * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
  * @returns {Promise<(ElectrificationProject | null)[]>} The result of running the findMany operation
  */
@@ -170,14 +165,10 @@ export const searchElectrificationProjects = async (
         },
         {
           intakeStatus: { in: params.intakeStatus }
-        },
-        params.includeDeleted ? {} : { activity: { isDeleted: false } }
+        }
       ]
     }
   });
-
-  // Remove soft deleted electrification projects
-  if (!params.includeDeleted) result = result.filter((x) => !x.activity.isDeleted);
 
   return result;
 };

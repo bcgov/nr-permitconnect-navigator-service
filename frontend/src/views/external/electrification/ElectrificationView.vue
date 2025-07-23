@@ -89,10 +89,7 @@ watch(
 
 onBeforeMount(async () => {
   [projects.value, drafts.value] = (
-    await Promise.all([
-      electrificationProjectService.searchProjects({ includeDeleted: false }),
-      electrificationProjectService.getDrafts()
-    ])
+    await Promise.all([electrificationProjectService.searchProjects(), electrificationProjectService.getDrafts()])
   ).map((r) => r.data);
 
   // Sort by last updated, push non-updated projects to bottom
