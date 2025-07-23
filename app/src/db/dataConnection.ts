@@ -1,7 +1,9 @@
 import config from 'config';
 import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient;
+import filterDeletedTransform from './extensions/filterDeleted';
+import numericTransform from './extensions/numeric';
+import projectIdTransform from './extensions/projectId';
 
 const db = {
   host: config.get('server.db.host'),
@@ -12,34 +14,16 @@ const db = {
   poolMax: config.get('server.db.poolMax')
 };
 
-// @ts-expect-error 2458
-if (!prisma) {
-  const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;
-  prisma = new PrismaClient({
-    // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging
-    log: ['error', 'warn'],
-    errorFormat: 'pretty',
-    datasourceUrl: datasourceUrl
-  }).$extends({
-    result: {
-      electrification_project: {
-        projectId: {
-          needs: { electrificationProjectId: true },
-          compute(data: { electrificationProjectId: string }) {
-            return data.electrificationProjectId;
-          }
-        }
-      },
-      housing_project: {
-        projectId: {
-          needs: { housingProjectId: true },
-          compute(data: { housingProjectId: string }) {
-            return data.housingProjectId;
-          }
-        }
-      }
-    }
-  }) as any; // eslint-disable-line
-}
+const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;
+
+const prisma = new PrismaClient({
+  // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging
+  log: ['error', 'warn'],
+  errorFormat: 'pretty',
+  datasourceUrl: datasourceUrl
+})
+  .$extends(filterDeletedTransform)
+  .$extends(numericTransform)
+  .$extends(projectIdTransform);
 
 export default prisma;
