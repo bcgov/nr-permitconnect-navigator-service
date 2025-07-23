@@ -84,7 +84,8 @@ const controller = {
         contactApplicantRelationship: req.query.contactApplicantRelationship,
         phoneNumber: req.query.phoneNumber,
         initiative: req.query.initiative,
-        includeActivities: isTruthy(req.query.includeActivities)
+        includeActivities: isTruthy(req.query.includeActivities),
+        hasActivity: isTruthy(req.query.hasActivity)
       });
       res.status(200).json(response);
     } catch (e: unknown) {

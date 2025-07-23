@@ -58,6 +58,7 @@ const schema = {
       contactPreference: Joi.string()
         .valid(...CONTACT_PREFERENCE_LIST)
         .allow(null),
+      hasActivity: Joi.boolean().default(false),
       initiative: Joi.string()
         .valid(...Object.values(Initiative))
         .allow(null),

@@ -124,6 +124,8 @@ const service = {
    * @param {boolean} [params.contactPreference] Optional contactPreference string to match on
    * @param {Initiative} [params.initiative] Optional Initiative to match on
    * @param {boolean} [params.includeActivities] Optional boolean for whether to include activities
+   * @param {boolean} [params.hasActivity] Optional boolean for
+   * whether to include contacts with deleted activities
    * @returns {Promise<object>} The result of running the findMany operation
    */
   searchContacts: async (params: ContactSearchParameters) => {
@@ -156,7 +158,8 @@ const service = {
           },
           ...(params.initiative
             ? [{ activity_contact: { some: { activity: { initiative: { code: params.initiative } } } } }]
-            : [])
+            : []),
+          ...(params.hasActivity ? [{ activity_contact: { some: { activity: { is_deleted: false } } } }] : [])
         ]
       },
       include: {
