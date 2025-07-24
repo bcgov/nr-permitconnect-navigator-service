@@ -215,6 +215,10 @@ function onCancel() {
 function onInvalidSubmit(e: any) {
   const errors = Object.keys(e.errors);
 
+  if (errors.includes('contactFirstName')) {
+    toast.warn(t('submissionForm.basicInfoMissing'));
+  }
+
   // Scrolls to the top-most error
   let first: Element | null = null;
 
