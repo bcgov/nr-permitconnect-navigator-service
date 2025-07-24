@@ -3,14 +3,17 @@ import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { enquiryService, housingProjectService } from '@/services';
+import { enquiryService, housingProjectService, permitService } from '@/services';
 import { useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
+import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import {
   draftableProjectServiceKey,
@@ -20,7 +23,7 @@ import {
 } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject } from '@/types';
+import type { Enquiry, HousingProject, Permit } from '@/types';
 
 // Constants
 const PAGE_ROWS = 5;
@@ -31,7 +34,7 @@ const route = useRoute();
 const router = useRouter();
 
 // State
-const displayedProjects = computed(() => projects.value.slice(first.value, first.value + PAGE_ROWS));
+const authorizations: Ref<Array<Permit>> = ref([]);
 const drafts: Ref<Array<any>> = ref([]);
 const enquiries: Ref<Array<Enquiry>> = ref([]);
 const first: Ref<number> = ref(0);
@@ -70,6 +73,35 @@ async function createIntake() {
   });
 }
 
+const displayedProjectsInOrder = computed(() => {
+  // Filter projects to only include completed projects and sort them by last updated
+  const completed = projects.value
+    .filter((p) => p.applicationStatus === ApplicationStatus.COMPLETED)
+    .sort(sortByLastUpdated);
+
+  // Filter projects to only include active projects and sort them by last updated
+  const active = projects.value
+    .filter((p) => [ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW].includes(p.applicationStatus))
+    .sort((a, b) => {
+      if (a.submittedAt && b.submittedAt) {
+        return a.submittedAt > b.submittedAt ? -1 : 1;
+      } else {
+        if (!a.submittedAt) return 1;
+        if (!b.submittedAt) return -1;
+        return 0;
+      }
+    });
+
+  // Combine active and completed projects, then slice based on pagination
+  return [...active, ...completed].slice(first.value, first.value + PAGE_ROWS);
+});
+
+const hasPendingAuth = computed(() => (activityId: string) => {
+  return authorizations.value.some(
+    (auth) => auth.activityId === activityId && auth.authStatus === PermitAuthorizationStatus.PENDING
+  );
+});
+
 function onHousingProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
@@ -98,8 +130,9 @@ watch(
 );
 
 onBeforeMount(async () => {
-  [enquiries.value, projects.value, drafts.value] = (
+  [authorizations.value, enquiries.value, projects.value, drafts.value] = (
     await Promise.all([
+      permitService.listPermits(),
       enquiryService.getEnquiries(),
       housingProjectService.searchProjects({ includeDeleted: false }),
       housingProjectService.getDrafts()
@@ -202,27 +235,53 @@ onBeforeMount(async () => {
         <p class="font-bold">{{ t('e.housing.housingView.projectsEmpty') }}</p>
       </div>
       <div
-        v-for="(project, index) in displayedProjects"
+        v-for="(project, index) in displayedProjectsInOrder"
         v-else
         :key="project.activityId"
         :index="index"
         class="rounded-sm shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
-        :class="{ 'mb-2': index != displayedProjects.length - 1 }"
+        :class="{
+          'mb-2': index != displayedProjectsInOrder.length - 1,
+          'custom-card-completed': project.applicationStatus === ApplicationStatus.COMPLETED
+        }"
       >
+        <router-link
+          v-if="hasPendingAuth(project.activityId)"
+          class="no-underline"
+          :to="{
+            name: RouteName.EXT_HOUSING_PROJECT,
+            params: { projectId: project.housingProjectId }
+          }"
+        >
+          <h5 class="font-bold mb-4">{{ project.projectName }}</h5>
+        </router-link>
         <div class="grid grid-cols-12 gap-4">
           <div class="col-span-3 flex items-center">
             <router-link
+              v-if="!hasPendingAuth(project.activityId)"
               class="no-underline"
               :to="{
                 name: RouteName.EXT_HOUSING_PROJECT,
                 params: { projectId: project.housingProjectId }
               }"
             >
-              <h4 class="font-bold mb-0">{{ project.projectName }}</h4>
+              <h5 class="font-bold mb-0">{{ project.projectName }}</h5>
             </router-link>
+            <AuthorizationStatusPill
+              v-if="hasPendingAuth(project.activityId)"
+              class="my-1"
+              :auth-status="PermitAuthorizationStatus.PENDING"
+              :display-text="t('e.housing.housingView.pendingAuths')"
+            />
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('e.housing.housingView.projectState') }}: {{ project.applicationStatus }}</p>
+            <p
+              :class="{
+                'font-bold': [ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW].includes(project.applicationStatus)
+              }"
+            >
+              {{ project.applicationStatus }}
+            </p>
           </div>
           <div class="col-span-3 flex items-center">
             <p>{{ t('e.housing.housingView.confirmationId') }}: {{ project.activityId }}</p>
@@ -306,7 +365,17 @@ onBeforeMount(async () => {
 
 <style scoped lang="scss">
 .custom-card {
-  background-color: #f7f9fc;
+  background-color: var(--p-white);
+  border: 1px solid var(--p-greyscale-200);
+
+  &:hover {
+    a {
+      text-decoration: underline !important;
+    }
+  }
+}
+.custom-card-completed {
+  background-color: var(--p-greyscale-50);
 
   &:hover {
     a {

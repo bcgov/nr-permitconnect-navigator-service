@@ -2,7 +2,7 @@ import PrimeVue from 'primevue/config';
 import Tooltip from 'primevue/tooltip';
 import { shallowMount } from '@vue/test-utils';
 
-import { electrificationProjectService } from '@/services';
+import { electrificationProjectService, permitService } from '@/services';
 import ElectrificationView from '@/views/external/electrification/ElectrificationView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -35,9 +35,15 @@ afterEach(() => {
 
 const getDraftsSpy = vi.spyOn(electrificationProjectService, 'getDrafts');
 const searchProjectsSpy = vi.spyOn(electrificationProjectService, 'searchProjects');
+const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 
 getDraftsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 searchProjectsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+listPermitsSpy.mockResolvedValue({
+  data: [
+    { permitId: 'somePermitId', activityId: 'someActivityid', permitTypeId: 1, permitType: { name: 'Test Permit' } }
+  ]
+} as AxiosResponse);
 
 const wrapperSettings = () => ({
   global: {
