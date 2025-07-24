@@ -25,6 +25,7 @@ afterEach(() => {
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
 describe('upsertPermit', () => {
   const next = jest.fn();
@@ -76,7 +77,7 @@ describe('upsertPermit', () => {
       ...req.body,
       createdAt: expect.stringMatching(isoPattern),
       createdBy: 'abc-123',
-      permitId: expect.any(String),
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -117,7 +118,7 @@ describe('upsertPermit', () => {
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
-      permitId: expect.any(String),
+      permitId: expect.stringMatching(uuidv4Pattern),
       createdAt: expect.stringMatching(isoPattern),
       createdBy: 'abc-123',
       updatedAt: expect.stringMatching(isoPattern),
@@ -402,7 +403,7 @@ describe('upsertPermit', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
-      permitId: expect.any(String),
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -438,7 +439,7 @@ describe('upsertPermit', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
-      permitId: expect.any(String),
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });

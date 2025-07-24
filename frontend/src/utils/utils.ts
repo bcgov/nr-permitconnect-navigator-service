@@ -275,6 +275,27 @@ export function partition<T>(
 }
 
 /**
+ * @function scrollToFirstError
+ * Scrolls to the first invalid field in a form
+ * @param {object} errors An object with keys as field names and values as error messages
+ */
+export function scrollToFirstError(errors: { [key: string]: string }) {
+  let first: Element | null = null;
+
+  for (const error of Object.keys(errors)) {
+    const el = document.querySelector(`[name="${error}"]`);
+    const rect = el?.getBoundingClientRect();
+
+    if (rect) {
+      if (!first) first = el;
+      else if (rect.top < first.getBoundingClientRect().top) first = el;
+    }
+  }
+
+  first?.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
  * @function setDispositionHeader
  * Constructs a valid RFC 6266 'Content-Disposition' header
  * and optionally handles RFC 8187 UTF-8 encoding when necessary
