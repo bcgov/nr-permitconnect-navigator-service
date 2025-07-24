@@ -30,6 +30,12 @@ const trackingShownToProponent = computed(() => permit.permitTracking?.find((pt)
 
 // Actions
 const toast = useToast();
+
+function toCopy(toCopy: string) {
+  navigator.clipboard.writeText(toCopy);
+  toast.info(t('authorization.authorizationCard.copiedToClipboard'));
+}
+
 watchEffect(() => {
   if (permit.updatedBy) {
     userService
@@ -40,11 +46,6 @@ watchEffect(() => {
       .catch(() => {});
   }
 });
-
-function toCopy(toCopy: string) {
-  navigator.clipboard.writeText(toCopy);
-  toast.info(t('authorization.authorizationCard.copiedToClipboard'));
-}
 </script>
 
 <template>
@@ -131,9 +132,3 @@ function toCopy(toCopy: string) {
     </template>
   </Card>
 </template>
-
-<style lang="scss" scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>

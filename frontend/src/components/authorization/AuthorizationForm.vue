@@ -18,6 +18,7 @@ import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/e
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
+import { scrollToFirstError } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitNote, User } from '@/types';
@@ -231,22 +232,7 @@ function initializeFormValues() {
 }
 
 function onInvalidSubmit(e: any) {
-  const errors = Object.keys(e.errors);
-
-  // Scrolls to the top-most error
-  let first: Element | null = null;
-
-  for (let error of errors) {
-    let el = document.querySelector(`[name="${error}"]`);
-    let rect = el?.getBoundingClientRect();
-
-    if (rect) {
-      if (!first) first = el;
-      else if (rect.top < first.getBoundingClientRect().top) first = el;
-    }
-  }
-
-  first?.scrollIntoView({ behavior: 'smooth' });
+  scrollToFirstError(e.errors);
 }
 
 onBeforeMount(async () => {
