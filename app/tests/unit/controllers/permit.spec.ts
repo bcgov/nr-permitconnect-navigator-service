@@ -25,12 +25,13 @@ afterEach(() => {
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
 const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
 
-describe('createPermit', () => {
+describe('upsertPermit', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const createSpy = jest.spyOn(permitService, 'createPermit');
+  const createSpy = jest.spyOn(permitService, 'upsertPermit');
 
   it('should return 201 if all good', async () => {
     const now = new Date();
@@ -45,7 +46,9 @@ describe('createPermit', () => {
         needed: 'true',
         status: 'FOO',
         submittedDate: now,
-        adjudicationDate: now
+        adjudicationDate: now,
+        createdAt: new Date().toISOString(),
+        createdBy: 'abc-123'
       },
       currentContext: CURRENT_CONTEXT
     };
@@ -55,7 +58,6 @@ describe('createPermit', () => {
       permitTypeId: 123,
       activityId: 'ACT_ID',
       issuedPermitId: '1',
-      trackingId: '2',
       authStatus: 'ACTIVE',
       needed: 'true',
       status: 'FOO',
@@ -68,17 +70,18 @@ describe('createPermit', () => {
     createSpy.mockResolvedValue(created);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.createPermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
       createdAt: expect.stringMatching(isoPattern),
       createdBy: 'abc-123',
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
-    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(created);
   });
 
@@ -110,11 +113,12 @@ describe('createPermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.createPermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.stringMatching(uuidv4Pattern),
       createdAt: expect.stringMatching(isoPattern),
       createdBy: 'abc-123',
       updatedAt: expect.stringMatching(isoPattern),
@@ -209,8 +213,7 @@ describe('getPermitTypes', () => {
         nameSubtype: null,
         acronym: 'PRT1',
         trackedInATS: true,
-        sourceSystem: null,
-        sourceSystemAcronym: 'SRC'
+        sourceSystem: 'CODE'
       }
     ];
 
@@ -353,11 +356,11 @@ describe('listPermits', () => {
   });
 });
 
-describe('updatePermit', () => {
+describe('upsertPermit', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const updateSpy = jest.spyOn(permitService, 'updatePermit');
+  const updateSpy = jest.spyOn(permitService, 'upsertPermit');
 
   it('should return 200 if all good', async () => {
     const now = new Date();
@@ -395,11 +398,12 @@ describe('updatePermit', () => {
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.updatePermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });
@@ -430,11 +434,12 @@ describe('updatePermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.updatePermit(req as any, res as any, next);
+    await permitController.upsertPermit(req as any, res as any, next);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
       ...req.body,
+      permitId: expect.stringMatching(uuidv4Pattern),
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: 'abc-123'
     });

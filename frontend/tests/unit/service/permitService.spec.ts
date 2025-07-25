@@ -31,13 +31,14 @@ const TEST_PERMIT_1: Permit = {
   permitTypeId: 0,
   activityId: 'activityId',
   issuedPermitId: 'issuedPermitId',
-  trackingId: 'trackingId',
   authStatus: 'authStatus',
   needed: 'needed',
   status: 'status',
   submittedDate: new Date().toISOString(),
   adjudicationDate: new Date().toISOString(),
-  permitType: TEST_PERMIT_TYPE
+  permitType: TEST_PERMIT_TYPE,
+  permitNote: [],
+  permitTracking: []
 };
 
 // Mocks
@@ -60,7 +61,7 @@ vi.mocked(appAxios).mockReturnValue({
 } as any);
 
 // Spies
-const updatePermitSpy = vi.spyOn(permitService, 'updatePermit');
+const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
 
 // Tests
 beforeEach(() => {
@@ -79,9 +80,12 @@ describe('permitService', () => {
         appStore = useAppStore();
         appStore.setInitiative(initiative);
       });
+      afterEach(() => {
+        upsertPermitSpy.mockReset();
+      });
 
       it('calls creates a permit', async () => {
-        await permitService.createPermit(TEST_PERMIT_1);
+        await permitService.upsertPermit(TEST_PERMIT_1);
         expect(putSpy).toHaveBeenCalledTimes(1);
         expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
       });
@@ -119,21 +123,18 @@ describe('permitService', () => {
       });
 
       it('calls put permit', async () => {
-        await permitService.updatePermit(TEST_PERMIT_1);
+        await permitService.upsertPermit(TEST_PERMIT_1);
         expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(
-          `${initiative.toLowerCase()}/${PATH}/${TEST_PERMIT_1.permitId}`,
-          TEST_PERMIT_1
-        );
+        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
       });
 
       it('calls put permit with wrong object type', async () => {
-        const modifiedPermit = { ...TEST_PERMIT_1 } as any;
+        upsertPermitSpy.mockRejectedValue(new Error('Invalid permit object'));
+        const modifiedPermit = {} as any;
         delete modifiedPermit.permitTypeId;
 
-        await permitService.updatePermit(modifiedPermit);
-        expect(updatePermitSpy).toHaveBeenCalledTimes(1);
-        expect(updatePermitSpy).toThrow();
+        await expect(permitService.upsertPermit(modifiedPermit)).rejects.toThrow();
+        expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
       });
 
       it('calls get permit', async () => {

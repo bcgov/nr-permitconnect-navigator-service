@@ -1,17 +1,15 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
-
-import PermitModal from '@/components/permit/PermitModal.vue';
-import { userService } from '@/services';
-import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import Tooltip from 'primevue/tooltip';
 
-import type { AxiosResponse } from 'axios';
+import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
+import { StorageKey } from '@/utils/enums/application';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+
 import type { Permit, PermitType } from '@/types';
-
-const useUserService = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -27,7 +25,6 @@ vi.mock('vue-router', () => ({
 }));
 
 const currentDate = new Date().toISOString();
-const activityId = 'activityUUID';
 
 const testPermitType: PermitType = {
   permitTypeId: 1,
@@ -49,24 +46,24 @@ const testPermit: Permit = {
   permitId: 'permitUUID',
   permitTypeId: 123,
   activityId: 'activityUUID',
-  needed: 'yes',
-  status: 'status',
+  needed: PermitNeeded.YES,
+  status: PermitStatus.APPLIED,
   issuedPermitId: 'issued Permit ID',
-  trackingId: 'test tracking ID',
-  authStatus: 'test auth status',
+  authStatus: PermitAuthorizationStatus.IN_REVIEW,
   submittedDate: currentDate,
   adjudicationDate: currentDate,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
-  permitType: testPermitType
+  permitType: testPermitType,
+  permitNote: [],
+  permitTracking: []
 };
 
 const wrapperSettings = (testPermitProp = testPermit) => ({
   props: {
-    permit: testPermitProp,
-    activityId
+    permit: testPermitProp
   },
   global: {
     plugins: [
@@ -82,7 +79,10 @@ const wrapperSettings = (testPermitProp = testPermit) => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon']
+    stubs: ['font-awesome-icon'],
+    directives: {
+      Tooltip: Tooltip
+    }
   }
 });
 
@@ -98,17 +98,15 @@ beforeEach(() => {
   );
 
   vi.clearAllMocks();
-
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 });
 
 afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('PermitModal', () => {
+describe('AuthorizationCard', () => {
   it('renders component', async () => {
-    const wrapper = mount(PermitModal, wrapperSettings());
+    const wrapper = mount(AuthorizationCardLite, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

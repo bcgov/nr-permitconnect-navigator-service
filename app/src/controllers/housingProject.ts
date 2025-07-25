@@ -9,7 +9,8 @@ import {
   emailService,
   enquiryService,
   housingProjectService,
-  permitService
+  permitService,
+  permitTrackingService
 } from '../services';
 import { Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
@@ -137,7 +138,6 @@ const controller = {
         permitId: x.permitId,
         permitTypeId: x.permitTypeId,
         activityId: activityId as string,
-        trackingId: x.trackingId,
         status: PermitStatus.APPLIED,
         needed: PermitNeeded.YES,
         statusLastVerified: null,
@@ -145,7 +145,8 @@ const controller = {
         authStatus: PermitAuthorizationStatus.IN_REVIEW,
         submittedDate: x.submittedDate,
         adjudicationDate: null,
-        permitType: null
+        permitType: null,
+        permitTracking: x.permitTracking
       }));
     }
 
@@ -240,8 +241,26 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map(async (x: Permit) => await permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map(async (x: Permit) => await permitService.createPermit(x)));
+      await Promise.all(
+        appliedPermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
+      await Promise.all(
+        investigatePermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
 
       res.status(201).json(result);
     } catch (e: unknown) {
@@ -393,8 +412,26 @@ const controller = {
       });
 
       // Create each permit
-      await Promise.all(appliedPermits.map((x: Permit) => permitService.createPermit(x)));
-      await Promise.all(investigatePermits.map((x: Permit) => permitService.createPermit(x)));
+      await Promise.all(
+        appliedPermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
+      await Promise.all(
+        investigatePermits.map(async (x: Permit) => {
+          const permitDataWithId = {
+            ...x,
+            permitId: x.permitId || uuidv4()
+          };
+          await permitService.upsertPermit(permitDataWithId);
+          await permitTrackingService.upsertPermitTracking(permitDataWithId);
+        })
+      );
 
       // Delete old draft
       if (req.body.draftId) await draftService.deleteDraft(req.body.draftId);

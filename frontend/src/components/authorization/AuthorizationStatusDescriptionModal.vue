@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import StatusPill from '@/components/common/StatusPill.vue';
+import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import { Dialog } from '@/lib/primevue';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
 
@@ -51,13 +51,13 @@ const visible = defineModel<boolean>('visible');
     <h4 class="mb-6">Application statuses</h4>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.IN_REVIEW" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.IN_REVIEW" />
       </div>
       <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.IN_REVIEW }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.PENDING" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.PENDING" />
       </div>
       <div class="mt-2">
         {{ PermitAuthorizationStatusDescriptions.PENDING }}
@@ -65,25 +65,25 @@ const visible = defineModel<boolean>('visible');
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.ABANDONED" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.ABANDONED" />
       </div>
       <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.ABANDONED }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.WITHDRAWN" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.WITHDRAWN" />
       </div>
       <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.WITHDRAWN }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.CANCELLED" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.CANCELLED" />
       </div>
       <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.CANCELLED }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.DENIED" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.DENIED" />
       </div>
       <div class="mt-2">
         {{ PermitAuthorizationStatusDescriptions.DENIED }}
@@ -91,7 +91,7 @@ const visible = defineModel<boolean>('visible');
     </div>
     <div class="my-6">
       <div class="flex">
-        <StatusPill :auth-status="PermitAuthorizationStatus.ISSUED" />
+        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.ISSUED" />
       </div>
       <div class="mt-2">
         {{ PermitAuthorizationStatusDescriptions.ISSUED }}

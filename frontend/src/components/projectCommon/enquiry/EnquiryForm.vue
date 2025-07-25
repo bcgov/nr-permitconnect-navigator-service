@@ -44,7 +44,7 @@ import {
 } from '@/utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator, contactValidator } from '@/validators';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -192,22 +192,7 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
-  const errors = Object.keys(e.errors);
-
-  // Scrolls to the top-most error
-  let first: Element | null = null;
-
-  for (let error of errors) {
-    const el = document.querySelector(`[name="${error}"]`);
-    const rect = el?.getBoundingClientRect();
-
-    if (rect) {
-      if (!first) first = el;
-      else if (rect.top < first.getBoundingClientRect().top) first = el;
-    }
-  }
-
-  first?.scrollIntoView({ behavior: 'smooth' });
+  scrollToFirstError(e.errors);
 }
 
 function onRelatedActivityInput(e: IInputEvent) {

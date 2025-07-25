@@ -5,13 +5,13 @@ import { useI18n } from 'vue-i18n';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
+import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
+import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import NoteCard from '@/components/note/NoteCard.vue';
 import NoteModal from '@/components/note/NoteModal.vue';
-import PermitCard from '@/components/permit/PermitCard.vue';
-import PermitModal from '@/components/permit/PermitModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
@@ -66,14 +66,24 @@ const router = useRouter();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
-const { getDocuments, getProject, getNotes, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
+const {
+  getAuthsCompleted,
+  getAuthsNeeded,
+  getAuthsNotNeeded,
+  getAuthsOnGoing,
+  getAuthsUnderInvestigation,
+  getDocuments,
+  getProject,
+  getNotes,
+  getPermits,
+  getRelatedEnquiries
+} = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
-const permitModalVisible: Ref<boolean> = ref(false);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
@@ -158,6 +168,18 @@ onBeforeMount(async () => {
 
   loading.value = false;
 });
+
+function toAuthorization(authId: string) {
+  router.push({
+    name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+    params: {
+      projectId: projectId
+    },
+    query: {
+      permitId: authId
+    }
+  });
+}
 </script>
 
 <template>
@@ -199,7 +221,7 @@ onBeforeMount(async () => {
     <TabList>
       <Tab :value="0">{{ t('i.common.projectView.tabInformation') }}</Tab>
       <Tab :value="1">{{ t('i.common.projectView.tabFiles') }}</Tab>
-      <Tab :value="2">{{ t('i.common.projectView.tabPermits') }}</Tab>
+      <Tab :value="2">{{ t('i.common.projectView.tabAuthorizations') }}</Tab>
       <Tab :value="3">{{ t('i.common.projectView.tabNotes') }}</Tab>
       <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
       <Tab :value="5">{{ t('i.common.projectView.tabRelatedEnquiries') }}</Tab>
@@ -400,37 +422,116 @@ onBeforeMount(async () => {
       <TabPanel :value="2">
         <div class="flex items-center pb-5">
           <div class="grow">
-            <p class="font-bold">{{ t('i.common.projectView.applicablePermits') }} ({{ getPermits.length }})</p>
+            <p class="font-bold">{{ t('i.common.projectView.applicableAuthorizations') }} ({{ getPermits.length }})</p>
           </div>
           <Button
-            aria-label="Add permit"
+            aria-label="Add authorization"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
-            @click="permitModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+                params: {
+                  projectId: projectId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            Add permit
+            {{ t('i.common.projectView.addAuthorization') }}
           </Button>
         </div>
+        <!-- On going Authorizations -->
         <div
-          v-for="(permit, index) in getPermits"
+          v-for="(permit, index) in getAuthsOnGoing"
           :key="permit.permitId"
           :index="index"
-          class="mb-6"
+          class="mb-6 mt-6"
         >
-          <PermitCard
+          <AuthorizationCard
             :editable="!isCompleted"
             :permit="permit"
+            @authorization-card:more="toAuthorization(permit.permitId)"
           />
         </div>
-
-        <PermitModal
-          v-if="activityId"
-          v-model:visible="permitModalVisible"
-          :activity-id="activityId"
-        />
+        <!-- Authorizations with needed = under investigation -->
+        <div
+          v-if="getAuthsUnderInvestigation.length > 0"
+          class="mb-8 mt-16"
+        >
+          <h4 class="mb-6">{{ t('i.common.projectView.underInvestigation') }}</h4>
+          <div
+            v-for="(permit, index) in getAuthsUnderInvestigation"
+            :key="permit.permitId"
+            :index="index"
+            class="my-2"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
+            />
+          </div>
+        </div>
+        <!-- Authorizations with needed = Yes & stage = Pre-submission -->
+        <div
+          v-if="getAuthsNeeded.length > 0"
+          class="mb-8 mt-16"
+        >
+          <h4 class="mb-6">{{ t('i.common.projectView.needed') }}</h4>
+          <div
+            v-for="(permit, index) in getAuthsNeeded"
+            :key="permit.permitId"
+            :index="index"
+            class="my-2"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
+            />
+          </div>
+        </div>
+        <!--Authorizations when its Status=Approved, Denied, Cancelled, Withdrawn OR Abandoned.-->
+        <div
+          v-if="getAuthsCompleted.length > 0"
+          class="mb-8 mt-16"
+        >
+          <h4 class="mb-6">{{ t('i.common.projectView.completed') }}</h4>
+          <div
+            v-for="(permit, index) in getAuthsCompleted"
+            :key="permit.permitId"
+            :index="index"
+            class="my-2"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
+            />
+          </div>
+        </div>
+        <!--Authorizations when needed = NO-->
+        <div
+          v-if="getAuthsNotNeeded.length > 0"
+          class="mb-8 mt-16"
+        >
+          <h4 class="mb-6">{{ t('i.common.projectView.notNeeded') }}</h4>
+          <div
+            v-for="(permit, index) in getAuthsNotNeeded"
+            :key="permit.permitId"
+            :index="index"
+            class="my-2"
+          >
+            <AuthorizationCardLite
+              :editable="!isCompleted"
+              :permit="permit"
+              @authorization-card-lite:more="toAuthorization(permit.permitId)"
+            />
+          </div>
+        </div>
       </TabPanel>
       <TabPanel :value="3">
         <div class="flex items-center pb-5">

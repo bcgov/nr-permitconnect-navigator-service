@@ -99,7 +99,7 @@ const HOUSING_PROJECT_1 = {
 
 describe('createHousingProject', () => {
   // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
+  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
 
@@ -179,13 +179,13 @@ describe('createHousingProject', () => {
         appliedPermits: [
           {
             permitTypeId: 1,
-            trackingId: '123',
+            permitTracking: [{ trackingId: '123' }],
             status: PermitStatus.APPLIED,
             submittedDate: now
           },
           {
             permitTypeId: 3,
-            trackingId: '456',
+            permitTracking: [{ trackingId: '456' }],
             status: PermitStatus.APPLIED,
             submittedDate: now
           }
@@ -203,7 +203,7 @@ describe('createHousingProject', () => {
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
-    createPermitSpy.mockResolvedValue({} as Permit);
+    upsertPermitSpy.mockResolvedValue({} as Permit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await housingProjectController.createHousingProject(req as any, res as any, next);
@@ -211,28 +211,28 @@ describe('createHousingProject', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
 
-    expect(createPermitSpy).toHaveBeenCalledTimes(3);
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         permitTypeId: 1,
         activityId: '00000000',
-        trackingId: '123',
+        permitTracking: [{ trackingId: '123' }],
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
     );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         permitTypeId: 3,
         activityId: '00000000',
-        trackingId: '456',
+        permitTracking: [{ trackingId: '456' }],
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
     );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         permitTypeId: 12,
@@ -410,7 +410,7 @@ describe('getHousingProjects', () => {
 
 describe('submitDraft', () => {
   // Mock service calls
-  const createPermitSpy = jest.spyOn(permitService, 'createPermit');
+  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
@@ -517,7 +517,7 @@ describe('submitDraft', () => {
 
     createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
-    createPermitSpy.mockResolvedValue({} as Permit);
+    upsertPermitSpy.mockResolvedValue({} as Permit);
     upsertContacts.mockResolvedValue();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await housingProjectController.submitDraft(req as any, res as any, next);
@@ -526,28 +526,26 @@ describe('submitDraft', () => {
     expect(upsertContacts).toHaveBeenCalledTimes(0);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitSpy).toHaveBeenCalledTimes(3);
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
         permitTypeId: 1,
         activityId: '00000000',
-        trackingId: '123',
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
     );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         permitTypeId: 3,
         activityId: '00000000',
-        trackingId: '456',
         status: PermitStatus.APPLIED,
         submittedDate: now
       })
     );
-    expect(createPermitSpy).toHaveBeenNthCalledWith(
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(
       3,
       expect.objectContaining({
         permitTypeId: 12,

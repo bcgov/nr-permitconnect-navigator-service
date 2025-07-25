@@ -2,16 +2,18 @@ import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
+import { permitTrackingSchema } from './permitTracking';
 import { permitTypeSchema } from './permitType';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
+  permitId: Joi.string().allow(null),
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
-  issuedPermitId: Joi.string().min(0).max(255).allow(null),
-  trackingId: Joi.string().min(0).max(255).allow(null),
+  issuedPermitId: Joi.string().allow(null),
+  permitTracking: permitTrackingSchema,
   authStatus: Joi.string().max(255).allow(null),
-  statusLastVerified: Joi.date().iso().max('now'),
+  statusLastVerified: Joi.date().iso().max('now').allow(null),
   needed: Joi.string().max(255).required(),
   status: Joi.string().max(255).required(),
   submittedDate: Joi.date().iso().max('now'),
@@ -19,9 +21,6 @@ const sharedPermitSchema = {
 };
 
 const schema = {
-  createPermit: {
-    body: Joi.object(sharedPermitSchema)
-  },
   deletePermit: {
     params: Joi.object({
       permitId: uuidv4.required()
@@ -38,21 +37,14 @@ const schema = {
       includeNotes: Joi.boolean().allow(null)
     })
   },
-  updatePermit: {
-    body: Joi.object({
-      ...sharedPermitSchema,
-      permitId: uuidv4.required()
-    }),
-    params: Joi.object({
-      permitId: uuidv4.required()
-    })
+  upsertPermit: {
+    body: Joi.object(sharedPermitSchema)
   }
 };
 
 export default {
-  createPermit: validate(schema.createPermit),
   deletePermit: validate(schema.deletePermit),
   getPermit: validate(schema.getPermit),
   listPermits: validate(schema.listPermits),
-  updatePermit: validate(schema.updatePermit)
+  upsertPermit: validate(schema.upsertPermit)
 };

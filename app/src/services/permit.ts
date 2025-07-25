@@ -2,35 +2,12 @@
 
 import prisma from '../db/dataConnection';
 import { permit, permit_type } from '../db/models';
-import { v4 as uuidv4 } from 'uuid';
 
 import { Initiative } from '../utils/enums/application';
 
 import type { ListPermitsOptions, Permit } from '../types';
 
 const service = {
-  /**
-   * @function createPermit
-   * Creates a Permit
-   * @param {Permit} data Permit object
-   * @returns {Promise<Permit | null>} The result of running the create operation
-   */
-  createPermit: async (data: Permit) => {
-    try {
-      const newPermit = { ...data, permitId: uuidv4() };
-
-      const create = await prisma.permit.create({
-        include: {
-          permit_type: true
-        },
-        data: { ...permit.toPrismaModel(newPermit), created_by: data.createdBy, updated_by: data.updatedBy }
-      });
-      return permit.fromPrismaModel(create);
-    } catch (e: unknown) {
-      throw e;
-    }
-  },
-
   /**
    * @function deletePermit
    * Delete a permit
@@ -79,11 +56,12 @@ const service = {
       },
       include: {
         permit_type: true, // If changed reflect in type and model
-        permit_note: { orderBy: { created_at: 'desc' } }
+        permit_note: { orderBy: { created_at: 'desc' } },
+        permit_tracking: { include: { sourceSystemKind: true } }
       }
     });
 
-    return result ? permit.fromPrismaModelWithNotes(result) : null;
+    return result ? permit.fromPrismaModelWithNotesTracking(result) : null;
   },
 
   /**
@@ -130,7 +108,12 @@ const service = {
     const response = await prisma.permit.findMany({
       include: {
         permit_type: true,
-        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false
+        permit_note: options?.includeNotes ? { orderBy: { created_at: 'desc' } } : false,
+        permit_tracking: {
+          include: {
+            sourceSystemKind: true
+          }
+        }
       },
       where: {
         activity_id: options?.activityId || undefined
@@ -143,27 +126,32 @@ const service = {
     });
 
     if (options?.includeNotes) {
-      return response.map((x) => permit.fromPrismaModelWithNotes(x));
+      return response.map((x) => permit.fromPrismaModelWithNotesTracking(x));
     }
 
-    return response.map((x) => permit.fromPrismaModel(x));
+    return response.map((x) => permit.fromPrismaModelWithTracking(x));
   },
 
   /**
-   * @function updatePermit
-   * Updates a Permit
+   * @function upsertPermit
+   * Upsert a Permit
    * @param {Permit} data Permit object
    * @returns {Promise<Permit | null>} The result of running the update operation
    */
-  updatePermit: async (data: Permit) => {
+  upsertPermit: async (data: Permit) => {
     try {
-      const response = await prisma.permit.update({
+      const response = await prisma.permit.upsert({
         include: {
           permit_type: true
         },
-        data: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
         where: {
           permit_id: data.permitId
+        },
+        update: { ...permit.toPrismaModel(data), updated_by: data.updatedBy },
+        create: {
+          ...permit.toPrismaModel({ ...data }),
+          created_by: data.createdBy,
+          updated_by: data.updatedBy
         }
       });
 

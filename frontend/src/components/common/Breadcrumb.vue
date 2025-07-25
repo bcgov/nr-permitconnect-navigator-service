@@ -75,6 +75,9 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
           return '...Loading';
         }
       }
+      case 'authorization': {
+        return 'Add authorization';
+      }
       default:
         return 'Missing Label';
     }

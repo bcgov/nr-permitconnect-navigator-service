@@ -1,9 +1,9 @@
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 
 export const PERMIT_AUTHORIZATION_STATUS_LIST = [
-  PermitAuthorizationStatus.ISSUED,
-  PermitAuthorizationStatus.PENDING,
   PermitAuthorizationStatus.IN_REVIEW,
+  PermitAuthorizationStatus.PENDING,
+  PermitAuthorizationStatus.ISSUED,
   PermitAuthorizationStatus.DENIED,
   PermitAuthorizationStatus.CANCELLED,
   PermitAuthorizationStatus.WITHDRAWN,
@@ -16,7 +16,7 @@ export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIG
 export const PERMIT_STATUS_LIST = [
   PermitStatus.NEW,
   PermitStatus.APPLIED,
-  PermitStatus.COMPLETED,
   PermitStatus.TECHNICAL_REVIEW,
-  PermitStatus.PENDING
+  PermitStatus.PENDING,
+  PermitStatus.COMPLETED
 ];

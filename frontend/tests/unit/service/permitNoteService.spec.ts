@@ -75,18 +75,6 @@ describe('permitNoteService', () => {
           );
         });
       });
-
-      describe('updatePermitNote', () => {
-        it('calls with given data', () => {
-          permitNoteService.updatePermit(TEST_PERMIT_NOTE);
-
-          expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(
-            `${initiative.toLowerCase()}/${PATH}/${TEST_PERMIT_NOTE.permitNoteId}`,
-            TEST_PERMIT_NOTE
-          );
-        });
-      });
     }
   );
 });

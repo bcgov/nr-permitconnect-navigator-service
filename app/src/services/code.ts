@@ -12,8 +12,16 @@ const service = {
         active: true
       }
     });
+    const SourceSystem = await prisma.source_system_code.findMany({
+      where: {
+        active: true
+      },
+      orderBy: {
+        display: 'asc'
+      }
+    });
 
-    return { ElectrificationProjectType, ElectrificationProjectCategory };
+    return { ElectrificationProjectType, ElectrificationProjectCategory, SourceSystem };
   }
 };
 

@@ -47,7 +47,7 @@ import {
   Regex
 } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
-import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, setEmptyStringsToNull, scrollToFirstError } from '@/utils/utils';
 import {
   assignedToValidator,
   atsClientIdValidator,
@@ -213,26 +213,7 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
-  const errors = Object.keys(e.errors);
-
-  if (errors.includes('contactFirstName')) {
-    toast.warn(t('submissionForm.basicInfoMissing'));
-  }
-
-  // Scrolls to the top-most error
-  let first: Element | null = null;
-
-  for (let error of errors) {
-    const el = document.querySelector(`[name="${error}"]`);
-    const rect = el?.getBoundingClientRect();
-
-    if (rect) {
-      if (!first) first = el;
-      else if (rect.top < first.getBoundingClientRect().top) first = el;
-    }
-  }
-
-  first?.scrollIntoView({ behavior: 'smooth' });
+  scrollToFirstError(e.errors);
 }
 
 function onReOpen() {

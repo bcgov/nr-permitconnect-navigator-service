@@ -6,16 +6,24 @@ import permit_type from './permit_type';
 import type { Stamps } from '../stamps';
 import type { Permit } from '../../types';
 
+import { PermitTracking } from '../../types/PermitTracking';
+
 // Define types
 const _permit = Prisma.validator<Prisma.permitDefaultArgs>()({});
-const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({ include: { permit_type: true } });
-const _permitWithNotesGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
-  include: { permit_note: true, permit_type: true }
+const _permitWithGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permit_type: true }
+});
+const _permitWithNotesTrackingGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permit_note: true, permit_type: true, permit_tracking: { include: { sourceSystemKind: true } } }
+});
+const _permitWithTrackingGraph = Prisma.validator<Prisma.permitDefaultArgs>()({
+  include: { permit_type: true, permit_tracking: { include: { sourceSystemKind: true } } }
 });
 
 type PrismaRelationPermit = Omit<Prisma.permitGetPayload<typeof _permit>, 'activity' | keyof Stamps>;
 type PrismaGraphPermit = Prisma.permitGetPayload<typeof _permitWithGraph>;
-type PrismaGraphPermitNotes = Prisma.permitGetPayload<typeof _permitWithNotesGraph>;
+type PrismaGraphPermitNotesTracking = Prisma.permitGetPayload<typeof _permitWithNotesTrackingGraph>;
+type PrismaGraphPermitTracking = Prisma.permitGetPayload<typeof _permitWithTrackingGraph>;
 
 export default {
   toPrismaModel(input: Permit): PrismaRelationPermit {
@@ -24,7 +32,6 @@ export default {
       permit_type_id: input.permitTypeId,
       activity_id: input.activityId,
       issued_permit_id: input.issuedPermitId,
-      tracking_id: input.trackingId,
       auth_status: input.authStatus,
       needed: input.needed,
       status: input.status,
@@ -41,7 +48,6 @@ export default {
       activityId: input.activity_id,
       createdAt: input.created_at?.toISOString() ?? null,
       issuedPermitId: input.issued_permit_id,
-      trackingId: input.tracking_id,
       authStatus: input.auth_status,
       needed: input.needed,
       status: input.status,
@@ -54,10 +60,22 @@ export default {
     };
   },
 
-  fromPrismaModelWithNotes(input: PrismaGraphPermitNotes): Permit {
-    const permit = this.fromPrismaModel(input);
+  fromPrismaModelWithNotesTracking(input: PrismaGraphPermitNotesTracking): Permit {
+    const permit = this.fromPrismaModelWithTracking(input);
     if (permit && input.permit_note) {
       permit.permitNote = input.permit_note.map((note) => permit_note.fromPrismaModel(note));
+    }
+
+    return permit;
+  },
+
+  fromPrismaModelWithTracking(input: PrismaGraphPermitTracking): Permit {
+    const permit = this.fromPrismaModel(input);
+    if (permit && input.permit_tracking) {
+      permit.permitTracking = input.permit_tracking.map((x) => {
+        const { sourceSystemKind, ...rest } = x;
+        return { sourceSystemKind: sourceSystemKind, ...rest } as PermitTracking;
+      });
     }
 
     return permit;

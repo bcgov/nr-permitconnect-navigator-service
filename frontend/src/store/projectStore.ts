@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+
 import type { Ref } from 'vue';
 import type { Document, ElectrificationProject, Enquiry, HousingProject, Note, Permit } from '@/types';
 
@@ -27,6 +29,49 @@ export const useProjectStore = defineStore('project', () => {
 
   // Getters
   const getters = {
+    getAuthsOnGoing: computed(() =>
+      state.permits.value.filter((p) =>
+        [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
+          p.authStatus as PermitAuthorizationStatus
+        )
+      )
+    ),
+    getAuthsUnderInvestigation: computed(() =>
+      state.permits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION)
+    ),
+    getAuthsNeeded: computed(() => {
+      return state.permits.value
+        .filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW)
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
+    getAuthsCompleted: computed(() =>
+      state.permits.value.filter(
+        (p) =>
+          ![
+            PermitAuthorizationStatus.NONE,
+            PermitAuthorizationStatus.IN_REVIEW,
+            PermitAuthorizationStatus.PENDING
+          ].includes(p.authStatus as PermitAuthorizationStatus)
+      )
+    ),
+    getAuthsNotNeeded: computed(() => {
+      return state.permits.value
+        .filter((p) => p.needed === PermitNeeded.NO)
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
+    getAuthsSubmitted: computed(() => {
+      return state.permits.value
+        .filter(
+          (p) =>
+            p.authStatus !== PermitAuthorizationStatus.NONE &&
+            p.status !== PermitStatus.NEW &&
+            p.needed !== PermitNeeded.NO
+        )
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn);
+    }),
     getDocuments: computed(() => state.documents.value),
     getNotes: computed(() => state.notes.value),
     getPermits: computed(() => state.permits.value),
@@ -35,6 +80,14 @@ export const useProjectStore = defineStore('project', () => {
   };
 
   // Actions
+  function permitBusinessSortFcn(a: Permit, b: Permit) {
+    return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
+  }
+
+  function permitNameSortFcn(a: Permit, b: Permit) {
+    return a.permitType.name > b.permitType.name ? 1 : -1;
+  }
+
   function addDocument(data: Document) {
     state.documents.value.push(data);
   }

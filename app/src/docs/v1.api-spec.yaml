@@ -52,6 +52,8 @@ tags:
     description: Operations for validating Housing Roadmaps
   - name: Reporting
     description: Operations for performings actions related to reporting
+  - name: Source System Kind
+    description: Operations for source system kinds
   - name: User
     description: Operations for managing users
 paths:
@@ -871,32 +873,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Create a permit
-      operationId: createElectrificationPermit
-      tags:
-        - Electrification Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '201':
-          description: Permit created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
   /electrification/permit/{permitId}:
     get:
       summary: Get a permit
@@ -928,17 +904,10 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     put:
-      summary: Update a permit
-      operationId: updateElectrificationPermit
+      summary: Upsert a permit
+      operationId: upsertElectrificationPermit
       tags:
         - Electrification Permit
-      parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
       requestBody:
         required: true
         content:
@@ -1986,32 +1955,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Create a permit
-      operationId: createHousingPermit
-      tags:
-        - Housing Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '201':
-          description: Permit created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
   /housing/permit/{permitId}:
     get:
       summary: Get a permit
@@ -2027,7 +1970,7 @@ paths:
             description: The ID of the permit to update
       responses:
         '200':
-          description: Permit updated successfully
+          description: Permit upserted successfully
           content:
             application/json:
               schema:
@@ -2043,17 +1986,10 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     put:
-      summary: Update a permit
-      operationId: updateHousingPermit
+      summary: Upsert a permit
+      operationId: upsertHousingPermit
       tags:
         - Housing Permit
-      parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
       requestBody:
         required: true
         content:
@@ -2577,6 +2513,22 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
+  /sourceSystemKind:
+    get:
+      summary: List source system kinds
+      description: Gets a list of all the source system kinds
+      operationId: getSourceSystemKinds
+      tags:
+        - Source System Kind
+      responses:
+        '200':
+          description: Source System Kinds
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-SourceSystemKind'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
   /user:
     get:
       summary: Search users
@@ -3449,6 +3401,25 @@ components:
           type: string
           description: Type of permit type
           example: Alteration
+    DB-SourceSystemKind:
+      type: object
+      properties:
+        sourceSystemKindId:
+          type: number
+          description: ID for the source system kind
+          example: 1
+        kind:
+          type: string
+          description: Source system kind
+          example: Project Number
+        description:
+          type: string
+          description: Source system kind description
+          example: Project Number
+        sourceSystem:
+          type: string
+          description: Source system code
+          example: ITSM-5314
     DB-User:
       type: object
       properties:

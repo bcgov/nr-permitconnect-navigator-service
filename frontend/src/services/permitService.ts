@@ -8,14 +8,6 @@ const PATH = 'permit';
 
 export default {
   /**
-   * @function createPermit
-   * @returns {Promise} An axios response
-   */
-  createPermit(data: Permit) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
-  },
-
-  /**
    * @function deletePermit
    * @returns {Promise} An axios response
    */
@@ -49,10 +41,10 @@ export default {
   },
 
   /**
-   * @function updatePermit
+   * @function upsertPermit
    * @returns {Promise} An axios response
    */
-  updatePermit(data: Permit) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${data.permitId}`, data);
+  upsertPermit(data: Permit) {
+    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   }
 };
