@@ -414,7 +414,7 @@ onBeforeMount(async () => {
         basic: {
           consentToFeedback: response?.consentToFeedback,
           projectApplicantType: response?.projectApplicantType,
-          isDevelopedInBC: response?.isDevelopedInBC,
+          isDevelopedInBc: response?.isDevelopedInBc,
           registeredName: response?.companyNameRegistered
         },
         housing: {
@@ -429,7 +429,7 @@ onBeforeMount(async () => {
           otherUnits: response?.otherUnits,
           hasRentalUnits: response?.hasRentalUnits,
           rentalUnits: response?.rentalUnits,
-          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedBc: response?.financiallySupportedBc,
           financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
           indigenousDescription: response?.indigenousDescription,
           financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
@@ -445,7 +445,7 @@ onBeforeMount(async () => {
           province: response?.province,
           latitude: response?.latitude,
           longitude: response?.longitude,
-          ltsaPIDLookup: response?.locationPIDs,
+          ltsaPIDLookup: response?.locationPids,
           geomarkUrl: response?.geomarkUrl,
           projectLocationDescription: response?.projectLocationDescription,
           geoJSON: response?.geoJSON
@@ -626,7 +626,7 @@ watchEffect(() => {
                   :options="PROJECT_APPLICANT_LIST"
                   @on-change="
                     (e: string) => {
-                      if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBC', null);
+                      if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBc', null);
                     }
                   "
                 />
@@ -646,14 +646,14 @@ watchEffect(() => {
                   </div>
                   <RadioList
                     class="col-span-12 mt-2 pl-0"
-                    name="basic.isDevelopedInBC"
+                    name="basic.isDevelopedInBc"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_LIST"
                     @on-change="() => setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName)"
                   />
                   <AutoComplete
-                    v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
+                    v-if="values.basic.isDevelopedInBc === BasicResponse.YES"
                     class="col-span-6 mt-4 pl-0"
                     name="basic.registeredName"
                     :bold="false"
@@ -664,7 +664,7 @@ watchEffect(() => {
                     @on-complete="onRegisteredNameInput"
                   />
                   <InputText
-                    v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
+                    v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
                     class="col-span-6 mt-4 pl-0"
                     name="basic.registeredName"
                     :placeholder="'Type the business/company/organization name'"
@@ -874,7 +874,7 @@ watchEffect(() => {
                   :disabled="!editable"
                   @click="
                     () => {
-                      setFieldValue('housing.financiallySupportedBC', BasicResponse.NO);
+                      setFieldValue('housing.financiallySupportedBc', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedIndigenous', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedNonProfit', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedHousingCoop', BasicResponse.NO);
@@ -907,7 +907,7 @@ watchEffect(() => {
                   </div>
 
                   <RadioList
-                    name="housing.financiallySupportedBC"
+                    name="housing.financiallySupportedBc"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"

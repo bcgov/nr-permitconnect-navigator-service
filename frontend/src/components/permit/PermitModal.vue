@@ -123,15 +123,18 @@ async function onSubmit(data: PermitForm, { resetForm }) {
   if (permit) initialFormValues = { ...data };
   else resetForm();
 
+  const permitTypeId = data.permitType?.permitTypeId;
+
   // Remove extra fields in permit that belongs to permitType
   delete data.agency;
   delete data.businessDomain;
+  delete data.permitType;
   delete data.sourceSystem;
 
   // Convert form back to a proper Permit type
   const permitData = {
     ...data,
-    permitTypeId: data.permitType?.permitTypeId,
+    permitTypeId: permitTypeId,
     submittedDate: data.submittedDate?.toISOString(),
     adjudicationDate: data.adjudicationDate?.toISOString()
   } as Permit;

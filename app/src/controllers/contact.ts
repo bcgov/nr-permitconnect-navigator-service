@@ -1,30 +1,16 @@
-import { Prisma } from '@prisma/client';
+import { v4 as uuidv4 } from 'uuid';
 
+import { generateUpdateStamps } from '../db/utils/utils';
 import { deleteContact, getContact, matchContacts, searchContacts, upsertContacts } from '../services/contact';
 import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import type { Contact, ContactSearchParameters } from '../types';
 
-export const deleteContactController = async (
-  req: Request<{ contactId: string }>,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const contactId = req.params.contactId;
-    await deleteContact(contactId);
-
-    res.status(204).end();
-  } catch (e: unknown) {
-    // TODO: Handle Prisma errors at app level
-    // P2025 is thrown when a record is not found, https://www.prisma.io/docs/orm/reference/error-reference#p2025
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2025') {
-      res.status(404).json({ message: 'Contact not found' });
-    } else {
-      next(e);
-    }
-  }
+export const deleteContactController = async (req: Request<{ contactId: string }>, res: Response) => {
+  const contactId = req.params.contactId;
+  await deleteContact(contactId);
+  res.status(204).end();
 };
 
 export const getContactController = async (
@@ -74,6 +60,7 @@ export const searchContactsController = async (
 };
 
 export const updateContactController = async (req: Request<never, never, Contact, never>, res: Response) => {
-  const response = await upsertContacts([req.body], req.currentContext);
-  res.status(200).json(response);
+  const contact = { ...req.body, contactId: req.body.contactId ?? uuidv4() };
+  const response: Contact[] = await upsertContacts([{ ...contact, ...generateUpdateStamps(req.currentContext) }]);
+  res.status(200).json(response[0]);
 };

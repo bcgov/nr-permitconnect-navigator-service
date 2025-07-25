@@ -128,7 +128,7 @@ export const searchContacts = async (params: ContactSearchParameters): Promise<C
           bceidBusinessName: true
         }
       },
-      ...(params.includeActivities ? { activity_contact: { where: { activity: { is_deleted: false } } } } : {})
+      ...(params.includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {})
     }
   });
 
@@ -139,19 +139,13 @@ export const searchContacts = async (params: ContactSearchParameters): Promise<C
 
 /**
  * Creates or updates the given contacts
- * Generates IDs and timestamps automatically
  * @param data - The contact objects to create or update
- * @param currentContext - The Request context
  * @param activityId - The ID of the activity to associated the contacts with
  * @returns A promise that resolves when the operation is complete
  */
-export const upsertContacts = async (
-  data: Array<Contact>,
-  currentContext: CurrentContext,
-  activityId?: string
-): Promise<void> => {
+export const upsertContacts = async (data: Array<Contact>): Promise<Contact[]> => {
   return await prisma.$transaction(async (trx) => {
-    await Promise.all(
+    return await Promise.all(
       data.map(async (x: Contact) => {
         const response = await trx.contact.upsert({
           where: { contactId: x.contactId },
@@ -159,23 +153,7 @@ export const upsertContacts = async (
           create: x
         });
 
-        if (activityId) {
-          await trx.activity_contact.upsert({
-            where: {
-              activityId_contactId: {
-                activityId: activityId,
-                contactId: response?.contactId ?? x.contactId
-              }
-            },
-            update: {
-              // Noop, required empty
-            },
-            create: {
-              activityId,
-              contactId: response?.contactId ?? x.contactId
-            }
-          });
-        }
+        return response;
       })
     );
   });

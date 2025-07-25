@@ -104,7 +104,8 @@ export const createUser = async (data: JwtUser, etrx: Prisma.TransactionClient |
         firstName: data.firstName,
         lastName: data.lastName,
         idp: data.idp,
-        active: true
+        active: true,
+        ...generateCreateStamps(undefined)
       };
 
       const createResponse = await trx.user.create({
@@ -201,7 +202,7 @@ export const login = async (token: jwt.JwtPayload) => {
         ...generateCreateStamps(undefined),
         ...generateNullUpdateStamps()
       };
-      await upsertContacts([newContact], { userId: response.userId });
+      await upsertContacts([newContact]);
     }
   }
 

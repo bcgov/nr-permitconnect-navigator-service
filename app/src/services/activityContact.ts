@@ -7,7 +7,6 @@ import type { Contact } from '../types';
  * @param activityId
  * @param contacts
  */
-
 export const deleteUnmatchedActivityContacts = async (activityId: string, contacts: Array<Contact>): Promise<void> => {
   const requestContactIds = contacts.map((c) => c.contactId);
   await prisma.activity_contact.deleteMany({
