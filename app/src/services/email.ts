@@ -113,7 +113,7 @@ export const logEmail = async (data: EmailData | null, recipients: Array<string>
         msgId: data?.messages?.[0].msgId,
         to: recipient,
         txId: data?.txId,
-        http_status: status
+        httpStatus: status
       }))
     });
   });

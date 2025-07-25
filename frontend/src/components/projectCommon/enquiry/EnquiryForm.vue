@@ -22,7 +22,7 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, enquiryService, userService } from '@/services';
+import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
 import { useAppStore, useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
@@ -117,7 +117,7 @@ const intakeSchema = object({
     .label('Assigned to'),
   applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   waitingOn: string().notRequired().max(255).label('waiting on'),
-  addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
+  addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
   atsClientId: atsClientIdValidator
 });
@@ -232,7 +232,7 @@ function onReOpen() {
 async function onRelatedActivityChange(e: SelectChangeEvent) {
   formRef.value?.setFieldValue('atsClientId', null);
   formRef.value?.setFieldValue('atsEnquiryId', null);
-  formRef.value?.setFieldValue('addedToATS', false);
+  formRef.value?.setFieldValue('addedToAts', false);
   atsCreateType.value = undefined;
 
   if (e.value) {
@@ -280,77 +280,84 @@ function onNewATSEnquiry() {
 
 const onSubmit = async (values: any) => {
   try {
+    // Create ATS data as necessary
     if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
       const response = await createATSClientEnquiry();
       values.atsClientId = response?.atsClientId;
       values.atsEnquiryId = response?.atsEnquiryId;
       if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
       values.atsEnquiryId = await createATSEnquiry();
       if (values.atsEnquiryId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     }
 
-    // Convert contact fields into contacts array object then remove form keys from data
-    const valuesWithContact = omit(
-      {
-        ...values,
-        atsClientId: parseInt(values.atsClientId) || '',
-        contacts: [
-          {
-            contactId: values.contactId,
-            firstName: values.contactFirstName,
-            lastName: values.contactLastName,
-            phoneNumber: values.contactPhoneNumber,
-            email: values.contactEmail,
-            contactApplicantRelationship: values.contactApplicantRelationship,
-            contactPreference: values.contactPreference
-          }
-        ]
-      },
-      [
-        'contactId',
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactUserId'
-      ]
-    );
+    // Grab the contact information
+    const contact = {
+      contactId: values.contactId,
+      firstName: values.contactFirstName,
+      lastName: values.contactLastName,
+      phoneNumber: values.contactPhoneNumber,
+      email: values.contactEmail,
+      contactApplicantRelationship: values.contactApplicantRelationship,
+      contactPreference: values.contactPreference
+    };
 
-    // Remove ats client number from enquiry if submitted
-    // with linked activity
-    if (valuesWithContact.relatedActivityId) {
-      valuesWithContact.atsClientId = '';
+    // Omit all the fields we dont want to send
+    const dataOmitted = omit({ ...values }, [
+      'contactId',
+      'contactFirstName',
+      'contactLastName',
+      'contactPhoneNumber',
+      'contactEmail',
+      'contactApplicantRelationship',
+      'contactPreference',
+      'contactUserId'
+    ]);
+
+    // Remove ATS client number from enquiry if submitted with linked activity
+    if (dataOmitted.relatedActivityId) {
+      dataOmitted.atsClientId = '';
       formRef?.value?.setFieldValue('atsClientId', null);
     }
+
     // Generate final enquiry object
-    const submitData: Enquiry = omit(setEmptyStringsToNull(valuesWithContact) as EnquiryForm, ['user']);
+    const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
+
+    // Update enquiry - order of calls is important
+    // const contactResponse = (await contactService.updateContact(contact)).data;
+    // await activityContactService.updateActivityContact(values.activityId, [
+    //   { ...contact, contactId: contactResponse.contactId }
+    // ]);
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
+
+    // Update store with returned data
     enquiryStore.setEnquiry(result.data);
+
+    // TODO: Create one function for creating initial values and reset values
+    const firstContact = result.data?.activity?.activityContact?.[0]?.contact;
     formRef.value?.resetForm({
       values: {
         ...submitData,
-        contactId: result.data?.contacts[0].contactId,
-        contactFirstName: submitData?.contacts[0].firstName,
-        contactLastName: submitData?.contacts[0].lastName,
-        contactPhoneNumber: submitData?.contacts[0].phoneNumber,
-        contactEmail: submitData?.contacts[0].email,
-        contactApplicantRelationship: submitData?.contacts[0].contactApplicantRelationship,
-        contactPreference: submitData?.contacts[0].contactPreference,
-        contactUserId: result.data?.contacts[0].userId,
+        contactId: firstContact.contactId,
+        contactFirstName: firstContact.firstName,
+        contactLastName: firstContact.lastName,
+        contactPhoneNumber: firstContact.phoneNumber,
+        contactEmail: firstContact.email,
+        contactApplicantRelationship: firstContact.contactApplicantRelationship,
+        contactPreference: firstContact.contactPreference,
+        contactUserId: firstContact.userId,
         submittedAt: new Date(submitData.submittedAt),
         user: values.user
       }
     });
+
     basicInfoManualEntry.value = false;
     if (submitData?.relatedActivityId) getRelatedATSClientID(submitData?.relatedActivityId);
 
@@ -366,21 +373,36 @@ onBeforeMount(async () => {
   if (enquiry?.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }
+
+  const firstContact = enquiry?.activity?.activityContact?.[0]?.contact;
+
   initialFormValues.value = {
-    ...enquiry,
-    contactId: enquiry?.contacts[0]?.contactId,
-    contactFirstName: enquiry?.contacts[0]?.firstName,
-    contactLastName: enquiry?.contacts[0]?.lastName,
-    contactPhoneNumber: enquiry?.contacts[0]?.phoneNumber,
-    contactEmail: enquiry?.contacts[0]?.email,
-    contactApplicantRelationship: enquiry?.contacts[0]?.contactApplicantRelationship,
-    contactPreference: enquiry?.contacts[0]?.contactPreference,
-    contactUserId: enquiry?.contacts[0]?.userId,
+    activityId: enquiry?.activityId,
+    enquiryId: enquiry?.enquiryId,
+    submittedBy: enquiry?.submittedBy,
+
+    submissionType: enquiry?.submissionType,
     submittedAt: new Date(enquiry?.submittedAt),
-    addedToATS: enquiry?.addedToATS,
+    relatedActivityId: enquiry?.relatedActivityId,
+    submittedMethod: enquiry?.submittedMethod,
+    enquiryDescription: enquiry?.enquiryDescription,
+    contactId: firstContact?.contactId,
+    contactFirstName: firstContact?.firstName,
+    contactLastName: firstContact?.lastName,
+    contactPhoneNumber: firstContact?.phoneNumber,
+    contactEmail: firstContact?.email,
+    contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+    contactPreference: firstContact?.contactPreference,
+    contactUserId: firstContact?.userId,
+
+    addedToAts: enquiry?.addedToAts,
     atsClientId: enquiry?.atsClientId,
     atsEnquiryId: enquiry?.atsEnquiryId,
-    user: assigneeOptions.value[0] ?? null
+
+    intakeStatus: enquiry?.intakeStatus,
+    user: assigneeOptions.value[0] ?? null,
+    enquiryStatus: enquiry?.enquiryStatus,
+    waitingOn: enquiry?.waitingOn
   };
 
   if (enquiry?.relatedActivityId) getRelatedATSClientID(enquiry?.relatedActivityId);
@@ -643,7 +665,7 @@ async function createATSClientEnquiry() {
       </div>
       <Checkbox
         class="col-span-12 mt-2"
-        name="addedToATS"
+        name="addedToAts"
         label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
         :bold="true"
@@ -724,7 +746,7 @@ async function createATSClientEnquiry() {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
           setFieldValue('atsEnquiryId', null);
-          setFieldValue('addedToATS', false);
+          setFieldValue('addedToAts', false);
           atsCreateType = undefined;
         }
       "

@@ -1,6 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
+import {
+  generateCreateStamps,
+  generateNullUpdateStamps,
+  generateUpdateStamps,
+  jsonToPrismaInputJson
+} from '../db/utils/utils';
 import { createActivity } from '../services/activity';
 import { upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
@@ -88,7 +93,7 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
     basic = {
       consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
-      isDevelopedInBc: data.basic.isDevelopedInBC,
+      isDevelopedInBc: data.basic.isDevelopedInBc,
       companyNameRegistered: data.basic.registeredName
     };
   }
@@ -102,7 +107,7 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
       otherUnitsDescription: data.housing.otherUnitsDescription,
       otherUnits: data.housing.otherUnits,
       hasRentalUnits: data.housing.hasRentalUnits,
-      financiallySupportedBc: data.housing.financiallySupportedBC,
+      financiallySupportedBc: data.housing.financiallySupportedBc,
       financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
       financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
       financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
@@ -119,8 +124,8 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
-      geoJSON: data.location.geoJSON,
-      locationPIDs: data.location.ltsaPIDLookup,
+      geoJson: jsonToPrismaInputJson(data.location.geoJson),
+      locationPids: data.location.ltsaPIDLookup,
       latitude: data.location.latitude,
       longitude: data.location.longitude,
       streetAddress: data.location.streetAddress,
@@ -208,7 +213,6 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
       financiallySupported: false,
       waitingOn: null,
       checkProvincialPermits: null,
-      geoJson: {},
       atsEnquiryId: null
     } as HousingProject,
     appliedPermits,
@@ -251,10 +255,6 @@ export const createHousingProjectController = async (
     req.body,
     req.currentContext
   );
-
-  // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
-
   // Create new housing project
   const result: HousingProject = await createHousingProject({
     ...housingProject,
@@ -326,8 +326,7 @@ export const searchHousingProjectsController = async (
 ) => {
   let response: HousingProject[] = await searchHousingProjects({
     ...req.query,
-    includeUser: isTruthy(req.query.includeUser),
-    includeDeleted: isTruthy(req.query.includeDeleted)
+    includeUser: isTruthy(req.query.includeUser)
   });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -349,7 +348,7 @@ export const submitHousingProjectDraftController = async (
   );
 
   // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, req.currentContext, housingProject.activityId);
+  if (req.body.contacts) await upsertContacts(req.body.contacts, housingProject.activityId);
 
   // Create new housing project
   const result: HousingProject = await createHousingProject({

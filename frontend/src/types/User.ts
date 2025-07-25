@@ -1,5 +1,5 @@
 import type { IStamps } from '@/interfaces';
-import type { BasicBCeIDAttribute, BusinessBCeIDAttribute, Group, IDIRAttribute } from '@/types';
+import type { Group } from '@/types';
 
 export type User = {
   active: boolean;
@@ -13,7 +13,5 @@ export type User = {
   userId: string;
   sub: string;
   elevatedRights: boolean;
-  idirAttributes: IDIRAttribute;
-  bceidAttributes: BasicBCeIDAttribute;
-  businessBceidAttribute: BusinessBCeIDAttribute;
+  bceidBusinessName: string;
 } & IStamps;

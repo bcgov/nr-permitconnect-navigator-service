@@ -3,10 +3,12 @@ import type { IStamps } from '@/interfaces';
 
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
+import type { Activity } from './Activity';
+
 export type Enquiry = {
   enquiryId: string;
   activityId: string;
-  addedToATS: boolean;
+  addedToAts: boolean;
   assignedUserId?: string;
   atsClientId: number | null;
   atsEnquiryId: string | null;
@@ -20,4 +22,7 @@ export type Enquiry = {
   waitingOn?: string;
   contacts: Array<Contact>;
   submittedMethod: EnquirySubmittedMethod;
+
+  // Joined
+  activity?: Activity;
 } & Partial<IStamps>;

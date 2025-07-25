@@ -2,7 +2,6 @@ import type { IStamps } from '@/interfaces';
 
 export type PermitType = {
   permitTypeId: number; // Primary Key
-  acronym?: string;
   agency: string;
   branch: string;
   businessDomain: string;
@@ -11,6 +10,8 @@ export type PermitType = {
   infoUrl?: string;
   name: string;
   nameSubtype?: string;
+  acronym?: string;
+  trackedInAts?: boolean;
   sourceSystem: string;
   sourceSystemAcronym: string;
   trackedInATS?: boolean;

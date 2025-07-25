@@ -251,25 +251,25 @@ function updateQueryParams() {
       </template>
     </Column>
     <Column
-      field="contacts.0.firstName"
+      field="activity.activityContact.0.contact.firstName"
       header="Contact first name"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contacts.0.lastName"
+      field="activity.activityContact.0.contact.lastName"
       header="Contact last name"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contacts.0.phoneNumber"
+      field="activity.activityContact.0.contact.phoneNumber"
       header="Contact phone"
       :sortable="true"
       style="min-width: 200px"
     />
     <Column
-      field="contacts.0.email"
+      field="activity.activityContact.0.contact.email"
       header="Contact email"
       :sortable="true"
       style="min-width: 200px"
