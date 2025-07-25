@@ -29,7 +29,7 @@
     "postprisma:migrate:down": "npm run prisma:sync",
     "postprisma:migrate:up": "npm run prisma:sync",
     "postprisma:migrate:dev": "npm run seed:dev",
-    "postprisma:migrate": "npm run prisma:sync",
+    "postprisma:migrate": "npm run prisma:case",
     "postprisma:sync": "npm run prisma:generate",
     "postrebuild": "npm run build",
     "postreinstall": "npm install",

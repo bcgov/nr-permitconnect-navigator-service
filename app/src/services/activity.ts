@@ -48,27 +48,22 @@ export const deleteActivity = async (activityId: string): Promise<Activity> => {
  */
 export const getActivity = async (activityId: string): Promise<Activity> => {
   const response = await prisma.activity.findFirstOrThrow({ where: { activityId } });
-
-  return response ?? null;
+  return response;
 };
 
 /**
  * @function getActivities
  * Get a list of activities
  * @param {string} [initiative] Optional initiative code, if provided, only return activities for that initiative
- * @param {boolean} [includeDeleted=false] Optional flag to include deleted activities
  * @returns {Promise<Activity[]>} The result of running the findMany operation
  */
-export const getActivities = async (includeDeleted: boolean = false, initiative?: Initiative): Promise<Activity[]> => {
+export const getActivities = async (initiative?: Initiative): Promise<Activity[]> => {
   if (!initiative) {
-    const allActivities = await prisma.activity.findMany({
-      where: { isDeleted: includeDeleted ? undefined : false }
-    });
+    const allActivities = await prisma.activity.findMany({});
     return allActivities;
   } else {
     const response = await prisma.activity.findMany({
       where: {
-        isDeleted: includeDeleted ? undefined : false,
         initiative: {
           code: initiative
         }

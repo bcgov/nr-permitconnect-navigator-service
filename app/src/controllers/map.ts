@@ -7,7 +7,7 @@ export const getPIDsController = async (req: Request<{ housingProjectId: string 
   const housingProject = await getHousingProject(req.params.housingProjectId);
 
   let response;
-  if (housingProject?.geoJson) response = await getPIDs(housingProject.geoJson);
+  if (housingProject.geoJson) response = await getPIDs(housingProject.geoJson);
 
-  res.status(200).json(response);
+  res.status(response ? 200 : 204).json(response);
 };

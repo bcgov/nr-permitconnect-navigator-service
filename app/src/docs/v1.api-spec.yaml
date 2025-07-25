@@ -2677,9 +2677,6 @@ components:
       schema:
         type: boolean
         example: true
-    Query-IncludeDeleted:
-      in: query
-      name: includeDeleted
       description: >-
         Whether to include records where the related activity is flagged as deleted.
         When true, both deleted and non-deleted entities are returned.
@@ -2964,7 +2961,7 @@ components:
         - activityId
         - submittedAt
         - submittedBy
-        - addedToATS
+        - addedToAts
         - ltsaCompleted
         - bcOnlineCompleted
         - naturalDisaster
@@ -2992,7 +2989,7 @@ components:
           type: string
           description: Who made the housing project
           example: JSMITH
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs
           example: 006-209-521, 007-209-522
@@ -3042,7 +3039,7 @@ components:
           type: boolean
           description: Whether updated by AST
           example: false
-        addedToATS:
+        addedToAts:
           type: boolean
           description: Whether added to AST
           example: false
@@ -3065,7 +3062,7 @@ components:
           type: boolean
           description: Is it financially supported?
           example: false
-        financiallySupportedBC:
+        financiallySupportedBc:
           type: string
           description: Is is financially supported by BC Housing?
           example: 'No'
@@ -3098,7 +3095,7 @@ components:
           enum: [Business, Individual]
           description: Are you applying as an individual or as a business?
           example: 'Business'
-        isDevelopedInBC:
+        isDevelopedInBc:
           type: string
           description: Is the project developed in BC?
           example: 'Yes'
@@ -3402,7 +3399,7 @@ components:
         - name
         - permitTypeId
         - sourceSystemAcronym
-        - trackedInATS
+        - trackedInAts
         - type
       properties:
         permitTypeId:
@@ -3449,7 +3446,7 @@ components:
           type: string
           description: Acronym for source system
           example: APTS
-        trackedInATS:
+        trackedInAts:
           type: boolean
           description: Whether this permit type is tracked in ATS or not
           example: false
@@ -3813,7 +3810,7 @@ components:
               enum: [Business, Individual]
               description: Are you applying as an individual or as a business?
               example: 'Business'
-            isDevelopedInBC:
+            isDevelopedInBc:
               type: boolean
               description: >-
                 Indicates if the project is being developed in British Columbia
@@ -3855,7 +3852,7 @@ components:
               type: string
               description: Whether or not the project will have rental units
               example: 'Yes'
-            financiallySupportedBC:
+            financiallySupportedBc:
               type: string
               description: Is it financially supported by BC Housing?
               example: 'No'
@@ -3905,7 +3902,7 @@ components:
               type: string
               description: Description of the project’s location
               example: Near the downtown area
-            locationPIDs:
+            locationPids:
               type: string
               description: Location PIDs for the project
               example: 006-209-521, 007-209-522
@@ -4044,12 +4041,12 @@ components:
         - submittedAt
         - projectName
         - hasRentalUnits
-        - financiallySupportedBC
+        - financiallySupportedBc
         - financiallySupportedIndigenous
         - financiallySupportedNonProfit
         - financiallySupportedHousingCoop
         - naturalDisaster
-        - addedToATS
+        - addedToAts
         - ltsaCompleted
         - bcOnlineCompleted
         - aaiUpdated
@@ -4086,7 +4083,7 @@ components:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
-        isDevelopedInBC:
+        isDevelopedInBc:
           type: string
           description: Is the project developed in BC?
           example: 'Yes'
@@ -4125,7 +4122,7 @@ components:
           description: Range of rental units
           example: 1-9
           nullable: true
-        financiallySupportedBC:
+        financiallySupportedBc:
           type: string
           description: Is it financially supported by BC Housing?
           example: 'No'
@@ -4171,7 +4168,7 @@ components:
           description: Province (Location) of project
           example: BC
           maxLength: 255
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs
           example: 006-209-521, 007-209-522
@@ -4198,7 +4195,7 @@ components:
           description: Description of the location of the project
           example: Near the river
           maxLength: 4000
-        addedToATS:
+        addedToAts:
           type: boolean
           description: Whether added to ATS
           example: false
@@ -4567,7 +4564,7 @@ components:
           type: number
           description: Longitude Cordinate for project
           example: -123.377677
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs for the project
           example: 006-209-521, 007-209-522
@@ -4634,7 +4631,7 @@ components:
           type: string
           description: Acronym for source system
           example: APTS
-        trackedInATS:
+        trackedInAts:
           type: boolean
           description: Whether this permit type is tracked in ATS or not
           example: false
