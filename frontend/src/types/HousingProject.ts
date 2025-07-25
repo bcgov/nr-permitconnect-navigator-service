@@ -4,7 +4,7 @@ export type HousingProject = {
   housingProjectId: string;
   relatedEnquiries: string;
   consentToFeedback?: boolean;
-  isDevelopedInBC: string;
+  isDevelopedInBc: string;
   geoJSON?: any;
   projectLocationDescription: string;
   singleFamilyUnits: string;
@@ -13,7 +13,7 @@ export type HousingProject = {
   otherUnits: string;
   hasRentalUnits: string;
   rentalUnits: string;
-  financiallySupportedBC: string;
+  financiallySupportedBc: string;
   financiallySupportedIndigenous: string;
   indigenousDescription: string;
   financiallySupportedNonProfit: string;
@@ -22,12 +22,12 @@ export type HousingProject = {
   housingCoopDescription: string;
   locality: string;
   province: string;
-  locationPIDs: string;
+  locationPids: string;
   latitude: number;
   longitude: number;
   streetAddress: string;
   geomarkUrl: string;
-  naturalDisaster: string;
+  naturalDisaster: boolean;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
   waitingOn?: string;

@@ -3,6 +3,7 @@ import express from 'express';
 import { currentContext } from '../../middleware/authentication';
 import { Initiative } from '../../utils/enums/application';
 
+import activityContact from './activityContact';
 import ats from './ats';
 import code from './code';
 import contact from './contact';
@@ -22,6 +23,7 @@ router.use(currentContext(Initiative.PCNS));
 router.get('/', (_req, res) => {
   res.status(200).json({
     endpoints: [
+      '/activityContact',
       '/ats',
       '/code',
       '/contact',
@@ -37,6 +39,7 @@ router.get('/', (_req, res) => {
   });
 });
 
+router.use('/activityContact', activityContact);
 router.use('/ats', ats);
 router.use('/code', code);
 router.use('/contact', contact);

@@ -24,7 +24,14 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, housingProjectService, mapService, userService } from '@/services';
+import {
+  activityContactService,
+  atsService,
+  contactService,
+  housingProjectService,
+  mapService,
+  userService
+} from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -112,7 +119,7 @@ const formSchema = object({
   ...contactValidator,
   companyNameRegistered: string().notRequired().max(255).label('Company'),
   consentToFeedback: string().notRequired().nullable().label('Consent to feedback'),
-  isDevelopedInBC: string().when('companyNameRegistered', {
+  isDevelopedInBc: string().when('companyNameRegistered', {
     is: (val: string) => val,
     then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Company registered in B.C'),
     otherwise: () => string().notRequired()
@@ -133,7 +140,7 @@ const formSchema = object({
     then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Rental units'),
     otherwise: () => string().notRequired()
   }),
-  financiallySupportedBC: string().required().oneOf(YES_NO_UNSURE_LIST).label('BC Housing'),
+  financiallySupportedBc: string().required().oneOf(YES_NO_UNSURE_LIST).label('BC Housing'),
   financiallySupportedIndigenous: string().required().oneOf(YES_NO_UNSURE_LIST).label('Indigenous Housing Provider'),
   indigenousDescription: string().when('financiallySupportedIndigenous', {
     is: (val: string) => val === BasicResponse.YES,
@@ -155,13 +162,13 @@ const formSchema = object({
   streetAddress: string().notRequired().max(255).label('Street address'),
   locality: string().notRequired().max(255).label('Locality'),
   province: string().notRequired().max(255).label('Province'),
-  locationPIDs: string().notRequired().max(255).label('Location PID(s)'),
+  locationPids: string().notRequired().max(255).label('Location PID(s)'),
   latitude: latitudeValidator,
   longitude: longitudeValidator,
   geomarkUrl: string().notRequired().max(255).label('Geomark URL'),
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Affected by natural disaster'),
   projectLocationDescription: string().notRequired().max(4000).label('Additional information about location'),
-  addedToATS: boolean().required().label('Authorized Tracking System (ATS) updated'),
+  addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
   atsClientId: atsClientIdValidator,
   ltsaCompleted: boolean().required().label('Land Title Survey Authority (LTSA) completed'),
   bcOnlineCompleted: boolean().required().label('BC Online completed'),
@@ -288,66 +295,76 @@ const onSubmit = async (values: any) => {
       values.atsClientId = response?.atsClientId;
       values.atsEnquiryId = response?.atsEnquiryId;
       if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
       values.atsEnquiryId = await createATSEnquiry();
       if (values.atsEnquiryId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     }
-    // Convert contact fields into contacts array object then remove form keys from data
-    const valuesWithContact = omit(
-      {
-        ...values,
-        atsClientId: parseInt(values.atsClientId) || '',
-        contacts: [
-          {
-            contactId: values.contactId,
-            firstName: values.contactFirstName,
-            lastName: values.contactLastName,
-            phoneNumber: values.contactPhoneNumber,
-            email: values.contactEmail,
-            contactApplicantRelationship: values.contactApplicantRelationship,
-            contactPreference: values.contactPreference
-          }
-        ]
-      },
-      [
-        'contactId',
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactUserId',
-        'locationPIDsAuto'
-      ]
-    );
 
-    // Generate final submission object
-    const submitData: HousingProject = omit(setEmptyStringsToNull(valuesWithContact) as HousingProjectForm, [
+    // Grab the contact information
+    const contact = {
+      contactId: values.contactId,
+      firstName: values.contactFirstName,
+      lastName: values.contactLastName,
+      phoneNumber: values.contactPhoneNumber,
+      email: values.contactEmail,
+      contactApplicantRelationship: values.contactApplicantRelationship,
+      contactPreference: values.contactPreference
+    };
+
+    // Omit all the fields we dont want to send
+    const dataOmitted = omit({ ...values }, [
+      'contactId',
+      'contactFirstName',
+      'contactLastName',
+      'contactPhoneNumber',
+      'contactEmail',
+      'contactApplicantRelationship',
+      'contactPreference',
+      'contactUserId',
+      'locationPidsAuto',
       'locationAddress',
       'user'
     ]);
+
+    // Generate final submission object
+    const submitData: HousingProject = setEmptyStringsToNull({
+      ...dataOmitted,
+      atsClientId: parseInt(values.atsClientId) || ''
+    });
+
     submitData.assignedUserId = values.user?.userId ?? undefined;
     submitData.consentToFeedback = values.consentToFeedback === BasicResponse.YES;
+    submitData.naturalDisaster = values.naturalDisaster === BasicResponse.YES;
+
+    // Update project - order of calls is important
+    const contactResponse = (await contactService.updateContact(contact)).data;
+    await activityContactService.updateActivityContact(values.activityId, [
+      { ...contact, contactId: contactResponse.contactId }
+    ]);
     const result = await housingProjectService.updateProject(values.housingProjectId, submitData);
+
+    // Update store with returned data
     projectStore.setProject(result.data);
+
+    // TODO: Create one function for creating initial values and reset values
+    const firstContact = result.data?.activity?.activityContact?.[0]?.contact;
     formRef.value?.resetForm({
       values: {
         ...submitData,
-        contactId: result.data?.contacts[0].contactId,
-        contactFirstName: submitData?.contacts[0].firstName,
-        contactLastName: submitData?.contacts[0].lastName,
-        contactPhoneNumber: submitData?.contacts[0].phoneNumber,
-        contactEmail: submitData?.contacts[0].email,
-        contactApplicantRelationship: submitData?.contacts[0].contactApplicantRelationship,
-        contactPreference: submitData?.contacts[0].contactPreference,
-        contactUserId: result.data?.contacts[0].userId,
+        contactId: firstContact.contactId,
+        contactFirstName: firstContact.firstName,
+        contactLastName: firstContact.lastName,
+        contactPhoneNumber: firstContact.phoneNumber,
+        contactEmail: firstContact.email,
+        contactApplicantRelationship: firstContact.contactApplicantRelationship,
+        contactPreference: firstContact.contactPreference,
+        contactUserId: firstContact.userId,
         locationAddress: values.locationAddress,
         user: values.user,
         consentToFeedback: values.consentToFeedback
@@ -433,9 +450,11 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [housingProject.assignedUserId] })).data;
   }
 
-  const locationPIDsAuto = (await mapService.getPIDs(housingProject.housingProjectId)).data;
+  const locationPidsAuto = (await mapService.getPIDs(housingProject.housingProjectId)).data;
 
   if (housingProject.geoJSON) geoJson.value = housingProject.geoJSON;
+
+  const firstContact = housingProject?.activity?.activityContact?.[0]?.contact;
 
   // Default form values
   initialFormValues.value = {
@@ -446,7 +465,7 @@ onBeforeMount(async () => {
     submittedAt: new Date(housingProject.submittedAt),
     relatedEnquiries: housingProject.relatedEnquiries,
     companyNameRegistered: housingProject.companyNameRegistered,
-    isDevelopedInBC: housingProject.isDevelopedInBC,
+    isDevelopedInBc: housingProject.isDevelopedInBc,
     consentToFeedback: housingProject.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     projectName: housingProject.projectName,
     projectDescription: housingProject.projectDescription,
@@ -457,7 +476,7 @@ onBeforeMount(async () => {
     otherUnits: housingProject.otherUnits,
     hasRentalUnits: housingProject.hasRentalUnits,
     rentalUnits: housingProject.rentalUnits,
-    financiallySupportedBC: housingProject.financiallySupportedBC,
+    financiallySupportedBc: housingProject.financiallySupportedBc,
     financiallySupportedIndigenous: housingProject.financiallySupportedIndigenous,
     indigenousDescription: housingProject.indigenousDescription,
     financiallySupportedNonProfit: housingProject.financiallySupportedNonProfit,
@@ -468,13 +487,13 @@ onBeforeMount(async () => {
     streetAddress: housingProject.streetAddress,
     locality: housingProject.locality,
     province: housingProject.province,
-    locationPIDs: housingProject.locationPIDs,
-    locationPIDsAuto: locationPIDsAuto,
+    locationPids: housingProject.locationPids,
+    locationPidsAuto: locationPidsAuto,
     latitude: housingProject.latitude,
     longitude: housingProject.longitude,
     geomarkUrl: housingProject.geomarkUrl,
-    naturalDisaster: housingProject.naturalDisaster,
-    addedToATS: housingProject.addedToATS,
+    naturalDisaster: housingProject.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
+    addedToAts: housingProject.addedToAts,
     atsClientId: housingProject.atsClientId,
     atsEnquiryId: housingProject.atsEnquiryId,
     ltsaCompleted: housingProject.ltsaCompleted,
@@ -482,14 +501,14 @@ onBeforeMount(async () => {
     aaiUpdated: housingProject.aaiUpdated,
     astNotes: housingProject.astNotes,
     intakeStatus: housingProject.intakeStatus,
-    contactId: housingProject?.contacts[0]?.contactId,
-    contactFirstName: housingProject?.contacts[0]?.firstName,
-    contactLastName: housingProject?.contacts[0]?.lastName,
-    contactPhoneNumber: housingProject?.contacts[0]?.phoneNumber,
-    contactEmail: housingProject?.contacts[0]?.email,
-    contactApplicantRelationship: housingProject?.contacts[0]?.contactApplicantRelationship,
-    contactPreference: housingProject?.contacts[0]?.contactPreference,
-    contactUserId: housingProject?.contacts[0]?.userId,
+    contactId: firstContact?.contactId,
+    contactFirstName: firstContact?.firstName,
+    contactLastName: firstContact?.lastName,
+    contactPhoneNumber: firstContact?.phoneNumber,
+    contactEmail: firstContact?.email,
+    contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+    contactPreference: firstContact?.contactPreference,
+    contactUserId: firstContact?.userId,
     user: assigneeOptions.value[0] ?? null,
     applicationStatus: housingProject.applicationStatus,
     waitingOn: housingProject.waitingOn
@@ -593,14 +612,14 @@ onBeforeMount(async () => {
             (e) => {
               if (!e.target.value) {
                 setFieldValue('companyNameRegistered', null);
-                setFieldValue('isDevelopedInBC', null);
+                setFieldValue('isDevelopedInBc', null);
               }
             }
           "
         />
         <Select
           class="col-span-3"
-          name="isDevelopedInBC"
+          name="isDevelopedInBc"
           label="Company registered in B.C?"
           :disabled="!editable || !values.companyNameRegistered"
           :options="YES_NO_LIST"
@@ -732,7 +751,7 @@ onBeforeMount(async () => {
 
       <Select
         class="col-span-3"
-        name="financiallySupportedBC"
+        name="financiallySupportedBc"
         label="BC Housing"
         :disabled="!editable"
         :options="YES_NO_UNSURE_LIST"
@@ -827,7 +846,7 @@ onBeforeMount(async () => {
       />
       <InputText
         class="col-span-3"
-        name="locationPIDs"
+        name="locationPids"
         label="Location PID(s)"
         :disabled="!editable"
       />
@@ -860,7 +879,7 @@ onBeforeMount(async () => {
       />
       <TextArea
         class="col-span-12"
-        name="locationPIDsAuto"
+        name="locationPidsAuto"
         label="Auto generated location PID(s)"
         :disabled="true"
       />
@@ -948,7 +967,7 @@ onBeforeMount(async () => {
       </div>
       <Checkbox
         class="col-span-12 mt-2"
-        name="addedToATS"
+        name="addedToAts"
         label="Authorized Tracking System (ATS) updated"
         :disabled="!editable"
         :bold="true"
@@ -1059,7 +1078,7 @@ onBeforeMount(async () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
           setFieldValue('atsEnquiryId', null);
-          setFieldValue('addedToATS', false);
+          setFieldValue('addedToAts', false);
           atsCreateType = undefined;
         }
       "

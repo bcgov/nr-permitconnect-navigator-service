@@ -114,9 +114,6 @@ export const createElectrificationProjectController = async (
   }
   const electrificationProject = await generateElectrificationProjectData(req.body, req.currentContext);
 
-  // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, req.currentContext, electrificationProject.activityId);
-
   // Create new electrification project
   const result = await createElectrificationProject({
     ...electrificationProject,
@@ -195,9 +192,6 @@ export const submitElectrificationProjectDraftController = async (
 ) => {
   const electrificationProject = await generateElectrificationProjectData(req.body, req.currentContext);
 
-  // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, req.currentContext, electrificationProject.activityId);
-
   // Create new electrification project
   const result = await createElectrificationProject({
     ...electrificationProject,
@@ -255,32 +249,6 @@ export const updateElectrificationProjectController = async (
   req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
   res: Response
 ) => {
-  if (req.body.contacts) {
-    // Predicate function to check if a contact has a contactId.
-    // Used to partition contacts into existing (with contactId) and new (without contactId).
-    const hasContactId = (x: Contact) => !!x.contactId;
-
-    // Partition contacts into existing and new based on whether they have a contactId
-    const [existingContacts, newContacts] = partition(req.body.contacts, hasContactId);
-
-    // Assign a new contactId to each new contact
-    newContacts.forEach((x) => {
-      x.contactId = uuidv4();
-    });
-
-    // Combine existing contacts with new contacts
-    const contacts = existingContacts.concat(newContacts);
-
-    // Insert new contacts into the contact table
-    await insertContacts(newContacts, req.currentContext);
-
-    // Delete any activity_contact records that doesn't match the activity and contacts in the request
-    await deleteUnmatchedActivityContacts(req.body.project.activityId, contacts);
-
-    // Create or update activity_contact with the data from the request
-    await upsertActivityContacts(req.body.project.activityId, contacts);
-  }
-
   const response = await updateElectrificationProject({
     ...req.body.project,
     ...generateUpdateStamps(req.currentContext)

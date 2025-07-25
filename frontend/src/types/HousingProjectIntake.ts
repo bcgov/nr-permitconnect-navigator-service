@@ -5,7 +5,7 @@ export type HousingProjectIntake = {
   basic?: {
     consentToFeedback?: boolean;
     projectApplicantType?: string;
-    isDevelopedInBC?: string;
+    isDevelopedInBc?: string;
     registeredName?: string;
   };
 
@@ -17,7 +17,7 @@ export type HousingProjectIntake = {
     otherUnitsDescription?: string;
     otherUnits?: string;
     hasRentalUnits?: string;
-    financiallySupportedBC?: string;
+    financiallySupportedBc?: string;
     financiallySupportedIndigenous?: string;
     financiallySupportedNonProfit?: string;
     financiallySupportedHousingCoop?: string;

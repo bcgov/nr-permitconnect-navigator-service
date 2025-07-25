@@ -32,6 +32,7 @@ export const createNoteHistoryController = async (
 
   const historyRes: NoteHistory = await createNoteHistory({
     ...history,
+    noteHistoryId: uuidv4(),
     isDeleted: false,
     ...generateCreateStamps(req.currentContext)
   });

@@ -23,7 +23,7 @@ const projectRoute = inject(projectRouteNameKey);
 // Actions
 function isFinanciallySupported(data: HousingProject) {
   if (
-    data.financiallySupportedBC === BasicResponse.YES ||
+    data.financiallySupportedBc === BasicResponse.YES ||
     data.financiallySupportedHousingCoop === BasicResponse.YES ||
     data.financiallySupportedIndigenous === BasicResponse.YES ||
     data.financiallySupportedNonProfit === BasicResponse.YES

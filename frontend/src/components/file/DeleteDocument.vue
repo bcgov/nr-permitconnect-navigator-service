@@ -21,7 +21,7 @@ const { t } = useI18n();
 const confirm = useConfirm();
 const toast = useToast();
 
-const confirmDelete = (document: Document) => {
+const confirmDelete = () => {
   if (document) {
     confirm.require({
       message: `Please confirm that you want to delete ${document.filename}.`,
@@ -55,7 +55,7 @@ const confirmDelete = (document: Document) => {
         tabindex="0"
         @click="
           (e) => {
-            confirmDelete(document);
+            confirmDelete();
             e.stopPropagation();
           }
         "
