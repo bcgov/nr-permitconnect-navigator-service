@@ -309,7 +309,7 @@ async function onSubmit(data: any) {
     };
 
     // Show the trackingNumber of all appliedPermits to the proponent
-    submissionData.appliedPermits.forEach((x: Permit) => {
+    submissionData.appliedPermits?.forEach((x: Permit) => {
       if (x?.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
     });
 

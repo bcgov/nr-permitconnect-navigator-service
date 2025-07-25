@@ -154,11 +154,15 @@ function onDelete() {
 }
 
 const formSchema = object({
-  permitNote: string().when('status', {
-    is: (status: string) => status !== initialFormValues.value?.status,
-    then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired')),
-    otherwise: () => string().notRequired()
-  }),
+  permitNote: string()
+    .when('status', {
+      is: (status: string) => status !== initialFormValues.value?.status,
+      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
+    })
+    .when('authStatus', {
+      is: (authStatus: string) => authStatus !== initialFormValues.value?.authStatus,
+      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
+    }),
   authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
   needed: string().required().label(t('authorization.authorizationForm.needed')),
   status: string().required().oneOf(PERMIT_STATUS_LIST).label(t('authorization.authorizationForm.applicationStage')),

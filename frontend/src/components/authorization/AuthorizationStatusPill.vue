@@ -4,9 +4,14 @@ import { computed } from 'vue';
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
 
 // Props
-const { authStatus, enlarge = false } = defineProps<{
+const {
+  authStatus,
+  enlarge = false,
+  displayText
+} = defineProps<{
   authStatus?: string;
   enlarge?: boolean;
+  displayText?: string;
 }>();
 
 const defaultDimensions = {
@@ -106,7 +111,7 @@ const getState = computed(() => {
           :class="[getState?.iconClass]"
           :icon="getState?.iconString"
         />
-        <span class="text-color">{{ authStatus }}</span>
+        <span class="text-color">{{ displayText ?? authStatus }}</span>
       </div>
     </div>
   </div>
