@@ -11,7 +11,7 @@ export type PermitType = {
   name: string;
   nameSubtype?: string;
   acronym?: string;
-  trackedInATS?: boolean;
+  trackedInAts?: boolean;
   sourceSystem: string;
   sourceSystemAcronym: string;
 } & Partial<IStamps>;

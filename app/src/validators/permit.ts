@@ -2,10 +2,8 @@ import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
-import { permitTypeSchema } from './permitType';
 
 const sharedPermitSchema = {
-  permitType: permitTypeSchema,
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().min(0).max(255).allow(null),

@@ -2,11 +2,12 @@ import jwt from 'jsonwebtoken';
 import { Prisma, user } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
-import prisma from '../db/dataConnection';
-
-import type { Contact, User, UserSearchParameters } from '../types';
 import { searchContacts, upsertContacts } from './contact';
+import prisma from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
+
+import type { Contact, User } from '../types/models';
+import type { UserSearchParameters } from '../types/stuff';
 
 const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
@@ -104,7 +105,8 @@ export const createUser = async (data: JwtUser, etrx: Prisma.TransactionClient |
         firstName: data.firstName,
         lastName: data.lastName,
         idp: data.idp,
-        active: true
+        active: true,
+        ...generateCreateStamps(undefined)
       };
 
       const createResponse = await trx.user.create({
@@ -201,7 +203,7 @@ export const login = async (token: jwt.JwtPayload) => {
         ...generateCreateStamps(undefined),
         ...generateNullUpdateStamps()
       };
-      await upsertContacts([newContact], { userId: response.userId });
+      await upsertContacts([newContact]);
     }
   }
 

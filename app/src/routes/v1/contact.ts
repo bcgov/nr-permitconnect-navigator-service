@@ -45,9 +45,9 @@ router.get(
   getContactController
 );
 
-//** Update a specific contact */
+//** Create or update a contact */
 router.put(
-  '/:contactId',
+  '/',
   hasAuthorization(Resource.CONTACT, Action.UPDATE),
   contactValidator.updateContact,
   updateContactController
