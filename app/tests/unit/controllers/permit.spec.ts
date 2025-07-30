@@ -212,6 +212,7 @@ describe('getPermitTypes', () => {
         name: 'PERMIT1',
         nameSubtype: null,
         acronym: 'PRT1',
+        infoUrl: 'https://example.com/permit1',
         trackedInATS: true,
         sourceSystem: 'CODE'
       }
