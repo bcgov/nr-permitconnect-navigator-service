@@ -76,14 +76,15 @@ async function onSubmit(data: any) {
     projectStore.addPermit(result);
 
     // Prevent creating notes if the above call fails or if the note is empty
-    if (result?.permitId && permitNote?.trim().length > 0)
+    if (result?.permitId && permitNote?.trim().length > 0) {
       await permitNoteService.createPermitNote({
         permitId: result.permitId,
         note: permitNote
       });
 
-    // Send email to the user if permit is needed
-    if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
+      // Send email to the user if permit is needed
+      if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
+    }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
 
