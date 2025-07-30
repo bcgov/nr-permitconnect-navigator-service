@@ -8,6 +8,7 @@ export type PermitType = {
   businessDomain: string;
   division: string | null;
   family: string | null;
+  infoUrl: string | null;
   name: string;
   nameSubtype: string | null;
   sourceSystem: string | null;
