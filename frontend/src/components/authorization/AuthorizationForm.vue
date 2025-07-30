@@ -75,14 +75,14 @@ async function onSubmit(data: any) {
     const result = (await permitService.upsertPermit({ ...permitData, activityId: activityId })).data;
     projectStore.addPermit(result);
 
-    // Prevent creating notes if the above call fails or if the note is empty
+    // Prevent creating notes and sending an update email if the above call fails or if note is empty
     if (result?.permitId && permitNote?.trim().length > 0) {
       await permitNoteService.createPermitNote({
         permitId: result.permitId,
         note: permitNote
       });
 
-      // Send email to the user if permit is needed
+      // Send email to the user if permit is needed or if permit status is new
       if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
     }
 
