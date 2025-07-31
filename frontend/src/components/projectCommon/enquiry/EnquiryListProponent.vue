@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { inject, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
-import { Column, DataTable } from '@/lib/primevue';
+import { Column, DataTable, useToast } from '@/lib/primevue';
+import { userService } from '@/services';
 import { useAuthZStore } from '@/store/authzStore';
 import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Enquiry } from '@/types';
+import type { Enquiry, User } from '@/types';
 
 // Props
 const { loading, enquiries, projectId } = defineProps<{
@@ -24,16 +25,19 @@ const { loading, enquiries, projectId } = defineProps<{
 const enquiryRouteName = inject(enquiryRouteNameKey);
 const navigationPermission = inject(navigationPermissionKey);
 
+// Composables
+const { t } = useI18n();
+const toast = useToast();
+
 // Store
 const authZStore = useAuthZStore();
 const { canNavigate } = storeToRefs(authZStore);
 
 // State
+const createdBy: Ref<Array<User | undefined>> = ref([]);
 const selection: Ref<Enquiry | undefined> = ref(undefined);
 
 // Actions
-const { t } = useI18n();
-
 function getRouteToObject(data: Enquiry) {
   let toObject = {};
   if (enquiries && enquiries[0].relatedActivityId) {
@@ -50,6 +54,17 @@ function getRouteToObject(data: Enquiry) {
 
   return toObject;
 }
+
+onBeforeMount(async () => {
+  try {
+    if (enquiries && enquiries.length > 0) {
+      const createdByArray = enquiries.map((enquiry) => enquiry.createdBy as string);
+      createdBy.value = (await userService.searchUsers({ userId: createdByArray })).data;
+    }
+  } catch {
+    toast.error(t('enquiryListProponent.createdByFailed'));
+  }
+});
 </script>
 
 <template>
@@ -109,10 +124,22 @@ function getRouteToObject(data: Enquiry) {
       </template>
     </Column>
     <Column
-      field="intakeStatus"
-      :header="t('enquiryListProponent.state')"
+      field="submittedBy"
+      :header="t('enquiryListProponent.submittedBy')"
       :sortable="true"
-    />
+    >
+      <template #body="{ data }">
+        <span class="ml-2">
+          {{
+            data.createdBy
+              ? createdBy.find((user) => user?.userId === data.createdBy)?.firstName +
+                ' ' +
+                createdBy.find((user) => user?.userId === data.createdBy)?.lastName
+              : ''
+          }}
+        </span>
+      </template>
+    </Column>
 
     <Column
       field="submittedAt"

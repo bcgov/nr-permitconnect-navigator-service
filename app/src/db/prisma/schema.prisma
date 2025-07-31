@@ -237,6 +237,7 @@ model permit_type {
   updated_by                  String?
   updated_at                  DateTime?                     @db.Timestamptz(6)
   source_system               String?
+  info_url                    String?
   permit                      permit[]
   source_system_code          source_system_code?           @relation(fields: [source_system], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
   permit_type_initiative_xref permit_type_initiative_xref[]

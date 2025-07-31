@@ -38,7 +38,7 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Card>
+  <Card class="auth-card--hover">
     <template #content>
       <div class="flex justify-between items-center">
         <h6 class="mb-0 font-bold">{{ permit.permitType?.name }}</h6>
@@ -61,3 +61,15 @@ watchEffect(() => {
     </template>
   </Card>
 </template>
+
+<style scoped lang="scss">
+.auth-card {
+  border-color: var(--p-greyscale-100);
+  border-style: solid;
+  border-width: 0.063rem;
+  box-shadow: 0.25rem 0.25rem 0.25rem 0rem $app-proj-black;
+  &--hover:hover {
+    background-color: var(--p-bcblue-50);
+  }
+}
+</style>
