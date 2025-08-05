@@ -18,7 +18,7 @@ import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/e
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
-import { scrollToFirstError } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitNote, User } from '@/types';
@@ -62,17 +62,19 @@ const projectService = inject(projectServiceKey);
 async function onSubmit(data: any) {
   disableFormNavigationGuard.value = true;
 
-  const { authorizationType, permitNote, permitTracking, ...rest } = data;
-  const permitData = {
+  const { authorizationType, permitNote, ...rest } = data;
+  const permitData: Permit = {
     ...rest,
+    activityId,
     permitTypeId: authorizationType?.permitTypeId,
-    permitTracking: permitTracking,
     submittedDate: data.submittedDate?.toISOString(),
     adjudicationDate: data.adjudicationDate?.toISOString()
-  } as Permit;
+  };
+
+  const permitSubmitData = setEmptyStringsToNull(permitData);
 
   try {
-    const result = (await permitService.upsertPermit({ ...permitData, activityId: activityId })).data;
+    const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
     projectStore.addPermit(result);
 
     // Prevent creating notes and sending an update email if the above call fails or if note is empty
@@ -99,6 +101,7 @@ async function onSubmit(data: any) {
     toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
   }
 }
+
 async function emailNotification(data?: any) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = permitNoteNotificationTemplate({
