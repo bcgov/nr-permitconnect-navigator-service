@@ -15,6 +15,7 @@
     "lint:fix": "eslint . --fix --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --ignore-path .gitignore",
     "migrate:down": "knex migrate:down",
     "migrate:latest": "knex migrate:latest",
+    "migrate:list": "knex migrate:list",
     "migrate:make": "knex migrate:make",
     "migrate:rollback:all": "knex migrate:rollback --all",
     "migrate:rollback": "knex migrate:rollback",
