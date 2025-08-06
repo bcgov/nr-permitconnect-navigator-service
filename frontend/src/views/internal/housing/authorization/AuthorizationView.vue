@@ -5,19 +5,14 @@ import { useI18n } from 'vue-i18n';
 
 import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
 import { useToast } from '@/lib/primevue';
-import { housingProjectService } from '@/services';
-import { useProjectStore } from '@/store';
+import { housingProjectService, permitService } from '@/services';
+import { usePermitStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 
-const {
-  editable = true,
-  projectId,
-  permitId
-} = defineProps<{
-  editable?: boolean;
+const { projectId, permitId } = defineProps<{
   projectId: string;
   permitId?: string;
 }>();
@@ -28,9 +23,11 @@ const activityId: Ref<string> = ref('');
 // Composables
 const { t } = useI18n();
 const toast = useToast();
+const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 
 // Store
+const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Providers
@@ -46,6 +43,12 @@ onBeforeMount(async () => {
     if (getProject.value?.activityId) {
       activityId.value = getProject.value.activityId;
     }
+    if (!getPermit.value && permitId) {
+      const permit = (await permitService.getPermit(permitId)).data;
+      permitStore.setPermit(permit);
+    } else {
+      permitStore.reset();
+    }
   } catch {
     toast.error(t('i.housing.authorization.authorizationView.projectPermitLoadError'));
   }
@@ -53,10 +56,5 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <AuthorizationForm
-    :editable="editable"
-    :project-id="projectId"
-    :activity-id="activityId"
-    :authorization-id="permitId"
-  />
+  <AuthorizationForm :authorization-id="permitId" />
 </template>

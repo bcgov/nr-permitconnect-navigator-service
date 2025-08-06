@@ -64,14 +64,21 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: 'authorization',
                 component: () => import('@/views/GenericView.vue'),
+                meta: { dynamicBreadcrumb: 'authorization' },
                 children: [
                   {
                     path: '',
+                    name: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
+                    component: () => import('@/views/internal/electrification/authorization/AuthorizationView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps
+                  },
+                  {
+                    path: ':permitId',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
                     component: () => import('@/views/internal/electrification/authorization/AuthorizationView.vue'),
                     beforeEnter: accessHandler,
-                    props: createProps,
-                    meta: { dynamicBreadcrumb: 'authorization' }
+                    props: createProps
                   }
                 ]
               },

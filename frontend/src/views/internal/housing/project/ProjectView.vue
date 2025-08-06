@@ -138,6 +138,16 @@ function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
+function toAuthorization(authId: string) {
+  router.push({
+    name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+    params: {
+      permitId: authId,
+      projectId: projectId
+    }
+  });
+}
+
 onBeforeMount(async () => {
   const project = (await housingProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
@@ -168,18 +178,6 @@ onBeforeMount(async () => {
 
   loading.value = false;
 });
-
-function toAuthorization(authId: string) {
-  router.push({
-    name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
-    params: {
-      projectId: projectId
-    },
-    query: {
-      permitId: authId
-    }
-  });
-}
 </script>
 
 <template>
@@ -429,7 +427,7 @@ function toAuthorization(authId: string) {
             :disabled="isCompleted || !useAuthZStore().can(Initiative.HOUSING, Resource.PERMIT, Action.CREATE)"
             @click="
               router.push({
-                name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+                name: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
                 params: {
                   projectId: projectId
                 }

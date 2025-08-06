@@ -24,9 +24,7 @@ import type { Ref } from 'vue';
 import type { Permit, PermitNote, User } from '@/types';
 
 // Props
-const { activityId, projectId, authorizationId } = defineProps<{
-  activityId: string;
-  projectId: string;
+const { authorizationId } = defineProps<{
   authorizationId?: string;
 }>();
 
@@ -65,7 +63,7 @@ async function onSubmit(data: any) {
   const { authorizationType, permitNote, ...rest } = data;
   const permitData: Permit = {
     ...rest,
-    activityId,
+    activityId: getProject.value?.activityId,
     permitTypeId: authorizationType?.permitTypeId,
     submittedDate: data.submittedDate?.toISOString(),
     adjudicationDate: data.adjudicationDate?.toISOString()
@@ -92,7 +90,7 @@ async function onSubmit(data: any) {
 
     router.push({
       name: projectRouteName,
-      params: { projectId },
+      params: { projectId: getProject.value?.projectId },
       query: {
         initialTab: '2'
       }
@@ -145,7 +143,7 @@ function onDelete() {
         toast.success(t('authorization.authorizationForm.authDeleted'));
         router.push({
           name: projectRouteName,
-          params: { projectId },
+          params: { projectId: getProject.value?.projectId },
           query: {
             initialTab: AUTHORIZATION_TAB
           }
@@ -306,7 +304,7 @@ onBeforeMount(async () => {
           @click="
             router.push({
               name: projectRouteName,
-              params: { projectId },
+              params: { projectId: getProject?.projectId },
               query: {
                 initialTab: AUTHORIZATION_TAB
               }
