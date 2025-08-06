@@ -19,6 +19,7 @@ const { projectId, permitId } = defineProps<{
 
 // State
 const activityId: Ref<string> = ref('');
+const loading: Ref<boolean> = ref(true);
 
 // Composables
 const { t } = useI18n();
@@ -43,12 +44,13 @@ onBeforeMount(async () => {
     if (getProject.value?.activityId) {
       activityId.value = getProject.value.activityId;
     }
-    if (!getPermit.value && permitId) {
+    if (!permitId) {
+      permitStore.reset();
+    } else if (getPermit.value?.permitId !== permitId) {
       const permit = (await permitService.getPermit(permitId)).data;
       permitStore.setPermit(permit);
-    } else {
-      permitStore.reset();
     }
+    loading.value = false;
   } catch {
     toast.error(t('i.housing.authorization.authorizationView.projectPermitLoadError'));
   }
@@ -56,5 +58,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <AuthorizationForm :authorization-id="permitId" />
+  <div v-if="!loading">
+    <AuthorizationForm :authorization="getPermit" />
+  </div>
 </template>

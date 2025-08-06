@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, provide, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import AuthorizationCardProponent from '@/components/authorization/AuthorizationCardProponent.vue';
 import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
-import BasicProjectInfo from '@/components/basicInfo/BasicProjectInfo.vue';
+import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
@@ -57,6 +57,16 @@ function navigateToSubmissionIntakeView() {
     params: { projectId }
   });
 }
+
+const assigneeName: Ref<string> = computed(() => {
+  return assignee.value?.firstName
+    ? `${assignee.value.firstName} ${assignee.value?.lastName}`
+    : t('e.common.projectView.toBeAssigned');
+});
+
+const createdByName: Ref<string> = computed(() => {
+  return createdBy.value?.firstName ? `${createdBy.value.firstName} ${createdBy.value?.lastName}` : '';
+});
 
 onBeforeMount(async () => {
   let enquiriesValue, projectValue: any;
@@ -141,13 +151,9 @@ onBeforeMount(async () => {
       </TabList>
       <TabPanels>
         <TabPanel :value="0">
-          <BasicProjectInfo
-            :assignee="
-              assignee?.firstName
-                ? `${assignee?.firstName} ${assignee?.lastName}`
-                : t('e.common.projectView.toBeAssigned')
-            "
-            :created-by="createdBy?.firstName + ' ' + createdBy?.lastName"
+          <BasicProjectInfoCard
+            :assignee="assigneeName"
+            :created-by="createdByName"
             :activity-id="getProject.activityId"
             @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
           />

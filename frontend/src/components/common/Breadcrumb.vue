@@ -76,7 +76,12 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
         }
       }
       case 'authorization': {
-        return 'Add authorization';
+        const permit = getPermit;
+        if (permit.value) {
+          return permit.value.permitType.name;
+        } else {
+          return 'Add authorization';
+        }
       }
       default:
         return 'Missing Label';

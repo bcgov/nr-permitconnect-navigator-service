@@ -5,13 +5,13 @@ import { Card } from '@/lib/primevue';
 
 // Props
 const { assignee, createdBy, activityId } = defineProps<{
-  assignee?: string;
+  assignee: string;
   createdBy: string;
   activityId: string;
 }>();
 
 // Emits
-const emit = defineEmits(['basicProjectInfo:navigateToSubmissionIntakeView']);
+const emit = defineEmits(['basicProjectInfoCard:navigateToSubmissionIntakeView']);
 
 // Composables
 const { t } = useI18n();
@@ -21,19 +21,19 @@ const { t } = useI18n();
   <div class="grid grid-cols-3 gap-x-5 bg-[var(--p-bcblue-50)] p-5">
     <Card class="mb-0">
       <template #content>
-        <div class="mb-2">{{ t('basicInfo.basicProjectInfo.projectNavigator') }}</div>
-        <h5 class="m-0 p-0 text-[var(--p-bcblue-950)]">{{ assignee ?? '' }}</h5>
+        <div class="mb-2">{{ t('basicProjectInfoCard.projectNavigator') }}</div>
+        <h5 class="m-0 p-0 text-[var(--p-bcblue-950)]">{{ assignee }}</h5>
       </template>
     </Card>
     <Card class="mb-0 card-bg-bcblue-50">
       <template #content>
         <div class="">
           <div class="mb-2">
-            {{ t('basicInfo.basicProjectInfo.projectId') }}:
+            {{ t('basicProjectInfoCard.projectId') }}:
             <p class="ml-3 p-0 inline-block font-bold text-[var(--p-bcblue-950)]">{{ activityId }}</p>
           </div>
           <div class="mb-2">
-            {{ t('basicInfo.basicProjectInfo.createdBy') }}:
+            {{ t('basicProjectInfoCard.createdBy') }}:
             <p class="ml-2 p-0 inline-block font-bold text-[var(--p-bcblue-950)]">{{ createdBy }}</p>
           </div>
         </div>
@@ -43,14 +43,16 @@ const { t } = useI18n();
       <template #content>
         <div
           class="cursor-pointer"
-          @click="emit('basicProjectInfo:navigateToSubmissionIntakeView')"
+          @click="emit('basicProjectInfoCard:navigateToSubmissionIntakeView')"
         >
           <font-awesome-icon
             class="mr-2"
             icon="fa-solid fa-file-lines"
           />
 
-          <span class="underline app-primary-color">{{ t('basicInfo.basicProjectInfo.submittedProjectInfo') }}</span>
+          <span class="underline app-primary-color">
+            {{ t('basicProjectInfoCard.submittedProjectInfo') }}
+          </span>
         </div>
       </template>
     </Card>

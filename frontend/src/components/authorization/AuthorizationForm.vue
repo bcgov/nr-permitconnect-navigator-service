@@ -21,11 +21,11 @@ import { permitNoteNotificationTemplate } from '@/utils/templates';
 import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitNote, User } from '@/types';
+import type { Permit, User } from '@/types';
 
 // Props
-const { authorizationId } = defineProps<{
-  authorizationId?: string;
+const { authorization } = defineProps<{
+  authorization?: Permit;
 }>();
 
 // Constants
@@ -40,11 +40,9 @@ const toast = useToast();
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getProject, getPermits } = storeToRefs(projectStore);
+const { getProject } = storeToRefs(projectStore);
 
 // State
-const authorization: Ref<Permit | undefined> = ref(undefined);
-const authorizationNotes: Ref<Array<PermitNote>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const expandPanel: Ref<boolean> = ref(false);
@@ -139,7 +137,7 @@ function onDelete() {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        await permitService.deletePermit(authorizationId as string);
+        await permitService.deletePermit(authorization?.permitId as string);
         toast.success(t('authorization.authorizationForm.authDeleted'));
         router.push({
           name: projectRouteName,
@@ -204,30 +202,24 @@ const formSchema = object({
 });
 
 function initializeFormValues() {
-  if (authorizationId) {
-    authorization.value = getPermits.value.find((p) => p.permitId === authorizationId) as Permit;
-    authorizationNotes.value = authorization.value.permitNote;
-    if (authorization.value) {
-      initialFormValues.value = {
-        authorizationType: authorization.value.permitType,
-        adjudicationDate: authorization.value.adjudicationDate ? new Date(authorization.value.adjudicationDate) : null,
-        submittedDate: authorization.value.submittedDate ? new Date(authorization.value.submittedDate) : null,
-        permitTracking: authorization.value.permitTracking.map((tracking) => ({
-          permitTrackingId: tracking.permitTrackingId,
-          sourceSystemKindId: tracking.sourceSystemKind?.sourceSystemKindId,
-          trackingId: tracking.trackingId,
-          shownToProponent: tracking.shownToProponent
-        })),
-        issuedPermitId: authorization.value.issuedPermitId,
-        statusLastVerified: authorization.value.statusLastVerified
-          ? new Date(authorization.value.statusLastVerified)
-          : null,
-        authStatus: authorization.value.authStatus,
-        status: authorization.value.status,
-        needed: authorization.value.needed,
-        permitId: authorization.value?.permitId
-      };
-    }
+  if (authorization) {
+    initialFormValues.value = {
+      authorizationType: authorization.permitType,
+      adjudicationDate: authorization.adjudicationDate ? new Date(authorization.adjudicationDate) : null,
+      submittedDate: authorization.submittedDate ? new Date(authorization.submittedDate) : null,
+      permitTracking: authorization.permitTracking.map((tracking) => ({
+        permitTrackingId: tracking.permitTrackingId,
+        sourceSystemKindId: tracking.sourceSystemKind?.sourceSystemKindId,
+        trackingId: tracking.trackingId,
+        shownToProponent: tracking.shownToProponent
+      })),
+      issuedPermitId: authorization.issuedPermitId,
+      statusLastVerified: authorization.statusLastVerified ? new Date(authorization.statusLastVerified) : null,
+      authStatus: authorization.authStatus,
+      status: authorization.status,
+      needed: authorization.needed,
+      permitId: authorization?.permitId
+    };
   } else {
     // Set default values
     initialFormValues.value = {
@@ -243,8 +235,8 @@ function onInvalidSubmit(e: any) {
 
 onBeforeMount(async () => {
   initializeFormValues();
-  if (authorization.value?.updatedBy) {
-    updatedBy.value = (await userService.searchUsers({ userId: [authorization.value?.updatedBy] })).data[0];
+  if (authorization?.updatedBy) {
+    updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] })).data[0];
   }
 });
 </script>
@@ -270,7 +262,7 @@ onBeforeMount(async () => {
     <AuthorizationCardIntake
       initial-form-values=""
       :editable="true"
-      :expand-panel="authorizationId && !expandPanel ? true : false"
+      :expand-panel="authorization?.permitId && !expandPanel ? true : false"
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
@@ -313,7 +305,7 @@ onBeforeMount(async () => {
         />
       </div>
       <Button
-        v-if="authorizationId"
+        v-if="authorization?.permitId"
         class="p-button-outlined mr-2 p-button-danger"
         :label="t('authorization.authorizationForm.delete')"
         icon="pi pi-trash"
@@ -322,7 +314,7 @@ onBeforeMount(async () => {
     </div>
 
     <div
-      v-if="authorizationId"
+      v-if="authorization?.permitId"
       class="grid grid-cols-4 gap-x-6 gap-y-6 authorization-details-block pl-6 py-3 mt-8"
     >
       <div class="flex">
@@ -345,11 +337,11 @@ onBeforeMount(async () => {
       </div>
     </div>
     <AuthorizationUpdateHistory
-      v-if="authorizationId"
+      v-if="authorization?.permitId"
       initial-form-values=""
       :editable="true"
       class="mt-6"
-      :authorization-notes="authorizationNotes"
+      :authorization-notes="authorization?.permitNote"
     />
   </Form>
 </template>

@@ -39,12 +39,19 @@ const authsNotNeededCSV = computed(() => `${authsNotNeeded.map((a) => a.permitTy
           class="mb-6 mt-3"
         >
           <a
+            v-if="permit.permitType.infoUrl"
             class="m-0 p-0"
             :href="permit.permitType.infoUrl"
             target="_blank"
           >
             <span class="underline">{{ permit.permitType.name }}</span>
           </a>
+          <span
+            v-else
+            class="m-0 p-0"
+          >
+            {{ permit.permitType.name }}
+          </span>
           <span
             v-if="permit.permitNote?.[0]"
             class="ml-2"

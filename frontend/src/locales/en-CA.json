@@ -387,13 +387,11 @@
       "requiredAuthsDesc": "We have investigated the provincial authorizations potentially required for this project based on the information you provided. Please note, this list may change as your project progresses."
     }
   },
-  "basicInfo": {
-    "basicProjectInfo": {
-      "createdBy": "Created by",
-      "projectId": "Project ID",
-      "projectNavigator": "Project Navigator",
-      "submittedProjectInfo": "Submitted project information"
-    }
+  "basicProjectInfoCard": {
+    "createdBy": "Created by",
+    "projectId": "Project ID",
+    "projectNavigator": "Project Navigator",
+    "submittedProjectInfo": "Submitted project information"
   },
   "cancelButton": {
     "btnText": "Cancel"
