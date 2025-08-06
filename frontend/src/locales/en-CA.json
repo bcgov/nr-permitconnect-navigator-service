@@ -51,28 +51,32 @@
       },
       "projectView": {
         "agency": "Agency",
-        "createdBy": "Created by",
+        "askMyNavigator": "Ask my Navigator",
+        "completedAuths": "Completed authorizations",
         "crumbAppsPermits": "Applications and Permits",
         "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
+        "emptyCompletedAuths": "You have no completed or closed authorizations at this time.",
         "enquiryID": "Enquiry ID",
         "latestUpdates": "Latest updates",
         "listEmpty": "Your project related enquiries will be displayed here.",
+        "missingAuth": "Missing an authorization? Please contact your Navigator.",
         "noUpdates": "No updates at the moment.",
         "notNeeded": "Not needed",
-        "notNeededDesc": "We have also investigated the following permits as requested. These permits are not required for this project.",
+        "ongoingAuths": "Ongoing authorizations",
         "rangeSeparator": "of",
-        "recommendedPermits": "Recommended permits",
-        "recommendedPermitsDesc": "We will update the recommended permits here as the project progresses. You may see this message while we are investigating or if no application is needed at this time.",
+        "requiredAuths": "Potentially required authorizations",
+        "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no authorization is needed at this time.",
         "relatedEnquiries": "Related enquiries",
+        "relatedEnquiriesDesc": "Any project-related enquiries you or a team member have submitted through the Navigator Service website will appear on this page. You can submit an enquiry about this project to your assigned Navigator by clicking the 'Ask my Navigator' button in the top-right corner.",
         "status": "Status",
         "statusNotVerified": "This status has not yet been verified by Navigators",
-        "statusVerified": "Status last verified on",
-        "submittedApplications": "Submitted applications",
-        "submittedApplicationsDesc": "We will update your submitted applications here as the project progresses.",
         "submittedDate": "Submitted date",
+        "tabAuthorizations": "Authorizations",
+        "tabRelatedEnquiries": "Related enquiries",
         "toastEnquiryFailed": "Failed to submit enquiry",
         "toastProjectLoadFailed": "Unable to load project, please try again later",
         "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
+        "toBeAssigned": "To be assigned",
         "trackingId": "Tracking ID"
       }
     },
@@ -128,9 +132,6 @@
         "upload2": "shape files",
         "upload3": ", etc)",
         "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
-      },
-      "projectView": {
-        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Electrification. For questions, please submit a general enquiry."
       }
     },
     "housing": {
@@ -160,9 +161,6 @@
         "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
         "projectId": "Project ID:",
         "success": "Your application has been successfully submitted."
-      },
-      "projectView": {
-        "inapplicableSubmissionType": "A Navigator has reviewed your submission and found it inapplicable to Housing. For questions, please submit a general enquiry."
       }
     }
   },
@@ -311,6 +309,15 @@
       "more": "More",
       "statusVerified": "Status verified date"
     },
+    "authorizationCardProponent": {
+      "agency": "Agency",
+      "latestUpdates": "Latest updates",
+      "more": "More",
+      "noUpdates": "No updates at the moment.",
+      "statusNotVerified": "This status has not yet been verified by Navigators",
+      "statusVerified": "Status last verified by Navigator on",
+      "submittedOn": "Submitted on"
+    },
     "authorizationCardLite": {
       "more": "More"
     },
@@ -371,7 +378,20 @@
     },
     "authorizationUpdateHistory": {
       "updateNoteHistory": "Update note history"
+    },
+    "requiredAuths": {
+      "areNotNeeded": "are not needed. ",
+      "isNotNeeded": "is not needed. ",
+      "moreInfo": "More information",
+      "notNeededDesc": "We have also investigated the ones you thought you might need. The ",
+      "requiredAuthsDesc": "We have investigated the provincial authorizations potentially required for this project based on the information you provided. Please note, this list may change as your project progresses."
     }
+  },
+  "basicProjectInfoCard": {
+    "createdBy": "Created by",
+    "projectId": "Project ID",
+    "projectNavigator": "Project Navigator",
+    "submittedProjectInfo": "Submitted project information"
   },
   "cancelButton": {
     "btnText": "Cancel"
@@ -482,10 +502,12 @@
     "failedSubmission": "Failed to create new submission"
   },
   "enquiryListProponent": {
+    "createdByFailed": "Failed to load created by users",
     "enquiryId": "Enquiry ID",
     "listEmpty": "Your project related enquiries will be displayed here.",
     "of": "of",
     "state": "State",
+    "submittedBy": "Submitted by",
     "submittedDate": "Submitted date",
     "tableAlt": "A table containing a list of enquiries"
   },
@@ -547,6 +569,16 @@
     "loginIDIR": "Login with IDIR",
     "register": "Need an account?",
     "setupBCServicesCard": "Set up a BC Services Card account."
+  },
+  "relatedEnquiryListProponent": {
+    "createdByFailed": "Failed to load created by users",
+    "enquiryId": "Enquiry ID",
+    "listEmpty": "Your project related enquiries will be displayed here.",
+    "of": "of",
+    "state": "State",
+    "submittedBy": "Submitted by",
+    "submittedDate": "Submitted date",
+    "tableAlt": "A table containing a list of enquiries"
   },
   "submissionDraftListProponent": {
     "action": "Action",
