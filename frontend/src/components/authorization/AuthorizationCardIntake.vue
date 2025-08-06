@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { FieldArray } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
-import { onMounted, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 
 import { Checkbox, InputText, Select } from '@/components/form';
 import { Button, Panel } from '@/lib/primevue';
@@ -21,7 +21,7 @@ const { expandPanel } = defineProps<{
 const emit = defineEmits(['update:uncheckShownToProponent']);
 
 // Composables
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const codeStore = useCodeStore();
 const permitStore = usePermitStore();
 
@@ -34,13 +34,24 @@ const { getPermitTypes } = storeToRefs(permitStore);
 const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 
 // Actions
-onMounted(async () => {
+const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
+  const srcSysCompare = codeDisplay.SourceSystem[a.sourceSystem].localeCompare(
+    codeDisplay.SourceSystem[b.sourceSystem],
+    locale.value,
+    { sensitivity: 'base' }
+  );
+  if (srcSysCompare !== 0) return srcSysCompare;
+  return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
+};
+
+onBeforeMount(async () => {
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
     permitStore.setPermitTypes(permitTypes);
   }
 
-  sourceSystemKinds.value = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  const data = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  sourceSystemKinds.value = data.sort(sortForDisplayOrder);
 });
 </script>
 
