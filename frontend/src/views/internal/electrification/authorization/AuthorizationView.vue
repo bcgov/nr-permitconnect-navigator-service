@@ -43,11 +43,11 @@ onBeforeMount(async () => {
     if (getProject.value?.activityId) {
       activityId.value = getProject.value.activityId;
     }
-    if (!getPermit.value && permitId) {
+    if (!permitId) {
+      permitStore.reset();
+    } else {
       const permit = (await permitService.getPermit(permitId)).data;
       permitStore.setPermit(permit);
-    } else {
-      permitStore.reset();
     }
   } catch {
     toast.error(t('i.electrification.authorization.authorizationView.projectPermitLoadError'));

@@ -7,14 +7,14 @@ export type Permit = {
   permitId: string; // Primary Key
   activityId: string;
   adjudicationDate?: string;
-  authStatus?: string;
+  authStatus: string;
   issuedPermitId?: string;
-  needed?: string;
+  needed: string;
   permitNote: Array<PermitNote>;
   permitTracking: Array<PermitTracking>;
   permitType: PermitType;
   permitTypeId: number;
-  status?: string;
+  status: string;
   statusLastVerified?: string;
   submittedDate?: string;
 } & Partial<IStamps>;

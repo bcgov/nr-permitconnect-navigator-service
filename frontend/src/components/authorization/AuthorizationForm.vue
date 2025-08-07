@@ -34,8 +34,8 @@ const AUTHORIZATION_TAB = '2';
 // Composables
 const { t } = useI18n();
 const confirmDialog = useConfirm();
-const router = useRouter();
 const projectStore = useProjectStore();
+const router = useRouter();
 const toast = useToast();
 
 // Store
@@ -71,7 +71,6 @@ async function onSubmit(data: any) {
 
   try {
     const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
-    projectStore.addPermit(result);
 
     // Prevent creating notes and sending an update email if the above call fails or if note is empty
     if (result?.permitId && permitNote?.trim().length > 0) {
@@ -336,6 +335,7 @@ onBeforeMount(async () => {
         {{ formatDateTime(authorization?.updatedAt) }}
       </div>
     </div>
+    <h4 class="my-10">{{ t('authorization.authorizationForm.updateHistory') }}</h4>
     <AuthorizationUpdateHistory
       v-if="authorization?.permitId"
       initial-form-values=""
