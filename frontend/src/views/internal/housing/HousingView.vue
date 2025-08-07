@@ -48,9 +48,8 @@ onBeforeMount(async () => {
       noteService.listBringForward(BringForwardType.UNRESOLVED)
     ])
   ).map((r) => r.data);
+  loading.value = false;
 });
-
-loading.value = false;
 </script>
 
 <template>
