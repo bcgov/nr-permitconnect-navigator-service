@@ -11,7 +11,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, contactService, enquiryService } from '@/services';
+import { activityContactService, enquiryService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
@@ -230,7 +230,8 @@ async function onSubmit(values: any) {
     if (permit) {
       let permitDescription =
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
-      const trackingId = permit.trackingId ? permit.trackingId : t('enquiryIntakeForm.notApplicable');
+      const trackingId =
+        permit.permitTracking.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
       permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
       dataOmitted.basic.enquiryDescription = permitDescription + dataOmitted.basic.enquiryDescription;

@@ -13,7 +13,6 @@ export type Permit = {
   permitNote: Array<PermitNote>;
   permitTracking: Array<PermitTracking>;
   permitType: PermitType;
-  permitTypeId: number;
   status?: string;
   statusLastVerified?: string;
   submittedDate?: string;
