@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
-import { castInput } from '../utils/utils';
+// import { castInput } from '../utils/utils';
 
-const NUMERIC_PRISMA_TYPES = ['Decimal'];
+// const NUMERIC_PRISMA_TYPES = ['Decimal'];
 
 const numericTransform = Prisma.defineExtension({
   // query: {

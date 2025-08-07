@@ -347,8 +347,9 @@ const updateUser = async (userId: string, data: JwtUser, etrx: Prisma.Transactio
     if (etrx) {
       await _updateUser(userId, data, etrx);
     } else {
-      await prisma.$transaction(async (trx) => {
-        await _updateUser(userId, data, trx);
+      await prisma.$transaction(async (tx) => {
+        // TODO: Address incorect typing, see github issue - https://github.com/prisma/prisma/issues/20738
+        await _updateUser(userId, data, tx);
       });
     }
 

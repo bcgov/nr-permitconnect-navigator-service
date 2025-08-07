@@ -13,8 +13,6 @@ import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
-import PermitCard from '@/components/permit/PermitCard.vue';
-import PermitModal from '@/components/permit/PermitModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
@@ -74,7 +72,18 @@ const router = useRouter();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
-const { getDocuments, getProject, getNoteHistory, getPermits, getRelatedEnquiries } = storeToRefs(projectStore);
+const {
+  getAuthsCompleted,
+  getAuthsNeeded,
+  getAuthsNotNeeded,
+  getAuthsOnGoing,
+  getAuthsUnderInvestigation,
+  getDocuments,
+  getNoteHistory,
+  getProject,
+  getPermits,
+  getRelatedEnquiries
+} = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));

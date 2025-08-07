@@ -11,9 +11,6 @@ import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCar
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
-import Divider from '@/components/common/Divider.vue';
-import StatusPill from '@/components/common/StatusPill.vue';
-import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
 import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';

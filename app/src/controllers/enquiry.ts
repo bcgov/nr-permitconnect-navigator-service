@@ -58,7 +58,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
   const enquiry = await generateEnquiryData(req, IntakeStatus.SUBMITTED);
 
   // Create or update contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, req.currentContext, enquiry.activityId);
+  if (req.body.contacts) await upsertContacts(req.body.contacts);
 
   // Create new enquiry
   const result = await createEnquiry({

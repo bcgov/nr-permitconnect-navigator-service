@@ -183,6 +183,7 @@ model permit {
   activity           activity      @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   permitType         permit_type   @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
   permitNote         permit_note[]
+  permitTracking     permit_tracking[]
 
   @@unique([permitId, permitTypeId, activityId], map: "permit_permit_id_permit_type_id_activity_id_unique")
   @@schema("public")
@@ -221,6 +222,7 @@ model permit_type {
   updatedBy                String?                       @map("updated_by")
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
   permit                   permit[]
+  sourceSystemCode         source_system_code?           @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
   permitTypeInitiativeXref permit_type_initiative_xref[]
 
   @@unique([agency, division, branch, name], map: "permit_type_agency_division_branch_name_unique")
@@ -620,7 +622,7 @@ model permit_tracking {
   createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?             @map("updated_by")
   updatedAt          DateTime?           @map("updated_at") @db.Timestamptz(6)
-  permit             permit              @relation(fields: [permitId], references: [permit_id], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
+  permit             permit              @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
   sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
 
   @@schema("public")
