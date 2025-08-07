@@ -336,6 +336,7 @@ onBeforeMount(async () => {
         {{ formatDateTime(authorization?.updatedAt) }}
       </div>
     </div>
+    <h4 class="my-10">{{ t('authorization.authorizationForm.updateHistory') }}</h4>
     <AuthorizationUpdateHistory
       v-if="authorization?.permitId"
       initial-form-values=""

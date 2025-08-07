@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
 
@@ -78,10 +79,19 @@ const pillState = {
   }
 };
 
+// Composables
+const { t } = useI18n();
+
 const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensions));
 const getState = computed(() => {
   return pillState[authStatus as keyof typeof pillState];
 });
+
+const authStatusPillDisplayText = {
+  [PermitAuthorizationStatus.ABANDONED]: t('authorization.authorizationStatusPill.abandonedByClient'),
+  [PermitAuthorizationStatus.WITHDRAWN]: t('authorization.authorizationStatusPill.withdrawnByClient'),
+  [PermitAuthorizationStatus.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+};
 </script>
 
 <template>
@@ -111,7 +121,11 @@ const getState = computed(() => {
           :class="[getState?.iconClass]"
           :icon="getState?.iconString"
         />
-        <span class="text-color">{{ displayText ?? authStatus }}</span>
+        <span class="text-color">
+          {{
+            displayText ?? authStatusPillDisplayText[authStatus as keyof typeof authStatusPillDisplayText] ?? authStatus
+          }}
+        </span>
       </div>
     </div>
   </div>
