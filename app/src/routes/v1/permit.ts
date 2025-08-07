@@ -24,14 +24,14 @@ router.use('/note', permitNote);
 router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);
 
 /** Permit create endpoint */
-router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.createPermit, createPermitController);
+router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, createPermitController);
 
 /** Permit update endpoint */
 router.put(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.UPDATE),
   hasAccess('permitId'),
-  permitValidator.updatePermit,
+  permitValidator.upsertPermit,
   updatePermitController
 );
 

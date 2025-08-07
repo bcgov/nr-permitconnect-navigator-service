@@ -348,7 +348,7 @@ export const submitHousingProjectDraftController = async (
   );
 
   // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts, housingProject.activityId);
+  if (req.body.contacts) await upsertContacts(req.body.contacts);
 
   // Create new housing project
   const result: HousingProject = await createHousingProject({
