@@ -4,12 +4,19 @@ import { useI18n } from 'vue-i18n';
 import { DatePicker, Select, TextArea } from '@/components/form';
 import { Panel } from '@/lib/primevue';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
+import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 
 // Emits
 const emit = defineEmits(['update:setVerifiedDate']);
 
 // Composables
 const { t } = useI18n();
+
+const authStatusDisplayText = {
+  [PermitAuthorizationStatus.ABANDONED]: t('authorization.authorizationStatusPill.abandonedByClient'),
+  [PermitAuthorizationStatus.WITHDRAWN]: t('authorization.authorizationStatusPill.withdrawnByClient'),
+  [PermitAuthorizationStatus.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+};
 </script>
 
 <template>
@@ -42,6 +49,7 @@ const { t } = useI18n();
             name="authStatus"
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
             :options="PERMIT_AUTHORIZATION_STATUS_LIST"
+            :option-label="(option) => authStatusDisplayText[option as keyof typeof authStatusDisplayText] ?? option"
           />
         </div>
         <div>

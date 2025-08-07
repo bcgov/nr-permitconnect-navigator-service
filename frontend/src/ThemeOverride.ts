@@ -34,8 +34,8 @@ export const ThemeOverride = definePreset(Material, {
     },
     green: {
       // Override base green hues, for base values see link at top
-      50: '#ffffff',
-      75: '#FAF9F8',
+      50: '#FAF9F8',
+      75: '#F6FFF8',
       100: '#d9e6db',
       200: '#b3cdb7',
       300: '#8eb392',
