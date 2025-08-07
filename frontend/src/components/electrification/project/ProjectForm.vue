@@ -39,7 +39,7 @@ import {
 } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -239,7 +239,26 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
-  scrollToFirstError(e.errors);
+  const errors = Object.keys(e.errors);
+
+  if (errors.includes('contact.firstName')) {
+    toast.warn(t('i.electrification.projectForm.basicInfoMissing'));
+  }
+
+  // Scrolls to the top-most error
+  let first: Element | null = null;
+
+  for (let error of errors) {
+    const el = document.querySelector(`[name="${error}"]`);
+    const rect = el?.getBoundingClientRect();
+
+    if (rect) {
+      if (!first) first = el;
+      else if (rect.top < first.getBoundingClientRect().top) first = el;
+    }
+  }
+
+  first?.scrollIntoView({ behavior: 'smooth' });
 }
 
 function onReOpen() {
