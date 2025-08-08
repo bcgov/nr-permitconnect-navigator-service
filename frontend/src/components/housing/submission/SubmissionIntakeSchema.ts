@@ -21,7 +21,7 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
         otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
       }),
       registeredName: string().when('isDevelopedInBC', {
-        is: (value: string) => value === BasicResponse.YES || value === BasicResponse.NO,
+        is: (value: string) => value === BasicResponse.YES,
         then: (schema) =>
           schema
             .required()
