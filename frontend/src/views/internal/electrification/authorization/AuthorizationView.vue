@@ -19,6 +19,7 @@ const { projectId, permitId } = defineProps<{
 
 // State
 const activityId: Ref<string> = ref('');
+const loading: Ref<boolean> = ref(true);
 
 // Composables
 const { t } = useI18n();
@@ -49,6 +50,7 @@ onBeforeMount(async () => {
       const permit = (await permitService.getPermit(permitId)).data;
       permitStore.setPermit(permit);
     }
+    loading.value = false;
   } catch {
     toast.error(t('i.electrification.authorization.authorizationView.projectPermitLoadError'));
   }
@@ -56,5 +58,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <AuthorizationForm :authorization-id="permitId" />
+  <div v-if="!loading">
+    <AuthorizationForm :authorization="getPermit" />
+  </div>
 </template>
