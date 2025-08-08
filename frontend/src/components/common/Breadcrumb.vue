@@ -32,7 +32,7 @@ const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => {
     let label = generateBreadcrumbLabel(record);
     let tooltip = '';
 
-    if (!isLast && label.length > 10 && record.meta.dynamicBreadcrumb && label !== 'Missing Label') {
+    if (!isLast && label?.length > 10 && record.meta.dynamicBreadcrumb && label !== 'Missing Label') {
       tooltip = label;
       label = label.substring(0, 10) + '...';
     }
