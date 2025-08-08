@@ -15,7 +15,7 @@ const service = {
       intake_status,
       application_status,
       p.issued_permit_id,
-      p.tracking_id,
+      (select ptr.tracking_id where ptr.shown_to_proponent = true) as tracking_id,
       p.auth_status,
       p.needed,
       p.status,
@@ -31,14 +31,17 @@ const service = {
       pt.acronym,
       pt.tracked_in_ats,
       pt.source_system,
-      pt.source_system_acronym
+       ssc.display as source_system_acronym
     from electrification_project as ep
     join activity as a on ep.activity_id = a.activity_id
     join activity_contact as ac on ep.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on ep.activity_id = p.activity_id
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    where a.is_deleted = false`;
+    join source_system_code ssc on pt.source_system = ssc.code
+    left join permit_tracking ptr on p.permit_id = ptr.permit_id
+    where a.is_deleted = false
+    order by ep.activity_id asc`;
 
     return result;
   },
@@ -66,7 +69,7 @@ const service = {
       intake_status,
       application_status,
       p.issued_permit_id,
-      p.tracking_id,
+      (select ptr.tracking_id where ptr.shown_to_proponent = true) as tracking_id,
       p.auth_status,
       p.needed,
       p.status,
@@ -82,14 +85,17 @@ const service = {
       pt.acronym,
       pt.tracked_in_ats,
       pt.source_system,
-      pt.source_system_acronym
+      ssc.display as source_system_acronym
     from housing_project as hp
     join activity as a on hp.activity_id = a.activity_id
     join activity_contact as ac on hp.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on hp.activity_id = p.activity_id
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    where a.is_deleted = false`;
+    join source_system_code ssc on pt.source_system = ssc.code
+    left join permit_tracking ptr on p.permit_id = ptr.permit_id
+    where a.is_deleted = false
+    order by hp.activity_id asc`;
 
     return result;
   }
