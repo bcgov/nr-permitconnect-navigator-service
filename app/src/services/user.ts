@@ -1,15 +1,16 @@
 import jwt from 'jsonwebtoken';
-import { Prisma, user } from '@prisma/client';
+import { user } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact';
 import prisma from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
 
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Contact, User } from '../types/models';
 import type { UserSearchParameters } from '../types/stuff';
 
-const trxWrapper = (etrx: Prisma.TransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
+const trxWrapper = (etrx: PrismaTransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
 /**
  * The User DB Service
@@ -57,13 +58,14 @@ const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
  * @returns {Promise<object>} The result of running the insert operation
  * @throws The error encountered upon db transaction failure
  */
-const createIdp = async (idp: string, etrx: Prisma.TransactionClient | undefined = undefined) => {
+const createIdp = async (idp: string, etrx: PrismaTransactionClient | undefined = undefined) => {
   const obj = {
     idp: idp,
     active: true,
     createdBy: NIL
   };
 
+  // const response = trxWrapper(etrx).identity_provider.create()
   const response = trxWrapper(etrx).identity_provider.create({ data: obj });
 
   return response;
@@ -77,11 +79,11 @@ const createIdp = async (idp: string, etrx: Prisma.TransactionClient | undefined
  * @returns {Promise<object>} The result of running the insert operation
  * @throws The error encountered upon db transaction failure
  */
-export const createUser = async (data: JwtUser, etrx: Prisma.TransactionClient | undefined = undefined) => {
+export const createUser = async (data: JwtUser, etrx: PrismaTransactionClient | undefined = undefined) => {
   let response: User | undefined;
 
   // Logical function
-  const _createUser = async (data: JwtUser, trx: Prisma.TransactionClient) => {
+  const _createUser = async (data: JwtUser, trx: PrismaTransactionClient) => {
     const exists = await trx.user.findFirst({
       where: {
         sub: data.sub
@@ -218,7 +220,7 @@ export const login = async (token: jwt.JwtPayload) => {
  * @returns {Promise<object>} The result of running the find operation
  * @throws The error encountered upon db transaction failure
  */
-const readIdp = async (code: string, etrx: Prisma.TransactionClient | undefined = undefined) => {
+const readIdp = async (code: string, etrx: PrismaTransactionClient | undefined = undefined) => {
   const response = await trxWrapper(etrx).identity_provider.findUnique({
     where: {
       idp: code
@@ -302,7 +304,7 @@ export const searchUsers = async (params: UserSearchParameters): Promise<user[]>
  * @returns {Promise<object>} The result of running the patch operation
  * @throws The error encountered upon db transaction failure
  */
-const updateUser = async (userId: string, data: JwtUser, etrx: Prisma.TransactionClient | undefined = undefined) => {
+const updateUser = async (userId: string, data: JwtUser, etrx: PrismaTransactionClient | undefined = undefined) => {
   // Check if any user values have changed
   const oldUser = await readUser(userId);
   const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
@@ -310,11 +312,7 @@ const updateUser = async (userId: string, data: JwtUser, etrx: Prisma.Transactio
   let response: User | undefined;
 
   if (diff) {
-    const _updateUser = async (
-      userId: string,
-      data: JwtUser,
-      trx: Prisma.TransactionClient | undefined = undefined
-    ) => {
+    const _updateUser = async (userId: string, data: JwtUser, trx: PrismaTransactionClient | undefined = undefined) => {
       // Patch existing user
       if (data.idp) {
         const identityProvider = await readIdp(data.idp, trx);
@@ -347,9 +345,9 @@ const updateUser = async (userId: string, data: JwtUser, etrx: Prisma.Transactio
     if (etrx) {
       await _updateUser(userId, data, etrx);
     } else {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (trx) => {
         // TODO: Address incorect typing, see github issue - https://github.com/prisma/prisma/issues/20738
-        await _updateUser(userId, data, tx);
+        await _updateUser(userId, data, trx);
       });
     }
 
