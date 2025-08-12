@@ -1,15 +1,22 @@
-import housingProjectController from '../../../src/controllers/housingProject';
 import {
-  activityService,
-  contactService,
-  draftService,
-  enquiryService,
-  housingProjectService,
-  permitService
-} from '../../../src/services';
+  assignPriority,
+  createHousingProjectController,
+  getHousingProjectController,
+  getHousingProjectsController,
+  getHousingProjectStatisticsController,
+  submitHousingProjectDraftController,
+  updateHousingProjectDraftController
+} from '../../../src/controllers/housingProject';
+import * as activityService from '../../../src/services/activity';
+import * as contactService from '../../../src/services/contact';
+import * as draftService from '../../../src/services/draft';
+import * as enquiryService from '../../../src/services/enquiry';
+import * as housingProjectService from '../../../src/services/housingProject';
+import * as permitService from '../../../src/services/permit';
 import { PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
 import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/projectCommon';
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
+import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
 
 import type { Draft, HousingProject, Permit } from '../../../src/types';
 
@@ -38,10 +45,32 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
+
+const TEST_ACTIVITY = {
+  activityId: '00000000',
+  initiativeId: Initiative.HOUSING,
+  isDeleted: false,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
+};
+
+const TEST_CONTACT = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant',
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null
+};
 
 const HOUSING_PROJECT_1 = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
@@ -80,7 +109,7 @@ const HOUSING_PROJECT_1 = {
   bcOnlineCompleted: true,
   naturalDisaster: false,
   financiallySupported: true,
-  financiallySupportedBC: 'Yes',
+  financiallySupportedBc: 'Yes',
   financiallySupportedIndigenous: 'Yes',
   financiallySupportedNonProfit: 'Yes',
   financiallySupportedHousingCoop: 'Yes',
@@ -97,7 +126,7 @@ const HOUSING_PROJECT_1 = {
   user: null
 };
 
-describe('createHousingProject', () => {
+describe('createHousingProjectController', () => {
   // Mock service calls
   const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
@@ -108,16 +137,15 @@ describe('createHousingProject', () => {
       body: { ...HOUSING_PROJECT_1, activityId: undefined, housingProjectId: undefined },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({
       activityId: '00000000',
       housingProjectId: '11111111'
     } as HousingProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.createHousingProject(req as any, res as any, next);
+    await createHousingProjectController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
@@ -126,8 +154,6 @@ describe('createHousingProject', () => {
   });
 
   it('populates data from body if it exists', async () => {
-    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
     const req = {
       body: {
         applicant: {},
@@ -146,13 +172,12 @@ describe('createHousingProject', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.createHousingProject(req as any, res as any, next);
+    await createHousingProjectController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
@@ -199,14 +224,13 @@ describe('createHousingProject', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     upsertPermitSpy.mockResolvedValue({} as Permit);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.createHousingProject(req as any, res as any, next);
+    await createHousingProjectController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
@@ -243,11 +267,11 @@ describe('createHousingProject', () => {
   });
 });
 
-describe('getStatistics', () => {
+describe('getHousingProjectStatisticsController', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const statisticsSpy = jest.spyOn(housingProjectService, 'getStatistics');
+  const statisticsSpy = jest.spyOn(housingProjectService, 'getHousingProjectStatistics');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -272,7 +296,7 @@ describe('getStatistics', () => {
     statisticsSpy.mockResolvedValue(statistics);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getStatistics(req as any, res as any, next);
+    await getHousingProjectStatisticsController(req as any, res as any);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -296,7 +320,7 @@ describe('getStatistics', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getStatistics(req as any, res as any, next);
+    await getHousingProjectStatisticsController(req as any, res as any);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -305,7 +329,7 @@ describe('getStatistics', () => {
   });
 });
 
-describe('getHousingProject', () => {
+describe('getHousingProjectController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -323,7 +347,7 @@ describe('getHousingProject', () => {
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getHousingProject(req as any, res as any, next);
+    await getHousingProjectController(req as any, res as any);
 
     expect(housingProjectSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectSpy).toHaveBeenCalledWith(req.params.housingProjectId);
@@ -342,7 +366,7 @@ describe('getHousingProject', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getHousingProject(req as any, res as any, next);
+    await getHousingProjectController(req as any, res as any);
 
     expect(housingProjectSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectSpy).toHaveBeenCalledWith(req.params.housingProjectId);
@@ -351,7 +375,7 @@ describe('getHousingProject', () => {
   });
 });
 
-describe('getHousingProjects', () => {
+describe('getHousingProjectsController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -367,7 +391,7 @@ describe('getHousingProjects', () => {
     housingProjectsSpy.mockResolvedValue([HOUSING_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getHousingProjects(req as any, res as any, next);
+    await getHousingProjectsController(req as any, res as any);
 
     expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectsSpy).toHaveBeenCalledWith();
@@ -384,7 +408,7 @@ describe('getHousingProjects', () => {
     housingProjectsSpy.mockResolvedValue([HOUSING_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getHousingProjects(req as any, res as any, next);
+    await getHousingProjectsController(req as any, res as any);
 
     expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
   });
@@ -399,7 +423,7 @@ describe('getHousingProjects', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.getHousingProjects(req as any, res as any, next);
+    await getHousingProjectsController(req as any, res as any);
 
     expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectsSpy).toHaveBeenCalledWith();
@@ -408,7 +432,7 @@ describe('getHousingProjects', () => {
   });
 });
 
-describe('submitDraft', () => {
+describe('submitHousingProjectDraftController', () => {
   // Mock service calls
   const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
@@ -434,14 +458,13 @@ describe('submitDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
-    upsertContacts.mockResolvedValue();
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.submitDraft(req as any, res as any, next);
+    await submitHousingProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(1);
@@ -466,14 +489,13 @@ describe('submitDraft', () => {
       body: {},
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
-    upsertContacts.mockResolvedValue();
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.submitDraft(req as any, res as any, next);
+    await submitHousingProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(0);
@@ -513,14 +535,14 @@ describe('submitDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createHousingProjectSpy.mockResolvedValue({ activityId: '00000000' } as HousingProject);
     upsertPermitSpy.mockResolvedValue({} as Permit);
-    upsertContacts.mockResolvedValue();
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.submitDraft(req as any, res as any, next);
+    await submitHousingProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(upsertContacts).toHaveBeenCalledTimes(0);
@@ -556,7 +578,7 @@ describe('submitDraft', () => {
   });
 });
 
-describe('updateDraft', () => {
+describe('updateHousingProjectDraftController', () => {
   // Mock service calls
   const createDraftSpy = jest.spyOn(draftService, 'createDraft');
   const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
@@ -582,13 +604,12 @@ describe('updateDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.updateDraft(req as any, res as any, next);
+    await updateHousingProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
@@ -624,13 +645,12 @@ describe('updateDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({ activityId: '00000000', initiativeId: Initiative.HOUSING, isDeleted: false });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.updateDraft(req as any, res as any, next);
+    await updateHousingProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
@@ -644,7 +664,7 @@ describe('updateDraft', () => {
   });
 });
 
-describe('updateHousingProject', () => {
+describe('updateHousingProjectDraftController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -662,7 +682,7 @@ describe('updateHousingProject', () => {
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.updateHousingProject(req as any, res as any, next);
+    await updateHousingProjectDraftController(req as any, res as any);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
@@ -685,7 +705,7 @@ describe('updateHousingProject', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await housingProjectController.updateHousingProject(req as any, res as any, next);
+    await updateHousingProjectDraftController(req as any, res as any);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
 
@@ -704,11 +724,11 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '50-500',
       hasRentalUnits: 'No',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -717,11 +737,11 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '>500',
       hasRentalUnits: 'No',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -730,11 +750,11 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'Yes',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'No'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -743,11 +763,11 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
-      financiallySupportedBC: 'Yes',
+      financiallySupportedBc: 'Yes',
       financiallySupportedIndigenous: 'No'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -756,11 +776,11 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'Yes'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -769,13 +789,13 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '10-49',
       hasRentalUnits: 'Yes',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'Yes',
       multiFamilyUnits: '1-9',
       otherUnits: ''
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(1);
   });
@@ -785,7 +805,7 @@ describe('assignPriority', () => {
       singleFamilyUnits: '10-49'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(2);
   });
@@ -795,7 +815,7 @@ describe('assignPriority', () => {
       multiFamilyUnits: '1-9'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(2);
   });
@@ -805,7 +825,7 @@ describe('assignPriority', () => {
       otherUnits: '1-9'
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(2);
   });
@@ -814,13 +834,13 @@ describe('assignPriority', () => {
     const housingProject: Partial<HousingProject> = {
       singleFamilyUnits: '1-9',
       hasRentalUnits: 'No',
-      financiallySupportedBC: 'No',
+      financiallySupportedBc: 'No',
       financiallySupportedIndigenous: 'No',
       multiFamilyUnits: '',
       otherUnits: ''
     };
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(3);
   });
@@ -828,7 +848,7 @@ describe('assignPriority', () => {
   it('assigns priority 3 if no criteria are met/given', () => {
     const housingProject: Partial<HousingProject> = {};
 
-    housingProjectController.assignPriority(housingProject);
+    assignPriority(housingProject);
 
     expect(housingProject.queuePriority).toBe(3);
   });

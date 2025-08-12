@@ -1,16 +1,8 @@
 import { getSourceSystemKinds } from '../services/sourceSystemKind';
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 
-const controller = {
-  getSourceSystemKinds: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await getSourceSystemKinds();
-      res.status(200).json(response);
-    } catch (e) {
-      next(e);
-    }
-  }
+export const getSourceSystemKindsController = async (req: Request, res: Response) => {
+  const response = await getSourceSystemKinds();
+  res.status(200).json(response);
 };
-
-export default controller;

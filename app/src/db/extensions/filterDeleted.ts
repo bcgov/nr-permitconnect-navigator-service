@@ -16,7 +16,7 @@ const findOperations: readonly string[] = [
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterActivity(operation: any, args: any) {
   if (findOperations.includes(operation)) {
-    args.where = args.where ? { AND: [args.where, { activity: { isDeleted: false } }] } : {};
+    args.where = args.where ? { ...args.where, AND: [{ activity: { isDeleted: false } }] } : {};
   }
 
   return args;
@@ -25,7 +25,7 @@ function filterActivity(operation: any, args: any) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterColumn(operation: any, args: any) {
   if (findOperations.includes(operation)) {
-    args.where = args.where ? { AND: [args.where, { isDeleted: false }] } : {};
+    args.where = args.where ? { ...args.where, AND: [{ isDeleted: false }] } : {};
   }
 
   return args;

@@ -1,8 +1,13 @@
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
-import { contactService } from '../../../src/services';
-import contactController from '../../../src/controllers/contact';
+import * as contactService from '../../../src/services/contact';
 import { Request, Response } from 'express';
+import {
+  deleteContactController,
+  getContactController,
+  searchContactsController,
+  updateContactController
+} from '../../../src/controllers/contact';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -15,7 +20,11 @@ const CONTACT_DATA = {
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
   contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
+  contactApplicantRelationship: 'applicant',
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null
 };
 
 const ACTIVITY_CONTACT_DATA = {
@@ -24,14 +33,7 @@ const ACTIVITY_CONTACT_DATA = {
 };
 
 const CONTACT_DATA_WITH_ACTIVITY = {
-  contactId: 'contact123',
-  userId: 'user123',
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '123-456-7890',
-  email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  ...CONTACT_DATA,
   contactActivity: [ACTIVITY_CONTACT_DATA]
 };
 
@@ -57,7 +59,7 @@ const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 describe('contactController', () => {
   const next = jest.fn();
 
-  describe('deleteContact', () => {
+  describe('deleteContactController', () => {
     const deleteContactSpy = jest.spyOn(contactService, 'deleteContact');
 
     it('should return 204 if the contact is deleted successfully', async () => {
@@ -70,7 +72,7 @@ describe('contactController', () => {
       res.end = jest.fn().mockReturnValue(res);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
+      await deleteContactController(req as any, res as unknown as Response);
 
       expect(deleteContactSpy).toHaveBeenCalledTimes(1);
       expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
@@ -94,7 +96,7 @@ describe('contactController', () => {
       res.end = jest.fn().mockReturnValue(res);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
+      await deleteContactController(req as any, res as unknown as Response);
 
       expect(deleteContactSpy).toHaveBeenCalledTimes(1);
       expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
@@ -115,7 +117,7 @@ describe('contactController', () => {
       res.end = jest.fn().mockReturnValue(res);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
+      await deleteContactController(req as any, res as unknown as Response);
 
       expect(deleteContactSpy).toHaveBeenCalledTimes(1);
       expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
@@ -124,7 +126,7 @@ describe('contactController', () => {
     });
   });
 
-  describe('getContact', () => {
+  describe('getContactController', () => {
     const getContactSpy = jest.spyOn(contactService, 'getContact');
 
     it('should return 200 and the contact if found', async () => {
@@ -137,7 +139,7 @@ describe('contactController', () => {
       getContactSpy.mockResolvedValue(CONTACT_DATA);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
+      await getContactController(req as any, res as unknown as Response);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
       expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
@@ -155,7 +157,7 @@ describe('contactController', () => {
       getContactSpy.mockResolvedValue(CONTACT_DATA_WITH_ACTIVITY);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
+      await getContactController(req as any, res as unknown as Response);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
       expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, true);
@@ -170,10 +172,12 @@ describe('contactController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request;
 
-      getContactSpy.mockResolvedValue(null);
+      getContactSpy.mockImplementationOnce(() => {
+        throw new Error();
+      });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
+      await getContactController(req as any, res as unknown as Response);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
       expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
@@ -193,14 +197,14 @@ describe('contactController', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
+      await getContactController(req as any, res as unknown as Response);
 
       expect(getContactSpy).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('searchContacts', () => {
+  describe('searchContactsController', () => {
     const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
 
     it('should return 200 if all good', async () => {
@@ -214,7 +218,7 @@ describe('contactController', () => {
       searchContactsSpy.mockResolvedValue(contacts);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
+      await searchContactsController(req as any, res as unknown as Response);
 
       expect(searchContactsSpy).toHaveBeenCalledTimes(1);
       expect(searchContactsSpy).toHaveBeenCalledWith({
@@ -236,23 +240,12 @@ describe('contactController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request;
 
-      const contacts = [
-        {
-          contactId: 'contact123',
-          userId: 'user123',
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '123-456-7890',
-          email: 'john.doe@example.com',
-          contactPreference: 'email',
-          contactApplicantRelationship: 'applicant'
-        }
-      ];
+      const contacts = [CONTACT_DATA];
 
       searchContactsSpy.mockResolvedValue(contacts);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
+      await searchContactsController(req as any, res as unknown as Response);
 
       expect(searchContactsSpy).toHaveBeenCalledTimes(1);
       expect(searchContactsSpy).toHaveBeenCalledWith({
@@ -272,23 +265,12 @@ describe('contactController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request;
 
-      const contacts = [
-        {
-          contactId: 'contact123',
-          userId: 'user123',
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '123-456-7890',
-          email: 'john.doe@example.com',
-          contactPreference: 'email',
-          contactApplicantRelationship: 'applicant'
-        }
-      ];
+      const contacts = [CONTACT_DATA];
 
       searchContactsSpy.mockResolvedValue(contacts);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
+      await searchContactsController(req as any, res as unknown as Response);
 
       expect(searchContactsSpy).toHaveBeenCalledTimes(1);
       expect(searchContactsSpy).toHaveBeenCalledWith({
@@ -313,7 +295,7 @@ describe('contactController', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
+      await searchContactsController(req as any, res as unknown as Response);
 
       expect(searchContactsSpy).toHaveBeenCalledTimes(1);
       expect(searchContactsSpy).toHaveBeenCalledWith({
@@ -330,7 +312,7 @@ describe('contactController', () => {
     });
   });
 
-  describe('updateContact', () => {
+  describe('updateContactController', () => {
     const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
     it('should return 200 if contact is updated successfully', async () => {
@@ -344,10 +326,10 @@ describe('contactController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request;
 
-      upsertContactsSpy.mockResolvedValue();
+      upsertContactsSpy.mockResolvedValueOnce([CONTACT_DATA]);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.updateContact(req as any, res as unknown as Response, next);
+      await updateContactController(req as any, res as unknown as Response);
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
       expect(upsertContactsSpy).toHaveBeenCalledWith([req.body], req.currentContext);
@@ -370,7 +352,7 @@ describe('contactController', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.updateContact(req as any, res as unknown as Response, next);
+      await updateContactController(req as any, res as unknown as Response);
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
       expect(upsertContactsSpy).toHaveBeenCalledWith([req.body], req.currentContext);

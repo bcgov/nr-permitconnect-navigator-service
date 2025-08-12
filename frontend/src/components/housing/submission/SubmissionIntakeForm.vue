@@ -457,7 +457,7 @@ onBeforeMount(async () => {
           province: response?.province,
           latitude: response?.latitude,
           longitude: response?.longitude,
-          ltsaPIDLookup: response?.locationPids,
+          ltsaPidLookup: response?.locationPids,
           geomarkUrl: response?.geomarkUrl,
           projectLocationDescription: response?.projectLocationDescription,
           geoJSON: response?.geoJSON
@@ -1125,7 +1125,7 @@ watchEffect(() => {
                           <!-- eslint-disable max-len -->
                           <InputText
                             class="col-span-12"
-                            name="location.ltsaPIDLookup"
+                            name="location.ltsaPidLookup"
                             :bold="false"
                             :disabled="!editable"
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"

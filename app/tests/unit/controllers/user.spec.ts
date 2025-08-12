@@ -1,5 +1,5 @@
-import { userController } from '../../../src/controllers';
-import { userService } from '../../../src/services';
+import { searchUsersController } from '../../../src/controllers/user';
+import * as userService from '../../../src/services/user';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -23,7 +23,25 @@ afterEach(() => {
 
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
 
-describe('searchUsers', () => {
+const TEST_USER_LIST = [
+  {
+    bceidBusinessName: null,
+    userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
+    idp: 'IDIR',
+    sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
+    email: 'first.last@gov.bc.ca',
+    firstName: 'First',
+    fullName: 'Last, First',
+    lastName: 'Last',
+    active: true,
+    createdAt: null,
+    createdBy: null,
+    updatedAt: null,
+    updatedBy: null
+  }
+];
+
+describe('searchUsersController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -35,31 +53,17 @@ describe('searchUsers', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const users = [
-      {
-        bceidBusinessName: null,
-        userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-        idp: 'IDIR',
-        sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
-        email: 'first.last@gov.bc.ca',
-        firstName: 'First',
-        fullName: 'Last, First',
-        lastName: 'Last',
-        active: true
-      }
-    ];
-
-    searchUsersSpy.mockResolvedValue(users);
+    searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await userController.searchUsers(req as any, res as any, next);
+    await searchUsersController(req as any, res as any);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({
       userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923']
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(users);
+    expect(res.json).toHaveBeenCalledWith(TEST_USER_LIST);
   });
 
   it('adds dashes to user IDs', async () => {
@@ -68,24 +72,10 @@ describe('searchUsers', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const users = [
-      {
-        bceidBusinessName: null,
-        userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-        idp: 'IDIR',
-        sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
-        email: 'first.last@gov.bc.ca',
-        firstName: 'First',
-        fullName: 'Last, First',
-        lastName: 'Last',
-        active: true
-      }
-    ];
-
-    searchUsersSpy.mockResolvedValue(users);
+    searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await userController.searchUsers(req as any, res as any, next);
+    await searchUsersController(req as any, res as any);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({
@@ -104,7 +94,7 @@ describe('searchUsers', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await userController.searchUsers(req as any, res as any, next);
+    await searchUsersController(req as any, res as any);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({

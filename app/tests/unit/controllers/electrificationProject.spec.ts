@@ -1,15 +1,22 @@
-import electrificationProjectController from '../../../src/controllers/electrificationProject';
 import {
-  activityContactService,
-  activityService,
-  contactService,
-  draftService,
-  enquiryService,
-  electrificationProjectService
-} from '../../../src/services';
+  createElectrificationProjectController,
+  getElectrificationProjectController,
+  getElectrificationProjectsController,
+  getElectrificationProjectStatisticsController,
+  submitElectrificationProjectDraftController,
+  updateElectrificationProjectController,
+  updateElectrificationProjectDraftController
+} from '../../../src/controllers/electrificationProject';
+import * as activityContactService from '../../../src/services/activityContact';
+import * as activityService from '../../../src/services/activity';
+import * as contactService from '../../../src/services/contact';
+import * as draftService from '../../../src/services/draft';
+import * as enquiryService from '../../../src/services/enquiry';
+import * as electrificationProjectService from '../../../src/services/electrificationProject';
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
 import { ProjectType } from '../../../src/utils/enums/electrification';
-import { SubmissionType } from '../../../src/utils/enums/projectCommon';
+import { ProjectRelationship, SubmissionType } from '../../../src/utils/enums/projectCommon';
+import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
 
 import type { Draft, ElectrificationProject } from '../../../src/types';
 
@@ -38,10 +45,27 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-
 const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
+
+const CONTACT_NO_ID = {
+  contactId: null,
+  userId: null,
+  firstName: 'Test',
+  lastName: 'Person',
+  phoneNumber: null,
+  email: null,
+  contactPreference: null,
+  contactApplicantRelationship: ProjectRelationship.OWNER,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
+};
+
+const TEST_CONTACT = {
+  ...CONTACT_NO_ID,
+  contactId: '3483e223-526a-44cf-8b6a-80f90c3b724c'
+};
 
 const ELECTRIFICATION_INTAKE = {
   project: {
@@ -52,21 +76,11 @@ const ELECTRIFICATION_INTAKE = {
     bcHydroNumber: '123',
     submissionType: SubmissionType.GUIDANCE
   },
-  contacts: [
-    {
-      contactId: undefined,
-      firstName: 'Test',
-      lastName: 'Person',
-      phoneNumber: null,
-      email: null,
-      contactPreference: null,
-      contactApplicantRelationship: 'Property owner'
-    }
-  ],
-  createdAt: new Date().toISOString(),
-  createdBy: 'abc-123',
-  updatedAt: new Date().toISOString(),
-  updatedBy: 'abc-123'
+  contacts: [CONTACT_NO_ID],
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const ELECTRIFICATION_PROJECT_1 = {
@@ -76,24 +90,24 @@ const ELECTRIFICATION_PROJECT_1 = {
     assignedUserId: null,
     submittedAt: new Date().toISOString()
   },
-  contacts: [
-    {
-      contactId: undefined,
-      firstName: 'Test',
-      lastName: 'Person',
-      phoneNumber: null,
-      email: null,
-      contactPreference: null,
-      contactApplicantRelationship: 'Property owner'
-    }
-  ],
-  createdAt: new Date().toISOString(),
-  createdBy: 'abc-123',
-  updatedAt: new Date().toISOString(),
-  updatedBy: 'abc-123'
+  contacts: [CONTACT_NO_ID],
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
 };
 
-describe('createElectrificationProject', () => {
+const TEST_ACTIVITY = {
+  activityId: '00000000',
+  initiativeId: Initiative.ELECTRIFICATION,
+  isDeleted: false,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
+};
+
+describe('createElectrificationProjectController', () => {
   // Mock service calls
   const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
@@ -104,21 +118,16 @@ describe('createElectrificationProject', () => {
       body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    upsertContacts.mockResolvedValue();
-    createActivitySpy.mockResolvedValue({
-      activityId: '00000000',
-      initiativeId: Initiative.ELECTRIFICATION,
-      isDeleted: false
-    });
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createElectrificationProjectSpy.mockResolvedValue({
       activityId: '00000000',
       electrificationProjectId: '11111111'
     } as ElectrificationProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.createElectrificationProject(req as any, res as any, next);
+    await createElectrificationProjectController(req as any, res as any);
 
     expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
@@ -132,18 +141,13 @@ describe('createElectrificationProject', () => {
       body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    upsertContacts.mockResolvedValue();
-    createActivitySpy.mockResolvedValue({
-      activityId: '00000000',
-      initiativeId: Initiative.ELECTRIFICATION,
-      isDeleted: false
-    });
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.createElectrificationProject(req as any, res as any, next);
+    await createElectrificationProjectController(req as any, res as any);
 
     expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
@@ -160,11 +164,11 @@ describe('createElectrificationProject', () => {
   });
 });
 
-describe('getStatistics', () => {
+describe('getElectrificationProjectStatistics', () => {
   const next = jest.fn();
 
   // Mock service calls
-  const statisticsSpy = jest.spyOn(electrificationProjectService, 'getStatistics');
+  const statisticsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjectStatistics');
 
   it('should return 200 if all good', async () => {
     const req = {
@@ -189,7 +193,7 @@ describe('getStatistics', () => {
     statisticsSpy.mockResolvedValue(statistics);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getStatistics(req as any, res as any, next);
+    await getElectrificationProjectStatisticsController(req as any, res as any);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -213,7 +217,7 @@ describe('getStatistics', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getStatistics(req as any, res as any, next);
+    await getElectrificationProjectStatisticsController(req as any, res as any);
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
@@ -222,7 +226,7 @@ describe('getStatistics', () => {
   });
 });
 
-describe('getElectrificationProject', () => {
+describe('getElectrificationProjectController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -240,7 +244,7 @@ describe('getElectrificationProject', () => {
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getElectrificationProject(req as any, res as any, next);
+    await getElectrificationProjectController(req as any, res as any);
 
     expect(electrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
@@ -259,7 +263,7 @@ describe('getElectrificationProject', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getElectrificationProject(req as any, res as any, next);
+    await getElectrificationProjectController(req as any, res as any);
 
     expect(electrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
@@ -268,7 +272,7 @@ describe('getElectrificationProject', () => {
   });
 });
 
-describe('getElectrificationProjects', () => {
+describe('getElectrificationProjectsController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -284,7 +288,7 @@ describe('getElectrificationProjects', () => {
     electrificationProjectsSpy.mockResolvedValue([ELECTRIFICATION_PROJECT_1 as any]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getElectrificationProjects(req as any, res as any, next);
+    await getElectrificationProjectsController(req as any, res as any);
 
     expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectsSpy).toHaveBeenCalledWith();
@@ -302,7 +306,7 @@ describe('getElectrificationProjects', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.getElectrificationProjects(req as any, res as any, next);
+    await getElectrificationProjectsController(req as any, res as any);
 
     expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectsSpy).toHaveBeenCalledWith();
@@ -311,7 +315,7 @@ describe('getElectrificationProjects', () => {
   });
 });
 
-describe('submitDraft', () => {
+describe('submitElectrificationProjectDraftController', () => {
   // Mock service calls
   const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
@@ -322,18 +326,13 @@ describe('submitDraft', () => {
       body: { ...ELECTRIFICATION_INTAKE },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    upsertContacts.mockResolvedValue();
-    createActivitySpy.mockResolvedValue({
-      activityId: '00000000',
-      initiativeId: Initiative.ELECTRIFICATION,
-      isDeleted: false
-    });
+    upsertContacts.mockResolvedValue([TEST_CONTACT]);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.submitDraft(req as any, res as any, next);
+    await submitElectrificationProjectDraftController(req as any, res as any);
 
     expect(upsertContacts).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
@@ -350,7 +349,7 @@ describe('submitDraft', () => {
   });
 });
 
-describe('updateDraft', () => {
+describe('updateElectrificationProjectDraftController', () => {
   // Mock service calls
   const createDraftSpy = jest.spyOn(draftService, 'createDraft');
   const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
@@ -376,17 +375,12 @@ describe('updateDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({
-      activityId: '00000000',
-      initiativeId: Initiative.ELECTRIFICATION,
-      isDeleted: false
-    });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.updateDraft(req as any, res as any, next);
+    await updateElectrificationProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
@@ -422,17 +416,12 @@ describe('updateDraft', () => {
       },
       currentContext: CURRENT_CONTEXT
     };
-    const next = jest.fn();
 
-    createActivitySpy.mockResolvedValue({
-      activityId: '00000000',
-      initiativeId: Initiative.ELECTRIFICATION,
-      isDeleted: false
-    });
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
     updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.updateDraft(req as any, res as any, next);
+    await updateElectrificationProjectDraftController(req as any, res as any);
 
     expect(createActivitySpy).toHaveBeenCalledTimes(0);
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
@@ -446,7 +435,7 @@ describe('updateDraft', () => {
   });
 });
 
-describe('updateElectrificationProject', () => {
+describe('updateElectrificationProjectController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -470,7 +459,7 @@ describe('updateElectrificationProject', () => {
     updateSpy.mockResolvedValue(updated);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
+    await updateElectrificationProjectController(req as any, res as any);
 
     expect(insertContacts).toHaveBeenCalledTimes(1);
     expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
@@ -499,7 +488,7 @@ describe('updateElectrificationProject', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await electrificationProjectController.updateElectrificationProject(req as any, res as any, next);
+    await updateElectrificationProjectController(req as any, res as any);
 
     expect(insertContacts).toHaveBeenCalledTimes(1);
     expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);

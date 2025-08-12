@@ -1,5 +1,10 @@
-import { documentController } from '../../../src/controllers';
-import { documentService } from '../../../src/services';
+import {
+  createDocumentController,
+  deleteDocumentController,
+  listDocumentsController
+} from '../../../src/controllers/document';
+import * as documentService from '../../../src/services/document';
+import { isoPattern } from '../../../src/utils/regexp';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -23,9 +28,20 @@ afterEach(() => {
 
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+const TEST_DOCUMENT = {
+  documentId: 'abc123',
+  activityId: '1',
+  filename: 'testfile',
+  mimeType: 'imgjpg',
+  filesize: 1234567,
+  createdByFullName: 'testuser',
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null
+};
 
-describe('createDocument', () => {
+describe('createDocumentController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -37,19 +53,10 @@ describe('createDocument', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const created = {
-      documentId: 'abc123',
-      activityId: '1',
-      filename: 'testfile',
-      mimeType: 'imgjpg',
-      filesize: 1234567,
-      createdByFullName: 'testuser'
-    };
-
-    createSpy.mockResolvedValue(created);
+    createSpy.mockResolvedValue(TEST_DOCUMENT);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.createDocument(req as any, res as any, next);
+    await createDocumentController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
@@ -61,7 +68,7 @@ describe('createDocument', () => {
       { createdAt: expect.stringMatching(isoPattern), createdBy: 'abc-123' }
     );
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(created);
+    expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT);
   });
 
   it('calls next if the document service fails to create', async () => {
@@ -75,7 +82,7 @@ describe('createDocument', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.createDocument(req as any, res as any, next);
+    await createDocumentController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
@@ -91,7 +98,7 @@ describe('createDocument', () => {
   });
 });
 
-describe('deleteDocument', () => {
+describe('deleteDocumentController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -103,24 +110,15 @@ describe('deleteDocument', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const deleted = {
-      documentId: 'abc123',
-      activityId: '1',
-      filename: 'testfile',
-      mimeType: 'imgjpg',
-      filesize: 1234567,
-      createdByFullName: 'testuser'
-    };
-
-    deleteSpy.mockResolvedValue(deleted);
+    deleteSpy.mockResolvedValue(TEST_DOCUMENT);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.deleteDocument(req as any, res as any, next);
+    await deleteDocumentController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(deleted);
+    expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT);
   });
 
   it('calls next if the document service fails to delete', async () => {
@@ -134,7 +132,7 @@ describe('deleteDocument', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.deleteDocument(req as any, res as any, next);
+    await deleteDocumentController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
@@ -143,7 +141,7 @@ describe('deleteDocument', () => {
   });
 });
 
-describe('listDocuments', () => {
+describe('listDocumentsController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -155,26 +153,15 @@ describe('listDocuments', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const documentList = [
-      {
-        documentId: 'abc123',
-        activityId: '1',
-        filename: 'testfile',
-        mimeType: 'imgjpg',
-        filesize: 1234567,
-        createdByFullName: 'testuser'
-      }
-    ];
-
-    listSpy.mockResolvedValue(documentList);
+    listSpy.mockResolvedValue([TEST_DOCUMENT]);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.listDocuments(req as any, res as any, next);
+    await listDocumentsController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(documentList);
+    expect(res.json).toHaveBeenCalledWith([TEST_DOCUMENT]);
   });
 
   it('calls next if the document service fails to list documents', async () => {
@@ -188,7 +175,7 @@ describe('listDocuments', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.listDocuments(req as any, res as any, next);
+    await listDocumentsController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);

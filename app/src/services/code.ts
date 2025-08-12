@@ -11,6 +11,11 @@ export const listAllCodeTables = async () => {
       active: true
     }
   });
+  const SourceSystem = await prisma.source_system_code.findMany({
+    where: {
+      active: true
+    }
+  });
 
-  return { ElectrificationProjectType, ElectrificationProjectCategory };
+  return { ElectrificationProjectType, ElectrificationProjectCategory, SourceSystem };
 };

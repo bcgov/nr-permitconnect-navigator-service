@@ -129,6 +129,13 @@ export function errorHandler(
     err.send(req, res);
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     switch (err.code) {
+      case 'P2003':
+        new Problem(500, {
+          type: err.code,
+          title: err.meta?.constraint as string,
+          detail: err.meta?.modelName as string
+        }).send(req, res);
+        break;
       case 'P2025':
         new Problem(404, {
           type: err.code,

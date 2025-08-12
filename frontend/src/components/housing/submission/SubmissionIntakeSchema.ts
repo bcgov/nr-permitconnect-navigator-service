@@ -147,7 +147,7 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
         then: () => number().required().min(-139).max(-114).label('Longitude'),
         otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
       }),
-      ltsaPIDLookup: string().max(255).nullable().label('Parcel ID'),
+      ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
       geomarkUrl: string().max(255).label('Geomark web service url'),
       getJSON: mixed().nullable().label('geoJSON')
     }),

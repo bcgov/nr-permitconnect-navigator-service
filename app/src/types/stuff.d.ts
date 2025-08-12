@@ -285,7 +285,7 @@ export type HousingProjectIntake = {
     projectLocationDescription?: string;
     geomarkUrl?: string | null;
     geoJson: Prisma.JsonValue;
-    ltsaPIDLookup?: string;
+    ltsaPidLookup?: string;
     latitude?: number | null;
     longitude?: number | null;
     streetAddress?: string;
