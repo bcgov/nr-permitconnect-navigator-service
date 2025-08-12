@@ -8,6 +8,7 @@ import { useToast } from '@/lib/primevue';
 import { electrificationProjectService, permitService } from '@/services';
 import { usePermitStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -59,6 +60,9 @@ onBeforeMount(async () => {
 
 <template>
   <div v-if="!loading">
-    <AuthorizationForm :authorization="getPermit" />
+    <AuthorizationForm
+      :authorization="getPermit"
+      :editable="getProject?.applicationStatus !== ApplicationStatus.COMPLETED"
+    />
   </div>
 </template>

@@ -6,6 +6,11 @@ import { Panel } from '@/lib/primevue';
 import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
 import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 
+// Props
+const { editable } = defineProps<{
+  editable?: boolean;
+}>();
+
 // Emits
 const emit = defineEmits(['update:setVerifiedDate']);
 
@@ -42,6 +47,7 @@ const authStatusDisplayText = {
           <DatePicker
             name="statusLastVerified"
             :max-date="new Date()"
+            :disabled="!editable"
           />
         </div>
         <div>
@@ -50,6 +56,7 @@ const authStatusDisplayText = {
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
             :options="PERMIT_AUTHORIZATION_STATUS_LIST"
             :option-label="(option) => authStatusDisplayText[option as keyof typeof authStatusDisplayText] ?? option"
+            :disabled="!editable"
           />
         </div>
         <div>
@@ -57,6 +64,7 @@ const authStatusDisplayText = {
             name="status"
             :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
             :options="PERMIT_STATUS_LIST"
+            :disabled="!editable"
           />
         </div>
       </div>
@@ -66,6 +74,7 @@ const authStatusDisplayText = {
             name="needed"
             :label="t('authorization.authorizationStatusUpdatesCard.needed')"
             :options="PERMIT_NEEDED_LIST"
+            :disabled="!editable"
           />
         </div>
         <div>
@@ -73,6 +82,7 @@ const authStatusDisplayText = {
             name="submittedDate"
             :label="t('authorization.authorizationStatusUpdatesCard.submittedDate')"
             :max-date="new Date()"
+            :disabled="!editable"
           />
         </div>
         <div>
@@ -80,6 +90,7 @@ const authStatusDisplayText = {
             name="adjudicationDate"
             :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
             :max-date="new Date()"
+            :disabled="!editable"
           />
         </div>
       </div>
@@ -88,6 +99,7 @@ const authStatusDisplayText = {
           :label="t('authorization.authorizationStatusUpdatesCard.updateNoteForProponent')"
           class="col-span-12"
           name="permitNote"
+          :disabled="!editable"
         />
       </div>
     </div>

@@ -31,15 +31,24 @@ export const useProjectStore = defineStore('project', () => {
   const getters = {
     getAuthsOnGoing: computed(() =>
       state.permits.value
-        .filter((p) =>
-          [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
-            p.authStatus as PermitAuthorizationStatus
-          )
+        .filter(
+          (p) =>
+            [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
+              p.authStatus as PermitAuthorizationStatus
+            ) && ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
         )
         .sort(permitNameSortFcn)
     ),
     getAuthsUnderInvestigation: computed(() =>
-      state.permits.value.filter((p) => p.needed === PermitNeeded.UNDER_INVESTIGATION)
+      state.permits.value
+        .filter(
+          (p) =>
+            p.needed === PermitNeeded.UNDER_INVESTIGATION &&
+            p.status === PermitStatus.NEW &&
+            p.authStatus === PermitAuthorizationStatus.NONE
+        )
+        .sort(permitNameSortFcn)
+        .sort(permitBusinessSortFcn)
     ),
     getAuthsNeeded: computed(() => {
       return state.permits.value
@@ -54,7 +63,8 @@ export const useProjectStore = defineStore('project', () => {
             PermitAuthorizationStatus.NONE,
             PermitAuthorizationStatus.IN_REVIEW,
             PermitAuthorizationStatus.PENDING
-          ].includes(p.authStatus as PermitAuthorizationStatus)
+          ].includes(p.authStatus as PermitAuthorizationStatus) &&
+          ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
       );
       const authsIssued = authsCompleted
         .filter((p) => p.authStatus === PermitAuthorizationStatus.ISSUED)
@@ -77,7 +87,7 @@ export const useProjectStore = defineStore('project', () => {
           (p) =>
             p.authStatus !== PermitAuthorizationStatus.NONE &&
             p.status !== PermitStatus.NEW &&
-            p.needed !== PermitNeeded.NO
+            ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
         )
         .sort(permitNameSortFcn)
         .sort(permitBusinessSortFcn);

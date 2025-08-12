@@ -50,82 +50,101 @@ watchEffect(() => {
 
 <template>
   <Card>
+    <template #title>
+      <div
+        class="flex justify-between cursor-pointer hover:underline"
+        @click="emit('authorizationCard:more')"
+      >
+        <h4 class="mb-0">{{ permit.permitType?.name }}</h4>
+        <Button
+          class="p-button-outlined mr-4 mb-4 size-fit"
+          :label="t('authorization.authorizationCard.more')"
+          @click="emit('authorizationCard:more')"
+        />
+      </div>
+    </template>
     <template #content>
-      <div class="grid grid-cols-[2fr_1fr] p-2">
-        <div>
-          <div class="mb-4">
-            <h4 class="mb-0">{{ permit.permitType?.name }}</h4>
-          </div>
-          <div class="mb-14">
-            <span class="font-bold">
-              {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
+      <div class="flex gap-2">
+        <span :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
+          <AuthorizationStatusPill
+            v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
+            :auth-status="permit.authStatus"
+          />
+        </span>
+        <StatusPill :status="permit.status" />
+      </div>
+      <div class="grid grid-cols-[1fr_1fr_1fr] pt-2 pb-2 pr-2 gap-4">
+        <div class="bg-[var(--p-bcblue-50)] py-5 pl-5">
+          <div class="mb-2 text-xs">{{ t('authorization.authorizationCard.ids') }}</div>
+          <div
+            v-if="trackingShownToProponent"
+            class="my-2"
+          >
+            <font-awesome-icon
+              class="mr-2"
+              icon="fa-solid fa-eye"
+            />
+            <span
+              v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
+              class="cursor-pointer"
+              @click="toCopy(trackingShownToProponent.trackingId as string)"
+            >
+              <span class="font-bold">
+                {{ trackingShownToProponent.sourceSystemKind?.description }}
+              </span>
+              :
+
+              {{ trackingShownToProponent.trackingId }}
             </span>
-            <span class="ml-2 text-xs">{{ t('authorization.authorizationCard.statusVerified') }}</span>
-          </div>
-          <div class="flex gap-2">
-            <span :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
-              <AuthorizationStatusPill
-                v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-                :auth-status="permit.authStatus"
-              />
-            </span>
-            <StatusPill :status="permit.status" />
           </div>
           <div
-            v-if="permit.permitNote?.length"
-            class="pb-2 mt-1 mr-3"
+            v-for="permitTracking in trackingNotShownToProponent"
+            :key="permitTracking.permitTrackingId"
+            class="my-2"
           >
-            <div>
-              <span>{{ ' ' + formatDateTime(permit.permitNote[0].createdAt) }},</span>
-              {{ permit.permitNote[0].note }}
-            </div>
+            <span
+              v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
+              class="cursor-pointer"
+              @click="toCopy(permitTracking.trackingId as string)"
+            >
+              <span class="font-bold">{{ permitTracking.sourceSystemKind?.description }}</span>
+              :
+              {{ permitTracking.trackingId }}
+            </span>
+          </div>
+          <div>
+            <span
+              v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
+              class="cursor-pointer"
+              @click="toCopy(permit.issuedPermitId as string)"
+            >
+              <span class="font-bold">{{ t('authorization.authorizationCard.issuedPermitId') }}:</span>
+              {{ permit.issuedPermitId }}
+            </span>
           </div>
         </div>
-        <div class="bg-[var(--p-bcblue-50)] grid grid-rows-[2fr_1fr]">
-          <div class="mt-2">
-            <div
-              v-if="trackingShownToProponent"
-              class="ml-5 mt-2 flex items-center"
-            >
-              <font-awesome-icon
-                class="mr-2"
-                icon="fa-solid fa-eye"
-              />
-              <span
-                v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
-                class="cursor-pointer"
-                @click="toCopy(trackingShownToProponent.trackingId as string)"
-              >
-                <span class="font-bold">
-                  {{ trackingShownToProponent.sourceSystemKind?.description }}
-                </span>
-                :
-
-                {{ trackingShownToProponent.trackingId }}
-              </span>
-            </div>
-            <div
-              v-for="permitTracking in trackingNotShownToProponent"
-              :key="permitTracking.permitTrackingId"
-              class="ml-5 mt-2 flex items-center"
-            >
-              <span
-                v-tooltip.right="t('authorization.authorizationCard.clickToCopy')"
-                class="cursor-pointer"
-                @click="toCopy(permitTracking.trackingId as string)"
-              >
-                <span class="font-bold">{{ permitTracking.sourceSystemKind?.description }}</span>
-                :
-                {{ permitTracking.trackingId }}
-              </span>
-            </div>
+        <div class="bg-[var(--p-bcblue-50)] py-5 px-4">
+          <div class="text-xs">{{ t('authorization.authorizationCard.dates') }}</div>
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.statusVerified') }}:</span>
+            {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
           </div>
-          <div class="flex justify-end items-end">
-            <Button
-              class="p-button-outlined mr-4 mb-4 size-fit"
-              :label="t('authorization.authorizationCard.more')"
-              @click="emit('authorizationCard:more')"
-            />
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
+            {{ permit.statusLastVerified ? formatDate(permit.submittedDate) : undefined }}
+          </div>
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
+            {{ permit.statusLastVerified ? formatDate(permit.adjudicationDate) : undefined }}
+          </div>
+        </div>
+        <div
+          v-if="permit.permitNote?.length"
+          class="pb-2 mt-2 mr-3"
+        >
+          <div>
+            <span>{{ ' ' + formatDateTime(permit.permitNote[0].createdAt) }},</span>
+            {{ permit.permitNote[0].note }}
           </div>
         </div>
       </div>
