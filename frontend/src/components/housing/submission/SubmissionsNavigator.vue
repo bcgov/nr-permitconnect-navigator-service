@@ -101,13 +101,8 @@ function assignMultiPermitsNeeded() {
     ).length;
 
     if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
-    else sub.multiPermitsNeeded = BasicResponse.NO;
+    else sub.multiPermitsNeeded = `${BasicResponse.NO} (${multiPermitsNeededCount})`;
   });
-}
-
-function getBringForwardDate(bf: BringForward) {
-  const { pastOrToday } = getBringForwardInterval(bf);
-  return pastOrToday ? 'today' : formatDate(bf.bringForwardDate);
 }
 
 function getBringForwardInterval(bf: BringForward) {
@@ -285,7 +280,7 @@ watchEffect(() => {
                     class="text-xl p-1 w-full"
                     :class="getBringForwardStyling(bf)"
                   >
-                    Bring forward {{ getBringForwardDate(bf) }}:
+                    Bring forward {{ formatDate(bf.bringForwardDate) }}:
                     <router-link
                       :to="{
                         name: getNameObject(bf),
@@ -332,14 +327,15 @@ watchEffect(() => {
 
 <style scoped lang="scss">
 .pastOrToday {
-  background-color: rgb(234, 153, 153);
+  background-color: var(--p-red-50);
+  color: var(--p-red-400);
 }
 
 .withinWeek {
-  background-color: rgb(255, 229, 153);
+  background-color: $app-pill-lightyellow;
 }
 
 .withinMonth {
-  background-color: rgb(159, 197, 248);
+  background-color: var(--p-bcblue-50);
 }
 </style>

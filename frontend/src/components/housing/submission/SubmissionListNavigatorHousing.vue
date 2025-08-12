@@ -101,7 +101,7 @@ function isFinanciallySupported(data: HousingProject) {
   />
   <Column
     field="streetAddress"
-    header="Location address"
+    header="Location"
     :sortable="true"
     style="min-width: 250px"
   >
@@ -120,12 +120,6 @@ function isFinanciallySupported(data: HousingProject) {
     </template>
   </Column>
   <Column
-    field="submissionType"
-    header="Submission type"
-    :sortable="true"
-    style="min-width: 200px"
-  />
-  <Column
     field="queuePriority"
     header="Priority"
     :sortable="true"
@@ -139,55 +133,16 @@ function isFinanciallySupported(data: HousingProject) {
   />
   <Column
     field="user.fullName"
-    header="Assigned to"
+    header="Assigned-to"
     :sortable="true"
     style="min-width: 200px"
   />
-  <Column
-    field="hasRelatedEnquiry"
-    header="Related enquiry"
-    :sortable="true"
-    style="min-width: 200px"
-  >
-    <template #body="{ data }">
-      {{ data.hasRelatedEnquiry ? BasicResponse.YES : BasicResponse.NO }}
-    </template>
-  </Column>
-  <Column
-    field="singleFamilyUnits"
-    header="Single family units"
-    :sortable="true"
-    style="min-width: 200px"
-  />
-  <Column
-    field="multiFamilyUnits"
-    header="Multi family units"
-    :sortable="true"
-    style="min-width: 200px"
-  />
-  <Column
-    field="otherUnitsDescription"
-    header="Other type"
-    :sortable="true"
-    style="min-width: 200px"
-  />
-  <Column
-    field="otherUnits"
-    header="Other type units"
-    :sortable="true"
-    style="min-width: 200px"
-  />
+
   <Column
     field="hasRentalUnits"
     header="Rental"
     :sortable="true"
     style="min-width: 125px"
-  />
-  <Column
-    field="rentalUnits"
-    header="Rental units"
-    :sortable="true"
-    style="min-width: 150px"
   />
   <Column
     field="financiallySupported"

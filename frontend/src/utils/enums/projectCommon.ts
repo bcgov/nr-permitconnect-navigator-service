@@ -51,7 +51,6 @@ export enum IntakeStatus {
 export enum NoteType {
   GENERAL = 'General',
   BRING_FORWARD = 'Bring forward',
-  ENQUIRY = 'Enquiry',
   ROADMAP = 'Roadmap'
 }
 

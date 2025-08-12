@@ -47,7 +47,7 @@ import {
   Regex
 } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
-import { findIdpConfig, omit, setEmptyStringsToNull, scrollToFirstError } from '@/utils/utils';
+import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
 import {
   assignedToValidator,
   atsClientIdValidator,
@@ -213,6 +213,11 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  if (errors.includes('contactFirstName')) {
+    toast.warn(t('submissionForm.basicInfoMissing'));
+  }
   scrollToFirstError(e.errors);
 }
 

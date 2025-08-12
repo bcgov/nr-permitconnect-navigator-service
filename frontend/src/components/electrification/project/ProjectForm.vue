@@ -239,6 +239,11 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  if (errors.includes('contact.firstName')) {
+    toast.warn(t('i.electrification.projectForm.basicInfoMissing'));
+  }
   scrollToFirstError(e.errors);
 }
 

@@ -216,30 +216,6 @@ watch(
         </tr>
         <tr>
           <td class="col-span-9">
-            Submissions by intake state:
-            <span class="font-bold">Submitted</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.intake_submitted }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.intake_submitted) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by intake state:
-            <span class="font-bold">Assigned</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.intake_assigned }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.intake_assigned) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
-            Submissions by intake state:
-            <span class="font-bold">Completed</span>
-          </td>
-          <td class="col-span-1 text-right">{{ statistics.intake_completed }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.intake_completed) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">
             Submissions by activity state:
             <span class="font-bold">New</span>
           </td>
@@ -301,11 +277,6 @@ watch(
           </td>
           <td class="col-span-1 text-right">{{ statistics.supported_housing_coop }}</td>
           <td class="col-span-2 text-right">{{ getPercentage(statistics.supported_housing_coop) }}%</td>
-        </tr>
-        <tr>
-          <td class="col-span-9">Submissions waiting on someone</td>
-          <td class="col-span-1 text-right">{{ statistics.waiting_on }}</td>
-          <td class="col-span-2 text-right">{{ getPercentage(statistics.waiting_on) }}%</td>
         </tr>
         <tr>
           <td class="col-span-9">
