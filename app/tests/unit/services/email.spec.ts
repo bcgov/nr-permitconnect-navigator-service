@@ -1,4 +1,4 @@
-import { emailService } from '../../../src/services';
+import * as emailService from '../../../src/services/email';
 
 import { prismaMock } from '../../__mocks__/prismaMock';
 

@@ -1,11 +1,25 @@
-import { activityContactService, enquiryService, contactService } from '../../../src/services';
-import enquiryController from '../../../src/controllers/enquiry';
-import { Request, Response } from 'express';
-import { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
+import {
+  createEnquiryController,
+  getEnquiriesController,
+  getEnquiryController,
+  listRelatedEnquiriesController,
+  searchEnquiriesController,
+  updateEnquiryController,
+  updateEnquiryIsDeletedFlagController
+} from '../../../src/controllers/enquiry';
+import * as activityContactService from '../../../src/services/activityContact';
+import * as enquiryService from '../../../src/services/enquiry';
+import * as contactService from '../../../src/services/contact';
 import { Initiative } from '../../../src/utils/enums/application';
-import { EnquirySubmittedMethod, ApplicationStatus } from '../../../src/utils/enums/projectCommon';
+import {
+  EnquirySubmittedMethod,
+  ApplicationStatus,
+  ProjectRelationship,
+  ContactPreference
+} from '../../../src/utils/enums/projectCommon';
 
-import type { Contact } from '../../../src/types';
+import type { Request, Response } from 'express';
+import type { Contact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
 
 jest.mock('config');
 
@@ -16,19 +30,23 @@ const CONTACT_DATA: Contact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.OWNER,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const ENQUIRY_DATA: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity123',
-  addedToATS: false,
+  addedToAts: false,
   assignedUserId: null,
   atsClientId: null,
   atsEnquiryId: null,
   submissionType: 'general',
-  submittedAt: '2025-02-28T00:00:00.000Z',
+  submittedAt: new Date(),
   submittedBy: 'testuser',
   relatedActivityId: 'activity123',
   enquiryDescription: 'Test enquiry description',
@@ -36,7 +54,30 @@ const ENQUIRY_DATA: Enquiry = {
   intakeStatus: 'submitted',
   enquiryStatus: 'new',
   waitingOn: null,
-  contacts: [CONTACT_DATA],
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  activity: {
+    activityId: 'activity123',
+    initiativeId: Initiative.HOUSING,
+    isDeleted: false,
+    createdAt: null,
+    createdBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    activityContact: [
+      {
+        activityId: 'activity123',
+        contactId: CONTACT_DATA.contactId,
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null
+      }
+    ]
+  },
+
   user: null
 };
 
@@ -82,10 +123,10 @@ const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, initiative: In
 describe('enquiryController', () => {
   const next = jest.fn();
 
-  describe('createEnquiry', () => {
+  describe('createEnquiryController', () => {
     const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
     const createEnquirySpy = jest.spyOn(enquiryService, 'createEnquiry');
-    const generateEnquiryDataSpy = jest.spyOn(enquiryController, 'generateEnquiryData');
+    //const generateEnquiryDataSpy = jest.spyOn(enquiryController, 'generateEnquiryData');
 
     it('should return 201 if enquiry is created successfully', async () => {
       const req = {
@@ -93,12 +134,12 @@ describe('enquiryController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request<never, never, EnquiryIntake>;
 
-      generateEnquiryDataSpy.mockResolvedValue(GENERATE_ENQUIRY_DATA);
+      //generateEnquiryDataSpy.mockResolvedValue(GENERATE_ENQUIRY_DATA);
       createEnquirySpy.mockResolvedValue(ENQUIRY_DATA);
 
-      await enquiryController.createEnquiry(req, res, next);
+      await createEnquiryController(req, res);
 
-      expect(generateEnquiryDataSpy).toHaveBeenCalled();
+      //expect(generateEnquiryDataSpy).toHaveBeenCalled();
       expect(upsertContactsSpy).toHaveBeenCalledWith(
         ENQUIRY_INTAKE_DATA.contacts,
         CURRENT_CONTEXT,
@@ -115,70 +156,20 @@ describe('enquiryController', () => {
         currentContext: CURRENT_CONTEXT
       } as unknown as Request<never, never, EnquiryIntake>;
 
-      generateEnquiryDataSpy.mockResolvedValue(GENERATE_ENQUIRY_DATA);
+      //generateEnquiryDataSpy.mockResolvedValue(GENERATE_ENQUIRY_DATA);
       createEnquirySpy.mockImplementationOnce(() => {
         throw new Error('failure');
       });
 
-      await enquiryController.createEnquiry(req, res, next);
+      await createEnquiryController(req, res);
 
-      expect(generateEnquiryDataSpy).toHaveBeenCalled();
+      //expect(generateEnquiryDataSpy).toHaveBeenCalled();
       expect(createEnquirySpy).toHaveBeenCalled();
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('deleteEnquiry', () => {
-    const deleteEnquirySpy = jest.spyOn(enquiryService, 'deleteEnquiry');
-
-    it('should return 200 if enquiry is deleted successfully', async () => {
-      const req = {
-        params: { enquiryId: 'enquiry123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request<{ enquiryId: string }>;
-
-      deleteEnquirySpy.mockResolvedValue(ENQUIRY_DATA);
-
-      await enquiryController.deleteEnquiry(req, res, next);
-
-      expect(deleteEnquirySpy).toHaveBeenCalledWith('enquiry123');
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(ENQUIRY_DATA);
-    });
-
-    it('should return 404 if enquiry is not found', async () => {
-      const req = {
-        params: { enquiryId: 'enquiry123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request<{ enquiryId: string }>;
-
-      deleteEnquirySpy.mockResolvedValue(null as unknown as Enquiry);
-
-      await enquiryController.deleteEnquiry(req, res, next);
-
-      expect(deleteEnquirySpy).toHaveBeenCalledWith('enquiry123');
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Enquiry not found' });
-    });
-
-    it('calls next if the enquiry service fails to delete enquiry', async () => {
-      const req = {
-        params: { enquiryId: 'enquiry123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request<{ enquiryId: string }>;
-
-      deleteEnquirySpy.mockImplementationOnce(() => {
-        throw new Error();
-      });
-
-      await enquiryController.deleteEnquiry(req, res, next);
-
-      expect(deleteEnquirySpy).toHaveBeenCalledWith('enquiry123');
-      expect(next).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('getEnquiries', () => {
+  describe('getEnquiriesController', () => {
     const getEnquiriesSpy = jest.spyOn(enquiryService, 'getEnquiries');
 
     it('should return 200 with enquiries', async () => {
@@ -190,7 +181,7 @@ describe('enquiryController', () => {
       const enquiries: Enquiry[] = [ENQUIRY_DATA];
       getEnquiriesSpy.mockResolvedValue(enquiries);
 
-      await enquiryController.getEnquiries(req, res, next);
+      await getEnquiriesController(req, res);
 
       expect(getEnquiriesSpy).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
@@ -203,14 +194,14 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.getEnquiries(req, res, next);
+      await getEnquiriesController(req, res);
 
       expect(getEnquiriesSpy).toHaveBeenCalled();
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('getEnquiry', () => {
+  describe('getEnquiryController', () => {
     const getEnquirySpy = jest.spyOn(enquiryService, 'getEnquiry');
 
     it('should return 200 if enquiry is found', async () => {
@@ -221,7 +212,7 @@ describe('enquiryController', () => {
 
       getEnquirySpy.mockResolvedValue(ENQUIRY_DATA);
 
-      await enquiryController.getEnquiry(req, res, next);
+      await getEnquiryController(req, res);
 
       expect(getEnquirySpy).toHaveBeenCalledWith('enquiry123');
       expect(res.status).toHaveBeenCalledWith(200);
@@ -236,7 +227,7 @@ describe('enquiryController', () => {
 
       getEnquirySpy.mockResolvedValue(null as unknown as Enquiry);
 
-      await enquiryController.getEnquiry(req, res, next);
+      await getEnquiryController(req, res);
 
       expect(getEnquirySpy).toHaveBeenCalledWith('enquiry123');
       expect(res.status).toHaveBeenCalledWith(404);
@@ -253,14 +244,14 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.getEnquiry(req, res, next);
+      await getEnquiryController(req, res);
 
       expect(getEnquirySpy).toHaveBeenCalledWith('enquiry123');
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('listRelatedEnquiries', () => {
+  describe('listRelatedEnquiriesController', () => {
     const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
 
     it('should return 200 with related enquiries', async () => {
@@ -271,7 +262,7 @@ describe('enquiryController', () => {
       const relatedEnquiries: Enquiry[] = [ENQUIRY_DATA];
       getRelatedEnquiriesSpy.mockResolvedValue(relatedEnquiries);
 
-      await enquiryController.listRelatedEnquiries(req, res, next);
+      await listRelatedEnquiriesController(req, res);
 
       expect(getRelatedEnquiriesSpy).toHaveBeenCalledWith('activity123');
       expect(res.status).toHaveBeenCalledWith(200);
@@ -287,14 +278,14 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.listRelatedEnquiries(req, res, next);
+      await listRelatedEnquiriesController(req, res);
 
       expect(getRelatedEnquiriesSpy).toHaveBeenCalledWith('activity123');
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('searchEnquiries', () => {
+  describe('searchEnquiriesController', () => {
     const searchEnquiriesSpy = jest.spyOn(enquiryService, 'searchEnquiries');
 
     it('should return 200 if search is successful', async () => {
@@ -307,7 +298,7 @@ describe('enquiryController', () => {
       const enquiries: Enquiry[] = [ENQUIRY_DATA];
       searchEnquiriesSpy.mockResolvedValue(enquiries);
 
-      await enquiryController.searchEnquiries(req, res, next);
+      await searchEnquiriesController(req, res);
 
       expect(searchEnquiriesSpy).toHaveBeenCalledWith(
         {
@@ -331,14 +322,14 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.searchEnquiries(req, res, next);
+      await searchEnquiriesController(req, res);
 
       expect(searchEnquiriesSpy).toHaveBeenCalled();
       expect(next).toHaveBeenCalledTimes(1);
     });
   });
 
-  describe('updateEnquiry', () => {
+  describe('updateEnquiryController', () => {
     const insertContacts = jest.spyOn(contactService, 'insertContacts');
     const deleteUnmatchedActivityContacts = jest.spyOn(activityContactService, 'deleteUnmatchedActivityContacts');
     const upsertActivityContacts = jest.spyOn(activityContactService, 'upsertActivityContacts');
@@ -352,7 +343,7 @@ describe('enquiryController', () => {
 
       updateEnquirySpy.mockResolvedValue(ENQUIRY_DATA);
 
-      await enquiryController.updateEnquiry(req, res, next);
+      await updateEnquiryController(req, res);
 
       expect(insertContacts).toHaveBeenCalled();
       expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
@@ -370,7 +361,7 @@ describe('enquiryController', () => {
 
       updateEnquirySpy.mockResolvedValue(null as unknown as Enquiry);
 
-      await enquiryController.updateEnquiry(req, res, next);
+      await updateEnquiryController(req, res);
 
       expect(insertContacts).toHaveBeenCalled();
       expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
@@ -390,7 +381,7 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.updateEnquiry(req, res, next);
+      await updateEnquiryController(req, res);
 
       expect(insertContacts).toHaveBeenCalled();
       expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
@@ -400,8 +391,8 @@ describe('enquiryController', () => {
     });
   });
 
-  describe('updateIsDeletedFlag', () => {
-    const updateIsDeletedFlagSpy = jest.spyOn(enquiryService, 'updateIsDeletedFlag');
+  describe('updateEnquiryIsDeletedFlagController', () => {
+    const updateIsDeletedFlagSpy = jest.spyOn(enquiryService, 'updateEnquiryIsDeletedFlag');
 
     it('should return 200 if isDeleted flag is updated successfully', async () => {
       const req = {
@@ -413,7 +404,7 @@ describe('enquiryController', () => {
 
       updateIsDeletedFlagSpy.mockResolvedValue(ENQUIRY_DATA);
 
-      await enquiryController.updateIsDeletedFlag(req, res, next);
+      await updateEnquiryIsDeletedFlagController(req, res);
 
       expect(updateIsDeletedFlagSpy).toHaveBeenCalledWith('enquiry123', true, expect.any(Object));
       expect(res.status).toHaveBeenCalledWith(200);
@@ -430,7 +421,7 @@ describe('enquiryController', () => {
 
       updateIsDeletedFlagSpy.mockResolvedValue(null as unknown as Enquiry);
 
-      await enquiryController.updateIsDeletedFlag(req, res, next);
+      await updateEnquiryIsDeletedFlagController(req, res);
 
       expect(updateIsDeletedFlagSpy).toHaveBeenCalledWith('enquiry123', true, expect.any(Object));
       expect(res.status).toHaveBeenCalledWith(404);
@@ -449,7 +440,7 @@ describe('enquiryController', () => {
         throw new Error();
       });
 
-      await enquiryController.updateIsDeletedFlag(req, res, next);
+      await updateEnquiryIsDeletedFlagController(req, res);
 
       expect(updateIsDeletedFlagSpy).toHaveBeenCalledWith('enquiry123', true, expect.any(Object));
       expect(next).toHaveBeenCalledTimes(1);

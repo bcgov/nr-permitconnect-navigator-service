@@ -81,11 +81,11 @@ function onDelete() {
 
 onBeforeMount(async () => {
   const contactData = (await contactService.getContact(contactId, true)).data;
-  const activityIds = contactData.activityContact.map((ac: ActivityContact) => ac.activityId);
+  const activityIds = contactData.activityContact?.map((ac: ActivityContact) => ac.activityId);
 
   contact.value = contactData;
 
-  if (activityIds.length) {
+  if (activityIds?.length) {
     const [projects, enquiries] = (
       await Promise.all([
         projectService?.searchProjects({ activityId: activityIds }),

@@ -1,5 +1,6 @@
-import { permitNoteController } from '../../../src/controllers';
-import { permitNoteService } from '../../../src/services';
+import { createPermitNoteController } from '../../../src/controllers/permitNote';
+import * as permitNoteService from '../../../src/services/permitNote';
+import { isoPattern } from '../../../src/utils/regexp';
 
 jest.mock('config');
 
@@ -21,7 +22,17 @@ afterEach(() => {
 });
 
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+const TEST_PERMIT_NOTE = {
+  permitNoteId: 'NOTE123',
+  permitId: 'PERMIT123',
+  note: 'This is a permit note.',
+  isDeleted: false,
+  createdAt: new Date(),
+  createdBy: 'abc-123',
+  updatedAt: null,
+  updatedBy: null
+};
 
 describe('createPermitNote', () => {
   const next = jest.fn();
@@ -30,7 +41,6 @@ describe('createPermitNote', () => {
   const createSpy = jest.spyOn(permitNoteService, 'createPermitNote');
 
   it('should return 201 if all good', async () => {
-    const now = new Date();
     const req = {
       body: {
         permitId: 'PERMIT123',
@@ -40,19 +50,10 @@ describe('createPermitNote', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const created = {
-      permitNoteId: 'NOTE123',
-      permitId: 'PERMIT123',
-      note: 'This is a permit note.',
-      isDeleted: false,
-      createdAt: now.toISOString(),
-      createdBy: 'abc-123'
-    };
-
-    createSpy.mockResolvedValue(created);
+    createSpy.mockResolvedValue(TEST_PERMIT_NOTE);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitNoteController.createPermitNote(req as any, res as any, next);
+    await createPermitNoteController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -61,7 +62,7 @@ describe('createPermitNote', () => {
       createdBy: 'abc-123'
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(created);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_NOTE);
   });
 
   it('calls next if the permitNote service fails to create', async () => {
@@ -79,7 +80,7 @@ describe('createPermitNote', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitNoteController.createPermitNote(req as any, res as any, next);
+    await createPermitNoteController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({

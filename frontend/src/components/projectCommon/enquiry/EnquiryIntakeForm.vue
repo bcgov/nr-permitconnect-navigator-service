@@ -231,7 +231,7 @@ async function onSubmit(values: any) {
       let permitDescription =
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
       const trackingId =
-        permit.permitTracking.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
+        permit.permitTracking?.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
       permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
       dataOmitted.basic.enquiryDescription = permitDescription + dataOmitted.basic.enquiryDescription;

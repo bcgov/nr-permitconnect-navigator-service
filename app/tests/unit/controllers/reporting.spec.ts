@@ -1,5 +1,5 @@
-import reportingController from '../../../src/controllers/reporting';
-import reportingService from '../../../src/services/reporting';
+import { getHousingProjectPermitDataController } from '../../../src/controllers/reporting';
+import * as reportingService from '../../../src/services/reporting';
 import { AuthType } from '../../../src/utils/enums/application';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -81,7 +81,7 @@ describe('getHousingProjectPermitData', () => {
     getHousingProjectPermitDataSpy.mockResolvedValue(mockData);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await reportingController.getHousingProjectPermitData(req as any, res as any, next);
+    await getHousingProjectPermitDataController(req as any, res as any);
 
     expect(getHousingProjectPermitDataSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
@@ -99,7 +99,7 @@ describe('getHousingProjectPermitData', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await reportingController.getHousingProjectPermitData(req as any, res as any, next);
+    await getHousingProjectPermitDataController(req as any, res as any);
 
     expect(getHousingProjectPermitDataSpy).toHaveBeenCalledTimes(1);
     expect(res.status).not.toHaveBeenCalled();

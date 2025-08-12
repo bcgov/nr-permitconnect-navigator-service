@@ -1,15 +1,21 @@
-import { noteHistoryController } from '../../../src/controllers';
 import {
-  electrificationProjectService,
-  enquiryService,
-  housingProjectService,
-  noteService,
-  noteHistoryService,
-  userService
-} from '../../../src/services';
-import { ElectrificationProject, Enquiry, HousingProject } from '../../../src/types';
+  createNoteHistoryController,
+  deleteNoteHistoryController,
+  listBringForwardController,
+  listNoteHistoryController,
+  updateNoteHistoryController
+} from '../../../src/controllers/noteHistory';
+import * as electrificationProjectService from '../../../src/services/electrificationProject';
+import * as enquiryService from '../../../src/services/enquiry';
+import * as housingProjectService from '../../../src/services/housingProject';
+import * as noteService from '../../../src/services/note';
+import * as noteHistoryService from '../../../src/services/noteHistory';
+import * as userService from '../../../src/services/user';
 import { Initiative } from '../../../src/utils/enums/application';
 import { BringForwardType, NoteType } from '../../../src/utils/enums/projectCommon';
+import { isoPattern } from '../../../src/utils/regexp';
+
+import type { ElectrificationProject, Enquiry, HousingProject } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -41,8 +47,6 @@ const CURRENT_CONTEXT = {
   userId: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6',
   initiative: Initiative.HOUSING
 };
-
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
 describe('createNoteHistory', () => {
   const next = jest.fn();
@@ -99,7 +103,7 @@ describe('createNoteHistory', () => {
     createNoteSpy.mockResolvedValue(createdNote);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.createNoteHistory(req as any, res as any, next);
+    await createNoteHistoryController(req as any, res as any);
 
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith({
@@ -132,7 +136,7 @@ describe('createNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.createNoteHistory(req as any, res as any, next);
+    await createNoteHistoryController(req as any, res as any);
 
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledTimes(0);
@@ -174,7 +178,7 @@ describe('deleteNoteHistory', () => {
     deleteHistorySpy.mockResolvedValue(deletedNoteHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.deleteNoteHistory(req as any, res as any, next);
+    await deleteNoteHistoryController(req as any, res as any);
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
@@ -191,7 +195,7 @@ describe('deleteNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.deleteNoteHistory(req as any, res as any, next);
+    await deleteNoteHistoryController(req as any, res as any);
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
@@ -276,7 +280,7 @@ describe('listBringForward', () => {
     searchEnquiries.mockResolvedValue(enquiriesList as any);
     searchUsersSpy.mockResolvedValue(userList as any);
 
-    await noteHistoryController.listBringForward(req as any, res as any, next);
+    await listBringForwardController(req as any, res as any);
     /* eslint-enable @typescript-eslint/no-explicit-any */
 
     expect(listSpy).toHaveBeenCalledTimes(1);
@@ -309,7 +313,7 @@ describe('listBringForward', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.listBringForward(req as any, res as any, next);
+    await listBringForwardController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
@@ -367,7 +371,7 @@ describe('listNoteHistory', () => {
     listSpy.mockResolvedValue(noteList);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.listNoteHistory(req as any, res as any, next);
+    await listNoteHistoryController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -440,7 +444,7 @@ describe('listNoteHistory', () => {
     listSpy.mockResolvedValue(noteList);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.listNoteHistory(req as any, res as any, next);
+    await listNoteHistoryController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -454,7 +458,7 @@ describe('listNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.listNoteHistory(req as any, res as any, next);
+    await listNoteHistoryController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
@@ -528,7 +532,7 @@ describe('updateNoteHistory', () => {
     updateNoteHistorySpy.mockResolvedValue(updatedHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
+    await updateNoteHistoryController(req as any, res as any);
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith({
@@ -556,7 +560,7 @@ describe('updateNoteHistory', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
+    await updateNoteHistoryController(req as any, res as any);
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith({
@@ -618,7 +622,7 @@ describe('updateNoteHistory', () => {
     updateNoteHistorySpy.mockResolvedValue(updatedHistory);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await noteHistoryController.updateNoteHistory(req as any, res as any, next);
+    await updateNoteHistoryController(req as any, res as any);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith({

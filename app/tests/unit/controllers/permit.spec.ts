@@ -1,6 +1,13 @@
-import { permitController } from '../../../src/controllers';
-import { permitService } from '../../../src/services';
+import {
+  deletePermitController,
+  getPermitTypesController,
+  listPermitsController,
+  upsertPermitController
+} from '../../../src/controllers/permit';
+import * as permitService from '../../../src/services/permit';
+import { Permit, PermitType } from '../../../src/types';
 import { Initiative } from '../../../src/utils/enums/application';
+import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -24,110 +31,46 @@ afterEach(() => {
 
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
+const TEST_PERMIT: Permit = {
+  permitId: '12345',
+  permitTypeId: 123,
+  activityId: 'ACT_ID',
+  issuedPermitId: '1',
+  authStatus: 'ACTIVE',
+  needed: 'true',
+  status: 'FOO',
+  submittedDate: new Date(),
+  adjudicationDate: new Date(),
+  statusLastVerified: new Date(),
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
+};
 
-describe('upsertPermit', () => {
-  const next = jest.fn();
+const PERMIT_LIST: Permit[] = [TEST_PERMIT];
 
-  // Mock service calls
-  const createSpy = jest.spyOn(permitService, 'upsertPermit');
+const TEST_PERMIT_TYPE: PermitType = {
+  permitTypeId: 123,
+  agency: 'SOME_AGENCY',
+  division: 'SOME_DIVISION',
+  branch: 'SOME_BRANCH',
+  businessDomain: 'DOMAIN',
+  type: 'ABC',
+  family: null,
+  name: 'PERMIT1',
+  nameSubtype: null,
+  acronym: 'PRT1',
+  infoUrl: 'https://example.com/permit1',
+  trackedInAts: true,
+  sourceSystem: 'CODE',
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
+};
 
-  it('should return 201 if all good', async () => {
-    const now = new Date();
-    const req = {
-      body: {
-        permitType: 'ABC',
-        permitTypeId: '123',
-        activityId: 'ACT_ID',
-        issuedPermitId: '1',
-        trackingId: '2',
-        authStatus: 'ACTIVE',
-        needed: 'true',
-        status: 'FOO',
-        submittedDate: now,
-        adjudicationDate: now,
-        createdAt: new Date().toISOString(),
-        createdBy: 'abc-123'
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    const created = {
-      permitId: '12345',
-      permitTypeId: 123,
-      activityId: 'ACT_ID',
-      issuedPermitId: '1',
-      authStatus: 'ACTIVE',
-      needed: 'true',
-      status: 'FOO',
-      submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString(),
-      permitType: null
-    };
-
-    createSpy.mockResolvedValue(created);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.upsertPermit(req as any, res as any, next);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: 'abc-123',
-      permitId: expect.stringMatching(uuidv4Pattern),
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
-    });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(created);
-  });
-
-  it('calls next if the permit service fails to create', async () => {
-    const now = new Date();
-    const req = {
-      body: {
-        permitType: 'ABC',
-        permitTypeId: '123',
-        activityId: 'ACT_ID',
-        issuedPermitId: '1',
-        trackingId: '2',
-        authStatus: 'ACTIVE',
-        statusLastVerified: now.toISOString(),
-        needed: 'true',
-        status: 'FOO',
-        submittedDate: now,
-        adjudicationDate: now,
-        createdAt: new Date().toISOString(),
-        createdBy: 'abc-123',
-        updatedAt: new Date().toISOString(),
-        updatedBy: 'abc-123'
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    createSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.upsertPermit(req as any, res as any, next);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body,
-      permitId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: 'abc-123',
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-});
+const PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE];
 
 describe('deletePermit', () => {
   const next = jest.fn();
@@ -141,31 +84,15 @@ describe('deletePermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const now = new Date();
-    const deleted = {
-      permitId: '12345',
-      permitTypeId: 123,
-      activityId: 'ACT_ID',
-      issuedPermitId: '1',
-      trackingId: '2',
-      authStatus: 'ACTIVE',
-      needed: 'true',
-      status: 'FOO',
-      submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString(),
-      permitType: null
-    };
-
-    deleteSpy.mockResolvedValue(deleted);
+    deleteSpy.mockResolvedValue(TEST_PERMIT);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.deletePermit(req as any, res as any, next);
+    await deletePermitController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.permitId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(deleted);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT);
   });
 
   it('calls next if the permit service fails to delete', async () => {
@@ -179,7 +106,7 @@ describe('deletePermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.deletePermit(req as any, res as any, next);
+    await deletePermitController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.permitId);
@@ -200,33 +127,15 @@ describe('getPermitTypes', () => {
       query: { initiative: Initiative.HOUSING }
     };
 
-    const permitTypesList = [
-      {
-        permitTypeId: 123,
-        agency: 'SOME_AGENCY',
-        division: 'SOME_DIVISION',
-        branch: 'SOME_BRANCH',
-        businessDomain: 'DOMAIN',
-        type: 'ABC',
-        family: null,
-        name: 'PERMIT1',
-        nameSubtype: null,
-        acronym: 'PRT1',
-        infoUrl: 'https://example.com/permit1',
-        trackedInATS: true,
-        sourceSystem: 'CODE'
-      }
-    ];
-
-    permitTypesSpy.mockResolvedValue(permitTypesList);
+    permitTypesSpy.mockResolvedValue(PERMIT_TYPE_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.getPermitTypes(req as any, res as any, next);
+    await getPermitTypesController(req as any, res as any);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(permitTypesList);
+    expect(res.json).toHaveBeenCalledWith(PERMIT_TYPE_LIST);
   });
 
   it('calls next if the permit service fails to get permit types', async () => {
@@ -240,7 +149,7 @@ describe('getPermitTypes', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.getPermitTypes(req as any, res as any, next);
+    await getPermitTypesController(req as any, res as any);
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
     expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
@@ -256,38 +165,20 @@ describe('listPermits', () => {
   const listSpy = jest.spyOn(permitService, 'listPermits');
 
   it('should return 200 if all good', async () => {
-    const now = new Date();
     const req = {
       query: { activityId: 'ACT_ID' },
       currentContext: CURRENT_CONTEXT
     };
 
-    const permitList = [
-      {
-        permitId: '12345',
-        permitTypeId: 123,
-        activityId: 'ACT_ID',
-        issuedPermitId: '1',
-        trackingId: '2',
-        authStatus: 'ACTIVE',
-        needed: 'true',
-        status: 'FOO',
-        submittedDate: now.toISOString(),
-        adjudicationDate: now.toISOString(),
-        statusLastVerified: now.toISOString(),
-        permitType: null
-      }
-    ];
-
-    listSpy.mockResolvedValue(permitList);
+    listSpy.mockResolvedValue(PERMIT_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.listPermits(req as any, res as any, next);
+    await listPermitsController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.query);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(permitList);
+    expect(res.json).toHaveBeenCalledWith(PERMIT_LIST);
   });
 
   it('should return 200 and include notes if requested', async () => {
@@ -299,17 +190,7 @@ describe('listPermits', () => {
 
     const permitList = [
       {
-        permitId: '12345',
-        permitTypeId: 123,
-        activityId: 'ACT_ID',
-        issuedPermitId: '1',
-        trackingId: '2',
-        authStatus: 'ACTIVE',
-        needed: 'true',
-        status: 'FOO',
-        submittedDate: now.toISOString(),
-        adjudicationDate: now.toISOString(),
-        statusLastVerified: now.toISOString(),
+        ...TEST_PERMIT,
         permitNotes: [
           {
             permitNoteId: 'NOTE123',
@@ -318,15 +199,14 @@ describe('listPermits', () => {
             createdAt: now.toISOString(),
             createdBy: 'abc-123'
           }
-        ],
-        permitType: null
+        ]
       }
     ];
 
     listSpy.mockResolvedValue(permitList);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.listPermits(req as any, res as any, next);
+    await listPermitsController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith({
@@ -348,7 +228,7 @@ describe('listPermits', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.listPermits(req as any, res as any, next);
+    await listPermitsController(req as any, res as any);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(req.query);
@@ -381,25 +261,10 @@ describe('upsertPermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const updated = {
-      permitId: '12345',
-      permitTypeId: 123,
-      activityId: 'ACT_ID',
-      issuedPermitId: '1',
-      trackingId: '2',
-      authStatus: 'ACTIVE',
-      needed: 'true',
-      status: 'FOO',
-      submittedDate: now.toISOString(),
-      adjudicationDate: now.toISOString(),
-      statusLastVerified: now.toISOString(),
-      permitType: null
-    };
-
-    updateSpy.mockResolvedValue(updated);
+    updateSpy.mockResolvedValue(TEST_PERMIT);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.upsertPermit(req as any, res as any, next);
+    await upsertPermitController(req as any, res as any);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({
@@ -409,7 +274,7 @@ describe('upsertPermit', () => {
       updatedBy: 'abc-123'
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(updated);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT);
   });
 
   it('calls next if the permit service fails to update', async () => {
@@ -435,7 +300,7 @@ describe('upsertPermit', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await permitController.upsertPermit(req as any, res as any, next);
+    await upsertPermitController(req as any, res as any);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith({

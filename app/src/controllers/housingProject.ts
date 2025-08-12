@@ -19,7 +19,6 @@ import {
   updateHousingProject,
   updateHousingProjectIsDeletedFlag
 } from '../services/housingProject';
-import { createPermit } from '../services/permit';
 
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
@@ -39,13 +38,15 @@ import type {
   Permit,
   StatisticsFilters
 } from '../types';
+import { upsertPermitTracking } from '../services/permitTracking';
+import { upsertPermit } from '../services/permit';
 
 /**
  * @function assignPriority
  * Assigns a priority level to a housing project based on given criteria
  * Criteria defined below
  */
-const assignPriority = (housingProject: Partial<HousingProject>) => {
+export const assignPriority = (housingProject: Partial<HousingProject>) => {
   const matchesPriorityOneCriteria = // Priority 1 Criteria:
     // 1. More than 50 units (any)
     housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
@@ -125,7 +126,7 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
       geoJson: jsonToPrismaInputJson(data.location.geoJson),
-      locationPids: data.location.ltsaPIDLookup,
+      locationPids: data.location.ltsaPidLookup,
       latitude: data.location.latitude,
       longitude: data.location.longitude,
       streetAddress: data.location.streetAddress,
@@ -142,10 +143,9 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
 
   if (data.appliedPermits && data.appliedPermits.length) {
     appliedPermits = data.appliedPermits.map((x: Permit) => ({
-      permitId: x.permitId,
+      permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId,
       activityId: activityId as string,
-      trackingId: x.trackingId,
       status: PermitStatus.APPLIED,
       needed: PermitNeeded.YES,
       statusLastVerified: null,
@@ -153,6 +153,7 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
       authStatus: PermitAuthorizationStatus.IN_REVIEW,
       submittedDate: x.submittedDate,
       adjudicationDate: null,
+      permitTracking: x.permitTracking,
       createdAt: null,
       createdBy: null,
       updatedAt: null,
@@ -162,10 +163,9 @@ const generateHousingProjectData = async (data: HousingProjectIntake, currentCon
 
   if (data.investigatePermits && data.investigatePermits.length) {
     investigatePermits = data.investigatePermits.map((x: Permit) => ({
-      permitId: x.permitId as string,
+      permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId as number,
       activityId: activityId as string,
-      trackingId: null,
       status: PermitStatus.NEW,
       needed: PermitNeeded.UNDER_INVESTIGATION,
       statusLastVerified: null,
@@ -261,9 +261,16 @@ export const createHousingProjectController = async (
     ...generateCreateStamps(req.currentContext)
   });
 
-  // Create each permit
-  await Promise.all(appliedPermits.map(async (x: Permit) => await createPermit(x)));
-  await Promise.all(investigatePermits.map(async (x: Permit) => await createPermit(x)));
+  // Create each permit and tracking IDs
+  await Promise.all(
+    appliedPermits.map(async (x: Permit) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { permitTracking, ...rest } = x;
+      await upsertPermit(rest);
+    })
+  );
+  await Promise.all(investigatePermits.map(async (x: Permit) => await upsertPermit(x)));
+  await Promise.all(appliedPermits.map(async (x: Permit) => await upsertPermitTracking(x)));
 
   res.status(201).json(result);
 };
@@ -356,9 +363,16 @@ export const submitHousingProjectDraftController = async (
     ...generateCreateStamps(req.currentContext)
   });
 
-  // Create each permit
-  await Promise.all(appliedPermits.map((x: Permit) => createPermit(x)));
-  await Promise.all(investigatePermits.map((x: Permit) => createPermit(x)));
+  // Create each permit and tracking IDs
+  await Promise.all(
+    appliedPermits.map(async (x: Permit) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { permitTracking, ...rest } = x;
+      await upsertPermit(rest);
+    })
+  );
+  await Promise.all(investigatePermits.map(async (x: Permit) => await upsertPermit(x)));
+  await Promise.all(appliedPermits.map(async (x: Permit) => await upsertPermitTracking(x)));
 
   // Delete old draft
   if (req.body.draftId) await deleteDraft(req.body.draftId);
