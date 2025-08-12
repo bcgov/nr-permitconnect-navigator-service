@@ -1,5 +1,9 @@
-import { atsController } from '../../../src/controllers';
-import { atsService } from '../../../src/services';
+import {
+  createATSClientController,
+  createATSEnquiryController,
+  searchATSUsersController
+} from '../../../src/controllers/ats';
+import * as atsService from '../../../src/services/ats';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -23,7 +27,7 @@ afterEach(() => {
 
 const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
 
-describe('createATSClient', () => {
+describe('createATSClientController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -71,7 +75,7 @@ describe('createATSClient', () => {
     createSpy.mockResolvedValue(created);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.createATSClient(req as any, res as any, next);
+    await createATSClientController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -104,7 +108,7 @@ describe('createATSClient', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.createATSClient(req as any, res as any, next);
+    await createATSClientController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -115,7 +119,7 @@ describe('createATSClient', () => {
   });
 });
 
-describe('createATSEnquiry', () => {
+describe('createATSEnquiryController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -161,7 +165,7 @@ describe('createATSEnquiry', () => {
     createSpy.mockResolvedValue(created);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.createATSEnquiry(req as any, res as any, next);
+    await createATSEnquiryController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -194,7 +198,7 @@ describe('createATSEnquiry', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.createATSEnquiry(req as any, res as any, next);
+    await createATSEnquiryController(req as any, res as any);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -205,7 +209,7 @@ describe('createATSEnquiry', () => {
   });
 });
 
-describe('searchATSUsers', () => {
+describe('searchATSUsersController', () => {
   const next = jest.fn();
 
   // Mock service calls
@@ -290,7 +294,7 @@ describe('searchATSUsers', () => {
     searchATSUsersSpy.mockResolvedValue(atsUsers);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.searchATSUsers(req as any, res as any, next);
+    await searchATSUsersController(req as any, res as any);
 
     expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });
@@ -308,7 +312,7 @@ describe('searchATSUsers', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await atsController.searchATSUsers(req as any, res as any, next);
+    await searchATSUsersController(req as any, res as any);
 
     expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });

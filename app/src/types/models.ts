@@ -22,7 +22,7 @@ export type Draft = DraftBase;
 
 const documentBase = Prisma.validator<Prisma.documentDefaultArgs>()({});
 export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;
-export type Document = DocumentBase;
+export type Document = Omit<DocumentBase, 'filesize'> & { filesize: number | null };
 
 const electrificationProjectBase = Prisma.validator<Prisma.electrification_projectDefaultArgs>()({});
 export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase>;
@@ -58,11 +58,19 @@ export type NoteHistory = NoteHistoryBase & { note?: Note[] };
 
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 export type PermitBase = Prisma.permitGetPayload<typeof permitBase>;
-export type Permit = PermitBase & { permitNote?: PermitNote[]; permitType?: PermitType };
+export type Permit = PermitBase & {
+  permitNote?: PermitNote[];
+  permitTracking?: PermitTracking[];
+  permitType?: PermitType;
+};
 
 const permitNoteBase = Prisma.validator<Prisma.permit_noteDefaultArgs>()({});
 export type PermitNoteBase = Prisma.permit_noteGetPayload<typeof permitNoteBase>;
 export type PermitNote = PermitNoteBase;
+
+const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
+export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
+export type PermitTracking = PermitTrackingBase;
 
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;

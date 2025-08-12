@@ -1,5 +1,9 @@
-import { roadmapController } from '../../../src/controllers';
-import { comsService, emailService, noteHistoryService, noteService } from '../../../src/services';
+import * as comsService from '../../../src/services/coms';
+import * as emailService from '../../../src/services/email';
+import * as noteHistoryService from '../../../src/services/noteHistory';
+import * as noteService from '../../../src/services/note';
+import { sendRoadmapController } from '../../../src/controllers/roadmap';
+import { isoPattern } from '../../../src/utils/regexp';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -86,7 +90,7 @@ describe('send', () => {
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
@@ -144,14 +148,12 @@ describe('send', () => {
       updatedBy: null
     };
 
-    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
@@ -262,7 +264,7 @@ describe('send', () => {
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
     expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
@@ -344,7 +346,7 @@ describe('send', () => {
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
@@ -431,8 +433,6 @@ describe('send', () => {
       updatedBy: null
     };
 
-    const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
@@ -440,7 +440,7 @@ describe('send', () => {
     getObjectSpy.mockResolvedValue(getObjectResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
     expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
@@ -512,7 +512,7 @@ describe('send', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
     expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
@@ -572,7 +572,7 @@ describe('send', () => {
     getObjectSpy.mockResolvedValue(getObjectResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await roadmapController.send(req as any, res as any, next);
+    await sendRoadmapController(req as any, res as any);
 
     expect(getObjectsSpy).toHaveBeenCalledTimes(1);
     expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);

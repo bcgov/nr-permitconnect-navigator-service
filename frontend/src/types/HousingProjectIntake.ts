@@ -31,7 +31,7 @@ export type HousingProjectIntake = {
     naturalDisaster?: string;
     projectLocation?: string;
     projectLocationDescription?: string;
-    ltsaPIDLookup?: string;
+    ltsaPidLookup?: string;
     latitude?: number;
     longitude?: number;
     streetAddress?: string;

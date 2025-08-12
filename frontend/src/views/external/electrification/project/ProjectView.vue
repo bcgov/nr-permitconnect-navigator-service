@@ -10,7 +10,7 @@ import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, electrificationProjectService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';

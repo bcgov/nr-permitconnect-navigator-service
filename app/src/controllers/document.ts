@@ -3,7 +3,7 @@ import { createDocument, deleteDocument, listDocuments } from '../services/docum
 import { readUser } from '../services/user';
 
 import type { Request, Response } from 'express';
-import type { DocumentBase } from '../types';
+import type { Document } from '../types';
 
 export const createDocumentController = async (
   req: Request<
@@ -13,7 +13,7 @@ export const createDocumentController = async (
   >,
   res: Response
 ) => {
-  const response: DocumentBase & { createdByFullName?: string } = await createDocument(
+  const response: Document & { createdByFullName?: string } = await createDocument(
     req.body.documentId,
     req.body.activityId,
     req.body.filename,
@@ -36,7 +36,7 @@ export const deleteDocumentController = async (req: Request<{ documentId: string
 };
 
 export const listDocumentsController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response: (DocumentBase & { createdByFullName?: string })[] = await listDocuments(req.params.activityId);
+  const response: (Document & { createdByFullName?: string })[] = await listDocuments(req.params.activityId);
 
   if (response && Array.isArray(response)) {
     for (let i = 0; i < response.length; i++) {

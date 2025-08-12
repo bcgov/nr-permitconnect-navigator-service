@@ -114,8 +114,6 @@ export async function generateUniqueActivityId() {
 }
 
 export function jsonToPrismaInputJson(json: Prisma.JsonValue) {
-  console.log(json);
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
-
   return json as Prisma.InputJsonValue;
 }

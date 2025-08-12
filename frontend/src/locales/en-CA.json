@@ -138,7 +138,7 @@
     },
     "housing": {
       "enquiryConfirmationView": {
-        "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+        "message": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
       },
       "housingView": {
         "confirmationId": "Project ID",
