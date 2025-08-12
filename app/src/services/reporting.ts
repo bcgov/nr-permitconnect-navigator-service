@@ -3,7 +3,7 @@ import prisma from '../db/dataConnection';
 const service = {
   getElectrificationProjectPermitData: async () => {
     const result = await prisma.$queryRaw`
-    select project_name,
+    select ep.project_name,
       c.first_name,
       c.last_name,
       c.phone_number,
@@ -11,11 +11,11 @@ const service = {
       c.contact_preference,
       c.contact_applicant_relationship,
       ep.activity_id,
-      submission_type,
-      intake_status,
-      application_status,
+      ep.submission_type,
+      ep.intake_status,
+      ep.application_status,
       p.issued_permit_id,
-      p.tracking_id,
+      ptr.tracking_id,
       p.auth_status,
       p.needed,
       p.status,
@@ -31,21 +31,23 @@ const service = {
       pt.acronym,
       pt.tracked_in_ats,
       pt.source_system,
-      pt.source_system_acronym
+       ssc.display as source_system_acronym
     from electrification_project as ep
-    join activity as a on ep.activity_id = a.activity_id
+    join activity as a on ep.activity_id = a.activity_id and a.is_deleted = false
     join activity_contact as ac on ep.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on ep.activity_id = p.activity_id
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    where a.is_deleted = false`;
+    left join source_system_code ssc on pt.source_system = ssc.code
+    left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
+    order by ep.activity_id asc`;
 
     return result;
   },
 
   getHousingProjectPermitData: async () => {
     const result = await prisma.$queryRaw`
-    select project_name,
+    select hp.project_name,
       case
         when hp.consent_to_feedback then 'Yes'
         else 'No'
@@ -57,16 +59,16 @@ const service = {
       c.contact_preference,
       c.contact_applicant_relationship,
       hp.activity_id,
-      street_address,
-      locality,
-      latitude,
-      longitude,
-      location_pids,
-      submission_type,
-      intake_status,
-      application_status,
+      hp.street_address,
+      hp.locality,
+      hp.latitude,
+      hp.longitude,
+      hp.location_pids,
+      hp.submission_type,
+      hp.intake_status,
+      hp.application_status,
       p.issued_permit_id,
-      p.tracking_id,
+      ptr.tracking_id,
       p.auth_status,
       p.needed,
       p.status,
@@ -82,14 +84,16 @@ const service = {
       pt.acronym,
       pt.tracked_in_ats,
       pt.source_system,
-      pt.source_system_acronym
+      ssc.display as source_system_acronym
     from housing_project as hp
-    join activity as a on hp.activity_id = a.activity_id
+    join activity as a on hp.activity_id = a.activity_id and a.is_deleted = false
     join activity_contact as ac on hp.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on hp.activity_id = p.activity_id
     left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    where a.is_deleted = false`;
+    left join source_system_code ssc on pt.source_system = ssc.code
+    left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
+    order by hp.activity_id asc`;
 
     return result;
   }
