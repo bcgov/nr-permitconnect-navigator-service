@@ -40,14 +40,13 @@
         "confirmationBanner": "Your enquiry has been successfully submitted."
       },
       "permitStatusView": {
-        "additionalUpdates": "Additional updates",
         "applicationProgress": "Application progress",
         "askNav": "Ask my Navigator",
         "contactNav": "Contact your Navigator for this project for further updates on this application.",
         "noUpdates": "There are no updates.",
         "statusDescriptionMeaning": "What does the status mean?",
-        "statusLastVerified": "This status was last verified on",
-        "statusNotVerified": "This status has not yet been verified."
+        "unableToLoad": "Unable to load permit or project, please try again later",
+        "updateHistory": "Update history"
       },
       "projectView": {
         "agency": "Agency",
@@ -65,7 +64,7 @@
         "ongoingAuths": "Ongoing authorizations",
         "rangeSeparator": "of",
         "requiredAuths": "Potentially required authorizations",
-        "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no authorization is needed at this time.",
+        "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no new authorization is needed at this time.",
         "relatedEnquiries": "Related enquiries",
         "relatedEnquiriesDesc": "Any project-related enquiries you or a team member have submitted through the Navigator Service website will appear on this page. You can submit an enquiry about this project to your assigned Navigator by clicking the 'Ask my Navigator' button in the top-right corner.",
         "status": "Status",
@@ -309,6 +308,21 @@
       "more": "More",
       "statusVerified": "Status verified date"
     },
+    "authorizationCardIntake": {
+      "addId": "Add an ID",
+      "authorization": "Authorization",
+      "authorizationTypeID": "Authorization type and IDs",
+      "deleteTrackingId": "Delete tracking ID",
+      "trackingIds": "Tracking IDs",
+      "issuedPermitId": "Issued Permit ID",
+      "selectAuthorization": "Select an authorization",
+      "selectId": "Select an ID",
+      "shownToProponent": "Show to Proponent",
+      "typeNumber": "Type the number"
+    },
+    "authorizationCardLite": {
+      "more": "More"
+    },
     "authorizationCardProponent": {
       "agency": "Agency",
       "latestUpdates": "Latest updates",
@@ -317,9 +331,6 @@
       "statusNotVerified": "This status has not yet been verified by Navigators",
       "statusVerified": "Status last verified by Navigator on",
       "submittedOn": "Submitted on"
-    },
-    "authorizationCardLite": {
-      "more": "More"
     },
     "authorizationForm": {
       "addAuthorization": "Add authorization",
@@ -351,33 +362,40 @@
       "trackingId": "Tracking ID",
       "trackingIdType": "Tracking ID type",
       "updatedBy": "Updated by:",
-      "updateNoteHistory": "Update note history"
+      "updateHistory": "Update history"
     },
-    "authorizationCardIntake": {
-      "addId": "Add an ID",
-      "authorization": "Authorization",
-      "authorizationTypeID": "Authorization type and IDs",
-      "deleteTrackingId": "Delete tracking ID",
-      "trackingIds": "Tracking IDs",
-      "issuedPermitId": "Issued Permit ID",
-      "selectAuthorization": "Select an authorization",
-      "selectId": "Select an ID",
-      "shownToProponent": "Show to Proponent",
-      "typeNumber": "Type the number"
+    "authorizationInfoProponent": {
+      "agency": "Agency",
+      "applicationId": "Application ID",
+      "avgProcessingTime": "Average processing time",
+      "decisionDate": "Decision date",
+      "learnMore": "Learn more about this authorization type",
+      "submittedDate": "Submitted date",
+      "uponDecision": "Upon decision"
+    },
+    "authorizationStatusPill": {
+      "abandonedByClient": "Abandoned by client",
+      "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
+      "withdrawnByClient": "Withdrawn by client"
     },
     "authorizationStatusUpdatesCard": {
+      "abandonedByClient": "Abandoned by client",
+      "applicationStage": "Application stage",
+      "authorizationStatus": "Authorization status",
+      "decisionDate": "Decision date",
+      "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
+      "needed": "Needed",
       "statusUpdates": "Status updates",
       "statusVerifiedDate": "Status verified date",
-      "updateToToday": "Update to today",
-      "authorizationStatus": "Authorization status",
-      "applicationStage": "Application stage",
-      "needed": "Needed",
       "submittedDate": "Submitted date",
-      "decisionDate": "Decision date",
-      "updateNoteForProponent": "Update note for Proponent"
+      "updateNoteForProponent": "Update note for Proponent",
+      "updateToToday": "Update to today",
+      "withdrawnByClient": "Withdrawn by client"
     },
-    "authorizationUpdateHistory": {
-      "updateNoteHistory": "Update note history"
+    "authorizationTrackerCard": {
+      "byYourNavigator": "by your Navigator",
+      "statusLastVerified": "Status last verified on",
+      "statusNotVerified": "This status has not yet been verified."
     },
     "requiredAuths": {
       "areNotNeeded": "are not needed. ",

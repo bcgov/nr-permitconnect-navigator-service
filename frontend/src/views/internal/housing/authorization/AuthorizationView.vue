@@ -46,7 +46,7 @@ onBeforeMount(async () => {
     }
     if (!permitId) {
       permitStore.reset();
-    } else if (getPermit.value?.permitId !== permitId) {
+    } else {
       const permit = (await permitService.getPermit(permitId)).data;
       permitStore.setPermit(permit);
     }
