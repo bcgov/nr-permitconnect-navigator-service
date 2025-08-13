@@ -28,6 +28,19 @@ const electrificationProjectBase = Prisma.validator<Prisma.electrification_proje
 export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase>;
 export type ElectrificationProject = ElectrificationProjectBase & { activity?: Activity; user?: User | null };
 
+const electrificationProjectCategoryCodeBase =
+  Prisma.validator<Prisma.electrification_project_category_codeDefaultArgs>()({});
+export type ElectrificationProjectCategoryCodeBase = Prisma.electrification_project_category_codeGetPayload<
+  typeof electrificationProjectCategoryCodeBase
+>;
+export type ElectrificationProjectCategoryCode = ElectrificationProjectCategoryCodeBase;
+
+const electrificationProjectTypeCodeBase = Prisma.validator<Prisma.electrification_project_type_codeDefaultArgs>()({});
+export type ElectrificationProjectTypeCodeBase = Prisma.electrification_project_type_codeGetPayload<
+  typeof electrificationProjectTypeCodeBase
+>;
+export type ElectrificationProjectTypeCode = ElectrificationProjectTypeCodeBase;
+
 const emailLogBase = Prisma.validator<Prisma.email_logDefaultArgs>()({});
 export type EmailLogBase = Prisma.email_logGetPayload<typeof emailLogBase>;
 export type EmailLog = EmailLogBase;
@@ -75,6 +88,10 @@ export type PermitTracking = PermitTrackingBase;
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;
 export type PermitType = PermitTypeBase;
+
+const SourceSystemCodeBase = Prisma.validator<Prisma.source_system_codeDefaultArgs>()({});
+export type SourceSystemCodeBase = Prisma.source_system_codeGetPayload<typeof SourceSystemCodeBase>;
+export type SourceSystemCode = SourceSystemCodeBase;
 
 const user = Prisma.validator<Prisma.userDefaultArgs>()({});
 export type UserBase = Prisma.userGetPayload<typeof user>;

@@ -1,24 +1,31 @@
 import prisma from '../db/dataConnection';
 import { generateCreateStamps } from '../db/utils/utils';
-import { Contact, ContactSearchParameters, CurrentContext } from '../types';
+
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { Contact, ContactSearchParameters, CurrentContext } from '../types';
 
 /**
- * @function deleteContact
  * Deletes a specific contact from the PCNS database
- * @param {string} contactId Contact ID
+ * @param tx Prisma transaction client
+ * @param contactId Contact ID
  */
-export const deleteContact = async (contactId: string) => {
-  await prisma.contact.delete({ where: { contactId } });
+export const deleteContact = async (tx: PrismaTransactionClient, contactId: string): Promise<void> => {
+  await tx.contact.delete({ where: { contactId } });
 };
 
 /**
- * Delete a contact
- * @param contactId - The ID of the contact to delete
- * @param includeActivities - Boolean flag indicated if associated acitivties are to be deleted
- * @returns A Promise that resolves to the deleted resource
+ * Gets a specific contact
+ * @param tx Prisma transaction client
+ * @param contactId - The ID of the contact
+ * @param includeActivities - Boolean flag indicated if associated activities are to be included
+ * @returns A Promise that resolves to the contact
  */
-export const getContact = async (contactId: string, includeActivities: boolean): Promise<Contact> => {
-  const result = await prisma.contact.findFirstOrThrow({
+export const getContact = async (
+  tx: PrismaTransactionClient,
+  contactId: string,
+  includeActivities: boolean
+): Promise<Contact> => {
+  const result = await tx.contact.findFirstOrThrow({
     where: { contactId },
     include: includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {}
   });
@@ -27,21 +34,18 @@ export const getContact = async (contactId: string, includeActivities: boolean):
 };
 
 /**
- * @function insertContacts
- * Inserts multiple contacts into the database, generating IDs and timestamps automatically.
- * @param data - Array of Contact objects to insert
- * @param currentContext - Current context containing user information
- * @returns - {Promise<void>} The result of running the transaction
- *
- */
-
-/**
  * Create multiple contacts
+ * @param tx Prisma transaction client
  * @param data - The contact objects to be created
  * @param currentContext - The Request context
  * @returns A promise that resolves when the operation is complete
  */
-export const insertContacts = async (data: Array<Contact>, currentContext: CurrentContext): Promise<void> => {
+export const insertContacts = async (
+  tx: PrismaTransactionClient,
+  data: Array<Contact>,
+  currentContext: CurrentContext
+): Promise<void> => {
+  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
   return await prisma.$transaction(async (trx) => {
     await Promise.all(
       data.map(async (x: Contact) => {
@@ -58,11 +62,15 @@ export const insertContacts = async (data: Array<Contact>, currentContext: Curre
 
 /**
  * Retrieve all contacts matching any of the search parameters
+ * @param tx Prisma transaction client
  * @param params - The search parameters
  * @returns A Promise that resolves to the contacts matching the given params
  */
-export const matchContacts = async (params: ContactSearchParameters): Promise<Contact[]> => {
-  const response = await prisma.contact.findMany({
+export const matchContacts = async (
+  tx: PrismaTransactionClient,
+  params: ContactSearchParameters
+): Promise<Contact[]> => {
+  const response = await tx.contact.findMany({
     where: {
       OR: [
         {
@@ -86,11 +94,15 @@ export const matchContacts = async (params: ContactSearchParameters): Promise<Co
 
 /**
  * Retrieve all contacts matching the search parameters
+ * @param tx Prisma transaction client
  * @param params - The search parameters
  * @returns A Promise that resolves to the contacts matching the given params
  */
-export const searchContacts = async (params: ContactSearchParameters): Promise<Contact[]> => {
-  const response = await prisma.contact.findMany({
+export const searchContacts = async (
+  tx: PrismaTransactionClient,
+  params: ContactSearchParameters
+): Promise<Contact[]> => {
+  const response = await tx.contact.findMany({
     where: {
       AND: [
         {
@@ -139,11 +151,13 @@ export const searchContacts = async (params: ContactSearchParameters): Promise<C
 
 /**
  * Creates or updates the given contacts
+ * @param tx Prisma transaction client
  * @param data - The contact objects to create or update
  * @param activityId - The ID of the activity to associated the contacts with
  * @returns A promise that resolves when the operation is complete
  */
-export const upsertContacts = async (data: Array<Contact>): Promise<Contact[]> => {
+export const upsertContacts = async (tx: PrismaTransactionClient, data: Array<Contact>): Promise<Contact[]> => {
+  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
   return await prisma.$transaction(async (trx) => {
     return await Promise.all(
       data.map(async (x: Contact) => {

@@ -1,7 +1,12 @@
-import prisma from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-export const getSourceSystemKinds = async () => {
-  const response = await prisma.source_system_kind.findMany({
+/**
+ * Get all source system kinds
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolves to an array of source system kinds
+ */
+export const getSourceSystemKinds = async (tx: PrismaTransactionClient) => {
+  const response = await tx.source_system_kind.findMany({
     orderBy: {
       sourceSystem: 'asc'
     }

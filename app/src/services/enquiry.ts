@@ -1,16 +1,18 @@
 import prisma from '../db/dataConnection';
-import { IStamps } from '../interfaces/IStamps';
 import { Initiative } from '../utils/enums/application';
 
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { IStamps } from '../interfaces/IStamps';
 import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types';
 
 /**
- * @function createEnquiry
  * Creates a new enquiry
- * @returns {Promise<Partial<Enquiry>>} The result of running the transaction
+ * @param tx Prisma transaction client
+ * @param data The enquiry data to create
+ * @returns A Promise that resolves to the created enquiry
  */
-export const createEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
-  const response = await prisma.enquiry.create({
+export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBase): Promise<Enquiry> => {
+  const response = await tx.enquiry.create({
     data: data,
     include: {
       activity: {
@@ -29,13 +31,15 @@ export const createEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
 };
 
 /**
- * @function deleteEnquiry
  * Deletes the enquiry, followed by the associated activity
  * This action will cascade delete across all linked items
- * @param {string} enquiryId Enquiry ID
- * @returns {Promise<Enquiry>} The result of running the delete operation
+ * @param tx Prisma transaction client
+ * @param enquiryId Enquiry ID
+ * @returns A Promise that will resolve to the deleted enquiry
  */
-export const deleteEnquiry = async (enquiryId: string): Promise<Enquiry> => {
+export const deleteEnquiry = async (tx: PrismaTransactionClient, enquiryId: string): Promise<Enquiry> => {
+  // TODO-PR: Drop this service function, move project search to controller layer
+  // and add delete activity service call to controller layer
   const response = await prisma.$transaction(async (trx) => {
     const del = await trx.enquiry.delete({
       where: {
@@ -56,13 +60,13 @@ export const deleteEnquiry = async (enquiryId: string): Promise<Enquiry> => {
 };
 
 /**
- * @function getEnquiries
  * Gets a list of enquiries
- * @returns {Promise<(Enquiry | null)[]>} The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolves to an array of enquiries
  */
-export const getEnquiries = async (): Promise<Enquiry[]> => {
+export const getEnquiries = async (tx: PrismaTransactionClient): Promise<Enquiry[]> => {
   // fetch all enquiries with activity not deleted
-  const result = await prisma.enquiry.findMany({
+  const result = await tx.enquiry.findMany({
     where: {
       activity: {
         isDeleted: false
@@ -86,13 +90,13 @@ export const getEnquiries = async (): Promise<Enquiry[]> => {
 };
 
 /**
- * @function getEnquiry
  * Gets a specific enquiry from the PCNS database
- * @param {string} enquiryId Enquiry ID
- * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
+ * @param tx Prisma transaction client
+ * @param enquiryId Enquiry ID
+ * @returns A Promise that resolves into the specific enquiry
  */
-export const getEnquiry = async (enquiryId: string): Promise<Enquiry> => {
-  const result = await prisma.enquiry.findFirstOrThrow({
+export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string): Promise<Enquiry> => {
+  const result = await tx.enquiry.findFirstOrThrow({
     where: {
       enquiryId: enquiryId
     },
@@ -115,16 +119,21 @@ export const getEnquiry = async (enquiryId: string): Promise<Enquiry> => {
 /**
  * @function searchEnquiries
  * Search and filter for specific enquiries
- * @param {string[]} [params.activityId] Optional array of uuids representing the activity ID
- * @param {string[]} [params.createdBy] Optional array of uuids representing users who created enquiries
- * @param {string[]} [params.enquiryId] Optional array of uuids representing the enquiry ID
- * @param {string[]} [params.intakeStatus] Optional array of strings representing the intake status
- * @param {boolean}  [params.includeUser] Optional boolean representing whether the linked user should be included
- * @param {Initiative} [initiative] Initiative to search in
- * @returns {Promise<Enquiry[]>} The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param params.activityId Optional array of uuids representing the activity ID
+ * @param params.createdBy Optional array of uuids representing users who created enquiries
+ * @param params.enquiryId Optional array of uuids representing the enquiry ID
+ * @param params.intakeStatus Optional array of strings representing the intake status
+ * @param params.includeUser Optional boolean representing whether the linked user should be included
+ * @param initiative Initiative to search in
+ * @returns A Promise that resolves to an array of enquiries from search params
  */
-export const searchEnquiries = async (params: EnquirySearchParameters, initiative: Initiative): Promise<Enquiry[]> => {
-  const result = await prisma.enquiry.findMany({
+export const searchEnquiries = async (
+  tx: PrismaTransactionClient,
+  params: EnquirySearchParameters,
+  initiative: Initiative
+): Promise<Enquiry[]> => {
+  const result = await tx.enquiry.findMany({
     include: {
       activity: {
         include: {
@@ -167,13 +176,13 @@ export const searchEnquiries = async (params: EnquirySearchParameters, initiativ
 };
 
 /**
- * @function getRelatedEnquiries
- * Gets list of enquiries related to the given activityId
- * @param {string} activityId Activity ID
- * @returns {Promise<Enquiry | null>} The result of running the findFirst operation
+ * Gets a list of enquiries related to the given activityId
+ * @param tx Prisma transaction client
+ * @param activityId Activity ID
+ * @returns A Promise that resolves to an array of related enquiries
  */
-export const getRelatedEnquiries = async (activityId: string): Promise<Enquiry[]> => {
-  const result = await prisma.enquiry.findMany({
+export const getRelatedEnquiries = async (tx: PrismaTransactionClient, activityId: string): Promise<Enquiry[]> => {
+  const result = await tx.enquiry.findMany({
     where: {
       relatedActivityId: activityId
     },
@@ -186,13 +195,13 @@ export const getRelatedEnquiries = async (activityId: string): Promise<Enquiry[]
 };
 
 /**
- * @function updateEnquiry
  * Updates a specific enquiry
- * @param {Enquiry} data Enquiry to update
- * @returns {Promise<Enquiry | null>} The result of running the update operation
+ * @param tx Prisma transaction client
+ * @param data Enquiry to update
+ * @returns A Promise that resolves to the updated enquiry
  */
-export const updateEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
-  const result = await prisma.enquiry.update({
+export const updateEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBase): Promise<Enquiry> => {
+  const result = await tx.enquiry.update({
     data: data,
     where: {
       enquiryId: data.enquiryId
@@ -214,18 +223,21 @@ export const updateEnquiry = async (data: EnquiryBase): Promise<Enquiry> => {
 };
 
 /**
- * @function updateEnquiryIsDeletedFlag
  * Updates is_deleted flag for the corresponding activity
- * @param {string} enquiryId Enquiry ID
- * @param {string} isDeleted flag
- * @returns {Promise<Enquiry>} The result of running the delete operation
+ * @param tx Prisma transaction client
+ * @param enquiryId Enquiry ID
+ * @param isDeleted flag
+ * @returns A Promise that resolves to the enquiry with the updated flag
  */
 export const updateEnquiryIsDeletedFlag = async (
+  tx: PrismaTransactionClient,
   enquiryId: string,
   isDeleted: boolean,
   updateStamp: Partial<IStamps>
 ): Promise<Enquiry> => {
-  const deleteEnquiry = await prisma.enquiry.findUniqueOrThrow({
+  // TODO-PR: Remove this service function, move project search up to controller layer
+  // and add "correct" service calls to controller layer
+  const deleteEnquiry = await tx.enquiry.findUniqueOrThrow({
     where: {
       enquiryId: enquiryId
     },

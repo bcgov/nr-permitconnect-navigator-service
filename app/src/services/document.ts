@@ -1,18 +1,20 @@
-import prisma from '../db/dataConnection';
-import { IStamps } from '../interfaces/IStamps';
-import { Document } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { IStamps } from '../interfaces/IStamps';
+import type { Document } from '../types';
 
 /**
  * @function createDocument
  * Creates a link between an activity and a previously existing object in COMS
- * @param {string} documentId COMS ID of an existing object
- * @param {string} activityId Activity ID the document is associated with
- * @param {string} filename Original filename of the document
- * @param {string} mimeType Type of document
- * @param {number} filesize Size of document
- * @returns {Promise<Document | null>} The result of running the create operation
+ * @param tx Prisma transaction client
+ * @param documentId COMS ID of an existing object
+ * @param activityId Activity ID the document is associated with
+ * @param filename Original filename of the document
+ * @param mimeType Type of document
+ * @param filesize Size of document
+ * @returns The result of running the create operation
  */
 export const createDocument = async (
+  tx: PrismaTransactionClient,
   documentId: string,
   activityId: string,
   filename: string,
@@ -20,7 +22,7 @@ export const createDocument = async (
   filesize: number,
   createStamp: Partial<IStamps>
 ): Promise<Document> => {
-  const response = await prisma.document.create({
+  const response = await tx.document.create({
     data: {
       documentId: documentId,
       activityId: activityId,
@@ -38,23 +40,22 @@ export const createDocument = async (
 /**
  * @function deleteDocument
  * Delete a document
- * @param {string} documentId PCNS Document ID
- * @returns {Promise<Document | null>} The result of running the delete operation
+ * @param tx Prisma transaction client
+ * @param documentId PCNS Document ID
  */
-export const deleteDocument = async (documentId: string): Promise<Document> => {
-  const response = await prisma.document.delete({ where: { documentId } });
-
-  return response;
+export const deleteDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<void> => {
+  await tx.document.delete({ where: { documentId } });
 };
 
 /**
  * @function getDocument
  * Get a document
- * @param {string} documentId Document ID
- * @returns {Promise<PermitType[]>} The result of running the findFirst operation
+ * @param tx Prisma transaction client
+ * @param documentId Document ID
+ * @returns The result of running the findFirst operation
  */
-export const getDocument = async (documentId: string): Promise<Document> => {
-  const result = await prisma.document.findFirstOrThrow({ where: { documentId } });
+export const getDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<Document> => {
+  const result = await tx.document.findFirstOrThrow({ where: { documentId } });
 
   return result;
 };
@@ -62,11 +63,12 @@ export const getDocument = async (documentId: string): Promise<Document> => {
 /**
  * @function listDocuments
  * Retrieve a list of documents associated with a given activity
- * @param {string} activityId PCNS Activity ID
- * @returns {Promise<(Document | null)[]>} The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param activityId PCNS Activity ID
+ * @returns The result of running the findMany operation
  */
-export const listDocuments = async (activityId: string): Promise<Document[]> => {
-  const response = await prisma.document.findMany({
+export const listDocuments = async (tx: PrismaTransactionClient, activityId: string): Promise<Document[]> => {
+  const response = await tx.document.findMany({
     where: {
       activityId
     },

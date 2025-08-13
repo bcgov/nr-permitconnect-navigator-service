@@ -1,16 +1,12 @@
 import jwt from 'jsonwebtoken';
-import { user } from '@prisma/client';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact';
-import prisma from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, User } from '../types/models';
+import type { Contact, IdentityProvider, User } from '../types/models';
 import type { UserSearchParameters } from '../types/stuff';
-
-const trxWrapper = (etrx: PrismaTransactionClient | undefined = undefined) => (etrx ? etrx : prisma);
 
 /**
  * The User DB Service
@@ -34,8 +30,8 @@ type JwtUser = {
  * @function _tokenToUser
  * Transforms JWT payload contents into a User Model object
  * Checks IDIR/BCeID keys first, fallbacks are for BCSC
- * @param {object} token The decoded JWT payload
- * @returns {object} An equivalent User model object
+ * @param token The decoded JWT payload
+ * @returns An equivalent User model object
  */
 const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
   return {
@@ -51,51 +47,45 @@ const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
 };
 
 /**
- * @function createIdp
  * Create an identity provider record
- * @param {string} idp The identity provider code
- * @param {object} [etrx=undefined] An optional Prisma Transaction object
- * @returns {Promise<object>} The result of running the insert operation
- * @throws The error encountered upon db transaction failure
+ * @param tx Prisma transaction client
+ * @param idp The identity provider code
+ * @returns A Promise that resolves into the created identity provider
  */
-const createIdp = async (idp: string, etrx: PrismaTransactionClient | undefined = undefined) => {
+const createIdp = async (tx: PrismaTransactionClient, idp: string): Promise<IdentityProvider> => {
   const obj = {
     idp: idp,
     active: true,
     createdBy: NIL
   };
 
-  // const response = trxWrapper(etrx).identity_provider.create()
-  const response = trxWrapper(etrx).identity_provider.create({ data: obj });
+  const response = tx.identity_provider.create({ data: obj });
 
   return response;
 };
 
 /**
- * @function createUser
  * Create a user DB record
- * @param {object} data Incoming user data
- * @param {object} [etrx=undefined] An optional Prisma Transaction object
- * @returns {Promise<object>} The result of running the insert operation
- * @throws The error encountered upon db transaction failure
+ * @param tx Prisma transaction client
+ * @param data Incoming user data
+ * @returns A Promise that resolves into the created user
  */
-export const createUser = async (data: JwtUser, etrx: PrismaTransactionClient | undefined = undefined) => {
-  let response: User | undefined;
-
+export const createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
+  // TODO-PR: Keep logical function or split and move up to controller?
   // Logical function
-  const _createUser = async (data: JwtUser, trx: PrismaTransactionClient) => {
-    const exists = await trx.user.findFirst({
+  const _createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
+    const exists = await tx.user.findFirst({
       where: {
         sub: data.sub
       }
     });
 
     if (exists) {
-      response = exists;
+      return exists;
     } else {
       if (data.idp) {
-        const identityProvider = await readIdp(data.idp, trx);
-        if (!identityProvider) await createIdp(data.idp, trx);
+        const identityProvider = await readIdp(tx, data.idp);
+        if (!identityProvider) await createIdp(tx, data.idp);
       }
 
       const newUser = {
@@ -111,37 +101,28 @@ export const createUser = async (data: JwtUser, etrx: PrismaTransactionClient | 
         ...generateCreateStamps(undefined)
       };
 
-      const createResponse = await trx.user.create({
+      return await tx.user.create({
         data: newUser
       });
-
-      // TS hiccuping on the internal function
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      response = createResponse;
     }
   };
 
-  // Call with proper transaction
-  if (etrx) {
-    await _createUser(data, etrx);
-  } else {
-    await prisma.$transaction(async (trx) => {
-      await _createUser(data, trx);
-    });
-  }
-
-  return response;
+  return _createUser(tx, data);
 };
 
 /**
- * @function getCurrentUserId
  * Gets userId (primary identifier of a user in db) of currentContext.
- * @param {object} sub The subject of the current user
- * @param {string} [defaultValue=undefined] An optional default return value
- * @returns {string} The current userId if applicable, or `defaultValue`
+ * @param tx Prisma transaction client
+ * @param sub The subject of the current user
+ * @param defaultValue Optional default return value. Defaults to `undefined`
+ * @returns A Promise that resolves to the current userId if applicable, or `defaultValue`
  */
-export const getCurrentUserId = async (sub: string, defaultValue: string | undefined = undefined) => {
-  const user = await prisma.user.findFirst({
+export const getCurrentUserId = async (
+  tx: PrismaTransactionClient,
+  sub: string,
+  defaultValue: string | undefined = undefined
+): Promise<string | undefined> => {
+  const user = await tx.user.findFirst({
     where: {
       sub: sub
     }
@@ -151,13 +132,13 @@ export const getCurrentUserId = async (sub: string, defaultValue: string | undef
 };
 
 /**
- * @function listIdps
  * Lists all known identity providers
- * @param {boolean} [active] Boolean on identity_provider active status
- * @returns {Promise<object>} The result of running the find operation
+ * @param tx Prisma transaction client
+ * @param active Boolean on identity_provider active status
+ * @returns A Promise that resolves to an array of identity providers
  */
-export const listIdps = async (active: boolean) => {
-  return prisma.identity_provider.findMany({
+export const listIdps = async (tx: PrismaTransactionClient, active: boolean): Promise<IdentityProvider[]> => {
+  return tx.identity_provider.findMany({
     where: {
       active: active
     }
@@ -165,31 +146,29 @@ export const listIdps = async (active: boolean) => {
 };
 
 /**
- * @function login
  * Parse the user token and update the user table if necessary
  * Create a contact entry if necessary
- * @param {object} token The decoded JWT token payload
+ * @param tx Prisma transaction client
+ * @param token The decoded JWT token payload
  * @returns {Promise<object>} The result of running the login operation
  */
-export const login = async (token: jwt.JwtPayload) => {
+export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload): Promise<User> => {
   const newUser = _tokenToUser(token);
 
-  const response: User | undefined | null = await prisma.$transaction(async (trx) => {
-    const oldUser = await trx.user.findFirst({
-      where: {
-        sub: newUser.sub
-      }
-    });
-    if (!oldUser) {
-      return await createUser(newUser, trx);
-    } else {
-      return await updateUser(oldUser.userId, newUser, trx);
+  // TODO-PR: Leave multiple db calls in function?
+  // Or pull out into controller layer to call multiple services and contain logic?
+  const oldUser = await tx.user.findFirst({
+    where: {
+      sub: newUser.sub
     }
   });
 
+  const response = !oldUser ? await createUser(tx, newUser) : await updateUser(tx, oldUser.userId, newUser);
+
+  // TODO-PR: If leaving multiple db calls in function, should these be service calls or prisma calls?
   // Create initial contact entry
   if (response) {
-    const oldContact: Array<Contact> = await searchContacts({
+    const oldContact: Array<Contact> = await searchContacts(tx, {
       userId: [response.userId as string]
     });
     if (!oldContact.length) {
@@ -205,7 +184,7 @@ export const login = async (token: jwt.JwtPayload) => {
         ...generateCreateStamps(undefined),
         ...generateNullUpdateStamps()
       };
-      await upsertContacts([newContact]);
+      await upsertContacts(tx, [newContact]);
     }
   }
 
@@ -213,15 +192,13 @@ export const login = async (token: jwt.JwtPayload) => {
 };
 
 /**
- * @function readIdp
  * Gets an identity provider record
- * @param {string} code The identity provider code
- * @param {object} [etrx=undefined] An optional Prisma Transaction object
- * @returns {Promise<object>} The result of running the find operation
- * @throws The error encountered upon db transaction failure
+ * @param tx Prisma transaction client
+ * @param code The identity provider code
+ * @returns A Promise that resolves into the unique identity provider or null if not found
  */
-const readIdp = async (code: string, etrx: PrismaTransactionClient | undefined = undefined) => {
-  const response = await trxWrapper(etrx).identity_provider.findUnique({
+const readIdp = async (tx: PrismaTransactionClient, code: string): Promise<IdentityProvider | null> => {
+  const response = await tx.identity_provider.findUnique({
     where: {
       idp: code
     }
@@ -231,14 +208,13 @@ const readIdp = async (code: string, etrx: PrismaTransactionClient | undefined =
 };
 
 /**
- * @function readUser
  * Gets a user record
- * @param {string} userId The userId uuid
- * @returns {Promise<object>} The result of running the find operation
- * @throws If no record is found
+ * @param tx Prisma transaction client
+ * @param userId The userId uuid
+ * @returns A Promise that resolves into the unique user or null if not found
  */
-export const readUser = async (userId: string) => {
-  const response = await prisma.user.findUnique({
+export const readUser = async (tx: PrismaTransactionClient, userId: string): Promise<User | null> => {
+  const response = await tx.user.findUnique({
     where: {
       userId
     }
@@ -248,20 +224,19 @@ export const readUser = async (userId: string) => {
 };
 
 /**
- * @function searchUsers
  * Search and filter for specific users
- * @param {string[]} [params.userId] Optional array of uuids representing the user subject
- * @param {string[]} [params.idp] Optional array of identity providers
- * @param {string} [params.sub] Optional sub string to match on
- * @param {string} [params.email] Optional email string to match on
- * @param {string} [params.firstName] Optional firstName string to match on
- * @param {string} [params.fullName] Optional fullName string to match on
- * @param {string} [params.lastName] Optional lastName string to match on
- * @param {boolean} [params.active] Optional boolean on user active status
- * @returns {Promise<object>} The result of running the find operation
+ * @param params.userId Optional array of uuids representing the user subject
+ * @param params.idp Optional array of identity providers
+ * @param params.sub Optional sub string to match on
+ * @param params.email Optional email string to match on
+ * @param params.firstName Optional firstName string to match on
+ * @param params.fullName Optional fullName string to match on
+ * @param params.lastName Optional lastName string to match on
+ * @param params.active Optional boolean on user active status
+ * @returns A Promise that resolves into a list of users from search params
  */
-export const searchUsers = async (params: UserSearchParameters): Promise<user[]> => {
-  const response = await prisma.user.findMany({
+export const searchUsers = async (tx: PrismaTransactionClient, params: UserSearchParameters): Promise<User[]> => {
+  const response = await tx.user.findMany({
     where: {
       AND: [
         {
@@ -296,27 +271,24 @@ export const searchUsers = async (params: UserSearchParameters): Promise<user[]>
 };
 
 /**
- * @function updateUser
  * Updates a user record only if there are changed values
- * @param {string} userId The userId uuid
- * @param {object} data Incoming user data
- * @param {object} [etrx=undefined] An optional Prisma Transaction object
- * @returns {Promise<object>} The result of running the patch operation
- * @throws The error encountered upon db transaction failure
+ * @param tx Prisma transaction client
+ * @param userId The userId uuid
+ * @param data Incoming user data
+ * @returns A Promise that resolves into the updated user
  */
-const updateUser = async (userId: string, data: JwtUser, etrx: PrismaTransactionClient | undefined = undefined) => {
+const updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
+  // TODO-PR: Keep multiple service calls or split and move up to controller??
   // Check if any user values have changed
-  const oldUser = await readUser(userId);
+  const oldUser = await readUser(tx, userId);
   const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
 
-  let response: User | undefined;
-
   if (diff) {
-    const _updateUser = async (userId: string, data: JwtUser, trx: PrismaTransactionClient | undefined = undefined) => {
+    const _updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
       // Patch existing user
       if (data.idp) {
-        const identityProvider = await readIdp(data.idp, trx);
-        if (!identityProvider) await createIdp(data.idp, trx);
+        const identityProvider = await readIdp(tx, data.idp);
+        if (!identityProvider) await createIdp(tx, data.idp);
       }
 
       const obj = {
@@ -331,29 +303,19 @@ const updateUser = async (userId: string, data: JwtUser, etrx: PrismaTransaction
       };
 
       // TODO: Add support for updating userId primary key in the event it changes
-      const updateResponse = await trx?.user.update({
+      return await tx.user.update({
         data: obj,
         where: {
           userId
         }
       });
-
-      if (updateResponse) response = updateResponse;
     };
 
-    // Call with proper transaction
-    if (etrx) {
-      await _updateUser(userId, data, etrx);
-    } else {
-      await prisma.$transaction(async (trx) => {
-        // TODO: Address incorect typing, see github issue - https://github.com/prisma/prisma/issues/20738
-        await _updateUser(userId, data, trx);
-      });
-    }
-
-    return response;
+    return await _updateUser(tx, userId, data);
   } else {
     // Nothing to update
-    return oldUser;
+    if (oldUser) return oldUser;
+    // TODO-PR: Correct handling if old user not found?
+    else throw new Error('User not found');
   }
 };

@@ -1,26 +1,33 @@
 import { createBucket } from './coms';
-import prisma from '../db/dataConnection';
 import { Initiative, GroupName, Action } from '../utils/enums/application';
 
+import type { PrismaTransactionClient } from '../db/dataConnection';
+// import type { Group, GroupPolicyDetails } from '../types';
 import type { Group } from '../types';
 
 /**
- * @function assignGroup
  * Assigns an identity to the given group
  * Assigns permissions to COMS based on the given group
- * @param {string | undefined} bearerToken The bearer token of the authorized user
- * @param {string} sub Subject of the authorized user
- * @param {number} groupId The group ID to add the user to
- * @returns {Promise<{sub: string; roleId: number;}>} The result of running the create operation
+ * @param tx Prisma transaction client
+ * @param bearerToken The bearer token of the authorized user
+ * @param sub Subject of the authorized user
+ * @param groupId The group ID to add the user to
+ * @returns A Promise that resolve to an object with a subject and role id
  */
-export const assignGroup = async (bearerToken: string | undefined, sub: string, groupId?: number) => {
-  const groupResult = await prisma.group.findFirstOrThrow({
+export const assignGroup = async (
+  tx: PrismaTransactionClient,
+  bearerToken: string | undefined,
+  sub: string,
+  groupId?: number
+): Promise<{ sub: string; roleId: number }> => {
+  // TODO-PR: Separate prisma db queries up to controller layer?
+  const groupResult = await tx.group.findFirstOrThrow({
     where: {
       groupId
     }
   });
 
-  const result = await prisma.subject_group.create({
+  const result = await tx.subject_group.create({
     data: {
       sub: sub,
       groupId: groupResult.groupId
@@ -45,13 +52,13 @@ export const assignGroup = async (bearerToken: string | undefined, sub: string, 
 };
 
 /**
- * @function getSubjectGroups
  * Gets groups for the specified identity
- * @param {string} sub Subject to search
- * @returns {Promise<Array<Group>>} The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param sub Subject to search
+ * @returns A Promise that resolves into an array of groups
  */
-export const getSubjectGroups = async (sub: string) => {
-  const result = await prisma.subject_group.findMany({
+export const getSubjectGroups = async (tx: PrismaTransactionClient, sub: string): Promise<Group[]> => {
+  const result = await tx.subject_group.findMany({
     where: {
       sub: sub
     },
@@ -74,21 +81,24 @@ export const getSubjectGroups = async (sub: string) => {
 };
 
 /**
- * @function getGroupPolicyDetails
  * Gets a list of group/role/policy/resource/action matching the given parameters
- * @param {string} groupId Group ID to match on
- * @param {string} resourceName Resource name to match on
- * @param {string} actionName Action name to match on
- * @param {Initiative} initiative Optional initiative code to match on
- * @returns The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param groupId Group ID to match on
+ * @param resourceName Resource name to match on
+ * @param actionName Action name to match on
+ * @param initiative Optional initiative code to match on
+ * @returns A Promise that resolves into an array of group policy details
  */
 export const getGroupPolicyDetails = async (
+  tx: PrismaTransactionClient,
   groupId: number,
   resourceName: string,
   actionName: string,
   initiative?: Initiative
+  // TODO-PR: Create group policy details type
+  // ): Promise<GroupPolicyDetails[]> => {
 ) => {
-  const result = await prisma.group_role_policy_vw.findMany({
+  const result = await tx.group_role_policy_vw.findMany({
     where: {
       groupId: groupId,
       resourceName: resourceName,
@@ -109,15 +119,22 @@ export const getGroupPolicyDetails = async (
 };
 
 /**
- * @function getPCNSGroupPolicyDetails
  * Gets a list of group/role/policy/resource/action matching the given parameters for the PCNS initiative
- * @param {string} groupName Group name to match on
- * @param {string} resourceName Resource name to match on
- * @param {string} actionName Action name to match on
- * @returns The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param groupName Group name to match on
+ * @param resourceName Resource name to match on
+ * @param actionName Action name to match on
+ * @returns A Promise that resolves into an array of group policy details
  */
-export const getPCNSGroupPolicyDetails = async (groupName: string, resourceName: string, actionName: string) => {
-  const result = await prisma.group_role_policy_vw.findMany({
+export const getPCNSGroupPolicyDetails = async (
+  tx: PrismaTransactionClient,
+  groupName: string,
+  resourceName: string,
+  actionName: string
+  // TODO-PR: Create group policy details type
+  // ): Promise<GroupPolicyDetails[]> => {
+) => {
+  const result = await tx.group_role_policy_vw.findMany({
     where: {
       initiativeCode: Initiative.PCNS,
       groupName: groupName,
@@ -137,14 +154,15 @@ export const getPCNSGroupPolicyDetails = async (groupName: string, resourceName:
   }));
 };
 
+//TODO-PR: Set the return types for below functions
 /**
- * @function getGroupPermissions
  * Gets a list of resource/actions associated with the given groupId
- * @param {number} groupId Group ID to search
+ * @param tx Prisma transaction client
+ * @param groupId Group ID to search
  * @returns The result of running the findMany operation
  */
-export const getGroupPermissions = async (groupId: number) => {
-  const result = await prisma.group_role_policy_vw.findMany({
+export const getGroupPermissions = async (tx: PrismaTransactionClient, groupId: number) => {
+  const result = await tx.group_role_policy_vw.findMany({
     where: {
       groupId
     }
@@ -159,19 +177,20 @@ export const getGroupPermissions = async (groupId: number) => {
 };
 
 /**
- * @function getGroups
  * Gets a list of groups for the given initiativeId
- * @param {string} initiative Initiative code to search
+ * @param tx Prisma transaction client
+ * @param initiative Initiative code to search
  * @returns The result of running the findMany operation
  */
-export const getGroups = async (initiative: Initiative | undefined) => {
-  const i = await prisma.initiative.findFirstOrThrow({
+export const getGroups = async (tx: PrismaTransactionClient, initiative: Initiative | undefined) => {
+  // TODO-PR: Separate prisma db queries up to controller layer?
+  const i = await tx.initiative.findFirstOrThrow({
     where: {
       code: initiative
     }
   });
 
-  const result = await prisma.group.findMany({
+  const result = await tx.group.findMany({
     where: {
       initiativeId: i.initiativeId
     }
@@ -186,13 +205,13 @@ export const getGroups = async (initiative: Initiative | undefined) => {
 };
 
 /**
- * @function getPolicyAttributes
  * Gets a list of attributes associated with the given policyId
- * @param {number} policyId Policy ID to search
+ * @param tx Prisma transaction client
+ * @param policyId Policy ID to search
  * @returns The result of running the findMany operation
  */
-export const getPolicyAttributes = async (policyId: number) => {
-  const result = await prisma.policy_attribute.findMany({
+export const getPolicyAttributes = async (tx: PrismaTransactionClient, policyId: number) => {
+  const result = await tx.policy_attribute.findMany({
     where: {
       policyId
     },
@@ -212,8 +231,14 @@ export const getPolicyAttributes = async (policyId: number) => {
   }));
 };
 
-export const removeGroup = async (sub: string, groupId: number) => {
-  const result = await prisma.subject_group.delete({
+/**
+ * @param tx Prisma transaction client
+ * @param sub The subject of the current user
+ * @param groupId The ID of the group to remove
+ * @returns A Promise that resolves to the result of the delete operation
+ */
+export const removeGroup = async (tx: PrismaTransactionClient, sub: string, groupId: number) => {
+  const result = await tx.subject_group.delete({
     where: {
       sub_groupId: {
         sub: sub,
