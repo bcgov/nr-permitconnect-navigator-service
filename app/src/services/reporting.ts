@@ -1,7 +1,7 @@
-import prisma from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-export const getElectrificationProjectPermitData = async () => {
-  const result = await prisma.$queryRaw`
+export const getElectrificationProjectPermitData = async (tx: PrismaTransactionClient) => {
+  const result = await tx.$queryRaw`
     select project_name,
       c.first_name,
       c.last_name,
@@ -42,8 +42,8 @@ export const getElectrificationProjectPermitData = async () => {
   return result;
 };
 
-export const getHousingProjectPermitData = async () => {
-  const result = await prisma.$queryRaw`
+export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) => {
+  const result = await tx.$queryRaw`
     select project_name,
       case
         when hp.consent_to_feedback then 'Yes'
