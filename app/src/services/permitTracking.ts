@@ -1,14 +1,17 @@
 import prisma from '../db/dataConnection';
 
-import type { Permit, PermitTracking } from '../types/models';
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { Permit, PermitTracking } from '../types';
 
 /**
  * @function upsertPermitTracking
  * Upsert Permit Tracking
- * @param {Permit} data Permit object
- * @returns {Promise<Permit | null>} The result of running the update operation
+ * @param tx Prisma transaction client
+ * @param data Permit object
+ * @returns A Promise that resolves to the upserted permit tracking object
  */
-export const upsertPermitTracking = async (data: Permit) => {
+export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Permit) => {
+  // TODO-PR: Move transaction and necessary services calls up to the controller layer
   return await prisma.$transaction(async (trx) => {
     // Delete any permit tracking that is not in the new data
     await trx.permit_tracking.deleteMany({
