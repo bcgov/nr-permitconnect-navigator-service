@@ -1,15 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watchEffect } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
-import { userService } from '@/services';
 import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
-import type { Ref } from 'vue';
 import type { Permit } from '@/types';
 
 // Props
@@ -24,7 +22,6 @@ const emit = defineEmits(['authorizationCard:more']);
 const { t } = useI18n();
 
 // State
-const cardUpdatedBy: Ref<string> = ref('');
 const trackingNotShownToProponent = computed(() => permit.permitTracking?.filter((pt) => !pt.shownToProponent));
 const trackingShownToProponent = computed(() => permit.permitTracking?.find((pt) => pt.shownToProponent));
 
@@ -35,17 +32,6 @@ function toCopy(toCopy: string) {
   navigator.clipboard.writeText(toCopy);
   toast.info(t('authorization.authorizationCard.copiedToClipboard'));
 }
-
-watchEffect(() => {
-  if (permit.updatedBy) {
-    userService
-      .searchUsers({ userId: [permit.updatedBy] })
-      .then((res) => {
-        cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
-      })
-      .catch(() => {});
-  }
-});
 </script>
 
 <template>
@@ -131,11 +117,11 @@ watchEffect(() => {
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
-            {{ permit.statusLastVerified ? formatDate(permit.submittedDate) : undefined }}
+            {{ permit.submittedDate ? formatDate(permit.submittedDate) : undefined }}
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
-            {{ permit.statusLastVerified ? formatDate(permit.adjudicationDate) : undefined }}
+            {{ permit.adjudicationDate ? formatDate(permit.adjudicationDate) : undefined }}
           </div>
         </div>
         <div
