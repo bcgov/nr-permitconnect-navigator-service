@@ -1,17 +1,14 @@
-import prisma from '../db/dataConnection';
-
 import { Initiative } from '../utils/enums/application';
 
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { ListPermitsOptions, Permit, PermitBase, PermitType } from '../types';
 
-/**
- * @function deletePermit
- * Delete a permit
- * @param {string} permitId Permit ID
- * @returns {Promise<Permit>} The result of running the delete operation
+/** Delete a specific permit
+ * @param tx Prisma transaction client
+ * @param permitId Permit ID
  */
-export const deletePermit = async (permitId: string): Promise<Permit> => {
-  const response = await prisma.permit.delete({
+export const deletePermit = async (tx: PrismaTransactionClient, permitId: string): Promise<void> => {
+  await tx.permit.delete({
     include: {
       permitType: true
     },
@@ -19,18 +16,18 @@ export const deletePermit = async (permitId: string): Promise<Permit> => {
       permitId: permitId
     }
   });
-
-  return response;
 };
 
 /**
  * @function deletePermitByActivity
  * Delete a permit
- * @param {string} activityId Activity ID to remove permits from
+ * @param tx Prisma transaction client
+ * @param activityId Activity ID to remove permits from
  * @returns {number} The result of running the deleteMany operation
  */
-export const deletePermitsByActivity = async (activityId: string): Promise<number> => {
-  const response = await prisma.permit.deleteMany({
+// TODO-PR: Drop this service function and add delete activity service calls to controller layer
+export const deletePermitsByActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<number> => {
+  const response = await tx.permit.deleteMany({
     where: {
       activityId: activityId
     }
@@ -40,13 +37,13 @@ export const deletePermitsByActivity = async (activityId: string): Promise<numbe
 };
 
 /**
- * @function getPermit
- * Get a permit
- * @param {string} permitId Permit ID
- * @returns {Promise<Permit>} The result of running the findFirst operation
+ * Gets a specific permit
+ * @param tx Prisma transaction client
+ * @param permitId Permit ID
+ * @returns A Promise that resolves to the specific permit
  */
-export const getPermit = async (permitId: string): Promise<Permit> => {
-  const result = await prisma.permit.findFirstOrThrow({
+export const getPermit = async (tx: PrismaTransactionClient, permitId: string): Promise<Permit> => {
+  const result = await tx.permit.findFirstOrThrow({
     where: {
       permitId: permitId
     },
@@ -61,12 +58,13 @@ export const getPermit = async (permitId: string): Promise<Permit> => {
 };
 
 /**
- * @function getPermitTypes
- * Get all Permit types for the given initiative
- * @returns {Promise<PermitType[]>} The result of running the findMany operation
+ * Gets all Permit types for the given initiative
+ * @param tx Prisma transaction client
+ * @param initiative Initiative code
+ * @returns A Promise that resolves to an array of permit types for a certain initiative
  */
-export const getPermitTypes = async (initiative: Initiative): Promise<PermitType[]> => {
-  const initiativeResult = await prisma.initiative.findFirstOrThrow({
+export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: Initiative): Promise<PermitType[]> => {
+  const initiativeResult = await tx.initiative.findFirstOrThrow({
     include: {
       permitTypeInitiativeXref: {
         include: {
@@ -95,13 +93,14 @@ export const getPermitTypes = async (initiative: Initiative): Promise<PermitType
 };
 
 /**
- * @function listPermits
  * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
- * @param {string} activityId PCNS Activity ID
- * @returns {Promise<Permit[]>} The result of running the findMany operation
+ * @param tx Prisma transaction client
+ * @param options.activityId Optional PCNS Activity ID
+ * @param options.includeNotes Optional flag to include permit notes
+ * @returns A Promise that resolves to an array of permits
  */
-export const listPermits = async (options?: ListPermitsOptions): Promise<Permit[]> => {
-  const response = await prisma.permit.findMany({
+export const listPermits = async (tx: PrismaTransactionClient, options?: ListPermitsOptions): Promise<Permit[]> => {
+  const response = await tx.permit.findMany({
     include: {
       permitType: true,
       permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
@@ -125,13 +124,13 @@ export const listPermits = async (options?: ListPermitsOptions): Promise<Permit[
 };
 
 /**
- * @function upsertPermit
  * Upsert a Permit
- * @param {Permit} data Permit object
- * @returns {Promise<Permit | null>} The result of running the update operation
+ * @param tx Prisma transaction client
+ * @param data Permit object
+ * @returns A Promise that resolves to the upserted permit
  */
-export const upsertPermit = async (data: PermitBase): Promise<Permit> => {
-  const response = await prisma.permit.upsert({
+export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase): Promise<Permit> => {
+  const response = await tx.permit.upsert({
     include: {
       permitType: true
     },

@@ -1,8 +1,10 @@
 import { generateCreateStamps } from '../db/utils/utils';
 import { createDocument, deleteDocument, listDocuments } from '../services/document';
 import { readUser } from '../services/user';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Document } from '../types';
 
 export const createDocumentController = async (
@@ -13,40 +15,54 @@ export const createDocumentController = async (
   >,
   res: Response
 ) => {
-  const response: Document & { createdByFullName?: string } = await createDocument(
-    req.body.documentId,
-    req.body.activityId,
-    req.body.filename,
-    req.body.mimeType,
-    req.body.length,
-    generateCreateStamps(req.currentContext)
+  const result = await transactionWrapper<Document & { createdByFullName?: string }>(
+    async (tx: PrismaTransactionClient) => {
+      const created = await createDocument(
+        tx,
+        req.body.documentId,
+        req.body.activityId,
+        req.body.filename,
+        req.body.mimeType,
+        req.body.length,
+        generateCreateStamps(req.currentContext)
+      );
+
+      let createdByFullName: string | undefined;
+      if (created.createdBy) {
+        const user = await readUser(created.createdBy, tx);
+        createdByFullName = user ? (user.fullName ?? '') : '';
+      }
+
+      return { ...created, ...(createdByFullName ? { createdByFullName } : {}) };
+    }
   );
 
-  if (response.createdBy) {
-    const user = await readUser(response.createdBy);
-    response.createdByFullName = user ? `${user.fullName}` : '';
-  }
-
-  res.status(201).json(response);
+  res.status(201).json(result);
 };
 
 export const deleteDocumentController = async (req: Request<{ documentId: string }>, res: Response) => {
-  const response = await deleteDocument(req.params.documentId);
-  res.status(200).json(response);
+  await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    await deleteDocument(tx, req.params.documentId);
+  });
+  res.status(204).end();
 };
 
 export const listDocumentsController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response: (Document & { createdByFullName?: string })[] = await listDocuments(req.params.activityId);
+  const response = await transactionWrapper<(Document & { createdByFullName?: string })[]>(
+    async (tx: PrismaTransactionClient) => {
+      const documents: Document[] = await listDocuments(tx, req.params.activityId);
 
-  if (response && Array.isArray(response)) {
-    for (let i = 0; i < response.length; i++) {
-      const document = response[i];
-      if (document.createdBy) {
-        const user = await readUser(document.createdBy);
-        document.createdByFullName = user ? `${user.fullName}` : '';
-      }
+      const documentsWithNames: (Document & { createdByFullName?: string })[] = await Promise.all(
+        documents.map(async (doc) => {
+          if (!doc.createdBy) return doc;
+          const user = await readUser(doc.createdBy, tx);
+          return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
+        })
+      );
+
+      return documentsWithNames;
     }
-  }
+  );
 
   res.status(200).json(response);
 };

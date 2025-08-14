@@ -1,7 +1,13 @@
 import express from 'express';
 
 import permitNote from './permitNote';
-
+import {
+  deletePermitController,
+  getPermitController,
+  getPermitTypesController,
+  listPermitsController,
+  upsertPermitController
+} from '../../controllers/permit';
 import { hasAccess, hasAccessPermit, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
