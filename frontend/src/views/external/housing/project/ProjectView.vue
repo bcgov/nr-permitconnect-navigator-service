@@ -10,8 +10,8 @@ import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, housingProjectService, permitService } from '@/services';
+import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
@@ -21,6 +21,7 @@ import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Contact } from '@/types';
+import { formatDateLong } from '@/utils/formatters';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -37,8 +38,15 @@ const toast = useToast();
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getAuthsCompleted, getAuthsNeeded, getAuthsNotNeeded, getAuthsOnGoing, getProject, getRelatedEnquiries } =
-  storeToRefs(projectStore);
+const {
+  getAuthsCompleted,
+  getAuthsNeeded,
+  getAuthsNotNeeded,
+  getAuthsOnGoing,
+  getNoteHistory,
+  getProject,
+  getRelatedEnquiries
+} = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -142,32 +150,33 @@ onBeforeMount(async () => {
     <Tabs
       :value="activeTab"
       class="mt-3"
-
-    <div
-      v-if="getNoteHistory.length"
-      class="bg-[var(--p-green-100)] p-4"
     >
-      <div class="grid grid-cols-6 gap-4 items-center">
-        <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
-        <div class="font-bold">
-          Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+      <!-- TODO: Where does this go now after the rebase? -->
+      <!-- <div
+          v-if="getNoteHistory.length"
+          class="bg-[var(--p-green-100)] p-4"
+        >
+          <div class="grid grid-cols-6 gap-4 items-center">
+            <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
+            <div class="font-bold">
+              Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+            </div>
+            <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
+            <div class="flex justify-end">
+              <Button
+                class="p-button-sm header-btn"
+                label="View all"
+                outlined
+                @click="noteHistoryVisible = true"
+              />
+            </div>
+          </div>
         </div>
-        <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
-        <div class="flex justify-end">
-          <Button
-            class="p-button-sm header-btn"
-            label="View all"
-            outlined
-            @click="noteHistoryVisible = true"
-          />
-        </div>
-      </div>
-    </div>
 
-    <div
-      v-if="getProject?.submissionType === SubmissionType.INAPPLICABLE"
-      class="inapplicable-block p-4 mt-12"
-    >
+        <div
+          v-if="getProject?.submissionType === SubmissionType.INAPPLICABLE"
+          class="inapplicable-block p-4 mt-12"
+        > -->
       <TabList>
         <Tab :value="0">
           <font-awesome-icon

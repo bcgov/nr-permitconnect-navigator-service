@@ -4,6 +4,7 @@ import prisma from '../../db/dataConnection';
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
 export let escalationTypeCodes: string[] = [];
+export let sourceSystemCodes: string[] = [];
 
 const log = getLogger(module.filename);
 
@@ -29,6 +30,13 @@ export async function refreshCodeCaches(): Promise<boolean> {
 
     escalationTypeCodes = (
       await prisma.escalation_type_code.findMany({
+        where: { active: true },
+        select: { code: true }
+      })
+    ).map((r) => r.code);
+
+    sourceSystemCodes = (
+      await prisma.source_system_code.findMany({
         where: { active: true },
         select: { code: true }
       })
