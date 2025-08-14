@@ -29,7 +29,7 @@ export const createDocumentController = async (
 
       let createdByFullName: string | undefined;
       if (created.createdBy) {
-        const user = await readUser(created.createdBy, tx);
+        const user = await readUser(tx, created.createdBy);
         createdByFullName = user ? (user.fullName ?? '') : '';
       }
 
@@ -55,7 +55,7 @@ export const listDocumentsController = async (req: Request<{ activityId: string 
       const documentsWithNames: (Document & { createdByFullName?: string })[] = await Promise.all(
         documents.map(async (doc) => {
           if (!doc.createdBy) return doc;
-          const user = await readUser(doc.createdBy, tx);
+          const user = await readUser(tx, doc.createdBy);
           return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
         })
       );

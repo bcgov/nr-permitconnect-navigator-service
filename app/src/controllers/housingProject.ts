@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import {
   generateCreateStamps,
   generateNullUpdateStamps,
@@ -19,7 +21,8 @@ import {
   updateHousingProject,
   updateHousingProjectIsDeletedFlag
 } from '../services/housingProject';
-
+import { upsertPermit } from '../services/permit';
+import { upsertPermitTracking } from '../services/permitTracking';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
@@ -35,11 +38,10 @@ import type {
   HousingProject,
   HousingProjectIntake,
   HousingProjectSearchParameters,
+  HousingProjectStatistics,
   Permit,
   StatisticsFilters
 } from '../types';
-import { upsertPermitTracking } from '../services/permitTracking';
-import { upsertPermit } from '../services/permit';
 
 /**
  * @function assignPriority
@@ -82,9 +84,13 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
   }
 };
 
-const generateHousingProjectData = async (data: HousingProjectIntake, currentContext: CurrentContext) => {
+const generateHousingProjectData = async (
+  tx: PrismaTransactionClient,
+  data: HousingProjectIntake,
+  currentContext: CurrentContext
+) => {
   const activityId =
-    data.activityId ?? (await createActivity(Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
+    data.activityId ?? (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
 
   let basic, housing, location, permits;
   let appliedPermits: Array<Permit> = [],
@@ -234,7 +240,9 @@ export const emailHousingProjectConfirmationController = async (req: Request<nev
 };
 
 export const getHousingProjectActivityIdsController = async (req: Request, res: Response) => {
-  let response: HousingProject[] = await getHousingProjects();
+  let response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
+    return await getHousingProjects(tx);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter(
@@ -251,42 +259,53 @@ export const createHousingProjectController = async (
 ) => {
   // TODO: Remove when create PUT calls get switched to POST
   if (req.body === undefined) req.body = {};
-  const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
-    req.body,
-    req.currentContext
-  );
-  // Create new housing project
-  const result: HousingProject = await createHousingProject({
-    ...housingProject,
-    ...generateCreateStamps(req.currentContext)
-  });
+  const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
+    const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
+      tx,
+      req.body,
+      req.currentContext
+    );
+    // Create new housing project
+    const data = await createHousingProject(tx, {
+      ...housingProject,
+      ...generateCreateStamps(req.currentContext)
+    });
 
-  // Create each permit and tracking IDs
-  await Promise.all(
-    appliedPermits.map(async (x: Permit) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { permitTracking, ...rest } = x;
-      await upsertPermit(rest);
-    })
-  );
-  await Promise.all(investigatePermits.map(async (x: Permit) => await upsertPermit(x)));
-  await Promise.all(appliedPermits.map(async (x: Permit) => await upsertPermitTracking(x)));
+    // Create each permit and tracking IDs
+    await Promise.all(
+      appliedPermits.map(async (p: Permit) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { permitTracking, ...rest } = p;
+        await upsertPermit(tx, rest);
+      })
+    );
+    await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
+    await Promise.all(appliedPermits.map(async (p: Permit) => await upsertPermitTracking(tx, p)));
+
+    return data;
+  });
 
   res.status(201).json(result);
 };
 
 export const deleteDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response: Draft = await deleteDraft(req.params.draftId);
-  res.status(200).json(response);
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await deleteDraft(tx, req.params.draftId);
+  });
+  res.status(204).end();
 };
 
 export const getDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response: Draft = await getDraft(req.params.draftId);
+  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
+    return await getDraft(tx, req.params.draftId);
+  });
   res.status(200).json(response);
 };
 
 export const getDraftsController = async (req: Request, res: Response) => {
-  let response: Draft[] = await getDrafts(DraftCode.HOUSING_PROJECT);
+  let response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
+    return await getDrafts(tx, DraftCode.HOUSING_PROJECT);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
@@ -299,12 +318,16 @@ export const getHousingProjectStatisticsController = async (
   req: Request<never, never, never, StatisticsFilters>,
   res: Response
 ) => {
-  const response = await getHousingProjectStatistics(req.query);
+  const response = await transactionWrapper<HousingProjectStatistics[]>(async (tx: PrismaTransactionClient) => {
+    return await getHousingProjectStatistics(tx, req.query);
+  });
   res.status(200).json(response[0]);
 };
 
 export const getHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
-  const response: HousingProject = await getHousingProject(req.params.housingProjectId);
+  const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
+    return await getHousingProject(tx, req.params.housingProjectId);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     if (response?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()) {
@@ -316,7 +339,9 @@ export const getHousingProjectController = async (req: Request<{ housingProjectI
 };
 
 export const getHousingProjectsController = async (req: Request, res: Response) => {
-  let response: HousingProject[] = await getHousingProjects();
+  let response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
+    return await getHousingProjects(tx);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter(
@@ -331,9 +356,11 @@ export const searchHousingProjectsController = async (
   req: Request<never, never, never, HousingProjectSearchParameters>,
   res: Response
 ) => {
-  let response: HousingProject[] = await searchHousingProjects({
-    ...req.query,
-    includeUser: isTruthy(req.query.includeUser)
+  let response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
+    return await searchHousingProjects(tx, {
+      ...req.query,
+      includeUser: isTruthy(req.query.includeUser)
+    });
   });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -349,33 +376,38 @@ export const submitHousingProjectDraftController = async (
   req: Request<never, never, HousingProjectIntake>,
   res: Response
 ) => {
-  const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
-    req.body,
-    req.currentContext
-  );
+  const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
+    const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
+      tx,
+      req.body,
+      req.currentContext
+    );
 
-  // Create contacts
-  if (req.body.contacts) await upsertContacts(req.body.contacts);
+    // Create contacts
+    if (req.body.contacts) await upsertContacts(tx, req.body.contacts);
 
-  // Create new housing project
-  const result: HousingProject = await createHousingProject({
-    ...housingProject,
-    ...generateCreateStamps(req.currentContext)
+    // Create new housing project
+    const data = await createHousingProject(tx, {
+      ...housingProject,
+      ...generateCreateStamps(req.currentContext)
+    });
+
+    // Create each permit and tracking IDs
+    await Promise.all(
+      appliedPermits.map(async (p: Permit) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { permitTracking, ...rest } = p;
+        await upsertPermit(tx, rest);
+      })
+    );
+    await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
+    await Promise.all(appliedPermits.map(async (p: Permit) => await upsertPermitTracking(tx, p)));
+
+    // Delete old draft
+    if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
+
+    return data;
   });
-
-  // Create each permit and tracking IDs
-  await Promise.all(
-    appliedPermits.map(async (x: Permit) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { permitTracking, ...rest } = x;
-      await upsertPermit(rest);
-    })
-  );
-  await Promise.all(investigatePermits.map(async (x: Permit) => await upsertPermit(x)));
-  await Promise.all(appliedPermits.map(async (x: Permit) => await upsertPermitTracking(x)));
-
-  // Delete old draft
-  if (req.body.draftId) await deleteDraft(req.body.draftId);
 
   res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
 };
@@ -383,27 +415,28 @@ export const submitHousingProjectDraftController = async (
 export const updateHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
-  let response: Draft;
+  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
+    if (update) {
+      // Update draft
+      return await updateDraft(tx, {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      });
+    } else {
+      // Create new draft
+      const activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(req.currentContext)))
+        ?.activityId;
 
-  if (update) {
-    // Update draft
-    response = await updateDraft({
-      ...req.body,
-      ...generateUpdateStamps(req.currentContext)
-    });
-  } else {
-    const activityId = (await createActivity(Initiative.HOUSING, generateCreateStamps(req.currentContext)))?.activityId;
-
-    // Create new draft
-    response = await createDraft({
-      draftId: uuidv4(),
-      activityId: activityId,
-      draftCode: DraftCode.HOUSING_PROJECT,
-      data: req.body.data,
-      ...generateCreateStamps(req.currentContext),
-      ...generateNullUpdateStamps()
-    });
-  }
+      return await createDraft(tx, {
+        draftId: uuidv4(),
+        activityId: activityId,
+        draftCode: DraftCode.HOUSING_PROJECT,
+        data: req.body.data,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
+      });
+    }
+  });
 
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
 };
@@ -412,19 +445,24 @@ export const updateHousingProjectIsDeletedFlagController = async (
   req: Request<{ housingProjectId: string }, never, { isDeleted: boolean }>,
   res: Response
 ) => {
-  const response: HousingProject = await updateHousingProjectIsDeletedFlag(
-    req.params.housingProjectId,
-    req.body.isDeleted,
-    generateUpdateStamps(req.currentContext)
-  );
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await updateHousingProjectIsDeletedFlag(
+      tx,
+      req.params.housingProjectId,
+      req.body.isDeleted,
+      generateUpdateStamps(req.currentContext)
+    );
+  });
 
-  res.status(200).json(response);
+  res.status(204).end();
 };
 
 export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {
-  const response: HousingProject = await updateHousingProject({
-    ...req.body,
-    ...generateUpdateStamps(req.currentContext)
+  const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
+    return await updateHousingProject(tx, {
+      ...req.body,
+      ...generateUpdateStamps(req.currentContext)
+    });
   });
 
   res.status(200).json(response);

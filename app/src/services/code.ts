@@ -24,7 +24,7 @@ export const listAllCodeTables = async (
       active: true
     }
   });
-  const SourceSystem = await prisma.source_system_code.findMany({
+  const SourceSystem = await tx.source_system_code.findMany({
     where: {
       active: true
     }

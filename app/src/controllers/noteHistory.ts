@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { PrismaTransactionClient } from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { searchElectrificationProjects } from '../services/electrificationProject';
 import { searchEnquiries } from '../services/enquiry';
@@ -30,22 +32,28 @@ export const createNoteHistoryController = async (
 ) => {
   const { note, ...history } = req.body;
 
-  const historyRes: NoteHistory = await createNoteHistory({
-    ...history,
-    noteHistoryId: uuidv4(),
-    isDeleted: false,
-    ...generateCreateStamps(req.currentContext)
-  });
+  const response = await transactionWrapper<{ historyRes: NoteHistory; noteRes: Note }>(
+    async (tx: PrismaTransactionClient) => {
+      const historyRes = await createNoteHistory(tx, {
+        ...history,
+        noteHistoryId: uuidv4(),
+        isDeleted: false,
+        ...generateCreateStamps(req.currentContext)
+      });
 
-  const noteRes: Note = await createNote({
-    noteId: uuidv4(),
-    noteHistoryId: historyRes.noteHistoryId,
-    note: note,
-    ...generateCreateStamps(req.currentContext),
-    ...generateNullUpdateStamps()
-  });
+      const noteRes = await createNote(tx, {
+        noteId: uuidv4(),
+        noteHistoryId: historyRes.noteHistoryId,
+        note: note,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
+      });
 
-  res.status(201).json({ ...historyRes, note: [noteRes] });
+      return { historyRes, noteRes };
+    }
+  );
+
+  res.status(201).json({ ...response.historyRes, note: [response.noteRes] });
 };
 
 /**
@@ -53,74 +61,79 @@ export const createNoteHistoryController = async (
  * Soft delete the given note history
  */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
-  const response: NoteHistory = await deleteNoteHistory(
-    req.params.noteHistoryId,
-    generateUpdateStamps(req.currentContext)
-  );
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await deleteNoteHistory(tx, req.params.noteHistoryId, generateUpdateStamps(req.currentContext));
+  });
 
-  res.status(200).json(response);
+  res.status(204).end();
 };
 
 export const listBringForwardController = async (
   req: Request<never, never, never, { bringForwardState?: BringForwardType }>,
   res: Response
 ) => {
-  let response = new Array<BringForward>();
+  const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
+    const history: NoteHistory[] = await listBringForward(
+      tx,
+      req.currentContext.initiative as Initiative,
+      req.query.bringForwardState
+    );
 
-  const history: NoteHistory[] = await listBringForward(
-    req.currentContext.initiative as Initiative,
-    req.query.bringForwardState
-  );
+    if (history && history.length) {
+      const [elecProj, housingProj] = await Promise.all([
+        searchElectrificationProjects(tx, {
+          activityId: history.map((x) => x.activityId)
+        }),
+        searchHousingProjects(tx, {
+          activityId: history.map((x) => x.activityId)
+        })
+      ]);
 
-  if (history && history.length) {
-    const [elecProj, housingProj] = await Promise.all([
-      searchElectrificationProjects({
-        activityId: history.map((x) => x.activityId)
-      }),
-      searchHousingProjects({
-        activityId: history.map((x) => x.activityId)
-      })
-    ]);
+      const users = await searchUsers(tx, {
+        userId: history
+          .map((x) => x.createdBy)
+          .filter((x) => !!x)
+          .map((x) => x as string)
+      });
 
-    const users = await searchUsers({
-      userId: history
-        .map((x) => x.createdBy)
-        .filter((x) => !!x)
-        .map((x) => x as string)
-    });
+      const enquiries = (
+        await Promise.all([
+          searchEnquiries(
+            tx,
+            {
+              activityId: history.map((x) => x.activityId)
+            },
+            Initiative.ELECTRIFICATION
+          ),
+          searchEnquiries(
+            tx,
+            {
+              activityId: history.map((x) => x.activityId)
+            },
+            Initiative.HOUSING
+          )
+        ])
+      ).flatMap((x) => x);
 
-    const enquiries = (
-      await Promise.all([
-        searchEnquiries(
-          {
-            activityId: history.map((x) => x.activityId)
-          },
-          Initiative.ELECTRIFICATION
-        ),
-        searchEnquiries(
-          {
-            activityId: history.map((x) => x.activityId)
-          },
-          Initiative.HOUSING
-        )
-      ])
-    ).flatMap((x) => x);
-
-    response = history.map((h) => ({
-      activityId: h.activityId,
-      noteId: h.noteHistoryId as string,
-      electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId as string,
-      housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
-      enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId as string,
-      title: h.title,
-      projectName:
-        elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
-        housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
-        null,
-      createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
-      bringForwardDate: h.bringForwardDate?.toISOString() as string
-    }));
-  }
+      return history.map((h) => ({
+        activityId: h.activityId,
+        noteId: h.noteHistoryId as string,
+        electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)
+          ?.electrificationProjectId as string,
+        housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
+        enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId as string,
+        title: h.title,
+        projectName:
+          elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
+          housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
+          null,
+        createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
+        bringForwardDate: h.bringForwardDate?.toISOString() as string
+      }));
+    } else {
+      return [];
+    }
+  });
   res.status(200).json(response);
 };
 
@@ -129,7 +142,9 @@ export const listBringForwardController = async (
  * Get a list of all note histories for the given activityId
  */
 export const listNoteHistoryController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response = await listNoteHistory(req.params.activityId);
+  const response = await transactionWrapper<NoteHistory[]>(async (tx: PrismaTransactionClient) => {
+    return await listNoteHistory(tx, req.params.activityId);
+  });
 
   // Only return notes flagged as shown when called by proponent
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -149,24 +164,28 @@ export const updateNoteHistoryController = async (
   req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
   res: Response
 ) => {
-  const { note, ...history } = req.body;
+  const response = await transactionWrapper<NoteHistory>(async (tx: PrismaTransactionClient) => {
+    const { note, ...history } = req.body;
 
-  await updateNoteHistory({
-    ...history,
-    noteHistoryId: req.params.noteHistoryId,
-    isDeleted: false,
-    ...generateUpdateStamps(req.currentContext)
+    await updateNoteHistory(tx, {
+      ...history,
+      noteHistoryId: req.params.noteHistoryId,
+      isDeleted: false,
+      ...generateUpdateStamps(req.currentContext)
+    });
+
+    if (note) {
+      await createNote(tx, {
+        noteHistoryId: req.params.noteHistoryId,
+        noteId: uuidv4(),
+        note: note,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
+      });
+    }
+
+    return await getNoteHistory(tx, req.params.noteHistoryId);
   });
 
-  if (note) {
-    await createNote({
-      noteHistoryId: req.params.noteHistoryId,
-      noteId: uuidv4(),
-      note: note,
-      ...generateCreateStamps(req.currentContext),
-      ...generateNullUpdateStamps()
-    });
-  }
-
-  res.status(200).json(await getNoteHistory(req.params.noteHistoryId));
+  res.status(200).json(response);
 };

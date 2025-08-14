@@ -18,7 +18,6 @@ import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 import { contactService, electrificationProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { User } from '@/types';
 
 // Props
 const { permitId, projectId } = defineProps<{

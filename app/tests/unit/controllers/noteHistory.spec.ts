@@ -157,25 +157,7 @@ describe('deleteNoteHistory', () => {
   const deleteHistorySpy = jest.spyOn(noteHistoryService, 'deleteNoteHistory');
 
   it('should return 200 if deletion is successful', async () => {
-    const deletedNoteHistory = {
-      activityId: '123',
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToDirector: false,
-      escalateToSupervisor: false,
-      escalationType: null,
-      isDeleted: false,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Title',
-      type: NoteType.GENERAL,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: new Date(),
-      updatedBy: req.currentContext.userId
-    };
-
-    deleteHistorySpy.mockResolvedValue(deletedNoteHistory);
+    deleteHistorySpy.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await deleteNoteHistoryController(req as any, res as any);
@@ -185,8 +167,8 @@ describe('deleteNoteHistory', () => {
       updatedAt: expect.stringMatching(isoPattern),
       updatedBy: req.currentContext.userId
     });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(deletedNoteHistory);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 
   it('calls next if the note service fails to delete the note', async () => {

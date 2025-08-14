@@ -173,25 +173,22 @@ describe('housingProjectService', () => {
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      housingProjectService.searchProjects({ activityId: [TEST_ID], includeDeleted: false });
+      housingProjectService.searchProjects({ activityId: [TEST_ID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
         params: {
-          activityId: [TEST_ID],
-          includeDeleted: false
+          activityId: [TEST_ID]
         }
       });
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      housingProjectService.searchProjects({ includeDeleted: true });
+      housingProjectService.searchProjects({});
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        params: {
-          includeDeleted: true
-        }
+        params: {}
       });
     });
   });

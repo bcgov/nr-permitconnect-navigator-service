@@ -14,14 +14,6 @@ import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { permitValidator } from '../../validators';
 
-import {
-  deletePermitController,
-  getPermitController,
-  getPermitTypesController,
-  listPermitsController,
-  upsertPermitController
-} from '../../controllers/permit';
-
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);

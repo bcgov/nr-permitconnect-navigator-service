@@ -18,7 +18,7 @@ import { ProjectType } from '../../../src/utils/enums/electrification';
 import { ProjectRelationship, SubmissionType } from '../../../src/utils/enums/projectCommon';
 import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
 
-import type { Draft, ElectrificationProject } from '../../../src/types';
+import type { Draft, ElectrificationProject, ElectrificationProjectStatistics } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -181,12 +181,25 @@ describe('getElectrificationProjectStatistics', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const statistics = [
+    const statistics: ElectrificationProjectStatistics[] = [
       {
-        stat_0: '0',
-        stat_1: '1',
-        stat_2: '2',
-        stat_3: '3'
+        total_submissions: 0,
+        total_submissions_between: 0,
+        total_submissions_monthyear: 0,
+        total_submissions_assignedto: 0,
+        state_new: 0,
+        state_inprogress: 0,
+        state_delayed: 0,
+        state_completed: 0,
+        queue_1: 0,
+        queue_2: 0,
+        queue_3: 0,
+        escalation: 0,
+        general_enquiry: 0,
+        guidance: 0,
+        inapplicable: 0,
+        status_request: 0,
+        multi_permits_needed: 0
       }
     ];
 
@@ -198,7 +211,7 @@ describe('getElectrificationProjectStatistics', () => {
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
     expect(statisticsSpy).toHaveBeenCalledWith(req.query);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(statistics[0]);
+    expect(res.json).toHaveBeenCalledWith(statistics);
   });
 
   it('calls next if the submission service fails to get statistics', async () => {

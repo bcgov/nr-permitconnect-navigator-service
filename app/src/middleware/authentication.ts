@@ -7,6 +7,8 @@ import { AuthType, Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { CurrentContext } from '../types';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { PrismaTransactionClient } from '../db/dataConnection';
 
 // TODO: Implement a 401 for unrecognized users.
 
@@ -58,7 +60,9 @@ export const currentContext = (initiative: Initiative) => {
           if (isValid) {
             currentContext.bearerToken = bearerToken;
             currentContext.tokenPayload = isValid as jwt.JwtPayload;
-            const user = await login(currentContext.tokenPayload);
+            const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+              return await login(tx, currentContext.tokenPayload as jwt.JwtPayload);
+            });
 
             if (user && user.userId) currentContext.userId = user.userId;
             else throw new Error('Failed to log user in');
