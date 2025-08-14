@@ -7,7 +7,12 @@ import type { Ref } from 'vue';
 import type { Code } from '@/types';
 
 // Add new code tables here, name refers to returns from service call
-const codeNames = ['ElectrificationProjectCategory', 'ElectrificationProjectType', 'EscalationType'] as const;
+const codeNames = [
+  'ElectrificationProjectCategory',
+  'ElectrificationProjectType',
+  'EscalationType',
+  'SourceSystem'
+] as const;
 
 export type CodeName = (typeof codeNames)[number];
 export type CodeMap = Record<CodeName, Code[]>;

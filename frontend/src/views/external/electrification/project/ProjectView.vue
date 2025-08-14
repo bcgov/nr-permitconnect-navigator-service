@@ -11,7 +11,13 @@ import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCar
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, electrificationProjectService, permitService } from '@/services';
+import {
+  contactService,
+  enquiryService,
+  electrificationProjectService,
+  noteHistoryService,
+  permitService
+} from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
