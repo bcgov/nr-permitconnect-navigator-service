@@ -13,8 +13,6 @@ import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
-import PermitCard from '@/components/permit/PermitCard.vue';
-import PermitModal from '@/components/permit/PermitModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
@@ -83,7 +81,7 @@ const {
   getAuthsUnderInvestigation,
   getDocuments,
   getProject,
-  getNotes,
+  getNoteHistory,
   getPermits,
   getRelatedEnquiries
 } = storeToRefs(projectStore);
@@ -95,7 +93,6 @@ const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
 const noteModalVisible: Ref<boolean> = ref(false);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
-const permitModalVisible: Ref<boolean> = ref(false);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
