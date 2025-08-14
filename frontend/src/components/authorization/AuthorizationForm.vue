@@ -13,7 +13,7 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
-import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
+import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
@@ -24,8 +24,9 @@ import type { Ref } from 'vue';
 import type { Permit, User } from '@/types';
 
 // Props
-const { authorization } = defineProps<{
+const { authorization, editable } = defineProps<{
   authorization?: Permit;
+  editable?: boolean;
 }>();
 
 // Constants
@@ -163,7 +164,17 @@ const formSchema = object({
       then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
     }),
   authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
-  needed: string().required().label(t('authorization.authorizationForm.needed')),
+  needed: string()
+    .required()
+    .oneOf(PERMIT_NEEDED_LIST)
+    .label(t('authorization.authorizationForm.needed'))
+    .test('valid-needed', t('authorization.authorizationForm.neededCondition'), function (value) {
+      const { authStatus } = this.parent;
+      return (
+        (value === PermitNeeded.UNDER_INVESTIGATION && authStatus === PermitAuthorizationStatus.NONE) ||
+        value !== PermitNeeded.UNDER_INVESTIGATION
+      );
+    }),
   status: string().required().oneOf(PERMIT_STATUS_LIST).label(t('authorization.authorizationForm.applicationStage')),
   permitTracking: array().of(
     object({
@@ -260,8 +271,7 @@ onBeforeMount(async () => {
 
     <AuthorizationCardIntake
       initial-form-values=""
-      :editable="true"
-      :expand-panel="authorization?.permitId && !expandPanel ? true : false"
+      :editable="editable"
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
@@ -275,7 +285,7 @@ onBeforeMount(async () => {
     />
     <AuthorizationStatusUpdatesCard
       initial-form-values=""
-      :editable="true"
+      :editable="editable"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date().toISOString())"
     />
@@ -286,6 +296,7 @@ onBeforeMount(async () => {
           :label="t('authorization.authorizationForm.publish')"
           type="submit"
           icon="pi pi-check"
+          :disabled="!editable"
           @click="expandPanel = true"
         />
         <Button
@@ -308,6 +319,7 @@ onBeforeMount(async () => {
         class="p-button-outlined mr-2 p-button-danger"
         :label="t('authorization.authorizationForm.delete')"
         icon="pi pi-trash"
+        :disabled="!editable"
         @click="onDelete"
       />
     </div>
