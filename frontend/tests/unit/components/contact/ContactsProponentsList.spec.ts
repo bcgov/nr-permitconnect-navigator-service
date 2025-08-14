@@ -11,6 +11,21 @@ import { contactInitiativeRouteNameKey } from '@/utils/keys';
 
 import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
 
+const CONTACT_DATA = {
+  contactId: 'contact123',
+  userId: 'user123',
+  firstName: 'John',
+  lastName: 'Doe',
+  phoneNumber: '123-456-7890',
+  email: 'john.doe@example.com',
+  contactPreference: 'email',
+  contactApplicantRelationship: 'applicant',
+  createdAt: undefined,
+  createdBy: undefined,
+  updatedBy: undefined,
+  updatedAt: undefined
+};
+
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: vi.fn()
@@ -23,7 +38,7 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.spyOn(contactService, 'getContact').mockResolvedValue({
-  data: { activityContact: [] },
+  data: CONTACT_DATA,
   status: 200,
   statusText: 'OK',
   headers: {},

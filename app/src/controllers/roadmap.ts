@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject, getObjects } from '../services/coms';
 import { email } from '../services/email';
@@ -17,76 +19,80 @@ export const sendRoadmapController = async (
   req: Request<never, never, { activityId: string; selectedFileIds: Array<string>; emailData: Email }>,
   res: Response
 ) => {
-  if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
-    const attachments: Array<EmailAttachment> = [];
+  const response = await transactionWrapper<{ data: any; status: number }>(async (tx: PrismaTransactionClient) => {
+    if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
+      const attachments: Array<EmailAttachment> = [];
 
-    if (req.currentContext?.bearerToken) {
-      const comsObjects = await getObjects(req.currentContext?.bearerToken, req.body.selectedFileIds);
+      if (req.currentContext?.bearerToken) {
+        const comsObjects = await getObjects(req.currentContext?.bearerToken, req.body.selectedFileIds);
 
-      // Attempt to get the requested documents from COMS
-      // If succesful it is converted to base64 encoding and added to the attachment list
-      const objectPromises = req.body.selectedFileIds.map(async (id) => {
-        const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
+        // Attempt to get the requested documents from COMS
+        // If succesful it is converted to base64 encoding and added to the attachment list
+        const objectPromises = req.body.selectedFileIds.map(async (id) => {
+          const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
 
-        if (status === 200) {
-          const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;
-          if (filename) {
-            attachments.push({
-              content: Buffer.from(data).toString('base64'),
-              contentType: headers['content-type'],
-              encoding: 'base64',
-              filename: filename
-            });
-          } else {
-            throw new Error(`Unable to obtain filename for file ${id}`);
+          if (status === 200) {
+            const filename = comsObjects.find((x: { id: string }) => x.id === id)?.name;
+            if (filename) {
+              attachments.push({
+                content: Buffer.from(data).toString('base64'),
+                contentType: headers['content-type'],
+                encoding: 'base64',
+                filename: filename
+              });
+            } else {
+              throw new Error(`Unable to obtain filename for file ${id}`);
+            }
           }
-        }
-      });
+        });
 
-      await Promise.all(objectPromises);
+        await Promise.all(objectPromises);
+      }
+
+      // All succesful so attachment list is added to payload
+      req.body.emailData.attachments = attachments;
     }
 
-    // All succesful so attachment list is added to payload
-    req.body.emailData.attachments = attachments;
-  }
+    // Send the email
+    const { data, status } = await email(req.body.emailData);
 
-  // Send the email
-  const { data, status } = await email(req.body.emailData);
+    // Add a new note on success
+    if (status === 201) {
+      let noteBody = req.body.emailData.body;
+      if (req.body.emailData.attachments) {
+        noteBody += '\n\nAttachments:\n';
+        req.body.emailData.attachments.forEach((x) => {
+          noteBody += `${x.filename}\n`;
+        });
+      }
 
-  // Add a new note on success
-  if (status === 201) {
-    let noteBody = req.body.emailData.body;
-    if (req.body.emailData.attachments) {
-      noteBody += '\n\nAttachments:\n';
-      req.body.emailData.attachments.forEach((x) => {
-        noteBody += `${x.filename}\n`;
+      const history = await createNoteHistory(tx, {
+        noteHistoryId: uuidv4(),
+        activityId: req.body.activityId,
+        type: 'Roadmap',
+        title: 'Sent roadmap',
+        bringForwardDate: null,
+        bringForwardState: null,
+        escalateToSupervisor: false,
+        escalateToDirector: false,
+        escalationType: null,
+        shownToProponent: false,
+        isDeleted: false,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
+      });
+
+      await createNote(tx, {
+        noteId: uuidv4(),
+        noteHistoryId: history.noteHistoryId,
+        note: noteBody,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
       });
     }
 
-    const history = await createNoteHistory({
-      noteHistoryId: uuidv4(),
-      activityId: req.body.activityId,
-      type: 'Roadmap',
-      title: 'Sent roadmap',
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      shownToProponent: false,
-      isDeleted: false,
-      ...generateCreateStamps(req.currentContext),
-      ...generateNullUpdateStamps()
-    });
+    return { data, status };
+  });
 
-    await createNote({
-      noteId: uuidv4(),
-      noteHistoryId: history.noteHistoryId,
-      note: noteBody,
-      ...generateCreateStamps(req.currentContext),
-      ...generateNullUpdateStamps()
-    });
-  }
-
-  res.status(status).json(data);
+  res.status(response.status).json(response.data);
 };

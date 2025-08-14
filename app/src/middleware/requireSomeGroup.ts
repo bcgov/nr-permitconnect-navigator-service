@@ -1,3 +1,5 @@
+import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { assignGroup, getGroups, getSubjectGroups } from '../services/yars';
 import { Problem } from '../utils';
 import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
@@ -15,33 +17,40 @@ import type { NextFunction, Request, Response } from 'express';
  * @throws The error encountered upon failure
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const idp = (req.currentContext?.tokenPayload as any).identity_provider;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sub = (req.currentContext?.tokenPayload as any).sub;
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const idp = (req.currentContext?.tokenPayload as any).identity_provider;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sub = (req.currentContext?.tokenPayload as any).sub;
 
-  let groups = await getSubjectGroups(sub);
+    let groups = await getSubjectGroups(tx, sub);
 
-  if (idp !== IdentityProvider.IDIR) {
-    const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
-    const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
-    await Promise.all(
-      missing.map(async (x) => {
-        const g = await getGroups(x);
+    if (idp !== IdentityProvider.IDIR) {
+      const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
+      const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
+      await Promise.all(
+        missing.map(async (x) => {
+          const g = await getGroups(tx, x);
 
-        await assignGroup(req.currentContext.bearerToken, sub, g.find((x) => x.name === GroupName.PROPONENT)?.groupId);
-      })
-    );
+          await assignGroup(
+            tx,
+            req.currentContext.bearerToken,
+            sub,
+            g.find((x) => x.name === GroupName.PROPONENT)?.groupId
+          );
+        })
+      );
 
-    groups = await getSubjectGroups(sub);
-  }
+      groups = await getSubjectGroups(tx, sub);
+    }
 
-  if (groups.length === 0) {
-    throw new Problem(403, {
-      detail: 'User lacks permission to complete this action',
-      instance: req.originalUrl
-    });
-  }
+    if (groups.length === 0) {
+      throw new Problem(403, {
+        detail: 'User lacks permission to complete this action',
+        instance: req.originalUrl
+      });
+    }
+  });
 
   next();
 };

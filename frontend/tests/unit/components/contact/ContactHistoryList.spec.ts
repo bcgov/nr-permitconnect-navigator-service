@@ -5,6 +5,7 @@ import { mount } from '@vue/test-utils';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import type { Enquiry, HousingProject } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -17,10 +18,10 @@ vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({ replace: vi.fn() }))
 }));
 
-const testEnquiry = {
+const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
-  addedToATS: false,
+  addedToAts: false,
   assignedUserId: 'user123',
   atsClientId: null,
   atsEnquiryId: '654321',
@@ -30,10 +31,14 @@ const testEnquiry = {
   submittedBy: 'user123',
   intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
-  contacts: []
+  contacts: [],
+  createdAt: undefined,
+  createdBy: undefined,
+  updatedAt: undefined,
+  updatedBy: undefined
 };
 
-const testSubmission = {
+const testSubmission: HousingProject = {
   activityId: 'activity789',
   housingProjectId: 'submission123',
   projectId: 'submission123',
@@ -43,7 +48,7 @@ const testSubmission = {
   relatedEnquiries: 'none',
   hasRelatedEnquiry: false,
   companyNameRegistered: 'Company Inc.',
-  isDevelopedInBC: 'Yes',
+  isDevelopedInBc: 'Yes',
   projectName: 'Test Project',
   projectDescription: 'Test Description',
   projectLocationDescription: 'Location Description',
@@ -54,7 +59,7 @@ const testSubmission = {
   otherUnits: '0',
   hasRentalUnits: 'No',
   rentalUnits: '0',
-  financiallySupportedBC: 'No',
+  financiallySupportedBc: 'No',
   financiallySupportedIndigenous: 'No',
   indigenousDescription: '',
   financiallySupportedNonProfit: 'No',
@@ -64,12 +69,12 @@ const testSubmission = {
   streetAddress: '123 Test St',
   locality: 'Test City',
   province: 'Test Province',
-  locationPIDs: 'PID123',
+  locationPids: 'PID123',
   latitude: 0,
   longitude: 0,
   geomarkUrl: 'http://test.com',
-  naturalDisaster: 'None',
-  addedToATS: false,
+  naturalDisaster: false,
+  addedToAts: false,
   atsClientId: null,
   atsEnquiryId: '654321',
   ltsaCompleted: false,
@@ -79,7 +84,11 @@ const testSubmission = {
   intakeStatus: 'Pending',
   assignedUserId: 'user123',
   applicationStatus: ApplicationStatus.NEW,
-  contacts: []
+  contacts: [],
+  createdAt: undefined,
+  createdBy: undefined,
+  updatedAt: undefined,
+  updatedBy: undefined
 };
 
 const testHistory = [testEnquiry, testSubmission];

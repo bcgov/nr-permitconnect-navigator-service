@@ -25,7 +25,7 @@ export const createActivity = async (
 
     return await trx.activity.create({
       data: {
-        activityId: await generateUniqueActivityId(),
+        activityId: await generateUniqueActivityId(trx),
         initiativeId: initiativeResult.initiativeId,
         createdAt: createStamp.createdAt,
         createdBy: createStamp.createdBy

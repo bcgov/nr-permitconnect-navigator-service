@@ -16,7 +16,6 @@ import { formatDate, formatDateLong } from '@/utils/formatters';
 import { contactService, housingProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { User } from '@/types';
 
 // Props
 const { permitId, projectId } = defineProps<{

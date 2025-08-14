@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 
 import { createActivity } from '../services/activity';
-import { deleteUnmatchedActivityContacts, upsertActivityContacts } from '../services/activityContact';
-import { insertContacts, upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
@@ -18,18 +18,19 @@ import {
 } from '../services/electrificationProject';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { partition, isTruthy } from '../utils/utils';
+import { isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
-import type {
-  Contact,
-  CurrentContext,
-  Draft,
-  ElectrificationProject,
-  ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters,
-  Email,
-  StatisticsFilters
+import {
+  ElectrificationProjectStatistics,
+  type Contact,
+  type CurrentContext,
+  type Draft,
+  type ElectrificationProject,
+  type ElectrificationProjectIntake,
+  type ElectrificationProjectSearchParameters,
+  type Email,
+  type StatisticsFilters
 } from '../types';
 
 /**
@@ -37,12 +38,13 @@ import type {
  * Handles creating a project from intake data
  */
 const generateElectrificationProjectData = async (
+  tx: PrismaTransactionClient,
   data: ElectrificationProjectIntake,
   currentContext: CurrentContext
 ) => {
   const activityId =
     data.project.activityId ??
-    (await createActivity(Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))?.activityId;
+    (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))?.activityId;
 
   // Put new electrification project together
   const electrificationProjectData: ElectrificationProject = {
@@ -87,7 +89,9 @@ export const emailElectrificationProjectConfirmationController = async (
 };
 
 export const getElectrificationProjectActivityIdsController = async (req: Request, res: Response) => {
-  let response = await getElectrificationProjects();
+  let response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
+    return await getElectrificationProjects(tx);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter((x) => x?.createdBy === req.currentContext.userId);
@@ -112,30 +116,38 @@ export const createElectrificationProjectController = async (
       }
     };
   }
-  const electrificationProject = await generateElectrificationProjectData(req.body, req.currentContext);
+  const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
+    const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
 
-  // Create new electrification project
-  const result = await createElectrificationProject({
-    ...electrificationProject,
-    ...generateCreateStamps(req.currentContext)
+    // Create new electrification project
+    return await createElectrificationProject(tx, {
+      ...electrificationProject,
+      ...generateCreateStamps(req.currentContext)
+    });
   });
 
   res.status(201).json(result);
 };
 
 export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response = await deleteDraft(req.params.draftId);
-  res.status(200).json(response);
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await deleteDraft(tx, req.params.draftId);
+  });
+  res.status(204).end();
 };
 
 export const getElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response = await getDraft(req.params.draftId);
+  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
+    return await getDraft(tx, req.params.draftId);
+  });
 
   res.status(200).json(response);
 };
 
 export const getElectrificationProjectDraftsController = async (req: Request, res: Response) => {
-  let response = await getDrafts(DraftCode.ELECTRIFICATION_PROJECT);
+  let response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
+    return await getDrafts(tx, DraftCode.ELECTRIFICATION_PROJECT);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter((x: Draft) => x?.createdBy === req.currentContext.userId);
@@ -148,7 +160,9 @@ export const getElectrificationProjectStatisticsController = async (
   req: Request<never, never, never, StatisticsFilters>,
   res: Response
 ) => {
-  const response = await getElectrificationProjectStatistics(req.query);
+  const response = await transactionWrapper<ElectrificationProjectStatistics[]>(async (tx: PrismaTransactionClient) => {
+    return await getElectrificationProjectStatistics(tx, req.query);
+  });
   res.status(200).json(response[0]);
 };
 
@@ -156,12 +170,16 @@ export const getElectrificationProjectController = async (
   req: Request<{ electrificationProjectId: string }>,
   res: Response
 ) => {
-  const response = await getElectrificationProject(req.params.electrificationProjectId);
+  const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
+    return await getElectrificationProject(tx, req.params.electrificationProjectId);
+  });
   res.status(200).json(response);
 };
 
 export const getElectrificationProjectsController = async (req: Request, res: Response) => {
-  let response = await getElectrificationProjects();
+  let response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
+    return await getElectrificationProjects(tx);
+  });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
     response = response.filter((x: ElectrificationProject) => x?.createdBy === req.currentContext.userId);
@@ -174,9 +192,11 @@ export const searchElectrificationProjectsController = async (
   req: Request<never, never, never, ElectrificationProjectSearchParameters>,
   res: Response
 ) => {
-  let response = await searchElectrificationProjects({
-    ...req.query,
-    includeUser: isTruthy(req.query.includeUser)
+  let response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
+    return await searchElectrificationProjects(tx, {
+      ...req.query,
+      includeUser: isTruthy(req.query.includeUser)
+    });
   });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -190,16 +210,20 @@ export const submitElectrificationProjectDraftController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
   res: Response
 ) => {
-  const electrificationProject = await generateElectrificationProjectData(req.body, req.currentContext);
+  const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
+    const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
 
-  // Create new electrification project
-  const result = await createElectrificationProject({
-    ...electrificationProject,
-    ...generateCreateStamps(req.currentContext)
+    // Create new electrification project
+    const data = await createElectrificationProject(tx, {
+      ...electrificationProject,
+      ...generateCreateStamps(req.currentContext)
+    });
+
+    // Delete old draft
+    if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
+
+    return data;
   });
-
-  // Delete old draft
-  if (req.body.draftId) await deleteDraft(req.body.draftId);
 
   res.status(201).json({ activityId: result.activityId, electrificationProjectId: result.electrificationProjectId });
 };
@@ -207,28 +231,29 @@ export const submitElectrificationProjectDraftController = async (
 export const updateElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
-  let response;
+  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
+    if (update) {
+      // Update draft
+      return await updateDraft(tx, {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      });
+    } else {
+      // Create new draft
+      const activityId = (
+        await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(req.currentContext))
+      )?.activityId;
 
-  if (update) {
-    // Update draft
-    response = await updateDraft({
-      ...req.body,
-      ...generateUpdateStamps(req.currentContext)
-    });
-  } else {
-    const activityId = (await createActivity(Initiative.ELECTRIFICATION, generateCreateStamps(req.currentContext)))
-      ?.activityId;
-
-    // Create new draft
-    response = await createDraft({
-      draftId: uuidv4(),
-      activityId: activityId,
-      draftCode: DraftCode.ELECTRIFICATION_PROJECT,
-      data: req.body.data,
-      ...generateCreateStamps(req.currentContext),
-      ...generateNullUpdateStamps()
-    });
-  }
+      return await createDraft(tx, {
+        draftId: uuidv4(),
+        activityId: activityId,
+        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+        data: req.body.data,
+        ...generateCreateStamps(req.currentContext),
+        ...generateNullUpdateStamps()
+      });
+    }
+  });
 
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
 };
@@ -237,21 +262,26 @@ export const updateElectrificationProjectIsDeletedFlagController = async (
   req: Request<{ electrificationProjectId: string }, never, { isDeleted: boolean }>,
   res: Response
 ) => {
-  const response = await updateElectrificationProjectIsDeletedFlag(
-    req.params.electrificationProjectId,
-    req.body.isDeleted,
-    generateUpdateStamps(req.currentContext)
-  );
-  res.status(200).json(response);
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await updateElectrificationProjectIsDeletedFlag(
+      tx,
+      req.params.electrificationProjectId,
+      req.body.isDeleted,
+      generateUpdateStamps(req.currentContext)
+    );
+  });
+  res.status(204).end();
 };
 
 export const updateElectrificationProjectController = async (
   req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
   res: Response
 ) => {
-  const response = await updateElectrificationProject({
-    ...req.body.project,
-    ...generateUpdateStamps(req.currentContext)
+  const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
+    return await updateElectrificationProject(tx, {
+      ...req.body.project,
+      ...generateUpdateStamps(req.currentContext)
+    });
   });
 
   res.status(200).json(response);

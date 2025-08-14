@@ -1,106 +1,70 @@
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { Prisma } from '@prisma/client';
-import { contactService, userService } from '../../../src/services';
+import * as contactService from '../../../src/services/contact';
+import * as userService from '../../../src/services/user';
 import { prismaMock } from '../../__mocks__/prismaMock';
 import { IdentityProvider } from '../../../src/utils/enums/application';
 
 import type { IdentityProvider as IDPType, User } from '../../../src/types';
-
-const uuidv4Pattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
-
-const _identity_provider = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
-type PrismaIdentityProvider = Prisma.identity_providerGetPayload<typeof _identity_provider>;
-
-const _user = Prisma.validator<Prisma.userDefaultArgs>()({});
-type PrismaUser = Prisma.userGetPayload<typeof _user>;
-
-const prismaIdirIdentityProvider: PrismaIdentityProvider = {
-  idp: IdentityProvider.IDIR,
-  active: true,
-  created_at: new Date(),
-  created_by: NIL,
-  updated_at: null,
-  updated_by: null
-};
+import { uuidv4Pattern } from '../../../src/utils/regexp';
 
 const idirIdentityProvider: IDPType = {
   idp: IdentityProvider.IDIR,
-  active: true
-};
-
-const prismaBceidUser: PrismaUser = {
-  bceid_business_name: null,
-  user_id: uuidv4(),
-  idp: IdentityProvider.BCEID,
-  sub: 'sub',
-  email: 'test@email.com',
-  first_name: 'BCeID User',
-  full_name: 'BCeID User',
-  last_name: null,
   active: true,
-  created_at: new Date(),
-  created_by: NIL,
-  updated_at: null,
-  updated_by: null
+  createdAt: new Date(),
+  createdBy: NIL,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const bceidUser: User = {
   bceidBusinessName: null,
-  userId: prismaBceidUser.user_id,
-  idp: prismaBceidUser.idp,
-  sub: prismaBceidUser.sub,
-  email: prismaBceidUser.email,
-  firstName: prismaBceidUser.first_name,
-  fullName: prismaBceidUser.full_name,
-  lastName: prismaBceidUser.last_name,
-  active: prismaBceidUser.active
-};
-
-const prismaIdirUser: PrismaUser = {
-  bceid_business_name: null,
-  user_id: uuidv4(),
-  idp: IdentityProvider.IDIR,
+  userId: uuidv4(),
+  idp: IdentityProvider.BCEID,
   sub: 'sub',
   email: 'test@email.com',
-  first_name: 'Test',
-  full_name: 'Test User',
-  last_name: 'User',
+  firstName: 'BCeID User',
+  fullName: 'BCeID User',
+  lastName: null,
   active: true,
-  created_at: new Date(),
-  created_by: NIL,
-  updated_at: null,
-  updated_by: null
+  createdAt: new Date(),
+  createdBy: NIL,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const idirUser: User = {
   bceidBusinessName: null,
-  userId: prismaIdirUser.user_id,
-  idp: prismaIdirUser.idp,
-  sub: prismaIdirUser.sub,
-  email: prismaIdirUser.email,
-  firstName: prismaIdirUser.first_name,
-  fullName: prismaIdirUser.full_name,
-  lastName: prismaIdirUser.last_name,
-  active: prismaIdirUser.active
+  userId: uuidv4(),
+  idp: IdentityProvider.IDIR,
+  sub: 'sub',
+  email: 'test@email.com',
+  firstName: 'Test',
+  fullName: 'Test User',
+  lastName: 'User',
+  active: true,
+  createdAt: new Date(),
+  createdBy: NIL,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const bceidToken = {
-  sub: prismaBceidUser.sub,
-  given_name: prismaBceidUser.first_name,
-  name: prismaBceidUser.full_name,
-  family_name: prismaBceidUser.last_name,
-  email: prismaBceidUser.email,
-  identity_provider: prismaBceidUser.idp
+  sub: bceidUser.sub,
+  given_name: bceidUser.firstName,
+  name: bceidUser.fullName,
+  family_name: bceidUser.lastName,
+  email: bceidUser.email,
+  identity_provider: bceidUser.idp
 };
 
 const idirToken = {
-  sub: prismaIdirUser.sub,
-  given_name: prismaIdirUser.first_name,
-  name: prismaIdirUser.full_name,
-  family_name: prismaIdirUser.last_name,
-  email: prismaIdirUser.email,
-  identity_provider: prismaIdirUser.idp
+  sub: idirUser.sub,
+  given_name: idirUser.firstName,
+  name: idirUser.fullName,
+  family_name: idirUser.lastName,
+  email: idirUser.email,
+  identity_provider: idirUser.idp
 };
 
 describe('user service', () => {
@@ -118,17 +82,17 @@ describe('user service', () => {
 
   describe('createIdp', () => {
     it('creates the idp', async () => {
-      prismaMock.identity_provider.create.mockResolvedValueOnce(prismaIdirIdentityProvider);
+      prismaMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
       const response = await userService.createIdp(IdentityProvider.IDIR);
 
       expect(prismaMock.identity_provider.create).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(prismaIdirIdentityProvider);
+      expect(response).toEqual(idirIdentityProvider);
     });
   });
 
   describe('createUser', () => {
     it('searches for and returns an existing user', async () => {
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       const response = await userService.createUser(idirUser);
 
       expect(prismaMock.user.findFirst).toHaveBeenCalledTimes(1);
@@ -141,7 +105,7 @@ describe('user service', () => {
 
       prismaMock.user.findFirst.mockResolvedValueOnce(null);
       readIdpSpy.mockResolvedValueOnce(null);
-      prismaMock.user.create.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.create.mockResolvedValueOnce(idirUser);
 
       await userService.createUser({ ...idirUser, userId: undefined });
 
@@ -155,7 +119,7 @@ describe('user service', () => {
 
       prismaMock.user.findFirst.mockResolvedValueOnce(null);
       readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
-      prismaMock.user.create.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.create.mockResolvedValueOnce(idirUser);
 
       const response = await userService.createUser({ ...idirUser, userId: undefined });
 
@@ -177,7 +141,7 @@ describe('user service', () => {
 
       prismaMock.user.findFirst.mockResolvedValueOnce(null);
       readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
-      prismaMock.user.create.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.create.mockResolvedValueOnce(idirUser);
 
       await prismaMock.$transaction(async (trx) => {
         await userService.createUser({ ...idirUser, userId: undefined }, trx);
@@ -190,11 +154,11 @@ describe('user service', () => {
 
   describe('getCurrentUserId', () => {
     it('should return user id if found', async () => {
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       const response = await userService.getCurrentUserId('sub');
 
       expect(prismaMock.user.findFirst).toHaveBeenCalledTimes(1);
-      expect(response).toEqual(prismaIdirUser.user_id);
+      expect(response).toEqual(idirUser.user_id);
     });
 
     it('should return defaultValue if user not found', async () => {
@@ -208,17 +172,17 @@ describe('user service', () => {
 
   describe('listIdps', () => {
     it('calls identity_provider.findMany', async () => {
-      prismaMock.identity_provider.findMany.mockResolvedValueOnce([prismaIdirIdentityProvider]);
+      prismaMock.identity_provider.findMany.mockResolvedValueOnce([idirIdentityProvider]);
       const response = await userService.listIdps(true);
 
       expect(prismaMock.identity_provider.findMany).toHaveBeenCalledTimes(1);
-      expect(response).toStrictEqual([prismaIdirIdentityProvider]);
+      expect(response).toStrictEqual([idirIdentityProvider]);
     });
   });
 
   describe('login', () => {
     it('searches for and returns an existing user', async () => {
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       await userService.login(idirToken);
 
       expect(prismaMock.user.findFirst).toHaveBeenCalledTimes(1);
@@ -241,7 +205,7 @@ describe('user service', () => {
       const createUserSpy = jest.spyOn(userService, 'createUser');
       const updateUserSpy = jest.spyOn(userService, 'updateUser');
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       updateUserSpy.mockResolvedValueOnce(idirUser);
       await userService.login(idirToken);
 
@@ -255,7 +219,7 @@ describe('user service', () => {
       const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
       const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       updateUserSpy.mockResolvedValueOnce(idirUser);
       await userService.login(idirToken);
 
@@ -269,7 +233,7 @@ describe('user service', () => {
       const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
       const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       updateUserSpy.mockResolvedValueOnce(null);
       await userService.login(idirToken);
 
@@ -282,7 +246,7 @@ describe('user service', () => {
       const updateUserSpy = jest.spyOn(userService, 'updateUser');
       const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaBceidUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(bceidUser);
       updateUserSpy.mockResolvedValueOnce(bceidUser);
       await userService.login(bceidToken);
 
@@ -308,10 +272,6 @@ describe('user service', () => {
       const updateUserSpy = jest.spyOn(userService, 'updateUser');
       const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
-      const prismaBlankNameUser = { ...prismaBceidUser };
-      prismaBlankNameUser.first_name = 'Blank';
-      prismaBlankNameUser.last_name = null;
-
       const blankNameUser = { ...bceidUser };
       blankNameUser.firstName = 'Blank';
       blankNameUser.lastName = null;
@@ -320,7 +280,7 @@ describe('user service', () => {
       blankToken.given_name = 'Blank';
       blankToken.family_name = null;
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaBlankNameUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(blankNameUser);
       updateUserSpy.mockResolvedValueOnce(blankNameUser);
       await userService.login(blankToken);
 
@@ -345,7 +305,7 @@ describe('user service', () => {
     it('returns the user', async () => {
       const updateUserSpy = jest.spyOn(userService, 'updateUser');
 
-      prismaMock.user.findFirst.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findFirst.mockResolvedValueOnce(idirUser);
       updateUserSpy.mockResolvedValueOnce(idirUser);
       const response = await userService.login(idirToken);
 
@@ -356,14 +316,14 @@ describe('user service', () => {
 
   describe('readIdp', () => {
     it('calls identity_provider.findUnique', async () => {
-      prismaMock.identity_provider.findUnique.mockResolvedValueOnce(prismaIdirIdentityProvider);
+      prismaMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
       await userService.readIdp(IdentityProvider.IDIR);
 
       expect(prismaMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
     });
 
     it('converts prisma model to application model', async () => {
-      prismaMock.identity_provider.findUnique.mockResolvedValueOnce(prismaIdirIdentityProvider);
+      prismaMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
       const response = await userService.readIdp(IdentityProvider.IDIR);
 
       expect(response).toStrictEqual(idirIdentityProvider);
@@ -372,14 +332,14 @@ describe('user service', () => {
 
   describe('readUser', () => {
     it('calls user.findUnique', async () => {
-      prismaMock.user.findUnique.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findUnique.mockResolvedValueOnce(idirUser);
       await userService.readUser(idirUser.userId as string);
 
       expect(prismaMock.user.findUnique).toHaveBeenCalledTimes(1);
     });
 
     it('converts prisma model to application model', async () => {
-      prismaMock.user.findUnique.mockResolvedValueOnce(prismaIdirUser);
+      prismaMock.user.findUnique.mockResolvedValueOnce(idirUser);
       const response = await userService.readUser(idirUser.userId as string);
 
       expect(response).toStrictEqual(idirUser);
@@ -395,21 +355,21 @@ describe('user service', () => {
 
   describe('searchUsers', () => {
     it('calls user.findMany', async () => {
-      prismaMock.user.findMany.mockResolvedValueOnce([prismaIdirUser]);
+      prismaMock.user.findMany.mockResolvedValueOnce([idirUser]);
       await userService.searchUsers({ userId: [idirUser.userId as string] });
 
       expect(prismaMock.user.findMany).toHaveBeenCalledTimes(1);
     });
 
     it('converts prisma model to application model', async () => {
-      prismaMock.user.findMany.mockResolvedValueOnce([prismaIdirUser]);
+      prismaMock.user.findMany.mockResolvedValueOnce([idirUser]);
       const response = await userService.searchUsers({ userId: [idirUser.userId as string] });
 
       expect(response).toStrictEqual([idirUser]);
     });
 
     it('filters NIL userIds', async () => {
-      const nilUser: PrismaUser = { ...prismaIdirUser, user_id: NIL };
+      const nilUser: PrismaUser = { ...idirUser, user_id: NIL };
       prismaMock.user.findMany.mockResolvedValueOnce([nilUser]);
       const response = await userService.searchUsers({});
 
@@ -450,7 +410,7 @@ describe('user service', () => {
 
       readUserSpy.mockResolvedValueOnce(idirUser);
       readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
-      prismaMock.user.update.mockResolvedValueOnce({ ...prismaIdirUser, first_name: 'Changed' });
+      prismaMock.user.update.mockResolvedValueOnce({ ...idirUser, first_name: 'Changed' });
 
       const changedUser = { ...idirUser, firstName: 'Changed' };
       const response = await userService.updateUser(changedUser.userId as string, changedUser);
@@ -470,7 +430,7 @@ describe('user service', () => {
 
       readUserSpy.mockResolvedValueOnce(idirUser);
       readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
-      prismaMock.user.update.mockResolvedValueOnce({ ...prismaIdirUser, first_name: 'Changed' });
+      prismaMock.user.update.mockResolvedValueOnce({ ...idirUser, first_name: 'Changed' });
 
       const changedUser = { ...idirUser, firstName: 'Changed' };
 

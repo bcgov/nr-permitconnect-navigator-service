@@ -89,9 +89,13 @@ const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;
 export type PermitType = PermitTypeBase;
 
-const SourceSystemCodeBase = Prisma.validator<Prisma.source_system_codeDefaultArgs>()({});
-export type SourceSystemCodeBase = Prisma.source_system_codeGetPayload<typeof SourceSystemCodeBase>;
+const sourceSystemCodeBase = Prisma.validator<Prisma.source_system_codeDefaultArgs>()({});
+export type SourceSystemCodeBase = Prisma.source_system_codeGetPayload<typeof sourceSystemCodeBase>;
 export type SourceSystemCode = SourceSystemCodeBase;
+
+const sourceSystemKindBase = Prisma.validator<Prisma.source_system_kindDefaultArgs>()({});
+export type SourceSystemKindBase = Prisma.source_system_kindGetPayload<typeof sourceSystemKindBase>;
+export type SourceSystemKind = SourceSystemKindBase;
 
 const user = Prisma.validator<Prisma.userDefaultArgs>()({});
 export type UserBase = Prisma.userGetPayload<typeof user>;

@@ -159,7 +159,7 @@ export const getHousingProjectStatistics = async (
     monthYear: string;
     userId: string;
   }
-): Promise<HousingProjectStatistics> => {
+): Promise<HousingProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
   const val = (value: unknown) => (value ? `'${value}'` : null);
 
@@ -288,20 +288,21 @@ export const searchHousingProjects = async (
 };
 
 /**
- * @function updateHousingProjectIsDeletedFlag
  * Updates is_deleted flag for the corresponding activity
+ * @param tx Prisma transaction client
  * @param {string} housingProjectId Housing project ID
  * @param {string} isDeleted flag
  * @returns {Promise<HousingProject>} The result of running the delete operation
  */
 export const updateHousingProjectIsDeletedFlag = async (
+  tx: PrismaTransactionClient,
   housingProjectId: string,
   isDeleted: boolean,
   updateStamp: Partial<IStamps>
 ): Promise<HousingProject> => {
   // TODO-PR: Drop this service function, move project search to controller layer
   // and add delete activity service call to controller layer
-  const deleteHousingProject = await prisma.housing_project.findUniqueOrThrow({
+  const deleteHousingProject = await tx.housing_project.findUniqueOrThrow({
     where: {
       housingProjectId
     },
@@ -319,7 +320,7 @@ export const updateHousingProjectIsDeletedFlag = async (
   });
 
   if (deleteHousingProject) {
-    await prisma.activity.update({
+    await tx.activity.update({
       data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
       where: {
         activityId: deleteHousingProject?.activityId
