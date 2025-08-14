@@ -14,6 +14,7 @@ export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
 export let sourceSystemCodes: string[] = [];
 export let escalationTypeCodes: string[] = [];
+export let sourceSystemCodes: string[] = [];
 
 const log = getLogger(module.filename);
 
@@ -36,6 +37,13 @@ export async function refreshCodeCaches(): Promise<boolean> {
     electrificationProjectCategoryCodes = codeTables.ElectrificationProjectCategory.map((r) => r.code);
     escalationTypeCodes = codeTables.EscalationType.map((r) => r.code);
     sourceSystemCodes = codeTables.SourceSystem.map((r) => r.code);
+
+    sourceSystemCodes = (
+      await prisma.source_system_code.findMany({
+        where: { active: true },
+        select: { code: true }
+      })
+    ).map((r) => r.code);
 
     log.debug('Codes cache refreshed');
     return true;
