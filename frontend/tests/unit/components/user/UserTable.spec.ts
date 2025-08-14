@@ -5,34 +5,9 @@ import { mount } from '@vue/test-utils';
 import { AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import UserTable from '@/components/user/UserTable.vue';
 
-import type {
-  IDIRAttribute,
-  BasicBCeIDAttribute,
-  BusinessBCeIDAttribute,
-  User,
-  UserAccessRequest,
-  Group
-} from '@/types';
+import type { User, UserAccessRequest, Group } from '@/types';
 
 const currentDate = new Date().toISOString();
-
-const exampleIDIRAttribute: IDIRAttribute = {
-  idirUsername: 'idirUser',
-  idirUserGuid: 'idir-guid-123'
-};
-
-// Example BasicBCeIDAttribute object
-const exampleBasicBCeIDAttribute: BasicBCeIDAttribute = {
-  bceidUsername: 'bceidUser',
-  bceidUserGuid: 'bceid-guid-123'
-};
-
-// Example BusinessBCeIDAttribute object
-const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
-  bceidBusinessGuid: 'business-guid-123',
-  bceidBusinessName: 'Example Business',
-  ...exampleBasicBCeIDAttribute
-};
 
 const exampleAccessRequest = {
   accessRequestId: 'accessRequest123',
@@ -59,9 +34,7 @@ const exampleUser: User = {
   userId: 'user123',
   sub: 'sub-123',
   elevatedRights: true,
-  idirAttributes: exampleIDIRAttribute,
-  bceidAttributes: exampleBasicBCeIDAttribute,
-  businessBceidAttribute: exampleBusinessBCeIDAttribute,
+  bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

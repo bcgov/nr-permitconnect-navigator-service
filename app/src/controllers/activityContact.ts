@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { deleteUnmatchedActivityContacts, upsertActivityContacts } from '../services/activityContact';
 import { insertContacts } from '../services/contact';
 import { partition } from '../utils/utils';
@@ -26,14 +28,16 @@ export const updateActivityContactController = async (
   // Combine existing contacts with new contacts
   const contacts = existingContacts.concat(newContacts);
 
-  // Insert new contacts into the contact table
-  await insertContacts(newContacts, req.currentContext);
+  await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    // Insert new contacts into the contact table
+    await insertContacts(tx, newContacts, req.currentContext);
 
-  // Delete any activity_contact records that doesn't match the activity and contacts in the request
-  await deleteUnmatchedActivityContacts(req.body.activityId, contacts);
+    // Delete any activity_contact records that doesn't match the activity and contacts in the request
+    await deleteUnmatchedActivityContacts(tx, req.body.activityId, contacts);
 
-  // Create or update activity_contact with the data from the request
-  await upsertActivityContacts(req.body.activityId, contacts);
+    // Create or update activity_contact with the data from the request
+    await upsertActivityContacts(tx, req.body.activityId, contacts);
+  });
 
   res.status(200).end();
 };

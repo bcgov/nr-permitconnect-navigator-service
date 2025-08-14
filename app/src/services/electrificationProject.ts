@@ -48,7 +48,7 @@ export const getElectrificationProjectStatistics = async (
     monthYear: string;
     userId: string;
   }
-): Promise<ElectrificationProjectStatistics> => {
+): Promise<ElectrificationProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
   const val = (value: unknown) => (value ? `'${value}'` : null);
 

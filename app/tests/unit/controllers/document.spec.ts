@@ -110,15 +110,15 @@ describe('deleteDocumentController', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    deleteSpy.mockResolvedValue(TEST_DOCUMENT);
+    deleteSpy.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await deleteDocumentController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 
   it('calls next if the document service fails to delete', async () => {

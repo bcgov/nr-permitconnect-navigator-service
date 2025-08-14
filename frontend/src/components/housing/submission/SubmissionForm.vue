@@ -68,12 +68,6 @@ import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, HousingProject, User } from '@/types';
 
-// Interfaces
-interface HousingProjectForm extends HousingProject {
-  locationAddress: string;
-  user?: User;
-}
-
 // Props
 const { editable = true, housingProject } = defineProps<{
   editable?: boolean;

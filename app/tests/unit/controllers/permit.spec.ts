@@ -84,15 +84,15 @@ describe('deletePermit', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    deleteSpy.mockResolvedValue(TEST_PERMIT);
+    deleteSpy.mockResolvedValue();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await deletePermitController(req as any, res as any);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
     expect(deleteSpy).toHaveBeenCalledWith(req.params.permitId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 
   it('calls next if the permit service fails to delete', async () => {

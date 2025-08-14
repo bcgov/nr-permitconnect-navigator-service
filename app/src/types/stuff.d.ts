@@ -61,6 +61,7 @@ export type BringForward = {
   noteId: string;
   electrificationProjectId: string;
   housingProjectId: string;
+  enquiryId: string;
   title: string;
   projectName: string | null;
   bringForwardDate: string;

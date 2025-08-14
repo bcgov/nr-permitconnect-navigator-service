@@ -10,7 +10,7 @@ import type { Initiative } from '../types';
  * @param initiative The initiative code
  * @returns The result of running the findFirstOrThrow operation
  */
-export const getInitiative = async (initiative: EInitiative, tx: PrismaTransactionClient): Promise<Initiative> => {
+export const getInitiative = async (tx: PrismaTransactionClient, initiative: EInitiative): Promise<Initiative> => {
   const result = await tx.initiative.findFirstOrThrow({
     where: {
       code: initiative

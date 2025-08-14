@@ -46,7 +46,7 @@ const testEnquiry: Enquiry = {
   contacts: [exampleContact],
   atsClientId: null,
   atsEnquiryId: null,
-  addedToATS: false,
+  addedToAts: false,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

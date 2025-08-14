@@ -18,7 +18,7 @@ import { ApplicationStatus, IntakeStatus } from '../../../src/utils/enums/projec
 import { AuthType, Initiative } from '../../../src/utils/enums/application';
 import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
 
-import type { Draft, HousingProject, Permit } from '../../../src/types';
+import type { Draft, HousingProject, HousingProjectStatistics, Permit } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -284,12 +284,33 @@ describe('getHousingProjectStatisticsController', () => {
       currentContext: CURRENT_CONTEXT
     };
 
-    const statistics = [
+    const statistics: HousingProjectStatistics[] = [
       {
-        stat_0: '0',
-        stat_1: '1',
-        stat_2: '2',
-        stat_3: '3'
+        total_submissions: 0,
+        total_submissions_between: 0,
+        total_submissions_monthyear: 0,
+        total_submissions_assignedto: 0,
+        intake_submitted: 0,
+        intake_assigned: 0,
+        intake_completed: 0,
+        state_new: 0,
+        state_inprogress: 0,
+        state_delayed: 0,
+        state_completed: 0,
+        supported_bc: 0,
+        supported_indigenous: 0,
+        supported_non_profit: 0,
+        supported_housing_coop: 0,
+        waiting_on: 0,
+        queue_1: 0,
+        queue_2: 0,
+        queue_3: 0,
+        escalation: 0,
+        general_enquiry: 0,
+        guidance: 0,
+        inapplicable: 0,
+        status_request: 0,
+        multi_permits_needed: 0
       }
     ];
 

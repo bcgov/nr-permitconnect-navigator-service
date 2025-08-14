@@ -50,7 +50,7 @@ const testEnquiry = {
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
-  addedToATS: false,
+  addedToAts: false,
   atsClientId: 123456,
   atsEnquiryId: '654321'
 };

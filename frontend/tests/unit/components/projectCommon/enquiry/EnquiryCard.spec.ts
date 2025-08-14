@@ -9,6 +9,7 @@ import { userService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
+import type { Enquiry } from '@/types';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
@@ -22,7 +23,7 @@ const exampleContact = {
 };
 
 // Example Enquiry object
-const testEnquiry = {
+const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: 'General Inquiry',
@@ -36,7 +37,7 @@ const testEnquiry = {
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
-  addedToATS: false,
+  addedToAts: false,
   atsClientId: 123456,
   atsEnquiryId: '654321'
 };

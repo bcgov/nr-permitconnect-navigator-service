@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import prisma from '../../db/dataConnection';
+import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
 import { getLogger } from '../../components/log';
 import { getActivity } from '../../services/activity';
 import { uuidToActivityId } from '../../utils/utils';
@@ -101,13 +101,13 @@ export function generateNullUpdateStamps() {
  * If a collision is detected, generate new UUID and test again
  * @returns {Promise<string>} A string in title case
  */
-export async function generateUniqueActivityId() {
+export async function generateUniqueActivityId(tx: PrismaTransactionClient) {
   let id, queryResult;
 
   do {
     id = uuidToActivityId(uuidv4());
     // No op any errors, 404 is potentially expected here
-    queryResult = await getActivity(id).catch(() => {});
+    queryResult = await getActivity(tx, id).catch(() => {});
   } while (queryResult);
 
   return id;
