@@ -3,11 +3,17 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-![Tests](https://github.com/bcgov/nr-permitconnect-navigator-service/workflows/Tests/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/maintainability)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/test_coverage)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+[![Tests](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/unit-tests.yaml/badge.svg)](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/unit-tests.yaml)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+[![CodeQL](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/github-code-scanning/codeql)
 
-NR PermitConnect Navigator Service
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=bcgov_nr-permitconnect-navigator-service&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=bcgov_nr-permitconnect-navigator-service)
+
+NR Permit Connect Services Application
 
 ## Directory Structure
 
@@ -63,14 +69,14 @@ You can quickly run this application in development mode after cloning by openin
 - Create `.env` in the root directory with the following
   - `DATABASE_URL="your_connection_string"`
 
-```
+```sh
 cd app
 npm i
 npm run prisma:migrate
 npm run serve
 ```
 
-```
+```sh
 cd frontend
 npm i
 npm run serve
