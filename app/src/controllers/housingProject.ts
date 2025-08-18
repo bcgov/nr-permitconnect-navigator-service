@@ -196,7 +196,6 @@ const generateHousingProjectData = async (
       housingProjectId: uuidv4(),
       activityId: activityId,
       submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       submittedBy: getCurrentUsername(currentContext),
       intakeStatus: IntakeStatus.SUBMITTED,
       applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
@@ -258,7 +257,7 @@ export const createHousingProjectController = async (
   res: Response
 ) => {
   // TODO: Remove when create PUT calls get switched to POST
-  if (req.body === undefined) req.body = {};
+  if (req.body === undefined) req.body = {} as HousingProjectIntake;
   const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
     const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
       tx,
@@ -280,7 +279,11 @@ export const createHousingProjectController = async (
       })
     );
     await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-    await Promise.all(appliedPermits.map(async (p: Permit) => await upsertPermitTracking(tx, p)));
+    await Promise.all(
+      appliedPermits
+        .filter((p: Permit) => !!p.permitTracking)
+        .map(async (p: Permit) => await upsertPermitTracking(tx, p))
+    );
 
     return data;
   });
@@ -288,21 +291,21 @@ export const createHousingProjectController = async (
   res.status(201).json(result);
 };
 
-export const deleteDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+export const deleteHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     await deleteDraft(tx, req.params.draftId);
   });
   res.status(204).end();
 };
 
-export const getDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+export const getHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
     return await getDraft(tx, req.params.draftId);
   });
   res.status(200).json(response);
 };
 
-export const getDraftsController = async (req: Request, res: Response) => {
+export const getHousingProjectDraftsController = async (req: Request, res: Response) => {
   let response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
     return await getDrafts(tx, DraftCode.HOUSING_PROJECT);
   });
@@ -401,7 +404,11 @@ export const submitHousingProjectDraftController = async (
       })
     );
     await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-    await Promise.all(appliedPermits.map(async (p: Permit) => await upsertPermitTracking(tx, p)));
+    await Promise.all(
+      appliedPermits
+        .filter((p: Permit) => !!p.permitTracking)
+        .map(async (p: Permit) => await upsertPermitTracking(tx, p))
+    );
 
     // Delete old draft
     if (req.body.draftId) await deleteDraft(tx, req.body.draftId);

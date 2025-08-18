@@ -1,24 +1,48 @@
 import {
+  TEST_CURRENT_CONTEXT,
+  TEST_ELECTRIFICATION_INTAKE,
+  TEST_ELECTRIFICATION_ACTIVITY,
+  TEST_ELECTRIFICATION_PROJECT_1,
+  TEST_ELECTRIFICATION_PROJECT_CREATE,
+  TEST_ELECTRIFICATION_DRAFT
+} from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import {
   createElectrificationProjectController,
+  deleteElectrificationProjectDraftController,
+  emailElectrificationProjectConfirmationController,
+  getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
+  getElectrificationProjectDraftController,
+  getElectrificationProjectDraftsController,
   getElectrificationProjectsController,
   getElectrificationProjectStatisticsController,
+  searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  updateElectrificationProjectDraftController
+  updateElectrificationProjectDraftController,
+  updateElectrificationProjectIsDeletedFlagController
 } from '../../../src/controllers/electrificationProject';
-import * as activityContactService from '../../../src/services/activityContact';
 import * as activityService from '../../../src/services/activity';
-import * as contactService from '../../../src/services/contact';
+import * as emailService from '../../../src/services/email';
 import * as draftService from '../../../src/services/draft';
 import * as enquiryService from '../../../src/services/enquiry';
 import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import { AuthType, Initiative } from '../../../src/utils/enums/application';
-import { ProjectType } from '../../../src/utils/enums/electrification';
-import { ProjectRelationship, SubmissionType } from '../../../src/utils/enums/projectCommon';
-import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
+import { Initiative } from '../../../src/utils/enums/application';
+import { DraftCode } from '../../../src/utils/enums/projectCommon';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
 
-import type { Draft, ElectrificationProject, ElectrificationProjectStatistics } from '../../../src/types';
+import type { Request, Response } from 'express';
+import type {
+  Contact,
+  Draft,
+  ElectrificationProject,
+  ElectrificationProjectIntake,
+  ElectrificationProjectSearchParameters,
+  ElectrificationProjectStatistics,
+  Email,
+  StatisticsFilters
+} from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -27,7 +51,7 @@ const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -45,132 +69,171 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: AuthType.BEARER, tokenPayload: undefined, userId: 'abc-123' };
-
-const CONTACT_NO_ID = {
-  contactId: null,
-  userId: null,
-  firstName: 'Test',
-  lastName: 'Person',
-  phoneNumber: null,
-  email: null,
-  contactPreference: null,
-  contactApplicantRelationship: ProjectRelationship.OWNER,
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
-const TEST_CONTACT = {
-  ...CONTACT_NO_ID,
-  contactId: '3483e223-526a-44cf-8b6a-80f90c3b724c'
-};
-
-const ELECTRIFICATION_INTAKE = {
-  project: {
-    projectName: 'Test',
-    projectDescription: 'Test description',
-    companyNameRegistered: 'Company name',
-    projectType: ProjectType.IPP_WIND,
-    bcHydroNumber: '123',
-    submissionType: SubmissionType.GUIDANCE
-  },
-  contacts: [CONTACT_NO_ID],
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
-const ELECTRIFICATION_PROJECT_1 = {
-  project: {
-    electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-    activityId: '5183f223',
-    assignedUserId: null,
-    submittedAt: new Date().toISOString()
-  },
-  contacts: [CONTACT_NO_ID],
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
-const TEST_ACTIVITY = {
-  activityId: '00000000',
-  initiativeId: Initiative.ELECTRIFICATION,
-  isDeleted: false,
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
 describe('createElectrificationProjectController', () => {
-  // Mock service calls
-  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
-  const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
 
-  it('creates submission with unique activity ID', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...ELECTRIFICATION_INTAKE },
-      currentContext: CURRENT_CONTEXT
+      body: {
+        project: {
+          projectName: null,
+          projectDescription: null,
+          companyNameRegistered: null,
+          projectType: null,
+          bcHydroNumber: null
+        }
+      },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    upsertContacts.mockResolvedValue([TEST_CONTACT]);
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
-    createElectrificationProjectSpy.mockResolvedValue({
-      activityId: '00000000',
-      electrificationProjectId: '11111111'
-    } as ElectrificationProject);
+    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createElectrificationProjectController(req as any, res as any);
-
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ activityId: '00000000', electrificationProjectId: '11111111' });
-  });
-
-  it('populates data from body if it exists', async () => {
-    const req = {
-      body: { ...ELECTRIFICATION_INTAKE },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    upsertContacts.mockResolvedValue([TEST_CONTACT]);
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createElectrificationProjectController(req as any, res as any);
-
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ...ELECTRIFICATION_INTAKE.project,
-        electrificationProjectId: expect.stringMatching(uuidv4Pattern),
-        activityId: '00000000',
-        submittedAt: expect.stringMatching(isoPattern),
-        submissionType: SubmissionType.GUIDANCE
-      })
+    await createElectrificationProjectController(
+      req as unknown as Request<never, never, ElectrificationProjectIntake>,
+      res as unknown as Response
     );
+
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...TEST_ELECTRIFICATION_PROJECT_CREATE,
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
+      submittedAt: expect.any(Date),
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      ...TEST_ELECTRIFICATION_PROJECT_CREATE,
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
+      submittedAt: expect.any(Date),
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId
+    });
+  });
+});
+
+describe('deleteElectrificationProjectDraftController', () => {
+  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
+
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    deleteDraftSpy.mockResolvedValue();
+
+    await deleteElectrificationProjectDraftController(
+      req as unknown as Request<{ draftId: string }>,
+      res as unknown as Response
+    );
+
+    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
+    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('emailElectrificationProjectConfirmationController', () => {
+  const emailSpy = jest.spyOn(emailService, 'email');
+
+  it('should call services and respond with status and result', async () => {
+    const req = {
+      body: {
+        to: 'test@test.com',
+        subject: 'Subject',
+        body: 'Some body text'
+      },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    emailSpy.mockResolvedValue({ data: { text: '1234' }, status: 200 });
+
+    await emailElectrificationProjectConfirmationController(
+      req as unknown as Request<never, never, Email>,
+      res as unknown as Response
+    );
+
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(emailSpy).toHaveBeenCalledWith(req.body);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ text: '1234' });
+  });
+});
+
+describe('getElectrificationProjectActivityIdsController', () => {
+  const getElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjects');
+
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+
+    await getElectrificationProjectActivityIdsController(req as unknown as Request, res as unknown as Response);
+
+    expect(getElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(getElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1.activityId]);
+  });
+});
+
+describe('getElectrificationProjectDraftController', () => {
+  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
+
+  it('should call services and respond with 200', async () => {
+    const req = {
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
+
+    await getElectrificationProjectDraftController(
+      req as unknown as Request<{ draftId: string }>,
+      res as unknown as Response
+    );
+
+    expect(getDraftSpy).toHaveBeenCalledTimes(1);
+    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_DRAFT);
+  });
+});
+
+describe('getElectrificationProjectDraftsController', () => {
+  const getDraftsSpy = jest.spyOn(draftService, 'getDrafts');
+
+  it('should call services and respond with 200', async () => {
+    const req = {
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getDraftsSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
+
+    await getElectrificationProjectDraftsController(req as unknown as Request, res as unknown as Response);
+
+    expect(getDraftsSpy).toHaveBeenCalledTimes(1);
+    expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.ELECTRIFICATION_PROJECT);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_DRAFT]);
   });
 });
 
 describe('getElectrificationProjectStatistics', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const statisticsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjectStatistics');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
       query: {
         dateFrom: '',
@@ -178,7 +241,7 @@ describe('getElectrificationProjectStatistics', () => {
         monthYear: '',
         userId: ''
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const statistics: ElectrificationProjectStatistics[] = [
@@ -205,213 +268,208 @@ describe('getElectrificationProjectStatistics', () => {
 
     statisticsSpy.mockResolvedValue(statistics);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectStatisticsController(req as any, res as any);
+    await getElectrificationProjectStatisticsController(
+      req as unknown as Request<never, never, never, StatisticsFilters>,
+      res as unknown as Response
+    );
 
     expect(statisticsSpy).toHaveBeenCalledTimes(1);
-    expect(statisticsSpy).toHaveBeenCalledWith(req.query);
+    expect(statisticsSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(statistics);
-  });
-
-  it('calls next if the submission service fails to get statistics', async () => {
-    const req = {
-      query: {
-        dateFrom: '',
-        dateTo: '',
-        monthYear: '',
-        userId: ''
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    statisticsSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectStatisticsController(req as any, res as any);
-
-    expect(statisticsSpy).toHaveBeenCalledTimes(1);
-    expect(statisticsSpy).toHaveBeenCalledWith(req.query);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(statistics[0]);
   });
 });
 
 describe('getElectrificationProjectController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const electrificationProjectSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProject');
+  const getElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProject');
   const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { electrificationProjectId: 'SOMEID' },
-      currentContext: CURRENT_CONTEXT
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    electrificationProjectSpy.mockResolvedValue(ELECTRIFICATION_PROJECT_1 as any);
+    getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectController(req as any, res as any);
+    await getElectrificationProjectController(
+      req as unknown as Request<{ electrificationProjectId: string }>,
+      res as unknown as Response
+    );
 
-    expect(electrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(electrificationProjectSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
+    expect(getElectrificationProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(ELECTRIFICATION_PROJECT_1);
-  });
-
-  it('calls next if the submission service fails to get submission', async () => {
-    const req = {
-      params: { electrificationProjectId: 'SOMEID' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    electrificationProjectSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectController(req as any, res as any);
-
-    expect(electrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(electrificationProjectSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1);
   });
 });
 
 describe('getElectrificationProjectsController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const electrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjects');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: CURRENT_CONTEXT,
+      currentContext: TEST_CURRENT_CONTEXT,
       query: {}
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    electrificationProjectsSpy.mockResolvedValue([ELECTRIFICATION_PROJECT_1 as any]);
+    electrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectsController(req as any, res as any);
+    await getElectrificationProjectsController(req as unknown as Request, res as unknown as Response);
 
     expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(electrificationProjectsSpy).toHaveBeenCalledWith();
+    expect(electrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([ELECTRIFICATION_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
   });
+});
 
-  it('calls next if the electrification service fails to get projects', async () => {
+describe('searchElectrificationProjectsController', () => {
+  const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: CURRENT_CONTEXT
+      query: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    electrificationProjectsSpy.mockImplementationOnce(() => {
-      throw new Error();
+    searchElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+
+    await searchElectrificationProjectsController(
+      req as unknown as Request<never, never, never, ElectrificationProjectSearchParameters>,
+      res as unknown as Response
+    );
+
+    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      activityId: ['ACTI1234', 'ACTI5678'],
+      includeUser: false
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getElectrificationProjectsController(req as any, res as any);
-
-    expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(electrificationProjectsSpy).toHaveBeenCalledWith();
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
   });
 });
 
 describe('submitElectrificationProjectDraftController', () => {
-  // Mock service calls
-  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
   const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
 
-  it('populates data from body if it exists', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...ELECTRIFICATION_INTAKE },
-      currentContext: CURRENT_CONTEXT
+      body: { ...TEST_ELECTRIFICATION_INTAKE },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    upsertContacts.mockResolvedValue([TEST_CONTACT]);
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
-    createElectrificationProjectSpy.mockResolvedValue({ activityId: '00000000' } as ElectrificationProject);
+    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await submitElectrificationProjectDraftController(req as any, res as any);
-
-    expect(upsertContacts).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ...ELECTRIFICATION_INTAKE.project,
-        electrificationProjectId: expect.stringMatching(uuidv4Pattern),
-        activityId: '00000000',
-        submittedAt: expect.stringMatching(isoPattern),
-        submissionType: SubmissionType.GUIDANCE
-      })
+    await submitElectrificationProjectDraftController(
+      req as unknown as Request<never, never, ElectrificationProjectIntake>,
+      res as unknown as Response
     );
+
+    expect(createActivitySpy).toHaveBeenCalledTimes(1);
+    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
+    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...TEST_ELECTRIFICATION_PROJECT_1,
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
+      submittedAt: expect.any(Date),
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({
+      activityId: TEST_ELECTRIFICATION_PROJECT_1.activityId,
+      electrificationProjectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+    });
+  });
+
+  it('should delete associated draft if it exists', async () => {
+    const req = {
+      body: { ...TEST_ELECTRIFICATION_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
+    deleteDraftSpy.mockResolvedValue();
+
+    await submitElectrificationProjectDraftController(
+      req as unknown as Request<never, never, ElectrificationProjectIntake>,
+      res as unknown as Response
+    );
+
+    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
+    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.body.draftId);
   });
 });
 
 describe('updateElectrificationProjectDraftController', () => {
-  // Mock service calls
   const createDraftSpy = jest.spyOn(draftService, 'createDraft');
   const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
 
-  it('creates a new draft', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        electrification: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          contactFirstName: 'test',
+          contactLastName: 'person',
+          basic: {
+            projectApplicantType: 'Business'
+          },
+          electrification: {
+            projectName: 'TheProject'
+          },
+          location: {
+            projectLocation: 'Some place'
+          },
+          permits: {
+            hasAppliedProvincialPermits: true
+          }
         }
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
-    createDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
+    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateElectrificationProjectDraftController(req as any, res as any);
+    await updateElectrificationProjectDraftController(
+      req as unknown as Request<never, never, Draft>,
+      res as unknown as Response
+    );
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: expect.stringMatching(uuidv4Pattern),
-        activityId: '00000000'
-      })
-    );
+    expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
+      draftId: expect.stringMatching(uuidv4Pattern),
+      activityId: 'ACTI1234',
+      draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+      data: req.body.data,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: null,
+      updatedBy: null
+    });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
+    expect(res.json).toHaveBeenCalledWith({
+      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+      activityId: 'ACTI1234'
+    });
   });
 
   it('updates draft with the given draftId and activityId', async () => {
     const req = {
       body: {
-        draftId: '11111111',
-        activityId: '00000000',
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
         contactFirstName: 'test',
         contactLastName: 'person',
         basic: {
@@ -427,92 +485,90 @@ describe('updateElectrificationProjectDraftController', () => {
           hasAppliedProvincialPermits: true
         }
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY);
-    updateDraftSpy.mockResolvedValue({ draftId: '11111111', activityId: '00000000' } as Draft);
+    updateDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateElectrificationProjectDraftController(req as any, res as any);
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(0);
-    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
-    expect(updateDraftSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: '11111111'
-      })
+    await updateElectrificationProjectDraftController(
+      req as unknown as Request<never, never, Draft>,
+      res as unknown as Response
     );
+
+    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
+    expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...req.body,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ draftId: '11111111', activityId: '00000000' });
+    expect(res.json).toHaveBeenCalledWith({
+      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+      activityId: 'ACTI1234'
+    });
   });
 });
 
 describe('updateElectrificationProjectController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const insertContacts = jest.spyOn(contactService, 'insertContacts');
-  const deleteUnmatchedActivityContacts = jest.spyOn(activityContactService, 'deleteUnmatchedActivityContacts');
-  const upsertActivityContacts = jest.spyOn(activityContactService, 'upsertActivityContacts');
   const updateSpy = jest.spyOn(electrificationProjectService, 'updateElectrificationProject');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: ELECTRIFICATION_PROJECT_1,
-      currentContext: CURRENT_CONTEXT
+      body: { project: TEST_ELECTRIFICATION_PROJECT_1 },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updated: any = ELECTRIFICATION_PROJECT_1;
+    const updated: ElectrificationProject = { ...TEST_ELECTRIFICATION_PROJECT_1, projectName: 'NEW NAME' };
 
-    insertContacts.mockResolvedValue();
-    deleteUnmatchedActivityContacts.mockResolvedValue();
-    upsertActivityContacts.mockResolvedValue();
     updateSpy.mockResolvedValue(updated);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateElectrificationProjectController(req as any, res as any);
+    await updateElectrificationProjectController(
+      req as unknown as Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
+      res as unknown as Response
+    );
 
-    expect(insertContacts).toHaveBeenCalledTimes(1);
-    expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
-    expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({
+    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body.project,
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
   });
+});
 
-  it('calls next if the electrificationProject service fails to update', async () => {
+describe('updateElectrificationProjectIsDeletedFlagController', () => {
+  const updateElectrificationProjectIsDeletedFlagSpy = jest.spyOn(
+    electrificationProjectService,
+    'updateElectrificationProjectIsDeletedFlag'
+  );
+
+  it('should call services and respond with 204', async () => {
     const req = {
-      body: ELECTRIFICATION_PROJECT_1,
-      currentContext: CURRENT_CONTEXT
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      body: { isDeleted: true },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    insertContacts.mockResolvedValue();
-    deleteUnmatchedActivityContacts.mockResolvedValue();
-    upsertActivityContacts.mockResolvedValue();
-    updateSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
+    updateElectrificationProjectIsDeletedFlagSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateElectrificationProjectController(req as any, res as any);
+    await updateElectrificationProjectIsDeletedFlagController(
+      req as unknown as Request<{ electrificationProjectId: string }, never, { isDeleted: boolean }>,
+      res as unknown as Response
+    );
 
-    expect(insertContacts).toHaveBeenCalledTimes(1);
-    expect(deleteUnmatchedActivityContacts).toHaveBeenCalledTimes(1);
-    expect(upsertActivityContacts).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({
-      ...req.body.project,
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(updateElectrificationProjectIsDeletedFlagSpy).toHaveBeenCalledTimes(1);
+    expect(updateElectrificationProjectIsDeletedFlagSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      req.params.electrificationProjectId,
+      req.body.isDeleted,
+      {
+        updatedAt: expect.any(Date),
+        updatedBy: TEST_CURRENT_CONTEXT.userId
+      }
+    );
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 });

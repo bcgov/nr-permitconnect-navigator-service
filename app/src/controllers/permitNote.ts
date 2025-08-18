@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps } from '../db/utils/utils';
@@ -10,6 +12,7 @@ export const createPermitNoteController = async (req: Request<never, never, Perm
   const response = await transactionWrapper<PermitNote>(async (tx: PrismaTransactionClient) => {
     return await createPermitNote(tx, {
       ...req.body,
+      permitNoteId: uuidv4(),
       ...generateCreateStamps(req.currentContext)
     });
   });

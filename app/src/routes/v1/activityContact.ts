@@ -5,7 +5,6 @@ import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
-import { accessRequestValidator } from '../../validators';
 
 const router = express.Router();
 router.use(requireSomeAuth);

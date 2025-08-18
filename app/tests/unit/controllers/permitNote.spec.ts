@@ -1,14 +1,20 @@
 import { createPermitNoteController } from '../../../src/controllers/permitNote';
 import * as permitNoteService from '../../../src/services/permitNote';
-import { isoPattern } from '../../../src/utils/regexp';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
 
+import type { Request, Response } from 'express';
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_NOTE_1 } from '../data';
+import { PermitNote } from '../../../src/types';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+
+// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
 
 const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -21,74 +27,34 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
+describe('createPermitNoteController', () => {
+  const createPermitNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote');
 
-const TEST_PERMIT_NOTE = {
-  permitNoteId: 'NOTE123',
-  permitId: 'PERMIT123',
-  note: 'This is a permit note.',
-  isDeleted: false,
-  createdAt: new Date(),
-  createdBy: 'abc-123',
-  updatedAt: null,
-  updatedBy: null
-};
-
-describe('createPermitNote', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const createSpy = jest.spyOn(permitNoteService, 'createPermitNote');
-
-  it('should return 201 if all good', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
-        permitId: 'PERMIT123',
-        note: 'This is a permit note.',
+        permitId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',
+        note: 'This is a permit note',
         isDeleted: false
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createSpy.mockResolvedValue(TEST_PERMIT_NOTE);
+    createPermitNoteSpy.mockResolvedValue(TEST_PERMIT_NOTE_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createPermitNoteController(req as any, res as any);
+    await createPermitNoteController(req as unknown as Request<never, never, PermitNote>, res as unknown as Response);
 
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
+    expect(createPermitNoteSpy).toHaveBeenCalledTimes(1);
+    expect(createPermitNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: 'abc-123'
+      permitNoteId: expect.stringMatching(uuidv4Pattern),
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_NOTE);
-  });
-
-  it('calls next if the permitNote service fails to create', async () => {
-    const req = {
-      body: {
-        permitId: 'PERMIT123',
-        note: 'This is a permit note.',
-        isDeleted: false
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    createSpy.mockImplementationOnce(() => {
-      throw new Error();
+    expect(res.json).toHaveBeenCalledWith({
+      ...TEST_PERMIT_NOTE_1,
+      permitNoteId: expect.stringMatching(uuidv4Pattern)
     });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createPermitNoteController(req as any, res as any);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: 'abc-123'
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
   });
 });

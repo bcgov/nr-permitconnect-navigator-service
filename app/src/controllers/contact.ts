@@ -21,7 +21,7 @@ export const getContactController = async (
   req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
   res: Response
 ) => {
-  const response = transactionWrapper<Contact>(async (tx: PrismaTransactionClient) => {
+  const response = await transactionWrapper<Contact>(async (tx: PrismaTransactionClient) => {
     const contactId = req.params.contactId;
     const includeActivities = isTruthy(req.query.includeActivities) ?? false;
     return await getContact(tx, contactId, includeActivities);

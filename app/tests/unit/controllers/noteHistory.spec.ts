@@ -12,10 +12,21 @@ import * as noteService from '../../../src/services/note';
 import * as noteHistoryService from '../../../src/services/noteHistory';
 import * as userService from '../../../src/services/user';
 import { Initiative } from '../../../src/utils/enums/application';
-import { BringForwardType, NoteType } from '../../../src/utils/enums/projectCommon';
-import { isoPattern } from '../../../src/utils/regexp';
+import { BringForwardType } from '../../../src/utils/enums/projectCommon';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
 
-import type { ElectrificationProject, Enquiry, HousingProject } from '../../../src/types';
+import type { Request, Response } from 'express';
+import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types';
+import {
+  TEST_CURRENT_CONTEXT,
+  TEST_ELECTRIFICATION_PROJECT_1,
+  TEST_IDIR_USER_1,
+  TEST_NOTE_1,
+  TEST_NOTE_HISTORY_1,
+  TEST_NOTE_HISTORY_2
+} from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -24,7 +35,7 @@ const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -41,579 +52,232 @@ const CURRENT_AUTHORIZATION = {
   attributes: [] as Array<string>
 };
 
-const CURRENT_CONTEXT = {
-  authType: 'BEARER',
-  tokenPayload: null,
-  userId: '11abbea6-2f3a-4ff3-8e55-b1e5290046f6',
-  initiative: Initiative.HOUSING
-};
+TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
-describe('createNoteHistory', () => {
-  const next = jest.fn();
-
-  const req = {
-    body: {
-      activityId: '123',
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      note: 'Note text',
-      shownToProponent: false,
-      title: 'Title',
-      type: NoteType.GENERAL
-    },
-    currentContext: CURRENT_CONTEXT
-  };
-
-  // Mock service calls
+describe('createNoteHistoryController', () => {
   const createHistorySpy = jest.spyOn(noteHistoryService, 'createNoteHistory');
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
 
-  it('should return 201 if all good', async () => {
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+  it('should call services and respond with 201 and result', async () => {
+    const req = {
+      body: { ...TEST_NOTE_HISTORY_1, note: 'Some text' },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.note,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
-    };
+    createHistorySpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
+    createNoteSpy.mockResolvedValue(TEST_NOTE_1);
 
-    createHistorySpy.mockResolvedValue(createdHistory);
-    createNoteSpy.mockResolvedValue(createdNote);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createNoteHistoryController(req as any, res as any);
+    await createNoteHistoryController(
+      req as unknown as Request<never, never, NoteHistory & { note: string }>,
+      res as unknown as Response
+    );
 
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
-    expect(createHistorySpy).toHaveBeenCalledWith({
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
+    expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...TEST_NOTE_HISTORY_1,
+      noteHistoryId: expect.stringMatching(uuidv4Pattern),
       isDeleted: false,
-      createdAt: expect.stringMatching(isoPattern),
+      createdAt: expect.any(Date),
       createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith({
-      noteHistoryId: createdHistory.noteHistoryId,
+    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
+      noteId: expect.stringMatching(uuidv4Pattern),
+      noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: req.currentContext.userId
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId,
+      ...generateNullUpdateStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
-  });
-
-  it('calls next if the note history service fails to create', async () => {
-    createHistorySpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createNoteHistoryController(req as any, res as any);
-
-    expect(createHistorySpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledTimes(0);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith({ ...TEST_NOTE_HISTORY_1, note: [TEST_NOTE_1] });
   });
 });
 
-describe('deleteNoteHistory', () => {
-  const next = jest.fn();
-
-  const req = {
-    params: { noteHistoryId: '123' },
-    currentContext: CURRENT_CONTEXT
-  };
-
-  // Mock service calls
+describe('deleteNoteHistoryController', () => {
   const deleteHistorySpy = jest.spyOn(noteHistoryService, 'deleteNoteHistory');
 
-  it('should return 200 if deletion is successful', async () => {
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
     deleteHistorySpy.mockResolvedValue();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await deleteNoteHistoryController(req as any, res as any);
+    await deleteNoteHistoryController(req as unknown as Request<{ noteHistoryId: string }>, res as unknown as Response);
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
-      updatedAt: expect.stringMatching(isoPattern),
+    expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
+      updatedAt: expect.any(Date),
       updatedBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
-
-  it('calls next if the note service fails to delete the note', async () => {
-    deleteHistorySpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await deleteNoteHistoryController(req as any, res as any);
-
-    expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(deleteHistorySpy).toHaveBeenCalledWith(req.params.noteHistoryId, {
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: req.currentContext.userId
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
 });
 
-describe('listBringForward', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('listBringForwardController', () => {
   const listSpy = jest.spyOn(noteHistoryService, 'listBringForward');
   const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
   const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
   const searchEnquiries = jest.spyOn(enquiryService, 'searchEnquiries');
   const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
 
-  const req = {
-    currentContext: CURRENT_CONTEXT,
-    query: {}
-  };
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      query: {
+        bringForwardState: BringForwardType.UNRESOLVED
+      },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
 
-  it('should return 200 if all good', async () => {
-    const noteList = [
-      {
-        activityId: '123',
-        bringForwardDate: new Date(),
-        bringForwardState: BringForwardType.UNRESOLVED,
-        escalateToSupervisor: false,
-        escalateToDirector: false,
-        escalationType: null,
-        note: [
-          {
-            noteId: '123',
-            noteHistoryId: '123',
-            note: 'Note text',
-            createdAt: new Date(),
-            createdBy: req.currentContext.userId,
-            updatedAt: null,
-            updatedBy: null
-          }
-        ],
-        noteHistoryId: '123',
-        shownToProponent: false,
-        title: 'Title',
-        type: NoteType.BRING_FORWARD,
-        isDeleted: false,
-        createdAt: new Date(),
-        createdBy: req.currentContext.userId,
-        updatedAt: null,
-        updatedBy: null
-      }
+    const NOTE_HISTORY_LIST: NoteHistory[] = [
+      { ...TEST_NOTE_HISTORY_1, createdBy: '5e3f0c19-8664-4a43-ac9e-210da336e923' }
     ];
 
-    const enquiriesList: Array<Enquiry> = [];
+    const ENQUIRY_LIST: Enquiry[] = [];
+    const ELECTRIFICATION_PROJECT_LIST: ElectrificationProject[] = [TEST_ELECTRIFICATION_PROJECT_1];
+    const HOUSING_PROJECT_LIST: HousingProject[] = [];
+    const USER_LIST = [TEST_IDIR_USER_1];
 
-    const electrificationList: Array<ElectrificationProject> = [];
+    listSpy.mockResolvedValue(NOTE_HISTORY_LIST);
+    searchElectrificationProjectsSpy.mockResolvedValue(ELECTRIFICATION_PROJECT_LIST);
+    searchHousingProjectsSpy.mockResolvedValue(HOUSING_PROJECT_LIST);
+    searchEnquiries.mockResolvedValue(ENQUIRY_LIST);
+    searchUsersSpy.mockResolvedValue(USER_LIST);
 
-    const housingList: Array<Partial<HousingProject>> = [
-      {
-        activityId: '123',
-        housingProjectId: '123',
-        projectName: 'Project ABC'
-      }
-    ];
-
-    const userList = [
-      {
-        userId: req.currentContext.userId,
-        fullName: 'Test User'
-      }
-    ];
-
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    listSpy.mockResolvedValue(noteList);
-    searchElectrificationProjectsSpy.mockResolvedValue(electrificationList as any);
-    searchHousingProjectsSpy.mockResolvedValue(housingList as any);
-    searchEnquiries.mockResolvedValue(enquiriesList as any);
-    searchUsersSpy.mockResolvedValue(userList as any);
-
-    await listBringForwardController(req as any, res as any);
-    /* eslint-enable @typescript-eslint/no-explicit-any */
+    await listBringForwardController(
+      req as unknown as Request<never, never, never, { bringForwardState?: BringForwardType }>,
+      res as unknown as Response
+    );
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
+    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, BringForwardType.UNRESOLVED);
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
+    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledWith({ activityId: ['123'] });
+    expect(searchHousingProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['11abbea6-2f3a-4ff3-8e55-b1e5290046f6'] });
+    expect(searchUsersSpy).toHaveBeenCalledWith(prismaTxMock, { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([
       {
-        activityId: '123',
-        noteId: '123',
-        electrificationProjectId: undefined,
-        housingProjectId: '123',
+        activityId: 'ACTI1234',
+        noteId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1',
+        electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+        housingProjectId: undefined,
         enquiryId: undefined,
         title: 'Title',
-        projectName: 'Project ABC',
-        createdByFullName: 'Test User',
-        bringForwardDate: noteList[0].bringForwardDate.toISOString()
+        projectName: 'NAME',
+        createdByFullName: 'Doe, John',
+        bringForwardDate: NOTE_HISTORY_LIST[0].bringForwardDate?.toISOString()
       }
     ]);
   });
-
-  it('calls next if the note service fails to list bring forward notes', async () => {
-    listSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listBringForwardController(req as any, res as any);
-
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING, undefined);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(0);
-    expect(searchUsersSpy).toHaveBeenCalledTimes(0);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
 });
 
-describe('listNoteHistory', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const listSpy = jest.spyOn(noteHistoryService, 'listNoteHistory');
+describe('listNoteHistoryController', () => {
+  const listNoteHistorySpy = jest.spyOn(noteHistoryService, 'listNoteHistory');
 
   const req = {
-    params: { activityId: '123' },
+    params: { activityId: 'ACTI1234' },
     currentAuthorization: CURRENT_AUTHORIZATION,
-    currentContext: CURRENT_CONTEXT
+    currentContext: TEST_CURRENT_CONTEXT
   };
 
-  it('should return 200 if all good', async () => {
-    const noteList = [
-      {
-        activityId: '123',
-        bringForwardDate: new Date(),
-        bringForwardState: BringForwardType.UNRESOLVED,
-        escalateToSupervisor: false,
-        escalateToDirector: false,
-        escalationType: null,
-        note: [
-          {
-            noteId: '123',
-            noteHistoryId: '123',
-            note: 'Note text',
-            createdAt: new Date(),
-            createdBy: req.currentContext.userId,
-            updatedAt: null,
-            updatedBy: null
-          }
-        ],
-        noteHistoryId: '123',
-        shownToProponent: false,
-        title: 'Title',
-        type: NoteType.BRING_FORWARD,
-        isDeleted: false,
-        createdAt: new Date(),
-        createdBy: req.currentContext.userId,
-        updatedAt: null,
-        updatedBy: null
-      }
-    ];
+  it('should call services and respond with 200 and result', async () => {
+    const NOTE_HISTORY_LIST: NoteHistory[] = [TEST_NOTE_HISTORY_1];
 
-    listSpy.mockResolvedValue(noteList);
+    listNoteHistorySpy.mockResolvedValue(NOTE_HISTORY_LIST);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listNoteHistoryController(req as any, res as any);
+    await listNoteHistoryController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
 
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(listNoteHistorySpy).toHaveBeenCalledTimes(1);
+    expect(listNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(noteList);
+    expect(res.json).toHaveBeenCalledWith(NOTE_HISTORY_LIST);
   });
 
   it('should filter results if scope:self and shownToProponent = true', async () => {
     req.currentAuthorization.attributes.push('scope:self');
 
-    const noteList = [
-      {
-        activityId: '123',
-        bringForwardDate: new Date(),
-        bringForwardState: BringForwardType.UNRESOLVED,
-        escalateToSupervisor: false,
-        escalateToDirector: false,
-        escalationType: null,
-        note: [
-          {
-            noteId: '123',
-            noteHistoryId: '123',
-            note: 'Note text',
-            createdAt: new Date(),
-            createdBy: req.currentContext.userId,
-            updatedAt: null,
-            updatedBy: null
-          }
-        ],
-        noteHistoryId: '123',
-        shownToProponent: true,
-        title: 'Title',
-        type: NoteType.BRING_FORWARD,
-        isDeleted: false,
-        createdAt: new Date(),
-        createdBy: req.currentContext.userId,
-        updatedAt: null,
-        updatedBy: null
-      },
-      {
-        activityId: '123',
-        bringForwardDate: new Date(),
-        bringForwardState: BringForwardType.UNRESOLVED,
-        escalateToSupervisor: false,
-        escalateToDirector: false,
-        escalationType: null,
-        note: [
-          {
-            noteId: '1234',
-            noteHistoryId: '1234',
-            note: 'Note text',
-            createdAt: new Date(),
-            createdBy: 'filter this',
-            updatedAt: null,
-            updatedBy: null
-          }
-        ],
-        noteHistoryId: '1234',
-        shownToProponent: false,
-        title: 'Title',
-        type: NoteType.BRING_FORWARD,
-        isDeleted: false,
-        createdAt: new Date(),
-        createdBy: 'filter this',
-        updatedAt: null,
-        updatedBy: null
-      }
-    ];
+    const NOTE_HISTORY_LIST: NoteHistory[] = [TEST_NOTE_HISTORY_1, TEST_NOTE_HISTORY_2];
 
-    listSpy.mockResolvedValue(noteList);
+    listNoteHistorySpy.mockResolvedValue(NOTE_HISTORY_LIST);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listNoteHistoryController(req as any, res as any);
+    await listNoteHistoryController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
 
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
+    expect(listNoteHistorySpy).toHaveBeenCalledTimes(1);
+    expect(listNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([noteList[0]]);
-  });
-
-  it('calls next if the note service fails to list notes', async () => {
-    listSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listNoteHistoryController(req as any, res as any);
-
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith([NOTE_HISTORY_LIST[1]]);
   });
 });
 
-describe('updateNoteHistory', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('updateNoteHistoryController', () => {
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
   const getNoteHistorySpy = jest.spyOn(noteHistoryService, 'getNoteHistory');
   const updateNoteHistorySpy = jest.spyOn(noteHistoryService, 'updateNoteHistory');
 
-  const req = {
-    body: {
-      activityId: '123',
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      note: undefined as string | undefined,
-      shownToProponent: false,
-      title: 'Title',
-      type: NoteType.GENERAL
-    },
-    currentContext: CURRENT_CONTEXT,
-    params: {
-      noteHistoryId: '123'
-    }
-  };
+  const UPDATED_HISTORY: NoteHistory = { ...TEST_NOTE_HISTORY_1, title: 'New title' };
 
-  it('should return 200 if update is successful', async () => {
-    const updatedHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      escalationType: req.body.escalationType,
-      noteHistoryId: req.params.noteHistoryId,
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: new Date(),
-      updatedBy: req.currentContext.userId
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      body: { ...UPDATED_HISTORY },
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: {
+        noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
+      }
     };
 
-    const list = {
-      ...updatedHistory,
-      note: [
-        {
-          noteId: '123',
-          noteHistoryId: '123',
-          note: 'Note text',
-          createdAt: new Date(),
-          createdBy: req.currentContext.userId,
-          updatedAt: null,
-          updatedBy: null
-        }
-      ]
-    };
+    getNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
+    updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
 
-    getNoteHistorySpy.mockResolvedValue(list);
-    updateNoteHistorySpy.mockResolvedValue(updatedHistory);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateNoteHistoryController(req as any, res as any);
+    await updateNoteHistoryController(
+      req as unknown as Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+      res as unknown as Response
+    );
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(updateNoteHistorySpy).toHaveBeenCalledWith({
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      escalationType: req.body.escalationType,
-      noteHistoryId: req.params.noteHistoryId,
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
-      isDeleted: false,
-      updatedAt: expect.stringMatching(isoPattern),
+    expect(updateNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...UPDATED_HISTORY,
+      updatedAt: expect.any(Date),
       updatedBy: req.currentContext.userId
     });
+    expect(getNoteHistorySpy).toHaveBeenCalledTimes(1);
+    expect(getNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(list);
-  });
-
-  it('calls next if the note service fails to update the note', async () => {
-    updateNoteHistorySpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateNoteHistoryController(req as any, res as any);
-
-    expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(updateNoteHistorySpy).toHaveBeenCalledWith({
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      escalationType: req.body.escalationType,
-      noteHistoryId: req.params.noteHistoryId,
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
-      isDeleted: false,
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: req.currentContext.userId
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(UPDATED_HISTORY);
   });
 
   it('creates a new note if given', async () => {
-    req.body.note = 'Note text';
-
-    const updatedHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: req.body.bringForwardDate,
-      bringForwardState: req.body.bringForwardState,
-      escalateToSupervisor: req.body.escalateToSupervisor,
-      escalateToDirector: req.body.escalateToDirector,
-      escalationType: req.body.escalationType,
-      noteHistoryId: req.params.noteHistoryId,
-      shownToProponent: req.body.shownToProponent,
-      title: req.body.title,
-      type: req.body.type,
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: new Date(),
-      updatedBy: req.currentContext.userId
+    const req = {
+      body: { ...UPDATED_HISTORY, note: 'Some text' },
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: {
+        noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
+      }
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.note,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
-    };
+    getNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
+    updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
 
-    const list = {
-      ...updatedHistory,
-      note: [createdNote]
-    };
-
-    getNoteHistorySpy.mockResolvedValue(list);
-    updateNoteHistorySpy.mockResolvedValue(updatedHistory);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await updateNoteHistoryController(req as any, res as any);
+    await updateNoteHistoryController(
+      req as unknown as Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+      res as unknown as Response
+    );
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith({
+    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
+      noteId: expect.stringMatching(uuidv4Pattern),
       noteHistoryId: req.params.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: req.currentContext.userId
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId,
+      ...generateNullUpdateStamps()
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(list);
+    expect(res.json).toHaveBeenCalledWith(UPDATED_HISTORY);
   });
 });

@@ -19,13 +19,11 @@ export const deletePermit = async (tx: PrismaTransactionClient, permitId: string
 };
 
 /**
- * @function deletePermitByActivity
  * Delete a permit
  * @param tx Prisma transaction client
  * @param activityId Activity ID to remove permits from
- * @returns {number} The result of running the deleteMany operation
+ * @returns The result of running the deleteMany operation
  */
-// TODO-PR: Drop this service function and add delete activity service calls to controller layer
 export const deletePermitsByActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<number> => {
   const response = await tx.permit.deleteMany({
     where: {

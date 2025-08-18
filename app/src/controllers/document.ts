@@ -15,27 +15,25 @@ export const createDocumentController = async (
   >,
   res: Response
 ) => {
-  const result = await transactionWrapper<Document & { createdByFullName?: string }>(
-    async (tx: PrismaTransactionClient) => {
-      const created = await createDocument(
-        tx,
-        req.body.documentId,
-        req.body.activityId,
-        req.body.filename,
-        req.body.mimeType,
-        req.body.length,
-        generateCreateStamps(req.currentContext)
-      );
+  const result = await transactionWrapper<Document>(async (tx: PrismaTransactionClient) => {
+    const created = await createDocument(
+      tx,
+      req.body.documentId,
+      req.body.activityId,
+      req.body.filename,
+      req.body.mimeType,
+      req.body.length,
+      generateCreateStamps(req.currentContext)
+    );
 
-      let createdByFullName: string | undefined;
-      if (created.createdBy) {
-        const user = await readUser(tx, created.createdBy);
-        createdByFullName = user ? (user.fullName ?? '') : '';
-      }
-
-      return { ...created, ...(createdByFullName ? { createdByFullName } : {}) };
+    let createdByFullName: string | undefined;
+    if (created.createdBy) {
+      const user = await readUser(tx, created.createdBy);
+      createdByFullName = user ? (user.fullName ?? '') : '';
     }
-  );
+
+    return { ...created, ...(createdByFullName ? { createdByFullName } : {}) };
+  });
 
   res.status(201).json(result);
 };
@@ -48,21 +46,19 @@ export const deleteDocumentController = async (req: Request<{ documentId: string
 };
 
 export const listDocumentsController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response = await transactionWrapper<(Document & { createdByFullName?: string })[]>(
-    async (tx: PrismaTransactionClient) => {
-      const documents: Document[] = await listDocuments(tx, req.params.activityId);
+  const response = await transactionWrapper<Document[]>(async (tx: PrismaTransactionClient) => {
+    const documents: Document[] = await listDocuments(tx, req.params.activityId);
 
-      const documentsWithNames: (Document & { createdByFullName?: string })[] = await Promise.all(
-        documents.map(async (doc) => {
-          if (!doc.createdBy) return doc;
-          const user = await readUser(tx, doc.createdBy);
-          return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
-        })
-      );
+    const documentsWithNames: Document[] = await Promise.all(
+      documents.map(async (doc) => {
+        if (!doc.createdBy) return doc;
+        const user = await readUser(tx, doc.createdBy);
+        return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
+      })
+    );
 
-      return documentsWithNames;
-    }
-  );
+    return documentsWithNames;
+  });
 
   res.status(200).json(response);
 };

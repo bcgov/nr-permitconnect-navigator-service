@@ -31,35 +31,6 @@ export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBa
 };
 
 /**
- * Deletes the enquiry, followed by the associated activity
- * This action will cascade delete across all linked items
- * @param tx Prisma transaction client
- * @param enquiryId Enquiry ID
- * @returns A Promise that will resolve to the deleted enquiry
- */
-export const deleteEnquiry = async (tx: PrismaTransactionClient, enquiryId: string): Promise<Enquiry> => {
-  // TODO-PR: Drop this service function, move project search to controller layer
-  // and add delete activity service call to controller layer
-  const response = await prisma.$transaction(async (trx) => {
-    const del = await trx.enquiry.delete({
-      where: {
-        enquiryId
-      }
-    });
-
-    await trx.activity.delete({
-      where: {
-        activityId: del.activityId
-      }
-    });
-
-    return del;
-  });
-
-  return response;
-};
-
-/**
  * Gets a list of enquiries
  * @param tx Prisma transaction client
  * @returns A Promise that resolves to an array of enquiries

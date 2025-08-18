@@ -4,15 +4,6 @@ import { getCurrentUsername } from '../utils/utils';
 import type { Request, Response } from 'express';
 import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types';
 
-export const searchATSUsersController = async (
-  req: Request<never, never, never, ATSUserSearchParameters>,
-  res: Response
-) => {
-  const response = await searchATSUsers(req.query);
-
-  res.status(response.status).json(response.data);
-};
-
 export const createATSClientController = async (
   req: Request<never, never, ATSClientResource, never>,
   res: Response
@@ -34,5 +25,13 @@ export const createATSEnquiryController = async (
   // Set the createdBy field to current user with \\ as the separator for the domain and username to match ATS DB
   atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(req.currentContext)}`;
   const response = await createATSEnquiry(atsEnquiry);
+  res.status(response.status).json(response.data);
+};
+
+export const searchATSUsersController = async (
+  req: Request<never, never, never, ATSUserSearchParameters>,
+  res: Response
+) => {
+  const response = await searchATSUsers(req.query);
   res.status(response.status).json(response.data);
 };

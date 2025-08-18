@@ -1,7 +1,5 @@
-import prisma from '../db/dataConnection';
-
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact } from '../types';
+import type { ActivityContact, Contact } from '../types';
 
 /**
  * Deletes activity_contact records that do not match the provided activityId and contacts
@@ -35,28 +33,25 @@ export const upsertActivityContacts = async (
   tx: PrismaTransactionClient,
   activityId: string,
   contacts: Array<Contact>
-): Promise<void> => {
-  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
-  return await prisma.$transaction(async (trx) => {
-    await Promise.all(
-      contacts.map(async (x: Contact) => {
-        await trx.activity_contact.upsert({
-          where: {
-            activityId_contactId: {
-              activityId: activityId,
-              contactId: x.contactId
-            }
-          },
-          update: {
-            activityId: activityId,
-            contactId: x.contactId
-          },
-          create: {
+): Promise<ActivityContact[]> => {
+  return await Promise.all(
+    contacts.map(async (x: Contact) => {
+      return await tx.activity_contact.upsert({
+        where: {
+          activityId_contactId: {
             activityId: activityId,
             contactId: x.contactId
           }
-        });
-      })
-    );
-  });
+        },
+        update: {
+          activityId: activityId,
+          contactId: x.contactId
+        },
+        create: {
+          activityId: activityId,
+          contactId: x.contactId
+        }
+      });
+    })
+  );
 };
