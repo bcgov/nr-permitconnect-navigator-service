@@ -16,12 +16,13 @@ import type { Email, EmailAttachment } from '../types';
  * Send an email with the roadmap data
  */
 export const sendRoadmapController = async (
-  req: Request<never, never, { activityId: string; selectedFileIds: Array<string>; emailData: Email }>,
+  req: Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
   res: Response
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const response = await transactionWrapper<{ data: any; status: number }>(async (tx: PrismaTransactionClient) => {
     if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
-      const attachments: Array<EmailAttachment> = [];
+      const attachments: EmailAttachment[] = [];
 
         if (req.currentContext?.bearerToken) {
           // Attempt to get the requested documents from COMS

@@ -1,3 +1,4 @@
+import { TEST_CURRENT_CONTEXT } from '../data';
 import {
   createATSClientController,
   createATSEnquiryController,
@@ -5,11 +6,14 @@ import {
 } from '../../../src/controllers/ats';
 import * as atsService from '../../../src/services/ats';
 
+import type { Request, Response } from 'express';
+import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types';
+
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
+  const res: { status?: jest.Mock; json?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
 
@@ -25,15 +29,10 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
-
 describe('createATSClientController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const createSpy = jest.spyOn(atsService, 'createATSClient');
 
-  it('should return 201 if all good', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
         '@type': 'ClientResource',
@@ -50,7 +49,7 @@ describe('createATSClientController', () => {
         regionName: 'HOUSING',
         optOutOfBCStatSurveyInd: 'NO'
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const created = {
@@ -74,58 +73,23 @@ describe('createATSClientController', () => {
 
     createSpy.mockResolvedValue(created);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createATSClientController(req as any, res as any);
+    await createATSClientController(
+      req as unknown as Request<never, never, ATSClientResource, never>,
+      res as unknown as Response
+    );
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
       ...req.body
     });
     expect(res.status).toHaveBeenCalledWith(201);
-  });
-
-  it('calls next if the ats service fails to create', async () => {
-    const req = {
-      body: {
-        '@type': 'ClientResource',
-        address: {
-          '@type': 'AddressResource',
-          addressLine1: null,
-          city: null,
-          provinceCode: null,
-          primaryPhone: '(213) 213-2132',
-          email: 's@s.com'
-        },
-        firstName: 'Gill',
-        surName: 'Bates',
-        optOutOfBCStatSurveyInd: 'NO'
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    createSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createATSClientController(req as any, res as any);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('createATSEnquiryController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const createSpy = jest.spyOn(atsService, 'createATSEnquiry');
 
-  it('should return 201 if all good', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
         '@type': 'EnquiryResource',
@@ -141,7 +105,7 @@ describe('createATSEnquiryController', () => {
         enquiryTypeCodes: ['Project Intake'],
         createdBy: 'IDIR\\DONNY'
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const created = {
@@ -164,8 +128,10 @@ describe('createATSEnquiryController', () => {
 
     createSpy.mockResolvedValue(created);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createATSEnquiryController(req as any, res as any);
+    await createATSEnquiryController(
+      req as unknown as Request<never, never, ATSEnquiryResource, never>,
+      res as unknown as Response
+    );
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith({
@@ -173,52 +139,15 @@ describe('createATSEnquiryController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(201);
   });
-
-  it('calls next if the ats service fails to create', async () => {
-    const req = {
-      body: {
-        '@type': 'EnquiryResource',
-        clientId: 256432,
-        contactFirstName: 'PCNS BusinessTester',
-        contactSurname: 'k12',
-        regionName: 'Navigator',
-        subRegionalOffice: 'Navigator',
-        enquiryFileNumbers: ['B8D4B783'],
-        enquiryPartnerAgencies: ['Housing'],
-        enquiryMethodCodes: ['PCNS'],
-        notes: 'dsdsa',
-        enquiryTypeCodes: ['Project Intake'],
-        createdBy: 'IDIR\\DONNY'
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    createSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await createATSEnquiryController(req as any, res as any);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe('searchATSUsersController', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const searchATSUsersSpy = jest.spyOn(atsService, 'searchATSUsers');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
       query: { firstName: 'John' },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const atsUsers = {
@@ -294,29 +223,10 @@ describe('searchATSUsersController', () => {
     searchATSUsersSpy.mockResolvedValue(atsUsers);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchATSUsersController(req as any, res as any);
+    await searchATSUsersController(req as any, res as unknown as Response);
 
     expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });
     expect(res.status).toHaveBeenCalledWith(200);
-  });
-
-  it('calls next if the ats service fails to get ats users', async () => {
-    const req = {
-      query: { firstName: 'John' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    searchATSUsersSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchATSUsersController(req as any, res as any);
-
-    expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
   });
 });

@@ -19,18 +19,16 @@ export const createActivity = async (
   initiative: string,
   createStamp: Partial<IStamps>
 ): Promise<Activity> => {
-  // TODO-PR: Rewrite service call to only call one service, move initiative search up to controller layer.
-  const response = await prisma.$transaction(async (trx) => {
-    const initiativeResult = await trx.initiative.findFirstOrThrow({ where: { code: initiative } });
+  // TODO-PR: Move initiative search up to controller layer.
+  const initiativeResult = await tx.initiative.findFirstOrThrow({ where: { code: initiative } });
 
-    return await trx.activity.create({
-      data: {
-        activityId: await generateUniqueActivityId(trx),
-        initiativeId: initiativeResult.initiativeId,
-        createdAt: createStamp.createdAt,
-        createdBy: createStamp.createdBy
-      }
-    });
+  const response = await tx.activity.create({
+    data: {
+      activityId: await generateUniqueActivityId(tx),
+      initiativeId: initiativeResult.initiativeId,
+      createdAt: createStamp.createdAt,
+      createdBy: createStamp.createdBy
+    }
   });
 
   return response;

@@ -269,58 +269,58 @@ export type Group = {
 } & Partial<IStamps>;
 
 export type HousingProjectIntake = {
-  activityId?: string;
-  draftId?: string;
-  submittedAt?: string;
+  activityId: string | null;
+  draftId: string | null;
+  submittedAt: string | null;
   applicationStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
 
-  basic?: {
-    consentToFeedback?: boolean;
-    projectApplicantType?: string | null;
-    isDevelopedInBc?: string | null;
-    registeredName?: string;
+  basic: {
+    consentToFeedback: boolean;
+    projectApplicantType: string | null;
+    isDevelopedInBc: string | null;
+    registeredName: string | null;
   };
 
-  housing?: {
-    projectName?: string;
-    projectDescription?: string;
-    singleFamilyUnits?: string;
-    multiFamilyUnits?: string;
-    otherUnitsDescription?: string;
-    otherUnits?: string | null;
-    hasRentalUnits?: string | null;
-    financiallySupportedBc?: string | null;
-    financiallySupportedIndigenous?: string | null;
-    financiallySupportedNonProfit?: string | null;
-    financiallySupportedHousingCoop?: string | null;
-    rentalUnits?: string;
-    indigenousDescription?: string;
-    nonProfitDescription?: string;
-    housingCoopDescription?: string;
+  housing: {
+    projectName: string;
+    projectDescription: string;
+    singleFamilyUnits: string;
+    multiFamilyUnits: string;
+    otherUnitsDescription: string | null;
+    otherUnits: string;
+    hasRentalUnits: string;
+    financiallySupportedBc: string;
+    financiallySupportedIndigenous: string;
+    financiallySupportedNonProfit: string;
+    financiallySupportedHousingCoop: string;
+    rentalUnits: string;
+    indigenousDescription: string | null;
+    nonProfitDescription: string | null;
+    housingCoopDescription: string | null;
   };
 
-  location?: {
-    naturalDisaster?: string;
-    projectLocation?: string;
-    projectLocationDescription?: string;
-    geomarkUrl?: string | null;
+  location: {
+    naturalDisaster: string;
+    projectLocation: string;
+    projectLocationDescription: string;
+    geomarkUrl: string | null;
     geoJson: Prisma.JsonValue;
-    ltsaPidLookup?: string;
-    latitude?: number | null;
-    longitude?: number | null;
-    streetAddress?: string;
-    locality?: string;
-    province?: string;
+    ltsaPidLookup: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    streetAddress: string;
+    locality: string;
+    province: string;
   };
 
-  permits?: {
+  permits: {
     hasAppliedProvincialPermits?: string | null;
   };
 
-  appliedPermits?: Permit[];
-  investigatePermits?: Permit[];
-  contacts?: Contact[];
+  appliedPermits: Permit[];
+  investigatePermits: Permit[];
+  contacts: Contact[];
 };
 
 export type HousingProjectSearchParameters = {

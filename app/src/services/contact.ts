@@ -1,8 +1,7 @@
-import prisma from '../db/dataConnection';
 import { generateCreateStamps } from '../db/utils/utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, ContactSearchParameters, CurrentContext } from '../types';
+import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types';
 
 /**
  * Deletes a specific contact from the PCNS database
@@ -42,22 +41,19 @@ export const getContact = async (
  */
 export const insertContacts = async (
   tx: PrismaTransactionClient,
-  data: Array<Contact>,
+  data: Array<ContactBase>,
   currentContext: CurrentContext
-): Promise<void> => {
-  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
-  return await prisma.$transaction(async (trx) => {
-    await Promise.all(
-      data.map(async (x: Contact) => {
-        await trx.contact.create({
-          data: {
-            ...x,
-            ...generateCreateStamps(currentContext)
-          }
-        });
-      })
-    );
-  });
+): Promise<Contact[]> => {
+  return await Promise.all(
+    data.map(async (x: ContactBase) => {
+      return await tx.contact.create({
+        data: {
+          ...x,
+          ...generateCreateStamps(currentContext)
+        }
+      });
+    })
+  );
 };
 
 /**
@@ -135,16 +131,10 @@ export const searchContacts = async (
       ]
     },
     include: {
-      user: {
-        select: {
-          bceidBusinessName: true
-        }
-      },
+      user: true,
       ...(params.includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {})
     }
   });
-
-  if (!response || response.length === 0) return [];
 
   return response;
 };
@@ -156,19 +146,14 @@ export const searchContacts = async (
  * @param activityId - The ID of the activity to associated the contacts with
  * @returns A promise that resolves when the operation is complete
  */
-export const upsertContacts = async (tx: PrismaTransactionClient, data: Array<Contact>): Promise<Contact[]> => {
-  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
-  return await prisma.$transaction(async (trx) => {
-    return await Promise.all(
-      data.map(async (x: Contact) => {
-        const response = await trx.contact.upsert({
-          where: { contactId: x.contactId },
-          update: x,
-          create: x
-        });
-
-        return response;
-      })
-    );
-  });
+export const upsertContacts = async (tx: PrismaTransactionClient, data: Array<ContactBase>): Promise<Contact[]> => {
+  return await Promise.all(
+    data.map(async (x: ContactBase) => {
+      return await tx.contact.upsert({
+        where: { contactId: x.contactId },
+        update: x,
+        create: x
+      });
+    })
+  );
 };

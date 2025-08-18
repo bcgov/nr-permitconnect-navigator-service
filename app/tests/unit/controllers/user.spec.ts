@@ -1,6 +1,8 @@
 import { searchUsersController } from '../../../src/controllers/user';
 import * as userService from '../../../src/services/user';
 
+import type { Response } from 'express';
+
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
 
@@ -56,7 +58,7 @@ describe('searchUsersController', () => {
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchUsersController(req as any, res as any);
+    await searchUsersController(req as any, res as unknown as Response);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({
@@ -75,7 +77,7 @@ describe('searchUsersController', () => {
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchUsersController(req as any, res as any);
+    await searchUsersController(req as any, res as unknown as Response);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({
@@ -94,7 +96,7 @@ describe('searchUsersController', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchUsersController(req as any, res as any);
+    await searchUsersController(req as any, res as unknown as Response);
 
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchUsersSpy).toHaveBeenCalledWith({

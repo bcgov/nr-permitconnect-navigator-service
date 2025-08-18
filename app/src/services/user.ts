@@ -7,6 +7,7 @@ import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/util
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Contact, IdentityProvider, User } from '../types/models';
 import type { UserSearchParameters } from '../types/stuff';
+import { Problem } from '../utils';
 
 /**
  * The User DB Service
@@ -71,7 +72,6 @@ const createIdp = async (tx: PrismaTransactionClient, idp: string): Promise<Iden
  * @returns A Promise that resolves into the created user
  */
 export const createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
-  // TODO-PR: Keep logical function or split and move up to controller?
   // Logical function
   const _createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
     const exists = await tx.user.findFirst({
@@ -150,13 +150,11 @@ export const listIdps = async (tx: PrismaTransactionClient, active: boolean): Pr
  * Create a contact entry if necessary
  * @param tx Prisma transaction client
  * @param token The decoded JWT token payload
- * @returns {Promise<object>} The result of running the login operation
+ * @returns A Promise that resolves to the logged in user
  */
 export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload): Promise<User> => {
   const newUser = _tokenToUser(token);
 
-  // TODO-PR: Leave multiple db calls in function?
-  // Or pull out into controller layer to call multiple services and contain logic?
   const oldUser = await tx.user.findFirst({
     where: {
       sub: newUser.sub
@@ -165,7 +163,6 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
 
   const response = !oldUser ? await createUser(tx, newUser) : await updateUser(tx, oldUser.userId, newUser);
 
-  // TODO-PR: If leaving multiple db calls in function, should these be service calls or prisma calls?
   // Create initial contact entry
   if (response) {
     const oldContact: Array<Contact> = await searchContacts(tx, {
@@ -278,7 +275,6 @@ export const searchUsers = async (tx: PrismaTransactionClient, params: UserSearc
  * @returns A Promise that resolves into the updated user
  */
 const updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
-  // TODO-PR: Keep multiple service calls or split and move up to controller??
   // Check if any user values have changed
   const oldUser = await readUser(tx, userId);
   const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
@@ -315,7 +311,6 @@ const updateUser = async (tx: PrismaTransactionClient, userId: string, data: Jwt
   } else {
     // Nothing to update
     if (oldUser) return oldUser;
-    // TODO-PR: Correct handling if old user not found?
-    else throw new Error('User not found');
+    else throw new Problem(404, { detail: 'User not found' });
   }
 };

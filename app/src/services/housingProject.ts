@@ -1,14 +1,7 @@
-import axios from 'axios';
-import config from 'config';
 import { Prisma } from '@prisma/client';
 
-import prisma from '../db/dataConnection';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { Initiative } from '../utils/enums/application';
-import { ApplicationStatus } from '../utils/enums/projectCommon';
-import { getChefsApiKey } from '../utils/utils';
 
-import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { IStamps } from '../interfaces/IStamps';
 import type {
@@ -17,20 +10,6 @@ import type {
   HousingProjectSearchParameters,
   HousingProjectStatistics
 } from '../types';
-
-/**
- * Returns an Axios instance for the CHEFS API
- * @param options Axios request config options
- * @returns An axios instance
- */
-function chefsAxios(formId: string, options: AxiosRequestConfig = {}): AxiosInstance {
-  return axios.create({
-    baseURL: config.get('server.chefs.apiPath'),
-    timeout: 10000,
-    auth: { username: formId, password: getChefsApiKey(formId) ?? '' },
-    ...options
-  });
-}
 
 /**
  * Creates a new housing project
@@ -60,88 +39,6 @@ export const createHousingProject = async (
     }
   });
   return response;
-};
-
-/**
- * @function createHousingProjectsFromExport
- * Creates the given activities and housing projects from exported CHEFS data
- * @param tx Prisma transaction client
- * @param housingProjects Array of housing projects
- * @returns The result of running the transaction
- */
-export const createHousingProjectsFromExport = async (
-  tx: PrismaTransactionClient,
-  housingProjects: Array<Partial<HousingProject>>
-) => {
-  // TODO-PR: Rewrite service call to use tx client param, move transaction up to controller layer.
-  await prisma.$transaction(async (trx) => {
-    const initiative = await trx.initiative.findFirstOrThrow({
-      where: {
-        code: Initiative.HOUSING
-      }
-    });
-
-    await trx.activity.createMany({
-      data: housingProjects.map((x) => ({
-        activityId: x.activityId as string,
-        initiativeId: initiative.initiativeId,
-        isDeleted: false
-      }))
-    });
-
-    await trx.housing_project.createMany({
-      data: housingProjects.map((x) => ({
-        housingProjectId: x.housingProjectId as string,
-        activityId: x.activityId as string,
-        applicationStatus: ApplicationStatus.NEW,
-        companyNameRegistered: x.companyNameRegistered,
-        financiallySupported: x.financiallySupported,
-        financiallySupportedBc: x.financiallySupportedBc,
-        financiallySupportedIndigenous: x.financiallySupportedIndigenous,
-        financiallySupportedNonProfit: x.financiallySupportedNonProfit,
-        financiallySupportedHousingCoop: x.financiallySupportedHousingCoop,
-        hasAppliedProvincialPermits: x.hasAppliedProvincialPermits,
-        housingCoopDescription: x.housingCoopDescription,
-        indigenousDescription: x.indigenousDescription,
-        projectApplicantType: x.projectApplicantType,
-        isDevelopedInBc: x.isDevelopedInBc,
-        intakeStatus: x.intakeStatus,
-        locationPids: x.locationPids,
-        latitude: parseFloat(x.latitude as unknown as string),
-        locality: x.locality,
-        longitude: parseFloat(x.longitude as unknown as string),
-        naturalDisaster: x.naturalDisaster,
-        nonProfitDescription: x.nonProfitDescription,
-        projectLocation: x.projectLocation,
-        projectName: x.projectName,
-        projectDescription: x.projectDescription,
-        province: x.province,
-        queuePriority: x.queuePriority,
-        rentalUnits: x.rentalUnits?.toString(),
-        singleFamilyUnits: x.singleFamilyUnits,
-        multiFamilyUnits: x.multiFamilyUnits,
-        otherUnits: x.otherUnits,
-        otherUnitsDescription: x.otherUnitsDescription,
-        hasRentalUnits: x.hasRentalUnits,
-        streetAddress: x.streetAddress,
-        submittedAt: new Date(x.submittedAt ?? Date.now()),
-        submittedBy: x.submittedBy as string
-      }))
-    });
-  });
-};
-
-/**
- * @function getFormExport
- * Gets a full data export for the requested CHEFS form
- * @param {string} formId CHEFS form id
- * @returns {Promise<any>} The result of running the get operation
- */
-export const getFormExport = async (formId: string) => {
-  const response = await chefsAxios(formId).get(`forms/${formId}/export`, {
-    params: { format: 'json', type: 'submissions' }
-  });
-  return response.data;
 };
 
 /**

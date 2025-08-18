@@ -3,7 +3,12 @@ import * as emailService from '../../../src/services/email';
 import * as noteHistoryService from '../../../src/services/noteHistory';
 import * as noteService from '../../../src/services/note';
 import { sendRoadmapController } from '../../../src/controllers/roadmap';
-import { isoPattern } from '../../../src/utils/regexp';
+import type { Request, Response } from 'express';
+import { TEST_CURRENT_CONTEXT, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data';
+import { Email, Note, NoteHistory } from '../../../src/types';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
+import { generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -25,21 +30,16 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', bearerToken: 'sometoken', tokenPayload: null, userId: 'abc-123' };
-
 describe('send', () => {
-  const next = jest.fn();
-
-  // Mock service calls
   const emailSpy = jest.spyOn(emailService, 'email');
   const getObjectSpy = jest.spyOn(comsService, 'getObject');
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
   const createHistorySpy = jest.spyOn(noteHistoryService, 'createNoteHistory');
 
-  it('should return 201 if all good', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
-        activityId: '123-123',
+        activityId: 'ACTI1234',
         emailData: {
           body: 'Some message text',
           bodyType: 'text',
@@ -48,35 +48,18 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Roadmap',
-      type: 'Sent roadmap',
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdHistory: NoteHistory = {
+      ...TEST_NOTE_HISTORY_1,
+      type: 'Roadmap',
+      title: 'Sent roadmap'
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.emailData.body,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdNote: Note = {
+      ...TEST_NOTE_1,
+      note: req.body.emailData.body
     };
 
     const emailResponse = {
@@ -88,8 +71,10 @@ describe('send', () => {
     createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
+    await sendRoadmapController(
+      req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
+      res as unknown as Response
+    );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
@@ -101,7 +86,7 @@ describe('send', () => {
   it('should create a note on success', async () => {
     const req = {
       body: {
-        activityId: '123-123',
+        activityId: 'ACTI1234',
         emailData: {
           body: 'Some message text',
           bodyType: 'text',
@@ -110,7 +95,7 @@ describe('send', () => {
           subject: 'Unit tests'
         }
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const emailResponse = {
@@ -118,61 +103,45 @@ describe('send', () => {
       status: 201
     };
 
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Sent roadmap',
+    const createdHistory: NoteHistory = {
+      ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+      title: 'Sent roadmap'
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.emailData.body,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdNote: Note = {
+      ...TEST_NOTE_1,
+      note: req.body.emailData.body
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
+    await sendRoadmapController(
+      req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
+      res as unknown as Response
+    );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
-    expect(createHistorySpy).toHaveBeenCalledWith({
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      shownToProponent: false,
-      title: createdHistory.title,
-      type: createdHistory.type,
-      isDeleted: false,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: createdHistory.createdBy
+    expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...createdHistory,
+      noteHistoryId: expect.stringMatching(uuidv4Pattern),
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith({ noteHistoryId: createdNote.noteHistoryId, note: createdNote.note });
+    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
+      noteId: expect.stringMatching(uuidv4Pattern),
+      noteHistoryId: createdNote.noteHistoryId,
+      note: createdNote.note,
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId,
+      ...generateNullUpdateStamps()
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
   });
@@ -180,7 +149,7 @@ describe('send', () => {
   it('should get coms objects and attach', async () => {
     const req = {
       body: {
-        activityId: '123-123',
+        activityId: 'ACTI1234',
         selectedFileIds: ['123', '456'],
         emailData: {
           body: 'Some message text',
@@ -204,7 +173,7 @@ describe('send', () => {
           ]
         }
       },
-      currentContext: CURRENT_CONTEXT,
+      currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' },
       headers: {}
     };
 
@@ -222,32 +191,15 @@ describe('send', () => {
       status: 201
     };
 
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Roadmap',
-      type: 'Sent roadmap',
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdHistory: NoteHistory = {
+      ...TEST_NOTE_HISTORY_1,
+      type: 'Roadmap',
+      title: 'Sent roadmap'
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.emailData.body,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdNote: Note = {
+      ...TEST_NOTE_1,
+      note: req.body.emailData.body
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
@@ -255,8 +207,10 @@ describe('send', () => {
     getObjectSpy.mockResolvedValue(getObjectResponse);
     emailSpy.mockResolvedValue(emailResponse);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
+    await sendRoadmapController(
+      req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
+      res as unknown as Response
+    );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
@@ -270,7 +224,7 @@ describe('send', () => {
   it('should not call COMS without a bearer token', async () => {
     const req = {
       body: {
-        activityId: '123-123',
+        activityId: 'ACTI1234',
         selectedFileIds: ['123', '456'],
         emailData: {
           body: 'Some message text',
@@ -294,7 +248,7 @@ describe('send', () => {
           ]
         }
       },
-      currentContext: { ...CURRENT_CONTEXT, bearerToken: null },
+      currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: null },
       headers: {}
     };
 
@@ -303,40 +257,25 @@ describe('send', () => {
       status: 201
     };
 
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Roadmap',
-      type: 'Sent roadmap',
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdHistory: NoteHistory = {
+      ...TEST_NOTE_HISTORY_1,
+      type: 'Roadmap',
+      title: 'Sent roadmap'
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: req.body.emailData.body,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdNote: Note = {
+      ...TEST_NOTE_1,
+      note: req.body.emailData.body
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     emailSpy.mockResolvedValue(emailResponse);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
+    await sendRoadmapController(
+      req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
+      res as unknown as Response
+    );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
@@ -348,7 +287,7 @@ describe('send', () => {
   it('should append attachments to note', async () => {
     const req = {
       body: {
-        activityId: '123-123',
+        activityId: 'ACTI1234',
         selectedFileIds: ['123', '456'],
         emailData: {
           body: 'Some message text',
@@ -372,7 +311,7 @@ describe('send', () => {
           ]
         }
       },
-      currentContext: CURRENT_CONTEXT,
+      currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' },
       headers: {}
     };
 
@@ -402,32 +341,15 @@ describe('send', () => {
     const note1 = `${getObjectResponse1.headers['x-amz-meta-name']}\n`;
     const note2 = `${getObjectResponse2.headers['x-amz-meta-name']}\n`;
 
-    const createdHistory = {
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      noteHistoryId: '123',
-      shownToProponent: false,
-      title: 'Sent roadmap',
+    const createdHistory: NoteHistory = {
+      ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
-      isDeleted: false,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+      title: 'Sent roadmap'
     };
 
-    const createdNote = {
-      noteId: '123',
-      noteHistoryId: '123',
-      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`,
-      createdAt: new Date(),
-      createdBy: req.currentContext.userId,
-      updatedAt: null,
-      updatedBy: null
+    const createdNote: Note = {
+      ...TEST_NOTE_1,
+      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
@@ -436,8 +358,10 @@ describe('send', () => {
     getObjectSpy.mockResolvedValueOnce(getObjectResponse1);
     getObjectSpy.mockResolvedValueOnce(getObjectResponse2);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
+    await sendRoadmapController(
+      req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
+      res as unknown as Response
+    );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
@@ -445,121 +369,22 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
-    expect(createHistorySpy).toHaveBeenCalledWith({
-      activityId: req.body.activityId,
-      bringForwardDate: null,
-      bringForwardState: null,
-      escalateToSupervisor: false,
-      escalateToDirector: false,
-      escalationType: null,
-      shownToProponent: false,
-      title: createdHistory.title,
-      type: createdHistory.type,
-      isDeleted: false,
-      createdAt: expect.stringMatching(isoPattern),
-      createdBy: createdHistory.createdBy
+    expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
+      ...createdHistory,
+      noteHistoryId: expect.stringMatching(uuidv4Pattern),
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith({ noteHistoryId: createdNote.noteHistoryId, note: createdNote.note });
+    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
+      noteId: expect.stringMatching(uuidv4Pattern),
+      noteHistoryId: createdNote.noteHistoryId,
+      note: createdNote.note,
+      createdAt: expect.any(Date),
+      createdBy: req.currentContext.userId,
+      ...generateNullUpdateStamps()
+    });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
-  });
-
-  it('should call next if COMS fails', async () => {
-    const req = {
-      body: {
-        activityId: '123-123',
-        selectedFileIds: ['123', '456'],
-        emailData: {
-          body: 'Some message text',
-          bodyType: 'text',
-          from: 'test@gov.bc.ca',
-          to: 'hello@gov.bc.ca',
-          subject: 'Unit tests',
-          attachments: [
-            {
-              content: Buffer.from('foo').toString('base64'),
-              contentType: 'filetype',
-              encoding: 'base64',
-              filename: 'foo'
-            },
-            {
-              content: Buffer.from('foo').toString('base64'),
-              contentType: 'filetype',
-              encoding: 'base64',
-              filename: 'bar'
-            }
-          ]
-        }
-      },
-      currentContext: CURRENT_CONTEXT,
-      headers: {}
-    };
-
-    getObjectSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
-
-    expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
-    expect(emailSpy).toHaveBeenCalledTimes(0);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-
-  it('should call next if a filename is not found', async () => {
-    const req = {
-      body: {
-        activityId: '123-123',
-        selectedFileIds: ['123', '456'],
-        emailData: {
-          body: 'Some message text',
-          bodyType: 'text',
-          from: 'test@gov.bc.ca',
-          to: 'hello@gov.bc.ca',
-          subject: 'Unit tests',
-          attachments: [
-            {
-              content: Buffer.from('foo').toString('base64'),
-              contentType: 'filetype',
-              encoding: 'base64',
-              filename: 'foo'
-            },
-            {
-              content: Buffer.from('foo').toString('base64'),
-              contentType: 'filetype',
-              encoding: 'base64',
-              filename: 'bar'
-            }
-          ]
-        }
-      },
-      currentContext: CURRENT_CONTEXT,
-      headers: {}
-    };
-
-    const getObjectResponse = {
-      data: 'foo',
-      headers: {
-        'content-type': 'filetype'
-      },
-      status: 200
-    };
-
-    getObjectSpy.mockResolvedValue(getObjectResponse);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await sendRoadmapController(req as any, res as any);
-
-    expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
-    expect(emailSpy).toHaveBeenCalledTimes(0);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
   });
 });

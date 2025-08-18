@@ -1,13 +1,19 @@
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_1, TEST_PERMIT_LIST, TEST_PERMIT_TYPE_LIST } from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
   deletePermitController,
+  getPermitController,
   getPermitTypesController,
   listPermitsController,
   upsertPermitController
 } from '../../../src/controllers/permit';
 import * as permitService from '../../../src/services/permit';
-import { Permit, PermitType } from '../../../src/types';
 import { Initiative } from '../../../src/utils/enums/application';
-import { isoPattern, uuidv4Pattern } from '../../../src/utils/regexp';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
+import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
+
+import type { Request, Response } from 'express';
+import type { ListPermitsOptions, Permit } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -16,7 +22,7 @@ const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -29,168 +35,101 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
-
-const TEST_PERMIT: Permit = {
-  permitId: '12345',
-  permitTypeId: 123,
-  activityId: 'ACT_ID',
-  issuedPermitId: '1',
-  authStatus: 'ACTIVE',
-  needed: 'true',
-  status: 'FOO',
-  submittedDate: new Date(),
-  adjudicationDate: new Date(),
-  statusLastVerified: new Date(),
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
-const PERMIT_LIST: Permit[] = [TEST_PERMIT];
-
-const TEST_PERMIT_TYPE: PermitType = {
-  permitTypeId: 123,
-  agency: 'SOME_AGENCY',
-  division: 'SOME_DIVISION',
-  branch: 'SOME_BRANCH',
-  businessDomain: 'DOMAIN',
-  type: 'ABC',
-  family: null,
-  name: 'PERMIT1',
-  nameSubtype: null,
-  acronym: 'PRT1',
-  infoUrl: 'https://example.com/permit1',
-  trackedInAts: true,
-  sourceSystem: 'CODE',
-  createdAt: null,
-  createdBy: null,
-  updatedAt: null,
-  updatedBy: null
-};
-
-const PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE];
-
-describe('deletePermit', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('deletePermitController', () => {
   const deleteSpy = jest.spyOn(permitService, 'deletePermit');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 204', async () => {
     const req = {
-      params: { permitId: 'abc123' },
-      currentContext: CURRENT_CONTEXT
+      params: { permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066' },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     deleteSpy.mockResolvedValue();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await deletePermitController(req as any, res as any);
+    await deletePermitController(req as unknown as Request<{ permitId: string }>, res as unknown as Response);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(req.params.permitId);
+    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.permitId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
+});
 
-  it('calls next if the permit service fails to delete', async () => {
+describe('getPermitController', () => {
+  const getSpy = jest.spyOn(permitService, 'getPermit');
+
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { permitId: 'abc123' },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: { permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066' }
     };
 
-    deleteSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
+    getSpy.mockResolvedValue(TEST_PERMIT_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await deletePermitController(req as any, res as any);
+    await getPermitController(req as unknown as Request<{ permitId: string }>, res as unknown as Response);
 
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(req.params.permitId);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(prismaTxMock, '1381438d-0c7a-46bf-8ae2-d1febbf27066');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_1);
   });
 });
 
-describe('getPermitTypes', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('getPermitTypesController', () => {
   const permitTypesSpy = jest.spyOn(permitService, 'getPermitTypes');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: CURRENT_CONTEXT,
+      currentContext: TEST_CURRENT_CONTEXT,
       query: { initiative: Initiative.HOUSING }
     };
 
-    permitTypesSpy.mockResolvedValue(PERMIT_TYPE_LIST);
+    permitTypesSpy.mockResolvedValue(TEST_PERMIT_TYPE_LIST);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getPermitTypesController(req as any, res as any);
+    await getPermitTypesController(
+      req as unknown as Request<never, never, never, { initiative: Initiative }>,
+      res as unknown as Response
+    );
 
     expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
+    expect(permitTypesSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(PERMIT_TYPE_LIST);
-  });
-
-  it('calls next if the permit service fails to get permit types', async () => {
-    const req = {
-      currentContext: CURRENT_CONTEXT,
-      query: { initiative: Initiative.HOUSING }
-    };
-
-    permitTypesSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await getPermitTypesController(req as any, res as any);
-
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith(Initiative.HOUSING);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_TYPE_LIST);
   });
 });
 
-describe('listPermits', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('listPermitsController', () => {
   const listSpy = jest.spyOn(permitService, 'listPermits');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { activityId: 'ACT_ID' },
-      currentContext: CURRENT_CONTEXT
+      query: { activityId: 'ACTI1234' },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    listSpy.mockResolvedValue(PERMIT_LIST);
+    listSpy.mockResolvedValue(TEST_PERMIT_LIST);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listPermitsController(req as any, res as any);
+    await listPermitsController(
+      req as unknown as Request<never, never, never, Partial<ListPermitsOptions>>,
+      res as unknown as Response
+    );
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.query);
+    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(PERMIT_LIST);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_LIST);
   });
 
-  it('should return 200 and include notes if requested', async () => {
+  it('should include notes if requested', async () => {
     const now = new Date();
     const req = {
-      query: { activityId: 'ACT_ID', includeNotes: 'true' },
-      currentContext: CURRENT_CONTEXT
+      query: { activityId: 'ACTI1234', includeNotes: 'true' },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
     const permitList = [
       {
-        ...TEST_PERMIT,
+        ...TEST_PERMIT_1,
         permitNotes: [
           {
             permitNoteId: 'NOTE123',
@@ -205,111 +144,54 @@ describe('listPermits', () => {
 
     listSpy.mockResolvedValue(permitList);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listPermitsController(req as any, res as any);
+    await listPermitsController(
+      req as unknown as Request<never, never, never, Partial<ListPermitsOptions>>,
+      res as unknown as Response
+    );
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith({
-      activityId: 'ACT_ID',
+    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, {
+      activityId: 'ACTI1234',
       includeNotes: true
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(permitList);
   });
-
-  it('calls next if the permit service fails to list permits', async () => {
-    const req = {
-      query: { activityId: 'ACT_ID' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    listSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await listPermitsController(req as any, res as any);
-
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.query);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
 });
 
-describe('upsertPermit', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('upsertPermitController', () => {
   const updateSpy = jest.spyOn(permitService, 'upsertPermit');
 
-  it('should return 200 if all good', async () => {
+  it('should call services and respond with 200 and result', async () => {
     const now = new Date();
     const req = {
       body: {
         permitType: 'ABC',
-        permitTypeId: '123',
-        activityId: 'ACT_ID',
+        permitTypeId: 1,
+        activityId: '165E5F7F',
         issuedPermitId: '1',
         trackingId: '2',
-        authStatus: 'ACTIVE',
-        needed: 'true',
-        status: 'FOO',
+        authStatus: PermitAuthorizationStatus.IN_REVIEW,
+        needed: PermitNeeded.YES,
+        status: PermitStatus.NEW,
         submittedDate: now,
         adjudicationDate: now
       },
-      currentContext: CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    updateSpy.mockResolvedValue(TEST_PERMIT);
+    updateSpy.mockResolvedValue(TEST_PERMIT_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await upsertPermitController(req as any, res as any);
+    await upsertPermitController(req as unknown as Request<never, never, Permit>, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({
+    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
       permitId: expect.stringMatching(uuidv4Pattern),
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT);
-  });
-
-  it('calls next if the permit service fails to update', async () => {
-    const now = new Date();
-    const req = {
-      body: {
-        permitType: 'ABC',
-        permitTypeId: '123',
-        activityId: 'ACT_ID',
-        issuedPermitId: '1',
-        trackingId: '2',
-        authStatus: 'ACTIVE',
-        needed: 'true',
-        status: 'FOO',
-        submittedDate: now,
-        adjudicationDate: now
-      },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    updateSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await upsertPermitController(req as any, res as any);
-
-    expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith({
-      ...req.body,
-      permitId: expect.stringMatching(uuidv4Pattern),
-      updatedAt: expect.stringMatching(isoPattern),
-      updatedBy: 'abc-123'
-    });
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_1);
   });
 });

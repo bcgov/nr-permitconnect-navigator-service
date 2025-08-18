@@ -2,11 +2,11 @@ import express from 'express';
 
 import {
   createHousingProjectController,
-  deleteDraftController,
+  deleteHousingProjectDraftController,
   emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
-  getDraftController,
-  getDraftsController,
+  getHousingProjectDraftController,
+  getHousingProjectDraftsController,
   getHousingProjectController,
   getHousingProjectsController,
   getHousingProjectStatisticsController,
@@ -57,11 +57,11 @@ router.get(
   '/draft/:draftId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
   hasAccess('draftId'),
-  getDraftController
+  getHousingProjectDraftController
 );
 
 /** Gets a housing project draft */
-router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getDraftsController);
+router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
 router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), updateHousingProjectDraftController);
@@ -96,7 +96,7 @@ router.delete(
   hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),
   hasAccess('draftId'),
   housingProjectValidator.deleteDraft,
-  deleteDraftController
+  deleteHousingProjectDraftController
 );
 
 /** Gets a specific housing project */
