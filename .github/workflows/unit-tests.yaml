@@ -96,7 +96,7 @@ jobs:
           path: ${{ github.workspace }}/app/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '22.x' && ! github.event.pull_request.head.repo.fork"
+        if: "matrix.node-version == '22.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
         uses: slavcodev/coverage-monitor-action@398c4cbbb710e549a8407fdef96ae8b9454d0463 # 1.10.0
         with:
           comment_mode: update
@@ -162,7 +162,7 @@ jobs:
           path: ${{ github.workspace }}/frontend/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '22.x' && ! github.event.pull_request.head.repo.fork"
+        if: "matrix.node-version == '22.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
         uses: slavcodev/coverage-monitor-action@398c4cbbb710e549a8407fdef96ae8b9454d0463 # 1.10.0
         with:
           comment_mode: update
