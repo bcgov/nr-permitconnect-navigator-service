@@ -13,8 +13,8 @@ import type { Ref } from 'vue';
 import type { SourceSystemKind } from '@/types';
 
 // Props
-const { expandPanel } = defineProps<{
-  expandPanel?: boolean;
+const { editable } = defineProps<{
+  editable?: boolean;
 }>();
 
 // Emits
@@ -56,10 +56,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <Panel
-    toggleable
-    :collapsed="expandPanel"
-  >
+  <Panel toggleable>
     <template #header>
       <h3>{{ t('authorization.authorizationCardIntake.authorizationTypeID') }}</h3>
     </template>
@@ -70,6 +67,7 @@ onBeforeMount(async () => {
         :placeholder="t('authorization.authorizationCardIntake.selectAuthorization')"
         :options="getPermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+        :disabled="!editable"
       />
       <div class="mt-5 mb-3 font-bold text-[var(--p-bcblue-900)]">
         {{ t('authorization.authorizationCardIntake.trackingIds') }}
@@ -95,21 +93,25 @@ onBeforeMount(async () => {
                 :options="sourceSystemKinds"
                 :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
                 option-value="sourceSystemKindId"
+                :disabled="!editable"
               />
               <InputText
                 :name="`permitTracking[${idx}].trackingId`"
                 :placeholder="t('authorization.authorizationCardIntake.typeNumber')"
+                :disabled="!editable"
               />
               <div class="flex">
                 <Checkbox
                   :name="`permitTracking[${idx}].shownToProponent`"
                   :label="t('authorization.authorizationCardIntake.shownToProponent')"
                   :checked="`permitTracking[${idx}].shownToProponent`"
+                  :disabled="!editable"
                   @change="emit('update:uncheckShownToProponent', idx)"
                 />
                 <Button
                   class="p-button-lg p-button-text p-button-danger ml-7"
                   aria-label="Delete tracking ID"
+                  :disabled="!editable"
                   @click="remove(idx)"
                 >
                   <font-awesome-icon icon="fa-solid fa-trash" />
@@ -121,6 +123,7 @@ onBeforeMount(async () => {
           <Button
             class="p-button mt-2"
             aria-label="Add an ID"
+            :disabled="!editable"
             @click="push({ sourceSystemKindId: undefined, trackingId: '', shownToProponent: false })"
           >
             <font-awesome-icon
@@ -135,6 +138,7 @@ onBeforeMount(async () => {
         <InputText
           name="issuedPermitId"
           :label="t('authorization.authorizationCardIntake.issuedPermitId')"
+          :disabled="!editable"
         />
       </div>
     </div>

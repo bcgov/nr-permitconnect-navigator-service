@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
-import { userService } from '@/services';
 import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 
-import type { Ref } from 'vue';
 import type { Permit } from '@/types';
 
 // Props
@@ -20,21 +17,6 @@ const emit = defineEmits(['authorizationCardLite:more']);
 
 // Composables
 const { t } = useI18n();
-
-// State
-const cardUpdatedBy: Ref<string> = ref('');
-
-// Actions
-watchEffect(() => {
-  if (permit.updatedBy) {
-    userService
-      .searchUsers({ userId: [permit.updatedBy] })
-      .then((res) => {
-        cardUpdatedBy.value = res?.data.length ? res?.data[0].fullName : '';
-      })
-      .catch(() => {});
-  }
-});
 </script>
 
 <template>

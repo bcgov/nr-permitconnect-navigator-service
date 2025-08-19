@@ -504,10 +504,10 @@ onBeforeMount(async () => {
             :index="index"
             class="my-2"
           >
-            <AuthorizationCardLite
+            <AuthorizationCard
               :editable="!isCompleted"
               :permit="permit"
-              @authorization-card-lite:more="toAuthorization(permit.permitId)"
+              @authorization-card:more="toAuthorization(permit.permitId)"
             />
           </div>
         </div>
