@@ -94,6 +94,16 @@ export const useProjectStore = defineStore('project', () => {
     }),
     getDocuments: computed(() => state.documents.value),
     getNoteHistory: computed(() => state.noteHistory.value),
+    // Get array of note history that is shown to the proponent in descending order of creation date of the note
+    getNoteHistoryShownToProponent: computed(() => {
+      return state.noteHistory.value
+        .filter((noteHistory) => noteHistory.shownToProponent)
+        .sort((a, b) => {
+          const aCreatedAt = a.note[0].createdAt!;
+          const bCreatedAt = b.note[0].createdAt!;
+          return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
+        });
+    }),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
     getProject: computed(() => state.project.value)
