@@ -24,6 +24,7 @@ const sampleContact: Contact = {
   updatedBy: 'testUpdatedAt',
   updatedAt: new Date().toISOString()
 };
+
 const sampleContactSearchParameters: ContactSearchParameters = {
   contactApplicantRelationship: 'applicant',
   contactPreference: 'email',
@@ -70,6 +71,6 @@ describe('contactService', () => {
     contactService.updateContact(sampleContact);
 
     expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith(`contact/${sampleContact.contactId}`, sampleContact);
+    expect(putSpy).toHaveBeenCalledWith('contact', sampleContact);
   });
 });

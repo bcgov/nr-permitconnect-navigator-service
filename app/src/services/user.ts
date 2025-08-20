@@ -2,12 +2,13 @@ import jwt from 'jsonwebtoken';
 import { v4 as uuidv4, NIL } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact';
+import { IdentityProvider as enumIDP } from '../utils/enums/application';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
+import { Problem } from '../utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Contact, IdentityProvider, User } from '../types/models';
 import type { UserSearchParameters } from '../types/stuff';
-import { Problem } from '../utils';
 
 /**
  * The User DB Service
@@ -53,7 +54,7 @@ const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
  * @param idp The identity provider code
  * @returns A Promise that resolves into the created identity provider
  */
-const createIdp = async (tx: PrismaTransactionClient, idp: string): Promise<IdentityProvider> => {
+export const createIdp = async (tx: PrismaTransactionClient, idp: string): Promise<IdentityProvider> => {
   const obj = {
     idp: idp,
     active: true,
@@ -169,11 +170,26 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
       userId: [response.userId as string]
     });
     if (!oldContact.length) {
+      // BCeID crams the entire name into firstName
+      // Parse first word into first name and rest into last name
+      // This does not guarantee name correctness, but a null last name breaks ATS
+      let firstNameOverride: string | null = null,
+        lastNameOverride: string | null = null;
+      if ([enumIDP.BCEID, enumIDP.BCEIDBUSINESS].includes(newUser.idp as enumIDP)) {
+        const split = newUser.firstName?.indexOf(' ');
+        if (newUser.firstName && split && split > 0) {
+          firstNameOverride = newUser.firstName.substring(0, split);
+          lastNameOverride = newUser.firstName.substring(split + 1);
+        } else {
+          firstNameOverride = newUser.firstName;
+        }
+      }
+
       const newContact: Contact = {
         contactId: uuidv4(),
         userId: response.userId as string,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
+        firstName: firstNameOverride ?? newUser.firstName,
+        lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options
         email: newUser.email,
         phoneNumber: null,
         contactApplicantRelationship: null,
@@ -194,7 +210,7 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
  * @param code The identity provider code
  * @returns A Promise that resolves into the unique identity provider or null if not found
  */
-const readIdp = async (tx: PrismaTransactionClient, code: string): Promise<IdentityProvider | null> => {
+export const readIdp = async (tx: PrismaTransactionClient, code: string): Promise<IdentityProvider | null> => {
   const response = await tx.identity_provider.findUnique({
     where: {
       idp: code
@@ -274,7 +290,7 @@ export const searchUsers = async (tx: PrismaTransactionClient, params: UserSearc
  * @param data Incoming user data
  * @returns A Promise that resolves into the updated user
  */
-const updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
+export const updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
   // Check if any user values have changed
   const oldUser = await readUser(tx, userId);
   const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);

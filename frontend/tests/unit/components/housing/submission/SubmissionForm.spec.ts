@@ -174,7 +174,7 @@ describe('SubmissionForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(19);
+    expect(elements.length).toBe(15);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -184,7 +184,7 @@ describe('SubmissionForm.vue', () => {
 
     // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(21);
+    expect(elements.length).toBe(16);
   });
 
   it('renders the correct amount of datepickers components', async () => {
@@ -202,7 +202,7 @@ describe('SubmissionForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(1);
+    expect(elements.length).toBe(0);
   });
 
   it('renders the correct amount of text area components', async () => {
@@ -241,7 +241,7 @@ describe('SubmissionForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(23);
+    expect(elements.length).toBe(19);
   });
 
   it('geojson download btn not visible when no geojson', async () => {

@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import helmet from 'helmet';
 import yaml from 'js-yaml';
 import { join } from 'path';
+
 import docs from '../../docs/docs';
 
 const router = Router();

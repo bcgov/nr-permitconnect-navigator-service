@@ -650,7 +650,6 @@ paths:
       tags:
         - Electrification Enquiry
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -880,40 +879,7 @@ paths:
       tags:
         - Electrification Permit
       parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
-      responses:
-        '200':
-          description: Permit updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Upsert a permit
-      operationId: upsertElectrificationPermit
-      tags:
-        - Electrification Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
+        - $ref: '#/components/parameters/Path-PermitId'
       responses:
         '200':
           description: Permit updated successfully
@@ -1254,7 +1220,6 @@ paths:
       tags:
         - Electrification Project
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -1732,7 +1697,6 @@ paths:
       tags:
         - Housing Enquiry
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -1962,43 +1926,10 @@ paths:
       tags:
         - Housing Permit
       parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
+        - $ref: '#/components/parameters/Path-PermitId'
       responses:
         '200':
           description: Permit upserted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Upsert a permit
-      operationId: upsertHousingPermit
-      tags:
-        - Housing Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '200':
-          description: Permit updated successfully
           content:
             application/json:
               schema:
@@ -2336,7 +2267,6 @@ paths:
       tags:
         - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -2677,14 +2607,6 @@ components:
       schema:
         type: boolean
         example: true
-      description: >-
-        Whether to include records where the related activity is flagged as deleted.
-        When true, both deleted and non-deleted entities are returned.
-        When false (default), only non-deleted entities are returned.
-      required: false
-      schema:
-        type: boolean
-        example: false
     Query-SubmissionType:
       in: query
       name: submissionType
