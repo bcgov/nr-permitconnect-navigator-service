@@ -217,7 +217,7 @@ describe('SubmissionIntakeForm', () => {
     const basicTest = createProjectIntakeSchema(['testString3']).validateAt('basic', {
       basic: {
         projectApplicantType: ProjectApplicant.BUSINESS,
-        isDevelopedInBC: BasicResponse.NO,
+        isDevelopedInBc: BasicResponse.NO,
         registeredName: 'testString3'
       }
     });
@@ -227,7 +227,7 @@ describe('SubmissionIntakeForm', () => {
         projectName: 'testString1',
         projectDescription: 'testString2',
         hasRentalUnits: 'Yes',
-        financiallySupportedBC: 'No',
+        financiallySupportedBc: 'No',
         financiallySupportedIndigenous: 'No',
         financiallySupportedNonProfit: 'No',
         financiallySupportedHousingCoop: 'No',
