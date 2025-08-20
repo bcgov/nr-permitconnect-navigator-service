@@ -16,17 +16,39 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  tests-preflight:
+    name: Preflight Check
+    runs-on: ubuntu-latest
+    outputs:
+      PR_EXISTS: ${{ steps.pr-check.outputs.PR_EXISTS }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Short circuit if open PR exists for this branch (on push)
+        id: pr-check
+        if: github.event_name == 'push'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sleep 10
+          prs=$(gh pr list --head "${{ github.ref_name }}" --state open --repo "${{ github.repository }}" --json number --jq '.[].number')
+          if [ -n "$prs" ]; then
+            echo "PR_EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "PR_EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+
   test-app:
     name: Unit Tests (App)
+    needs: tests-preflight
+    if: needs.tests-preflight.outputs.PR_EXISTS != 'true'
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     defaults:
       run:
         working-directory: app
     outputs:
-      HAS_CC_SECRETS: ${{ steps.check-secrets.outputs.HAS_CC_SECRETS }}
+      HAS_SONAR_SECRETS: ${{ steps.check-secrets.outputs.HAS_SONAR_SECRETS }}
     timeout-minutes: 10
     strategy:
       fail-fast: true
@@ -37,10 +59,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Check CodeClimate Secrets
+      - name: Check Sonar Secrets
         id: check-secrets
         run: |
-          echo "HAS_CC_SECRETS=${{ secrets.CC_TEST_REPORTER_ID != '' }}" >> $GITHUB_OUTPUT
+          echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_APP != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -74,8 +96,8 @@ jobs:
           path: ${{ github.workspace }}/app/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '22.x' && ! github.event.pull_request.head.repo.fork"
-        uses: slavcodev/coverage-monitor-action@v1
+        if: "matrix.node-version == '22.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
+        uses: slavcodev/coverage-monitor-action@398c4cbbb710e549a8407fdef96ae8b9454d0463 # 1.10.0
         with:
           comment_mode: update
           comment_footer: false
@@ -87,15 +109,14 @@ jobs:
 
   test-frontend:
     name: Unit Tests (Frontend)
+    needs: tests-preflight
+    if: needs.tests-preflight.outputs.PR_EXISTS != 'true'
     runs-on: ubuntu-latest
-    if: |
-      github.event_name == 'push' ||
-      (github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == true)
     defaults:
       run:
         working-directory: frontend
     outputs:
-      HAS_CC_SECRETS: ${{ steps.check-secrets.outputs.HAS_CC_SECRETS }}
+      HAS_SONAR_SECRETS: ${{ steps.check-secrets.outputs.HAS_SONAR_SECRETS }}
     timeout-minutes: 10
     strategy:
       fail-fast: true
@@ -106,10 +127,10 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
-      - name: Check CodeClimate Secrets
+      - name: Check Sonar Secrets
         id: check-secrets
         run: |
-          echo "HAS_CC_SECRETS=${{ secrets.CC_TEST_REPORTER_ID != '' }}" >> $GITHUB_OUTPUT
+          echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_FRONTEND != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
@@ -141,8 +162,8 @@ jobs:
           path: ${{ github.workspace }}/frontend/coverage
           retention-days: 1
       - name: Monitor Coverage
-        if: "matrix.node-version == '22.x' && ! github.event.pull_request.head.repo.fork"
-        uses: slavcodev/coverage-monitor-action@v1
+        if: "matrix.node-version == '22.x' &&  github.event_name == 'pull_request' && ! github.event.pull_request.head.repo.fork"
+        uses: slavcodev/coverage-monitor-action@398c4cbbb710e549a8407fdef96ae8b9454d0463 # 1.10.0
         with:
           comment_mode: update
           comment_footer: false
@@ -152,24 +173,50 @@ jobs:
           threshold_alert: 50
           threshold_warning: 80
 
-  test-coverage:
-    name: Publish to Code Climate
+  test-coverage-app:
+    name: Publish App Coverage to SonarCloud
     needs:
       - test-app
-      - test-frontend
-    if: needs.test-app.outputs.HAS_CC_SECRETS == 'true'
+    if: needs.test-app.outputs.HAS_SONAR_SECRETS == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
       - name: Restore Coverage Results
-        uses: actions/download-artifact@v4
-      - name: Publish code coverage
-        uses: paambaati/codeclimate-action@v9
-        env:
-          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        uses: actions/download-artifact@v4.3.0
         with:
-          coverageLocations: |
-            ${{ github.workspace }}/**/lcov.info:lcov
-          prefix: ${{ github.workplace }}
+          name: coverage-app
+          path: ${{ github.workspace }}/app/coverage
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9 # v5.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_APP }}
+        with:
+          projectBaseDir: app
+
+  test-coverage-frontend:
+    name: Publish Frontend Coverage to SonarCloud
+    needs:
+      - test-frontend
+    if: needs.test-frontend.outputs.HAS_SONAR_SECRETS == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+      - name: Restore Coverage Results
+        uses: actions/download-artifact@v4.3.0
+        with:
+          name: coverage-frontend
+          path: ${{ github.workspace }}/frontend/coverage
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@8c71dc039c2dd71d3821e89a2b58ecc7fee6ced9 # v5.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
+        with:
+          projectBaseDir: frontend

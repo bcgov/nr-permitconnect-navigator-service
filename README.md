@@ -3,11 +3,30 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Lifecycle:Experimental](https://img.shields.io/badge/Lifecycle-Experimental-339999)](https://github.com/bcgov/repomountie/blob/master/doc/lifecycle-badges.md)
 
-![Tests](https://github.com/bcgov/nr-permitconnect-navigator-service/workflows/Tests/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/maintainability)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/77078c9bd93bd99d5840/test_coverage)](https://codeclimate.com/github/bcgov/nr-permitconnect-navigator-service/test_coverage)
+[![Tests](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/unit-tests.yaml/badge.svg)](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/unit-tests.yaml)
+[![CodeQL](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/bcgov/nr-permitconnect-navigator-service/actions/workflows/github-code-scanning/codeql)
 
-NR PermitConnect Navigator Service
+App
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_app&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_app)
+
+Frontend
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=bcgov-sonarcloud_nr-permitconnect-navigator-service_frontend)
+
+Permit Connect Navigator Service, a case management system for the proponents and staff who use or support the Navigator Service
 
 ## Directory Structure
 
@@ -63,14 +82,14 @@ You can quickly run this application in development mode after cloning by openin
 - Create `.env` in the root directory with the following
   - `DATABASE_URL="your_connection_string"`
 
-```
+```sh
 cd app
 npm i
 npm run prisma:migrate
 npm run serve
 ```
 
-```
+```sh
 cd frontend
 npm i
 npm run serve
