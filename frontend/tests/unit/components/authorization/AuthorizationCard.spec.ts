@@ -55,6 +55,7 @@ const testPermit: Permit = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   permitType: testPermitType,
+  permitTypeId: testPermitType.permitTypeId,
   permitNote: [],
   permitTracking: []
 };
