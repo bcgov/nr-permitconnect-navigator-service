@@ -63,7 +63,7 @@ onBeforeMount(() => {
             class="p-button-outlined"
             aria-label="Edit"
             :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-            @click="noteModalVisible = true"
+            @click="noteHistoryModalVisible = true"
           >
             <font-awesome-icon
               class="pr-2"
@@ -84,27 +84,13 @@ onBeforeMount(() => {
           />
           Edit
         </Button>
-      </div>
-      <Divider type="solid" />
-    </template>
-    <template #content>
-      <div class="grid grid-cols-4 gap-4">
-        <p>
-          <span class="key font-bold">Date:</span>
-          {{ formatDateShort(noteHistory.createdAt) }}
-        </p>
-        <p>
-          <span class="key font-bold">Author:</span>
-          {{ userName }}
-        </p>
-        <p>
-          <span class="key font-bold">Note type:</span>
-          {{ noteHistory.type }}
-        </p>
-        <div>
-          <p v-if="noteHistory.bringForwardDate">
-            <span class="key font-bold">Bring forward date:</span>
-            {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <div class="grid grid-cols-4 gap-4">
+          <p>
+            <span class="key font-bold">Date:</span>
+            {{ formatDateShort(noteHistory.createdAt) }}
           </p>
           <p>
             <span class="key font-bold">Author:</span>
@@ -119,24 +105,38 @@ onBeforeMount(() => {
               <span class="key font-bold">Bring forward date:</span>
               {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
             </p>
+            <p>
+              <span class="key font-bold">Author:</span>
+              {{ userName }}
+            </p>
+            <p>
+              <span class="key font-bold">Note type:</span>
+              {{ noteHistory.type }}
+            </p>
+            <div>
+              <p v-if="noteHistory.bringForwardDate">
+                <span class="key font-bold">Bring forward date:</span>
+                {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
+              </p>
+            </div>
+            <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0]?.note }}</p>
           </div>
-          <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0]?.note }}</p>
         </div>
       </template>
     </Card>
 
-  <NoteHistoryModal
+    <NoteHistoryModal
       v-if="noteHistory"
-    v-model:visible="noteHistoryModalVisible"
-    :activity-id="noteHistory.activityId"
-    :note-history="noteHistory"
-    @delete-note-history="
-      (history: NoteHistory) => {
-        emit('deleteNoteHistory', history);
-      }
-    "
-    @update-note-history="(history: NoteHistory) => emit('updateNoteHistory', history)"
-  />
+      v-model:visible="noteHistoryModalVisible"
+      :activity-id="noteHistory.activityId"
+      :note-history="noteHistory"
+      @delete-note-history="
+        (history: NoteHistory) => {
+          emit('deleteNoteHistory', history);
+        }
+      "
+      @update-note-history="(history: NoteHistory) => emit('updateNoteHistory', history)"
+    />
   </div>
 </template>
 

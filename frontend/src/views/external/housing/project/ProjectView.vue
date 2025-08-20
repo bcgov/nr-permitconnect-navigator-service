@@ -7,10 +7,12 @@ import { useRouter } from 'vue-router';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import AuthorizationCardProponent from '@/components/authorization/AuthorizationCardProponent.vue';
 import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
-import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
+import NoteBanner from '@/components/note/NoteBanner.vue';
+import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
+import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
@@ -43,7 +45,7 @@ const {
   getAuthsNeeded,
   getAuthsNotNeeded,
   getAuthsOnGoing,
-  getNoteHistory,
+  getNoteHistoryShownToProponent,
   getProject,
   getRelatedEnquiries
 } = storeToRefs(projectStore);
@@ -154,70 +156,61 @@ onBeforeMount(async () => {
         :value="activeTab"
         class="mt-3"
       >
-        <TabList>
-          <Tab :value="0">
-            <font-awesome-icon
-              class="mr-2 ellipsis-icon"
-              icon="fa-solid fa-file"
-            />
-            {{ t('e.common.projectView.tabAuthorizations') }}
-          </Tab>
-          <Tab :value="1">
-            <font-awesome-icon
-              class="mr-2 ellipsis-icon"
-              icon="fa-solid fa-file-circle-question"
-            />
-            {{ t('i.common.projectView.tabRelatedEnquiries') }}
-          </Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel :value="0">
-            <BasicProjectInfoCard
-              :assignee="assigneeName"
-              :created-by="createdByName"
-              :activity-id="getProject.activityId"
-              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
-            />
-            <div
-              v-if="getNoteHistory.length"
-              class="bg-[var(--p-green-100)] p-4"
-            >
-              <div class="grid grid-cols-6 gap-4 items-center">
-                <div class="font-bold">{{ t('e.common.projectView.beAware') }}</div>
-                <div class="font-bold">
-                  Updated on {{ formatDate(getNoteHistory[0]!.updatedAt ?? getNoteHistory[0]!.createdAt) }}
-                </div>
-                <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0]!.note[0]!.note }}</div>
-                <div class="flex justify-end">
-                  <Button
-                    class="p-button-sm header-btn"
-                    label="View all"
-                    outlined
-                    @click="noteHistoryVisible = true"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="disclaimer-block p-8 mt-8">
-              {{ t('e.common.projectView.disclaimer') }}
-            </div>
-
-            <div>
-              <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
-            </div>
-            <div
-              v-if="!getAuthsNeeded?.length"
-              class="empty-block p-8 mb-2"
-            >
-              {{ t('e.common.projectView.requiredAuthsEmpty') }}
-            </div>
-            <RequiredAuths
-              v-if="getAuthsNeeded?.length"
-              :auths-needed="getAuthsNeeded"
-              :auths-not-needed="getAuthsNotNeeded"
-            />
-            <h3 class="mt-20 mb-8">{{ t('e.common.projectView.ongoingAuths') }}</h3>
+        <AskMyNavigator />
+        {{ t('e.common.projectView.askMyNavigator') }}
+      </Button>
+    </div>
+    <Tabs
+      :value="activeTab"
+      class="mt-3"
+    >
+      <TabList>
+        <Tab :value="0">
+          <font-awesome-icon
+            class="mr-2 ellipsis-icon"
+            icon="fa-solid fa-file"
+          />
+          {{ t('e.common.projectView.tabAuthorizations') }}
+        </Tab>
+        <Tab :value="1">
+          <font-awesome-icon
+            class="mr-2 ellipsis-icon"
+            icon="fa-solid fa-file-circle-question"
+          />
+          {{ t('i.common.projectView.tabRelatedEnquiries') }}
+        </Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel :value="0">
+          <BasicProjectInfoCard
+            :assignee="assigneeName"
+            :created-by="createdByName"
+            :activity-id="getProject.activityId"
+            @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+          />
+          <NoteBanner
+            v-if="getNoteHistoryShownToProponent.length"
+            :note="getNoteHistoryShownToProponent[0].note[0]"
+            @note-banner:show-history="noteHistoryVisible = true"
+          />
+          <div class="disclaimer-block p-8 mt-8">
+            {{ t('e.common.projectView.disclaimer') }}
+          </div>
+          <div>
+            <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
+          </div>
+          <div
+            v-if="!getAuthsNeeded?.length"
+            class="empty-block p-8 mb-2"
+          >
+            {{ t('e.common.projectView.requiredAuthsEmpty') }}
+          </div>
+          <RequiredAuths
+            v-if="getAuthsNeeded?.length"
+            :auths-needed="getAuthsNeeded"
+            :auths-not-needed="getAuthsNotNeeded"
+          />
+          <h3 class="mt-20 mb-8">{{ t('e.common.projectView.ongoingAuths') }}</h3>
 
             <router-link
               v-for="permit in getAuthsOnGoing"
@@ -284,34 +277,20 @@ onBeforeMount(async () => {
                 :project-id="projectId"
               />
             </div>
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </div>
-
-    <Dialog
-      v-model:visible="noteHistoryVisible"
-      :draggable="false"
-      :modal="true"
-      class="app-info-dialog w-6/12"
-    >
-      <template #header>
-        <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
-      </template>
-
-      <div
-        v-for="history of getNoteHistory"
-        :key="history.noteHistoryId"
-        class="mb-5"
-      >
-        <div class="flex flex-col">
-          <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
-          <div class="font-bold">{{ history.title }}</div>
-          <div>{{ history.note[0]!.note }}</div>
-        </div>
-      </div>
-    </Dialog>
+            <RelatedEnquiryListProponent
+              :loading="loading"
+              :enquiries="getRelatedEnquiries"
+              :project-id="projectId"
+            />
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
   </div>
+  <ShownToProponentModal
+    v-model:visible="noteHistoryVisible"
+    :note-history="getNoteHistoryShownToProponent"
+  />
 </template>
 
 <style scoped lang="scss">
