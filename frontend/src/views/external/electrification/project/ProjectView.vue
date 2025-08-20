@@ -7,10 +7,12 @@ import { useRouter } from 'vue-router';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import AuthorizationCardProponent from '@/components/authorization/AuthorizationCardProponent.vue';
 import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
-import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
+import NoteBanner from '@/components/note/NoteBanner.vue';
+import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
+import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import {
   contactService,
   enquiryService,
@@ -49,7 +51,7 @@ const {
   getAuthsNeeded,
   getAuthsNotNeeded,
   getAuthsOnGoing,
-  getNoteHistory,
+  getNoteHistoryShownToProponent,
   getProject,
   getRelatedEnquiries
 } = storeToRefs(projectStore);
@@ -186,6 +188,11 @@ onBeforeMount(async () => {
             :activity-id="getProject.activityId"
             @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
           />
+          <NoteBanner
+            v-if="getNoteHistoryShownToProponent.length"
+            :note="getNoteHistoryShownToProponent[0].note[0]"
+            @note-banner:show-history="noteHistoryVisible = true"
+          />
 
           <div
             v-if="getNoteHistory.length"
@@ -297,29 +304,10 @@ onBeforeMount(async () => {
       </TabPanels>
     </Tabs>
   </div>
-
-  <Dialog
+  <ShownToProponentModal
     v-model:visible="noteHistoryVisible"
-    :draggable="false"
-    :modal="true"
-    class="app-info-dialog w-6/12"
-  >
-    <template #header>
-      <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
-    </template>
-
-    <div
-      v-for="history of getNoteHistory"
-      :key="history.noteHistoryId"
-      class="mb-5"
-    >
-      <div class="flex flex-col">
-        <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
-        <div class="font-bold">{{ history.title }}</div>
-        <div>{{ history.note[0].note }}</div>
-      </div>
-    </div>
-  </Dialog>
+    :note-history="getNoteHistoryShownToProponent"
+  />
 </template>
 
 <style scoped lang="scss">

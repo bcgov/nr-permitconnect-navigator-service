@@ -10,7 +10,7 @@ export type NoteHistory = {
   escalateToSupervisor: boolean;
   escalationType: string | null;
   isDeleted: boolean;
-  note: Array<Note>;
+  note: Note[];
   shownToProponent: boolean;
   title: string;
   type: string;
