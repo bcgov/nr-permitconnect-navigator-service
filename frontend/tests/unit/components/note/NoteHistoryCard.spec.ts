@@ -2,16 +2,19 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import { useI18n } from 'vue-i18n';
 import { mount } from '@vue/test-utils';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
-import { formatDate, formatDateShort } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
 
 import type { AxiosResponse } from 'axios';
 import type { Note, NoteHistory } from '@/types';
+
+const { t } = useI18n();
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
@@ -25,6 +28,12 @@ vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn()
+  })
+}));
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => key // returns the key as the translation
   })
 }));
 
@@ -99,7 +108,7 @@ const wrapperSettings = (testNoteHistoryProp = TEST_NOTE_HISTORY) => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon']
+    stubs: ['font-awesome-icon', 'vue-i18n']
   }
 });
 
@@ -155,38 +164,37 @@ describe('NoteHistoryCard', () => {
   it('displays p tags for general notes', async () => {
     const wrapper = mount(NoteHistoryCard, wrapperSettings());
     const pTag = wrapper.findAll('p');
+    const spanTag = wrapper.findAll('span');
 
     expect(wrapper.find('[data-test="bf-title"]').exists()).toBe(false);
     expect(pTag.length).toBe(4);
-    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1]!.text()).toBe('Author:');
-    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY.type}`);
-    expect(pTag[3]!.text()).toBe(TEST_NOTE_HISTORY.note[0]?.note);
+    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(spanTag[1].text()).toBe(t('note.noteHistoryCard.lastUpdated:'));
+    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[3].text()).toBe(TEST_NOTE_HISTORY.note[0].note);
   });
 
   it('displays p tags for unresolved notes', async () => {
     const wrapper = mount(NoteHistoryCard, wrapperSettings(TEST_NOTE_HISTORY_UNRESOLVED));
     const pTag = wrapper.findAll('p');
 
-    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState})`);
+    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState}`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1]!.text()).toBe('Author:');
-    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY_UNRESOLVED.type}`);
-    expect(pTag[3]!.text()).toBe(`Bring forward date: ${formatDate(tomorrowDate)}`);
-    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0]?.note);
+    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(tomorrowDate)}`);
+    expect(pTag[3].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0].note);
   });
 
   it('displays p tags for resolved notes', async () => {
     const wrapper = mount(NoteHistoryCard, wrapperSettings(TEST_NOTE_HISTORY_RESOLVED));
     const pTag = wrapper.findAll('p');
 
-    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_RESOLVED.bringForwardState})`);
+    expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`${TEST_NOTE_HISTORY_RESOLVED.bringForwardState}`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1]!.text()).toBe('Author:');
-    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY_RESOLVED.type}`);
-    expect(pTag[3]!.text()).toBe(`Bring forward date: ${formatDate(yesterdayDate)}`);
-    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0]?.note);
+    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(yesterdayDate)}`);
+    expect(pTag[3].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0].note);
   });
 });

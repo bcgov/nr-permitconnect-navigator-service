@@ -139,7 +139,7 @@ export const useProjectStore = defineStore('project', () => {
     state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNoteHistory(data: Array<NoteHistory>) {
+  function setNoteHistory(data: NoteHistory[]) {
     state.noteHistory.value = data;
   }
 
