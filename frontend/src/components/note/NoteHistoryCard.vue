@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
-import Divider from '@/components/common/Divider.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
-import { Button, Card } from '@/lib/primevue';
+import StatusPill from '@/components/common/StatusPill.vue';
+import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAppStore, useAuthZStore } from '@/store';
+import { useAppStore, useCodeStore, useAuthZStore } from '@/store';
 import { Action, Resource } from '@/utils/enums/application';
-import { formatDate, formatDateShort } from '@/utils/formatters';
+import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
 import type { NoteHistory } from '@/types';
@@ -33,7 +34,15 @@ const appStore = useAppStore();
 const noteHistoryModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string | undefined> = ref(createdByFullName);
 
+// Composables
+const { t } = useI18n();
+const { options } = useCodeStore();
+
 // Actions
+const getEscalationLabel = computed(() => (type: string) => {
+  return options.EscalationType.find((e) => e.value === type)?.label;
+});
+
 onBeforeMount(() => {
   if (!userName.value && noteHistory.createdBy) {
     userService.searchUsers({ userId: [noteHistory.createdBy] }).then((res) => {
@@ -46,18 +55,82 @@ onBeforeMount(() => {
 <template>
   <Card :id="noteHistory.noteHistoryId">
     <template #title>
-      <div class="flex items-center">
-        <div class="grow">
-          <h3 class="mb-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center">
+          <h3
+            class="cursor-pointer truncate max-w-[50ch] inline-block hover:underline"
+            :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
+            @click="noteHistoryModalVisible = true"
+          >
             {{ noteHistory.title }}
-            <span
-              v-if="noteHistory.bringForwardState"
-              data-test="bf-title"
-            >
-              {{ `(${noteHistory.bringForwardState})` }}
-            </span>
+          </h3>
+          <Divider
+            v-if="noteHistory.bringForwardState"
+            layout="vertical"
+            class="h-7 border-l border-[var(--p-greyscale-700)]"
+          />
+          <h3
+            v-if="noteHistory.bringForwardState"
+            data-test="bf-title"
+          >
+            {{ `${noteHistory.bringForwardState}` }}
+          </h3>
+          <Divider
+            v-if="noteHistory.escalationType"
+            layout="vertical"
+            class="h-7 border-l border-[var(--p-greyscale-700)]"
+          />
+          <h3
+            v-if="noteHistory.escalationType"
+            data-test="bf-title"
+          >
+            {{ `${getEscalationLabel(noteHistory.escalationType)}` }}
           </h3>
         </div>
+        <StatusPill
+          v-if="noteHistory.shownToProponent"
+          :status="t('note.noteHistoryCard.shownToProponent')"
+          :bg-color="'var(--p-gold-600)'"
+          :icon="'fa-solid fa-eye'"
+        />
+        <StatusPill
+          v-if="noteHistory.escalateToDirector || noteHistory.escalateToSupervisor"
+          :status="t('note.noteHistoryCard.escalated')"
+          :bg-color="'var(--p-red-400)'"
+          :icon="'fa-solid fa-exclamation'"
+          :content-color="'var(--p-red-50)'"
+        />
+      </div>
+    </template>
+    <template #content>
+      <div class="flex flex-row">
+        <p>
+          <span class="key">{{ t('note.noteHistoryCard.created') }}:</span>
+          {{ formatDate(noteHistory.createdAt) }}
+        </p>
+        <Divider layout="vertical" />
+        <p>
+          <span class="key">{{ t('note.noteHistoryCard.lastUpdated') }}:</span>
+          {{ noteHistory.updatedAt ? formatDate(noteHistory.updatedAt) : formatDate(noteHistory.createdAt) }}
+        </p>
+        <Divider
+          v-if="noteHistory.bringForwardDate"
+          layout="vertical"
+        />
+        <p v-if="noteHistory.bringForwardDate">
+          <span class="key">{{ t('note.noteHistoryCard.bringForward') }}:</span>
+          {{
+            noteHistory.updatedAt ? formatDate(noteHistory.bringForwardDate) : formatDate(noteHistory.bringForwardDate)
+          }}
+        </p>
+        <Divider layout="vertical" />
+        <p>
+          <span class="key">{{ t('note.noteHistoryCard.author') }}:</span>
+          {{ userName }}
+        </p>
+      </div>
+      <div class="mt-4 flex justify-between items-center">
+        <p class="note-content truncate max-w-[145ch] text-base sm:text-md">{{ noteHistory.note[0].note }}</p>
         <Button
           class="p-button-outlined"
           aria-label="Edit"
@@ -70,30 +143,6 @@ onBeforeMount(() => {
           />
           Edit
         </Button>
-      </div>
-      <Divider type="solid" />
-    </template>
-    <template #content>
-      <div class="grid grid-cols-4 gap-4">
-        <p>
-          <span class="key font-bold">Date:</span>
-          {{ formatDateShort(noteHistory.createdAt) }}
-        </p>
-        <p>
-          <span class="key font-bold">Author:</span>
-          {{ userName }}
-        </p>
-        <p>
-          <span class="key font-bold">Note type:</span>
-          {{ noteHistory.type }}
-        </p>
-        <div>
-          <p v-if="noteHistory.bringForwardDate">
-            <span class="key font-bold">Bring forward date:</span>
-            {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
-          </p>
-        </div>
-        <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0].note }}</p>
       </div>
     </template>
   </Card>
@@ -120,10 +169,5 @@ p {
 
 .key {
   color: #38598a;
-}
-
-.note-content {
-  white-space: pre;
-  text-wrap: balance;
 }
 </style>

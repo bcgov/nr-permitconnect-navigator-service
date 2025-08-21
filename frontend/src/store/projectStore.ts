@@ -12,7 +12,7 @@ export type ProjectType = ElectrificationProject | HousingProject | undefined;
 export type ProjectStoreState = {
   documents: Ref<Array<Document>>;
   relatedEnquiries: Ref<Array<Enquiry>>;
-  noteHistory: Ref<Array<NoteHistory>>;
+  noteHistory: Ref<NoteHistory[]>;
   permits: Ref<Array<Permit>>;
   project: Ref<ProjectType>;
 };
@@ -139,7 +139,7 @@ export const useProjectStore = defineStore('project', () => {
     state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNoteHistory(data: Array<NoteHistory>) {
+  function setNoteHistory(data: NoteHistory[]) {
     state.noteHistory.value = data;
   }
 

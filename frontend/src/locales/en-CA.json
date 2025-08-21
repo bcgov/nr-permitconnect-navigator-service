@@ -585,6 +585,14 @@
     },
     "shownToProponentModal": {
       "attnReqd": "Attention required"
+    },
+    "noteHistoryCard": {
+      "author": "Author",
+      "bringForward": "Bring forward",
+      "created": "Created",
+      "escalated": "Escalated",
+      "lastUpdated": "Last updated",
+      "shownToProponent": "Shown to Proponent"
     }
   },
   "noteHistoryModal": {
