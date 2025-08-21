@@ -82,6 +82,20 @@ function toCopy(toCopy: string) {
 
               {{ trackingShownToProponent.trackingId }}
             </span>
+            <span class="ml-2 text-xs">{{ t('authorization.authorizationCard.statusVerified') }}</span>
+          </div>
+          <div class="flex gap-2">
+            <span :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
+              <AuthorizationStatusPill
+                v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
+                :auth-status="permit.authStatus"
+              />
+            </span>
+            <StatusPill
+              :status="permit.status"
+              :border-color="'var(--p-bcblue-900)'"
+              :bg-color="'var(--p-bcblue-50)'"
+            />
           </div>
           <div
             v-for="permitTracking in trackingNotShownToProponent"

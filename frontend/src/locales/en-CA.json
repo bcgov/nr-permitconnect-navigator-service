@@ -578,6 +578,15 @@
     "login": "Log in",
     "logout": "Log out"
   },
+  "note": {
+    "noteHistoryCard": {
+      "author": "Author",
+      "created": "Created",
+      "escalated": "Escalated",
+      "lastUpdated": "Last updated",
+      "shownToProponent": "Shown to Proponent"
+    }
+  },
   "noteHistoryModal": {
     "cancel": "Cancel",
     "confirm": "Confirm",

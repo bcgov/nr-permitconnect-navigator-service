@@ -2,9 +2,20 @@
 import { computed } from 'vue';
 
 // Props
-const { enlarge = false, status } = defineProps<{
+const {
+  enlarge = false,
+  status,
+  bgColor,
+  borderColor,
+  icon,
+  contentColor = '$app-pill-text'
+} = defineProps<{
   enlarge?: boolean;
   status?: string;
+  bgColor?: string;
+  borderColor?: string;
+  icon?: string;
+  contentColor?: string;
 }>();
 
 const defaultDimensions = {
@@ -26,16 +37,25 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
 <template>
   <div class="flex">
     <div
-      class="flex justify-center items-center status-indicator bg-[var(--p-bcblue-50)] border-[var(--p-bcblue-900)]"
+      class="flex justify-center items-center status-indicator"
       :style="{
         '--font-size': dimensions.fontSize,
         '--icon-font-size': dimensions.iconFontSize,
         '--height': dimensions.height,
-        '--line-height': dimensions.lineHeight
+        '--line-height': dimensions.lineHeight,
+        backgroundColor: `${bgColor}`,
+        borderColor: `${borderColor}`,
+        borderWidth: `${borderColor ? '0.1rem' : '0'}`
       }"
       :aria-label="status"
     >
-      <span class="text-color">{{ status }}</span>
+      <font-awesome-icon
+        v-if="icon"
+        :icon="icon"
+        :style="{ fontSize: dimensions.iconFontSize, color: `${contentColor}` }"
+        class="mr-2"
+      />
+      <span :style="{ color: `${contentColor}` }">{{ status }}</span>
     </div>
   </div>
 </template>
@@ -44,7 +64,6 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
 .status-indicator {
   border-radius: 0.125rem;
   border-style: solid;
-  border-width: 0.1rem;
   font-size: var(--font-size);
   height: var(--height);
   line-height: var(--line-height);
