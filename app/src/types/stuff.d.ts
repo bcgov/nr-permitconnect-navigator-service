@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
 import { AuthType, GroupName, Initiative } from '../utils/enums/application';
@@ -5,7 +6,6 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon'
 
 import type { AccessRequest, Contact, Permit, User } from './models';
 import type { IStamps } from '../interfaces/IStamps';
-import { Prisma } from '@prisma/client';
 
 type AddressResource = {
   '@type': string;

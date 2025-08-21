@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { createStamps } from './stamps';
 
 export const permitTrackingSchema = Joi.array()
   .items(
@@ -8,7 +9,8 @@ export const permitTrackingSchema = Joi.array()
       shownToProponent: Joi.boolean().allow(null),
       sourceSystemKindId: Joi.number().allow(null),
       sourceSystemKind: Joi.object({}).allow(null),
-      permitId: Joi.string().allow(null)
+      permitId: Joi.string().allow(null),
+      ...createStamps
     })
   )
   .allow(null);

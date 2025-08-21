@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+
 import {
   Activity,
   ActivityContact,

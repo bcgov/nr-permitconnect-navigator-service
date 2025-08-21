@@ -135,12 +135,8 @@ export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase
     where: {
       permitId: data.permitId
     },
-    update: { ...data, updatedBy: data.updatedBy },
-    create: {
-      ...data,
-      createdBy: data.createdBy,
-      updatedBy: data.updatedBy
-    }
+    update: data,
+    create: data
   });
 
   return response;

@@ -2,14 +2,12 @@ import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Permit, PermitTracking } from '../types';
 
 /**
- * @function upsertPermitTracking
- * Upsert Permit Tracking
+ * Deletes many Permit Tracking from a Permit
  * @param tx Prisma transaction client
  * @param data Permit object
- * @returns A Promise that resolves to the upserted permit tracking object
+ * @returns A Promise that resolves when complete
  */
-export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Permit): Promise<PermitTracking[]> => {
-  // Delete any permit tracking that is not in the new data
+export const deleteManyPermitTracking = async (tx: PrismaTransactionClient, data: Permit): Promise<void> => {
   await tx.permit_tracking.deleteMany({
     where: {
       permitId: data.permitId,
@@ -18,8 +16,15 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
       }
     }
   });
+};
 
-  // Upsert the permit tracking
+/**
+ * Upsert Permit Tracking
+ * @param tx Prisma transaction client
+ * @param data Permit object
+ * @returns A Promise that resolves to the upserted permit tracking object
+ */
+export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Permit): Promise<PermitTracking[]> => {
   let response: PermitTracking[] = [];
   if (data.permitTracking?.length) {
     response = await Promise.all(
@@ -29,25 +34,11 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
             where: {
               permitTrackingId: x.permitTrackingId
             },
-            data: {
-              permitId: data.permitId,
-              trackingId: x.trackingId,
-              sourceSystemKindId: x?.sourceSystemKindId,
-              shownToProponent: x?.shownToProponent ?? false,
-              updatedBy: data.updatedBy
-            }
+            data: x
           });
         } else {
-          const createData = {
-            permitId: data.permitId,
-            trackingId: x.trackingId,
-            sourceSystemKindId: x?.sourceSystemKindId,
-            shownToProponent: x?.shownToProponent ?? false,
-            createdBy: data.createdBy,
-            updatedBy: data.updatedBy
-          };
           return await tx.permit_tracking.create({
-            data: createData
+            data: x
           });
         }
       })

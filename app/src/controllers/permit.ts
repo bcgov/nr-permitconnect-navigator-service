@@ -2,14 +2,14 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { PrismaTransactionClient } from '../db/dataConnection';
-import { generateUpdateStamps } from '../db/utils/utils';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { isTruthy } from '../utils/utils';
 import { Initiative } from '../utils/enums/application';
 import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit';
-import { upsertPermitTracking } from '../services/permitTracking';
+import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking';
 
 import type { Request, Response } from 'express';
-import type { ListPermitsOptions, Permit, PermitType } from '../types';
+import type { ListPermitsOptions, Permit, PermitTracking, PermitType } from '../types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -52,14 +52,42 @@ export const listPermitsController = async (
 
 export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {
   const response = await transactionWrapper<Permit>(async (tx: PrismaTransactionClient) => {
-    const permitDataWithId = {
+    const createStamps = generateCreateStamps(req.currentContext);
+    const updateStamps = generateUpdateStamps(req.currentContext);
+
+    // Add permit ID and stamp data if necessary
+    const permitData: Permit = {
       ...req.body,
-      ...generateUpdateStamps(req.currentContext),
-      permitId: req.body.permitId || uuidv4()
+      permitId: req.body.permitId || uuidv4(),
+      createdAt: req.body.createdAt ?? createStamps.createdAt,
+      createdBy: req.body.createdBy ?? createStamps.createdBy,
+      ...updateStamps
     };
 
-    const data = await upsertPermit(tx, permitDataWithId);
-    await upsertPermitTracking(tx, permitDataWithId);
+    // Add data to tracking IDs if necessary
+    permitData.permitTracking?.forEach((x: PermitTracking) => {
+      x.permitId = x.permitId ?? permitData.permitId;
+      x.shownToProponent = x.shownToProponent ?? false;
+
+      if (x.createdAt && x.createdBy) {
+        x.updatedAt = updateStamps.updatedAt;
+        x.updatedBy = updateStamps.updatedBy;
+      } else {
+        x.createdAt = createStamps.createdAt;
+        x.createdBy = createStamps.createdBy;
+      }
+    });
+
+    // Upserting can't have relational information in the data
+    const permitUpsertData: Permit = {
+      ...permitData,
+      permitNote: undefined,
+      permitTracking: undefined
+    };
+
+    const data = await upsertPermit(tx, permitUpsertData);
+    await deleteManyPermitTracking(tx, permitData);
+    await upsertPermitTracking(tx, permitData);
     return data;
   });
   res.status(200).json(response);

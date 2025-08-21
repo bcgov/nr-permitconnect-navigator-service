@@ -44,7 +44,7 @@ export const createUserAccessRequestController = async (
     let userResponse;
     const existingUser = !!user.userId;
 
-    if (!user.userId) userResponse = await createUser(tx, user);
+    if (!existingUser) userResponse = await createUser(tx, user);
     else userResponse = await readUser(tx, user.userId);
 
     let accessUserGroups: Array<Group> = [];

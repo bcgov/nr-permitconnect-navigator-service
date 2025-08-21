@@ -160,7 +160,7 @@ describe('listPermitsController', () => {
 });
 
 describe('upsertPermitController', () => {
-  const updateSpy = jest.spyOn(permitService, 'upsertPermit');
+  const upsertSpy = jest.spyOn(permitService, 'upsertPermit');
 
   it('should call services and respond with 200 and result', async () => {
     const now = new Date();
@@ -180,14 +180,18 @@ describe('upsertPermitController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    updateSpy.mockResolvedValue(TEST_PERMIT_1);
+    upsertSpy.mockResolvedValue(TEST_PERMIT_1);
 
     await upsertPermitController(req as unknown as Request<never, never, Permit>, res as unknown as Response);
 
-    expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
       permitId: expect.stringMatching(uuidv4Pattern),
+      permitNote: undefined,
+      permitTracking: undefined,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });

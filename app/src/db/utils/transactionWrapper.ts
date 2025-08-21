@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+
 import prisma from '../dataConnection';
 
 import type { PrismaTransactionClient } from '../dataConnection';
