@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import compression from 'compression';
 import config from 'config';
 import cors from 'cors';
@@ -5,7 +6,6 @@ import { randomBytes } from 'crypto';
 import express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
-import { Prisma } from '@prisma/client';
 import querystring from 'querystring';
 
 import { version as appVersion } from './package.json';
