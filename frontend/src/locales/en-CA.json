@@ -51,7 +51,6 @@
       "projectView": {
         "agency": "Agency",
         "askMyNavigator": "Ask my Navigator",
-        "beAware": "Please be aware!",
         "completedAuths": "Completed authorizations",
         "createdBy": "Created by",
         "crumbAppsPermits": "Applications and Permits",
@@ -577,6 +576,16 @@
   "loginButton": {
     "login": "Log in",
     "logout": "Log out"
+  },
+  "note": {
+    "noteBanner": {
+      "attnReqd": "Attention required",
+      "updatedOn": "Updated on",
+      "viewAll": "View all"
+    },
+    "shownToProponentModal": {
+      "attnReqd": "Attention required"
+    }
   },
   "noteHistoryModal": {
     "cancel": "Cancel",
