@@ -2,7 +2,7 @@
 
 /** Module dependencies */
 import config from 'config';
-import http from 'node:http';
+import { createServer } from 'node:http';
 
 import app from './app';
 import getLogger from './src/components/log';
@@ -19,14 +19,13 @@ process.on('unhandledRejection', (err: Error): void => {
 });
 
 // Graceful shutdown support
-['SIGTERM', 'SIGINT', 'SIGUSR1', 'SIGUSR2'].forEach((signal) => {
+['SIGHUP', 'SIGINT', 'SIGTERM', 'SIGUSR1', 'SIGUSR2'].forEach((signal) => {
   process.on(signal, () => shutdown(signal as NodeJS.Signals));
 });
 process.on('exit', () => log.info('Exiting...'));
 
 // Create HTTP server and listen on provided port, on all network interfaces.
-// eslint-disable-next-line @typescript-eslint/no-misused-promises
-const server = http.createServer(app);
+const server = createServer(app);
 server.listen(port, () => {
   log.info(`Server running on http://localhost:${port}`);
 });
@@ -72,11 +71,11 @@ function onError(error: { syscall?: string; code: string }): void {
   switch (error.code) {
     case 'EACCES':
       log.error(`${bind} requires elevated privileges`);
-      process.exit(1);
+      shutdown('SIGABRT');
       break;
     case 'EADDRINUSE':
       log.error(`${bind} is already in use`);
-      process.exit(1);
+      shutdown('SIGABRT');
       break;
     default:
       throw error; // eslint-disable-line @typescript-eslint/only-throw-error
@@ -86,13 +85,16 @@ function onError(error: { syscall?: string; code: string }): void {
 /**
  * Gracefully shuts down the server and exits the process.
  * @see https://nodejs.org/api/http.html#servercloseallconnections
+ * @param signal - Optional termination signal (e.g., 'SIGINT', 'SIGTERM').
  */
-function cleanup(): void {
+function cleanup(signal?: NodeJS.Signals): void {
   state.ready = false;
   server.close(() => {
+    log.debug('Closing all server connections...');
     server.closeAllConnections();
     log.info('Server shut down');
-    process.exit(0);
+    if (signal) process.kill(process.pid, signal);
+    else process.exit();
   });
 }
 
@@ -106,7 +108,7 @@ function shutdown(signal: NodeJS.Signals): void {
 
   // Stop periodic 10 second connection probes
   if (probeId) clearInterval(probeId);
-  cleanup();
+  cleanup(signal);
 }
 
 /**
