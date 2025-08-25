@@ -6,7 +6,6 @@ import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums
 import * as utils from '../../../src/utils/utils';
 
 import type { JwtPayload } from 'jsonwebtoken';
-// import type { IdentityProvider } from '../../../src/types';
 
 jest.mock('config', () => ({
   has: jest.fn(),
@@ -309,7 +308,6 @@ describe('utils', () => {
 
     it('returns false when not valid', () => {
       (validate as jest.Mock).mockReturnValue(false);
-      // version won’t be read if validate is false
       expect(utils.uuidValidateV4('anything')).toBe(false);
     });
 

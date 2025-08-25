@@ -9,6 +9,7 @@ import { randomBytes } from 'crypto';
 
 import { version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
+import { requestSanitizer } from './src/middleware/requestSanitizer';
 import router from './src/routes';
 import { Problem } from './src/utils';
 import { DEFAULTCORS } from './src/utils/constants/application';
@@ -26,6 +27,7 @@ app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
+app.use(requestSanitizer);
 app.set('query parser', 'extended');
 
 app.use((_req, res, next) => {

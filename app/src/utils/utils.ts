@@ -235,7 +235,7 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: string[]
 /**
  * Converts a string to title case
  * @param str The string to convert
- * @returns An arbitrary object with specified secret fields marked as redacted
+ * @returns The input string converted to title case
  */
 export function toTitleCase(str: string): string {
   if (!str) return str;
