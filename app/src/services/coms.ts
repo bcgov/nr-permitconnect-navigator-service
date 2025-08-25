@@ -2,6 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import { Action } from '../utils/enums/application';
+import { Problem, uuidValidateV4 } from '../utils';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
@@ -48,31 +49,19 @@ const service = {
   },
 
   /**
-   * @function getObject
    * Get an object
-   * @param {string} bearerToken The bearer token of the authorized user
-   * @param {string} objectId The id for the object to get
+   * @param bearerToken The bearer token of the authorized user
+   * @param objectId The id for the object to get
    */
   async getObject(bearerToken: string, objectId: string) {
+    if (!uuidValidateV4(objectId)) {
+      throw new Problem(422, { detail: 'Invalid objectId parameter' });
+    }
     const { status, headers, data } = await comsAxios({
       responseType: 'arraybuffer',
       headers: { Authorization: `Bearer ${bearerToken}` }
     }).get(`/object/${objectId}`);
     return { status, headers, data };
-  },
-
-  /**
-   * @function getObjects
-   * Gets a list of objects
-   * @param {string} bearerToken The bearer token of the authorized user
-   * @param {string[]} objectIds Array of object ids to get
-   */
-  async getObjects(bearerToken: string, objectIds: Array<string>) {
-    const { data } = await comsAxios({ headers: { Authorization: `Bearer ${bearerToken}` } }).get('/object', {
-      params: { objectId: objectIds }
-    });
-
-    return data;
   }
 };
 

@@ -1,6 +1,7 @@
 import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
+import { validate, version } from 'uuid';
 
 import { getLogger } from '../components/log';
 import type { JwtPayload } from 'jsonwebtoken';
@@ -9,10 +10,9 @@ import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttribute
 const log = getLogger(module.filename);
 
 /**
- * @function camelCaseToTitleCase
- * Converts a string to title case that can handle camel case
- * @param {string | null} str The string to convert
- * @returns {string | null} A string in title case
+ * Converts a CamelCase string to title case that can handle camel case
+ * @param str The string to convert
+ * @returns A string in title case
  */
 export function camelCaseToTitleCase(input: string | null): string | null {
   if (!input) return input;
@@ -22,10 +22,9 @@ export function camelCaseToTitleCase(input: string | null): string | null {
 }
 
 /**
- * @function addDashesToUuid
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
- * @param {string} str The input string uuid
- * @returns {string} The string `str` but with dashes inserted, or `str` if not a string.
+ * @param str The input string uuid
+ * @returns The string `str` but with dashes inserted, or `str` if not a string.
  */
 export function addDashesToUuid(str: string): string {
   if (str.length === 32) {
@@ -36,9 +35,8 @@ export function addDashesToUuid(str: string): string {
 }
 
 /**
- * @function getChefsApiKey
  * Search for a CHEFS form Api Key
- * @returns {string | undefined} The CHEFS form Api Key if it exists
+ * @returns The CHEFS form Api Key if it exists
  */
 export function getChefsApiKey(formId: string): string | undefined {
   const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
@@ -46,10 +44,9 @@ export function getChefsApiKey(formId: string): string | undefined {
 }
 
 /**
- * @function getGitRevision
  * Gets the current git revision hash
  * @see {@link https://stackoverflow.com/a/34518749}
- * @returns {string} The git revision hash, or empty string
+ * @returns The git revision hash, or empty string
  */
 export function getGitRevision(): string {
   try {
@@ -82,21 +79,19 @@ export function getGitRevision(): string {
 }
 
 /**
- * @function getCurrentSubject
  * Attempts to acquire a specific current token sub. Yields `defaultValue` otherwise
- * @param {object} currentContext The express request currentContext object
- * @param {string} [defaultValue=''] An optional default return value
- * @returns {object} The requested current token sub if applicable, or `defaultValue`
+ * @param currentContext The express request currentContext object
+ * @param [defaultValue=''] An optional default return value
+ * @returns The requested current token sub if applicable, or `defaultValue`
  */
-export function getCurrentSubject(currentContext: CurrentContext | undefined, defaultValue: string = '') {
+export function getCurrentSubject(currentContext: CurrentContext | undefined, defaultValue: string = ''): string {
   return currentContext?.tokenPayload?.sub ?? defaultValue;
 }
 
 /**
- * @function getCurrentUsername
  * Parses currentContext object's identity provider to return their username
- * @param {object} currentContext The express request CurrentContext object
- * @returns {string | undefined} The username in currentUser or undefined
+ * @param currentContext The express request CurrentContext object
+ * @returns The username in currentUser or undefined
  */
 export function getCurrentUsername(currentContext: CurrentContext | undefined): string | undefined {
   if (currentContext?.tokenPayload) {
@@ -112,12 +107,11 @@ export function getCurrentUsername(currentContext: CurrentContext | undefined): 
 }
 
 /**
- * @function isTruthy
  * Returns true if the element name in the object contains a truthy value
- * @param {object} value The object to evaluate
- * @returns {boolean} True if truthy, false if not, and undefined if undefined
+ * @param value The object to evaluate
+ * @returns True if truthy, false if not, and undefined if undefined
  */
-export function isTruthy(value: unknown) {
+export function isTruthy(value: unknown): boolean | undefined {
   if (value === undefined) return value;
 
   const isStr = typeof value === 'string' || value instanceof String;
@@ -126,12 +120,11 @@ export function isTruthy(value: unknown) {
 }
 
 /**
- * @function mixedQueryToArray
  * Standardizes query params to yield an array of unique string values
- * @param {string|string[]} param The query param to process
- * @returns {string[]} A unique, non-empty array of string values, or undefined if empty
+ * @param param The query param to process
+ * @returns A unique, non-empty array of string values, or undefined if empty
  */
-export function mixedQueryToArray(param: string | Array<string> | undefined): Array<string> | undefined {
+export function mixedQueryToArray(param: string | string[] | undefined): string[] | undefined {
   // Short circuit undefined if param is falsy
   if (!param) return undefined;
 
@@ -142,45 +135,42 @@ export function mixedQueryToArray(param: string | Array<string> | undefined): Ar
 }
 
 /**
- * @function parseCSV
  * Converts a comma separated value string into an array of string values
- * @param {string} value The CSV string to parse
- * @returns {string[]} An array of string values, or `value` if it is not a string
+ * @param value The CSV string to parse
+ * @returns An array of string values, or `value` if it is not a string
  */
-export function parseCSV(value: string): Array<string> {
+export function parseCSV(value: string): string[] {
   return value.split(',').map((s) => s.trim());
 }
 
 /**
- * @function partition
  * Partitions an array into two array sets depending on conditional
  * @see {@link https://stackoverflow.com/a/71247432}
- * @param {Array<T>} arr The array to partition
- * @param {Function} predicate The predicate function
+ * @param arr The array to partition
+ * @param predicate The predicate function
  * @returns
  */
 export function partition<T>(
-  arr: Array<T>,
+  arr: T[],
   // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  predicate: (v: T, i: number, ar: Array<T>) => boolean
-): [Array<T>, Array<T>] {
+  predicate: (v: T, i: number, ar: T[]) => boolean
+): [T[], T[]] {
   return arr.reduce(
     (acc, item, index, array) => {
       acc[+!predicate(item, index, array)].push(item);
       return acc;
     },
-    [[], []] as [Array<T>, Array<T>]
+    [[], []] as [T[], T[]]
   );
 }
 
 /**
- * @function parseIdentityKeyClaims
  * Returns an array of strings representing potential identity key claims
  * Array will always end with the last value as 'sub'
- * @returns {string[]} An array of string values, or `value` if it is not a string
+ * @returns An array of string values, or `value` if it is not a string
  */
-export function parseIdentityKeyClaims(): Array<string> {
-  const claims: Array<string> = [];
+export function parseIdentityKeyClaims(): string[] {
+  const claims: string[] = [];
   if (config.has('server.oidc.identityKey')) {
     claims.push(...parseCSV(config.get('server.oidc.identityKey')));
   }
@@ -188,9 +178,8 @@ export function parseIdentityKeyClaims(): Array<string> {
 }
 
 /**
- * @function readFeatureList
  * Acquires the list of feature flags to be used
- * @returns {object[]} A promise resolving to an object of key values
+ * @returns A promise resolving to an object of key values
  */
 export function readFeatureList(): { [key: string]: unknown } {
   const configDir = '../../config';
@@ -209,11 +198,10 @@ export function readFeatureList(): { [key: string]: unknown } {
 }
 
 /**
- * @function readIdpList
  * Acquires the list of identity providers to be used
- * @returns {object[]} A promise resolving to an array of idp provider objects
+ * @returns A promise resolving to an array of idp provider objects
  */
-export function readIdpList(): Array<IdpAttributes> {
+export function readIdpList(): IdpAttributes[] {
   const configDir = '../../config';
   const defaultFile = 'idplist-default.json';
   const overrideFile = 'idplist-local.json';
@@ -230,13 +218,12 @@ export function readIdpList(): Array<IdpAttributes> {
 }
 
 /**
- * @function redactSecrets
  * Sanitizes objects by replacing sensitive data with a REDACTED string value
- * @param {object} data An arbitrary object
- * @param {string[]} fields An array of field strings to sanitize on
- * @returns {object} An arbitrary object with specified secret fields marked as redacted
+ * @param data An arbitrary object
+ * @param fields An array of field strings to sanitize on
+ * @returns An arbitrary object with specified secret fields marked as redacted
  */
-export function redactSecrets(data: { [key: string]: unknown }, fields: Array<string>): unknown {
+export function redactSecrets(data: { [key: string]: unknown }, fields: string[]): unknown {
   if (fields && Array.isArray(fields) && fields.length) {
     fields.forEach((field) => {
       if (data[field]) data[field] = 'REDACTED';
@@ -246,10 +233,9 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: Array<st
 }
 
 /**
- * @function toTitleCase
  * Converts a string to title case
- * @param {string} str The string to convert
- * @returns {object} An arbitrary object with specified secret fields marked as redacted
+ * @param str The string to convert
+ * @returns An arbitrary object with specified secret fields marked as redacted
  */
 export function toTitleCase(str: string): string {
   if (!str) return str;
@@ -258,11 +244,19 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * @function uuidToActivityId
  * Converts a UUDI to an activity ID
- * @param {string} id The ID to convert
- * @returns {string} A truncated version of the given ID
+ * @param id The ID to convert
+ * @returns A truncated version of the given ID
  */
 export function uuidToActivityId(id: string): string {
   return id.substring(0, 8).toUpperCase();
+}
+
+/**
+ * Validates a UUID and checks if it is version 4
+ * @param uuid The UUID to validate
+ * @returns True if the UUID is valid and is version 4
+ */
+export function uuidValidateV4(uuid: string): boolean {
+  return validate(uuid) && version(uuid) === 4;
 }

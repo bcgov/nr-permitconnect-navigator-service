@@ -1,6 +1,5 @@
 export type IdpAttributes = {
-  identityKey: string;
   idp: string;
-  name: string;
+  kind: string;
   username: string;
 };
