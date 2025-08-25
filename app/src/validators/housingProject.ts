@@ -71,17 +71,8 @@ const schema = {
       createdBy: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
-      includeDeleted: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
-    })
-  },
-  updateIsDeletedFlag: {
-    params: Joi.object({
-      housingProjectId: uuidv4.required()
-    }),
-    body: Joi.object({
-      isDeleted: Joi.boolean().required()
     })
   },
   updateHousingProject: {
@@ -96,7 +87,7 @@ const schema = {
       submittedAt: Joi.string().required(),
       relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),
-      isDevelopedInBC: Joi.when('companyNameRegistered', {
+      isDevelopedInBc: Joi.when('companyNameRegistered', {
         is: Joi.string().required(),
         then: Joi.string()
           .required()
@@ -129,7 +120,7 @@ const schema = {
           .valid(...NUM_RESIDENTIAL_UNITS_LIST),
         otherwise: Joi.string().allow(null)
       }),
-      financiallySupportedBC: Joi.string()
+      financiallySupportedBc: Joi.string()
         .required()
         .valid(...YES_NO_UNSURE_LIST),
       financiallySupportedIndigenous: Joi.string()
@@ -159,13 +150,11 @@ const schema = {
       streetAddress: Joi.string().allow(null).max(255),
       locality: Joi.string().allow(null).max(255),
       province: Joi.string().allow(null).max(255),
-      locationPIDs: Joi.string().allow(null).max(255),
+      locationPids: Joi.string().allow(null).max(255),
       latitude: Joi.number().allow(null).max(255),
       longitude: Joi.number().allow(null).max(255),
       geomarkUrl: Joi.string().allow(null).max(255),
-      naturalDisaster: Joi.string()
-        .valid(...YES_NO_LIST)
-        .required(),
+      naturalDisaster: Joi.boolean().required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
       ...atsValidator.atsEnquirySubmissionFields,
       ltsaCompleted: Joi.boolean().required(),
@@ -179,8 +168,7 @@ const schema = {
         otherwise: uuidv4.allow(null)
       }),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      waitingOn: Joi.string().allow(null).max(255),
-      contacts: contacts
+      waitingOn: Joi.string().allow(null).max(255)
     }),
     params: Joi.object({
       housingProjectId: uuidv4.required()
@@ -196,6 +184,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),
   searcHousingProjects: validate(schema.searchHousingProjects),
-  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateHousingProject: validate(schema.updateHousingProject)
 };

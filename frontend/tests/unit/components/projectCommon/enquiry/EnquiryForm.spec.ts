@@ -46,7 +46,7 @@ const testEnquiry: Enquiry = {
   contacts: [exampleContact],
   atsClientId: null,
   atsEnquiryId: null,
-  addedToATS: false,
+  addedToAts: false,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
@@ -131,7 +131,7 @@ describe('EnquiryForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(8);
+    expect(elements.length).toBe(6);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -140,7 +140,7 @@ describe('EnquiryForm.vue', () => {
 
     // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(6);
+    expect(elements.length).toBe(2);
   });
 
   it('renders the correct amount of datepickers components', async () => {
@@ -156,7 +156,7 @@ describe('EnquiryForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(1);
+    expect(elements.length).toBe(0);
   });
 
   it('renders the correct amount of text area components', async () => {
@@ -203,6 +203,6 @@ describe('EnquiryForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.props('editable')).toBe(false);
-    expect(elements.length).toBe(9);
+    expect(elements.length).toBe(7);
   });
 });

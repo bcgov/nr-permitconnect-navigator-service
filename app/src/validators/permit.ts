@@ -4,6 +4,7 @@ import { activityId, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 import { permitTrackingSchema } from './permitTracking';
 import { permitTypeSchema } from './permitType';
+import { createStamps } from './stamps';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
@@ -17,7 +18,8 @@ const sharedPermitSchema = {
   needed: Joi.string().max(255).required(),
   status: Joi.string().max(255).required(),
   submittedDate: Joi.date().iso().max('now'),
-  adjudicationDate: Joi.date().iso().max('now')
+  adjudicationDate: Joi.date().iso().max('now'),
+  ...createStamps
 };
 
 const schema = {

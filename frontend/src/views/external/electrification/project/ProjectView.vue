@@ -10,13 +10,14 @@ import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
+import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, electrificationProjectService, permitService } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
+import { formatDate, formatDateLong } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -37,14 +38,22 @@ const toast = useToast();
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
-const { getAuthsCompleted, getAuthsNeeded, getAuthsNotNeeded, getAuthsOnGoing, getProject, getRelatedEnquiries } =
-  storeToRefs(projectStore);
+const {
+  getAuthsCompleted,
+  getAuthsNeeded,
+  getAuthsNotNeeded,
+  getAuthsOnGoing,
+  getNoteHistory,
+  getProject,
+  getRelatedEnquiries
+} = storeToRefs(projectStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
+const noteHistoryVisible: Ref<boolean> = ref(false);
 
 // Providers
 provide(enquiryRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY);
@@ -87,6 +96,15 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.projectView.toastPermitLoadFailed'));
   }
+
+  try {
+    const activityId = projectValue.activityId;
+    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
+    projectStore.setPermits(permitsValue);
+  } catch {
+    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
+  }
+
   projectStore.setProject(projectValue);
   projectStore.setRelatedEnquiries(enquiriesValue);
 
@@ -163,9 +181,31 @@ onBeforeMount(async () => {
             @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
           />
 
+          <div
+            v-if="getNoteHistory.length"
+            class="bg-[var(--p-green-100)] p-4"
+          >
+            <div class="grid grid-cols-6 gap-4 items-center">
+              <div class="font-bold">Please be aware!</div>
+              <div class="font-bold">
+                Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
+              </div>
+              <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
+              <div class="flex justify-end">
+                <Button
+                  class="p-button-sm header-btn"
+                  label="View all"
+                  outlined
+                  @click="noteHistoryVisible = true"
+                />
+              </div>
+            </div>
+          </div>
+
           <div class="disclaimer-block p-8 mt-8">
             {{ t('e.common.projectView.disclaimer') }}
           </div>
+
           <div>
             <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
           </div>
@@ -251,6 +291,29 @@ onBeforeMount(async () => {
       </TabPanels>
     </Tabs>
   </div>
+
+  <Dialog
+    v-model:visible="noteHistoryVisible"
+    :draggable="false"
+    :modal="true"
+    class="app-info-dialog w-6/12"
+  >
+    <template #header>
+      <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
+    </template>
+
+    <div
+      v-for="history of getNoteHistory"
+      :key="history.noteHistoryId"
+      class="mb-5"
+    >
+      <div class="flex flex-col">
+        <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
+        <div class="font-bold">{{ history.title }}</div>
+        <div>{{ history.note[0].note }}</div>
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <style scoped lang="scss">

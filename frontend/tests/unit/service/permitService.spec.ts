@@ -28,7 +28,6 @@ const TEST_PERMIT_TYPE: PermitType = {
 
 const TEST_PERMIT_1: Permit = {
   permitId: 'permitId',
-  permitTypeId: 0,
   activityId: 'activityId',
   issuedPermitId: 'issuedPermitId',
   authStatus: 'authStatus',
@@ -37,6 +36,7 @@ const TEST_PERMIT_1: Permit = {
   submittedDate: new Date().toISOString(),
   adjudicationDate: new Date().toISOString(),
   permitType: TEST_PERMIT_TYPE,
+  permitTypeId: TEST_PERMIT_TYPE.permitTypeId,
   permitNote: [],
   permitTracking: []
 };

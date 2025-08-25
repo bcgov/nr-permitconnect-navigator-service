@@ -99,21 +99,21 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('deleteProject', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.deleteProject(TEST_ID);
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
-    });
-  });
-
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
       housingProjectService.deleteDraft(TEST_ID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
+    });
+  });
+
+  describe('deleteProject', () => {
+    it('calls correct endpoint', () => {
+      housingProjectService.deleteProject(TEST_ID);
+
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
     });
   });
 
@@ -182,25 +182,22 @@ describe('housingProjectService', () => {
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      housingProjectService.searchProjects({ activityId: [TEST_ID], includeDeleted: false });
+      housingProjectService.searchProjects({ activityId: [TEST_ID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
         params: {
-          activityId: [TEST_ID],
-          includeDeleted: false
+          activityId: [TEST_ID]
         }
       });
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      housingProjectService.searchProjects({ includeDeleted: true });
+      housingProjectService.searchProjects({});
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        params: {
-          includeDeleted: true
-        }
+        params: {}
       });
     });
   });
@@ -220,17 +217,6 @@ describe('housingProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
-    });
-  });
-
-  describe('updateIsDeletedFlag', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.updateIsDeletedFlag(TEST_ID, true);
-
-      expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}/delete`, {
-        isDeleted: true
-      });
     });
   });
 

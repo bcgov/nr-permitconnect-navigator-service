@@ -35,6 +35,7 @@ const { setContact } = contactStore;
       </template>
       <template #content>
         <ContactForm
+          v-if="getContact"
           :contact="getContact"
           @update-contact="setContact"
         />

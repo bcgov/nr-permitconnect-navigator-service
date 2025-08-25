@@ -1,4 +1,5 @@
 export { default as accessRequestService } from './accessRequestService';
+export { default as activityContactService } from './activityContactService';
 export { default as atsService } from './atsService';
 export { default as AuthService } from './authService';
 export { default as codeService } from './codeService';
@@ -11,7 +12,7 @@ export { default as enquiryService } from './enquiryService';
 export { default as externalApiService } from './externalApiService';
 export { default as housingProjectService } from './housingProjectService';
 export { default as mapService } from './mapService';
-export { default as noteService } from './noteService';
+export { default as noteHistoryService } from './noteHistoryService';
 export { default as permitNoteService } from './permitNoteService';
 export { default as permitService } from './permitService';
 export { default as reportingService } from './reportingService';

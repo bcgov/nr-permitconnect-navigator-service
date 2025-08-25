@@ -13,7 +13,6 @@ export interface IProjectService {
     filters?: ElectrificationProjectSearchParameters | HousingProjectSearchParameters
   ): Promise<AxiosResponse<any, any>>;
   submitDraft(data?: any): Promise<AxiosResponse<any, any>>;
-  updateIsDeletedFlag(projectId: string, isDeleted: boolean): Promise<AxiosResponse<any, any>>;
   updateProject(projectId: string, data: any): Promise<AxiosResponse<any, any>>;
 }
 

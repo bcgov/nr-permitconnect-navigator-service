@@ -1,9 +1,9 @@
 import { Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
+import { NIL, v4 as uuidv4 } from 'uuid';
 
-import prisma from '../../db/dataConnection';
+import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
 import { getLogger } from '../../components/log';
-import { activityService } from '../../services';
+import { getActivity } from '../../services/activity';
 import { uuidToActivityId } from '../../utils/utils';
 
 import type { CurrentContext } from '../../types';
@@ -43,21 +43,22 @@ export async function checkDatabaseSchema(): Promise<boolean> {
       'activity_contact',
       'contact',
       'document',
+      'draft',
+      'draft_code',
+      'electrification_project',
+      'electrification_project_category_code',
+      'electrification_project_type_code',
+      'email_log',
       'enquiry',
+      'housing_project',
       'identity_provider',
       'initiative',
       'note',
+      'note_history',
       'permit',
       'permit_note',
       'permit_type',
       'user',
-      'draft',
-      'draft_code',
-      'email_log',
-      'electrification_project',
-      'electrification_project_category_code',
-      'electrification_project_type_code',
-      'housing_project',
       'permit_type_initiative_xref'
     ]
   });
@@ -75,15 +76,22 @@ export async function checkDatabaseSchema(): Promise<boolean> {
 
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
-    createdBy: currentContext?.userId ?? null,
-    createdAt: new Date().toISOString()
+    createdBy: currentContext?.userId ?? NIL,
+    createdAt: new Date()
   };
 }
 
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
-    updatedBy: (currentContext?.userId as string) ?? null,
-    updatedAt: new Date().toISOString()
+    updatedBy: (currentContext?.userId as string) ?? NIL,
+    updatedAt: new Date()
+  };
+}
+
+export function generateNullUpdateStamps() {
+  return {
+    updatedBy: null,
+    updatedAt: null
   };
 }
 
@@ -93,13 +101,19 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
  * If a collision is detected, generate new UUID and test again
  * @returns {Promise<string>} A string in title case
  */
-export async function generateUniqueActivityId() {
+export async function generateUniqueActivityId(tx: PrismaTransactionClient) {
   let id, queryResult;
 
   do {
     id = uuidToActivityId(uuidv4());
-    queryResult = await activityService.getActivity(id);
+    // No op any errors, 404 is potentially expected here
+    queryResult = await getActivity(tx, id).catch(() => {});
   } while (queryResult);
 
   return id;
+}
+
+export function jsonToPrismaInputJson(json: Prisma.JsonValue) {
+  if (json === null) return null as unknown as Prisma.JsonNullValueInput;
+  return json as Prisma.InputJsonValue;
 }

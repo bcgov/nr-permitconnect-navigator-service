@@ -1,36 +1,21 @@
 import express from 'express';
 
-import { yarsController } from '../../controllers';
+import { deleteSubjectGroupController, getGroupsController, getPermissionsController } from '../../controllers/yars';
+
 import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Initiative, Resource } from '../../utils/enums/application';
-
-import type { NextFunction, Request, Response } from 'express';
+import { Action, Resource } from '../../utils/enums/application';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-router.get(
-  '/groups',
-  hasAuthorization(Resource.YARS, Action.READ),
-  (req: Request<never, never, never, { initiative: Initiative }>, res: Response, next: NextFunction): void => {
-    yarsController.getGroups(req, res, next);
-  }
-);
+router.get('/groups', hasAuthorization(Resource.YARS, Action.READ), getGroupsController);
 
 // Publicly accessible
-router.get('/permissions', (req: Request, res: Response, next: NextFunction): void => {
-  yarsController.getPermissions(req, res, next);
-});
+router.get('/permissions', getPermissionsController);
 
-router.delete(
-  '/subject/group',
-  hasAuthorization(Resource.YARS, Action.DELETE),
-  (req: Request<never, never, { sub: string; groupId: number }>, res: Response, next: NextFunction): void => {
-    yarsController.deleteSubjectGroup(req, res, next);
-  }
-);
+router.delete('/subject/group', hasAuthorization(Resource.YARS, Action.DELETE), deleteSubjectGroupController);
 
 export default router;

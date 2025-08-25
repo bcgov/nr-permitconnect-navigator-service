@@ -204,7 +204,15 @@ async function onUserGroupChange(group: Group) {
   try {
     const user = selectedUserAccessRequest.value?.user;
     if (user) {
-      const omittedUser = omit(user, ['groups', 'status']);
+      const omittedUser = omit(user, [
+        'bceidBusinessName',
+        'groups',
+        'status',
+        'createdAt',
+        'createdBy',
+        'updatedAt',
+        'updatedBy'
+      ]);
       const response = await accessRequestService.createUserAccessRequest({
         user: omittedUser,
         accessRequest: {

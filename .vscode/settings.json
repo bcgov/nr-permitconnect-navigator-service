@@ -27,5 +27,6 @@
   "scss.lint.unknownAtRules": "ignore",
   "yaml.schemas": {
     "openapi:v3": "./app/src/docs/v1.api-spec.yaml"
-  }
+  },
+  "todo-tree.tree.scanMode": "workspace only"
 }

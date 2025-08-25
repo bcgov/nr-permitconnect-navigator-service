@@ -36,7 +36,7 @@ const testEnquiry: Enquiry = {
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
-  addedToATS: false,
+  addedToAts: false,
   atsClientId: 123456,
   atsEnquiryId: '654321'
 };
@@ -52,7 +52,7 @@ const testProject: HousingProject = {
   hasRelatedEnquiry: true,
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
-  isDevelopedInBC: 'Yes',
+  isDevelopedInBc: 'Yes',
   projectName: 'Super Long Project Name',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
@@ -63,7 +63,7 @@ const testProject: HousingProject = {
   otherUnits: '5',
   hasRentalUnits: 'Yes',
   rentalUnits: '15',
-  financiallySupportedBC: 'Yes',
+  financiallySupportedBc: 'Yes',
   financiallySupportedIndigenous: 'Yes',
   indigenousDescription: 'Indigenous support description.',
   financiallySupportedNonProfit: 'Yes',
@@ -73,12 +73,12 @@ const testProject: HousingProject = {
   streetAddress: '123 Main St',
   locality: 'Anytown',
   province: 'BC',
-  locationPIDs: '123456789',
+  locationPids: '123456789',
   latitude: 49.2827,
   longitude: -123.1207,
   geomarkUrl: 'http://example.com/geomark',
-  naturalDisaster: 'None',
-  addedToATS: true,
+  naturalDisaster: false,
+  addedToAts: true,
   atsClientId: 654321,
   atsEnquiryId: '654321',
   ltsaCompleted: true,
@@ -112,7 +112,6 @@ const testPermitType: PermitType = {
 
 const testPermit: Permit = {
   permitId: '123',
-  permitTypeId: 1,
   activityId: 'activityUUID',
   needed: 'yes',
   status: 'status',
@@ -125,6 +124,7 @@ const testPermit: Permit = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   permitType: testPermitType,
+  permitTypeId: testPermitType.permitTypeId,
   permitNote: [],
   permitTracking: []
 };

@@ -44,7 +44,6 @@ const testPermitType: PermitType = {
 
 const testPermit: Permit = {
   permitId: 'permitUUID',
-  permitTypeId: 123,
   activityId: 'activityUUID',
   needed: PermitNeeded.YES,
   status: PermitStatus.APPLIED,
@@ -57,6 +56,7 @@ const testPermit: Permit = {
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate,
   permitType: testPermitType,
+  permitTypeId: testPermitType.permitTypeId,
   permitNote: [],
   permitTracking: []
 };

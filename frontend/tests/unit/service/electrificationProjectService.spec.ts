@@ -99,21 +99,21 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('deleteProject', () => {
-    it('calls correct endpoint', () => {
-      electrificationProjectService.deleteProject(testID);
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
-    });
-  });
-
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
       electrificationProjectService.deleteDraft(testID);
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${testID}`);
+    });
+  });
+
+  describe('deleteProject', () => {
+    it('calls correct endpoint', () => {
+      electrificationProjectService.deleteProject(testID);
+
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
     });
   });
 
@@ -182,25 +182,22 @@ describe('electrificationProjectService', () => {
     });
 
     it('calls endpoint with includeDeleted=false if specified', () => {
-      electrificationProjectService.searchProjects({ activityId: [testID], includeDeleted: false });
+      electrificationProjectService.searchProjects({ activityId: [testID] });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
         params: {
-          activityId: [testID],
-          includeDeleted: false
+          activityId: [testID]
         }
       });
     });
 
     it('calls endpoint with includeDeleted=true if specified', () => {
-      electrificationProjectService.searchProjects({ includeDeleted: true });
+      electrificationProjectService.searchProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
-        params: {
-          includeDeleted: true
-        }
+        params: {}
       });
     });
   });
@@ -220,17 +217,6 @@ describe('electrificationProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);
-    });
-  });
-
-  describe('updateIsDeletedFlag', () => {
-    it('calls correct endpoint', () => {
-      electrificationProjectService.updateIsDeletedFlag(testID, true);
-
-      expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}/delete`, {
-        isDeleted: true
-      });
     });
   });
 

@@ -22,21 +22,12 @@ const schema = {
       enquiryId: uuidv4.required()
     })
   },
-  updateIsDeletedFlag: {
-    params: Joi.object({
-      enquiryId: uuidv4.required()
-    }),
-    body: Joi.object({
-      isDeleted: Joi.boolean().required()
-    })
-  },
   searchEnquiries: {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       enquiryId: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(Joi.string()),
-      includeDeleted: Joi.boolean(),
       includeUser: Joi.boolean()
     })
   },
@@ -70,6 +61,5 @@ export default {
   createEnquiry: validate(schema.createEnquiry),
   deleteEnquiry: validate(schema.deleteEnquiry),
   searchEnquiries: validate(schema.searchEnquiries),
-  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateEnquiry: validate(schema.updateEnquiry)
 };

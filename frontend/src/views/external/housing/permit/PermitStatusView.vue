@@ -18,7 +18,6 @@ import { PermitAuthorizationStatus } from '@/utils/enums/permit';
 import { contactService, housingProjectService, permitService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { User } from '@/types';
 
 // Props
 const { permitId, projectId } = defineProps<{
@@ -40,7 +39,6 @@ const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
-const assignedNavigator: Ref<User | undefined> = ref(undefined);
 const descriptionModalVisible: Ref<boolean> = ref(false);
 const updatedBy: Ref<string | undefined> = ref(undefined);
 
@@ -62,12 +60,6 @@ onBeforeMount(async () => {
     if (!getProject.value) {
       const submission = (await housingProjectService.getProject(projectId)).data;
       projectStore.setProject(submission);
-    }
-
-    if (getProject.value?.assignedUserId) {
-      assignedNavigator.value = (
-        await contactService.searchContacts({ userId: [getProject.value.assignedUserId] })
-      ).data[0];
     }
 
     if (getPermit.value?.updatedBy) {
