@@ -82,13 +82,13 @@ function isFinanciallySupported(data: HousingProject) {
     </template>
   </Column>
   <Column
-    field="contacts.0.firstName"
+    field="activity.activityContact.0.contact.firstName"
     header="First name"
     :sortable="true"
     style="min-width: 150px"
   />
   <Column
-    field="contacts.0.lastName"
+    field="activity.activityContact.0.contact.lastName"
     header="Last name"
     :sortable="true"
     style="min-width: 150px"
@@ -159,7 +159,11 @@ function isFinanciallySupported(data: HousingProject) {
     header="Affected by natural disaster"
     :sortable="true"
     style="min-width: 275px"
-  />
+  >
+    <template #body="{ data }">
+      {{ data.naturalDisaster ? BasicResponse.YES : BasicResponse.NO }}
+    </template>
+  </Column>
   <Column
     header="Action"
     class="text-center header-center"

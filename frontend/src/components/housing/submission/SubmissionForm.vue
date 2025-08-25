@@ -360,6 +360,7 @@ const onSubmit = async (values: any) => {
         contactPreference: firstContact.contactPreference,
         contactUserId: firstContact.userId,
         locationAddress: values.locationAddress,
+        naturalDisaster: values.naturalDisaster,
         user: values.user,
         consentToFeedback: values.consentToFeedback
       }

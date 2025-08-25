@@ -22,7 +22,7 @@ import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, enquiryService, userService } from '@/services';
+import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
 import { useAppStore, useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
@@ -200,7 +200,7 @@ function onRelatedActivityInput(e: IInputEvent) {
     id.toUpperCase().includes(e.target.value.toUpperCase())
   );
   // Revert basic info to initial enquiry contact
-  setBasicInfo(enquiry?.contacts[0]);
+  setBasicInfo(enquiry?.activity?.activityContact?.[0]?.contact);
 }
 
 async function getRelatedATSClientID(activityId: string) {
@@ -241,10 +241,8 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
       if (response.length > 0) {
         // Set ATS client ID from the related project
         formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
-        // Set basic info from the related activity contact
-        if (getInitiative.value === Initiative.HOUSING) setBasicInfo(response[0].contacts[0]);
-        // For other initiatives
-        else setBasicInfo(response[0].activity?.activityContact?.[0]?.contact);
+        if (response[0].activity?.activityContact?.[0]?.contact)
+          setBasicInfo(response[0].activity?.activityContact?.[0]?.contact);
       }
     } else {
       throw new Error('No service');
@@ -296,6 +294,18 @@ const onSubmit = async (values: any) => {
       }
       atsCreateType.value = undefined;
     }
+
+    // Grab the contact information
+    const contact = {
+      contactId: values.contactId,
+      firstName: values.contactFirstName,
+      lastName: values.contactLastName,
+      phoneNumber: values.contactPhoneNumber,
+      email: values.contactEmail,
+      contactApplicantRelationship: values.contactApplicantRelationship,
+      contactPreference: values.contactPreference
+    };
+
     // Omit all the fields we dont want to send
     const dataOmitted = omit({ ...values }, [
       'contactId',
@@ -318,7 +328,11 @@ const onSubmit = async (values: any) => {
     const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
 
-    // Update enquiry
+    // Update enquiry - order of calls is important
+    const contactResponse = (await contactService.updateContact(contact)).data;
+    await activityContactService.updateActivityContact(values.activityId, [
+      { ...contact, contactId: contactResponse.contactId }
+    ]);
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
 
     // Update store with returned data
