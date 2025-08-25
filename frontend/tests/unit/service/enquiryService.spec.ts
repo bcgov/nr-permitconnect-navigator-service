@@ -8,8 +8,6 @@ import { Initiative } from '@/utils/enums/application';
 // Constants
 const PATH = 'enquiry';
 
-const IS_DELETED = true;
-
 const TEST_ACTIVITY_ID = '25357C4A';
 
 const testEnquiry = {
@@ -115,15 +113,6 @@ describe('enquiryService', () => {
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/search`, {
           params: { activityId: [TEST_ACTIVITY_ID] }
-        });
-      });
-
-      it('calls updateIsDeletedFlag with correct data', () => {
-        enquiryService.updateIsDeletedFlag(testEnquiry.enquiryId, IS_DELETED);
-
-        expect(patchSpy).toHaveBeenCalledTimes(1);
-        expect(patchSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}/delete`, {
-          isDeleted: IS_DELETED
         });
       });
 

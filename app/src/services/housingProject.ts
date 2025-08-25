@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
 import type {
   HousingProject,
   HousingProjectBase,
@@ -182,50 +181,6 @@ export const searchHousingProjects = async (
   });
 
   return result;
-};
-
-/**
- * Updates is_deleted flag for the corresponding activity
- * @param tx Prisma transaction client
- * @param {string} housingProjectId Housing project ID
- * @param {string} isDeleted flag
- * @returns {Promise<HousingProject>} The result of running the delete operation
- */
-export const updateHousingProjectIsDeletedFlag = async (
-  tx: PrismaTransactionClient,
-  housingProjectId: string,
-  isDeleted: boolean,
-  updateStamp: Partial<IStamps>
-): Promise<HousingProject> => {
-  // TODO-PR: Drop this service function, move project search to controller layer
-  // and add delete activity service call to controller layer
-  const deleteHousingProject = await tx.housing_project.findUniqueOrThrow({
-    where: {
-      housingProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (deleteHousingProject) {
-    await tx.activity.update({
-      data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
-      where: {
-        activityId: deleteHousingProject?.activityId
-      }
-    });
-  }
-
-  return deleteHousingProject;
 };
 
 /**

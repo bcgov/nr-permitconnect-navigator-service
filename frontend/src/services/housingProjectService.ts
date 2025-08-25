@@ -18,6 +18,14 @@ const service: IDraftableProjectService = {
   },
 
   /**
+   * @function deleteProject
+   * @returns {Promise} An axios response
+   */
+  deleteProject(projectId: string) {
+    return appAxios().delete(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`);
+  },
+
+  /**
    * @function deleteDraft
    * @returns {Promise} An axios response
    */
@@ -112,16 +120,6 @@ const service: IDraftableProjectService = {
    */
   updateDraft(data?: Partial<Draft>) {
     return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, data);
-  },
-
-  /**
-   * @function updateIsDeletedFlag
-   * @returns {Promise} An axios response
-   */
-  updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
-    return appAxios().patch(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}/delete`, {
-      isDeleted: isDeleted
-    });
   },
 
   /**

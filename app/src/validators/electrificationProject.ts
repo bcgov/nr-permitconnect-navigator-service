@@ -80,14 +80,6 @@ const schema = {
       projectCategory: Joi.array().items(...electrificationProjectCategoryCodes)
     })
   },
-  updateIsDeletedFlag: {
-    params: Joi.object({
-      electrificationProjectId: uuidv4.required()
-    }),
-    body: Joi.object({
-      isDeleted: Joi.boolean().required()
-    })
-  },
   updateElectrificationProject: {
     body: Joi.object({
       contacts: contacts,
@@ -134,6 +126,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getElectrificationProject: validate(schema.getElectrificationProject),
   searcElectrificationProjects: validate(schema.searchElectrificationProjects),
-  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateElectrificationProject: validate(schema.updateElectrificationProject)
 };

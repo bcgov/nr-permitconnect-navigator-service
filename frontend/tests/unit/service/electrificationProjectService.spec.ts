@@ -108,6 +108,15 @@ describe('electrificationProjectService', () => {
     });
   });
 
+  describe('deleteProject', () => {
+    it('calls correct endpoint', () => {
+      electrificationProjectService.deleteProject(testID);
+
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
+    });
+  });
+
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
       electrificationProjectService.getDraft(testID);
@@ -208,17 +217,6 @@ describe('electrificationProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);
-    });
-  });
-
-  describe('updateIsDeletedFlag', () => {
-    it('calls correct endpoint', () => {
-      electrificationProjectService.updateIsDeletedFlag(testID, true);
-
-      expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}/delete`, {
-        isDeleted: true
-      });
     });
   });
 

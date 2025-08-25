@@ -4,7 +4,7 @@ import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 
-import { createActivity } from '../services/activity';
+import { createActivity, deleteActivity } from '../services/activity';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
@@ -13,8 +13,7 @@ import {
   getElectrificationProjects,
   getElectrificationProjectStatistics,
   searchElectrificationProjects,
-  updateElectrificationProject,
-  updateElectrificationProjectIsDeletedFlag
+  updateElectrificationProject
 } from '../services/electrificationProject';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -127,6 +126,17 @@ export const createElectrificationProjectController = async (
   });
 
   res.status(201).json(result);
+};
+
+export const deleteElectrificationProjectController = async (
+  req: Request<{ electrificationProjectId: string }>,
+  res: Response
+) => {
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    const project = await getElectrificationProject(tx, req.params.electrificationProjectId);
+    await deleteActivity(tx, project.activityId, generateUpdateStamps(req.currentContext));
+  });
+  res.status(204).end();
 };
 
 export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
@@ -256,21 +266,6 @@ export const updateElectrificationProjectDraftController = async (req: Request<n
   });
 
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
-};
-
-export const updateElectrificationProjectIsDeletedFlagController = async (
-  req: Request<{ electrificationProjectId: string }, never, { isDeleted: boolean }>,
-  res: Response
-) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await updateElectrificationProjectIsDeletedFlag(
-      tx,
-      req.params.electrificationProjectId,
-      req.body.isDeleted,
-      generateUpdateStamps(req.currentContext)
-    );
-  });
-  res.status(204).end();
 };
 
 export const updateElectrificationProjectController = async (

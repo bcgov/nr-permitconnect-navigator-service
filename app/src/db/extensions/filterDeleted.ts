@@ -33,6 +33,11 @@ function filterColumn(operation: any, args: any) {
 
 const filterDeletedTransform = Prisma.defineExtension({
   query: {
+    enquiry: {
+      $allOperations({ operation, args, query }) {
+        return query(filterActivity(operation, args));
+      }
+    },
     electrification_project: {
       $allOperations({ operation, args, query }) {
         return query(filterActivity(operation, args));

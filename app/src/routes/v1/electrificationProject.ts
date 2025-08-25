@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
   createElectrificationProjectController,
+  deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
   emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
@@ -13,8 +14,7 @@ import {
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectDraftController,
-  updateElectrificationProjectController,
-  updateElectrificationProjectIsDeletedFlagController
+  updateElectrificationProjectController
 } from '../../controllers/electrificationProject';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -120,13 +120,13 @@ router.put(
   updateElectrificationProjectController
 );
 
-/** Updates is_deleted flag for a electrification project */
-router.patch(
-  '/:electrificationProjectId/delete',
+/** Deletes an electrification project */
+router.delete(
+  '/:electrificationProjectId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.DELETE),
   hasAccess('electrificationProjectId'),
-  electrificationProjectValidator.updateIsDeletedFlag,
-  updateElectrificationProjectIsDeletedFlagController
+  electrificationProjectValidator.deleteElectrificationProject,
+  deleteElectrificationProjectController
 );
 
 export default router;

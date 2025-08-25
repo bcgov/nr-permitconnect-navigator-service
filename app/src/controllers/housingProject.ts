@@ -8,7 +8,7 @@ import {
   generateUpdateStamps,
   jsonToPrismaInputJson
 } from '../db/utils/utils';
-import { createActivity } from '../services/activity';
+import { createActivity, deleteActivity } from '../services/activity';
 import { upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
@@ -18,8 +18,7 @@ import {
   getHousingProjects,
   getHousingProjectStatistics,
   searchHousingProjects,
-  updateHousingProject,
-  updateHousingProjectIsDeletedFlag
+  updateHousingProject
 } from '../services/housingProject';
 import { upsertPermit } from '../services/permit';
 import { upsertPermitTracking } from '../services/permitTracking';
@@ -291,6 +290,15 @@ export const createHousingProjectController = async (
   res.status(201).json(result);
 };
 
+export const deleteHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    const project = await getHousingProject(tx, req.params.housingProjectId);
+    await deleteActivity(tx, project.activityId, generateUpdateStamps(req.currentContext));
+  });
+
+  res.status(204).end();
+};
+
 export const deleteHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     await deleteDraft(tx, req.params.draftId);
@@ -446,22 +454,6 @@ export const updateHousingProjectDraftController = async (req: Request<never, ne
   });
 
   res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
-};
-
-export const updateHousingProjectIsDeletedFlagController = async (
-  req: Request<{ housingProjectId: string }, never, { isDeleted: boolean }>,
-  res: Response
-) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await updateHousingProjectIsDeletedFlag(
-      tx,
-      req.params.housingProjectId,
-      req.body.isDeleted,
-      generateUpdateStamps(req.currentContext)
-    );
-  });
-
-  res.status(204).end();
 };
 
 export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {

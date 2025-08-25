@@ -108,6 +108,15 @@ describe('housingProjectService', () => {
     });
   });
 
+  describe('deleteProject', () => {
+    it('calls correct endpoint', () => {
+      housingProjectService.deleteProject(TEST_ID);
+
+      expect(deleteSpy).toHaveBeenCalledTimes(1);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
+    });
+  });
+
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
       housingProjectService.getDraft(TEST_ID);
@@ -208,17 +217,6 @@ describe('housingProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
-    });
-  });
-
-  describe('updateIsDeletedFlag', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.updateIsDeletedFlag(TEST_ID, true);
-
-      expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}/delete`, {
-        isDeleted: true
-      });
     });
   });
 

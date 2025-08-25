@@ -2,12 +2,12 @@ import express from 'express';
 
 import {
   createEnquiryController,
+  deleteEnquiryController,
   getEnquiriesController,
   getEnquiryController,
   listRelatedEnquiriesController,
   searchEnquiriesController,
-  updateEnquiryController,
-  updateEnquiryIsDeletedFlagController
+  updateEnquiryController
 } from '../../controllers/enquiry';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -58,13 +58,13 @@ router.put(
   updateEnquiryController
 );
 
-/** Updates is_deleted flag for an enquiry */
-router.patch(
-  '/:enquiryId/delete',
+/** Deletes an enquiry */
+router.delete(
+  '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.DELETE),
   hasAccess('enquiryId'),
-  enquiryValidator.updateIsDeletedFlag,
-  updateEnquiryIsDeletedFlagController
+  enquiryValidator.deleteEnquiry,
+  deleteEnquiryController
 );
 
 export default router;

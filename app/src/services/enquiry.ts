@@ -1,8 +1,6 @@
-import prisma from '../db/dataConnection';
 import { Initiative } from '../utils/enums/application';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
 import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types';
 
 /**
@@ -191,47 +189,4 @@ export const updateEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBa
   });
 
   return result;
-};
-
-/**
- * Updates is_deleted flag for the corresponding activity
- * @param tx Prisma transaction client
- * @param enquiryId Enquiry ID
- * @param isDeleted flag
- * @returns A Promise that resolves to the enquiry with the updated flag
- */
-export const updateEnquiryIsDeletedFlag = async (
-  tx: PrismaTransactionClient,
-  enquiryId: string,
-  isDeleted: boolean,
-  updateStamp: Partial<IStamps>
-): Promise<Enquiry> => {
-  // TODO-PR: Remove this service function, move project search up to controller layer
-  // and add "correct" service calls to controller layer
-  const deleteEnquiry = await tx.enquiry.findUniqueOrThrow({
-    where: {
-      enquiryId: enquiryId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
-  });
-  if (deleteEnquiry) {
-    await prisma.activity.update({
-      data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
-      where: {
-        activityId: deleteEnquiry.activityId
-      }
-    });
-  }
-
-  return deleteEnquiry;
 };
