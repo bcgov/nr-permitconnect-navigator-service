@@ -24,8 +24,8 @@ vi.mock('vue-router', () => ({
   }))
 }));
 
-const useEnquiryService = vi.spyOn(enquiryService, 'updateIsDeletedFlag');
-useEnquiryService.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
+deleteEnquirySpy.mockResolvedValue({ data: {} } as AxiosResponse);
 const currentDate = new Date().toISOString();
 
 const exampleContact = {

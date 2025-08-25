@@ -9,6 +9,7 @@ import {
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
   createElectrificationProjectController,
+  deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
   emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
@@ -20,8 +21,7 @@ import {
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  updateElectrificationProjectDraftController,
-  updateElectrificationProjectIsDeletedFlagController
+  updateElectrificationProjectDraftController
 } from '../../../src/controllers/electrificationProject';
 import * as activityService from '../../../src/services/activity';
 import * as emailService from '../../../src/services/email';
@@ -116,6 +116,36 @@ describe('createElectrificationProjectController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
+  });
+});
+
+describe('deleteElectrificationProjectController', () => {
+  const getElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProject');
+  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
+    deleteActivitySpy.mockResolvedValue();
+
+    await deleteElectrificationProjectController(
+      req as unknown as Request<{ electrificationProjectId: string }>,
+      res as unknown as Response
+    );
+
+    expect(getElectrificationProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
+    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
+    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_PROJECT_1.activityId, {
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 });
 
@@ -535,40 +565,5 @@ describe('updateElectrificationProjectController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(updated);
-  });
-});
-
-describe('updateElectrificationProjectIsDeletedFlagController', () => {
-  const updateElectrificationProjectIsDeletedFlagSpy = jest.spyOn(
-    electrificationProjectService,
-    'updateElectrificationProjectIsDeletedFlag'
-  );
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      body: { isDeleted: true },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    updateElectrificationProjectIsDeletedFlagSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
-
-    await updateElectrificationProjectIsDeletedFlagController(
-      req as unknown as Request<{ electrificationProjectId: string }, never, { isDeleted: boolean }>,
-      res as unknown as Response
-    );
-
-    expect(updateElectrificationProjectIsDeletedFlagSpy).toHaveBeenCalledTimes(1);
-    expect(updateElectrificationProjectIsDeletedFlagSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      req.params.electrificationProjectId,
-      req.body.isDeleted,
-      {
-        updatedAt: expect.any(Date),
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      }
-    );
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
   });
 });

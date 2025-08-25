@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PrismaTransactionClient } from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 
-import { createActivity } from '../services/activity';
+import { createActivity, deleteActivity } from '../services/activity';
 import { upsertContacts } from '../services/contact';
 import {
   createEnquiry,
@@ -11,8 +11,7 @@ import {
   getEnquiry,
   getRelatedEnquiries,
   searchEnquiries,
-  updateEnquiry,
-  updateEnquiryIsDeletedFlag
+  updateEnquiry
 } from '../services/enquiry';
 import { Initiative } from '../utils/enums/application';
 import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -83,6 +82,14 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
   res.status(201).json(result);
 };
 
+export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    const enquiry = await getEnquiry(tx, req.params.enquiryId);
+    await deleteActivity(tx, enquiry.activityId, generateUpdateStamps(req.currentContext));
+  });
+  res.status(204).end();
+};
+
 export const getEnquiriesController = async (req: Request, res: Response) => {
   // Pull from PCNS database
   let response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
@@ -146,20 +153,4 @@ export const updateEnquiryController = async (req: Request<never, never, Enquiry
   });
 
   res.status(200).json(result);
-};
-
-export const updateEnquiryIsDeletedFlagController = async (
-  req: Request<{ enquiryId: string }, never, { isDeleted: boolean }>,
-  res: Response
-) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await updateEnquiryIsDeletedFlag(
-      tx,
-      req.params.enquiryId,
-      req.body.isDeleted,
-      generateUpdateStamps(req.currentContext)
-    );
-  });
-
-  res.status(204).end();
 };

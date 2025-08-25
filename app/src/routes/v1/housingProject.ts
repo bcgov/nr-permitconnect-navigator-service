@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
   createHousingProjectController,
+  deleteHousingProjectController,
   deleteHousingProjectDraftController,
   emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
@@ -13,8 +14,7 @@ import {
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectDraftController,
-  updateHousingProjectController,
-  updateHousingProjectIsDeletedFlagController
+  updateHousingProjectController
 } from '../../controllers/housingProject';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -117,14 +117,13 @@ router.put(
   updateHousingProjectController
 );
 
-/** Updates is_deleted flag for a housing project */
-router.patch(
-  '/:housingProjectId/delete',
+/** Deletes a housing project */
+router.delete(
+  '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),
   hasAccess('housingProjectId'),
-  housingProjectValidator.updateIsDeletedFlag,
-
-  updateHousingProjectIsDeletedFlagController
+  housingProjectValidator.deleteHousingProject,
+  deleteHousingProjectController
 );
 
 export default router;

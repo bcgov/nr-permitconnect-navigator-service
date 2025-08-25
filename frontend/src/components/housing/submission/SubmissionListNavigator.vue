@@ -127,7 +127,7 @@ function onDelete(projectId: string, activityId: string) {
     rejectProps: { outlined: true },
     accept: () => {
       projectService
-        ?.updateIsDeletedFlag(projectId, true)
+        ?.deleteProject(projectId)
         .then(() => {
           emit('submission:delete', projectId, activityId);
           selection.value = undefined;

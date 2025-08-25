@@ -121,7 +121,7 @@ function onDelete(enquiryId: string, activityId: string) {
     rejectProps: { outlined: true },
     accept: () => {
       enquiryService
-        .updateIsDeletedFlag(enquiryId, true)
+        .deleteEnquiry(enquiryId)
         .then(() => {
           emit('enquiry:delete', enquiryId, activityId);
           selection.value = undefined;

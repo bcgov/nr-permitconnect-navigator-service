@@ -75,14 +75,6 @@ const schema = {
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
-  updateIsDeletedFlag: {
-    params: Joi.object({
-      housingProjectId: uuidv4.required()
-    }),
-    body: Joi.object({
-      isDeleted: Joi.boolean().required()
-    })
-  },
   updateHousingProject: {
     body: Joi.object({
       housingProjectId: uuidv4.required(),
@@ -192,6 +184,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),
   searcHousingProjects: validate(schema.searchHousingProjects),
-  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateHousingProject: validate(schema.updateHousingProject)
 };

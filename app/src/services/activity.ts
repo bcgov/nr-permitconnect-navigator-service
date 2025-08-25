@@ -37,12 +37,19 @@ export const createActivity = async (
 /**
  * @function deleteActivity
  * Delete an activity
- * This action will cascade delete across all linked items
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
+ * @param deleteStamp Timestamp information of the delete
  */
-export const deleteActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<void> => {
-  await tx.activity.delete({ where: { activityId } });
+export const deleteActivity = async (
+  tx: PrismaTransactionClient,
+  activityId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  await tx.activity.update({
+    data: { isDeleted: true, updatedAt: deleteStamp.updatedAt, updatedBy: deleteStamp.updatedBy },
+    where: { activityId }
+  });
 };
 
 /**

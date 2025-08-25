@@ -1,11 +1,11 @@
 import {
   createEnquiryController,
+  deleteEnquiryController,
   getEnquiriesController,
   getEnquiryController,
   listRelatedEnquiriesController,
   searchEnquiriesController,
-  updateEnquiryController,
-  updateEnquiryIsDeletedFlagController
+  updateEnquiryController
 } from '../../../src/controllers/enquiry';
 import * as activityService from '../../../src/services/activity';
 import * as enquiryService from '../../../src/services/enquiry';
@@ -65,6 +65,33 @@ describe('createEnquiryController', () => {
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
+  });
+});
+
+describe('deleteEnquiryController', () => {
+  const getEnquirySpy = jest.spyOn(enquiryService, 'getEnquiry');
+  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
+    deleteActivitySpy.mockResolvedValue();
+
+    await deleteEnquiryController(req as unknown as Request<{ enquiryId: string }>, res as unknown as Response);
+
+    expect(getEnquirySpy).toHaveBeenCalledTimes(1);
+    expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
+    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
+    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_1.activityId, {
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 });
 
@@ -177,33 +204,5 @@ describe('updateEnquiryController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
-  });
-});
-
-describe('updateEnquiryIsDeletedFlagController', () => {
-  const updateIsDeletedFlagSpy = jest.spyOn(enquiryService, 'updateEnquiryIsDeletedFlag');
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' },
-      body: { isDeleted: true },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    updateIsDeletedFlagSpy.mockResolvedValue(TEST_ENQUIRY_1);
-
-    await updateEnquiryIsDeletedFlagController(
-      req as unknown as Request<{ enquiryId: string }, never, { isDeleted: boolean }>,
-      res as unknown as Response
-    );
-
-    expect(updateIsDeletedFlagSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211',
-      true,
-      expect.any(Object)
-    );
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
   });
 });

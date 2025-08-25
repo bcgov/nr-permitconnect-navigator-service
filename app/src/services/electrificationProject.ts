@@ -1,5 +1,4 @@
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
 import type {
   ElectrificationProject,
   ElectrificationProjectBase,
@@ -180,50 +179,6 @@ export const searchElectrificationProjects = async (
   });
 
   return result;
-};
-
-/**
- * Updates is_deleted flag for the corresponding activity
- * @param tx Prisma transaction client
- * @param electrificationProjectId Electrification project ID
- * @param isDeleted flag
- * @returns A Promise that resolves to the electrification project with updated flag
- */
-export const updateElectrificationProjectIsDeletedFlag = async (
-  tx: PrismaTransactionClient,
-  electrificationProjectId: string,
-  isDeleted: boolean,
-  updateStamp: Partial<IStamps>
-): Promise<ElectrificationProject> => {
-  // TODO-PR: Drop this service function, move project search to controller layer
-  // and add delete activity service call to controller layer
-  const deleteElectrificationProject = await tx.electrification_project.findUniqueOrThrow({
-    where: {
-      electrificationProjectId: electrificationProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  if (deleteElectrificationProject) {
-    await tx.activity.update({
-      data: { isDeleted: isDeleted, updatedAt: updateStamp.updatedAt, updatedBy: updateStamp.updatedBy },
-      where: {
-        activityId: deleteElectrificationProject?.activityId
-      }
-    });
-  }
-
-  return deleteElectrificationProject;
 };
 
 /**

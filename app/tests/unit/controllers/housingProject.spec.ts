@@ -1,6 +1,7 @@
 import {
   assignPriority,
   createHousingProjectController,
+  deleteHousingProjectController,
   deleteHousingProjectDraftController,
   emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
@@ -12,8 +13,7 @@ import {
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectController,
-  updateHousingProjectDraftController,
-  updateHousingProjectIsDeletedFlagController
+  updateHousingProjectDraftController
 } from '../../../src/controllers/housingProject';
 import * as activityService from '../../../src/services/activity';
 import * as contactService from '../../../src/services/contact';
@@ -288,6 +288,36 @@ describe('createHousingProjectController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, TEST_PERMIT_2);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, TEST_PERMIT_3);
     expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
+  });
+});
+
+describe('deleteHousingProjectController', () => {
+  const getHousingProjectSpy = jest.spyOn(housingProjectService, 'getHousingProject');
+  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    getHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    deleteActivitySpy.mockResolvedValue();
+
+    await deleteHousingProjectController(
+      req as unknown as Request<{ housingProjectId: string }>,
+      res as unknown as Response
+    );
+
+    expect(getHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
+    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
+    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_PROJECT_1.activityId, {
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
   });
 });
 
@@ -747,37 +777,5 @@ describe('updateHousingProjectController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
-  });
-});
-
-describe('updateHousingProjectIsDeletedFlagController', () => {
-  const updateHousingProjectIsDeletedFlagSpy = jest.spyOn(housingProjectService, 'updateHousingProjectIsDeletedFlag');
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      body: { isDeleted: true },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    updateHousingProjectIsDeletedFlagSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
-
-    await updateHousingProjectIsDeletedFlagController(
-      req as unknown as Request<{ housingProjectId: string }, never, { isDeleted: boolean }>,
-      res as unknown as Response
-    );
-
-    expect(updateHousingProjectIsDeletedFlagSpy).toHaveBeenCalledTimes(1);
-    expect(updateHousingProjectIsDeletedFlagSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      req.params.housingProjectId,
-      req.body.isDeleted,
-      {
-        updatedAt: expect.any(Date),
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      }
-    );
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
   });
 });

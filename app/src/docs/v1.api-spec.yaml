@@ -574,64 +574,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete an enquiry
-      description: >-
-        Deletes the enquiry, followed by the associated activity. This action
-        will cascade delete across all linked items
+      summary: Delete an electrification enquiry
+      description: A delete of an electrification enquiry
       operationId: deleteElectrificationEnquiry
       tags:
         - Electrification Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        '200':
-          description: Enquiry deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /electrification/enquiry/{enquiryId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of an enquiry using a is_deleted flag
-      operationId: electrificationEnquiry-updateIsDeletedFlag
-      tags:
-        - Electrification Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Path-EnquiryId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                isDeleted:
-                  type: boolean
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    required:
-                      - is_deleted
-                    properties:
-                      is_deleted:
-                        type: boolean
-                        example: true
-                  - $ref: '#/components/schemas/DB-Enquiry'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1067,58 +1019,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a electrification project
+      summary: Delete an electrification project
+      description: Delete of an electrification project
       operationId: deleteElectrificationProject
       tags:
         - Electrification Project
       parameters:
         - $ref: '#/components/parameters/Path-ElectrificationProjectId'
       responses:
-        '200':
-          description: Electrification Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /electrification/project/{electrificationProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a electrification project using a is_deleted flag
-      operationId: electrificationProject-updateIsDeletedFlag
-      tags:
-        - Electrification Project
-      parameters:
-        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-ElectrificationProject'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1621,64 +1531,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete an enquiry
-      description: >-
-        Deletes the enquiry, followed by the associated activity. This action
-        will cascade delete across all linked items
+      summary: Delete a housing enquiry
+      description: Delete a housing enquiry
       operationId: deleteHousingEnquiry
       tags:
         - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        '200':
-          description: Enquiry deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /housing/enquiry/{enquiryId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of an enquiry using a is_deleted flag
-      operationId: HousingEnquiry-updateIsDeletedFlag
-      tags:
-        - Housing Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Path-EnquiryId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                isDeleted:
-                  type: boolean
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    required:
-                      - is_deleted
-                    properties:
-                      is_deleted:
-                        type: boolean
-                        example: true
-                  - $ref: '#/components/schemas/DB-Enquiry'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -2121,51 +1983,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Path-HousingProjectId'
       responses:
-        '200':
-          description: Housing Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housing/project/{housingProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a housing project using a is_deleted flag
-      operationId: housingProject-updateIsDeletedFlag
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
