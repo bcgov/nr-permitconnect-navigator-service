@@ -3,7 +3,7 @@ import { v4 as uuidv4, NIL } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact';
 import { IdentityProvider as enumIDP } from '../utils/enums/application';
-import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
+import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { Problem } from '../utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
@@ -194,7 +194,8 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
         contactApplicantRelationship: null,
         contactPreference: null,
         ...generateCreateStamps(undefined),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       };
       await upsertContacts(tx, [newContact]);
     }

@@ -1,6 +1,7 @@
 import { Initiative } from '../utils/enums/application';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { IStamps } from '../interfaces/IStamps';
 import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types';
 
 /**
@@ -29,6 +30,23 @@ export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBa
 };
 
 /**
+ * Delete an enquiry
+ * @param tx Prisma transaction client
+ * @param enquiryId Unique enquiry ID
+ * @param deleteStamp Timestamp information of the delete
+ */
+export const deleteEnquiry = async (
+  tx: PrismaTransactionClient,
+  enquiryId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  await tx.enquiry.update({
+    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
+    where: { enquiryId }
+  });
+};
+
+/**
  * Gets a list of enquiries
  * @param tx Prisma transaction client
  * @returns A Promise that resolves to an array of enquiries
@@ -36,11 +54,6 @@ export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBa
 export const getEnquiries = async (tx: PrismaTransactionClient): Promise<Enquiry[]> => {
   // fetch all enquiries with activity not deleted
   const result = await tx.enquiry.findMany({
-    where: {
-      activity: {
-        isDeleted: false
-      }
-    },
     include: {
       activity: {
         include: {

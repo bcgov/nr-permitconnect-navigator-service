@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
+import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject } from '../services/coms';
 import { email } from '../services/email';
 import { createNote } from '../services/note';
@@ -75,9 +75,9 @@ export const sendRoadmapController = async (
         escalateToDirector: false,
         escalationType: null,
         shownToProponent: false,
-        isDeleted: false,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
 
       await createNote(tx, {
@@ -85,7 +85,8 @@ export const sendRoadmapController = async (
         noteHistoryId: history.noteHistoryId,
         note: noteBody,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
     }
 

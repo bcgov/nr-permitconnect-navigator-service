@@ -311,6 +311,7 @@ describe('createHousingProjectController', () => {
 
 describe('deleteHousingProjectController', () => {
   const getHousingProjectSpy = jest.spyOn(housingProjectService, 'getHousingProject');
+  const deleteHousingProjectSpy = jest.spyOn(housingProjectService, 'deleteHousingProject');
   const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
@@ -329,10 +330,15 @@ describe('deleteHousingProjectController', () => {
 
     expect(getHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
+    expect(deleteHousingProjectSpy).toHaveBeenCalledTimes(1);
+    expect(deleteHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId, {
+      deletedAt: expect.any(Date),
+      deletedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_PROJECT_1.activityId, {
-      updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      deletedAt: expect.any(Date),
+      deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
@@ -734,7 +740,9 @@ describe('updateHousingProjectDraftController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: null,
-      updatedBy: null
+      updatedBy: null,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({

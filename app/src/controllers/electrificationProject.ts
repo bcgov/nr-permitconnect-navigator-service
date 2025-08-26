@@ -1,12 +1,19 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
+import {
+  generateCreateStamps,
+  generateDeleteStamps,
+  generateNullDeleteStamps,
+  generateNullUpdateStamps,
+  generateUpdateStamps
+} from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
   createElectrificationProject,
+  deleteElectrificationProject,
   getElectrificationProject,
   getElectrificationProjects,
   getElectrificationProjectStatistics,
@@ -67,7 +74,9 @@ const generateElectrificationProjectData = async (
     createdBy: null,
     createdAt: null,
     updatedBy: null,
-    updatedAt: null
+    updatedAt: null,
+    deletedBy: null,
+    deletedAt: null
   };
 
   return electrificationProjectData;
@@ -131,7 +140,12 @@ export const deleteElectrificationProjectController = async (
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const project = await getElectrificationProject(tx, req.params.electrificationProjectId);
-    await deleteActivity(tx, project.activityId, generateUpdateStamps(req.currentContext));
+    await deleteElectrificationProject(
+      tx,
+      req.params.electrificationProjectId,
+      generateDeleteStamps(req.currentContext)
+    );
+    await deleteActivity(tx, project.activityId, generateDeleteStamps(req.currentContext));
   });
   res.status(204).end();
 };
@@ -257,7 +271,8 @@ export const updateElectrificationProjectDraftController = async (req: Request<n
         draftCode: DraftCode.ELECTRIFICATION_PROJECT,
         data: req.body.data,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
     }
   });

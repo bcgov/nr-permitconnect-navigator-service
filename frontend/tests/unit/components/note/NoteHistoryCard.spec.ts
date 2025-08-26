@@ -52,7 +52,6 @@ const TEST_NOTE_HISTORY: NoteHistory = {
   escalateToDirector: false,
   escalateToSupervisor: false,
   escalationType: null,
-  isDeleted: false,
   note: [TEST_NOTE],
   noteHistoryId: '123',
   type: NoteType.GENERAL,
