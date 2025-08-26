@@ -30,7 +30,6 @@ describe('send', () => {
   // Mock service calls
   const emailSpy = jest.spyOn(emailService, 'email');
   const getObjectSpy = jest.spyOn(comsService, 'getObject');
-  const getObjectsSpy = jest.spyOn(comsService, 'getObjects');
   const createNoteSpy = jest.spyOn(noteService, 'createNote');
 
   it('should return 201 if all good', async () => {
@@ -71,7 +70,6 @@ describe('send', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
@@ -119,7 +117,6 @@ describe('send', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
@@ -162,15 +159,11 @@ describe('send', () => {
       headers: {}
     };
 
-    const getObjectsResponse = [
-      { id: '123', name: 'foo' },
-      { id: '456', name: 'bar' }
-    ];
-
     const getObjectResponse = {
       data: 'foo',
       headers: {
-        'content-type': 'filetype'
+        'content-type': 'filetype',
+        'x-amz-meta-name': 'foo'
       },
       status: 200
     };
@@ -180,15 +173,12 @@ describe('send', () => {
       status: 201
     };
 
-    getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockResolvedValue(getObjectResponse);
     emailSpy.mockResolvedValue(emailResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
     expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
@@ -239,7 +229,6 @@ describe('send', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(0);
     expect(getObjectSpy).toHaveBeenCalledTimes(0);
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
@@ -266,7 +255,7 @@ describe('send', () => {
               filename: 'foo'
             },
             {
-              content: Buffer.from('foo').toString('base64'),
+              content: Buffer.from('bar').toString('base64'),
               contentType: 'filetype',
               encoding: 'base64',
               filename: 'bar'
@@ -283,22 +272,30 @@ describe('send', () => {
       status: 201
     };
 
-    const getObjectsResponse = [
-      { id: '123', name: 'foo' },
-      { id: '456', name: 'bar' }
-    ];
-
-    const getObjectResponse = {
+    const getObjectResponse1 = {
       data: 'foo',
       headers: {
-        'content-type': 'filetype'
+        'content-type': 'filetype',
+        'x-amz-meta-name': 'foo'
       },
       status: 200
     };
 
+    const getObjectResponse2 = {
+      data: 'bar',
+      headers: {
+        'content-type': 'filetype',
+        'x-amz-meta-name': 'bar'
+      },
+      status: 200
+    };
+
+    const note1 = `${getObjectResponse1.headers['x-amz-meta-name']}\n`;
+    const note2 = `${getObjectResponse2.headers['x-amz-meta-name']}\n`;
+
     const noteCreate: Note = {
       activityId: '123-123',
-      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`,
+      note: `Some message text\n\nAttachments:\n${note1}${note2}`,
       noteType: 'Roadmap',
       title: 'Sent roadmap',
       bringForwardDate: null,
@@ -312,14 +309,12 @@ describe('send', () => {
 
     createNoteSpy.mockResolvedValue(noteCreate);
     emailSpy.mockResolvedValue(emailResponse);
-    getObjectsSpy.mockResolvedValue(getObjectsResponse);
-    getObjectSpy.mockResolvedValue(getObjectResponse);
+    getObjectSpy.mockResolvedValueOnce(getObjectResponse1);
+    getObjectSpy.mockResolvedValueOnce(getObjectResponse2);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
     expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
@@ -364,12 +359,6 @@ describe('send', () => {
       headers: {}
     };
 
-    const getObjectsResponse = [
-      { id: '123', name: 'foo' },
-      { id: 'nonmatchingid', name: 'bar' }
-    ];
-
-    getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockImplementationOnce(() => {
       throw new Error();
     });
@@ -377,8 +366,6 @@ describe('send', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
     expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
@@ -418,11 +405,6 @@ describe('send', () => {
       headers: {}
     };
 
-    const getObjectsResponse = [
-      { id: '123', name: 'foo' },
-      { id: 'nonmatchingid', name: 'bar' }
-    ];
-
     const getObjectResponse = {
       data: 'foo',
       headers: {
@@ -431,14 +413,11 @@ describe('send', () => {
       status: 200
     };
 
-    getObjectsSpy.mockResolvedValue(getObjectsResponse);
     getObjectSpy.mockResolvedValue(getObjectResponse);
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await roadmapController.send(req as any, res as any, next);
 
-    expect(getObjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getObjectsSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds);
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
     expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
     expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
