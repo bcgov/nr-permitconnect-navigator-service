@@ -34,11 +34,11 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
             where: {
               permitTrackingId: x.permitTrackingId
             },
-            data: x
+            data: { ...x, permitId: data.permitId }
           });
         } else {
           return await tx.permit_tracking.create({
-            data: x
+            data: { ...x, permitId: data.permitId }
           });
         }
       })

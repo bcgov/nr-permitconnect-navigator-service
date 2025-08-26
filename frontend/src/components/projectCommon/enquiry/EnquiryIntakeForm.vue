@@ -11,7 +11,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, enquiryService } from '@/services';
+import { activityContactService, contactService, enquiryService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
@@ -242,7 +242,11 @@ async function onSubmit(values: any) {
     const result = await enquiryService.createEnquiry(dataOmitted);
 
     // Link activity contact
-    await activityContactService.updateActivityContact(result.data.activityId, [contact]);
+    const contactResponse = (await contactService.updateContact(contact)).data;
+    await activityContactService.updateActivityContact(result.data.activityId, [contactResponse]);
+
+    // Save contact data to store
+    contactStore.setContact(contactResponse);
 
     // Send confirmation email
     emailConfirmation(result.data.activityId, result.data.enquiryId);
