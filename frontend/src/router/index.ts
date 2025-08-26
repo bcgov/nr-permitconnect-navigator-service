@@ -23,10 +23,9 @@ import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router'
 import type { Contact } from '@/types';
 
 /**
- * @function accessHandler
  * Checks for user access to the requested route and redirect if necessary
- * @param {object} to The route to navigate to
- * @returns {object} a Vue route
+ * @param to The route to navigate to
+ * @returns A Vue route
  */
 export function accessHandler(to: RouteLocationNormalizedGeneric) {
   const access = to.meta.access as NavigationPermission[];
@@ -40,9 +39,8 @@ export function accessHandler(to: RouteLocationNormalizedGeneric) {
 }
 
 /**
- * @function bootstrap
  * Obtains user permissions if authenticated before hard navigation
- * @returns {object} a Vue route
+ * @returns A Vue route
  */
 export async function bootstrap() {
   const authnStore = useAuthNStore();
@@ -60,20 +58,18 @@ export async function bootstrap() {
 }
 
 /**
- * @function createProps
  * Parses the route query and params to generate Vue props
- * @param {object} route The route object
- * @returns {object} a Vue props object
+ * @param route The route object
+ * @returns A Vue props object
  */
 export function createProps(route: { query: any; params: any }): object {
   return { ...route.query, ...route.params };
 }
 
 /**
- * @function entryRedirect
  * Checks for proper navigation on entry based on role
- * @param {object} to The route to navigate to
- * @returns {object} a Vue route
+ * @param to The route to navigate to
+ * @returns A Vue route
  */
 export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   const authzStore = useAuthZStore();

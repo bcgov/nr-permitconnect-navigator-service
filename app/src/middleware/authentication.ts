@@ -1,33 +1,31 @@
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { login } from '../services/user';
 import { Problem } from '../utils';
 import { AuthType, Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { CurrentContext } from '../types';
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { PrismaTransactionClient } from '../db/dataConnection';
 
 // TODO: Implement a 401 for unrecognized users.
 
 /**
- * @function _spkiWrapper
  * Wraps an SPKI key with PEM header and footer
- * @param {string} spki The PEM-encoded Simple public-key infrastructure string
- * @returns {string} The PEM-encoded SPKI with PEM header and footer
+ * @param spki The PEM-encoded Simple public-key infrastructure string
+ * @returns The PEM-encoded SPKI with PEM header and footer
  */
 export const _spkiWrapper = (spki: string) => `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
 
 /**
- * @function currentContext
  * Injects a currentContext object to the request if there exists valid authentication artifacts.
  * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
- * @param {Request} req Express request object
- * @param {Response} res Express response object
- * @param {NextFunction} next The next callback function
- * @returns {function} Express middleware function
+ * @param req Express request object
+ * @param  res Express response object
+ * @param next The next callback function
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const currentContext = (initiative: Initiative) => {

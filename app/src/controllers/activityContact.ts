@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { deleteUnmatchedActivityContacts, upsertActivityContacts } from '../services/activityContact';
 import { insertContacts } from '../services/contact';
 import { partition } from '../utils/utils';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Contact } from '../types';
 
 export const updateActivityContactController = async (

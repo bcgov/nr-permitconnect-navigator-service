@@ -4,12 +4,11 @@ import { AuthType } from '../utils/enums/application';
 import type { NextFunction, Request, Response } from 'express';
 
 /**
- * @function requireSomeAuth
  * Rejects the request if there is no authorization in the appropriate mode
- * @param {object} req Express request object
- * @param {object} _res Express response object
- * @param {function} next The next callback function
- * @returns {function} Express middleware function
+ * @param req Express request object
+ * @param _res Express response object
+ * @param next The next callback function
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const requireSomeAuth = (req: Request, _res: Response, next: NextFunction) => {

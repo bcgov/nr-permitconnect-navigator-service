@@ -1,6 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import {
   generateCreateStamps,
@@ -30,6 +29,7 @@ import { Problem } from '../utils';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type {
   CurrentContext,
   Draft,
@@ -43,7 +43,6 @@ import type {
 } from '../types';
 
 /**
- * @function assignPriority
  * Assigns a priority level to a housing project based on given criteria
  * Criteria defined below
  */
@@ -229,7 +228,6 @@ const generateHousingProjectData = async (
 };
 
 /**
- * @function emailConfirmation
  * Send an email with the confirmation of housing project
  */
 export const emailHousingProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {

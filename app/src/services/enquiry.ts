@@ -86,7 +86,6 @@ export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string)
 };
 
 /**
- * @function searchEnquiries
  * Search and filter for specific enquiries
  * @param tx Prisma transaction client
  * @param params.activityId Optional array of uuids representing the activity ID

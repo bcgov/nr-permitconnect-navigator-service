@@ -29,7 +29,6 @@ type JwtUser = {
 };
 
 /**
- * @function _tokenToUser
  * Transforms JWT payload contents into a User Model object
  * Checks IDIR/BCeID keys first, fallbacks are for BCSC
  * @param token The decoded JWT payload

@@ -1,9 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
-
 import { createActivity, deleteActivity } from '../services/activity';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
@@ -20,20 +18,20 @@ import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../u
 import { isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
-import {
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type {
+  Contact,
+  CurrentContext,
+  Draft,
+  ElectrificationProject,
+  ElectrificationProjectIntake,
+  ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  type Contact,
-  type CurrentContext,
-  type Draft,
-  type ElectrificationProject,
-  type ElectrificationProjectIntake,
-  type ElectrificationProjectSearchParameters,
-  type Email,
-  type StatisticsFilters
+  Email,
+  StatisticsFilters
 } from '../types';
 
 /**
- * @function generateElectrificationProjectData
  * Handles creating a project from intake data
  */
 const generateElectrificationProjectData = async (
@@ -76,7 +74,6 @@ const generateElectrificationProjectData = async (
 };
 
 /**
- * @function emailConfirmation
  * Send an email with the confirmation of electrification project
  */
 export const emailElectrificationProjectConfirmationController = async (
@@ -96,7 +93,7 @@ export const getElectrificationProjectActivityIdsController = async (req: Reques
     response = response.filter((x) => x?.createdBy === req.currentContext.userId);
   }
 
-  res.status(200).json(response.map((x: ElectrificationProject) => x.activityId));
+  res.status(200).json(response.map((x) => x.activityId));
 };
 
 export const createElectrificationProjectController = async (

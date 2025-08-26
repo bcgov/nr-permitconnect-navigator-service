@@ -41,7 +41,6 @@ export const createHousingProject = async (
 };
 
 /**
- * @function getHousingProjectStatistics
  * Gets a set of housing project related statistics
  * @param tx Prisma transaction client
  * @param filters The filters to apply to the statistics

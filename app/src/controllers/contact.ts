@@ -1,12 +1,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateUpdateStamps } from '../db/utils/utils';
 import { deleteContact, getContact, matchContacts, searchContacts, upsertContacts } from '../services/contact';
 import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Contact, ContactSearchParameters } from '../types';
 
 export const deleteContactController = async (req: Request<{ contactId: string }>, res: Response) => {

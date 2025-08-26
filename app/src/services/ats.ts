@@ -5,7 +5,6 @@ import type { AxiosInstance } from 'axios';
 import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types';
 
 /**
- * @function getToken
  * Gets Auth token using ATS client credentials
  * @returns
  */
@@ -27,10 +26,9 @@ async function getToken() {
 }
 
 /**
- * @function atsAxios
  * Returns an Axios instance with Authorization header
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @param options Axios request config options
+ * @returns An axios instance
  */
 function atsAxios(): AxiosInstance {
   // Create axios instance
@@ -49,10 +47,9 @@ function atsAxios(): AxiosInstance {
 }
 
 /**
- * @function searchATSUsers
  * Searches for ATS users
- * @param {ATSUserSearchParameters} data The search parameters
- * @returns {Promise<data | null>} The result of calling the search api
+ * @param params The search parameters
+ * @returns The result of calling the search api
  */
 export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
   try {
@@ -74,10 +71,9 @@ export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
 };
 
 /**
- * @function createATSClient
  * Creates a client in ATS
- * @param {ATSClientResource} data The client data
- * @returns {Promise<data | null>} The result of calling the post api
+ * @param atsClient The client data
+ * @returns The result of calling the post api
  */
 export const createATSClient = async (atsClient: ATSClientResource) => {
   try {
@@ -99,10 +95,9 @@ export const createATSClient = async (atsClient: ATSClientResource) => {
 };
 
 /**
- * @function createATSEnquiry
  * Creates a enquiry in ATS
- * @param {ATSEnquiryResource} data The client data
- * @returns {Promise<data | null>} The result of calling the post api
+ * @param atsEnquiryThe client data
+ * @returns The result of calling the post api
  */
 export const createATSEnquiry = async (atsEnquiry: ATSEnquiryResource) => {
   try {

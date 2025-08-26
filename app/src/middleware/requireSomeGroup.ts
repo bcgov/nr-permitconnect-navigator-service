@@ -1,19 +1,18 @@
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { assignGroup, getGroups, getSubjectGroups } from '../services/yars';
 import { Problem } from '../utils';
 import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
 /**
- * @function requireSomeGroup
  * Attempt to assign proponent groups to users with external IDPs
  * Rejects the request if user has no assigned group
- * @param {object} req Express request object
- * @param {object} _res Express response object
- * @param {function} next The next callback function
- * @returns {function} Express middleware function
+ * @param req Express request object
+ * @param _res Express response object
+ * @param next The next callback function
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {

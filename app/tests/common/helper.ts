@@ -10,11 +10,10 @@ import type { Express, Request, Response } from 'express';
  */
 const helper = {
   /**
-   * @function expressHelper
    * Creates a stripped-down simple Express server object
-   * @param {string} basePath The path to mount the `router` on
-   * @param {object} router An express router object to mount
-   * @returns {object} A simple express server object with `router` mounted to `basePath`
+   * @param basePath The path to mount the `router` on
+   * @param router An express router object to mount
+   * @returns A simple express server object with `router` mounted to `basePath`
    */
   expressHelper: (basePath: string, router: Express): object => {
     const app = express();

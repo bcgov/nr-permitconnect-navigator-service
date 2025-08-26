@@ -1,18 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps } from '../db/utils/utils';
-import { getObject, getObjects } from '../services/coms';
+import { getObject } from '../services/coms';
 import { email } from '../services/email';
 import { createNote } from '../services/note';
 import { createNoteHistory } from '../services/noteHistory';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Email, EmailAttachment } from '../types';
 
 /**
- * @function send
  * Send an email with the roadmap data
  */
 export const sendRoadmapController = async (
@@ -24,33 +23,26 @@ export const sendRoadmapController = async (
     if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
       const attachments: EmailAttachment[] = [];
 
-        if (req.currentContext?.bearerToken) {
-          // Attempt to get the requested documents from COMS
-          // If succesful it is converted to base64 encoding and added to the attachment list
-          const objectPromises = req.body.selectedFileIds.map(async (id) => {
-            const { status, headers, data } = await comsService.getObject(
-              req.currentContext?.bearerToken as string,
-              id
-            );
+      if (req.currentContext?.bearerToken) {
+        // Attempt to get the requested documents from COMS
+        // If succesful it is converted to base64 encoding and added to the attachment list
+        const objectPromises = req.body.selectedFileIds.map(async (id) => {
+          const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
 
-            if (status === 200) {
-              const filename = headers['x-amz-meta-name'];
-              if (filename) {
-                attachments.push({
-                  content: Buffer.from(data).toString('base64'),
-                  contentType: headers['content-type'],
-                  encoding: 'base64',
-                  filename: filename
-                });
-              } else {
-                throw new Error(`Unable to obtain filename for file ${id}`);
-              }
+          if (status === 200) {
+            const filename = headers['x-amz-meta-name'];
+            if (filename) {
+              attachments.push({
+                content: Buffer.from(data).toString('base64'),
+                contentType: headers['content-type'],
+                encoding: 'base64',
+                filename: filename
+              });
+            } else {
+              throw new Error(`Unable to obtain filename for file ${id}`);
             }
-          });
-
-          await Promise.all(objectPromises);
-        }
-      });
+          }
+        });
 
         await Promise.all(objectPromises);
       }

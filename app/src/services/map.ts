@@ -5,10 +5,9 @@ import proj4 from 'proj4';
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 
 /**
- * @function openMapsAxios
  * Returns an Axios instance for the CHEFS API
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @param options Axios request config options
+ * @returns An axios instance
  */
 function openMapsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
   return axios.create({
@@ -28,12 +27,12 @@ function getPolygonArray(geoJSON: any) {
 }
 
 /**
- * @function getParcelDataFromPMBC
  * DataBC’s Open Web Services
  * Accessing geographic data via WMS/WFS
  * Services Provided by OCIO - Digital Platforms & Data - Data Systems & Services
  * ref: https://docs.geoserver.org/main/en/user/services/wfs/reference.html#getfeature
  * ref: https://catalogue.data.gov.bc.ca/dataset/parcelmap-bc-parcel-fabric
+ * @param geoJSON Geo JSON object to search within
  * @returns parcel data in JSON
  */
 

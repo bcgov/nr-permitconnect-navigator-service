@@ -7,7 +7,6 @@ import type { IStamps } from '../interfaces/IStamps';
 import type { Activity } from '../types';
 
 /**
- * @function createActivity
  * Create an activity for the given initiative with a unique identifier
  * @param tx Prisma transaction client
  * @param initiative The initiative ID
@@ -35,7 +34,6 @@ export const createActivity = async (
 };
 
 /**
- * @function deleteActivity
  * Delete an activity
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
@@ -53,7 +51,6 @@ export const deleteActivity = async (
 };
 
 /**
- * @function getActivity
  * Get an activity
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
@@ -65,7 +62,6 @@ export const getActivity = async (tx: PrismaTransactionClient, activityId: strin
 };
 
 /**
- * @function getActivities
  * Get a list of activities
  * @param tx Prisma transaction client
  * @param initiative Optional initiative code, if provided, only return activities for that initiative

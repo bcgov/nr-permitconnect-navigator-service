@@ -1,4 +1,3 @@
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { GroupName, Initiative } from '../utils/enums/application';
 import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
@@ -7,6 +6,7 @@ import { searchUsers } from '../services/user';
 import { getSubjectGroups } from '../services/yars';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Group, User, UserSearchParameters } from '../types';
 
 export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {

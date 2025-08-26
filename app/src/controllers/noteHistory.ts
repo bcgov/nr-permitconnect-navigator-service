@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { searchElectrificationProjects } from '../services/electrificationProject';
 import { searchEnquiries } from '../services/enquiry';
@@ -20,10 +19,10 @@ import { Initiative } from '../utils/enums/application';
 import { BringForwardType } from '../utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { BringForward, Note, NoteHistory } from '../types';
 
 /**
- * @function createNoteHistoryController
  * Create a new note history and add the given note to it
  */
 export const createNoteHistoryController = async (
@@ -57,7 +56,6 @@ export const createNoteHistoryController = async (
 };
 
 /**
- * @function deleteNoteHistoryController
  * Soft delete the given note history
  */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
@@ -138,7 +136,6 @@ export const listBringForwardController = async (
 };
 
 /**
- * @function listNoteHistoryController
  * Get a list of all note histories for the given activityId
  */
 export const listNoteHistoryController = async (req: Request<{ activityId: string }>, res: Response) => {
@@ -156,7 +153,6 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
 };
 
 /**
- * @function updateNoteHistoryController
  * Updates a note history
  * Adds a new note to an existing history if one was given
  */

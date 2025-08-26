@@ -338,8 +338,8 @@ describe('send', () => {
       status: 200
     };
 
-    const note1 = `${getObjectResponse1.headers['x-amz-meta-name']}\n`;
-    const note2 = `${getObjectResponse2.headers['x-amz-meta-name']}\n`;
+    const note1Name = `${getObjectResponse1.headers['x-amz-meta-name']}`;
+    const note2Name = `${getObjectResponse2.headers['x-amz-meta-name']}`;
 
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
@@ -349,7 +349,7 @@ describe('send', () => {
 
     const createdNote: Note = {
       ...TEST_NOTE_1,
-      note: `Some message text\n\nAttachments:\n${getObjectsResponse[0].name}\n${getObjectsResponse[1].name}\n`
+      note: `Some message text\n\nAttachments:\n${note1Name}\n${note2Name}\n`
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);

@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
 import { isTruthy } from '../utils/utils';
 import { Initiative } from '../utils/enums/application';
@@ -9,6 +8,7 @@ import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } fr
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { ListPermitsOptions, Permit, PermitTracking, PermitType } from '../types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {

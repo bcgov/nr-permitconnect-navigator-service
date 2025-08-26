@@ -17,7 +17,6 @@ type EmailData = {
   txId: string;
 };
 /**
- * @function getToken
  * Gets Auth token using CHES client credentials
  * @returns
  */
@@ -38,10 +37,8 @@ async function getToken() {
   return response.data.access_token;
 }
 /**
- * @function chesAxios
  * Returns an Axios instance with Authorization header
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @returns An axios instance
  */
 function chesAxios(): AxiosInstance {
   // Create axios instance
@@ -60,7 +57,6 @@ function chesAxios(): AxiosInstance {
 }
 
 /**
- * @function email
  * Sends an email with CHES service
  * @param emailData
  * @returns Axios response status and data
@@ -98,14 +94,13 @@ export const email = async (emailData: Email) => {
 };
 
 /**
- * @function logEmail
  * Logs CHES email api calls
- * @param {EmailData | null} data Object containing CHES response, or null on error
- * @param {Array<string>} recipients Array of email strings
- * @param {status} status Http status of CHES response
- * @returns null
+ * @param data Object containing CHES response, or null on error
+ * @param recipients Array of email strings
+ * @param status Http status of CHES response
+ * @returns
  */
-export const logEmail = async (data: EmailData | null, recipients: Array<string>, status: number) => {
+export const logEmail = async (data: EmailData | null, recipients: string[], status: number) => {
   return await prisma.$transaction(async (trx) => {
     return await trx.email_log.createMany({
       data: recipients.map((recipient) => ({
@@ -120,7 +115,6 @@ export const logEmail = async (data: EmailData | null, recipients: Array<string>
 };
 
 /**
- * @function health
  * Checks CHES service health
  * @returns Axios response status and data
  */

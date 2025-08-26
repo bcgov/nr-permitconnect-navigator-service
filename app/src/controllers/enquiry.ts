@@ -1,8 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
-
 import { createActivity, deleteActivity } from '../services/activity';
 import { upsertContacts } from '../services/contact';
 import {
@@ -18,8 +17,8 @@ import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus, SubmissionType
 import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
-import { transactionWrapper } from '../db/utils/transactionWrapper';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,

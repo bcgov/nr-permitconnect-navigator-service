@@ -97,7 +97,6 @@ export const getElectrificationProject = async (
 };
 
 /**
- * @function getElectrificationProjects
  * Gets a list of electrification projects
  * @param tx Prisma transaction client
  * @returns A Promise that resolves to an array of electrification projects
@@ -125,7 +124,6 @@ export const getElectrificationProjects = async (tx: PrismaTransactionClient): P
 };
 
 /**
- * @function searchElectrificationProjects
  * Search and filter for specific electrification projects
  * @param tx Prisma transaction client
  * @param params.activityId Optional array of uuids representing the activity ID

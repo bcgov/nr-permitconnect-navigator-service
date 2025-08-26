@@ -5,9 +5,8 @@ import type { AxiosInstance } from 'axios';
 import type { BceidSearchParameters, IdirSearchParameters } from '../types';
 
 /**
- * @function getToken
  * Gets Auth token using SSO credentials
- * @returns
+ * @returns A valid access token
  */
 async function getToken() {
   const response = await axios({
@@ -27,10 +26,9 @@ async function getToken() {
 }
 
 /**
- * @function ssoAxios
  * Returns an Axios instance with Authorization header
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @param options Axios request config options
+ * @returns An axios instance
  */
 function ssoAxios(): AxiosInstance {
   // Create axios instance

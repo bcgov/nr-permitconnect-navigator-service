@@ -1,8 +1,8 @@
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { getSourceSystemKinds } from '../services/sourceSystemKind';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { SourceSystemKind } from '../types';
 
 export const getSourceSystemKindsController = async (req: Request, res: Response) => {

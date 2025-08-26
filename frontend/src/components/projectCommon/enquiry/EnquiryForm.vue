@@ -72,9 +72,7 @@ const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 const emit = defineEmits(['enquiryForm:saved']);
 
 // Store
-const appStore = useAppStore();
 const enquiryStore = useEnquiryStore();
-const { getInitiative } = storeToRefs(appStore);
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);

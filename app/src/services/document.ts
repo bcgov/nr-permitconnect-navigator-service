@@ -3,7 +3,6 @@ import type { IStamps } from '../interfaces/IStamps';
 import type { Document } from '../types';
 
 /**
- * @function createDocument
  * Creates a link between an activity and a previously existing object in COMS
  * @param tx Prisma transaction client
  * @param documentId COMS ID of an existing object
@@ -38,7 +37,6 @@ export const createDocument = async (
 };
 
 /**
- * @function deleteDocument
  * Delete a document
  * @param tx Prisma transaction client
  * @param documentId PCNS Document ID
@@ -48,7 +46,6 @@ export const deleteDocument = async (tx: PrismaTransactionClient, documentId: st
 };
 
 /**
- * @function getDocument
  * Get a document
  * @param tx Prisma transaction client
  * @param documentId Document ID
@@ -61,7 +58,6 @@ export const getDocument = async (tx: PrismaTransactionClient, documentId: strin
 };
 
 /**
- * @function listDocuments
  * Retrieve a list of documents associated with a given activity
  * @param tx Prisma transaction client
  * @param activityId PCNS Activity ID

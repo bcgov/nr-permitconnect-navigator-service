@@ -4,10 +4,9 @@ import type { ATSClientResource, ATSEnquiryResource } from '@/types';
 
 export default {
   /**
-   * @function searchATSUsers
    * Searches for ATS users
-   * @param {params} data The search parameters
-   * @returns {Promise<data | null>} The result of calling the search api
+   * @param params The search parameters
+   * @returns The result of calling the search api
    */
 
   searchATSUsers(params?: any) {
@@ -15,14 +14,17 @@ export default {
   },
 
   /**
-   * @function createATSClient
+   * Create a client resource in ATS
+   * @param data ATS client resource to create
    * @returns {Promise} An axios response
    */
   createATSClient(data?: ATSClientResource) {
     return appAxios().post('ats/client', data);
   },
+
   /**
-   * @function createATSEnquiry
+   * Create an enquiry resource in ATS
+   * @param data ATS enquiry resource to create
    * @returns {Promise} An axios response
    */
   createATSEnquiry(data?: ATSEnquiryResource) {

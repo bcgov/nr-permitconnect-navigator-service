@@ -1,4 +1,3 @@
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import {
   createUserAccessRequest,
@@ -13,6 +12,7 @@ import { Problem } from '../utils';
 import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
 
 import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { AccessRequest, Group, User } from '../types';
 
 // Request to create user & access

@@ -1,6 +1,5 @@
 import { NIL } from 'uuid';
 
-import { PrismaTransactionClient } from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { getDocument } from '../services/document';
 import { getDraft } from '../services/draft';
@@ -21,16 +20,16 @@ import { Problem } from '../utils';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { CurrentAuthorization } from '../types';
 
 /**
- * @function hasAuthorization
  * Obtains the groups for the current users identity
  * Obtains the full permission mappings for the given resource/action pair for any of the users groups
  * 403 if none are found
- * @param {string} resource a resource name
- * @param {string} action an action name
- * @returns {function} Express middleware function
+ * @param  resource a resource name
+ * @param action an action name
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const hasAuthorization = (resource: string, action: string) => {
@@ -140,13 +139,12 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
 ]);
 
 /**
- * @function hasAccess
  * If current scope of request is self ensure that the object being acted upon was created by the current user
  * Takes the key to be read from request params
  * Obtains callback function from paramMap
  * Compares createdBy with current userId
- * @param {string} param A route parameter string
- * @returns {function} Express middleware function
+ * @param param A route parameter string
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const hasAccess = (param: string) => {

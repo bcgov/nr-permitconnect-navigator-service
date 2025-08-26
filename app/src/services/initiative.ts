@@ -4,7 +4,6 @@ import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Initiative } from '../types';
 
 /**
- * @function getInitiative
  * Create an activity for the given initiative with a unique identifier
  * @param tx Prisma transaction client
  * @param initiative The initiative code
