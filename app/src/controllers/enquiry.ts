@@ -1,11 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
+import {
+  generateCreateStamps,
+  generateDeleteStamps,
+  generateNullUpdateStamps,
+  generateUpdateStamps
+} from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
 import { upsertContacts } from '../services/contact';
 import {
   createEnquiry,
+  deleteEnquiry,
   getEnquiries,
   getEnquiry,
   getRelatedEnquiries,
@@ -84,7 +90,8 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const enquiry = await getEnquiry(tx, req.params.enquiryId);
-    await deleteActivity(tx, enquiry.activityId, generateUpdateStamps(req.currentContext));
+    await deleteEnquiry(tx, req.params.enquiryId, generateDeleteStamps(req.currentContext));
+    await deleteActivity(tx, enquiry.activityId, generateDeleteStamps(req.currentContext));
   });
   res.status(204).end();
 };

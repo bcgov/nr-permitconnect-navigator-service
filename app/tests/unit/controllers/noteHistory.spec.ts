@@ -26,7 +26,7 @@ import {
   TEST_NOTE_HISTORY_2
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { generateNullUpdateStamps } from '../../../src/db/utils/utils';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -76,7 +76,6 @@ describe('createNoteHistoryController', () => {
     expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_NOTE_HISTORY_1,
       noteHistoryId: expect.stringMatching(uuidv4Pattern),
-      isDeleted: false,
       createdAt: expect.any(Date),
       createdBy: req.currentContext.userId
     });
@@ -87,7 +86,8 @@ describe('createNoteHistoryController', () => {
       note: req.body.note,
       createdAt: expect.any(Date),
       createdBy: req.currentContext.userId,
-      ...generateNullUpdateStamps()
+      ...generateNullUpdateStamps(),
+      ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({ ...TEST_NOTE_HISTORY_1, note: [TEST_NOTE_1] });
@@ -109,8 +109,8 @@ describe('deleteNoteHistoryController', () => {
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
-      updatedAt: expect.any(Date),
-      updatedBy: req.currentContext.userId
+      deletedAt: expect.any(Date),
+      deletedBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
@@ -275,7 +275,8 @@ describe('updateNoteHistoryController', () => {
       note: req.body.note,
       createdAt: expect.any(Date),
       createdBy: req.currentContext.userId,
-      ...generateNullUpdateStamps()
+      ...generateNullUpdateStamps(),
+      ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(UPDATED_HISTORY);

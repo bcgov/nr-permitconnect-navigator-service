@@ -25,18 +25,7 @@ const prisma = new PrismaClient({
   // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging
   log: ['error', 'warn'],
   errorFormat: 'pretty',
-  datasourceUrl: datasourceUrl,
-  omit: {
-    activity: {
-      isDeleted: true
-    },
-    note_history: {
-      isDeleted: true
-    },
-    permit_note: {
-      isDeleted: true
-    }
-  }
+  datasourceUrl: datasourceUrl
 })
   .$extends(filterDeletedTransform)
   .$extends(numericTransform)

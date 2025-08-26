@@ -712,7 +712,7 @@ paths:
           $ref: '#/components/responses/Error'
     delete:
       summary: Delete a note history
-      description: Soft deletes a note history by marking isDeleted true
+      description: Deletes a note history
       operationId: deleteElectrificationNoteHistory
       tags:
         - Electrification Note
@@ -1669,7 +1669,7 @@ paths:
           $ref: '#/components/responses/Error'
     delete:
       summary: Delete a note history
-      description: Soft deletes a note history by marking isDeleted true
+      description: Deletes a note history
       operationId: deleteHousingNoteHistory
       tags:
         - Housing Note
@@ -2977,10 +2977,6 @@ components:
           type: string
           description: State of a bring forward tyoe note
           example: Unresolved
-        isDeleted:
-          type: boolean
-          description: Deletion flag
-          example: false
         shownToProponent:
           type: boolean
           description: If the note history is displayed to the proponent
@@ -3099,7 +3095,6 @@ components:
         - permitNoteId
         - permitId
         - note
-        - isDeleted
         - createdAt
         - createdBy
       properties:
@@ -3117,10 +3112,6 @@ components:
           type: string
           description: The text content of the note
           example: "This is a note about the permit."
-        isDeleted:
-          type: boolean
-          description: Flag indicating if the note is soft-deleted
-          example: false
         createdAt:
           type: string
           format: date-time
@@ -3392,10 +3383,6 @@ components:
           type: string
           description: State of a bring forward tyoe note
           example: Unresolved
-        isDeleted:
-          type: boolean
-          description: Deletion flag
-          example: false
         note:
           type: string
           description: Optional note to add to the history
@@ -4051,13 +4038,6 @@ components:
     Response-DeletedEnquiry:
       type: object
       allOf:
-        - type: object
-          required:
-            - is_deleted
-          properties:
-            is_deleted:
-              type: boolean
-              example: true
         - $ref: '#/components/schemas/DB-Enquiry'
     Response-CreateEnquiry:
       type: object

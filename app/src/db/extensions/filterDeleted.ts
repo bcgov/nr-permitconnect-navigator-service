@@ -1,58 +1,42 @@
 import { Prisma } from '@prisma/client';
 
-// Prisma find operations to filter on
-const findOperations: readonly string[] = [
-  'findUnique',
-  'findUniqueOrThrow',
-  'findFirst',
-  'findFirstOrThrow',
-  'findMany'
-];
-
 /*
  * args is some crazy dynamic type
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function filterActivity(operation: string, args: any) {
-  if (findOperations.includes(operation)) {
-    args.where = args.where
-      ? { AND: [args.where, { activity: { isDeleted: false } }] }
-      : { activity: { isDeleted: false } };
-  }
-
-  return args;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterColumn(operation: string, args: any) {
-  if (findOperations.includes(operation)) {
-    args.where = args.where ? { AND: [args.where, { isDeleted: false }] } : { isDeleted: false };
-  }
+  if (!args.where) args = { ...args, where: {} };
+  args.where = { ...args.where, deletedAt: null };
 
   return args;
 }
 
+/**
+ * Models that are soft deleted to be added here
+ * Using `$allModels` is not possible as that will affect views as well
+ * This only filters data at the top level - will not filter relational includes
+ */
 const filterDeletedTransform = Prisma.defineExtension({
   query: {
-    activity_contact: {
+    activity: {
       $allOperations({ operation, args, query }) {
-        return query(filterActivity(operation, args));
+        return query(filterColumn(operation, args));
       }
     },
     enquiry: {
       $allOperations({ operation, args, query }) {
-        return query(filterActivity(operation, args));
+        return query(filterColumn(operation, args));
       }
     },
     electrification_project: {
       $allOperations({ operation, args, query }) {
-        return query(filterActivity(operation, args));
+        return query(filterColumn(operation, args));
       }
     },
     housing_project: {
       $allOperations({ operation, args, query }) {
-        return query(filterActivity(operation, args));
+        return query(filterColumn(operation, args));
       }
     },
     note_history: {

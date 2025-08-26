@@ -8,7 +8,7 @@ import { TEST_CURRENT_CONTEXT, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data'
 import { Email, Note, NoteHistory } from '../../../src/types';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
-import { generateNullUpdateStamps } from '../../../src/db/utils/utils';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -140,7 +140,8 @@ describe('send', () => {
       note: createdNote.note,
       createdAt: expect.any(Date),
       createdBy: req.currentContext.userId,
-      ...generateNullUpdateStamps()
+      ...generateNullUpdateStamps(),
+      ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);
@@ -382,7 +383,8 @@ describe('send', () => {
       note: createdNote.note,
       createdAt: expect.any(Date),
       createdBy: req.currentContext.userId,
-      ...generateNullUpdateStamps()
+      ...generateNullUpdateStamps(),
+      ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(emailResponse.data);

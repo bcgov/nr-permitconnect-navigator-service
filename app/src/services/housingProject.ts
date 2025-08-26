@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { IStamps } from '../interfaces/IStamps';
 import type {
   HousingProject,
   HousingProjectBase,
@@ -38,6 +39,23 @@ export const createHousingProject = async (
     }
   });
   return response;
+};
+
+/**
+ * Delete a housing project
+ * @param tx Prisma transaction client
+ * @param housingProjectId Unique housing project ID
+ * @param deleteStamp Timestamp information of the delete
+ */
+export const deleteHousingProject = async (
+  tx: PrismaTransactionClient,
+  housingProjectId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  await tx.housing_project.update({
+    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
+    where: { housingProjectId }
+  });
 };
 
 /**
