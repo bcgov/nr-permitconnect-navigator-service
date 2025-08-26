@@ -27,16 +27,15 @@ export const createNoteHistory = async (tx: PrismaTransactionClient, data: NoteH
 export const deleteNoteHistory = async (
   tx: PrismaTransactionClient,
   noteHistoryId: string,
-  updateStamp: Partial<IStamps>
+  deleteStamp: Partial<IStamps>
 ): Promise<void> => {
   await tx.note_history.update({
     where: {
       noteHistoryId: noteHistoryId
     },
     data: {
-      isDeleted: true,
-      updatedAt: updateStamp.updatedAt,
-      updatedBy: updateStamp.updatedBy
+      deletedAt: deleteStamp.deletedAt,
+      deletedBy: deleteStamp.deletedBy
     }
   });
 };
@@ -74,9 +73,7 @@ export const listBringForward = async (
   const response = await tx.note_history.findMany({
     where: {
       bringForwardState: state,
-      isDeleted: false,
       activity: {
-        isDeleted: false,
         initiative: {
           code: initiative
         }
@@ -97,18 +94,12 @@ export const listBringForward = async (
  * Get all note histories for the given activity
  * @param tx Prisma transaction client
  * @param activityId - The ID of the activity the note histories belong to
- * @param isDeleted - Boolean flag represented if soft deleted note histories are to be included
  * @returns A Promise that resolves to the permit types for the given initiative
  */
-export const listNoteHistory = async (
-  tx: PrismaTransactionClient,
-  activityId: string,
-  isDeleted: boolean = false
-): Promise<NoteHistory[]> => {
+export const listNoteHistory = async (tx: PrismaTransactionClient, activityId: string): Promise<NoteHistory[]> => {
   const response = await tx.note_history.findMany({
     where: {
-      activityId: activityId,
-      isDeleted: isDeleted
+      activityId: activityId
     },
     orderBy: {
       createdAt: 'desc'

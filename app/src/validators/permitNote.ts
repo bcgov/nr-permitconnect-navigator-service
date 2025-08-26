@@ -5,8 +5,7 @@ import { validate } from '../middleware/validation';
 
 const sharedPermitNoteSchema = {
   permitId: uuidv4.required(),
-  note: Joi.string().required(),
-  isDeleted: Joi.boolean()
+  note: Joi.string().required()
 };
 
 const schema = {
