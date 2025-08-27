@@ -18,9 +18,9 @@ const log = getLogger(module.filename);
 export async function refreshCodeCaches(): Promise<boolean> {
   try {
     const codeTables = await transactionWrapper<{
-      ElectrificationProjectType: Array<ElectrificationProjectTypeCode>;
-      ElectrificationProjectCategory: Array<ElectrificationProjectCategoryCode>;
-      SourceSystem: Array<SourceSystemCode>;
+      ElectrificationProjectType: ElectrificationProjectTypeCode[];
+      ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
+      SourceSystem: SourceSystemCode[];
     }>(async (tx: PrismaTransactionClient) => {
       return await listAllCodeTables(tx);
     });

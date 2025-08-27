@@ -71,7 +71,7 @@ export const searchContactsController = async (
   res.status(200).json(response);
 };
 
-export const updateContactController = async (req: Request<never, never, Contact, never>, res: Response) => {
+export const upsertContactController = async (req: Request<never, never, Contact, never>, res: Response) => {
   const contact = { ...req.body, contactId: req.body.contactId ?? uuidv4() };
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
     return await upsertContacts(tx, [{ ...contact, ...generateUpdateStamps(req.currentContext) }]);

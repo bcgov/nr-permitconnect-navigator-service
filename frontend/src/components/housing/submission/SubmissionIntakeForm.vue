@@ -310,13 +310,13 @@ async function onSubmit(data: any) {
       contactPreference: data.contacts.contactPreference
     };
 
-    // Show the trackingNumber of all appliedPermits to the proponent
-    data.appliedPermits?.forEach((x: Permit) => {
-      if (x?.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
-    });
-
     // Omit all the fields we dont want to send
     const dataOmitted = omit(setEmptyStringsToNull({ ...data }), ['contacts']);
+
+    // Show the trackingNumber of all appliedPermits to the proponent
+    dataOmitted.appliedPermits?.forEach((x: Permit) => {
+      if (x?.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
+    });
 
     // Remove empty investigate permit objects
     const filteredInvestigatePermits = dataOmitted.investigatePermits?.filter(

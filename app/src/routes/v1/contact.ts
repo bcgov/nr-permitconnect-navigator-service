@@ -6,7 +6,7 @@ import {
   getCurrentUserContactController,
   matchContactsController,
   searchContactsController,
-  updateContactController
+  upsertContactController
 } from '../../controllers/contact';
 import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -49,8 +49,8 @@ router.get(
 router.put(
   '/',
   hasAuthorization(Resource.CONTACT, Action.UPDATE),
-  contactValidator.updateContact,
-  updateContactController
+  contactValidator.upsertContact,
+  upsertContactController
 );
 
 /** Delete a specific contact */

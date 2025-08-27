@@ -5,7 +5,7 @@ import {
   deleteContactController,
   getContactController,
   searchContactsController,
-  updateContactController
+  upsertContactController
 } from '../../../src/controllers/contact';
 import { Contact, ContactSearchParameters } from '../../../src/types';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
@@ -200,7 +200,7 @@ describe('updateContactController', () => {
 
       upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
-      await updateContactController(
+      await upsertContactController(
         req as unknown as Request<never, never, Contact, never>,
         res as unknown as Response
       );
@@ -233,7 +233,7 @@ describe('updateContactController', () => {
 
       upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
-      await updateContactController(
+      await upsertContactController(
         req as unknown as Request<never, never, Contact, never>,
         res as unknown as Response
       );

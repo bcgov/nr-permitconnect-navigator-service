@@ -65,7 +65,7 @@ const schema = {
       includeActivities: Joi.boolean().default(false)
     })
   },
-  updateContact: {
+  upsertContact: {
     body: Joi.object({
       userId: uuidv4.allow(null),
       contactId: uuidv4.allow(null),
@@ -89,5 +89,5 @@ export default {
   getContactActivities: validate(schema.getContact),
   matchContacts: validate(schema.matchContacts),
   searchContacts: validate(schema.searchContacts),
-  updateContact: validate(schema.updateContact)
+  upsertContact: validate(schema.upsertContact)
 };

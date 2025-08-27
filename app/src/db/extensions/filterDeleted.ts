@@ -10,11 +10,11 @@ const findOperations: readonly string[] = [
 ];
 
 /*
- * Can't seem to get these param types from Prisma
+ * args is some crazy dynamic type
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function filterActivity(operation: any, args: any) {
+function filterActivity(operation: string, args: any) {
   if (findOperations.includes(operation)) {
     args.where = args.where
       ? { AND: [args.where, { activity: { isDeleted: false } }] }
@@ -25,7 +25,7 @@ function filterActivity(operation: any, args: any) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function filterColumn(operation: any, args: any) {
+function filterColumn(operation: string, args: any) {
   if (findOperations.includes(operation)) {
     args.where = args.where ? { AND: [args.where, { isDeleted: false }] } : { isDeleted: false };
   }

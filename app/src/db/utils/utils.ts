@@ -74,6 +74,11 @@ export async function checkDatabaseSchema(): Promise<boolean> {
   return matches.tables;
 }
 
+/**
+ * Generates DB create stamps
+ * @param currentContext The current context of the Express request
+ * @returns An object with filled create stamps
+ */
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
     createdBy: currentContext?.userId ?? NIL,
@@ -81,6 +86,11 @@ export function generateCreateStamps(currentContext: CurrentContext | undefined)
   };
 }
 
+/**
+ * Generates DB update stamps
+ * @param currentContext The current context of the Express request
+ * @returns An object with filled update stamps
+ */
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
     updatedBy: (currentContext?.userId as string) ?? NIL,
@@ -88,6 +98,11 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
   };
 }
 
+/**
+ * Generates null DB update stamps
+ * @param currentContext The current context of the Express request
+ * @returns An object with null update stamps
+ */
 export function generateNullUpdateStamps() {
   return {
     updatedBy: null,
@@ -98,9 +113,10 @@ export function generateNullUpdateStamps() {
 /**
  * Generate a new activityId, which are truncated UUIDs
  * If a collision is detected, generate new UUID and test again
+ * @param tx Prisma transaction client
  * @returns A string in title case
  */
-export async function generateUniqueActivityId(tx: PrismaTransactionClient) {
+export async function generateUniqueActivityId(tx: PrismaTransactionClient): Promise<string> {
   let id, queryResult;
 
   do {
@@ -112,7 +128,7 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient) {
   return id;
 }
 
-export function jsonToPrismaInputJson(json: Prisma.JsonValue) {
+export function jsonToPrismaInputJson(json: Prisma.JsonValue): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
   return json as Prisma.InputJsonValue;
 }
