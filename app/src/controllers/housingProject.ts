@@ -8,7 +8,6 @@ import {
   jsonToPrismaInputJson
 } from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
-import { upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
@@ -157,11 +156,12 @@ const generateHousingProjectData = async (
       authStatus: PermitAuthorizationStatus.IN_REVIEW,
       submittedDate: x.submittedDate,
       adjudicationDate: null,
-      permitTracking: x.permitTracking,
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null
+      permitTracking: x.permitTracking?.map((pt) => ({
+        ...pt,
+        ...generateCreateStamps(currentContext)
+      })),
+      ...generateCreateStamps(currentContext),
+      ...generateUpdateStamps(currentContext)
     }));
   }
 
@@ -177,10 +177,8 @@ const generateHousingProjectData = async (
       authStatus: PermitAuthorizationStatus.NONE,
       submittedDate: null,
       adjudicationDate: null,
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null
+      ...generateCreateStamps(currentContext),
+      ...generateUpdateStamps(currentContext)
     }));
   }
 
@@ -204,7 +202,6 @@ const generateHousingProjectData = async (
       updatedBy: null,
       aaiUpdated: false,
       assignedUserId: null,
-      locationPids: null,
       queuePriority: null,
       relatedPermits: null,
       astNotes: null,
@@ -213,7 +210,12 @@ const generateHousingProjectData = async (
       atsClientId: null,
       ltsaCompleted: false,
       bcOnlineCompleted: false,
-      financiallySupported: false,
+      financiallySupported: [
+        data.housing?.financiallySupportedBc,
+        data.housing?.financiallySupportedIndigenous,
+        data.housing?.financiallySupportedNonProfit,
+        data.housing?.financiallySupportedHousingCoop
+      ].includes(BasicResponse.YES),
       waitingOn: null,
       checkProvincialPermits: null,
       atsEnquiryId: null
@@ -391,9 +393,6 @@ export const submitHousingProjectDraftController = async (
       req.body,
       req.currentContext
     );
-
-    // Create contacts
-    if (req.body.contacts) await upsertContacts(tx, req.body.contacts);
 
     // Create new housing project
     const data = await createHousingProject(tx, {

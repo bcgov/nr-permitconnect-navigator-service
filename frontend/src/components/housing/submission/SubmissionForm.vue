@@ -447,7 +447,7 @@ onBeforeMount(async () => {
 
   const locationPidsAuto = (await mapService.getPIDs(housingProject.housingProjectId)).data;
 
-  if (housingProject.geoJSON) geoJson.value = housingProject.geoJSON;
+  if (housingProject.geoJson) geoJson.value = housingProject.geoJson;
 
   const firstContact = housingProject?.activity?.activityContact?.[0]?.contact;
 

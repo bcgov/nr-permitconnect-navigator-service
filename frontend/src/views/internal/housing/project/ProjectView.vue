@@ -37,7 +37,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, HousingProject, NoteHistory } from '@/types';
+import type { Document, Enquiry, HousingProject, NoteHistory } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -166,6 +166,7 @@ onBeforeMount(async () => {
     ])
   ).map((r) => r.data);
 
+  project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');
   documents.forEach((d: Document) => {
     d.extension = getFilenameAndExtension(d.filename).extension;
     d.filename = decodeURI(d.filename);
@@ -586,7 +587,7 @@ onBeforeMount(async () => {
         <div class="flex items-center pb-2">
           <div class="grow">
             <p class="font-bold">
-              {{ t('i.common.projectView.tabRelatedEnquiries') }}({{ getRelatedEnquiries.length }})
+              {{ t('i.common.projectView.tabRelatedEnquiries') }} ({{ getRelatedEnquiries.length }})
             </p>
           </div>
         </div>

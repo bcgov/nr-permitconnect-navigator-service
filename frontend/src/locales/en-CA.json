@@ -486,6 +486,7 @@
     "atsEnquiryPushed": "New enquiry pushed to ATS",
     "atsEnquiryPushError": "Error pushing enquiry to ATS",
     "basicInfoHeader": "Basic information",
+    "basicInfoMissing": "Basic information is required. Please scroll up and fill it out.",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "clientId": "Client ID",

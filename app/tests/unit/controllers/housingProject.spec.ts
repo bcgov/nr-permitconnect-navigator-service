@@ -269,7 +269,7 @@ describe('createHousingProjectController', () => {
     };
 
     createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
@@ -284,9 +284,27 @@ describe('createHousingProjectController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
 
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, TEST_PERMIT_1);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, TEST_PERMIT_2);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, TEST_PERMIT_3);
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
+      ...TEST_PERMIT_1,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
+      ...TEST_PERMIT_2,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
+      ...TEST_PERMIT_3,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
   });
 });
@@ -645,9 +663,27 @@ describe('submitHousingProjectDraftController', () => {
     expect(upsertContacts).toHaveBeenCalledTimes(0);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, TEST_PERMIT_1);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, TEST_PERMIT_2);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, TEST_PERMIT_3);
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
+      ...TEST_PERMIT_1,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
+      ...TEST_PERMIT_2,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
+    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
+      ...TEST_PERMIT_3,
+      createdAt: expect.any(Date),
+      createdBy: TEST_CURRENT_CONTEXT.userId,
+      updatedAt: expect.any(Date),
+      updatedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
   });
 });

@@ -5,7 +5,7 @@ export type HousingProject = {
   relatedEnquiries: string;
   consentToFeedback?: boolean;
   isDevelopedInBc: string;
-  geoJSON?: any;
+  geoJson?: any;
   projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;

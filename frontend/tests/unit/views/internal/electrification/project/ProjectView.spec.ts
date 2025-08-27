@@ -49,7 +49,7 @@ listDocumentsSpy.mockResolvedValue({ data: [{ filename: 'foo', activityId: 'acti
 listNotesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 listPermitsSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 listRelatedEnquiriesSpy.mockResolvedValue({
-  data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+  data: [{ enquiryId: 'enquiry123', activityId: 'activity456' }]
 } as AxiosResponse);
 getPermitTypesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 

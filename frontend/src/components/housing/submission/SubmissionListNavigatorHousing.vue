@@ -19,20 +19,6 @@ const selection = defineModel<ElectrificationProject | HousingProject | undefine
 // Injections
 const projectResource = inject(resourceKey);
 const projectRoute = inject(projectRouteNameKey);
-
-// Actions
-function isFinanciallySupported(data: HousingProject) {
-  if (
-    data.financiallySupportedBc === BasicResponse.YES ||
-    data.financiallySupportedHousingCoop === BasicResponse.YES ||
-    data.financiallySupportedIndigenous === BasicResponse.YES ||
-    data.financiallySupportedNonProfit === BasicResponse.YES
-  ) {
-    return BasicResponse.YES;
-  } else {
-    return BasicResponse.NO;
-  }
-}
 </script>
 
 <template>
@@ -151,7 +137,7 @@ function isFinanciallySupported(data: HousingProject) {
     style="min-width: 225px"
   >
     <template #body="{ data }">
-      {{ isFinanciallySupported(data) }}
+      {{ data.financiallySupported ? BasicResponse.YES : BasicResponse.NO }}
     </template>
   </Column>
   <Column

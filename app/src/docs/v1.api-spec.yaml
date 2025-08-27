@@ -3816,10 +3816,6 @@ components:
           description: Date it was submitted
           format: date-time
           example: '2024-04-03T00:57:09.070Z'
-        relatedEnquiries:
-          type: string
-          description: Related enquiries
-          example: Some enquiry
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project

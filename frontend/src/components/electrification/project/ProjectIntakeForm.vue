@@ -11,7 +11,13 @@ import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, 
 import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
 import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, documentService, electrificationProjectService, externalApiService } from '@/services';
+import {
+  activityContactService,
+  contactService,
+  documentService,
+  electrificationProjectService,
+  externalApiService
+} from '@/services';
 import { useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
@@ -181,7 +187,8 @@ async function onSubmit(data: any) {
 
     if (response.data.activityId && response.data.electrificationProjectId) {
       // Link activity contact
-      await activityContactService.updateActivityContact(response.data.activityId, [contact]);
+      const contactResponse = (await contactService.updateContact(contact)).data;
+      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
 
       assignedActivityId.value = response.data.activityId;
 
@@ -189,7 +196,7 @@ async function onSubmit(data: any) {
       emailConfirmation(response.data.activityId, response.data.electrificationProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(contact);
+      contactStore.setContact(contactResponse);
 
       router.push({
         name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,

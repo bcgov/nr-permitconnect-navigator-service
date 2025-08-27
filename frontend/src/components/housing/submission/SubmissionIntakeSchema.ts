@@ -149,7 +149,7 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
       }),
       ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
       geomarkUrl: string().max(255).label('Geomark web service url'),
-      getJSON: mixed().nullable().label('geoJSON')
+      geoJson: mixed().nullable().label('geoJson')
     }),
     [IntakeFormCategory.PERMITS]: object({
       hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits')

@@ -47,6 +47,7 @@ import {
 } from '@/lib/primevue';
 import {
   activityContactService,
+  contactService,
   documentService,
   enquiryService,
   externalApiService,
@@ -315,7 +316,8 @@ async function onSubmit(data: any) {
 
     // Show the trackingNumber of all appliedPermits to the proponent
     dataOmitted.appliedPermits?.forEach((x: Permit) => {
-      if (x?.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
+      if (x.permitTracking) x.permitTracking = x.permitTracking.filter((pt) => pt.trackingId);
+      if (x.permitTracking[0]) x.permitTracking[0].shownToProponent = true;
     });
 
     // Remove empty investigate permit objects
@@ -329,7 +331,8 @@ async function onSubmit(data: any) {
 
     if (response.data.activityId && response.data.housingProjectId) {
       // Link activity contact
-      await activityContactService.updateActivityContact(response.data.activityId, [contact]);
+      const contactResponse = (await contactService.updateContact(contact)).data;
+      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
 
       assignedActivityId.value = response.data.activityId;
 
@@ -337,7 +340,7 @@ async function onSubmit(data: any) {
       emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(contact);
+      contactStore.setContact(contactResponse);
 
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
@@ -460,7 +463,7 @@ onBeforeMount(async () => {
           ltsaPidLookup: response?.locationPids,
           geomarkUrl: response?.geomarkUrl,
           projectLocationDescription: response?.projectLocationDescription,
-          geoJSON: response?.geoJSON
+          geoJson: response?.geoJson
         },
         appliedPermits: permits
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)

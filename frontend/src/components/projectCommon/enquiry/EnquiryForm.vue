@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -23,7 +22,7 @@ import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
-import { useAppStore, useEnquiryStore } from '@/store';
+import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
@@ -190,6 +189,11 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: any) {
+  const errors = Object.keys(e.errors);
+
+  if (errors.includes('contactFirstName')) {
+    toast.warn(t('enquiryForm.basicInfoMissing'));
+  }
   scrollToFirstError(e.errors);
 }
 
@@ -215,10 +219,10 @@ async function getRelatedATSClientID(activityId: string) {
 
 function onReOpen() {
   confirm.require({
-    message: t('i.common.enquiryForm.confirmReopenMessage'),
-    header: t('i.common.enquiryForm.confirmReopenHeader'),
-    acceptLabel: t('i.common.enquiryForm.reopenAccept'),
-    rejectLabel: t('i.common.enquiryForm.reopenReject'),
+    message: t('enquiryForm.confirmReopenMessage'),
+    header: t('enquiryForm.confirmReopenHeader'),
+    acceptLabel: t('enquiryForm.reopenAccept'),
+    rejectLabel: t('enquiryForm.reopenReject'),
     rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
@@ -518,6 +522,7 @@ async function createATSClientEnquiry() {
         </Message>
       </div>
 
+      <!-- TODO: Use <ContactCardNavForm> -->
       <div
         v-if="values.contactId || basicInfoManualEntry || values.relatedActivityId"
         class="grid grid-cols-subgrid gap-4 col-span-12"

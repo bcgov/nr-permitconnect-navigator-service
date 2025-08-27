@@ -18,9 +18,9 @@ function openMapsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function getPolygonArray(geoJSON: any) {
+function getPolygonArray(geoJson: any) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const polygonArray = geoJSON?.geometry?.coordinates[0]?.map((c: any) => {
+  const polygonArray = geoJson?.geometry?.coordinates[0]?.map((c: any) => {
     return { lat: c[1], lng: c[0] };
   });
   return polygonArray;
@@ -32,13 +32,13 @@ function getPolygonArray(geoJSON: any) {
  * Services Provided by OCIO - Digital Platforms & Data - Data Systems & Services
  * ref: https://docs.geoserver.org/main/en/user/services/wfs/reference.html#getfeature
  * ref: https://catalogue.data.gov.bc.ca/dataset/parcelmap-bc-parcel-fabric
- * @param geoJSON Geo JSON object to search within
+ * @param geoJson Geo JSON object to search within
  * @returns parcel data in JSON
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getPIDs = async (geoJSON: any): Promise<string> => {
-  const polygon = getPolygonArray(geoJSON);
+export const getPIDs = async (geoJson: any): Promise<string> => {
+  const polygon = getPolygonArray(geoJson);
 
   // close polygon by re-adding first point to end of array
   // define the source and destination layer types

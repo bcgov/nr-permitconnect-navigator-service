@@ -245,7 +245,7 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('geojson download btn not visible when no geojson', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJSON: undefined };
+    const modifiedSubmission = { ...testSubmission, geoJson: undefined };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
@@ -255,7 +255,7 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('geojson download btn visible when geojson is in submission', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJSON: {} };
+    const modifiedSubmission = { ...testSubmission, geoJson: {} };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
@@ -268,7 +268,7 @@ describe('SubmissionForm.vue', () => {
 
   it('geojson download btn visible when geojson is in submission', async () => {
     const testGeoJson = { feature: 'POINT', data: 'test' };
-    const modifiedSubmission = { ...testSubmission, geoJSON: testGeoJson };
+    const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
