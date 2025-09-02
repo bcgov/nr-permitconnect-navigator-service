@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Permit note create endpoint
+/** Create a permit note */
 router.put(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
@@ -23,7 +23,7 @@ router.put(
   createPermitNoteController
 );
 
-// Permit note update endpoint
+/** Update a permit note */
 // TODO implement update
 router.put(
   '/:permitId',
@@ -38,7 +38,7 @@ router.put(
   }
 );
 
-// Permit note delete endpoint
+/** Delete a permit note */
 // TODO implement soft delete
 router.delete(
   '/:permitId',

@@ -6,7 +6,7 @@ import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } f
 
 /**
  * Gets Auth token using ATS client credentials
- * @returns
+ * @returns A valid access token
  */
 async function getToken() {
   const response = await axios({
@@ -49,7 +49,7 @@ function atsAxios(): AxiosInstance {
 /**
  * Searches for ATS users
  * @param params The search parameters
- * @returns The result of calling the search api
+ * @returns A Promise that resolves to the response from the external api
  */
 export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
   try {
@@ -73,7 +73,7 @@ export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
 /**
  * Creates a client in ATS
  * @param atsClient The client data
- * @returns The result of calling the post api
+ * @returns A Promise that resolves to the response from the external api
  */
 export const createATSClient = async (atsClient: ATSClientResource) => {
   try {
@@ -97,7 +97,7 @@ export const createATSClient = async (atsClient: ATSClientResource) => {
 /**
  * Creates a enquiry in ATS
  * @param atsEnquiryThe client data
- * @returns The result of calling the post api
+ * @returns A Promise that resolves to the response from the external api
  */
 export const createATSEnquiry = async (atsEnquiry: ATSEnquiryResource) => {
   try {

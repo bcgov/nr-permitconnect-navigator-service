@@ -10,7 +10,7 @@ import type { Document } from '../types';
  * @param filename Original filename of the document
  * @param mimeType Type of document
  * @param filesize Size of document
- * @returns The result of running the create operation
+ * @returns A Promise that resolves to the created resource
  */
 export const createDocument = async (
   tx: PrismaTransactionClient,
@@ -49,7 +49,7 @@ export const deleteDocument = async (tx: PrismaTransactionClient, documentId: st
  * Get a document
  * @param tx Prisma transaction client
  * @param documentId Document ID
- * @returns The result of running the findFirst operation
+ * @returns A Promise that resolves to the specific document
  */
 export const getDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<Document> => {
   const result = await tx.document.findFirstOrThrow({ where: { documentId } });
@@ -61,7 +61,7 @@ export const getDocument = async (tx: PrismaTransactionClient, documentId: strin
  * Retrieve a list of documents associated with a given activity
  * @param tx Prisma transaction client
  * @param activityId PCNS Activity ID
- * @returns The result of running the findMany operation
+ * @returns A Promise that resolves to an array of documents
  */
 export const listDocuments = async (tx: PrismaTransactionClient, activityId: string): Promise<Document[]> => {
   const response = await tx.document.findMany({

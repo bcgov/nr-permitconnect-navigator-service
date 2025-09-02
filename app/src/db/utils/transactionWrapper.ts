@@ -11,10 +11,10 @@ type TxOpts = {
 };
 
 /**
- * Run a transaction with the specified options.
- * @param fn The function to run within the transaction.
- * @param opts Options for the transaction.
- * @returns The result of the transaction.
+ * Run a transaction with the specified options
+ * @param fn The function to run within the transaction
+ * @param opts Options for the transaction
+ * @returns The result of the transaction
  */
 export async function transactionWrapper<T>(
   fn: (tx: PrismaTransactionClient) => Promise<T>,

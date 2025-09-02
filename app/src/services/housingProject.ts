@@ -66,7 +66,6 @@ export const getHousingProjectStatistics = async (
   const response =
     await tx.$queryRaw`select * from get_housing_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
 
-  // TODO-PR: Will this BigInt issue be handled with numeric prisma extension?
   // count() returns BigInt
   // JSON.stringify() doesn't know how to serialize BigInt
   // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510

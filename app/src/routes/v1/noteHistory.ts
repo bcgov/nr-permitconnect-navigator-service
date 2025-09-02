@@ -17,7 +17,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Note History create endpoint
+/** Create a note history */
 router.put(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
@@ -25,7 +25,7 @@ router.put(
   createNoteHistoryController
 );
 
-// Note History update endpoint
+/** Update a note history */
 router.put(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
@@ -34,7 +34,7 @@ router.put(
   updateNoteHistoryController
 );
 
-// Note History delete endpoint
+/** Delete a note history */
 router.delete(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.DELETE),
@@ -42,10 +42,10 @@ router.delete(
   deleteNoteHistoryController
 );
 
-// Note History list bring forward endpoint
+/** Get a list of bring forward note histories */
 router.get('/bringForward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardController);
 
-// Note History list general endpoint
+/** Get a list of note histories */
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),

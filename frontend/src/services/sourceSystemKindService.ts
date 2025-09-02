@@ -4,9 +4,8 @@ const path = 'sourceSystemKind';
 
 export default {
   /**
-   * @function getSourceSystemKinds
    * Retrieves all source system kinds
-   * @returns {Promise<data | null>} The result of calling code api
+   * @returns {Promise} An axios response
    */
   getSourceSystemKinds() {
     return appAxios().get(path);

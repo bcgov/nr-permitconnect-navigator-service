@@ -19,22 +19,6 @@ export const deletePermit = async (tx: PrismaTransactionClient, permitId: string
 };
 
 /**
- * Delete a permit
- * @param tx Prisma transaction client
- * @param activityId Activity ID to remove permits from
- * @returns The result of running the deleteMany operation
- */
-export const deletePermitsByActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<number> => {
-  const response = await tx.permit.deleteMany({
-    where: {
-      activityId: activityId
-    }
-  });
-
-  return response.count;
-};
-
-/**
  * Gets a specific permit
  * @param tx Prisma transaction client
  * @param permitId Permit ID
@@ -125,7 +109,7 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
  * Upsert a Permit
  * @param tx Prisma transaction client
  * @param data Permit object
- * @returns A Promise that resolves to the upserted permit
+ * @returns A Promise that resolves to the created/updated permit
  */
 export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase): Promise<Permit> => {
   const response = await tx.permit.upsert({

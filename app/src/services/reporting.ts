@@ -1,5 +1,10 @@
 import type { PrismaTransactionClient } from '../db/dataConnection';
 
+/**
+ * Execute a raw query to get electrification permit reporting data
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolve to the result of the raw query
+ */
 export const getElectrificationProjectPermitData = async (tx: PrismaTransactionClient) => {
   const result = await tx.$queryRaw`
     select ep.project_name,
@@ -44,6 +49,11 @@ export const getElectrificationProjectPermitData = async (tx: PrismaTransactionC
   return result;
 };
 
+/**
+ * Execute a raw query to get housing permit reporting data
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolve to the result of the raw query
+ */
 export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) => {
   const result = await tx.$queryRaw`
     select hp.project_name,

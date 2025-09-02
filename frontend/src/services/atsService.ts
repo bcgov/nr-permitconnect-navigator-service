@@ -6,7 +6,7 @@ export default {
   /**
    * Searches for ATS users
    * @param params The search parameters
-   * @returns The result of calling the search api
+   * @returns {Promise} An axios response
    */
 
   searchATSUsers(params?: any) {

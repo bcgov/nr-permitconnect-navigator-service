@@ -18,7 +18,7 @@ type EmailData = {
 };
 /**
  * Gets Auth token using CHES client credentials
- * @returns
+ * @returns A valid access token
  */
 async function getToken() {
   const response = await axios({
@@ -36,6 +36,7 @@ async function getToken() {
   });
   return response.data.access_token;
 }
+
 /**
  * Returns an Axios instance with Authorization header
  * @returns An axios instance
@@ -59,7 +60,7 @@ function chesAxios(): AxiosInstance {
 /**
  * Sends an email with CHES service
  * @param emailData
- * @returns Axios response status and data
+ * @returns A Promise that resolves to the response from the external api
  */
 export const email = async (emailData: Email) => {
   // Generate list of unique emails to be sent
@@ -98,7 +99,7 @@ export const email = async (emailData: Email) => {
  * @param data Object containing CHES response, or null on error
  * @param recipients Array of email strings
  * @param status Http status of CHES response
- * @returns
+ * @returns The result of the transaction
  */
 export const logEmail = async (data: EmailData | null, recipients: string[], status: number) => {
   return await prisma.$transaction(async (trx) => {
@@ -116,7 +117,7 @@ export const logEmail = async (data: EmailData | null, recipients: string[], sta
 
 /**
  * Checks CHES service health
- * @returns Axios response status and data
+ * @returns A Promise that resolves to the response from the external api
  */
 export const health = async () => {
   const { data, status } = await chesAxios().get('/health');

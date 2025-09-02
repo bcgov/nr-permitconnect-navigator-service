@@ -10,6 +10,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-router.get('/pids/:housingProjectId', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getPIDsController);
+/** Get PIDs for a housing project */
+router.get('/pids/:projectId', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getPIDsController);
 
 export default router;

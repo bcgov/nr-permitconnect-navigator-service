@@ -74,7 +74,7 @@ router.put(
   submitHousingProjectDraftController
 );
 
-// Send an email with the confirmation of housing project
+/** Send an email with the confirmation of housing project */
 router.put(
   '/email',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),

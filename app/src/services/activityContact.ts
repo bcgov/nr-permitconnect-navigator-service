@@ -4,8 +4,8 @@ import type { ActivityContact, Contact } from '../types';
 /**
  * Deletes activity_contact records that do not match the provided activityId and contacts
  * @param tx Prisma transaction client
- * @param activityId
- * @param contacts
+ * @param activityId The activity ID the contacts are associated to
+ * @param contacts Array of contacts to keep
  */
 export const deleteUnmatchedActivityContacts = async (
   tx: PrismaTransactionClient,
@@ -26,8 +26,9 @@ export const deleteUnmatchedActivityContacts = async (
 /**
  * Upserts activity_contact records for the given activityId and contacts
  * @param tx Prisma transaction client
- * @param activityId
- * @param contacts
+ * @param activityId The activity ID the contacts are associated to
+ * @param contacts Array of contacts to create/update
+ * @returns A Promise that resolves to an array of the created/updated ActivityContacts
  */
 export const upsertActivityContacts = async (
   tx: PrismaTransactionClient,

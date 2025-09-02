@@ -11,7 +11,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Send an email with the roadmap data
+/** Send an email with the roadmap data */
 router.put('/', hasAuthorization(Resource.ROADMAP, Action.CREATE), roadmapValidator.send, sendRoadmapController);
 
 export default router;

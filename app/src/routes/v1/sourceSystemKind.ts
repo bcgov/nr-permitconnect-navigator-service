@@ -4,7 +4,7 @@ import { getSourceSystemKindsController } from '../../controllers/sourceSystemKi
 
 const router = express.Router();
 
-/* GET all source system kind table data */
+/* Get all source system kind table data */
 router.get('/', getSourceSystemKindsController);
 
 export default router;

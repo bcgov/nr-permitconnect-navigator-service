@@ -15,6 +15,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+/** Create a document */
 router.put(
   '/',
   hasAuthorization(Resource.DOCUMENT, Action.CREATE),
@@ -22,6 +23,7 @@ router.put(
   createDocumentController
 );
 
+/** Delete a document */
 router.delete(
   '/:documentId',
   hasAuthorization(Resource.DOCUMENT, Action.DELETE),
@@ -30,6 +32,7 @@ router.delete(
   deleteDocumentController
 );
 
+/** Get a list of documents */
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.DOCUMENT, Action.READ),

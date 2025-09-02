@@ -10,6 +10,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+/** Update an activity/contact linkage */
 router.post('/', hasAuthorization(Resource.CONTACT, Action.UPDATE), updateActivityContactController);
 
 export default router;

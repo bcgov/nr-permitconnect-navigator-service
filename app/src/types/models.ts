@@ -22,7 +22,7 @@ export type Draft = DraftBase;
 
 const documentBase = Prisma.validator<Prisma.documentDefaultArgs>()({});
 export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;
-export type Document = Omit<DocumentBase, 'filesize'> & { createdByFullName?: string; filesize: number | null };
+export type Document = Omit<DocumentBase, 'filesize'> & { createdByFullName?: string; filesize: number };
 
 const electrificationProjectBase = Prisma.validator<Prisma.electrification_projectDefaultArgs>()({});
 export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase>;

@@ -11,6 +11,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
+/** Search clients in ATS */
 router.get('/clients', hasAuthorization(Resource.ATS, Action.READ), searchATSUsersController);
 
 /** Creates a client in ATS */

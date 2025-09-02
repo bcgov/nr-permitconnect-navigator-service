@@ -15,7 +15,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Request to create/revoke a user and access request - called by supervisor(201) & admin(200) when creating a user
+/** Request to create/revoke a user and access request - called by supervisor(201) & admin(200) when creating a user */
 router.post(
   '/',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.CREATE),
@@ -23,6 +23,7 @@ router.post(
   createUserAccessRequestController
 );
 
+/** Process an access request */
 router.post(
   '/:accessRequestId',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.UPDATE),
@@ -30,6 +31,7 @@ router.post(
   processUserAccessRequestController
 );
 
+/** Get access requests */
 router.get('/', hasAuthorization(Resource.ACCESS_REQUEST, Action.READ), getAccessRequestsController);
 
 export default router;

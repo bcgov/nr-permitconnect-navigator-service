@@ -18,10 +18,10 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Get current user's contact information endpoint */
+/** Get current user's contact information */
 router.get('/', hasAuthorization(Resource.CONTACT, Action.READ), getCurrentUserContactController);
 
-/** Match contacts endpoint */
+/** Match contacts */
 router.post(
   '/match',
   hasAuthorization(Resource.CONTACT, Action.READ),
@@ -29,7 +29,7 @@ router.post(
   matchContactsController
 );
 
-/** Search contacts endpoint */
+/** Search contacts */
 router.get(
   '/search',
   hasAuthorization(Resource.CONTACT, Action.READ),
@@ -37,7 +37,7 @@ router.get(
   searchContactsController
 );
 
-/** Gets a specific contact */
+/** Get a specific contact */
 router.get(
   '/:contactId',
   hasAuthorization(Resource.CONTACT, Action.READ),
@@ -45,7 +45,7 @@ router.get(
   getContactController
 );
 
-//** Create or update a contact */
+/** Create or update a contact */
 router.put(
   '/',
   hasAuthorization(Resource.CONTACT, Action.UPDATE),

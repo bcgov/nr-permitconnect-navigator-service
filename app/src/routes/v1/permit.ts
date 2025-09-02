@@ -19,13 +19,13 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 router.use('/note', permitNote);
 
-// Permit list endpoint
+/** Get a list of permits */
 router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);
 
-// Permit create endpoint
+/** Create a permit */
 router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, upsertPermitController);
 
-// Permit delete endpoint
+/** Delete a permit */
 router.delete(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.DELETE),
@@ -34,10 +34,10 @@ router.delete(
   deletePermitController
 );
 
-// Permit types endpoint
+/** Get a list of permit types */
 router.get('/types', hasAuthorization(Resource.PERMIT, Action.READ), getPermitTypesController);
 
-// Permit get endpoint
+/** Get a permit */
 router.get(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.READ),

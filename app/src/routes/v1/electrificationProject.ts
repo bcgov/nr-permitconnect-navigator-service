@@ -77,7 +77,7 @@ router.put(
   submitElectrificationProjectDraftController
 );
 
-// Send an email with the confirmation of electrification project
+/** Send an email with the confirmation of electrification project */
 router.put(
   '/email',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),

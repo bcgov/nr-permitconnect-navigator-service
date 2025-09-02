@@ -7,7 +7,7 @@ import type { Initiative } from '../types';
  * Create an activity for the given initiative with a unique identifier
  * @param tx Prisma transaction client
  * @param initiative The initiative code
- * @returns The result of running the findFirstOrThrow operation
+ * @returns A Promise that resolves to the specific initiative
  */
 export const getInitiative = async (tx: PrismaTransactionClient, initiative: EInitiative): Promise<Initiative> => {
   const result = await tx.initiative.findFirstOrThrow({

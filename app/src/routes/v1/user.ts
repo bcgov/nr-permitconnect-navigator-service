@@ -11,7 +11,7 @@ const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Search users endpoint
+/** Search users endpoint */
 router.get('/', hasAuthorization(Resource.USER, Action.READ), userValidator.searchUsers, searchUsersController);
 
 export default router;

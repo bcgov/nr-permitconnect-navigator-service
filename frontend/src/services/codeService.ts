@@ -4,9 +4,8 @@ const path = 'code';
 
 export default {
   /**
-   * @function getCodeTables
    * Retrieves all code tables
-   * @returns {Promise<data | null>} The result of calling code api
+   * @returns {Promise} An axios response
    */
 
   getCodeTables() {

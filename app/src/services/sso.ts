@@ -46,6 +46,11 @@ function ssoAxios(): AxiosInstance {
   return ssoAxios;
 }
 
+/**
+ * Retrieve all IDIR users matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
 export const searchIdirUsers = async (params?: IdirSearchParameters) => {
   try {
     const env = config.get('server.env');
@@ -66,6 +71,11 @@ export const searchIdirUsers = async (params?: IdirSearchParameters) => {
   }
 };
 
+/**
+ * Retrieve all basic BCeID matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
 export const searchBasicBceidUsers = async (params?: BceidSearchParameters) => {
   try {
     const env = config.get('server.env');
@@ -86,6 +96,11 @@ export const searchBasicBceidUsers = async (params?: BceidSearchParameters) => {
   }
 };
 
+/**
+ * Retrieve all business BCeID matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
 export const searchBusinessBceidUsers = async (params?: BceidSearchParameters) => {
   try {
     const env = config.get('server.env');

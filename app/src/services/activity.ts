@@ -11,14 +11,13 @@ import type { Activity } from '../types';
  * @param tx Prisma transaction client
  * @param initiative The initiative ID
  * @param createStamp The creation stamps
- * @returns The result of running the findFirst operation
+ * @returns A Promise that resolves to the created activity
  */
 export const createActivity = async (
   tx: PrismaTransactionClient,
-  initiative: string,
+  initiative: Initiative,
   createStamp: Partial<IStamps>
 ): Promise<Activity> => {
-  // TODO-PR: Move initiative search up to controller layer.
   const initiativeResult = await tx.initiative.findFirstOrThrow({ where: { code: initiative } });
 
   const response = await tx.activity.create({
@@ -54,7 +53,7 @@ export const deleteActivity = async (
  * Get an activity
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
- * @returns The result of running the findFirst operation
+ * @returns A Promise that resolves to the specific activity
  */
 export const getActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<Activity> => {
   const response = await tx.activity.findFirstOrThrow({ where: { activityId } });
@@ -65,7 +64,7 @@ export const getActivity = async (tx: PrismaTransactionClient, activityId: strin
  * Get a list of activities
  * @param tx Prisma transaction client
  * @param initiative Optional initiative code, if provided, only return activities for that initiative
- * @returns {Promise<Activity[]>} The result of running the findMany operation
+ * @returns A Promise that resolves to an array of activities
  */
 export const getActivities = async (tx: PrismaTransactionClient, initiative?: Initiative): Promise<Activity[]> => {
   if (!initiative) {
