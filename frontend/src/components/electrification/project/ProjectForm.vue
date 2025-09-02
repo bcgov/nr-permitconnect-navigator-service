@@ -45,7 +45,7 @@ import {
 } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -70,7 +70,7 @@ const emit = defineEmits<{
 }>();
 
 // Constants
-const ATS_ENQUIRY_TYPE_CODE = Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
+const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();

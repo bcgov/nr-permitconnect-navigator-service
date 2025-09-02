@@ -54,7 +54,7 @@ import {
   Regex
 } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import {
   assignedToValidator,
   atsClientIdValidator,
@@ -75,7 +75,7 @@ const { editable = true, housingProject } = defineProps<{
 }>();
 
 // Constants
-const ATS_ENQUIRY_TYPE_CODE = Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
+const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -323,6 +323,7 @@ const onSubmit = async (values: any) => {
       'contactUserId',
       'locationPidsAuto',
       'locationAddress',
+      'relatedEnquiries',
       'user'
     ]);
 

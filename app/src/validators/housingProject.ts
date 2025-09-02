@@ -85,7 +85,6 @@ const schema = {
         .required()
         .valid(...SUBMISSION_TYPE_LIST),
       submittedAt: Joi.string().required(),
-      relatedEnquiries: Joi.string().allow(null),
       companyNameRegistered: Joi.string().allow(null),
       isDevelopedInBc: Joi.when('companyNameRegistered', {
         is: Joi.string().required(),

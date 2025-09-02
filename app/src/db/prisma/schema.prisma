@@ -192,11 +192,11 @@ model permit_note {
   permitNoteId String    @id @map("permit_note_id") @db.Uuid
   permitId     String    @map("permit_id") @db.Uuid
   note         String    @default("")
+  isDeleted    Boolean   @default(false) @map("is_deleted")
   createdBy    String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
-  isDeleted    Boolean   @default(false) @map("is_deleted")
   permit       permit    @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_note_permit_id_foreign")
 
   @@schema("public")
@@ -669,11 +669,11 @@ model note_history {
   updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
   bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
   bringForwardState    String?   @map("bring_forward_state")
+  isDeleted            Boolean   @default(false) @map("is_deleted")
   shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
   escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
   escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
   escalationType       String?   @map("escalation_type") @db.VarChar(255)
-  isDeleted            Boolean   @default(false) @map("is_deleted")
   note                 note[]
   activity             activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "note_activity_id_foreign")
 

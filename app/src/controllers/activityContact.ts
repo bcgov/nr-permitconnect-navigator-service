@@ -39,5 +39,5 @@ export const updateActivityContactController = async (
     await upsertActivityContacts(tx, req.body.activityId, contacts);
   });
 
-  res.status(200).end();
+  res.status(204).end();
 };

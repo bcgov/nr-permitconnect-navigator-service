@@ -457,6 +457,12 @@ export const updateHousingProjectController = async (req: Request<never, never, 
   const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
     return await updateHousingProject(tx, {
       ...req.body,
+      financiallySupported: [
+        req.body.financiallySupportedBc,
+        req.body.financiallySupportedIndigenous,
+        req.body.financiallySupportedNonProfit,
+        req.body.financiallySupportedHousingCoop
+      ].includes(BasicResponse.YES),
       ...generateUpdateStamps(req.currentContext)
     });
   });

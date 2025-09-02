@@ -16,6 +16,7 @@ import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey 
 
 import type { Ref } from 'vue';
 import type { HousingProject, NoteHistory } from '@/types';
+import { toTitleCase } from '@/utils/utils';
 
 // Props
 const {
@@ -49,7 +50,7 @@ const isCompleted = computed(() => {
 
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
-provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
+provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
 provide(projectServiceKey, housingProjectService);
 
 // Actions
