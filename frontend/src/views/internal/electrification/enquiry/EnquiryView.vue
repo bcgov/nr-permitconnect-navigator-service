@@ -13,10 +13,10 @@ import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectC
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-
-import type { ElectrificationProject, NoteHistory, User } from '@/types';
-import type { Ref } from 'vue';
 import { toTitleCase } from '@/utils/utils';
+
+import type { ElectrificationProject, User } from '@/types';
+import type { Ref } from 'vue';
 
 // Props
 const {
@@ -55,18 +55,6 @@ provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQ
 provide(projectServiceKey, electrificationProjectService);
 
 // Actions
-function onCreateNoteHistory(history: NoteHistory) {
-  enquiryStore.addNoteHistory(history, true);
-}
-
-function onDeleteNoteHistory(history: NoteHistory) {
-  enquiryStore.removeNoteHistory(history);
-}
-
-function onUpdateNoteHistory(history: NoteHistory) {
-  enquiryStore.updateNoteHistory(history);
-}
-
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
 }
@@ -218,7 +206,7 @@ onBeforeMount(async () => {
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @create-note-history="onCreateNoteHistory"
+          @create-note-history="(e) => enquiryStore.addNoteHistory(e, true)"
         />
       </TabPanel>
     </TabPanels>

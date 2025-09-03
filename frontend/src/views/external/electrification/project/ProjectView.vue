@@ -25,7 +25,6 @@ import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
-import { formatDate, formatDateLong } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -223,21 +222,9 @@ onBeforeMount(async () => {
             :note="getNoteHistoryShownToProponent[0].note[0]"
             @note-banner:show-history="noteHistoryVisible = true"
           />
-
-          <div
-            v-if="getNoteHistory.length"
-            class="bg-[var(--p-green-100)] p-4"
-          >
-            <div class="grid grid-cols-6 gap-4 items-center">
-              <div class="font-bold">Please be aware!</div>
-              <div class="font-bold">
-                Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
-              </div>
-            </div>
-
-            <div class="disclaimer-block p-8 mt-8">
-              {{ t('e.common.projectView.disclaimer') }}
-            </div>
+          <div class="disclaimer-block p-8 mt-8">
+            {{ t('e.common.projectView.disclaimer') }}
+          </div>
 
             <div>
               <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>

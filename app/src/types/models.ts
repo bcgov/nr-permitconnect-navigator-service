@@ -49,6 +49,10 @@ const enquiryBase = Prisma.validator<Prisma.enquiryDefaultArgs>()({});
 export type EnquiryBase = Prisma.enquiryGetPayload<typeof enquiryBase>;
 export type Enquiry = EnquiryBase & { activity?: Activity; user?: User | null };
 
+const escalationTypeCodeBase = Prisma.validator<Prisma.escalation_type_codeDefaultArgs>()({});
+export type EscalationTypeCodeBase = Prisma.escalation_type_codeGetPayload<typeof escalationTypeCodeBase>;
+export type EscalationTypeCode = EscalationTypeCodeBase;
+
 const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
 export type HousingProject = HousingProjectBase & { activity?: Activity; user?: User | null };
