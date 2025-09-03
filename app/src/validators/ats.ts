@@ -28,7 +28,7 @@ const enquiryBody = {
   contactFirstName: Joi.string().max(255).required(),
   contactSurname: Joi.string().max(255).required(),
   regionName: Joi.string().max(255).required(),
-  notes: Joi.string().max(255).required(),
+  notes: Joi.string().max(4000).required(),
   subRegionalOffice: Joi.string().max(255).required(),
   enquiryTypeCodes: Joi.array().items(Joi.string().max(255)).required(),
   enquiryMethodCodes: Joi.array().items(Joi.string().max(255)).required(),
