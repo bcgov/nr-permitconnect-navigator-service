@@ -4,7 +4,7 @@ import { BasicResponse } from '../utils/enums/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
 
 export const housing = Joi.object({
-  financiallySupportedBC: Joi.string()
+  financiallySupportedBc: Joi.string()
     .required()
     .valid(...YES_NO_UNSURE_LIST),
   financiallySupportedIndigenous: Joi.string()

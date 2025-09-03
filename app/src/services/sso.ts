@@ -5,9 +5,8 @@ import type { AxiosInstance } from 'axios';
 import type { BceidSearchParameters, IdirSearchParameters } from '../types';
 
 /**
- * @function getToken
  * Gets Auth token using SSO credentials
- * @returns
+ * @returns A valid access token
  */
 async function getToken() {
   const response = await axios({
@@ -27,10 +26,9 @@ async function getToken() {
 }
 
 /**
- * @function ssoAxios
  * Returns an Axios instance with Authorization header
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @param options Axios request config options
+ * @returns An axios instance
  */
 function ssoAxios(): AxiosInstance {
   // Create axios instance
@@ -48,66 +46,77 @@ function ssoAxios(): AxiosInstance {
   return ssoAxios;
 }
 
-const service = {
-  searchIdirUsers: async (params?: IdirSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  searchBasicBceidUsers: async (params?: BceidSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  searchBusinessBceidUsers: async (params?: BceidSearchParameters) => {
-    try {
-      const env = config.get('server.env');
-      const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
-      return { data: data.data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
+/**
+ * Retrieve all IDIR users matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const searchIdirUsers = async (params?: IdirSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
     }
   }
 };
 
-export default service;
+/**
+ * Retrieve all basic BCeID matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const searchBasicBceidUsers = async (params?: BceidSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};
+
+/**
+ * Retrieve all business BCeID matching the search parameters
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const searchBusinessBceidUsers = async (params?: BceidSearchParameters) => {
+  try {
+    const env = config.get('server.env');
+    const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
+    return { data: data.data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};

@@ -1,10 +1,10 @@
 import express from 'express';
 
-import { codeController } from '../../controllers';
+import { listAllCodeTablesController } from '../../controllers/code';
 
 const router = express.Router();
 
-/* GET all code tables */
-router.get('/', codeController.listAllCodeTables);
+/** Get all code tables */
+router.get('/', listAllCodeTablesController);
 
 export default router;

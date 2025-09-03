@@ -22,7 +22,7 @@ export type IProject = {
   astNotes: string;
   atsClientId: number | null;
   atsEnquiryId: string | null;
-  addedToATS: boolean;
+  addedToAts: boolean;
   aaiUpdated: boolean;
 
   // Joined

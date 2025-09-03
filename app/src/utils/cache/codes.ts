@@ -1,8 +1,13 @@
 import { getLogger } from '../../components/log';
-import prisma from '../../db/dataConnection';
+import { transactionWrapper } from '../../db/utils/transactionWrapper';
+import { listAllCodeTables } from '../../services/code';
+
+import type { PrismaTransactionClient } from '../../db/dataConnection';
+import type { ElectrificationProjectCategoryCode, ElectrificationProjectTypeCode, SourceSystemCode } from '../../types';
 
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
+export let sourceSystemCodes: string[] = [];
 
 const log = getLogger(module.filename);
 
@@ -12,19 +17,17 @@ const log = getLogger(module.filename);
  */
 export async function refreshCodeCaches(): Promise<boolean> {
   try {
-    electrificationProjectTypeCodes = (
-      await prisma.electrification_project_type_code.findMany({
-        where: { active: true },
-        select: { code: true }
-      })
-    ).map((r) => r.code);
+    const codeTables = await transactionWrapper<{
+      ElectrificationProjectType: ElectrificationProjectTypeCode[];
+      ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
+      SourceSystem: SourceSystemCode[];
+    }>(async (tx: PrismaTransactionClient) => {
+      return await listAllCodeTables(tx);
+    });
 
-    electrificationProjectCategoryCodes = (
-      await prisma.electrification_project_category_code.findMany({
-        where: { active: true },
-        select: { code: true }
-      })
-    ).map((r) => r.code);
+    electrificationProjectTypeCodes = codeTables.ElectrificationProjectType.map((r) => r.code);
+    electrificationProjectCategoryCodes = codeTables.ElectrificationProjectCategory.map((r) => r.code);
+    sourceSystemCodes = codeTables.SourceSystem.map((r) => r.code);
 
     log.debug('Codes cache refreshed');
     return true;

@@ -19,7 +19,13 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, userService } from '@/services';
+import {
+  activityContactService,
+  atsService,
+  contactService,
+  electrificationProjectService,
+  userService
+} from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import {
@@ -39,7 +45,7 @@ import {
 } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -64,7 +70,7 @@ const emit = defineEmits<{
 }>();
 
 // Constants
-const ATS_ENQUIRY_TYPE_CODE = Initiative.ELECTRIFICATION + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
+const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -119,16 +125,18 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 function initilizeFormValues(project: ElectrificationProject) {
+  const firstContact = project?.activity?.activityContact?.[0]?.contact;
+
   return {
     contact: {
-      contactId: project?.activity?.activityContact?.[0]?.contact?.contactId,
-      firstName: project?.activity?.activityContact?.[0]?.contact?.firstName,
-      lastName: project?.activity?.activityContact?.[0]?.contact?.lastName,
-      phoneNumber: project?.activity?.activityContact?.[0]?.contact?.phoneNumber,
-      email: project?.activity?.activityContact?.[0]?.contact?.email,
-      contactApplicantRelationship: project?.activity?.activityContact?.[0]?.contact?.contactApplicantRelationship,
-      contactPreference: project?.activity?.activityContact?.[0]?.contact?.contactPreference,
-      userId: project?.activity?.activityContact?.[0]?.contact?.userId
+      contactId: firstContact?.contactId,
+      firstName: firstContact?.firstName,
+      lastName: firstContact?.lastName,
+      phoneNumber: firstContact?.phoneNumber,
+      email: firstContact?.email,
+      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+      contactPreference: firstContact?.contactPreference,
+      userId: firstContact?.userId
     },
     project: {
       companyNameRegistered: project.companyNameRegistered,
@@ -165,7 +173,7 @@ function initilizeFormValues(project: ElectrificationProject) {
 
     // Updates
     aaiUpdated: project.aaiUpdated,
-    addedToATS: project.addedToATS
+    addedToAts: project.addedToAts
   };
 }
 
@@ -293,18 +301,30 @@ const onSubmit = async (values: any) => {
       values.atsClientId = response?.atsClientId;
       values.atsEnquiryId = response?.atsEnquiryId;
       if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
       values.atsEnquiryId = await createATSEnquiry();
       if (values.atsEnquiryId) {
-        values.addedToATS = true;
+        values.addedToAts = true;
       }
       atsCreateType.value = undefined;
     }
 
-    const submitData = omit(
+    // Grab the contact information
+    const contact = {
+      contactId: values.contact.contactId,
+      firstName: values.contact.firstName,
+      lastName: values.contact.lastName,
+      phoneNumber: values.contact.phoneNumber,
+      email: values.contact.email,
+      contactApplicantRelationship: values.contact.contactApplicantRelationship,
+      contactPreference: values.contact.contactPreference
+    };
+
+    // Generate final submission object
+    const dataOmitted = omit(
       setEmptyStringsToNull({
         project: {
           ...values.project,
@@ -320,27 +340,34 @@ const onSubmit = async (values: any) => {
           atsClientId: parseInt(values.atsClientId) || '',
           atsEnquiryId: parseInt(values.atsEnquiryId) || '',
           aaiUpdated: values.aaiUpdated,
-          addedToATS: values.addedToATS
-        },
-        contacts: [
-          {
-            contactId: values.contact.contactId,
-            firstName: values.contact.firstName,
-            lastName: values.contact.lastName,
-            phoneNumber: values.contact.phoneNumber,
-            email: values.contact.email,
-            contactApplicantRelationship: values.contact.contactApplicantRelationship,
-            contactPreference: values.contact.contactPreference
-          }
-        ]
+          addedToAts: values.addedToAts
+        }
       }),
-      ['assignedUser', 'submissionState']
+      [
+        'contactId',
+        'contactFirstName',
+        'contactLastName',
+        'contactPhoneNumber',
+        'contactEmail',
+        'contactApplicantRelationship',
+        'contactPreference',
+        'contactUserId',
+        'assignedUser',
+        'submissionState'
+      ]
     );
 
-    const result = await electrificationProjectService.updateProject(project.electrificationProjectId, submitData);
+    // Update project - order of calls is important
+    const contactResponse = (await contactService.updateContact(contact)).data;
+    await activityContactService.updateActivityContact(project.activityId, [
+      { ...contact, contactId: contactResponse.contactId }
+    ]);
+    const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
 
+    // Update store with returned data
     projectStore.setProject(result.data);
 
+    // Reinitialize the form
     formRef.value?.resetForm({
       values: {
         ...initilizeFormValues(result.data)
@@ -457,7 +484,7 @@ onBeforeMount(async () => {
                 (e) => {
                   if (!e.target.value) {
                     setFieldValue('companyNameRegistered', null);
-                    setFieldValue('isDevelopedInBC', null);
+                    setFieldValue('isDevelopedInBc', null);
                   }
                 }
               "
@@ -637,7 +664,7 @@ onBeforeMount(async () => {
             {{ t('i.electrification.projectForm.updatesHeader') }}
           </h4>
           <Checkbox
-            name="addedToATS"
+            name="addedToAts"
             class="mb-4"
             :label="t('i.electrification.projectForm.atsUpdated')"
             :disabled="!editable"
@@ -692,7 +719,7 @@ onBeforeMount(async () => {
           atsUserDetailsModalVisible = false;
           setFieldValue('atsClientId', null);
           setFieldValue('atsEnquiryId', null);
-          setFieldValue('addedToATS', false);
+          setFieldValue('addedToAts', false);
           atsCreateType = undefined;
         }
       "

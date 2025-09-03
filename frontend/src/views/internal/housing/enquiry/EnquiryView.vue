@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import NoteCard from '@/components/note/NoteCard.vue';
-import NoteModal from '@/components/note/NoteModal.vue';
+import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
+import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
-import type { Note, HousingProject } from '@/types';
 import type { Ref } from 'vue';
-import { provide } from 'vue';
+import type { HousingProject, NoteHistory } from '@/types';
+import { toTitleCase } from '@/utils/utils';
 
 // Props
 const {
@@ -35,7 +35,7 @@ const { t } = useI18n();
 // Store
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
-const { getEnquiry, getNotes } = storeToRefs(enquiryStore);
+const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -50,21 +50,21 @@ const isCompleted = computed(() => {
 
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
-provide(atsEnquiryTypeCodeKey, Initiative.HOUSING + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
+provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
 provide(projectServiceKey, housingProjectService);
 
 // Actions
-function onAddNote(note: Note) {
-  enquiryStore.addNote(note, true);
+function onCreateNoteHistory(history: NoteHistory) {
+  enquiryStore.addNoteHistory(history, true);
 }
 
-const onDeleteNote = (note: Note) => {
-  enquiryStore.removeNote(note);
-};
+function onDeleteNoteHistory(history: NoteHistory) {
+  enquiryStore.removeNoteHistory(history);
+}
 
-const onUpdateNote = (oldNote: Note, newNote: Note) => {
-  enquiryStore.updateNote(oldNote, newNote);
-};
+function onUpdateNoteHistory(history: NoteHistory) {
+  enquiryStore.updateNoteHistory(history);
+}
 
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
@@ -83,12 +83,12 @@ async function updateRelatedEnquiry() {
 onBeforeMount(async () => {
   if (enquiryId) {
     const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-    const notes = (await noteService.listNotes(enquiry.activityId)).data;
+    const notes = (await noteHistoryService.listNoteHistories(enquiry.activityId)).data;
 
     activityId.value = enquiry.activityId;
 
     enquiryStore.setEnquiry(enquiry);
-    enquiryStore.setNotes(notes);
+    enquiryStore.setNoteHistory(notes);
 
     updateRelatedEnquiry();
   }
@@ -161,7 +161,7 @@ onBeforeMount(async () => {
       <TabPanel :value="1">
         <div class="flex items-center pb-2">
           <div class="grow">
-            <p class="font-bold">Notes ({{ getNotes.length }})</p>
+            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
           </div>
           <Button
             aria-label="Add note"
@@ -176,23 +176,23 @@ onBeforeMount(async () => {
           </Button>
         </div>
         <div
-          v-for="(note, index) in getNotes"
-          :key="note.noteId"
+          v-for="(history, index) in getNoteHistory"
+          :key="history.noteHistoryId"
           :index="index"
           class="col-span-12"
         >
-          <NoteCard
+          <NoteHistoryCard
             :editable="!isCompleted"
-            :note="note"
-            @delete-note="onDeleteNote"
-            @update-note="onUpdateNote"
+            :note-history="history"
+            @delete-note-history="onDeleteNoteHistory"
+            @update-note-history="onUpdateNoteHistory"
           />
         </div>
-        <NoteModal
+        <NoteHistoryModal
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @add-note="onAddNote"
+          @create-note-history="onCreateNoteHistory"
         />
       </TabPanel>
     </TabPanels>

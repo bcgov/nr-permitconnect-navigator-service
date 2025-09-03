@@ -5,11 +5,11 @@ const PATH = 'map';
 
 export default {
   /**
-   * @function getPIDs
-   * getPIDs - Get the PIDs for a submission
-   * @returns {Promise<data | null>} The result of calling the get api
+   * Get the PIDs for a project
+   * @param projectId The ID of the project
+   * @returns {Promise} An axios response
    */
-  getPIDs(housingProjectId: string) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/pids/${housingProjectId}`);
+  getPIDs(projectId: string) {
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/pids/${projectId}`);
   }
 };

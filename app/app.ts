@@ -1,11 +1,12 @@
+import { Prisma } from '@prisma/client';
 import compression from 'compression';
 import config from 'config';
 import cors from 'cors';
+import { randomBytes } from 'crypto';
 import express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
 import querystring from 'querystring';
-import { randomBytes } from 'crypto';
 
 import { version as appVersion } from './package.json';
 import { getLogger, httpLogger } from './src/components/log';
@@ -124,11 +125,34 @@ export function errorHandler(
   res: Response,
   _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
-  if (err.stack) log.error(err);
-
   if (err instanceof Problem) {
     err.send(req, res);
+  } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    switch (err.code) {
+      case 'P2003':
+        new Problem(500, {
+          type: err.code,
+          title: err.meta?.constraint as string,
+          detail: err.meta?.modelName as string
+        }).send(req, res);
+        break;
+      case 'P2025':
+        new Problem(404, {
+          type: err.code,
+          title: err.meta?.cause as string,
+          detail: err.meta?.modelName as string
+        }).send(req, res);
+        break;
+      default:
+        new Problem(500, {
+          type: err.code,
+          title: err.meta?.cause as string,
+          detail: err.meta?.modelName as string
+        }).send(req, res);
+        break;
+    }
   } else {
+    if (err.stack) log.error(err);
     new Problem(500, { detail: err.message ?? err.toString() }).send(req, res);
   }
 }

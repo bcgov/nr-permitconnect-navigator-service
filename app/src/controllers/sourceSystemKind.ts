@@ -1,16 +1,13 @@
-import { sourceSystemKindService } from '../services';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { getSourceSystemKinds } from '../services/sourceSystemKind';
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { SourceSystemKind } from '../types';
 
-const controller = {
-  getSourceSystemKinds: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await sourceSystemKindService.getSourceSystemKinds();
-      res.status(200).json(response);
-    } catch (e) {
-      next(e);
-    }
-  }
+export const getSourceSystemKindsController = async (req: Request, res: Response) => {
+  const response = await transactionWrapper<SourceSystemKind[]>(async (tx: PrismaTransactionClient) => {
+    return await getSourceSystemKinds(tx);
+  });
+  res.status(200).json(response);
 };
-
-export default controller;

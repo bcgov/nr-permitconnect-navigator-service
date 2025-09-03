@@ -1,30 +1,16 @@
-/* eslint-disable no-useless-catch */
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PermitNote, PermitNoteBase } from '../types';
 
-import prisma from '../db/dataConnection';
-import { permit_note } from '../db/models';
-import { v4 as uuidv4 } from 'uuid';
+/**
+ * Create a permit note
+ * @param tx Prisma transaction client
+ * @param data - The permit note object to create
+ * @returns A Promise that resolves to the created permit note
+ */
+export const createPermitNote = async (tx: PrismaTransactionClient, data: PermitNoteBase): Promise<PermitNote> => {
+  const create = await tx.permit_note.create({
+    data
+  });
 
-import type { PermitNote } from '../types';
-
-const service = {
-  /**
-   * @function createPermitNote
-   * Creates a Permit Note
-   * @param {PermitNote} data Permit Note object
-   * @returns {Promise<PermitNote | null>} The result of running the create operation
-   */
-  createPermitNote: async (data: PermitNote) => {
-    try {
-      const newPermitNote = { ...data, permitNoteId: uuidv4() };
-
-      const create = await prisma.permit_note.create({
-        data: { ...permit_note.toPrismaModel(newPermitNote), created_by: data.createdBy }
-      });
-      return permit_note.fromPrismaModel(create);
-    } catch (e: unknown) {
-      throw e;
-    }
-  }
+  return create;
 };
-
-export default service;

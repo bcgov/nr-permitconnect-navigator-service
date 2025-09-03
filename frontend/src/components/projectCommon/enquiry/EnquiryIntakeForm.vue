@@ -11,7 +11,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService } from '@/services';
+import { activityContactService, contactService, enquiryService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
@@ -158,26 +158,27 @@ function getEnquiryConfirmationRoute(enquiry: Enquiry) {
 
 async function loadEnquiry() {
   try {
-    let response;
+    let firstContact, response;
 
     if (enquiryId) {
-      response = (await enquiryService.getEnquiry(enquiryId as string)).data;
+      response = (await enquiryService.getEnquiry(enquiryId)).data;
+      firstContact = response?.activity?.activityContact?.[0]?.contact;
       editable.value = response?.intakeStatus !== IntakeStatus.SUBMITTED;
     } else {
       // Load contact data for new enquiry
-      response = { contacts: [contactStore.getContact] };
+      firstContact = contactStore.getContact;
     }
 
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contactFirstName: response?.contacts[0]?.firstName,
-      contactLastName: response?.contacts[0]?.lastName,
-      contactPhoneNumber: response?.contacts[0]?.phoneNumber,
-      contactEmail: response?.contacts[0]?.email,
-      contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
-      contactPreference: response?.contacts[0]?.contactPreference,
-      contactId: response?.contacts[0]?.contactId,
+      contactFirstName: firstContact?.firstName,
+      contactLastName: firstContact?.lastName,
+      contactPhoneNumber: firstContact?.phoneNumber,
+      contactEmail: firstContact?.email,
+      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+      contactPreference: firstContact?.contactPreference,
+      contactId: firstContact?.contactId,
       basic: {
         relatedActivityId: response?.relatedActivityId,
         enquiryDescription: response?.enquiryDescription
@@ -195,70 +196,62 @@ function onInvalidSubmit(e: any) {
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(values: any) {
   editable.value = false;
-
-  let enquiryResponse;
 
   try {
     // Set related activity id if project activity id is passed in as a prop
     if (project) {
-      data.basic.relatedActivityId = project.activityId;
+      values.basic.relatedActivityId = project.activityId;
     }
 
-    // Convert contact fields into contacts array object then remove form keys from data
-    const enquiryData = omit(
-      {
-        ...data,
-        contacts: [
-          {
-            firstName: data.contactFirstName,
-            lastName: data.contactLastName,
-            phoneNumber: data.contactPhoneNumber,
-            email: data.contactEmail,
-            contactApplicantRelationship: data.contactApplicantRelationship,
-            contactPreference: data.contactPreference,
-            contactId: data.contactId
-          }
-        ]
-      },
-      [
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactId'
-      ]
-    );
+    // Grab the contact information
+    const contact = {
+      contactId: values.contactId,
+      firstName: values.contactFirstName,
+      lastName: values.contactLastName,
+      phoneNumber: values.contactPhoneNumber,
+      email: values.contactEmail,
+      contactApplicantRelationship: values.contactApplicantRelationship,
+      contactPreference: values.contactPreference
+    };
+
+    // Omit all the fields we dont want to send
+    const dataOmitted = omit({ ...values }, [
+      'contactId',
+      'contactFirstName',
+      'contactLastName',
+      'contactPhoneNumber',
+      'contactEmail',
+      'contactApplicantRelationship',
+      'contactPreference'
+    ]);
 
     if (permit) {
       let permitDescription =
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
-      // Obtain the tracking ID that is shown to the proponent
+      const trackingId =
+        permit.permitTracking?.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
       const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
-      permitDescription = permitDescription + trackingId.value + '\n' + authStatus + '\n\n';
-      enquiryData.basic.enquiryDescription = permitDescription + enquiryData.basic.enquiryDescription;
-      formRef.value?.setFieldValue('basic.enquiryDescription', enquiryData.basic.enquiryDescription);
+      permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
+      dataOmitted.basic.enquiryDescription = permitDescription + dataOmitted.basic.enquiryDescription;
+      formRef.value?.setFieldValue('basic.enquiryDescription', dataOmitted.basic.enquiryDescription);
     }
 
-    enquiryResponse = await enquiryService.createEnquiry(enquiryData);
+    // Create enquiry
+    const result = await enquiryService.createEnquiry(dataOmitted);
 
-    if (enquiryResponse.data.activityId && enquiryResponse.data.enquiryId) {
-      formRef.value?.setFieldValue('activityId', enquiryResponse.data.activityId);
-      formRef.value?.setFieldValue('enquiryId', enquiryResponse.data.enquiryId);
+    // Link activity contact
+    const contactResponse = (await contactService.updateContact(contact)).data;
+    await activityContactService.updateActivityContact(result.data.activityId, [contactResponse]);
 
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.data.activityId, enquiryResponse.data.enquiryId);
+    // Save contact data to store
+    contactStore.setContact(contactResponse);
 
-      // Save contact data to store
-      contactStore.setContact(enquiryData.contacts[0]);
+    // Send confirmation email
+    emailConfirmation(result.data.activityId, result.data.enquiryId);
 
-      router.push(getEnquiryConfirmationRoute(enquiryResponse.data));
-    } else {
-      throw new Error('Failed to retrieve correct enquiry data');
-    }
+    router.push(getEnquiryConfirmationRoute(result.data));
   } catch (e: any) {
     toast.error('Failed to save intake', e);
   } finally {

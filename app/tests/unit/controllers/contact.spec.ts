@@ -1,45 +1,25 @@
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { TEST_CURRENT_CONTEXT, TEST_CONTACT_1, TEST_CONTACT_WITH_ACTIVITY_1 } from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import * as contactService from '../../../src/services/contact';
+import {
+  deleteContactController,
+  getContactController,
+  searchContactsController,
+  upsertContactController
+} from '../../../src/controllers/contact';
+import { Contact, ContactSearchParameters } from '../../../src/types';
+import { uuidv4Pattern } from '../../../src/utils/regexp';
 
-import { contactService } from '../../../src/services';
-import contactController from '../../../src/controllers/contact';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
-
-const CONTACT_DATA = {
-  contactId: 'contact123',
-  userId: 'user123',
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '123-456-7890',
-  email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
-};
-
-const ACTIVITY_CONTACT_DATA = {
-  activityId: 'ACTI1234',
-  contactId: 'contact123'
-};
-
-const CONTACT_DATA_WITH_ACTIVITY = {
-  contactId: 'contact123',
-  userId: 'user123',
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '123-456-7890',
-  email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
-  contactActivity: [ACTIVITY_CONTACT_DATA]
-};
 
 const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -52,288 +32,162 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null };
+describe('deleteContactController', () => {
+  const deleteContactSpy = jest.spyOn(contactService, 'deleteContact');
 
-describe('contactController', () => {
-  const next = jest.fn();
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
 
-  describe('deleteContact', () => {
-    const deleteContactSpy = jest.spyOn(contactService, 'deleteContact');
+    deleteContactSpy.mockResolvedValue();
 
-    it('should return 204 if the contact is deleted successfully', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
+    await deleteContactController(req as unknown as Request<{ contactId: string }>, res as unknown as Response);
 
-      deleteContactSpy.mockResolvedValue();
-      res.end = jest.fn().mockReturnValue(res);
+    expect(deleteContactSpy).toHaveBeenCalledTimes(1);
+    expect(deleteContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledTimes(1);
+  });
+});
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
+describe('getContactController', () => {
+  const getContactSpy = jest.spyOn(contactService, 'getContact');
 
-      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
-      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
-      expect(res.status).toHaveBeenCalledWith(204);
-      expect(res.end).toHaveBeenCalledTimes(1);
-      expect(res.json).toHaveBeenCalledTimes(0);
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
+      query: { includeActivities: false },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
+
+    getContactSpy.mockResolvedValue(TEST_CONTACT_1);
+
+    await getContactController(
+      req as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
+      res as unknown as Response
+    );
+
+    expect(getContactSpy).toHaveBeenCalledTimes(1);
+    expect(getContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId, false);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
+  });
+
+  it('should call services and respond with 200 and result with activity contact if found', async () => {
+    const req = {
+      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
+      query: { includeActivities: true },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
+
+    getContactSpy.mockResolvedValue(TEST_CONTACT_WITH_ACTIVITY_1);
+
+    await getContactController(
+      req as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
+      res as unknown as Response
+    );
+
+    expect(getContactSpy).toHaveBeenCalledTimes(1);
+    expect(getContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId, true);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_WITH_ACTIVITY_1);
+  });
+});
+
+describe('searchContactsController', () => {
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
+
+    const contacts = [TEST_CONTACT_1];
+
+    searchContactsSpy.mockResolvedValue(contacts);
+
+    await searchContactsController(
+      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      res as unknown as Response
+    );
+
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'],
+      contactId: undefined,
+      email: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      contactApplicantRelationship: undefined,
+      phoneNumber: undefined
     });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(contacts);
+  });
 
-    it('should return 404 if the contact is not found', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
+  it('adds dashes to user IDs', async () => {
+    const req = {
+      query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
 
-      const notFoundError = new PrismaClientKnownRequestError('Contact not found', {
-        code: 'P2025',
-        clientVersion: '2.19.0'
-      });
+    const contacts = [TEST_CONTACT_1];
 
-      deleteContactSpy.mockRejectedValueOnce(notFoundError);
-      res.end = jest.fn().mockReturnValue(res);
+    searchContactsSpy.mockResolvedValue(contacts);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
+    await searchContactsController(
+      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      res as unknown as Response
+    );
 
-      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
-      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Contact not found' });
-      expect(res.end).toHaveBeenCalledTimes(0);
-    });
-
-    it('calls next if the contact service fails', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      deleteContactSpy.mockImplementationOnce(() => {
-        throw new Error('Service failure');
-      });
-      res.end = jest.fn().mockReturnValue(res);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.deleteContact(req as any, res as unknown as Response, next);
-
-      expect(deleteContactSpy).toHaveBeenCalledTimes(1);
-      expect(deleteContactSpy).toHaveBeenCalledWith(req.params.contactId);
-      expect(res.status).toHaveBeenCalledTimes(0); // response never sent
-      expect(next).toHaveBeenCalledTimes(1); // error bubbled up
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
+      contactId: undefined,
+      email: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      contactApplicantRelationship: undefined,
+      phoneNumber: undefined
     });
   });
 
-  describe('getContact', () => {
-    const getContactSpy = jest.spyOn(contactService, 'getContact');
+  it('adds dashes to contact IDs', async () => {
+    const req = {
+      query: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
+      currentContext: TEST_CURRENT_CONTEXT
+    } as unknown as Request;
 
-    it('should return 200 and the contact if found', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        query: { includeActivities: false },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
+    const contacts = [TEST_CONTACT_1];
 
-      getContactSpy.mockResolvedValue(CONTACT_DATA);
+    searchContactsSpy.mockResolvedValue(contacts);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
+    await searchContactsController(
+      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      res as unknown as Response
+    );
 
-      expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(CONTACT_DATA);
-    });
-
-    it('should return 200 and the contact with activity contact if found', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        query: { includeActivities: true },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      getContactSpy.mockResolvedValue(CONTACT_DATA_WITH_ACTIVITY);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
-
-      expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, true);
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(CONTACT_DATA_WITH_ACTIVITY);
-    });
-
-    it('should return 404 if the contact is not found', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        query: { includeActivities: false },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      getContactSpy.mockResolvedValue(null);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
-
-      expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(getContactSpy).toHaveBeenCalledWith(req.params.contactId, false);
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ message: 'Contact not found' });
-    });
-
-    it('calls next if the contact service fails', async () => {
-      const req = {
-        params: { contactId: 'contact123' },
-        query: { includeActivities: false },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      getContactSpy.mockImplementationOnce(() => {
-        throw new Error('Service failure');
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.getContact(req as any, res as unknown as Response, next);
-
-      expect(getContactSpy).toHaveBeenCalledTimes(1);
-      expect(next).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      contactId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
+      userId: undefined,
+      email: undefined,
+      firstName: undefined,
+      lastName: undefined,
+      contactApplicantRelationship: undefined,
+      phoneNumber: undefined
     });
   });
+});
 
-  describe('searchContacts', () => {
-    const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+describe('updateContactController', () => {
+  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
 
-    it('should return 200 if all good', async () => {
-      const req = {
-        query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      const contacts = [CONTACT_DATA];
-
-      searchContactsSpy.mockResolvedValue(contacts);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
-
-      expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactsSpy).toHaveBeenCalledWith({
-        userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'],
-        contactId: undefined,
-        email: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        contactApplicantRelationship: undefined,
-        phoneNumber: undefined
-      });
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(contacts);
-    });
-
-    it('adds dashes to user IDs', async () => {
-      const req = {
-        query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      const contacts = [
-        {
-          contactId: 'contact123',
-          userId: 'user123',
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '123-456-7890',
-          email: 'john.doe@example.com',
-          contactPreference: 'email',
-          contactApplicantRelationship: 'applicant'
-        }
-      ];
-
-      searchContactsSpy.mockResolvedValue(contacts);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
-
-      expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactsSpy).toHaveBeenCalledWith({
-        userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
-        contactId: undefined,
-        email: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        contactApplicantRelationship: undefined,
-        phoneNumber: undefined
-      });
-    });
-
-    it('adds dashes to contact IDs', async () => {
-      const req = {
-        query: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      const contacts = [
-        {
-          contactId: 'contact123',
-          userId: 'user123',
-          firstName: 'John',
-          lastName: 'Doe',
-          phoneNumber: '123-456-7890',
-          email: 'john.doe@example.com',
-          contactPreference: 'email',
-          contactApplicantRelationship: 'applicant'
-        }
-      ];
-
-      searchContactsSpy.mockResolvedValue(contacts);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
-
-      expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactsSpy).toHaveBeenCalledWith({
-        contactId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
-        userId: undefined,
-        email: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        contactApplicantRelationship: undefined,
-        phoneNumber: undefined
-      });
-    });
-
-    it('calls next if the contact service fails to list contacts', async () => {
-      const req = {
-        query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
-        currentContext: CURRENT_CONTEXT
-      } as unknown as Request;
-
-      searchContactsSpy.mockImplementationOnce(() => {
-        throw new Error();
-      });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.searchContacts(req as any, res as unknown as Response, next);
-
-      expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactsSpy).toHaveBeenCalledWith({
-        userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'],
-        contactId: undefined,
-        email: undefined,
-        firstName: undefined,
-        lastName: undefined,
-        contactApplicantRelationship: undefined,
-        phoneNumber: undefined
-      });
-      expect(res.status).toHaveBeenCalledTimes(0);
-      expect(next).toHaveBeenCalledTimes(1);
-    });
-  });
-
-  describe('updateContact', () => {
-    const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
-
-    it('should return 200 if contact is updated successfully', async () => {
+  describe('no contactId in body', () => {
+    it('should call services and respond with 200 and result', async () => {
       const req = {
         body: {
           userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
@@ -341,41 +195,59 @@ describe('contactController', () => {
           firstName: 'First',
           lastName: 'Last'
         },
-        currentContext: CURRENT_CONTEXT
+        currentContext: TEST_CURRENT_CONTEXT
       } as unknown as Request;
 
-      upsertContactsSpy.mockResolvedValue();
+      upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.updateContact(req as any, res as unknown as Response, next);
+      await upsertContactController(
+        req as unknown as Request<never, never, Contact, never>,
+        res as unknown as Response
+      );
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-      expect(upsertContactsSpy).toHaveBeenCalledWith([req.body], req.currentContext);
+      expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
+        {
+          ...req.body,
+          contactId: expect.stringMatching(uuidv4Pattern),
+          updatedAt: expect.any(Date),
+          updatedBy: TEST_CURRENT_CONTEXT.userId
+        }
+      ]);
       expect(res.status).toHaveBeenCalledWith(200);
     });
+  });
 
-    it('calls next if the contact service fails to update contact', async () => {
+  describe('contactId in body', () => {
+    it('should call services and respond with 200 and result', async () => {
       const req = {
         body: {
+          contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
           userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
           email: 'first.last@gov.bc.ca',
           firstName: 'First',
           lastName: 'Last'
         },
-        currentContext: CURRENT_CONTEXT
+        currentContext: TEST_CURRENT_CONTEXT
       } as unknown as Request;
 
-      upsertContactsSpy.mockImplementationOnce(() => {
-        throw new Error();
-      });
+      upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await contactController.updateContact(req as any, res as unknown as Response, next);
+      await upsertContactController(
+        req as unknown as Request<never, never, Contact, never>,
+        res as unknown as Response
+      );
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-      expect(upsertContactsSpy).toHaveBeenCalledWith([req.body], req.currentContext);
-      expect(res.status).toHaveBeenCalledTimes(0);
-      expect(next).toHaveBeenCalledTimes(1);
+      expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
+        {
+          ...req.body,
+          contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+          updatedAt: expect.any(Date),
+          updatedBy: TEST_CURRENT_CONTEXT.userId
+        }
+      ]);
+      expect(res.status).toHaveBeenCalledWith(200);
     });
   });
 });

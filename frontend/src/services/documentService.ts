@@ -42,7 +42,7 @@ export default {
         documentId: comsResponse.data.id,
         filename: comsResponse.data.name,
         mimeType: comsResponse.data.mimeType,
-        length: comsResponse.data.length
+        filesize: comsResponse.data.length
       });
     } catch (e: any) {
       // In event of any error try to Delete COMS object if it was created

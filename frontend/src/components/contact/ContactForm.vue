@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { ErrorMessage, Form } from 'vee-validate';
+
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { object, string } from 'yup';
@@ -8,15 +9,27 @@ import { FormNavigationGuard, InputText, InputMask, Select } from '@/components/
 import { Button, useToast } from '@/lib/primevue';
 import { contactService } from '@/services';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { setEmptyStringsToNull } from '@/utils/utils';
 import { emailValidator } from '@/validators/common';
 
+import type { GenericObject } from 'vee-validate';
 import type { Contact } from '@/types';
 
 // Props
 const { contact } = defineProps<{
-  contact?: Contact;
+  contact: Contact;
 }>();
+
+// Types
+type ContactForm = {
+  contactId: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phoneNumber?: string;
+  contactApplicantRelationship?: string;
+  contactPreference?: string;
+};
 
 // Emits
 const emit = defineEmits<{
@@ -29,22 +42,31 @@ const toast = useToast();
 
 // State
 const formRef = ref<InstanceType<typeof Form> | null>(null);
-const initialFormValues = ref<any | undefined>(contact);
+const initialFormValues = ref<ContactForm>({
+  contactId: contact.contactId,
+  firstName: contact.firstName,
+  lastName: contact.lastName,
+  email: contact.email,
+  phoneNumber: contact.phoneNumber,
+  contactApplicantRelationship: contact.contactApplicantRelationship,
+  contactPreference: contact.contactPreference
+});
 
 // Form validation schema
 // TODO: Sync contact key naming so common validator can be used
 const contactSchema = object({
+  contactId: string().required(),
   firstName: string().required().max(255).label('First name'),
   lastName: string().max(255).label('Last name').nullable(),
   email: emailValidator('Email must be valid').required().label('Email'),
   phoneNumber: string().required().label('Phone'),
   contactApplicantRelationship: string().required().label('Relationship to project'),
   contactPreference: string().required().label('Preferred contact method')
-});
+}).exact('Unknown keys in schema');
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: GenericObject | ContactForm) => {
   try {
-    const submitData: Contact = omit(setEmptyStringsToNull(values), ['activityContact']) as Contact;
+    const submitData: Contact = setEmptyStringsToNull(values);
     const result = await contactService.updateContact(submitData);
     if (result.status === 200) {
       toast.success(t('contactForm.formSaved'));
@@ -53,7 +75,7 @@ const onSubmit = async (values: any) => {
           ...formRef.value?.values
         }
       });
-      emit('update-contact', submitData);
+      emit('update-contact', result.data);
     } else toast.error(t('contactForm.failedToSaveTheForm'));
   } catch (e: any) {
     toast.error(t('contactForm.failedToSaveTheForm'), e);
@@ -108,15 +130,21 @@ const onSubmit = async (values: any) => {
         :bold="true"
         :options="CONTACT_PREFERENCE_LIST"
       />
-      <div class="flex">
-        <Button
-          class="mr-2"
-          :label="t('contactForm.save')"
-          :disabled="!meta.dirty"
-          type="submit"
-          icon="pi pi-check"
+      <div class="flex flex-col">
+        <div class="">
+          <Button
+            class="mr-2"
+            :label="t('contactForm.save')"
+            :disabled="!meta.dirty"
+            type="submit"
+            icon="pi pi-check"
+          />
+          <slot name="cancel" />
+        </div>
+        <ErrorMessage
+          name=""
+          class="app-error-message"
         />
-        <slot name="cancel" />
       </div>
     </Form>
   </div>

@@ -45,7 +45,15 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
+import {
+  activityContactService,
+  contactService,
+  documentService,
+  enquiryService,
+  externalApiService,
+  housingProjectService,
+  permitService
+} from '@/services';
 import { useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
@@ -59,7 +67,7 @@ import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Contact, Document, HousingProjectIntake, Permit, PermitType } from '@/types';
+import type { Document, HousingProjectIntake, Permit, PermitType } from '@/types';
 
 // Types
 type HousingProjectForm = {
@@ -292,45 +300,47 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    // Convert contact fields into contacts array object
-    const submissionData = {
-      ...data,
-      contacts: [
-        {
-          contactId: data.contacts.contactId,
-          firstName: data.contacts.contactFirstName,
-          lastName: data.contacts.contactLastName,
-          phoneNumber: data.contacts.contactPhoneNumber,
-          email: data.contacts.contactEmail,
-          contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-          contactPreference: data.contacts.contactPreference
-        }
-      ]
+    // Grab the contact information
+    const contact = {
+      contactId: data.contacts.contactId,
+      firstName: data.contacts.contactFirstName,
+      lastName: data.contacts.contactLastName,
+      phoneNumber: data.contacts.contactPhoneNumber,
+      email: data.contacts.contactEmail,
+      contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+      contactPreference: data.contacts.contactPreference
     };
 
+    // Omit all the fields we dont want to send
+    const dataOmitted = omit(setEmptyStringsToNull({ ...data }), ['contacts']);
+
     // Show the trackingNumber of all appliedPermits to the proponent
-    submissionData.appliedPermits?.forEach((x: Permit) => {
-      if (x?.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
+    dataOmitted.appliedPermits?.forEach((x: Permit) => {
+      if (x.permitTracking) x.permitTracking = x.permitTracking.filter((pt) => pt.trackingId);
+      if (x.permitTracking[0]) x.permitTracking[0].shownToProponent = true;
     });
 
     // Remove empty investigate permit objects
-    const filteredInvestigatePermits = submissionData.investigatePermits?.filter(
+    const filteredInvestigatePermits = dataOmitted.investigatePermits?.filter(
       (x: object) => JSON.stringify(x) !== '{}'
     );
 
-    submissionData.investigatePermits = filteredInvestigatePermits;
-    submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
+    dataOmitted.investigatePermits = filteredInvestigatePermits;
 
-    const response = await housingProjectService.submitDraft({ ...submissionData, draftId });
+    const response = await housingProjectService.submitDraft({ ...dataOmitted, draftId });
 
     if (response.data.activityId && response.data.housingProjectId) {
+      // Link activity contact
+      const contactResponse = (await contactService.updateContact(contact)).data;
+      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
+
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(submissionData.contacts[0]);
+      contactStore.setContact(contactResponse);
 
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
@@ -419,7 +429,7 @@ onBeforeMount(async () => {
         basic: {
           consentToFeedback: response?.consentToFeedback,
           projectApplicantType: response?.projectApplicantType,
-          isDevelopedInBC: response?.isDevelopedInBC,
+          isDevelopedInBc: response?.isDevelopedInBc,
           registeredName: response?.companyNameRegistered
         },
         housing: {
@@ -434,7 +444,7 @@ onBeforeMount(async () => {
           otherUnits: response?.otherUnits,
           hasRentalUnits: response?.hasRentalUnits,
           rentalUnits: response?.rentalUnits,
-          financiallySupportedBC: response?.financiallySupportedBC,
+          financiallySupportedBc: response?.financiallySupportedBc,
           financiallySupportedIndigenous: response?.financiallySupportedIndigenous,
           indigenousDescription: response?.indigenousDescription,
           financiallySupportedNonProfit: response?.financiallySupportedNonProfit,
@@ -450,10 +460,10 @@ onBeforeMount(async () => {
           province: response?.province,
           latitude: response?.latitude,
           longitude: response?.longitude,
-          ltsaPIDLookup: response?.locationPIDs,
+          ltsaPidLookup: response?.locationPids,
           geomarkUrl: response?.geomarkUrl,
           projectLocationDescription: response?.projectLocationDescription,
-          geoJSON: response?.geoJSON
+          geoJson: response?.geoJson
         },
         appliedPermits: permits
           .filter((x: Permit) => x.status === PermitStatus.APPLIED)
@@ -631,7 +641,7 @@ watchEffect(() => {
                   :options="PROJECT_APPLICANT_LIST"
                   @on-change="
                     (e: string) => {
-                      if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBC', null);
+                      if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBc', null);
                     }
                   "
                 />
@@ -651,14 +661,14 @@ watchEffect(() => {
                   </div>
                   <RadioList
                     class="col-span-12 mt-2 pl-0"
-                    name="basic.isDevelopedInBC"
+                    name="basic.isDevelopedInBc"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_LIST"
                     @on-change="() => setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName)"
                   />
                   <AutoComplete
-                    v-if="values.basic.isDevelopedInBC === BasicResponse.YES"
+                    v-if="values.basic.isDevelopedInBc === BasicResponse.YES"
                     class="col-span-6 mt-4 pl-0"
                     name="basic.registeredName"
                     :bold="false"
@@ -669,7 +679,7 @@ watchEffect(() => {
                     @on-complete="onRegisteredNameInput"
                   />
                   <InputText
-                    v-else-if="values.basic.isDevelopedInBC === BasicResponse.NO"
+                    v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
                     class="col-span-6 mt-4 pl-0"
                     name="basic.registeredName"
                     :placeholder="'Type the business/company/organization name'"
@@ -879,7 +889,7 @@ watchEffect(() => {
                   :disabled="!editable"
                   @click="
                     () => {
-                      setFieldValue('housing.financiallySupportedBC', BasicResponse.NO);
+                      setFieldValue('housing.financiallySupportedBc', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedIndigenous', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedNonProfit', BasicResponse.NO);
                       setFieldValue('housing.financiallySupportedHousingCoop', BasicResponse.NO);
@@ -912,7 +922,7 @@ watchEffect(() => {
                   </div>
 
                   <RadioList
-                    name="housing.financiallySupportedBC"
+                    name="housing.financiallySupportedBc"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
@@ -1118,7 +1128,7 @@ watchEffect(() => {
                           <!-- eslint-disable max-len -->
                           <InputText
                             class="col-span-12"
-                            name="location.ltsaPIDLookup"
+                            name="location.ltsaPidLookup"
                             :bold="false"
                             :disabled="!editable"
                             help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"

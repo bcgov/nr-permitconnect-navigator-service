@@ -7,5 +7,5 @@ export type Activity = {
   isDeleted: boolean;
 
   // Joined
-  activityContact?: Array<ActivityContact>;
+  activityContact?: ActivityContact[];
 } & Partial<IStamps>;

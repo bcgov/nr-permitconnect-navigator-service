@@ -120,7 +120,7 @@ describe('documentService', () => {
             documentId: testFileData.id,
             filename: testFileData.name,
             mimeType: testFileData.mimeType,
-            length: testFileData.length
+            filesize: testFileData.length
           });
         });
 

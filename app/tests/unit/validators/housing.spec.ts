@@ -5,7 +5,7 @@ import { housing } from '../../../src/validators/housing';
 describe('housingSchema', () => {
   it('should validate the housing schema with valid data', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -25,7 +25,7 @@ describe('housingSchema', () => {
 
   it('should not validate the housing schema with invalid data', () => {
     const data = {
-      financiallySupportedBC: 'Invalid',
+      financiallySupportedBc: 'Invalid',
       financiallySupportedIndigenous: BasicResponse.YES,
       financiallySupportedNonProfit: BasicResponse.NO,
       financiallySupportedHousingCoop: BasicResponse.UNSURE,
@@ -58,7 +58,7 @@ describe('housingSchema', () => {
 
   it('should not exceed maximum length', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -78,7 +78,7 @@ describe('housingSchema', () => {
 
   it('should accept when singleFamilySelected and otherSelected are true', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -100,7 +100,7 @@ describe('housingSchema', () => {
 
   it('should only accept otherUnitsDescription when otherSelected is true', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -120,7 +120,7 @@ describe('housingSchema', () => {
 
   it('should not accept otherUnitsDescription when otherSelected is null', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -139,7 +139,7 @@ describe('housingSchema', () => {
 
   it('should only accept a certain set of values for otherUnits', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,
@@ -159,7 +159,7 @@ describe('housingSchema', () => {
 
   it('should not accept when none of singleFamilySelected, otherSelected, multiFamilySelected are selected', () => {
     const data = {
-      financiallySupportedBC: BasicResponse.YES,
+      financiallySupportedBc: BasicResponse.YES,
       financiallySupportedIndigenous: BasicResponse.NO,
       financiallySupportedNonProfit: BasicResponse.UNSURE,
       financiallySupportedHousingCoop: BasicResponse.YES,

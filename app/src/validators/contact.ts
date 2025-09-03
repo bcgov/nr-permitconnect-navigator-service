@@ -65,10 +65,10 @@ const schema = {
       includeActivities: Joi.boolean().default(false)
     })
   },
-  updateContact: {
+  upsertContact: {
     body: Joi.object({
       userId: uuidv4.allow(null),
-      contactId: uuidv4.required(),
+      contactId: uuidv4.allow(null),
       email: Joi.string().max(255).required(),
       firstName: Joi.string().max(255).required(),
       lastName: Joi.string().max(255).allow(null),
@@ -79,9 +79,6 @@ const schema = {
       contactPreference: Joi.string()
         .valid(...CONTACT_PREFERENCE_LIST)
         .required()
-    }),
-    params: Joi.object({
-      contactId: uuidv4.required()
     })
   }
 };
@@ -92,5 +89,5 @@ export default {
   getContactActivities: validate(schema.getContact),
   matchContacts: validate(schema.matchContacts),
   searchContacts: validate(schema.searchContacts),
-  updateContact: validate(schema.updateContact)
+  upsertContact: validate(schema.upsertContact)
 };

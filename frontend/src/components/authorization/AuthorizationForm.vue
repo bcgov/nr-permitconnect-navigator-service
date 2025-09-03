@@ -217,18 +217,21 @@ function initializeFormValues() {
       authorizationType: authorization.permitType,
       adjudicationDate: authorization.adjudicationDate ? new Date(authorization.adjudicationDate) : null,
       submittedDate: authorization.submittedDate ? new Date(authorization.submittedDate) : null,
-      permitTracking: authorization.permitTracking.map((tracking) => ({
-        permitTrackingId: tracking.permitTrackingId,
-        sourceSystemKindId: tracking.sourceSystemKind?.sourceSystemKindId,
-        trackingId: tracking.trackingId,
-        shownToProponent: tracking.shownToProponent
-      })),
+      permitTracking: authorization.permitTracking.map((x) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sourceSystemKind, ...tracking } = x;
+        return tracking;
+      }),
       issuedPermitId: authorization.issuedPermitId,
       statusLastVerified: authorization.statusLastVerified ? new Date(authorization.statusLastVerified) : null,
       authStatus: authorization.authStatus,
       status: authorization.status,
       needed: authorization.needed,
-      permitId: authorization?.permitId
+      permitId: authorization?.permitId,
+      createdAt: authorization.createdAt,
+      createdBy: authorization.createdBy,
+      updatedAt: authorization.updatedAt,
+      updatedBy: authorization.updatedBy
     };
   } else {
     // Set default values

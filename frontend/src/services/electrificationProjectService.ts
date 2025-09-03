@@ -17,21 +17,6 @@ const service: IDraftableProjectService = {
   },
 
   /**
-   * @function emailConfirmation
-   * Send an email with the electrification project/enquiry/permit confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, emailData);
-  },
-
-  /**
    * @function deleteProject
    * @returns {Promise} An axios response
    */
@@ -45,6 +30,21 @@ const service: IDraftableProjectService = {
    */
   deleteDraft(draftId: string) {
     return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
+  },
+
+  /**
+   * @function emailConfirmation
+   * Send an email with the electrification project/enquiry/permit confirmation data
+   * @returns {Promise} An axios response
+   */
+  emailConfirmation(emailData: Email) {
+    if (emailData.to && !Array.isArray(emailData.to)) {
+      emailData.to = delimitEmails(emailData.to);
+    }
+    if (emailData.cc && !Array.isArray(emailData.cc)) {
+      emailData.cc = delimitEmails(emailData.cc);
+    }
+    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**
@@ -119,16 +119,6 @@ const service: IDraftableProjectService = {
    */
   updateDraft(data?: Partial<Draft>) {
     return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, data);
-  },
-
-  /**
-   * @function updateIsDeletedFlag
-   * @returns {Promise} An axios response
-   */
-  updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
-    return appAxios().patch(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}/delete`, {
-      isDeleted: isDeleted
-    });
   },
 
   /**

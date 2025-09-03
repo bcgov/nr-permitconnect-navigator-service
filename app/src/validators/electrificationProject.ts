@@ -75,18 +75,9 @@ const schema = {
       createdBy: Joi.array().items(Joi.string()),
       intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
-      includeDeleted: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
       projectType: Joi.array().items(...electrificationProjectTypeCodes),
       projectCategory: Joi.array().items(...electrificationProjectCategoryCodes)
-    })
-  },
-  updateIsDeletedFlag: {
-    params: Joi.object({
-      electrificationProjectId: uuidv4.required()
-    }),
-    body: Joi.object({
-      isDeleted: Joi.boolean().required()
     })
   },
   updateElectrificationProject: {
@@ -135,6 +126,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getElectrificationProject: validate(schema.getElectrificationProject),
   searcElectrificationProjects: validate(schema.searchElectrificationProjects),
-  updateIsDeletedFlag: validate(schema.updateIsDeletedFlag),
   updateElectrificationProject: validate(schema.updateElectrificationProject)
 };

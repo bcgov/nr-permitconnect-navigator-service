@@ -1,25 +1,19 @@
-import { reportingService } from '../services';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { getElectrificationProjectPermitData, getHousingProjectPermitData } from '../services/reporting';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-const controller = {
-  getElectrificationProjectPermitData: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await reportingService.getElectrificationProjectPermitData();
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getHousingProjectPermitData: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await reportingService.getHousingProjectPermitData();
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+export const getElectrificationProjectPermitDataController = async (req: Request, res: Response) => {
+  const response = await transactionWrapper<unknown>(async (tx: PrismaTransactionClient) => {
+    return await getElectrificationProjectPermitData(tx);
+  });
+  res.status(200).json(response);
 };
 
-export default controller;
+export const getHousingProjectPermitDataController = async (req: Request, res: Response) => {
+  const response = await transactionWrapper<unknown>(async (tx: PrismaTransactionClient) => {
+    return await getHousingProjectPermitData(tx);
+  });
+  res.status(200).json(response);
+};

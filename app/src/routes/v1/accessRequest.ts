@@ -1,47 +1,37 @@
 import express from 'express';
-import { accessRequestController } from '../../controllers';
+
+import {
+  createUserAccessRequestController,
+  getAccessRequestsController,
+  processUserAccessRequestController
+} from '../../controllers/accessRequest';
 import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
 import { accessRequestValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from 'express';
-import type { AccessRequest, User } from '../../types';
-
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Request to create/revoke a user and access request - called by supervisor(201) & admin(200) when creating a user
+/** Request to create/revoke a user and access request - called by supervisor(201) & admin(200) when creating a user */
 router.post(
   '/',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.CREATE),
   accessRequestValidator.createUserAccessRequest,
-  (
-    req: Request<never, never, { accessRequest: AccessRequest; user: User }>,
-    res: Response,
-    next: NextFunction
-  ): void => {
-    accessRequestController.createUserAccessRequest(req, res, next);
-  }
+  createUserAccessRequestController
 );
 
+/** Process an access request */
 router.post(
   '/:accessRequestId',
   hasAuthorization(Resource.ACCESS_REQUEST, Action.UPDATE),
   accessRequestValidator.processUserAccessRequest,
-  (req: Request<{ accessRequestId: string }, never, { approve: boolean }>, res: Response, next: NextFunction): void => {
-    accessRequestController.processUserAccessRequest(req, res, next);
-  }
+  processUserAccessRequestController
 );
 
-router.get(
-  '/',
-  hasAuthorization(Resource.ACCESS_REQUEST, Action.READ),
-  (req: Request, res: Response, next: NextFunction): void => {
-    accessRequestController.getAccessRequests(req, res, next);
-  }
-);
+/** Get access requests */
+router.get('/', hasAuthorization(Resource.ACCESS_REQUEST, Action.READ), getAccessRequestsController);
 
 export default router;

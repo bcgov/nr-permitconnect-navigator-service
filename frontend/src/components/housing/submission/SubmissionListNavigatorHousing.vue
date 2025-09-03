@@ -19,20 +19,6 @@ const selection = defineModel<ElectrificationProject | HousingProject | undefine
 // Injections
 const projectResource = inject(resourceKey);
 const projectRoute = inject(projectRouteNameKey);
-
-// Actions
-function isFinanciallySupported(data: HousingProject) {
-  if (
-    data.financiallySupportedBC === BasicResponse.YES ||
-    data.financiallySupportedHousingCoop === BasicResponse.YES ||
-    data.financiallySupportedIndigenous === BasicResponse.YES ||
-    data.financiallySupportedNonProfit === BasicResponse.YES
-  ) {
-    return BasicResponse.YES;
-  } else {
-    return BasicResponse.NO;
-  }
-}
 </script>
 
 <template>
@@ -82,13 +68,13 @@ function isFinanciallySupported(data: HousingProject) {
     </template>
   </Column>
   <Column
-    field="contacts.0.firstName"
+    field="activity.activityContact.0.contact.firstName"
     header="First name"
     :sortable="true"
     style="min-width: 150px"
   />
   <Column
-    field="contacts.0.lastName"
+    field="activity.activityContact.0.contact.lastName"
     header="Last name"
     :sortable="true"
     style="min-width: 150px"
@@ -151,7 +137,7 @@ function isFinanciallySupported(data: HousingProject) {
     style="min-width: 225px"
   >
     <template #body="{ data }">
-      {{ isFinanciallySupported(data) }}
+      {{ data.financiallySupported ? BasicResponse.YES : BasicResponse.NO }}
     </template>
   </Column>
   <Column
@@ -159,7 +145,11 @@ function isFinanciallySupported(data: HousingProject) {
     header="Affected by natural disaster"
     :sortable="true"
     style="min-width: 275px"
-  />
+  >
+    <template #body="{ data }">
+      {{ data.naturalDisaster ? BasicResponse.YES : BasicResponse.NO }}
+    </template>
+  </Column>
   <Column
     header="Action"
     class="text-center header-center"

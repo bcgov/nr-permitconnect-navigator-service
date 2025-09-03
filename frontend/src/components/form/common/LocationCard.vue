@@ -41,7 +41,7 @@ const setLongitude = useSetFieldValue('location.longitude');
 const setStreetAddress = useSetFieldValue('location.streetAddress');
 const setLocality = useSetFieldValue('location.locality');
 const setProvince = useSetFieldValue('location.province');
-const setGeoJSON = useSetFieldValue('location.geoJSON');
+const setGeoJson = useSetFieldValue('location.geoJson');
 const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
 
@@ -60,8 +60,8 @@ function clearAddress() {
   setProvince(null);
 }
 
-function clearGeoJSON() {
-  setGeoJSON(null);
+function clearGeoJson() {
+  setGeoJson(null);
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
@@ -99,7 +99,7 @@ async function onAddressSelect(e: SelectChangeEvent) {
     setLatitude(geometry?.coordinates[1]);
     setLongitude(geometry?.coordinates[0]);
     setProvince(properties?.provinceCode);
-    clearGeoJSON();
+    clearGeoJson();
   }
 }
 
@@ -111,20 +111,20 @@ async function onLatLongInput() {
     const location = values.value?.location;
     if (mapRef.value?.pinToMap && (location.latitude || location.longitude)) {
       mapRef.value.pinToMap(location.latitude, location.longitude);
-      clearGeoJSON();
+      clearGeoJson();
     }
   }
 }
 
 function onPolygonUpdate(data: any) {
   clearAddress();
-  setGeoJSON(data.geoJSON);
+  setGeoJson(data.geoJson);
 }
 
 function onPinUpdate(pinUpdateEvent: PinUpdateEvent) {
   const addressSplit = pinUpdateEvent.address.split(',');
   clearAddress();
-  clearGeoJSON();
+  clearGeoJson();
   setStreetAddress(addressSplit[0]);
   setLocality(addressSplit[1]);
   setProvince(addressSplit[2]);
@@ -293,11 +293,11 @@ defineExpose({ resizeMap, onLatLongInput });
           ref="mapRef"
           :pin-or-draw="true"
           :disabled="!editable"
-          :geo-json-data="values.location.geoJSON"
+          :geo-json-data="values.location.geoJson"
           :latitude="mapLatitude"
           :longitude="mapLongitude"
           @map:erased="
-            clearGeoJSON();
+            clearGeoJson();
             clearAddress();
           "
           @map:polygon-updated="onPolygonUpdate"

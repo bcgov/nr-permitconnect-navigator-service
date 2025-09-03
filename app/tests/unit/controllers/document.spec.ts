@@ -1,5 +1,14 @@
-import { documentController } from '../../../src/controllers';
-import { documentService } from '../../../src/services';
+import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import {
+  createDocumentController,
+  deleteDocumentController,
+  listDocumentsController
+} from '../../../src/controllers/document';
+import * as documentService from '../../../src/services/document';
+import * as userService from '../../../src/services/user';
+
+import type { Request, Response } from 'express';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -8,7 +17,7 @@ const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
   res.status = jest.fn().mockReturnValue(res);
   res.json = jest.fn().mockReturnValue(res);
-
+  res.end = jest.fn().mockReturnValue(res);
   return res;
 };
 
@@ -21,178 +30,148 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
-const CURRENT_CONTEXT = { authType: 'BEARER', tokenPayload: null, userId: 'abc-123' };
-
-const isoPattern = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-
-describe('createDocument', () => {
-  const next = jest.fn();
-
-  // Mock service calls
+describe('createDocumentController', () => {
   const createSpy = jest.spyOn(documentService, 'createDocument');
+  const readUserSpy = jest.spyOn(userService, 'readUser');
 
-  it('should return 201 if all good', async () => {
+  it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { documentId: 'abc123', activityId: '1', filename: 'testfile', mimeType: 'imgjpg', length: 1234567 },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    const created = {
-      documentId: 'abc123',
-      activityId: '1',
-      filename: 'testfile',
-      mimeType: 'imgjpg',
-      filesize: 1234567,
-      createdByFullName: 'testuser'
-    };
-
-    createSpy.mockResolvedValue(created);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.createDocument(req as any, res as any, next);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(
-      req.body.documentId,
-      req.body.activityId,
-      req.body.filename,
-      req.body.mimeType,
-      req.body.length,
-      { createdAt: expect.stringMatching(isoPattern), createdBy: 'abc-123' }
-    );
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(created);
-  });
-
-  it('calls next if the document service fails to create', async () => {
-    const req = {
-      body: { documentId: 'abc123', activityId: '1', filename: 'testfile', mimeType: 'imgjpg', length: 1234567 },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    createSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.createDocument(req as any, res as any, next);
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(
-      req.body.documentId,
-      req.body.activityId,
-      req.body.filename,
-      req.body.mimeType,
-      req.body.length,
-      { createdAt: expect.stringMatching(isoPattern), createdBy: expect.any(String) }
-    );
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('deleteDocument', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const deleteSpy = jest.spyOn(documentService, 'deleteDocument');
-
-  it('should return 200 if all good', async () => {
-    const req = {
-      params: { documentId: 'abc123' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    const deleted = {
-      documentId: 'abc123',
-      activityId: '1',
-      filename: 'testfile',
-      mimeType: 'imgjpg',
-      filesize: 1234567,
-      createdByFullName: 'testuser'
-    };
-
-    deleteSpy.mockResolvedValue(deleted);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.deleteDocument(req as any, res as any, next);
-
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(deleted);
-  });
-
-  it('calls next if the document service fails to delete', async () => {
-    const req = {
-      params: { documentId: 'abc123' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    deleteSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.deleteDocument(req as any, res as any, next);
-
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('listDocuments', () => {
-  const next = jest.fn();
-
-  // Mock service calls
-  const listSpy = jest.spyOn(documentService, 'listDocuments');
-
-  it('should return 200 if all good', async () => {
-    const req = {
-      params: { activityId: 'ACT_ID' },
-      currentContext: CURRENT_CONTEXT
-    };
-
-    const documentList = [
-      {
-        documentId: 'abc123',
-        activityId: '1',
+      body: {
+        documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
+        activityId: 'ACTI1234',
         filename: 'testfile',
         mimeType: 'imgjpg',
-        filesize: 1234567,
-        createdByFullName: 'testuser'
-      }
-    ];
-
-    listSpy.mockResolvedValue(documentList);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.listDocuments(req as any, res as any, next);
-
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(documentList);
-  });
-
-  it('calls next if the document service fails to list documents', async () => {
-    const req = {
-      params: { activityId: 'ACT_ID' },
-      currentContext: CURRENT_CONTEXT
+        filesize: 1234567
+      },
+      currentContext: TEST_CURRENT_CONTEXT
     };
 
-    listSpy.mockImplementationOnce(() => {
-      throw new Error();
-    });
+    createSpy.mockResolvedValue(TEST_DOCUMENT_1);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await documentController.listDocuments(req as any, res as any, next);
+    await createDocumentController(
+      req as unknown as Request<
+        never,
+        never,
+        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
+      >,
+      res as unknown as Response
+    );
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      req.body.documentId,
+      req.body.activityId,
+      req.body.filename,
+      req.body.mimeType,
+      req.body.filesize,
+      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT_1);
+  });
+
+  it('adds createdByFullName', async () => {
+    const req = {
+      body: {
+        documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
+        activityId: 'ACTI1234',
+        filename: 'testfile',
+        mimeType: 'imgjpg',
+        filesize: 1234567
+      },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };
+
+    createSpy.mockResolvedValue(DOC);
+    readUserSpy.mockResolvedValue(TEST_IDIR_USER_1);
+
+    await createDocumentController(
+      req as unknown as Request<
+        never,
+        never,
+        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
+      >,
+      res as unknown as Response
+    );
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      req.body.documentId,
+      req.body.activityId,
+      req.body.filename,
+      req.body.mimeType,
+      req.body.filesize,
+      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+    );
+    expect(readUserSpy).toHaveBeenCalledTimes(1);
+    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ ...DOC, createdByFullName: TEST_IDIR_USER_1.fullName });
+  });
+});
+
+describe('deleteDocumentController', () => {
+  const deleteSpy = jest.spyOn(documentService, 'deleteDocument');
+
+  it('should call services and respond with 204', async () => {
+    const req = {
+      params: { documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    deleteSpy.mockResolvedValue();
+
+    await deleteDocumentController(req as unknown as Request<{ documentId: string }>, res as unknown as Response);
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.documentId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('listDocumentsController', () => {
+  const listSpy = jest.spyOn(documentService, 'listDocuments');
+  const readUserSpy = jest.spyOn(userService, 'readUser');
+
+  it('should call services and respond with 200 and result', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    listSpy.mockResolvedValue([TEST_DOCUMENT_1]);
+
+    await listDocumentsController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
-    expect(res.status).toHaveBeenCalledTimes(0);
-    expect(next).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_DOCUMENT_1]);
+  });
+
+  it('adds createdByFullName', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234' },
+      currentContext: TEST_CURRENT_CONTEXT
+    };
+
+    const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };
+
+    listSpy.mockResolvedValue([DOC]);
+    readUserSpy.mockResolvedValue(TEST_IDIR_USER_1);
+
+    await listDocumentsController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
+    expect(readUserSpy).toHaveBeenCalledTimes(1);
+    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([{ ...DOC, createdByFullName: TEST_IDIR_USER_1.fullName }]);
   });
 });

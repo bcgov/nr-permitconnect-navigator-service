@@ -10,7 +10,7 @@ export const basicIntake = Joi.object({
   projectApplicantType: Joi.string()
     .required()
     .valid(...PROJECT_APPLICANT_LIST),
-  isDevelopedInBC: Joi.when('projectApplicantType', {
+  isDevelopedInBc: Joi.when('projectApplicantType', {
     is: ProjectApplicant.BUSINESS,
     then: Joi.string()
       .required()

@@ -61,6 +61,7 @@ const testUser = {
   idirAttributes: exampleIDIRAttribute,
   bceidAttributes: exampleBasicBCeIDAttribute,
   businessBceidAttribute: exampleBusinessBCeIDAttribute,
+  bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
@@ -87,7 +88,7 @@ const testSubmission: HousingProject = {
   hasRelatedEnquiry: true,
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
-  isDevelopedInBC: 'Yes',
+  isDevelopedInBc: 'Yes',
   projectName: 'Project Alpha',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
@@ -98,7 +99,7 @@ const testSubmission: HousingProject = {
   otherUnits: '5',
   hasRentalUnits: 'Yes',
   rentalUnits: '15',
-  financiallySupportedBC: 'Yes',
+  financiallySupportedBc: 'Yes',
   financiallySupportedIndigenous: 'Yes',
   indigenousDescription: 'Indigenous support description.',
   financiallySupportedNonProfit: 'Yes',
@@ -108,12 +109,12 @@ const testSubmission: HousingProject = {
   streetAddress: '123 Main St',
   locality: 'Anytown',
   province: 'BC',
-  locationPIDs: '123456789',
+  locationPids: '123456789',
   latitude: 49.2827,
   longitude: -123.1207,
   geomarkUrl: 'http://example.com/geomark',
-  naturalDisaster: 'None',
-  addedToATS: true,
+  naturalDisaster: false,
+  addedToAts: true,
   atsClientId: 654321,
   atsEnquiryId: '654321',
   ltsaCompleted: true,
@@ -173,7 +174,7 @@ describe('SubmissionForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(19);
+    expect(elements.length).toBe(15);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -183,7 +184,7 @@ describe('SubmissionForm.vue', () => {
 
     // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(21);
+    expect(elements.length).toBe(16);
   });
 
   it('renders the correct amount of datepickers components', async () => {
@@ -201,7 +202,7 @@ describe('SubmissionForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(1);
+    expect(elements.length).toBe(0);
   });
 
   it('renders the correct amount of text area components', async () => {
@@ -240,11 +241,11 @@ describe('SubmissionForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(23);
+    expect(elements.length).toBe(19);
   });
 
   it('geojson download btn not visible when no geojson', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJSON: undefined };
+    const modifiedSubmission = { ...testSubmission, geoJson: undefined };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
@@ -254,7 +255,7 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('geojson download btn visible when geojson is in submission', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJSON: {} };
+    const modifiedSubmission = { ...testSubmission, geoJson: {} };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
@@ -267,7 +268,7 @@ describe('SubmissionForm.vue', () => {
 
   it('geojson download btn visible when geojson is in submission', async () => {
     const testGeoJson = { feature: 'POINT', data: 'test' };
-    const modifiedSubmission = { ...testSubmission, geoJSON: testGeoJson };
+    const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
 
     const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();

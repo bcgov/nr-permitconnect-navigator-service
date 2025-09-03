@@ -2,44 +2,44 @@ import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
-import type { Enquiry, Note } from '@/types';
+import type { Enquiry, NoteHistory } from '@/types';
 
 export type EnquiryStoreState = {
-  notes: Ref<Array<Note>>;
+  noteHistory: Ref<Array<NoteHistory>>;
   enquiry: Ref<Enquiry | undefined>;
 };
 
 export const useEnquiryStore = defineStore('enquiry', () => {
   // State
   const state: EnquiryStoreState = {
-    notes: ref([]),
+    noteHistory: ref([]),
     enquiry: ref(undefined)
   };
 
   // Getters
   const getters = {
-    getNotes: computed(() => state.notes.value),
+    getNoteHistory: computed(() => state.noteHistory.value),
     getEnquiry: computed(() => state.enquiry.value)
   };
 
   // Actions
   /* Notes */
-  function addNote(data: Note, prepend: boolean = false) {
-    if (prepend) state.notes.value.unshift(data);
-    else state.notes.value.push(data);
+  function addNoteHistory(data: NoteHistory, prepend: boolean = false) {
+    if (prepend) state.noteHistory.value.unshift(data);
+    else state.noteHistory.value.push(data);
   }
 
-  function removeNote(data: Note) {
-    state.notes.value = state.notes.value.filter((x) => x.noteId !== data.noteId);
+  function removeNoteHistory(data: NoteHistory) {
+    state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNotes(data: Array<Note>) {
-    state.notes.value = data;
+  function setNoteHistory(data: Array<NoteHistory>) {
+    state.noteHistory.value = data;
   }
 
-  function updateNote(oldData: Note, newData: Note) {
-    const idx = state.notes.value.findIndex((x: Note) => x.noteId === oldData.noteId);
-    if (idx >= 0) state.notes.value[idx] = newData;
+  function updateNoteHistory(data: NoteHistory) {
+    const idx = state.noteHistory.value.findIndex((x: NoteHistory) => x.noteHistoryId === data.noteHistoryId);
+    if (idx >= 0) state.noteHistory.value[idx] = data;
   }
 
   /* Enquiries */
@@ -52,7 +52,7 @@ export const useEnquiryStore = defineStore('enquiry', () => {
   }
 
   function reset() {
-    state.notes.value = [];
+    state.noteHistory.value = [];
     state.enquiry.value = undefined;
   }
 
@@ -64,10 +64,10 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     ...getters,
 
     // Actions
-    addNote,
-    removeNote,
-    setNotes,
-    updateNote,
+    addNoteHistory,
+    removeNoteHistory,
+    setNoteHistory,
+    updateNoteHistory,
     removeEnquiry,
     setEnquiry,
     reset

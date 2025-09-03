@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 
 import type { AxiosResponse } from 'axios';
-import type { ContactSearchParameters } from '@/types';
+import type { Contact, ContactSearchParameters } from '@/types';
 
 const PATH = 'contact';
 
@@ -11,7 +11,7 @@ export default {
    * Returns a specific contact details
    * @returns {Promise<AxiosResponse>} An axios response or empty object
    */
-  getContact(contactId: string, includeActivities: boolean = false): Promise<AxiosResponse> {
+  getContact(contactId: string, includeActivities: boolean = false): Promise<AxiosResponse<Contact>> {
     return appAxios().get(`${PATH}/${contactId}`, { params: { includeActivities } });
   },
 
@@ -20,7 +20,7 @@ export default {
    * Returns current user's contact details
    * @returns {Promise<AxiosResponse>} An axios response or empty object
    */
-  getCurrentUserContact(): Promise<AxiosResponse> {
+  getCurrentUserContact(): Promise<AxiosResponse<Contact>> {
     return appAxios().get(`${PATH}`);
   },
 
@@ -30,7 +30,7 @@ export default {
    * @param contactId
    * @returns An axios response
    */
-  deleteContact(contactId: string): Promise<AxiosResponse> {
+  deleteContact(contactId: string): Promise<AxiosResponse<Contact>> {
     return appAxios().delete(`${PATH}/${contactId}`);
   },
 
@@ -40,7 +40,7 @@ export default {
    * @param {ContactSearchParameters} params SearchUsersOptions object containing the data to filter against
    * @returns {Promise<AxiosResponse>} An axios response or empty array
    */
-  matchContacts(data: ContactSearchParameters): Promise<AxiosResponse> {
+  matchContacts(data: ContactSearchParameters): Promise<AxiosResponse<Contact[]>> {
     return appAxios().post(`${PATH}/match`, data);
   },
 
@@ -50,15 +50,15 @@ export default {
    * @param {SearchUsersOptions} params SearchUsersOptions object containing the data to filter against
    * @returns {Promise<AxiosResponse>} An axios response or empty array
    */
-  searchContacts(params: ContactSearchParameters): Promise<AxiosResponse> {
+  searchContacts(params: ContactSearchParameters): Promise<AxiosResponse<Contact[]>> {
     return appAxios().get(`${PATH}/search`, { params: params });
   },
 
   /**
-   * @function updateEnquiry
+   * @function updateContact
    * @returns {Promise} An axios response
    */
-  updateContact(data?: any) {
-    return appAxios().put(`${PATH}/${data.contactId}`, data);
+  updateContact(data?: any): Promise<AxiosResponse<Contact>> {
+    return appAxios().put(`${PATH}`, data);
   }
 };

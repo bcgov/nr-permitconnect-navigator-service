@@ -1,16 +1,12 @@
-import { codeService } from '../services';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { listAllCodeTables } from '../services/code';
 
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-const controller = {
-  listAllCodeTables: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const response = await codeService.listAllCodeTables();
-      res.status(200).json(response);
-    } catch (e) {
-      next(e);
-    }
-  }
+export const listAllCodeTablesController = async (req: Request, res: Response) => {
+  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    return await listAllCodeTables(tx);
+  });
+  res.status(200).json(response);
 };
-
-export default controller;

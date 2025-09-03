@@ -4,10 +4,9 @@ import { Problem } from '../utils';
 import type { NextFunction, Request, Response } from 'express';
 
 /**
- * @function validator
  * Performs express request validation against a specified `schema`
- * @param {object} schema An object containing Joi validation schema definitions
- * @returns {function} Express middleware function
+ * @param schema An object containing Joi validation schema definitions
+ * @returns Express middleware function
  * @throws The error encountered upon failure
  */
 export const validate = (schema: object) => {

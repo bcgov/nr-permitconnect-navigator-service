@@ -1,47 +1,28 @@
-import { ssoService } from '../services';
+import { searchBasicBceidUsers, searchBusinessBceidUsers, searchIdirUsers } from '../services/sso';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import type { BceidSearchParameters, IdirSearchParameters } from '../types';
 
-const controller = {
-  searchIdirUsers: async (
-    req: Request<never, never, never, IdirSearchParameters>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await ssoService.searchIdirUsers(req.query);
-      res.status(response.status).json(response.data);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  searchBasicBceidUsers: async (
-    req: Request<never, never, never, BceidSearchParameters>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await ssoService.searchBasicBceidUsers(req.query);
-      res.status(response.status).json(response.data);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  searchBusinessBceidUsers: async (
-    req: Request<never, never, never, BceidSearchParameters>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await ssoService.searchBusinessBceidUsers(req.query);
-      res.status(response.status).json(response.data);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+export const searchIdirUsersController = async (
+  req: Request<never, never, never, IdirSearchParameters>,
+  res: Response
+) => {
+  const response = await searchIdirUsers(req.query);
+  res.status(response.status).json(response.data);
 };
 
-export default controller;
+export const searchBasicBceidUsersController = async (
+  req: Request<never, never, never, BceidSearchParameters>,
+  res: Response
+) => {
+  const response = await searchBasicBceidUsers(req.query);
+  res.status(response.status).json(response.data);
+};
+
+export const searchBusinessBceidUsersController = async (
+  req: Request<never, never, never, BceidSearchParameters>,
+  res: Response
+) => {
+  const response = await searchBusinessBceidUsers(req.query);
+  res.status(response.status).json(response.data);
+};

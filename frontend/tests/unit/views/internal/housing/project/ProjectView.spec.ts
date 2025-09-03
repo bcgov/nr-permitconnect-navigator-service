@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { documentService, enquiryService, noteService, permitService, housingProjectService } from '@/services';
+import { documentService, enquiryService, noteHistoryService, permitService, housingProjectService } from '@/services';
 import ProjectView from '@/views/internal/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -26,7 +26,7 @@ vi.mock('vue-router', () => ({
 
 const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
-const listNotesSpy = vi.spyOn(noteService, 'listNotes');
+const listNotesSpy = vi.spyOn(noteHistoryService, 'listNoteHistories');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
@@ -41,7 +41,7 @@ getPermitTypesSpy.mockResolvedValue({
   data: { enquiryId: 'enquiry123', activityId: 'activity456' }
 } as AxiosResponse);
 listRelatedEnquiriesSpy.mockResolvedValue({
-  data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+  data: [{ enquiryId: 'enquiry123', activityId: 'activity456' }]
 } as AxiosResponse);
 
 const testHousingProjectId = 'submission123';

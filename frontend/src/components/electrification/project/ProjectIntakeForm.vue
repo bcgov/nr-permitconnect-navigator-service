@@ -11,16 +11,22 @@ import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, 
 import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
 import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
-import { documentService, electrificationProjectService, externalApiService } from '@/services';
+import {
+  activityContactService,
+  contactService,
+  documentService,
+  electrificationProjectService,
+  externalApiService
+} from '@/services';
 import { useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
-import { setEmptyStringsToNull } from '@/utils/utils';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Contact, Document } from '@/types';
+import type { Document } from '@/types';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{
@@ -163,36 +169,34 @@ async function onSubmit(data: any) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    // Convert contact fields into contacts array object
-    const submissionData = {
-      project: {
-        ...data.project
-      },
-      contacts: [
-        {
-          contactId: data.contacts.contactId,
-          firstName: data.contacts.contactFirstName,
-          lastName: data.contacts.contactLastName,
-          phoneNumber: data.contacts.contactPhoneNumber,
-          email: data.contacts.contactEmail,
-          contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-          contactPreference: data.contacts.contactPreference
-        }
-      ]
+    // Grab the contact information
+    const contact = {
+      contactId: data.contacts.contactId,
+      firstName: data.contacts.contactFirstName,
+      lastName: data.contacts.contactLastName,
+      phoneNumber: data.contacts.contactPhoneNumber,
+      email: data.contacts.contactEmail,
+      contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+      contactPreference: data.contacts.contactPreference
     };
 
-    submissionData.contacts = submissionData.contacts.map((x: Contact) => setEmptyStringsToNull(x));
+    // Omit all the fields we dont want to send
+    const dataOmitted = omit(setEmptyStringsToNull({ ...data }), ['contacts']);
 
-    const response = await electrificationProjectService.submitDraft({ ...submissionData, draftId });
+    const response = await electrificationProjectService.submitDraft({ ...dataOmitted, draftId });
 
     if (response.data.activityId && response.data.electrificationProjectId) {
+      // Link activity contact
+      const contactResponse = (await contactService.updateContact(contact)).data;
+      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
+
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.electrificationProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(submissionData.contacts[0]);
+      contactStore.setContact(contactResponse);
 
       router.push({
         name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,

@@ -20,7 +20,6 @@ import 'primeicons/primeicons.css';
 import '@/assets/main.scss';
 
 /**
- * @function initializeApp
  * Initializes and mounts the Vue instance
  */
 function initializeApp(): void {
@@ -57,10 +56,9 @@ function initializeApp(): void {
 }
 
 /**
- * @function initializeServices
  * Initializes and mounts the service singletons
  * Services must load in the following order: config, auth, then app.
- * @param {Function} [next=undefined] Optional callback function
+ * @param next Optional callback function
  */
 async function initializeServices(next?: Function): Promise<void> {
   await ConfigService.init();

@@ -15,12 +15,12 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
     [IntakeFormCategory.BASIC]: object({
       consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
       projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
-      isDevelopedInBC: string().when('projectApplicantType', {
+      isDevelopedInBc: string().when('projectApplicantType', {
         is: (value: string) => value === ProjectApplicant.BUSINESS,
         then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
         otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
       }),
-      registeredName: string().when('isDevelopedInBC', {
+      registeredName: string().when('isDevelopedInBc', {
         is: (value: string) => value === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -36,7 +36,7 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
         projectName: string().required().max(255).label('Project name'),
         projectDescription: string().required().label('Project description'),
         hasRentalUnits: YesNoUnsureSchema.label('Rental units'),
-        financiallySupportedBC: YesNoUnsureSchema.label('BC Housing'),
+        financiallySupportedBc: YesNoUnsureSchema.label('BC Housing'),
         financiallySupportedIndigenous: YesNoUnsureSchema.label('Indigenous Housing Provider'),
         financiallySupportedNonProfit: YesNoUnsureSchema.label('Non-profit housing society'),
         financiallySupportedHousingCoop: YesNoUnsureSchema.label('Housing co-operative'),
@@ -147,9 +147,9 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
         then: () => number().required().min(-139).max(-114).label('Longitude'),
         otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
       }),
-      ltsaPIDLookup: string().max(255).nullable().label('Parcel ID'),
+      ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
       geomarkUrl: string().max(255).label('Geomark web service url'),
-      getJSON: mixed().nullable().label('geoJSON')
+      geoJson: mixed().nullable().label('geoJson')
     }),
     [IntakeFormCategory.PERMITS]: object({
       hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits')

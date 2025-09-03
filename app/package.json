@@ -24,11 +24,12 @@
     "postbuild:all": "npm run build",
     "postbuild": "tsx ./deploy-utils.ts docs",
     "postclean:all": "npm run clean",
+    "postprisma:case": "npm run prisma:sync",
     "postprisma:migrate:rollback": "npm run prisma:sync",
     "postprisma:migrate:down": "npm run prisma:sync",
     "postprisma:migrate:up": "npm run prisma:sync",
     "postprisma:migrate:dev": "npm run seed:dev",
-    "postprisma:migrate": "npm run prisma:sync",
+    "postprisma:migrate": "npm run prisma:case",
     "postprisma:sync": "npm run prisma:generate",
     "postrebuild": "npm run build",
     "postreinstall": "npm install",
@@ -37,6 +38,7 @@
     "prelint": "npm run typecheck",
     "prelint:fix": "npm run typecheck",
     "pretest": "npm run lint",
+    "prisma:case": "prisma-case-format -f \"./src/db/prisma/schema.prisma\" --table-case=snake --field-case=camel --enum-case=snake",
     "prisma:generate": "prisma generate",
     "prisma:migrate:rollback": "npm run migrate:rollback",
     "prisma:migrate:down": "npm run migrate:down",
@@ -101,10 +103,11 @@
     "jest-mock-extended": "^4.0.0-beta1",
     "prettier": "^3.6.0",
     "prisma": "^6.10.1",
+    "prisma-case-format": "^2.2.1",
     "rimraf": "^6.0.1",
     "supertest": "^7.1.1",
     "ts-jest": "^29.4.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   },
   "prisma": {
     "schema": "src/db/prisma/schema.prisma"

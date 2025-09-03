@@ -3,10 +3,10 @@ import { ProjectApplicant } from '../../../src/utils/enums/housing';
 import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
 
 describe('basicIntakeSchema', () => {
-  it('should validate when projectApplicantType and isDevelopedInBC are valid', () => {
+  it('should validate when projectApplicantType and isDevelopedInBc are valid', () => {
     const data = {
       projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBC: BasicResponse.YES,
+      isDevelopedInBc: BasicResponse.YES,
       registeredName: 'My Company'
     };
 
@@ -17,7 +17,7 @@ describe('basicIntakeSchema', () => {
   it('should throw an error when projectApplicantType is invalid', () => {
     const data = {
       projectApplicantType: 'invalid',
-      isDevelopedInBC: BasicResponse.YES,
+      isDevelopedInBc: BasicResponse.YES,
       registeredName: 'My Company'
     };
 
@@ -25,30 +25,30 @@ describe('basicIntakeSchema', () => {
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is invalid', () => {
+  it('should throw an error when isDevelopedInBc is invalid', () => {
     const data = {
       projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBC: 'invalid'
+      isDevelopedInBc: 'invalid'
     };
 
     const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is BUSINESS but registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBc is BUSINESS but registeredName is not provided', () => {
     const data = {
       projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBC: BasicResponse.YES
+      isDevelopedInBc: BasicResponse.YES
     };
 
     const result = basicIntake.validate(data);
     expect(result.error).toBeDefined();
   });
 
-  it('should throw an error when isDevelopedInBC is BUSINESS and registeredName is not provided', () => {
+  it('should throw an error when isDevelopedInBc is BUSINESS and registeredName is not provided', () => {
     const data = {
       projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBC: BasicResponse.NO
+      isDevelopedInBc: BasicResponse.NO
     };
 
     const result = basicIntake.validate(data);

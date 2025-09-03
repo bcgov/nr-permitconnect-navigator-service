@@ -1,4 +1,4 @@
-import { emailService } from '../../../src/services';
+import * as emailService from '../../../src/services/email';
 
 import { prismaMock } from '../../__mocks__/prismaMock';
 
@@ -49,11 +49,11 @@ describe('logEmail tests', () => {
 
     expect(prismaMock.email_log.createMany).toHaveBeenCalledWith({
       data: recipients.map((x) => ({
-        email_log_id: expect.any(String),
-        msg_id: chesResponse.messages?.[0].msgId,
+        emailLogId: expect.any(String),
+        msgId: chesResponse.messages?.[0].msgId,
         to: x,
-        tx_id: chesResponse.txId,
-        http_status: 201
+        txId: chesResponse.txId,
+        httpStatus: 201
       }))
     });
   });
@@ -67,11 +67,11 @@ describe('logEmail tests', () => {
 
     expect(prismaMock.email_log.createMany).toHaveBeenCalledWith({
       data: recipients.map((x) => ({
-        email_log_id: expect.any(String),
-        msg_id: chesResponse.messages?.[0].msgId,
+        emailLogId: expect.any(String),
+        msgId: chesResponse.messages?.[0].msgId,
         to: x,
-        tx_id: chesResponse.txId,
-        http_status: statusCode
+        txId: chesResponse.txId,
+        httpStatus: statusCode
       }))
     });
   });

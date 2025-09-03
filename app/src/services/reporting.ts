@@ -1,8 +1,12 @@
-import prisma from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-const service = {
-  getElectrificationProjectPermitData: async () => {
-    const result = await prisma.$queryRaw`
+/**
+ * Execute a raw query to get electrification permit reporting data
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolve to the result of the raw query
+ */
+export const getElectrificationProjectPermitData = async (tx: PrismaTransactionClient) => {
+  const result = await tx.$queryRaw`
     select ep.project_name,
       c.first_name,
       c.last_name,
@@ -42,11 +46,16 @@ const service = {
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by ep.activity_id asc`;
 
-    return result;
-  },
+  return result;
+};
 
-  getHousingProjectPermitData: async () => {
-    const result = await prisma.$queryRaw`
+/**
+ * Execute a raw query to get housing permit reporting data
+ * @param tx Prisma transaction client
+ * @returns A Promise that resolve to the result of the raw query
+ */
+export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) => {
+  const result = await tx.$queryRaw`
     select hp.project_name,
       case
         when hp.consent_to_feedback then 'Yes'
@@ -95,8 +104,5 @@ const service = {
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by hp.activity_id asc`;
 
-    return result;
-  }
+  return result;
 };
-
-export default service;

@@ -123,16 +123,6 @@ const service: IDraftableProjectService = {
   },
 
   /**
-   * @function updateIsDeletedFlag
-   * @returns {Promise} An axios response
-   */
-  updateIsDeletedFlag(projectId: string, isDeleted: boolean) {
-    return appAxios().patch(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}/delete`, {
-      isDeleted: isDeleted
-    });
-  },
-
-  /**
    * @function updateProject
    * @returns {Promise} An axios response
    */

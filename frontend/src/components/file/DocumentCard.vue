@@ -23,6 +23,7 @@ import type { Document } from '@/types';
 
 // Props
 const {
+  document,
   editable = true,
   selectable = false,
   selected = false

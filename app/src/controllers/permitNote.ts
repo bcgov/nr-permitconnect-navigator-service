@@ -1,21 +1,20 @@
-import { generateCreateStamps } from '../db/utils/utils';
-import { permitNoteService } from '../services';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { NextFunction, Request, Response } from 'express';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { generateCreateStamps } from '../db/utils/utils';
+import { createPermitNote } from '../services/permitNote';
+
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { PermitNote } from '../types';
 
-const controller = {
-  createPermitNote: async (req: Request<never, never, PermitNote>, res: Response, next: NextFunction) => {
-    try {
-      const response = await permitNoteService.createPermitNote({
-        ...req.body,
-        ...generateCreateStamps(req.currentContext)
-      });
-      res.status(201).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+export const createPermitNoteController = async (req: Request<never, never, PermitNote>, res: Response) => {
+  const response = await transactionWrapper<PermitNote>(async (tx: PrismaTransactionClient) => {
+    return await createPermitNote(tx, {
+      ...req.body,
+      permitNoteId: uuidv4(),
+      ...generateCreateStamps(req.currentContext)
+    });
+  });
+  res.status(201).json(response);
 };
-
-export default controller;

@@ -574,64 +574,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete an enquiry
-      description: >-
-        Deletes the enquiry, followed by the associated activity. This action
-        will cascade delete across all linked items
+      summary: Delete an electrification enquiry
+      description: A delete of an electrification enquiry
       operationId: deleteElectrificationEnquiry
       tags:
         - Electrification Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        '200':
-          description: Enquiry deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /electrification/enquiry/{enquiryId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of an enquiry using a is_deleted flag
-      operationId: electrificationEnquiry-updateIsDeletedFlag
-      tags:
-        - Electrification Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Path-EnquiryId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                isDeleted:
-                  type: boolean
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    required:
-                      - is_deleted
-                    properties:
-                      is_deleted:
-                        type: boolean
-                        example: true
-                  - $ref: '#/components/schemas/DB-Enquiry'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -650,7 +602,6 @@ paths:
       tags:
         - Electrification Enquiry
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -703,8 +654,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note:
     put:
-      summary: Create a note
-      operationId: createElectrificationNote
+      summary: Create a note history
+      operationId: createElectrificationNoteHistory
       tags:
         - Electrification Note
       requestBody:
@@ -712,14 +663,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-Notes'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '201':
-          description: Note created successfully
+          description: Note history created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -728,27 +679,27 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/note/{noteId}:
+  /electrification/note/{noteHistoryId}:
     put:
-      summary: Update a note
-      operationId: updateElectrificationNote
+      summary: Update a note history
+      operationId: updateElectrificationNoteHistory
       tags:
-        - Housing Note
+        - Electrification Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Note'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '200':
-          description: Note updated successfully
+          description: Note history updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -760,20 +711,20 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a note
-      description: Soft deletes a note by marking isDeleted true
-      operationId: deleteElectrificationNote
+      summary: Delete a note history
+      description: Soft deletes a note history by marking isDeleted true
+      operationId: deleteElectrificationNoteHistory
       tags:
         - Electrification Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       responses:
         '200':
-          description: Note deleted successfully
+          description: Note history deleted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -784,8 +735,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note/bringForward:
     get:
-      summary: List notes with bring forward type
-      description: Retrieve a list of notes with the Bring forward type given
+      summary: List note histories with bring forward type
+      description: Retrieve a list of note histories with the Bring forward type given
       operationId: listElectrificationBringForward
       tags:
         - Electrification Note
@@ -793,7 +744,7 @@ paths:
         - $ref: '#/components/parameters/Query-BringForwardState'
       responses:
         '200':
-          description: A list of bring forward notes
+          description: A list of bring forward note histories
           content:
             application/json:
               schema:
@@ -808,8 +759,8 @@ paths:
           $ref: '#/components/responses/Error'
   /electrification/note/list/{activityId}:
     get:
-      summary: List notes by Activity ID
-      description: Return a list of notes that have the given Activity ID
+      summary: List note histories by Activity ID
+      description: Return a list of note histories that have the given Activity ID
       operationId: listElectrificationNotes
       tags:
         - Electrification Note
@@ -817,13 +768,13 @@ paths:
         - $ref: '#/components/parameters/Path-ActivityId'
       responses:
         '200':
-          description: A list of notes for the specified activity
+          description: A list of note histories for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-Note'
+                  $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -880,40 +831,7 @@ paths:
       tags:
         - Electrification Permit
       parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
-      responses:
-        '200':
-          description: Permit updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Upsert a permit
-      operationId: upsertElectrificationPermit
-      tags:
-        - Electrification Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
+        - $ref: '#/components/parameters/Path-PermitId'
       responses:
         '200':
           description: Permit updated successfully
@@ -1101,58 +1019,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a electrification project
+      summary: Delete an electrification project
+      description: Delete of an electrification project
       operationId: deleteElectrificationProject
       tags:
         - Electrification Project
       parameters:
         - $ref: '#/components/parameters/Path-ElectrificationProjectId'
       responses:
-        '200':
-          description: Electrification Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /electrification/project/{electrificationProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a electrification project using a is_deleted flag
-      operationId: electrificationProject-updateIsDeletedFlag
-      tags:
-        - Electrification Project
-      parameters:
-        - $ref: '#/components/parameters/Path-ElectrificationProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-ElectrificationProject'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1254,7 +1130,6 @@ paths:
       tags:
         - Electrification Project
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -1656,64 +1531,16 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete an enquiry
-      description: >-
-        Deletes the enquiry, followed by the associated activity. This action
-        will cascade delete across all linked items
+      summary: Delete a housing enquiry
+      description: Delete a housing enquiry
       operationId: deleteHousingEnquiry
       tags:
         - Housing Enquiry
       parameters:
         - $ref: '#/components/parameters/Path-EnquiryId'
       responses:
-        '200':
-          description: Enquiry deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        default:
-          $ref: '#/components/responses/Error'
-  /housing/enquiry/{enquiryId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of an enquiry using a is_deleted flag
-      operationId: HousingEnquiry-updateIsDeletedFlag
-      tags:
-        - Housing Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Path-EnquiryId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                isDeleted:
-                  type: boolean
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - type: object
-                    required:
-                      - is_deleted
-                    properties:
-                      is_deleted:
-                        type: boolean
-                        example: true
-                  - $ref: '#/components/schemas/DB-Enquiry'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1732,7 +1559,6 @@ paths:
       tags:
         - Housing Enquiry
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -1785,8 +1611,8 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note:
     put:
-      summary: Create a note
-      operationId: createHousingNote
+      summary: Create a note history
+      operationId: createHousingNoteHistory
       tags:
         - Housing Note
       requestBody:
@@ -1794,14 +1620,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-Notes'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '201':
-          description: Note created successfully
+          description: Note history created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1810,27 +1636,27 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housing/note/{noteId}:
+  /housing/note/{noteHistoryId}:
     put:
-      summary: Update a note
-      operationId: updateHousingNote
+      summary: Update a note history
+      operationId: updateHousingNoteHistory
       tags:
         - Housing Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Note'
+              $ref: '#/components/schemas/Request-NoteHistory'
       responses:
         '200':
-          description: Note updated successfully
+          description: Note history updated successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1842,20 +1668,20 @@ paths:
         default:
           $ref: '#/components/responses/Error'
     delete:
-      summary: Delete a note
-      description: Soft deletes a note by marking isDeleted true
-      operationId: deleteHousingNote
+      summary: Delete a note history
+      description: Soft deletes a note history by marking isDeleted true
+      operationId: deleteHousingNoteHistory
       tags:
         - Housing Note
       parameters:
-        - $ref: '#/components/parameters/Path-NoteId'
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
       responses:
         '200':
-          description: Note deleted successfully
+          description: Note history deleted successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Note'
+                $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1866,8 +1692,8 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note/bringForward:
     get:
-      summary: List notes with bring forward type
-      description: Retrieve a list of notes with the Bring forward type given
+      summary: List note histories with bring forward type
+      description: Retrieve a list of note histories with the Bring forward type given
       operationId: listHousingBringForward
       tags:
         - Housing Note
@@ -1875,7 +1701,7 @@ paths:
         - $ref: '#/components/parameters/Query-BringForwardState'
       responses:
         '200':
-          description: A list of bring forward notes
+          description: A list of bring forward note histories
           content:
             application/json:
               schema:
@@ -1890,22 +1716,22 @@ paths:
           $ref: '#/components/responses/Error'
   /housing/note/list/{activityId}:
     get:
-      summary: List notes by Activity ID
-      description: Return a list of notes that have the given Activity ID
-      operationId: lisHousingtNotes
+      summary: List note histories by Activity ID
+      description: Return a list of note histories that have the given Activity ID
+      operationId: lisHousingtNoteHistory
       tags:
         - Housing Note
       parameters:
         - $ref: '#/components/parameters/Path-ActivityId'
       responses:
         '200':
-          description: A list of notes for the specified activity
+          description: A list of note histories for the specified activity
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/DB-Note'
+                  $ref: '#/components/schemas/Response-NoteHistory'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1962,43 +1788,10 @@ paths:
       tags:
         - Housing Permit
       parameters:
-        - in: path
-          name: permitId
-          required: true
-          schema:
-            type: string
-            description: The ID of the permit to update
+        - $ref: '#/components/parameters/Path-PermitId'
       responses:
         '200':
           description: Permit upserted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-    put:
-      summary: Upsert a permit
-      operationId: upsertHousingPermit
-      tags:
-        - Housing Permit
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-Permit'
-      responses:
-        '200':
-          description: Permit updated successfully
           content:
             application/json:
               schema:
@@ -2190,51 +1983,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Path-HousingProjectId'
       responses:
-        '200':
-          description: Housing Project deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housing/project/{housingProjectId}/delete:
-    patch:
-      summary: Soft delete
-      description: A soft delete of a housing project using a is_deleted flag
-      operationId: housingProject-updateIsDeletedFlag
-      tags:
-        - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Path-HousingProjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - isDeleted
-              properties:
-                isDeleted:
-                  type: boolean
-                  description: Set to true to change is deleted tag
-                  example: true
-      responses:
-        '200':
-          description: The is_deleted flag updated successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-HousingProject'
+        '204':
+          description: Returns no content success
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -2336,7 +2086,6 @@ paths:
       tags:
         - Housing Project
       parameters:
-        - $ref: '#/components/parameters/Query-IncludeDeleted'
         - $ref: '#/components/parameters/Query-IncludeUser'
         - in: query
           name: activityId
@@ -2616,10 +2365,10 @@ components:
         type: string
         format: uuid
         example: da5c5031-0e84-4234-7766-1ba846997482
-    Path-NoteId:
+    Path-NoteHistoryId:
       in: path
-      name: noteId
-      description: UUID of a Note
+      name: noteHistoryId
+      description: UUID of a Note History
       required: true
       schema:
         type: string
@@ -2677,17 +2426,6 @@ components:
       schema:
         type: boolean
         example: true
-    Query-IncludeDeleted:
-      in: query
-      name: includeDeleted
-      description: >-
-        Whether to include records where the related activity is flagged as deleted.
-        When true, both deleted and non-deleted entities are returned.
-        When false (default), only non-deleted entities are returned.
-      required: false
-      schema:
-        type: boolean
-        example: false
     Query-SubmissionType:
       in: query
       name: submissionType
@@ -2964,7 +2702,7 @@ components:
         - activityId
         - submittedAt
         - submittedBy
-        - addedToATS
+        - addedToAts
         - ltsaCompleted
         - bcOnlineCompleted
         - naturalDisaster
@@ -2992,7 +2730,7 @@ components:
           type: string
           description: Who made the housing project
           example: JSMITH
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs
           example: 006-209-521, 007-209-522
@@ -3042,7 +2780,7 @@ components:
           type: boolean
           description: Whether updated by AST
           example: false
-        addedToATS:
+        addedToAts:
           type: boolean
           description: Whether added to AST
           example: false
@@ -3065,7 +2803,7 @@ components:
           type: boolean
           description: Is it financially supported?
           example: false
-        financiallySupportedBC:
+        financiallySupportedBc:
           type: string
           description: Is is financially supported by BC Housing?
           example: 'No'
@@ -3098,7 +2836,7 @@ components:
           enum: [Business, Individual]
           description: Are you applying as an individual or as a business?
           example: 'Business'
-        isDevelopedInBC:
+        isDevelopedInBc:
           type: string
           description: Is the project developed in BC?
           example: 'Yes'
@@ -3159,11 +2897,8 @@ components:
       type: object
       required:
         - noteId
-        - activityId
-        - isDeleted
+        - noteHistoryId
         - note
-        - noteType
-        - title
         - createdBy
         - createdAt
         - updatedBy
@@ -3174,15 +2909,58 @@ components:
           description: UUID of a note
           format: uuid
           example: 17e5c858-66c1-49ba-bb2e-2b286525f532
+        noteHistoryId:
+          type: string
+          description: UUID of a note history
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
         note:
           type: string
           description: The note text
-          example: this is a note about something in the project
+          example: Some new note text
+        createdAt:
+          type: string
+          format: date-time
+          description: Date time for when the note was created
+          example: '2024-08-14T07:00:00.000Z'
+        createdBy:
+          type: string
+          description: UUID for the user that created the note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        updatedAt:
+          type: string
+          format: date-time
+          description: Date time for when the note was last updated
+          example: '2024-08-14T07:00:00.000Z'
+        updatedBy:
+          type: string
+          description: UUID for user that last updated the note
+          format: uuid
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+    DB-NoteHistory:
+      title: DB Note History
+      type: object
+      required:
+        - noteHistoryId
+        - activityId
+        - type
+        - title
+        - createdBy
+        - createdAt
+        - updatedBy
+        - updatedAt
+      properties:
+        noteHistoryId:
+          type: string
+          description: UUID of a note history
+          format: uuid
+          example: 17e5c858-66c1-49ba-bb2e-2b286525f532
         activityId:
           type: string
           description: The ID of the activity the note is associated with
           example: 2DE67F13
-        noteType:
+        type:
           type: string
           description: Type of note
           example: Bring forward
@@ -3203,24 +2981,40 @@ components:
           type: boolean
           description: Deletion flag
           example: false
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          description: A reason for the escalation
+          example: Time-sensitive
         createdAt:
           type: string
           format: date-time
-          description: Date time for when note is to be brought forward
+          description: Date time for when the note history was created
           example: '2024-08-14T07:00:00.000Z'
         createdBy:
           type: string
-          description: UUID for user that created note
+          description: UUID for the user that created the note history
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
         updatedAt:
           type: string
           format: date-time
-          description: Date time for when note was updated
+          description: Date time for when the note history was last updated
           example: '2024-08-14T07:00:00.000Z'
         updatedBy:
           type: string
-          description: UUID for user that updated note
+          description: UUID for user that last updated the note history
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
     DB-Permit:
@@ -3346,7 +3140,7 @@ components:
         - name
         - permitTypeId
         - sourceSystemAcronym
-        - trackedInATS
+        - trackedInAts
         - type
       properties:
         permitTypeId:
@@ -3393,7 +3187,7 @@ components:
           type: string
           description: Acronym for source system
           example: APTS
-        trackedInATS:
+        trackedInAts:
           type: boolean
           description: Whether this permit type is tracked in ATS or not
           example: false
@@ -3565,27 +3359,23 @@ components:
           type: number
           description: The size of the document in bytes
           example: 7414
-    Request-Notes:
-      title: Request Notes
+    Request-NoteHistory:
+      title: Request Note History
       type: object
       required:
-        - note
         - activityId
-        - noteType
+        - type
         - title
-        - bringForwardDate
-        - bringForwardState
+        - createdBy
         - createdAt
+        - updatedBy
+        - updatedAt
       properties:
-        note:
-          type: string
-          description: The note text
-          example: this is a note about something in the project
         activityId:
           type: string
           description: The ID of the activity the note is associated with
           example: 2DE67F13
-        noteType:
+        type:
           type: string
           description: Type of note
           example: Bring forward
@@ -3596,17 +3386,36 @@ components:
         bringForwardDate:
           type: string
           format: date-time
-          description: date time for when note is to be brought forward
+          description: Date time for when note is to be brought forward
           example: '2029-08-14T07:00:00.000Z'
         bringForwardState:
           type: string
-          description: state of a bring forward tyoe note
+          description: State of a bring forward tyoe note
           example: Unresolved
-        createdAt:
+        isDeleted:
+          type: boolean
+          description: Deletion flag
+          example: false
+        note:
           type: string
-          format: date-time
-          description: date time for when note is to be brought forward
-          example: '2024-08-14T07:00:00.000Z'
+          description: Optional note to add to the history
+          example: Some new note text
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          description: A reason for the escalation
+          example: Time-sensitive
     Request-Permit:
       title: Request Permit
       type: object
@@ -3742,7 +3551,7 @@ components:
               enum: [Business, Individual]
               description: Are you applying as an individual or as a business?
               example: 'Business'
-            isDevelopedInBC:
+            isDevelopedInBc:
               type: boolean
               description: >-
                 Indicates if the project is being developed in British Columbia
@@ -3784,7 +3593,7 @@ components:
               type: string
               description: Whether or not the project will have rental units
               example: 'Yes'
-            financiallySupportedBC:
+            financiallySupportedBc:
               type: string
               description: Is it financially supported by BC Housing?
               example: 'No'
@@ -3834,7 +3643,7 @@ components:
               type: string
               description: Description of the project’s location
               example: Near the downtown area
-            locationPIDs:
+            locationPids:
               type: string
               description: Location PIDs for the project
               example: 006-209-521, 007-209-522
@@ -3973,12 +3782,12 @@ components:
         - submittedAt
         - projectName
         - hasRentalUnits
-        - financiallySupportedBC
+        - financiallySupportedBc
         - financiallySupportedIndigenous
         - financiallySupportedNonProfit
         - financiallySupportedHousingCoop
         - naturalDisaster
-        - addedToATS
+        - addedToAts
         - ltsaCompleted
         - bcOnlineCompleted
         - aaiUpdated
@@ -4007,15 +3816,11 @@ components:
           description: Date it was submitted
           format: date-time
           example: '2024-04-03T00:57:09.070Z'
-        relatedEnquiries:
-          type: string
-          description: Related enquiries
-          example: Some enquiry
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
-        isDevelopedInBC:
+        isDevelopedInBc:
           type: string
           description: Is the project developed in BC?
           example: 'Yes'
@@ -4054,7 +3859,7 @@ components:
           description: Range of rental units
           example: 1-9
           nullable: true
-        financiallySupportedBC:
+        financiallySupportedBc:
           type: string
           description: Is it financially supported by BC Housing?
           example: 'No'
@@ -4100,7 +3905,7 @@ components:
           description: Province (Location) of project
           example: BC
           maxLength: 255
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs
           example: 006-209-521, 007-209-522
@@ -4127,7 +3932,7 @@ components:
           description: Description of the location of the project
           example: Near the river
           maxLength: 4000
-        addedToATS:
+        addedToAts:
           type: boolean
           description: Whether added to ATS
           example: false
@@ -4318,6 +4123,17 @@ components:
           type: string
           format: uuid
           example: b76469a3-896c-4435-aa83-b8b87db6f701
+    Response-NoteHistory:
+      title: Response Note History Details
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DB-NoteHistory'
+        - type: object
+          properties:
+            note:
+              type: array
+              items:
+                $ref: "#/components/schemas/DB-Note"
     Response-Error:
       title: Response Error
       type: object
@@ -4485,7 +4301,7 @@ components:
           type: number
           description: Longitude Cordinate for project
           example: -123.377677
-        locationPIDs:
+        locationPids:
           type: string
           description: Location PIDs for the project
           example: 006-209-521, 007-209-522
@@ -4552,7 +4368,7 @@ components:
           type: string
           description: Acronym for source system
           example: APTS
-        trackedInATS:
+        trackedInAts:
           type: boolean
           description: Whether this permit type is tracked in ATS or not
           example: false

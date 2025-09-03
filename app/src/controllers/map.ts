@@ -1,20 +1,15 @@
-import { housingProjectService, mapService } from '../services';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { getHousingProject } from '../services/housingProject';
+import { getPIDs } from '../services/map';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-const controller = {
-  getPIDs: async (req: Request<{ housingProjectId: string }>, res: Response, next: NextFunction) => {
-    try {
-      const housingProject = await housingProjectService.getHousingProject(req.params.housingProjectId);
+export const getPIDsController = async (req: Request<{ projectId: string }>, res: Response) => {
+  const response = await transactionWrapper<string | void>(async (tx: PrismaTransactionClient) => {
+    const project = await getHousingProject(tx, req.params.projectId);
+    if (project.geoJson) return await getPIDs(project.geoJson);
+  });
 
-      let response;
-      if (housingProject?.geoJSON) response = await mapService.getPIDs(housingProject?.geoJSON);
-
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+  res.status(response ? 200 : 204).json(response);
 };
-
-export default controller;

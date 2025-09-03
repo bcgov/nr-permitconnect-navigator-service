@@ -1,12 +1,7 @@
 import type { IStamps } from '@/interfaces';
 
 export type Note = {
-  noteId: string; // Primary Key
-  activityId: string;
-  bringForwardDate?: string;
-  bringForwardState?: string;
+  noteId?: string; // Primary Key
+  noteHistoryId?: string;
   note: string;
-  noteType: string;
-  title: string;
-  isDeleted: boolean;
 } & Partial<IStamps>;

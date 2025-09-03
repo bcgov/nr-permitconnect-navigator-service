@@ -1,214 +1,159 @@
-import prisma from '../db/dataConnection';
-import { contact } from '../db/models';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { Contact, ContactSearchParameters, CurrentContext } from '../types';
+import { generateCreateStamps } from '../db/utils/utils';
 
-const service = {
-  /**
-   * @function deleteContact
-   * Deletes a specific contact from the PCNS database
-   * @param {string} contactId Contact ID
-   */
-  deleteContact: async (contactId: string) => {
-    await prisma.contact.delete({ where: { contact_id: contactId } });
-  },
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types';
 
-  /**
-   * @function getContact
-   * Gets a specific contact from the PCNS database
-   * @param {string} contactId Contact ID
-   * @param {boolean} includeActivities Whether to include associated activities
-   * @returns {Promise<Contact | null>} The result of running the findFirst operation
-   */
-  getContact: async (contactId: string, includeActivities: boolean) => {
-    const result = await prisma.contact.findFirst({
-      where: {
-        contact_id: contactId
-      },
-      include: {
-        activity_contact: {
-          where: {
-            activity: {
-              is_deleted: false
-            }
-          }
-        }
-      }
-    });
-
-    if (!result) return null;
-
-    return includeActivities ? contact.fromPrismaModelWithActivities(result) : contact.fromPrismaModel(result);
-  },
-
-  /**
-   * @function upsertContacts
-   * Creates or updates the given contacts
-   * Generates IDs and timestamps automatically
-   * @returns {Promise<void>} The result of running the transaction
-   */
-  upsertContacts: async (data: Array<Contact>, currentContext: CurrentContext, activityId?: string) => {
-    return await prisma.$transaction(async (trx) => {
-      await Promise.all(
-        data.map(async (x: Contact) => {
-          const response = await trx.contact.upsert({
-            where: {
-              contact_id: x.contactId
-            },
-            update: {
-              ...contact.toPrismaModel({ ...x, ...generateUpdateStamps(currentContext) })
-            },
-            create: {
-              ...contact.toPrismaModel({
-                ...x,
-                ...generateCreateStamps(currentContext)
-              })
-            }
-          });
-
-          if (activityId) {
-            await trx.activity_contact.upsert({
-              where: {
-                activity_id_contact_id: {
-                  activity_id: activityId,
-                  contact_id: response?.contact_id ?? x.contactId
-                }
-              },
-              update: {
-                // Noop, required empty
-              },
-              create: {
-                activity_id: activityId,
-                contact_id: response?.contact_id ?? x.contactId
-              }
-            });
-          }
-        })
-      );
-    });
-  },
-
-  /**
-   * @function insertContacts
-   * Inserts multiple contacts into the database, generating IDs and timestamps automatically.
-   * @param data - Array of Contact objects to insert
-   * @param currentContext - Current context containing user information
-   * @returns - {Promise<void>} The result of running the transaction
-   *
-   */
-  insertContacts: async (data: Array<Contact>, currentContext: CurrentContext) => {
-    return await prisma.$transaction(async (trx) => {
-      await Promise.all(
-        data.map(async (x: Contact) => {
-          await trx.contact.create({
-            data: contact.toPrismaModel({
-              ...x,
-              ...generateCreateStamps(currentContext)
-            })
-          });
-        })
-      );
-    });
-  },
-
-  /**
-   * @function searchContacts
-   * Search and filter for specific users
-   * @param {string[]} [params.contactId] Optional array of uuids representing the contact subject
-   * @param {string[]} [params.userId] Optional array of uuids representing the user subject
-   * @param {string} [params.email] Optional email string to match on
-   * @param {string} [params.phoneNumber] Optional phoneNumber string to match on
-   * @param {string} [params.firstName] Optional firstName string to match on
-   * @param {string} [params.contactApplicantRelationship] Optional contactApplicantRelationship string to match on
-   * @param {string} [params.lastName] Optional lastName string to match on
-   * @param {boolean} [params.contactPreference] Optional contactPreference string to match on
-   * @param {Initiative} [params.initiative] Optional Initiative to match on
-   * @param {boolean} [params.includeActivities] Optional boolean for whether to include activities
-   * @param {boolean} [params.hasActivity] Optional boolean for
-   * whether to include contacts with deleted activities
-   * @returns {Promise<object>} The result of running the findMany operation
-   */
-  searchContacts: async (params: ContactSearchParameters) => {
-    const response = await prisma.contact.findMany({
-      where: {
-        AND: [
-          {
-            contact_id: { in: params.contactId }
-          },
-          {
-            user_id: { in: params.userId }
-          },
-          {
-            contact_applicant_relationship: { contains: params.contactApplicantRelationship, mode: 'insensitive' }
-          },
-          {
-            contact_preference: { contains: params.contactPreference, mode: 'insensitive' }
-          },
-          {
-            email: { contains: params.email, mode: 'insensitive' }
-          },
-          {
-            first_name: { contains: params.firstName, mode: 'insensitive' }
-          },
-          {
-            last_name: { contains: params.lastName, mode: 'insensitive' }
-          },
-          {
-            phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
-          },
-          ...(params.initiative
-            ? [{ activity_contact: { some: { activity: { initiative: { code: params.initiative } } } } }]
-            : []),
-          ...(params.hasActivity ? [{ activity_contact: { some: { activity: { is_deleted: false } } } }] : [])
-        ]
-      },
-      include: {
-        user: {
-          select: {
-            bceid_business_name: true
-          }
-        },
-        ...(params.includeActivities ? { activity_contact: { where: { activity: { is_deleted: false } } } } : {})
-      }
-    });
-
-    if (!response || response.length === 0) return [];
-
-    return params.includeActivities
-      ? response.map((x) => contact.fromPrismaModelWithBusinessNameAndActivities(x))
-      : response.map((x) => contact.fromPrismaModelWithBusinessName(x));
-  },
-
-  /**
-   * @function matchContacts
-   * Find contacts that match any of the given parameters
-   * @param {string} [email] Optional email string to match on
-   * @param {string} [phoneNumber] Optional phoneNumber string to match on
-   * @param {string} [firstName] Optional firstName string to match on
-   * @param {string} [lastName] Optional lastName string to match on
-   * @returns {Promise<object>} The result of running the findMany operation
-   */
-  matchContacts: async (params: ContactSearchParameters) => {
-    const response = await prisma.contact.findMany({
-      where: {
-        OR: [
-          {
-            email: { contains: params.email, mode: 'insensitive' }
-          },
-          {
-            first_name: { contains: params.firstName, mode: 'insensitive' }
-          },
-          {
-            last_name: { contains: params.lastName, mode: 'insensitive' }
-          },
-          {
-            phone_number: { contains: params.phoneNumber, mode: 'insensitive' }
-          }
-        ]
-      }
-    });
-    return response.map((x) => contact.fromPrismaModel(x));
-  }
+/**
+ * Deletes a specific contact from the PCNS database
+ * @param tx Prisma transaction client
+ * @param contactId Contact ID
+ */
+export const deleteContact = async (tx: PrismaTransactionClient, contactId: string): Promise<void> => {
+  await tx.contact.delete({ where: { contactId } });
 };
 
-export default service;
+/**
+ * Gets a specific contact
+ * @param tx Prisma transaction client
+ * @param contactId - The ID of the contact
+ * @param includeActivities - Boolean flag indicated if associated activities are to be included
+ * @returns A Promise that resolves to the contact
+ */
+export const getContact = async (
+  tx: PrismaTransactionClient,
+  contactId: string,
+  includeActivities: boolean
+): Promise<Contact> => {
+  const result = await tx.contact.findFirstOrThrow({
+    where: { contactId },
+    include: includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {}
+  });
+
+  return result;
+};
+
+/**
+ * Create multiple contacts
+ * @param tx Prisma transaction client
+ * @param data - The contact objects to be created
+ * @param currentContext - The Request context
+ * @returns A promise that resolves when the operation is complete
+ */
+export const insertContacts = async (
+  tx: PrismaTransactionClient,
+  data: Array<ContactBase>,
+  currentContext: CurrentContext
+): Promise<Contact[]> => {
+  return await Promise.all(
+    data.map(async (x: ContactBase) => {
+      return await tx.contact.create({
+        data: {
+          ...x,
+          ...generateCreateStamps(currentContext)
+        }
+      });
+    })
+  );
+};
+
+/**
+ * Retrieve all contacts matching any of the search parameters
+ * @param tx Prisma transaction client
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the contacts matching the given params
+ */
+export const matchContacts = async (
+  tx: PrismaTransactionClient,
+  params: ContactSearchParameters
+): Promise<Contact[]> => {
+  const response = await tx.contact.findMany({
+    where: {
+      OR: [
+        {
+          email: { contains: params.email, mode: 'insensitive' }
+        },
+        {
+          firstName: { contains: params.firstName, mode: 'insensitive' }
+        },
+        {
+          lastName: { contains: params.lastName, mode: 'insensitive' }
+        },
+        {
+          phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
+        }
+      ]
+    }
+  });
+
+  return response;
+};
+
+/**
+ * Retrieve all contacts matching the search parameters
+ * @param tx Prisma transaction client
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the contacts matching the given params
+ */
+export const searchContacts = async (
+  tx: PrismaTransactionClient,
+  params: ContactSearchParameters
+): Promise<Contact[]> => {
+  const response = await tx.contact.findMany({
+    where: {
+      AND: [
+        {
+          contactId: { in: params.contactId }
+        },
+        {
+          userId: { in: params.userId }
+        },
+        {
+          contactApplicantRelationship: { contains: params.contactApplicantRelationship, mode: 'insensitive' }
+        },
+        {
+          contactPreference: { contains: params.contactPreference, mode: 'insensitive' }
+        },
+        {
+          email: { contains: params.email, mode: 'insensitive' }
+        },
+        {
+          firstName: { contains: params.firstName, mode: 'insensitive' }
+        },
+        {
+          lastName: { contains: params.lastName, mode: 'insensitive' }
+        },
+        {
+          phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
+        },
+        ...(params.initiative
+          ? [{ activityContact: { some: { activity: { initiative: { code: params.initiative } } } } }]
+          : [])
+      ]
+    },
+    include: {
+      user: true,
+      ...(params.includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {})
+    }
+  });
+
+  return response;
+};
+
+/**
+ * Creates or updates the given contacts
+ * @param tx Prisma transaction client
+ * @param data - The contact objects to create or update
+ * @param activityId - The ID of the activity to associated the contacts with
+ * @returns A promise that resolves when the operation is complete
+ */
+export const upsertContacts = async (tx: PrismaTransactionClient, data: Array<ContactBase>): Promise<Contact[]> => {
+  return await Promise.all(
+    data.map(async (x: ContactBase) => {
+      return await tx.contact.upsert({
+        where: { contactId: x.contactId },
+        update: x,
+        create: x
+      });
+    })
+  );
+};

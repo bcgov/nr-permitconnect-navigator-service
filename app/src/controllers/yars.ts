@@ -1,53 +1,36 @@
-import { yarsService } from '../services';
+import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { getGroupPermissions, getGroups, getSubjectGroups, removeGroup } from '../services/yars';
 import { Initiative } from '../utils/enums/application';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response } from 'express';
+import type { PrismaTransactionClient } from '../db/dataConnection';
 
-const controller = {
-  getGroups: async (
-    req: Request<never, never, never, { initiative: Initiative }>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await yarsService.getGroups(req.query.initiative);
-
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  getPermissions: async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const groups = await yarsService.getSubjectGroups(req.currentContext.tokenPayload?.sub as string);
-
-      const permissions = await Promise.all(groups.map((x) => yarsService.getGroupPermissions(x.groupId))).then((x) =>
-        x.flat()
-      );
-
-      res.status(200).json({ groups: groups, permissions });
-    } catch (e: unknown) {
-      next(e);
-    }
-  },
-
-  deleteSubjectGroup: async (
-    req: Request<never, never, { sub: string; groupId: number }>,
-    res: Response,
-    next: NextFunction
-  ) => {
-    try {
-      const response = await yarsService.removeGroup(req.body.sub, req.body.groupId);
-
-      if (!response) {
-        return res.status(422).json({ message: 'Unable to process revocation.' });
-      }
-      res.status(200).json(response);
-    } catch (e: unknown) {
-      next(e);
-    }
-  }
+export const getGroupsController = async (
+  req: Request<never, never, never, { initiative: Initiative }>,
+  res: Response
+) => {
+  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    return await getGroups(tx, req.query.initiative);
+  });
+  res.status(200).json(response);
 };
 
-export default controller;
+export const getPermissionsController = async (req: Request, res: Response) => {
+  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload?.sub as string);
+    const permissions = await Promise.all(groups.map((x) => getGroupPermissions(tx, x.groupId))).then((x) => x.flat());
+
+    return { groups, permissions };
+  });
+  res.status(200).json({ groups: response.groups, permissions: response.permissions });
+};
+
+export const deleteSubjectGroupController = async (
+  req: Request<never, never, { sub: string; groupId: number }>,
+  res: Response
+) => {
+  await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    await removeGroup(tx, req.body.sub, req.body.groupId);
+  });
+  res.status(204).end();
+};

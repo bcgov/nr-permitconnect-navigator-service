@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { permitNoteController } from '../../controllers';
+import { createPermitNoteController } from '../../controllers/permitNote';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
@@ -8,24 +8,22 @@ import { Action, Resource } from '../../utils/enums/application';
 import { Problem } from '../../utils';
 import { permitNoteValidator } from '../../validators';
 
-import type { NextFunction, Request, Response } from 'express';
+import type { Request } from 'express';
 import type { PermitNote } from '../../types';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-// Permit note create endpoint
+/** Create a permit note */
 router.put(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
   permitNoteValidator.createPermitNote,
-  (req: Request<never, never, PermitNote>, res: Response, next: NextFunction): void => {
-    permitNoteController.createPermitNote(req, res, next);
-  }
+  createPermitNoteController
 );
 
-// Permit note update endpoint
+/** Update a permit note */
 // TODO implement update
 router.put(
   '/:permitId',
@@ -40,7 +38,7 @@ router.put(
   }
 );
 
-// Permit note delete endpoint
+/** Delete a permit note */
 // TODO implement soft delete
 router.delete(
   '/:permitId',

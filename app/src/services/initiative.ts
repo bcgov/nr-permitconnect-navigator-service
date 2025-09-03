@@ -1,22 +1,19 @@
-import prisma from '../db/dataConnection';
+import { Initiative as EInitiative } from '../utils/enums/application';
 
-import { Initiative } from '../utils/enums/application';
+import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { Initiative } from '../types';
 
-const service = {
-  /**
-   * @function getInitiative
-   * Create an activity for the given initiative with a unique identifier
-   * @param {string} initiative The initiative code
-   * @returns {Promise<Initiative | null>} The result of running the findFirstOrThrow operation
-   */
-  getInitiative: async (initiative: Initiative) => {
-    const result = await prisma.initiative.findFirstOrThrow({
-      where: {
-        code: initiative
-      }
-    });
-    return { initiativeId: result.initiative_id, code: result.code, label: result.label };
-  }
+/**
+ * Create an activity for the given initiative with a unique identifier
+ * @param tx Prisma transaction client
+ * @param initiative The initiative code
+ * @returns A Promise that resolves to the specific initiative
+ */
+export const getInitiative = async (tx: PrismaTransactionClient, initiative: EInitiative): Promise<Initiative> => {
+  const result = await tx.initiative.findFirstOrThrow({
+    where: {
+      code: initiative
+    }
+  });
+  return result;
 };
-
-export default service;

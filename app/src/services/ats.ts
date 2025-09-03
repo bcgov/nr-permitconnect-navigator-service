@@ -5,9 +5,8 @@ import type { AxiosInstance } from 'axios';
 import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types';
 
 /**
- * @function getToken
  * Gets Auth token using ATS client credentials
- * @returns
+ * @returns A valid access token
  */
 async function getToken() {
   const response = await axios({
@@ -27,10 +26,9 @@ async function getToken() {
 }
 
 /**
- * @function atsAxios
  * Returns an Axios instance with Authorization header
- * @param {AxiosRequestConfig} options Axios request config options
- * @returns {AxiosInstance} An axios instance
+ * @param options Axios request config options
+ * @returns An axios instance
  */
 function atsAxios(): AxiosInstance {
   // Create axios instance
@@ -48,81 +46,74 @@ function atsAxios(): AxiosInstance {
   return atsAxios;
 }
 
-const service = {
-  /**
-   * @function searchATSUsers
-   * Searches for ATS users
-   * @param {ATSUserSearchParameters} data The search parameters
-   * @returns {Promise<data | null>} The result of calling the search api
-   */
-  searchATSUsers: async (params?: ATSUserSearchParameters) => {
-    try {
-      const { data, status } = await atsAxios().get('/clients', { params: params });
-      return { data, status };
-    } catch (e) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  /**
-   * @function createATSClient
-   * Creates a client in ATS
-   * @param {ATSClientResource} data The client data
-   * @returns {Promise<data | null>} The result of calling the post api
-   */
-  createATSClient: async (atsClient: ATSClientResource) => {
-    try {
-      const { data, status } = await atsAxios().post('/clients', atsClient);
-      return { data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
-    }
-  },
-
-  /**
-   * @function createATSEnquiry
-   * Creates a enquiry in ATS
-   * @param {ATSEnquiryResource} data The client data
-   * @returns {Promise<data | null>} The result of calling the post api
-   */
-  createATSEnquiry: async (atsEnquiry: ATSEnquiryResource) => {
-    try {
-      const { data, status } = await atsAxios().post('/enquiries', atsEnquiry);
-      return { data, status };
-    } catch (e: unknown) {
-      if (axios.isAxiosError(e)) {
-        return {
-          data: e.response?.data.message,
-          status: e.response ? e.response.status : 500
-        };
-      } else {
-        return {
-          data: 'Error',
-          status: 500
-        };
-      }
+/**
+ * Searches for ATS users
+ * @param params The search parameters
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
+  try {
+    const { data, status } = await atsAxios().get('/clients', { params: params });
+    return { data, status };
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
     }
   }
 };
 
-export default service;
+/**
+ * Creates a client in ATS
+ * @param atsClient The client data
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const createATSClient = async (atsClient: ATSClientResource) => {
+  try {
+    const { data, status } = await atsAxios().post('/clients', atsClient);
+    return { data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};
+
+/**
+ * Creates a enquiry in ATS
+ * @param atsEnquiryThe client data
+ * @returns A Promise that resolves to the response from the external api
+ */
+export const createATSEnquiry = async (atsEnquiry: ATSEnquiryResource) => {
+  try {
+    const { data, status } = await atsAxios().post('/enquiries', atsEnquiry);
+    return { data, status };
+  } catch (e: unknown) {
+    if (axios.isAxiosError(e)) {
+      return {
+        data: e.response?.data.message,
+        status: e.response ? e.response.status : 500
+      };
+    } else {
+      return {
+        data: 'Error',
+        status: 500
+      };
+    }
+  }
+};

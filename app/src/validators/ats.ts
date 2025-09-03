@@ -37,7 +37,7 @@ const enquiryBody = {
 };
 
 const atsEnquirySubmissionFields = {
-  addedToATS: Joi.boolean().required(),
+  addedToAts: Joi.boolean().required(),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
   atsClientId: Joi.number().integer().min(0).allow(null),
   atsEnquiryId: Joi.number().integer().min(0).allow(null)

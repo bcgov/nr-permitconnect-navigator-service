@@ -31,6 +31,7 @@ function updateContact(updatedContact: Contact) {
       <span class="p-dialog-title px-3 py-1">{{ t('updateContactModal.header') }}</span>
     </template>
     <ContactForm
+      v-if="contact"
       :contact="contact"
       @update-contact="updateContact"
     >

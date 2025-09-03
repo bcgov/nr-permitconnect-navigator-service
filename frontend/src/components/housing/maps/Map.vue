@@ -39,7 +39,7 @@ const emit = defineEmits(['map:polygonUpdated', 'map:pinUpdated', 'map:erased'])
 // Actions
 let marker: L.Marker;
 let map: L.Map;
-const geoJSON: Ref<GeoJSON | undefined> = ref(undefined);
+const geoJson: Ref<GeoJSON | undefined> = ref(undefined);
 const toast = useToast();
 const oldLayer = ref<L.Layer | undefined>(undefined);
 
@@ -96,9 +96,9 @@ async function initMap() {
 
           getNearestOccupant(longitude, latitude);
         } else {
-          geoJSON.value = geo.toGeoJSON();
+          geoJson.value = geo.toGeoJSON();
 
-          emit('map:polygonUpdated', { geoJSON: toRaw(geoJSON.value) });
+          emit('map:polygonUpdated', { geoJson: toRaw(geoJson.value) });
         }
         // Zoom in
         zoomToGeometry(geo);

@@ -36,7 +36,7 @@ onBeforeMount(async () => {
       includeActivities: true,
       hasActivity: true
     })
-  ).data;
+  ).data.filter((x) => x.activityContact?.length);
   loading.value = false;
 });
 </script>
