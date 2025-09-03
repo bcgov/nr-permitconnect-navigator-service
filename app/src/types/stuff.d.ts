@@ -136,11 +136,9 @@ export type ChefsSubmissionExport = {
   createdAt: string;
   createdBy: string;
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   // No clue what format the CHEFS permits might be delivered in
-  permitGrid: any;
-  dataGrid: any;
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+  permitGrid: any; // eslint-disable-line @typescript-eslint/no-explicit-any
+  dataGrid: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
 export type ContactSearchParameters = {

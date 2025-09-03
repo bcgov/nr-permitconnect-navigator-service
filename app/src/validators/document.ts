@@ -10,7 +10,7 @@ const schema = {
       documentId: uuidv4.required(),
       filename: Joi.string().max(255).required(),
       mimeType: Joi.string().min(0).max(255),
-      length: Joi.number().required()
+      filesize: Joi.number().required()
     })
   },
   deleteDocument: {

@@ -41,7 +41,7 @@ describe('createDocumentController', () => {
         activityId: 'ACTI1234',
         filename: 'testfile',
         mimeType: 'imgjpg',
-        length: 1234567
+        filesize: 1234567
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -52,7 +52,7 @@ describe('createDocumentController', () => {
       req as unknown as Request<
         never,
         never,
-        { documentId: string; activityId: string; filename: string; mimeType: string; length: number }
+        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
       >,
       res as unknown as Response
     );
@@ -64,7 +64,7 @@ describe('createDocumentController', () => {
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.length,
+      req.body.filesize,
       { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(res.status).toHaveBeenCalledWith(201);
@@ -78,7 +78,7 @@ describe('createDocumentController', () => {
         activityId: 'ACTI1234',
         filename: 'testfile',
         mimeType: 'imgjpg',
-        length: 1234567
+        filesize: 1234567
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -92,7 +92,7 @@ describe('createDocumentController', () => {
       req as unknown as Request<
         never,
         never,
-        { documentId: string; activityId: string; filename: string; mimeType: string; length: number }
+        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
       >,
       res as unknown as Response
     );
@@ -104,7 +104,7 @@ describe('createDocumentController', () => {
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.length,
+      req.body.filesize,
       { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(readUserSpy).toHaveBeenCalledTimes(1);

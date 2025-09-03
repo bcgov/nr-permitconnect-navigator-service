@@ -11,7 +11,7 @@ export const createDocumentController = async (
   req: Request<
     never,
     never,
-    { documentId: string; activityId: string; filename: string; mimeType: string; length: number }
+    { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
   >,
   res: Response
 ) => {
@@ -22,7 +22,7 @@ export const createDocumentController = async (
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.length,
+      req.body.filesize,
       generateCreateStamps(req.currentContext)
     );
 
