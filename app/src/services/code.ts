@@ -1,5 +1,10 @@
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ElectrificationProjectCategoryCode, ElectrificationProjectTypeCode, SourceSystemCode } from '../types';
+import type {
+  ElectrificationProjectCategoryCode,
+  ElectrificationProjectTypeCode,
+  EscalationTypeCode,
+  SourceSystemCode
+} from '../types';
 
 /**
  * List all code tables
@@ -9,9 +14,10 @@ import type { ElectrificationProjectCategoryCode, ElectrificationProjectTypeCode
 export const listAllCodeTables = async (
   tx: PrismaTransactionClient
 ): Promise<{
-  ElectrificationProjectType: Array<ElectrificationProjectTypeCode>;
-  ElectrificationProjectCategory: Array<ElectrificationProjectCategoryCode>;
-  SourceSystem: Array<SourceSystemCode>;
+  ElectrificationProjectType: ElectrificationProjectTypeCode[];
+  ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
+  EscalationType: EscalationTypeCode[];
+  SourceSystem: SourceSystemCode[];
 }> => {
   const ElectrificationProjectType = await tx.electrification_project_type_code.findMany({
     where: {
@@ -24,11 +30,18 @@ export const listAllCodeTables = async (
       active: true
     }
   });
+
+  const EscalationType = await tx.escalation_type_code.findMany({
+    where: {
+      active: true
+    }
+  });
+
   const SourceSystem = await tx.source_system_code.findMany({
     where: {
       active: true
     }
   });
 
-  return { ElectrificationProjectType, ElectrificationProjectCategory, SourceSystem };
+  return { ElectrificationProjectType, ElectrificationProjectCategory, EscalationType, SourceSystem };
 };

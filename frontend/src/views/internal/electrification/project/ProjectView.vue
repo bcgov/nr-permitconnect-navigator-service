@@ -44,7 +44,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, ElectrificationProject, NoteHistory, User } from '@/types';
+import type { Document, ElectrificationProject, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -136,18 +136,6 @@ const filteredDocuments = computed(() => {
 const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
-
-function onCreateNoteHistory(history: NoteHistory) {
-  projectStore.addNoteHistory(history, true);
-}
-
-function onDeleteNoteHistory(history: NoteHistory) {
-  projectStore.removeNoteHistory(history);
-}
-
-function onUpdateNoteHistory(history: NoteHistory) {
-  projectStore.updateNoteHistory(history);
-}
 
 function sortComparator(sortValue: number | undefined, a: any, b: any) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
@@ -620,7 +608,7 @@ onBeforeMount(async () => {
           v-if="noteModalVisible && activityId"
           v-model:visible="noteModalVisible"
           :activity-id="activityId"
-          @create-note-history="onCreateNoteHistory"
+          @create-note-history="(e) => projectStore.addNoteHistory(e, true)"
         />
       </TabPanel>
       <TabPanel :value="4">
