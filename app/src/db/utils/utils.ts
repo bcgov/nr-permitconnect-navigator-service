@@ -110,6 +110,20 @@ export function generateNullUpdateStamps() {
   };
 }
 
+export function generateDeleteStamps(currentContext: CurrentContext | undefined) {
+  return {
+    deletedBy: (currentContext?.userId as string) ?? NIL,
+    deletedAt: new Date()
+  };
+}
+
+export function generateNullDeleteStamps() {
+  return {
+    deletedBy: null,
+    deletedAt: null
+  };
+}
+
 /**
  * Generate a new activityId, which are truncated UUIDs
  * If a collision is detected, generate new UUID and test again

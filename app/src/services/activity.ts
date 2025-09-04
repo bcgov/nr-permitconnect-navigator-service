@@ -44,7 +44,7 @@ export const deleteActivity = async (
   deleteStamp: Partial<IStamps>
 ): Promise<void> => {
   await tx.activity.update({
-    data: { isDeleted: true, updatedAt: deleteStamp.updatedAt, updatedBy: deleteStamp.updatedBy },
+    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
     where: { activityId }
   });
 };

@@ -70,6 +70,7 @@ describe('createEnquiryController', () => {
 
 describe('deleteEnquiryController', () => {
   const getEnquirySpy = jest.spyOn(enquiryService, 'getEnquiry');
+  const deleteEnquirySpy = jest.spyOn(enquiryService, 'deleteEnquiry');
   const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
@@ -85,10 +86,15 @@ describe('deleteEnquiryController', () => {
 
     expect(getEnquirySpy).toHaveBeenCalledTimes(1);
     expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
+    expect(deleteEnquirySpy).toHaveBeenCalledTimes(1);
+    expect(deleteEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId, {
+      deletedAt: expect.any(Date),
+      deletedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_1.activityId, {
-      updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      deletedAt: expect.any(Date),
+      deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();

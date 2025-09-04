@@ -26,7 +26,7 @@ export const getContact = async (
 ): Promise<Contact> => {
   const result = await tx.contact.findFirstOrThrow({
     where: { contactId },
-    include: includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {}
+    include: includeActivities ? { activityContact: { include: { activity: true } } } : {}
   });
 
   return result;
@@ -132,7 +132,7 @@ export const searchContacts = async (
     },
     include: {
       user: true,
-      ...(params.includeActivities ? { activityContact: { where: { activity: { isDeleted: false } } } } : {})
+      ...(params.includeActivities ? { activityContact: { include: { activity: true } } } : {})
     }
   });
 

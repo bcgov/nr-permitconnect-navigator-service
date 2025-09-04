@@ -7,7 +7,7 @@ import { IdentityProvider } from '../../../src/utils/enums/application';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
 
 import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types';
-import { generateNullUpdateStamps } from '../../../src/db/utils/utils';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 const idirIdentityProvider: IDPType = {
   idp: IdentityProvider.IDIR,
@@ -15,7 +15,9 @@ const idirIdentityProvider: IDPType = {
   createdAt: new Date(),
   createdBy: NIL,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 const bceidUser: User = {
@@ -31,7 +33,9 @@ const bceidUser: User = {
   createdAt: new Date(),
   createdBy: NIL,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 const idirUser: User = {
@@ -47,7 +51,9 @@ const idirUser: User = {
   createdAt: new Date(),
   createdBy: NIL,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 const bceidToken = {
@@ -247,7 +253,8 @@ describe('login', () => {
         contactPreference: null,
         createdAt: expect.any(Date),
         createdBy: expect.stringMatching(uuidv4Pattern),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       }
     ]);
   });
@@ -280,7 +287,8 @@ describe('login', () => {
         contactPreference: null,
         createdAt: expect.any(Date),
         createdBy: expect.stringMatching(uuidv4Pattern),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       }
     ]);
   });

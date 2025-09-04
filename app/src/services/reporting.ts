@@ -37,7 +37,7 @@ export const getElectrificationProjectPermitData = async (tx: PrismaTransactionC
       pt.source_system,
        ssc.display as source_system_acronym
     from electrification_project as ep
-    join activity as a on ep.activity_id = a.activity_id and a.is_deleted = false
+    join activity as a on ep.activity_id = a.activity_id and a.deleted_at is null
     join activity_contact as ac on ep.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on ep.activity_id = p.activity_id
@@ -95,7 +95,7 @@ export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) =
       pt.source_system,
       ssc.display as source_system_acronym
     from housing_project as hp
-    join activity as a on hp.activity_id = a.activity_id and a.is_deleted = false
+    join activity as a on hp.activity_id = a.activity_id and a.deleted_at is null
     join activity_contact as ac on hp.activity_id = ac.activity_id
     join contact as c on ac.contact_id = c.contact_id
     left join permit as p on hp.activity_id = p.activity_id

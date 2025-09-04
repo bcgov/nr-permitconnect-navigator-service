@@ -12,7 +12,6 @@ const TEST_PERMIT_NOTE = {
   permitNoteId: 'note123',
   permitId: 'permit456',
   note: 'This is a test note.',
-  isDeleted: false,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',

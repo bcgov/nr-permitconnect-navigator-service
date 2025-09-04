@@ -19,6 +19,8 @@ model access_request {
   createdAt       DateTime?                  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?                    @map("updated_by")
   updatedAt       DateTime?                  @map("updated_at") @db.Timestamptz(6)
+  deletedBy       String?                    @map("deleted_by")
+  deletedAt       DateTime?                  @map("deleted_at") @db.Timestamptz(6)
   user            user                       @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "access_request_user_id_foreign")
   group           group                      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, map: "public_access_request_group_id_foreign")
 
@@ -32,7 +34,8 @@ model activity {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  isDeleted              Boolean                   @default(false) @map("is_deleted")
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   initiative             initiative                @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "activity_initiative_id_foreign")
   activityContact        activity_contact[]
   document               document[]
@@ -53,6 +56,8 @@ model activity_contact {
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
   activity   activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "activity_contact_activity_id_foreign")
   contact    contact   @relation(fields: [contactId], references: [contactId], onDelete: Cascade, map: "activity_contact_contact_id_foreign")
 
@@ -73,6 +78,8 @@ model contact {
   createdAt                    DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                    String?            @map("updated_by")
   updatedAt                    DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy                    String?            @map("deleted_by")
+  deletedAt                    DateTime?          @map("deleted_at") @db.Timestamptz(6)
   activityContact              activity_contact[]
   user                         user?              @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "contact_user_id_foreign")
 
@@ -89,6 +96,8 @@ model document {
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
   activity   activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "document_activity_id_foreign")
 
   @@unique([documentId, activityId], map: "document_document_id_activity_id_unique")
@@ -115,6 +124,8 @@ model enquiry {
   addedToAts         Boolean                       @default(false) @map("added_to_ats")
   submittedMethod    enquiry_submitted_method_enum @default(PCNS) @map("submitted_method")
   atsEnquiryId       Int?                          @map("ats_enquiry_id")
+  deletedBy          String?                       @map("deleted_by")
+  deletedAt          DateTime?                     @map("deleted_at") @db.Timestamptz(6)
   activity           activity                      @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "enquiry_activity_id_foreign")
   user               user?                         @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
 
@@ -128,6 +139,8 @@ model identity_provider {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy String?   @map("deleted_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   user      user[]
 
   @@schema("public")
@@ -141,6 +154,8 @@ model initiative {
   createdAt                DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                String?                       @map("updated_by")
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
+  deletedBy                String?                       @map("deleted_by")
+  deletedAt                DateTime?                     @map("deleted_at") @db.Timestamptz(6)
   activity                 activity[]
   permitTypeInitiativeXref permit_type_initiative_xref[]
   group                    group[]
@@ -179,6 +194,8 @@ model permit {
   updatedBy          String?           @map("updated_by")
   updatedAt          DateTime?         @map("updated_at") @db.Timestamptz(6)
   statusLastVerified DateTime?         @map("status_last_verified") @db.Timestamptz(6)
+  deletedBy          String?           @map("deleted_by")
+  deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
   activity           activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   permitType         permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
   permitNote         permit_note[]
@@ -192,11 +209,12 @@ model permit_note {
   permitNoteId String    @id @map("permit_note_id") @db.Uuid
   permitId     String    @map("permit_id") @db.Uuid
   note         String    @default("")
-  isDeleted    Boolean   @default(false) @map("is_deleted")
   createdBy    String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy    String?   @map("deleted_by")
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
   permit       permit    @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_note_permit_id_foreign")
 
   @@schema("public")
@@ -220,6 +238,8 @@ model permit_type {
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
   sourceSystem             String?                       @map("source_system")
   infoUrl                  String?                       @map("info_url")
+  deletedBy                String?                       @map("deleted_by")
+  deletedAt                DateTime?                     @map("deleted_at") @db.Timestamptz(6)
   permit                   permit[]
   sourceSystemCode         source_system_code?           @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
   permitTypeInitiativeXref permit_type_initiative_xref[]
@@ -242,6 +262,8 @@ model user {
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
   bceidBusinessName      String?                   @map("bceid_business_name")
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   accessRequest          access_request[]
   contact                contact[]
   electrificationProject electrification_project[]
@@ -262,6 +284,8 @@ model action {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy String?   @map("deleted_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   policy    policy[]
 
   @@schema("yars")
@@ -275,6 +299,8 @@ model attribute {
   createdAt       DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?            @map("updated_by")
   updatedAt       DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy       String?            @map("deleted_by")
+  deletedAt       DateTime?          @map("deleted_at") @db.Timestamptz(6)
   attributeGroup  attribute_group[]
   policyAttribute policy_attribute[]
 
@@ -288,6 +314,8 @@ model attribute_group {
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy   String?   @map("updated_by")
   updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy   String?   @map("deleted_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
   attribute   attribute @relation(fields: [attributeId], references: [attributeId], onDelete: Cascade, map: "attribute_group_attribute_id_foreign")
   group       group     @relation(fields: [groupId], references: [groupId], onDelete: Cascade, map: "attribute_group_group_id_foreign")
 
@@ -304,6 +332,8 @@ model group {
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy      String?           @map("updated_by")
   updatedAt      DateTime?         @map("updated_at") @db.Timestamptz(6)
+  deletedBy      String?           @map("deleted_by")
+  deletedAt      DateTime?         @map("deleted_at") @db.Timestamptz(6)
   accessRequest  access_request[]
   attributeGroup attribute_group[]
   initiative     initiative        @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "group_initiative_id_foreign")
@@ -321,6 +351,8 @@ model group_role {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy String?   @map("deleted_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   group     group     @relation(fields: [groupId], references: [groupId], onDelete: Cascade, map: "group_role_group_id_foreign")
   role      role      @relation(fields: [roleId], references: [roleId], onDelete: Cascade, map: "group_role_role_id_foreign")
 
@@ -336,6 +368,8 @@ model policy {
   createdAt       DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?            @map("updated_by")
   updatedAt       DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy       String?            @map("deleted_by")
+  deletedAt       DateTime?          @map("deleted_at") @db.Timestamptz(6)
   action          action             @relation(fields: [actionId], references: [actionId], onDelete: Cascade, map: "policy_action_id_foreign")
   resource        resource           @relation(fields: [resourceId], references: [resourceId], onDelete: Cascade, map: "policy_resource_id_foreign")
   policyAttribute policy_attribute[]
@@ -352,6 +386,8 @@ model policy_attribute {
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy   String?   @map("updated_by")
   updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy   String?   @map("deleted_by")
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
   attribute   attribute @relation(fields: [attributeId], references: [attributeId], onDelete: Cascade, map: "policy_attribute_attribute_id_foreign")
   policy      policy    @relation(fields: [policyId], references: [policyId], onDelete: Cascade, map: "policy_attribute_policy_id_foreign")
 
@@ -366,6 +402,8 @@ model resource {
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
   policy     policy[]
 
   @@schema("yars")
@@ -380,6 +418,8 @@ model role {
   createdAt      DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy      String?       @map("updated_by")
   updatedAt      DateTime?     @map("updated_at") @db.Timestamptz(6)
+  deletedBy      String?       @map("deleted_by")
+  deletedAt      DateTime?     @map("deleted_at") @db.Timestamptz(6)
   groupRole      group_role[]
   rolePolicy     role_policy[]
 
@@ -393,6 +433,8 @@ model role_policy {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy String?   @map("deleted_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   policy    policy    @relation(fields: [policyId], references: [policyId], onDelete: Cascade, map: "role_policy_policy_id_foreign")
   role      role      @relation(fields: [roleId], references: [roleId], onDelete: Cascade, map: "role_policy_role_id_foreign")
 
@@ -407,6 +449,8 @@ model subject_group {
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy String?   @map("deleted_by")
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
   group     group     @relation(fields: [groupId], references: [groupId], onDelete: Cascade, map: "subject_group_group_id_foreign")
 
   @@id([sub, groupId])
@@ -422,6 +466,8 @@ model draft {
   createdAt                          DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                          String?    @map("updated_by")
   updatedAt                          DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedBy                          String?    @map("deleted_by")
+  deletedAt                          DateTime?  @map("deleted_at") @db.Timestamptz(6)
   activity                           activity   @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "draft_activity_id_foreign")
   draftCodeDraftDraftCodeTodraftCode draft_code @relation("draft_draft_codeTodraft_code", fields: [draftCode], references: [draftCode], onDelete: Cascade, map: "draft_draft_code_foreign")
 
@@ -434,6 +480,8 @@ model draft_code {
   createdAt                      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                      String?   @map("updated_by")
   updatedAt                      DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy                      String?   @map("deleted_by")
+  deletedAt                      DateTime? @map("deleted_at") @db.Timestamptz(6)
   draftDraftDraftCodeTodraftCode draft[]   @relation("draft_draft_codeTodraft_code")
 
   @@schema("public")
@@ -449,6 +497,8 @@ model email_log {
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   @@schema("public")
 }
@@ -463,6 +513,8 @@ model electrification_project_category_code {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   electrificationProject electrification_project[]
 
   @@schema("public")
@@ -478,6 +530,8 @@ model electrification_project_type_code {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   electrificationProject electrification_project[]
 
   @@schema("public")
@@ -542,6 +596,8 @@ model housing_project {
   geoJson                         Json?     @map("geo_json") @db.Json
   geomarkUrl                      String?   @map("geomark_url")
   atsEnquiryId                    Int?      @map("ats_enquiry_id")
+  deletedBy                       String?   @map("deleted_by")
+  deletedAt                       DateTime? @map("deleted_at") @db.Timestamptz(6)
   activity                        activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "submission_activity_id_foreign")
   user                            user?     @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
 
@@ -556,6 +612,8 @@ model note {
   createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy     String?      @map("updated_by")
   updatedAt     DateTime?    @map("updated_at") @db.Timestamptz(6)
+  deletedBy     String?      @map("deleted_by")
+  deletedAt     DateTime?    @map("deleted_at") @db.Timestamptz(6)
   noteHistory   note_history @relation(fields: [noteHistoryId], references: [noteHistoryId], onDelete: Cascade, map: "note_note_history_id_foreign")
 
   @@schema("public")
@@ -589,6 +647,8 @@ model electrification_project {
   updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
   atsEnquiryId                       Int?                                   @map("ats_enquiry_id")
   addedToAts                         Boolean                                @default(false) @map("added_to_ats")
+  deletedBy                          String?                                @map("deleted_by")
+  deletedAt                          DateTime?                              @map("deleted_at") @db.Timestamptz(6)
   activity                           activity                               @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
   user                               user?                                  @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
   electrificationProjectCategoryCode electrification_project_category_code? @relation(fields: [projectCategory], references: [code], map: "electrification_project_project_category_foreign")
@@ -604,6 +664,8 @@ model permit_type_initiative_xref {
   createdAt    DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?     @map("updated_by")
   updatedAt    DateTime?   @map("updated_at") @db.Timestamptz(6)
+  deletedBy    String?     @map("deleted_by")
+  deletedAt    DateTime?   @map("deleted_at") @db.Timestamptz(6)
   initiative   initiative  @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "permit_type_initiative_xref_initiative_id_foreign")
   permitType   permit_type @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_type_initiative_xref_permit_type_id_foreign")
 
@@ -621,6 +683,8 @@ model permit_tracking {
   createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?             @map("updated_by")
   updatedAt          DateTime?           @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?             @map("deleted_by")
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(6)
   permit             permit              @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
   sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
 
@@ -637,6 +701,8 @@ model source_system_code {
   createdAt        DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy        String?              @map("updated_by")
   updatedAt        DateTime?            @map("updated_at") @db.Timestamptz(6)
+  deletedBy        String?              @map("deleted_by")
+  deletedAt        DateTime?            @map("deleted_at") @db.Timestamptz(6)
   permitType       permit_type[]
   sourceSystemKind source_system_kind[]
 
@@ -652,6 +718,8 @@ model source_system_kind {
   createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?            @map("updated_by")
   updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?            @map("deleted_by")
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
   permitTracking     permit_tracking[]
   sourceSystemCode   source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 
@@ -669,11 +737,12 @@ model note_history {
   updatedAt            DateTime? @map("updated_at") @db.Timestamptz(6)
   bringForwardDate     DateTime? @map("bring_forward_date") @db.Timestamptz(6)
   bringForwardState    String?   @map("bring_forward_state")
-  isDeleted            Boolean   @default(false) @map("is_deleted")
   shownToProponent     Boolean   @default(false) @map("shown_to_proponent")
   escalateToSupervisor Boolean   @default(false) @map("escalate_to_supervisor")
   escalateToDirector   Boolean   @default(false) @map("escalate_to_director")
   escalationType       String?   @map("escalation_type") @db.VarChar(255)
+  deletedBy            String?   @map("deleted_by")
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(6)
   note                 note[]
   activity             activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "note_activity_id_foreign")
 

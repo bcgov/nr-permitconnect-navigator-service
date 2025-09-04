@@ -1,3 +1,8 @@
+/**
+ * Use these directly or destructure them and make any necessary data changes locally in a test.
+ * DO NOT change the existing objects in this file unless a schema change is required.
+ * If you need something wildly different than the existing ones then add new ones.
+ */
 import { Prisma } from '@prisma/client';
 
 import {
@@ -43,21 +48,23 @@ export const TEST_CURRENT_CONTEXT: CurrentContext = {
 export const TEST_ELECTRIFICATION_ACTIVITY: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
-  isDeleted: false,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_HOUSING_ACTIVITY: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.HOUSING,
-  isDeleted: false,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_CONTACT_1: Contact = {
@@ -72,7 +79,9 @@ export const TEST_CONTACT_1: Contact = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_CONTACT_NO_ID = {
@@ -88,7 +97,9 @@ export const TEST_ELECTRIFICATION_DRAFT: Draft = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
@@ -130,7 +141,9 @@ export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
   createdAt: new Date(),
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
@@ -160,7 +173,9 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
@@ -192,14 +207,17 @@ export const TEST_ENQUIRY_1: Enquiry = {
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
+  deletedBy: null,
+  deletedAt: null,
   activity: {
     activityId: 'ACTI1234',
     initiativeId: Initiative.HOUSING,
-    isDeleted: false,
     createdAt: null,
     createdBy: null,
     updatedAt: null,
     updatedBy: null,
+    deletedBy: null,
+    deletedAt: null,
     activityContact: [
       {
         activityId: 'ACTI1234',
@@ -207,7 +225,9 @@ export const TEST_ENQUIRY_1: Enquiry = {
         createdAt: null,
         createdBy: null,
         updatedAt: null,
-        updatedBy: null
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
       }
     ]
   },
@@ -223,7 +243,9 @@ export const TEST_HOUSING_DRAFT: Draft = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
@@ -282,7 +304,9 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
   createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
   createdAt: new Date(),
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
@@ -391,7 +415,9 @@ export const TEST_HOUSING_PROJECT_1: HousingProject = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
@@ -400,7 +426,9 @@ export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
@@ -418,7 +446,9 @@ export const TEST_DOCUMENT_1: Document = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_NOTE_1: Note = {
@@ -428,7 +458,9 @@ export const TEST_NOTE_1: Note = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_NOTE_HISTORY_1: NoteHistory = {
@@ -438,7 +470,6 @@ export const TEST_NOTE_HISTORY_1: NoteHistory = {
   bringForwardState: null,
   escalateToSupervisor: false,
   escalateToDirector: false,
-  isDeleted: false,
   escalationType: null,
   shownToProponent: false,
   title: 'Title',
@@ -446,7 +477,9 @@ export const TEST_NOTE_HISTORY_1: NoteHistory = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_NOTE_HISTORY_2: NoteHistory = {
@@ -456,7 +489,6 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   bringForwardState: null,
   escalateToSupervisor: false,
   escalateToDirector: false,
-  isDeleted: false,
   escalationType: null,
   shownToProponent: true,
   title: 'Title 2',
@@ -464,7 +496,9 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   createdAt: null,
   createdBy: null,
   updatedBy: null,
-  updatedAt: null
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_1: Permit = {
@@ -481,7 +515,9 @@ export const TEST_PERMIT_1: Permit = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_2: Permit = {
@@ -498,7 +534,9 @@ export const TEST_PERMIT_2: Permit = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_3: Permit = {
@@ -515,18 +553,21 @@ export const TEST_PERMIT_3: Permit = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_NOTE_1: PermitNote = {
   permitNoteId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',
   permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
   note: 'This is a permit note',
-  isDeleted: false,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_TYPE_1: PermitType = {
@@ -546,7 +587,9 @@ export const TEST_PERMIT_TYPE_1: PermitType = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_PERMIT_LIST: Permit[] = [TEST_PERMIT_1];
@@ -565,5 +608,7 @@ export const TEST_IDIR_USER_1: User = {
   createdAt: null,
   createdBy: null,
   updatedAt: null,
-  updatedBy: null
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
