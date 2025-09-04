@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
@@ -31,6 +32,7 @@ const {
 
 // Composables
 const { t } = useI18n();
+const router = useRouter();
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -67,6 +69,16 @@ async function updateRelatedEnquiry() {
       })
     ).data[0];
   } else relatedHousingProject.value = undefined;
+}
+
+function toEditNote(noteHistoryId: string) {
+  router.push({
+    name: RouteName.INT_HOUSING_PROJECT_NOTE,
+    params: {
+      noteHistoryId: noteHistoryId,
+      projectId: projectId
+    }
+  });
 }
 
 onBeforeMount(async () => {
@@ -174,7 +186,14 @@ onBeforeMount(async () => {
           <Button
             aria-label="Add note"
             :disabled="!isCompleted && !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
-            @click="noteModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_HOUSING_PROJECT_ADD_NOTE,
+                params: {
+                  projectId: projectId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
@@ -197,6 +216,7 @@ onBeforeMount(async () => {
                 noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
                   ?.createdByFullname
               "
+              @edit-note-history="(e) => toEditNote(e)"
               @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
               @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
             />

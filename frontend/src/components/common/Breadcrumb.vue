@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Breadcrumb } from '@/lib/primevue';
-import { useEnquiryStore, usePermitStore, useProjectStore } from '@/store';
+import { useEnquiryStore, useNoteHistoryStore, usePermitStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 import type { MenuItem } from 'primevue/menuitem';
@@ -16,9 +16,11 @@ const route = useRoute();
 
 // Store
 const enquiryStore = useEnquiryStore();
+const noteHistoryStore = useNoteHistoryStore();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getEnquiry } = storeToRefs(enquiryStore);
+const { getNoteHistory } = storeToRefs(noteHistoryStore);
 const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
@@ -81,6 +83,14 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
           return permit.value.permitType.name;
         } else {
           return 'Add authorization';
+        }
+      }
+      case 'note': {
+        const noteHistory = getNoteHistory;
+        if (noteHistory.value) {
+          return noteHistory.value.title;
+        } else {
+          return 'Add note';
         }
       }
       default:

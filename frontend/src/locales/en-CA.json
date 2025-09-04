@@ -584,6 +584,9 @@
       "updatedOn": "Updated on",
       "viewAll": "View all"
     },
+    "noteForm": {
+      "shownToPropBanner": "The title, date, and latest note history will get shared with the proponent. You may turn this off anytime."
+    },
     "shownToProponentModal": {
       "attnReqd": "Attention required"
     },
