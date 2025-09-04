@@ -155,6 +155,16 @@ function toAuthorization(authId: string) {
   });
 }
 
+function toEditNote(noteHistoryId: string) {
+  router.push({
+    name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+    params: {
+      noteHistoryId: noteHistoryId,
+      projectId: projectId
+    }
+  });
+}
+
 onBeforeMount(async () => {
   const project = (await electrificationProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
@@ -575,7 +585,14 @@ onBeforeMount(async () => {
           <Button
             aria-label="Add note"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
-            @click="noteModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+                params: {
+                  projectId: projectId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
@@ -598,6 +615,7 @@ onBeforeMount(async () => {
                 noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
                   ?.createdByFullname
               "
+              @edit-note-history="(e) => toEditNote(e)"
               @delete-note-history="(e) => projectStore.removeNoteHistory(e)"
               @update-note-history="(e) => projectStore.updateNoteHistory(e)"
             />

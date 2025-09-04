@@ -25,7 +25,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['updateNoteHistory', 'deleteNoteHistory']);
+const emit = defineEmits(['editNoteHistory', 'updateNoteHistory', 'deleteNoteHistory']);
 
 // Store
 const appStore = useAppStore();
@@ -135,7 +135,7 @@ onBeforeMount(() => {
           class="p-button-outlined"
           aria-label="Edit"
           :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-          @click="noteHistoryModalVisible = true"
+          @click="emit('editNoteHistory', noteHistory.noteHistoryId)"
         >
           <font-awesome-icon
             class="pr-2"

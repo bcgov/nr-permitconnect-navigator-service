@@ -24,7 +24,7 @@ import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { projectServiceKey } from '@/utils/keys';
+import { enquiryNoteRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
@@ -48,6 +48,7 @@ const projects = defineModel<Array<ElectrificationProject | HousingProject>>('pr
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
+const enquiryNoteRouteName = inject(enquiryNoteRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Composables
@@ -126,26 +127,36 @@ function getBringForwardStyling(bf: BringForward) {
   return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
 }
 
+// function getNameObject(bf: BringForward) {
+//   if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
+//   if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT;
+//   if (bf.enquiryId) return RouteName.INT_HOUSING_ENQUIRY;
+// }
+
 function getNameObject(bf: BringForward) {
-  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
-  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT;
+  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
+  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
   if (bf.enquiryId) return RouteName.INT_HOUSING_ENQUIRY;
 }
 
 function getParamObject(bf: BringForward) {
+  console.log('bf', bf);
   if (bf.electrificationProjectId) {
     return {
-      projectId: bf.electrificationProjectId
+      projectId: bf.electrificationProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.housingProjectId) {
     return {
-      projectId: bf.housingProjectId
+      projectId: bf.housingProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.enquiryId) {
     return {
       enquiryId: bf.enquiryId
+      // noteHistoryId: bf.noteId
     };
   }
 }
@@ -284,9 +295,7 @@ watchEffect(() => {
                     <router-link
                       :to="{
                         name: getNameObject(bf),
-                        params: getParamObject(bf),
-                        query: getQueryObject(bf),
-                        hash: `#${bf.noteId}`
+                        params: getParamObject(bf)
                       }"
                     >
                       {{ bf.title }}, {{ bf.projectName ?? NoteType.BRING_FORWARD }}

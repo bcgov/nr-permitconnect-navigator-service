@@ -6,5 +6,6 @@ export { default as useConfigStore } from './configStore';
 export { default as useContactStore } from './contactStore';
 export { default as useEnquiryStore } from './enquiryStore';
 export { default as useFeatureStore } from './featureStore';
+export { default as useNoteHistoryStore } from './noteHistoryStore';
 export { default as usePermitStore } from './permitStore';
 export { default as useProjectStore } from './projectStore';
