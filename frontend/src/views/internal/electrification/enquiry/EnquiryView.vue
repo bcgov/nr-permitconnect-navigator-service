@@ -54,7 +54,7 @@ const isCompleted = computed(() => {
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.ELECTRIFICATION);
 provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions
 function onEnquiryFormSaved() {

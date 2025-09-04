@@ -108,10 +108,10 @@ function handleCreateNewActivity() {
       try {
         if (!projectService) throw new Error('No service');
 
-        const response = (await projectService.createProject()).data;
+        const response = (await projectService.value.createProject()).data;
         if (response?.activityId) {
           router.push({
-            name: projectRoute,
+            name: projectRoute?.value,
             params: { projectId: response.projectId }
           });
         }
@@ -139,7 +139,7 @@ function onDelete(projectId: string, activityId: string) {
     rejectLabel: 'Cancel',
     rejectProps: { outlined: true },
     accept: () => {
-      projectService
+      projectService?.value
         ?.deleteProject(projectId)
         .then(() => {
           emit('submission:delete', projectId, activityId);

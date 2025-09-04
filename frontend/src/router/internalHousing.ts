@@ -38,13 +38,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/GenericView.vue'),
                 meta: { dynamicBreadcrumb: 'note' },
                 children: [
-                  // {
-                  //   path: '',
-                  //   name: RouteName.INT_HOUSING_ENQUIRY_ADD_NOTE,
-                  //   component: () => import('@/views/internal/housing/note/NoteView.vue'),
-                  //   beforeEnter: accessHandler,
-                  //   props: createProps
-                  // },
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
@@ -108,13 +101,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/GenericView.vue'),
                 meta: { dynamicBreadcrumb: 'note' },
                 children: [
-                  // {
-                  //   path: '',
-                  //   name: RouteName.INT_HOUSING_PROJECT_ADD_NOTE,
-                  //   component: () => import('@/views/internal/housing/note/NoteView.vue'),
-                  //   beforeEnter: accessHandler,
-                  //   props: createProps
-                  // },
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_HOUSING_PROJECT_NOTE,

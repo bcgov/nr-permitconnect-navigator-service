@@ -54,7 +54,7 @@ const isCompleted = computed(() => {
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
 provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
-provide(projectServiceKey, housingProjectService);
+provide(projectServiceKey, ref(housingProjectService));
 
 // Actions
 function onEnquiryFormSaved() {
@@ -188,9 +188,9 @@ onBeforeMount(async () => {
             :disabled="!isCompleted && !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
             @click="
               router.push({
-                name: RouteName.INT_HOUSING_PROJECT_ADD_NOTE,
+                name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
                 params: {
-                  projectId: projectId
+                  enquiryId: enquiryId
                 }
               })
             "

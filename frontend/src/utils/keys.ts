@@ -1,4 +1,6 @@
-import type { InjectionKey } from 'vue';
+import type { InjectionKey, Ref } from 'vue';
+
+import { enquiryService } from '@/services';
 
 import type { IDraftableProjectService, IProjectService } from '@/interfaces/IProjectService';
 import type { NavigationPermission } from '@/store/authzStore';
@@ -12,7 +14,7 @@ export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<string>;
 export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermission>;
 
 // Resources
-export const resourceKey = Symbol() as InjectionKey<Resource>;
+export const resourceKey = Symbol() as InjectionKey<Ref<Resource>>;
 
 // RouteNames
 export const contactInitiativeRouteNameKey = Symbol() as InjectionKey<RouteName>;
@@ -20,9 +22,9 @@ export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryRouteNameKey = Symbol() as InjectionKey<RouteName>;
-export const enquiryNoteRouteNameKey = Symbol() as InjectionKey<RouteName>;
-export const projectRouteNameKey = Symbol() as InjectionKey<RouteName>;
+export const projectRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 
 // Services
-export const projectServiceKey = Symbol() as InjectionKey<IProjectService>;
-export const draftableProjectServiceKey = Symbol() as InjectionKey<IDraftableProjectService>;
+export const enquiryServiceKey = Symbol() as InjectionKey<typeof enquiryService>;
+export const projectServiceKey = Symbol() as InjectionKey<Ref<IProjectService>>;
+export const draftableProjectServiceKey = Symbol() as InjectionKey<Ref<IDraftableProjectService>>;
