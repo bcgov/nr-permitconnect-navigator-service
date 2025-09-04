@@ -131,7 +131,6 @@ export enum RouteName {
   INT_HOUSING_PROJECT_ADD_AUTHORIZATION = 'int_housing_project_add_authorization',
   INT_HOUSING_PROJECT_AUTHORIZATION = 'int_housing_project_authorization',
   INT_HOUSING_PROJECT_ENQUIRY = 'int_housing_project_enquiry',
-  INT_HOUSING_PROJECT_ADD_NOTE = 'int_housing_project_add_note',
   INT_HOUSING_PROJECT_NOTE = 'int_housing_project_note',
   INT_HOUSING_PROJECT_PROPONENT = 'int_housing_project_proponent',
   INT_HOUSING_PROJECT_PROPONENT_PERMIT = 'int_housing_project_proponent_permit',

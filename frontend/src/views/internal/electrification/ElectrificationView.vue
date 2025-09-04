@@ -9,13 +9,7 @@ import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
 import { BringForwardType, IntakeStatus } from '@/utils/enums/projectCommon';
-import {
-  enquiryNoteRouteNameKey,
-  enquiryRouteNameKey,
-  projectRouteNameKey,
-  projectServiceKey,
-  resourceKey
-} from '@/utils/keys';
+import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, Permit, Statistics } from '@/types';
@@ -35,11 +29,10 @@ const projects: Ref<Array<ElectrificationProject>> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
-provide(enquiryNoteRouteNameKey, RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE);
 provide(enquiryRouteNameKey, RouteName.INT_ELECTRIFICATION_ENQUIRY);
-provide(projectRouteNameKey, RouteName.INT_ELECTRIFICATION_PROJECT);
-provide(projectServiceKey, electrificationProjectService);
-provide(resourceKey, Resource.ELECTRIFICATION_PROJECT);
+provide(projectRouteNameKey, ref(RouteName.INT_ELECTRIFICATION_PROJECT));
+provide(projectServiceKey, ref(electrificationProjectService));
+provide(resourceKey, ref(Resource.ELECTRIFICATION_PROJECT));
 
 // Actions
 onBeforeMount(async () => {

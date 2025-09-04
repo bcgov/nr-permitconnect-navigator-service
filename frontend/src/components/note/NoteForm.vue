@@ -52,11 +52,10 @@ const visible = defineModel<boolean>('visible');
 const shownToProponent: Ref<boolean> = ref(false);
 const createdByFullNames: Ref<Record<string, string>> = ref({});
 
-// Providers
+// Injections
 const projectRouteName = inject(projectRouteNameKey);
 
 // Actions
-
 const formSchema = object({
   bringForwardDate: mixed()
     .nullable()
@@ -181,7 +180,7 @@ async function fetchCreatedBy() {
 
 function toTheProject() {
   router.push({
-    name: projectRouteName,
+    name: projectRouteName?.value,
     params: { projectId: getProject.value?.projectId },
     query: {
       initialTab: '3'

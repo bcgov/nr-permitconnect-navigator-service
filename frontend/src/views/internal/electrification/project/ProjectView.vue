@@ -99,7 +99,7 @@ const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Providers
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions
 const filteredDocuments = computed(() => {

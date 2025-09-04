@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import { Breadcrumb } from '@/lib/primevue';
-import { useEnquiryStore, useNoteHistoryStore, usePermitStore, useProjectStore } from '@/store';
+import { useEnquiryStore, usePermitStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 
 import type { MenuItem } from 'primevue/menuitem';
@@ -12,15 +12,13 @@ import type { ComputedRef } from 'vue';
 import type { RouteLocationMatched, RouteRecordNameGeneric, RouteRecordRaw } from 'vue-router';
 
 // Composables
+const enquiryStore = useEnquiryStore();
+const permitStore = usePermitStore();
+const projectStore = useProjectStore();
 const route = useRoute();
 
 // Store
-const enquiryStore = useEnquiryStore();
-const noteHistoryStore = useNoteHistoryStore();
-const permitStore = usePermitStore();
-const projectStore = useProjectStore();
 const { getEnquiry } = storeToRefs(enquiryStore);
-const { getNoteHistory } = storeToRefs(noteHistoryStore);
 const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
@@ -86,9 +84,11 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
         }
       }
       case 'note': {
-        const noteHistory = getNoteHistory;
-        if (noteHistory.value) {
-          return noteHistory.value.title;
+        // Try to determine where to get the note history from
+        let noteHistory = useProjectStore().getNoteHistoryById(route.params.noteHistoryId as string);
+        if (!noteHistory) noteHistory = useEnquiryStore().getNoteHistoryById(route.params.noteHistoryId as string);
+        if (noteHistory) {
+          return noteHistory.title;
         } else {
           return 'Add note';
         }

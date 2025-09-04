@@ -94,6 +94,10 @@ export const useProjectStore = defineStore('project', () => {
     }),
     getDocuments: computed(() => state.documents.value),
     getNoteHistory: computed(() => state.noteHistory.value),
+    getNoteHistoryById: computed(
+      () => (noteHistoryId: string | undefined) =>
+        state.noteHistory.value.find((x) => x.noteHistoryId === noteHistoryId)
+    ),
     // Get array of note history that is shown to the proponent in descending order of creation date of the note
     getNoteHistoryShownToProponent: computed(() => {
       return state.noteHistory.value

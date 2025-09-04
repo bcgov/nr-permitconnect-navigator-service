@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide } from 'vue';
+import { provide, ref } from 'vue';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { housingProjectService } from '@/services';
@@ -12,7 +12,7 @@ const { contactId } = defineProps<{
 }>();
 
 // Providers
-provide(projectServiceKey, housingProjectService);
+provide(projectServiceKey, ref(housingProjectService));
 provide(contactInitiativeRouteNameKey, RouteName.INT_HOUSING_CONTACT);
 </script>
 

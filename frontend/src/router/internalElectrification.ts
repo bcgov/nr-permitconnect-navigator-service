@@ -64,13 +64,6 @@ const routes: Array<RouteRecordRaw> = [
                     component: () => import('@/views/GenericView.vue'),
                     meta: { dynamicBreadcrumb: 'note' },
                     children: [
-                      // {
-                      //   path: '',
-                      //   name: RouteName.INT_ELECTRIFICATION_ENQUIRY_ADD_NOTE,
-                      //   component: () => import('@/views/internal/electrification/note/NoteView.vue'),
-                      //   beforeEnter: accessHandler,
-                      //   props: createProps
-                      // },
                       {
                         path: ':noteHistoryId?',
                         name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
@@ -108,13 +101,6 @@ const routes: Array<RouteRecordRaw> = [
                 component: () => import('@/views/GenericView.vue'),
                 meta: { dynamicBreadcrumb: 'note' },
                 children: [
-                  // {
-                  //   path: '',
-                  //   name: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_NOTE,
-                  //   component: () => import('@/views/internal/electrification/note/NoteView.vue'),
-                  //   beforeEnter: accessHandler,
-                  //   props: createProps
-                  // },
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,

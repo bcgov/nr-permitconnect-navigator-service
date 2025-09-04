@@ -24,7 +24,7 @@ import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { enquiryNoteRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
@@ -48,7 +48,6 @@ const projects = defineModel<Array<ElectrificationProject | HousingProject>>('pr
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
-const enquiryNoteRouteName = inject(enquiryNoteRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Composables
@@ -161,18 +160,6 @@ function getParamObject(bf: BringForward) {
   }
 }
 
-// return the query object for the router link based on the submission type
-function getQueryObject(bf: BringForward) {
-  if (bf.electrificationProjectId || bf.housingProjectId) {
-    return {
-      initialTab: NOTES_TAB_INDEX.SUBMISSION
-    };
-  }
-  return {
-    initialTab: NOTES_TAB_INDEX.ENQUIRY
-  };
-}
-
 function onEnquiryDelete(enquiryId: string, activityId: string) {
   enquiries.value = enquiries.value.filter((x) => x.enquiryId !== enquiryId);
   bringForward.value = bringForward.value.filter((x) => x.activityId !== activityId);
@@ -186,7 +173,7 @@ function onSubmissionDelete(projectId: string, activityId: string) {
 }
 
 function refreshStatistics() {
-  projectService
+  projectService?.value
     ?.getStatistics()
     .then((response) => {
       statistics.value = response.data;
