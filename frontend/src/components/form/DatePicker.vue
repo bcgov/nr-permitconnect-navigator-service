@@ -56,7 +56,10 @@ const { errorMessage, handleBlur, value } = useField<Date>(name);
     />
     <small :id="`${name}-help`">{{ helpText }}</small>
     <div>
-      <ErrorMessage :name="name" />
+      <ErrorMessage
+        :name="name"
+        class="app-error-message"
+      />
     </div>
   </div>
 </template>

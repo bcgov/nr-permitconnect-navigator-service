@@ -33,8 +33,8 @@ const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Providers
-provide(projectRouteNameKey, RouteName.INT_ELECTRIFICATION_PROJECT);
-provide(projectServiceKey, electrificationProjectService);
+provide(projectRouteNameKey, ref(RouteName.INT_ELECTRIFICATION_PROJECT));
+provide(projectServiceKey, ref(electrificationProjectService));
 
 onBeforeMount(async () => {
   try {

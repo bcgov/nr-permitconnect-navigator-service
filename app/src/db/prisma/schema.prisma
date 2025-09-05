@@ -415,11 +415,11 @@ model permit_note {
   permitNoteId String    @id @map("permit_note_id") @db.Uuid
   permitId     String    @map("permit_id") @db.Uuid
   note         String    @default("")
-  isDeleted    Boolean   @default(false) @map("is_deleted")
   createdBy    String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
+  isDeleted    Boolean   @default(false) @map("is_deleted")
   permit       permit    @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_note_permit_id_foreign")
 
   @@schema("public")

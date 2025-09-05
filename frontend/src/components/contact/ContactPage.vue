@@ -88,7 +88,7 @@ onBeforeMount(async () => {
   if (activityIds?.length) {
     const [projects, enquiries] = (
       await Promise.all([
-        projectService?.searchProjects({ activityId: activityIds }),
+        projectService?.value.searchProjects({ activityId: activityIds }),
         enquiryService.searchEnquiries({ activityId: activityIds })
       ])
     ).map((r: any) => r?.data);

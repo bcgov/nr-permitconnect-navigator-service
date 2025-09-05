@@ -19,6 +19,10 @@ export const useEnquiryStore = defineStore('enquiry', () => {
   // Getters
   const getters = {
     getNoteHistory: computed(() => state.noteHistory.value),
+    getNoteHistoryById: computed(
+      () => (noteHistoryId: string | undefined) =>
+        state.noteHistory.value.find((x) => x.noteHistoryId === noteHistoryId)
+    ),
     getEnquiry: computed(() => state.enquiry.value)
   };
 

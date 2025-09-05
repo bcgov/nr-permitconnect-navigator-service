@@ -42,10 +42,10 @@ const loading: Ref<boolean> = ref(true);
 const projects: Ref<Array<HousingProject>> = ref([]);
 
 // Providers
-provide(draftableProjectServiceKey, housingProjectService);
+provide(draftableProjectServiceKey, ref(housingProjectService));
 provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_ENQUIRY);
 provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
-provide(projectRouteNameKey, RouteName.EXT_HOUSING_INTAKE);
+provide(projectRouteNameKey, ref(RouteName.EXT_HOUSING_INTAKE));
 
 // Actions
 async function createIntake() {

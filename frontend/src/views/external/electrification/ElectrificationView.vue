@@ -34,8 +34,8 @@ const loading: Ref<boolean> = ref(true);
 const projects: Ref<Array<ElectrificationProject>> = ref([]);
 
 // Providers
-provide(projectRouteNameKey, RouteName.EXT_ELECTRIFICATION_INTAKE);
-provide(draftableProjectServiceKey, electrificationProjectService);
+provide(projectRouteNameKey, ref(RouteName.EXT_ELECTRIFICATION_INTAKE));
+provide(draftableProjectServiceKey, ref(electrificationProjectService));
 
 // Actions
 async function createIntake() {

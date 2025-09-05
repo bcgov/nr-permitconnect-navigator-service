@@ -12,7 +12,6 @@ import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
@@ -91,7 +90,6 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
-const noteModalVisible: Ref<boolean> = ref(false);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
@@ -99,7 +97,7 @@ const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Providers
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions
 const filteredDocuments = computed(() => {
@@ -150,6 +148,16 @@ function toAuthorization(authId: string) {
     name: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
     params: {
       permitId: authId,
+      projectId: projectId
+    }
+  });
+}
+
+function toEditNote(noteHistoryId: string) {
+  router.push({
+    name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+    params: {
+      noteHistoryId: noteHistoryId,
       projectId: projectId
     }
   });
@@ -575,7 +583,14 @@ onBeforeMount(async () => {
           <Button
             aria-label="Add note"
             :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
-            @click="noteModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+                params: {
+                  projectId: projectId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
@@ -598,18 +613,12 @@ onBeforeMount(async () => {
                 noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
                   ?.createdByFullname
               "
+              @edit-note-history="(e) => toEditNote(e)"
               @delete-note-history="(e) => projectStore.removeNoteHistory(e)"
               @update-note-history="(e) => projectStore.updateNoteHistory(e)"
             />
           </div>
         </div>
-
-        <NoteHistoryModal
-          v-if="noteModalVisible && activityId"
-          v-model:visible="noteModalVisible"
-          :activity-id="activityId"
-          @create-note-history="(e) => projectStore.addNoteHistory(e, true)"
-        />
       </TabPanel>
       <TabPanel :value="4">
         <Roadmap

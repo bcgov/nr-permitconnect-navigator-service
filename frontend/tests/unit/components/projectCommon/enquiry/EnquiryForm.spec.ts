@@ -2,7 +2,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
@@ -11,6 +11,7 @@ import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/project
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
 import type { AxiosResponse } from 'axios';
+import type { Ref } from 'vue';
 import type { IProjectService } from '@/interfaces/IProjectService';
 import type { Enquiry } from '@/types';
 
@@ -71,7 +72,7 @@ vi.mock(import('vue-router'), async (importOriginal) => {
 const wrapperSettings = (
   testEnquiryProp = testEnquiry,
   editableProp?: boolean,
-  projectServiceMock: IProjectService = housingProjectService,
+  projectServiceMock: Ref<IProjectService> = ref(housingProjectService),
   atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
   atsEnquiryTypeCode = testAtsEnquiryTypeCode
 ) => ({
@@ -179,7 +180,7 @@ describe('EnquiryForm.vue', () => {
 
   it('gets electrification activity Ids onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, electrificationProjectService));
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, ref(electrificationProjectService)));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -189,7 +190,7 @@ describe('EnquiryForm.vue', () => {
 
   it('gets housing activity Ids onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, housingProjectService));
+    const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry, true, ref(housingProjectService)));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();

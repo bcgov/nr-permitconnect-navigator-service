@@ -30,9 +30,9 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
 provide(enquiryRouteNameKey, RouteName.INT_ELECTRIFICATION_ENQUIRY);
-provide(projectRouteNameKey, RouteName.INT_ELECTRIFICATION_PROJECT);
-provide(projectServiceKey, electrificationProjectService);
-provide(resourceKey, Resource.ELECTRIFICATION_PROJECT);
+provide(projectRouteNameKey, ref(RouteName.INT_ELECTRIFICATION_PROJECT));
+provide(projectServiceKey, ref(electrificationProjectService));
+provide(resourceKey, ref(Resource.ELECTRIFICATION_PROJECT));
 
 // Actions
 onBeforeMount(async () => {
