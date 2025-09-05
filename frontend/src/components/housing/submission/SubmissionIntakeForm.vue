@@ -394,8 +394,12 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       }
     } else {
+      let firstContact;
       if (housingProjectId) {
         response = (await housingProjectService.getProject(housingProjectId)).data;
+        projectStore.setProject(response);
+
+        firstContact = response?.activity?.activityContact[0]?.contact;
 
         if (response.activityId) {
           activityId.value = response.activityId;
@@ -411,20 +415,20 @@ onBeforeMount(async () => {
         projectStore.setDocuments(documents);
       } else {
         // Load contact data for new submission
-        response = { contacts: [contactStore.getContact] };
+        firstContact = contactStore.getContact;
       }
 
       initialFormValues.value = {
         activityId: response?.activityId,
         housingProjectId: response?.housingProjectId,
         contacts: {
-          contactFirstName: response?.contacts[0]?.firstName,
-          contactLastName: response?.contacts[0]?.lastName,
-          contactPhoneNumber: response?.contacts[0]?.phoneNumber,
-          contactEmail: response?.contacts[0]?.email,
-          contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
-          contactPreference: response?.contacts[0]?.contactPreference,
-          contactId: response?.contacts[0]?.contactId
+          contactFirstName: firstContact?.firstName,
+          contactLastName: firstContact?.lastName,
+          contactPhoneNumber: firstContact?.phoneNumber,
+          contactEmail: firstContact?.email,
+          contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+          contactPreference: firstContact?.contactPreference,
+          contactId: firstContact?.contactId
         },
         basic: {
           consentToFeedback: response?.consentToFeedback,
@@ -479,7 +483,8 @@ onBeforeMount(async () => {
     }
 
     locationRef.value?.onLatLongInput();
-  } catch (e) {
+  } catch (e: any) {
+    toast.error('Failed to load intake', e);
     router.replace({ name: RouteName.EXT_HOUSING });
   }
 });
