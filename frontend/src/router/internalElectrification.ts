@@ -32,6 +32,20 @@ const routes: Array<RouteRecordRaw> = [
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: { dynamicBreadcrumb: 'enquiry' }
+              },
+              {
+                path: 'note',
+                component: () => import('@/views/GenericView.vue'),
+                meta: { dynamicBreadcrumb: 'note' },
+                children: [
+                  {
+                    path: ':noteHistoryId?',
+                    name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps
+                  }
+                ]
               }
             ]
           },
@@ -58,20 +72,6 @@ const routes: Array<RouteRecordRaw> = [
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { dynamicBreadcrumb: 'enquiry' }
-                  },
-                  {
-                    path: 'note',
-                    component: () => import('@/views/GenericView.vue'),
-                    meta: { dynamicBreadcrumb: 'note' },
-                    children: [
-                      {
-                        path: ':noteHistoryId?',
-                        name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
-                        component: () => import('@/views/internal/note/NoteView.vue'),
-                        beforeEnter: accessHandler,
-                        props: createProps
-                      }
-                    ]
                   }
                 ]
               },

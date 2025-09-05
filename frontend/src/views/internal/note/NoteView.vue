@@ -8,6 +8,7 @@ import { useToast } from '@/lib/primevue';
 import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { useAppStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { enquiryServiceKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -47,19 +48,27 @@ onBeforeMount(async () => {
     let service;
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        provideResource.value = Resource.ELECTRIFICATION_PROJECT;
-        provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_PROJECT;
         if (projectId) {
           provideProjectServiceKey.value = electrificationProjectService;
           service = electrificationProjectService;
+          provideResource.value = Resource.ELECTRIFICATION_PROJECT;
+          provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_PROJECT;
+        }
+        if (enquiryId) {
+          provideResource.value = Resource.ENQUIRY;
+          provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_ENQUIRY;
         }
         break;
       case Initiative.HOUSING:
-        provideResource.value = Resource.HOUSING_PROJECT;
-        provideProjectRouteNameKey.value = RouteName.INT_HOUSING_PROJECT;
         if (projectId) {
           provideProjectServiceKey.value = housingProjectService;
           service = housingProjectService;
+          provideResource.value = Resource.HOUSING_PROJECT;
+          provideProjectRouteNameKey.value = RouteName.INT_HOUSING_PROJECT;
+        }
+        if (enquiryId) {
+          provideResource.value = Resource.ENQUIRY;
+          provideProjectRouteNameKey.value = RouteName.INT_HOUSING_ENQUIRY;
         }
         break;
     }
@@ -68,7 +77,7 @@ onBeforeMount(async () => {
       const project = (await service.getProject(projectId)).data;
       projectStore.setProject(project);
     }
-    if (!getEnquiry.value && service && enquiryId) {
+    if (!getEnquiry.value && enquiryId) {
       const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
       enquiryStore.setEnquiry(enquiry);
     }
@@ -84,21 +93,22 @@ onBeforeMount(async () => {
 
     loading.value = false;
   } catch {
-    toast.error(t('i.housing.authorization.authorizationView.projectPermitLoadError'));
+    toast.error(t('note.noteView.noteLoadError'));
   }
 });
 </script>
 
 <template>
   <div v-if="!loading">
-    <!-- <NoteForm :editable="getProject?.applicationStatus !== ApplicationStatus.COMPLETED" /> -->
     <NoteForm
       v-if="projectId"
       :note-history="projectStore.getNoteHistoryById(noteHistoryId)"
+      :editable="getProject?.applicationStatus !== ApplicationStatus.COMPLETED"
     />
     <NoteForm
       v-if="enquiryId"
       :note-history="enquiryStore.getNoteHistoryById(noteHistoryId)"
+      :editable="getEnquiry?.enquiryStatus !== ApplicationStatus.COMPLETED"
     />
   </div>
 </template>

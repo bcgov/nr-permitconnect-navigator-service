@@ -5,7 +5,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { electrificationProjectService, enquiryService, noteHistoryService, userService } from '@/services';
@@ -44,7 +43,6 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const relatedElectrificationProject: Ref<ElectrificationProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const noteModalVisible: Ref<boolean> = ref(false);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
 const isCompleted = computed(() => {
@@ -73,10 +71,12 @@ async function updateRelatedEnquiry() {
 
 function toEditNote(noteHistoryId: string) {
   router.push({
-    name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+    name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
     params: {
-      noteHistoryId: noteHistoryId,
-      projectId: projectId
+      noteHistoryId: noteHistoryId
+    },
+    query: {
+      enquiryId: enquiryId
     }
   });
 }
@@ -188,9 +188,9 @@ onBeforeMount(async () => {
             :disabled="!isCompleted && !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
             @click="
               router.push({
-                name: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_NOTE,
-                params: {
-                  projectId: projectId
+                name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+                query: {
+                  enquiryId: enquiryId
                 }
               })
             "
@@ -222,12 +222,6 @@ onBeforeMount(async () => {
             />
           </div>
         </div>
-        <NoteHistoryModal
-          v-if="noteModalVisible && activityId"
-          v-model:visible="noteModalVisible"
-          :activity-id="activityId"
-          @create-note-history="(e) => enquiryStore.addNoteHistory(e, true)"
-        />
       </TabPanel>
     </TabPanels>
   </Tabs>
