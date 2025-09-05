@@ -418,13 +418,13 @@ onBeforeMount(async () => {
         activityId: response?.activityId,
         housingProjectId: response?.housingProjectId,
         contacts: {
-          contactFirstName: response?.contacts[0]?.firstName,
-          contactLastName: response?.contacts[0]?.lastName,
-          contactPhoneNumber: response?.contacts[0]?.phoneNumber,
-          contactEmail: response?.contacts[0]?.email,
-          contactApplicantRelationship: response?.contacts[0]?.contactApplicantRelationship,
-          contactPreference: response?.contacts[0]?.contactPreference,
-          contactId: response?.contacts[0]?.contactId
+          contactFirstName: response?.activity.activityContact[0].contact?.firstName,
+          contactLastName: response?.activity.activityContact[0].contact?.lastName,
+          contactPhoneNumber: response?.activity.activityContact[0].contact?.phoneNumber,
+          contactEmail: response?.activity.activityContact[0].contact?.email,
+          contactApplicantRelationship: response?.activity.activityContact[0].contact?.contactApplicantRelationship,
+          contactPreference: response?.activity.activityContact[0].contact?.contactPreference,
+          contactId: response?.activity.activityContact[0].contact?.contactId
         },
         basic: {
           consentToFeedback: response?.consentToFeedback,
@@ -479,7 +479,8 @@ onBeforeMount(async () => {
     }
 
     locationRef.value?.onLatLongInput();
-  } catch (e) {
+  } catch (e: any) {
+    toast.error('Failed to load intake', e);
     router.replace({ name: RouteName.EXT_HOUSING });
   }
 });
