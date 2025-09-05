@@ -175,7 +175,7 @@ onBeforeMount(async () => {
             :assignee="assigneeName"
             :created-by="createdByName"
             :activity-id="getProject.activityId"
-            @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+            @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
           />
           <div
             v-if="getNoteHistory.length"
