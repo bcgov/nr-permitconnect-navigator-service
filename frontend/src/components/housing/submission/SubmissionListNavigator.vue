@@ -31,7 +31,7 @@ type FilterOption = { label: string; statuses: string[] };
 
 // Props
 const { submissions } = defineProps<{
-  submissions: Array<ElectrificationProject | HousingProject> | undefined;
+  submissions: (ElectrificationProject | HousingProject)[] | undefined;
 }>();
 
 // Injections
@@ -46,7 +46,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const FILTER_OPTIONS: Array<FilterOption> = [
+const FILTER_OPTIONS: FilterOption[] = [
   {
     label: 'Active projects',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -68,14 +68,27 @@ const pagination: Ref<Pagination> = ref({
   field: 'submittedAt',
   page: 0
 });
-const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
+const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
 
+/**
+ * Filter submissions based on status
+ * Inject a joined location field for housing for proper sorting and searching
+ */
 const filteredSubmissions = computed(() => {
-  return submissions?.filter((element) => {
-    return selectedFilter.value.statuses.includes(element.applicationStatus);
-  });
+  return submissions
+    ?.filter((element) => {
+      return selectedFilter.value.statuses.includes(element.applicationStatus);
+    })
+    .map((x) => {
+      if ('housingProjectId' in x) {
+        return {
+          ...x,
+          location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', ')
+        };
+      } else return x;
+    });
 });
 
 // read from query params if tab is set to enquiry otherwise use default values

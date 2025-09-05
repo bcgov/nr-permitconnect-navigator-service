@@ -85,16 +85,13 @@ const projectRoute = inject(projectRouteNameKey);
     :sortable="true"
     style="min-width: 150px"
   />
+  <!-- location injected in filteredSubmissions() in SubmissionListNavigator.vue -->
   <Column
-    field="streetAddress"
+    field="location"
     header="Location"
     :sortable="true"
     style="min-width: 250px"
-  >
-    <template #body="{ data }">
-      {{ [data.streetAddress, data.locality, data.province].filter((str) => str?.trim()).join(', ') }}
-    </template>
-  </Column>
+  />
   <Column
     field="submittedAt"
     header="Submitted date"
