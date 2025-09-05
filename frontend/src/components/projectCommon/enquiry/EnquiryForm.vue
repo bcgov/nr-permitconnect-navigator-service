@@ -207,7 +207,7 @@ function onRelatedActivityInput(e: IInputEvent) {
 
 async function getRelatedATSClientID(activityId: string) {
   formRef.value?.setFieldValue('atsClientId', null);
-  if (projectService) {
+  if (projectService?.value) {
     const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
     if (response.length > 0) {
       formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
@@ -238,7 +238,7 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
   atsCreateType.value = undefined;
 
   if (e.value) {
-    if (projectService) {
+    if (projectService?.value) {
       const response = (await projectService.value.searchProjects({ activityId: [e?.value] })).data;
       if (response.length > 0) {
         // Set ATS client ID from the related project
@@ -407,7 +407,7 @@ onBeforeMount(async () => {
 
   if (enquiry?.relatedActivityId) getRelatedATSClientID(enquiry?.relatedActivityId);
 
-  if (!projectService) throw new Error('No service');
+  if (!projectService?.value) throw new Error('No service');
   projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
 });
 

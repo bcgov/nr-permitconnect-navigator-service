@@ -10,7 +10,7 @@ import Banner from '@/components/common/Banner.vue';
 import Divider from '@/components/common/Divider.vue';
 import { Button, Card, useConfirm, ToggleSwitch, useToast } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
+import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { GroupName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { projectRouteNameKey } from '@/utils/keys';
@@ -29,14 +29,21 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { NoteHistory } from '@/types';
 
 // Props
-const { noteHistory = undefined } = defineProps<{
+const { editable, noteHistory = undefined } = defineProps<{
+  editable?: boolean;
   noteHistory?: NoteHistory;
 }>();
+
+const NOTES_TAB_INDEX = {
+  ENQUIRY: 1,
+  SUBMISSION: 3
+};
 
 // Composables
 const { t } = useI18n();
 const authzStore = useAuthZStore();
 const confirmDialog = useConfirm();
+const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
@@ -44,13 +51,14 @@ const { options } = useCodeStore();
 
 // Store
 const { getProject } = storeToRefs(projectStore);
+const { getEnquiry } = storeToRefs(enquiryStore);
 
 // State
+const createdByFullNames: Ref<Record<string, string>> = ref({});
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const visible = defineModel<boolean>('visible');
 const shownToProponent: Ref<boolean> = ref(false);
-const createdByFullNames: Ref<Record<string, string>> = ref({});
+const visible = defineModel<boolean>('visible');
 
 // Injections
 const projectRouteName = inject(projectRouteNameKey);
@@ -61,12 +69,7 @@ const formSchema = object({
     .nullable()
     .when('type', {
       is: (type: string) => type === NoteType.BRING_FORWARD,
-      then: (schema) =>
-        schema.test(
-          'bring forward required',
-          'Bring forward date is a required field',
-          (value) => value instanceof Date
-        ),
+      then: (schema) => schema.required(t('note.noteForm.bfDateReqd')),
       otherwise: (schema) => schema.nullable()
     })
     .label('Bring forward date'),
@@ -77,27 +80,45 @@ const formSchema = object({
       otherwise: () => mixed().nullable()
     })
     .label('Bring forward state'),
-  note: string().label('Note'),
+  note: string()
+    .when('noteHistoryId', {
+      is: (noteHistoryId: string) => noteHistoryId === undefined,
+      then: (schema) => schema.required(t('note.noteForm.noteReqd')),
+      otherwise: (schema) => schema.notRequired()
+    })
+    .label('Note'),
   type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
-  title: string().required().max(255, 'Title too long').label('Title')
+  title: string().required().max(255, 'Title too long').label('Title'),
+  escalationType: mixed()
+    .when(['escalateToSupervisor', 'escalateToDirector'], {
+      is: (escalateToSupervisor: boolean, escalateToDirector: boolean) => escalateToSupervisor || escalateToDirector,
+      then: (schema) => schema.required(t('note.noteForm.escalationTypeReqd')),
+      otherwise: (schema) => schema.nullable()
+    })
+    .label('Escalation type')
 });
 
 function initializeFormValues() {
   if (noteHistory) {
     initialFormValues.value = {
-      activityId: noteHistory?.activityId,
+      activityId: noteHistory.activityId,
       bringForwardDate: noteHistory?.bringForwardDate ? new Date(noteHistory.bringForwardDate) : null,
       bringForwardState: noteHistory?.bringForwardState ?? null,
       escalateToSupervisor: noteHistory?.escalateToSupervisor,
       escalateToDirector: noteHistory?.escalateToDirector,
       escalationType: noteHistory?.escalationType,
-      noteHistoryId: noteHistory?.noteHistoryId,
-      type: noteHistory?.type ?? NoteType.GENERAL,
-      title: noteHistory?.title
+      noteHistoryId: noteHistory.noteHistoryId,
+      type: noteHistory.type,
+      title: noteHistory.title
     };
     shownToProponent.value = noteHistory.shownToProponent;
+  } else {
+    initialFormValues.value = {
+      type: NoteType.GENERAL
+    };
   }
 }
+// }
 
 function onInvalidSubmit(e: any) {
   scrollToFirstError(e.errors);
@@ -106,20 +127,20 @@ function onInvalidSubmit(e: any) {
 function onDelete() {
   if (noteHistory) {
     confirmDialog.require({
-      message: t(shownToProponent.value ? 'noteHistoryModal.deleteMessageIfShown' : 'noteHistoryModal.deleteMessage'),
-      header: t('noteHistoryModal.deleteHeader'),
-      acceptLabel: t('noteHistoryModal.confirm'),
+      message: t(shownToProponent.value ? 'note.noteForm.deleteMessageIfShown' : 'note.noteForm.deleteMessage'),
+      header: t('note.noteForm.deleteHeader'),
+      acceptLabel: t('note.noteForm.confirm'),
       acceptClass: 'p-button-danger',
-      rejectLabel: t('noteHistoryModal.cancel'),
+      rejectLabel: t('note.noteForm.cancel'),
       rejectProps: { outlined: true },
       accept: () => {
         noteHistoryService
           .deleteNoteHistory(noteHistory?.noteHistoryId as string)
           .then(() => {
-            toast.success(t('noteHistoryModal.noteDeleted'));
-            toTheProject();
+            toast.success(t('note.noteForm.noteDeleted'));
+            getProject.value ? toTheProject() : toTheEnquiry();
           })
-          .catch((e: any) => toast.error(t('noteHistoryModal.noteDeleteFailed'), e.message));
+          .catch((e: any) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
       }
     });
   }
@@ -145,20 +166,20 @@ async function onSubmit(data: any) {
     if (!noteHistory) {
       await noteHistoryService.createNoteHistory({
         ...body,
-        activityId: getProject.value?.activityId,
+        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
         note: data.note
       });
     } else {
       await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
         ...body,
-        activityId: getProject.value?.activityId,
+        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
         note: data.note
       });
     }
-    toast.success(t('noteHistoryModal.noteSaved'));
-    toTheProject();
+    toast.success(t('note.noteForm.noteSaved'));
+    getProject.value ? toTheProject() : toTheEnquiry();
   } catch (e: any) {
-    toast.error(t('noteHistoryModal.noteSaveFailed'), e.message);
+    toast.error(t('note.noteForm.noteSaveFailed'), e.message);
   } finally {
     visible.value = false;
   }
@@ -167,6 +188,7 @@ async function onSubmit(data: any) {
 function onTypeChange(e: SelectChangeEvent) {
   if (e.value === NoteType.BRING_FORWARD) {
     formRef.value?.setFieldValue('bringForwardState', BringForwardType.UNRESOLVED);
+    shownToProponent.value = false;
   }
 }
 
@@ -183,7 +205,17 @@ function toTheProject() {
     name: projectRouteName?.value,
     params: { projectId: getProject.value?.projectId },
     query: {
-      initialTab: '3'
+      initialTab: NOTES_TAB_INDEX.SUBMISSION
+    }
+  });
+}
+
+function toTheEnquiry() {
+  router.push({
+    name: projectRouteName?.value,
+    params: { enquiryId: getEnquiry.value?.enquiryId },
+    query: {
+      initialTab: NOTES_TAB_INDEX.ENQUIRY
     }
   });
 }
@@ -199,13 +231,13 @@ onBeforeMount(async () => {
 <template>
   <div class="flex flex-row gap-x-3 my-4">
     <div class="flex flex-row gap-x-1">
-      <span class="text-[var(--p-bcblue-900)]">{{ t('noteHistoryModal.created') }}:</span>
+      <span class="text-[var(--p-bcblue-900)]">{{ t('note.noteForm.created') }}:</span>
       <span>
         {{ formatDate(noteHistory?.createdAt || new Date().toISOString()) }}
       </span>
     </div>
     <div class="flex flex-row gap-x-1">
-      <span class="text-[var(--p-bcblue-900)]">{{ t('noteHistoryModal.lastUpdated') }}:</span>
+      <span class="text-[var(--p-bcblue-900)]">{{ t('note.noteForm.lastUpdated') }}:</span>
       <span>{{ formatDate(noteHistory?.updatedAt) }}</span>
     </div>
   </div>
@@ -236,18 +268,21 @@ onBeforeMount(async () => {
                 name="type"
                 label="Note type"
                 :options="NOTE_TYPE_LIST"
+                :disabled="!editable"
                 @on-change="onTypeChange"
               />
               <InputText
                 class="w-1/2"
                 name="title"
                 label="Note title"
+                :disabled="!editable"
               />
             </div>
 
             <TextArea
               name="note"
               label="Note"
+              :disabled="!editable"
             />
           </div>
 
@@ -259,12 +294,13 @@ onBeforeMount(async () => {
                   v-if="values.type === NoteType.GENERAL"
                   class="flex flex-col gap-y-4"
                 >
-                  <span class="font-bold">{{ t('noteHistoryModal.showProponent') }}</span>
+                  <span class="font-bold">{{ t('note.noteForm.showProponent') }}</span>
                   <ToggleSwitch
                     v-model="shownToProponent"
                     class="mr-1"
                     name="shownToProponent"
-                    :label="t('noteHistoryModal.showProponent')"
+                    :label="t('note.noteForm.showProponent')"
+                    :disabled="!editable"
                   />
                 </div>
 
@@ -275,20 +311,23 @@ onBeforeMount(async () => {
                   <Checkbox
                     v-if="authzStore.isInGroup([GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY])"
                     name="escalateToSupervisor"
-                    :label="t('noteHistoryModal.escalateToSupervisor')"
+                    :label="t('note.noteForm.escalateToSupervisor')"
                     :bold="false"
+                    :disabled="!editable"
                   />
                   <Checkbox
                     v-if="authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])"
                     name="escalateToDirector"
-                    :label="t('noteHistoryModal.escalateToDirector')"
+                    :label="t('note.noteForm.escalateToDirector')"
                     :bold="false"
+                    :disabled="!editable"
                   />
                   <DatePicker
                     v-if="values.type === NoteType.BRING_FORWARD"
                     class="my-2"
                     name="bringForwardDate"
                     label="Bring forward date"
+                    :disabled="!editable"
                   />
                   <div
                     v-if="values.escalateToSupervisor || values.escalateToDirector"
@@ -300,12 +339,14 @@ onBeforeMount(async () => {
                       option-label="label"
                       option-value="value"
                       :options="options.EscalationType"
+                      :disabled="!editable"
                     />
                   </div>
                   <Select
                     name="bringForwardState"
                     label="Bring forward state"
                     :options="BRING_FORWARD_TYPE_LIST"
+                    :disabled="!editable"
                   />
                 </div>
               </div>
@@ -321,6 +362,7 @@ onBeforeMount(async () => {
           label="Save"
           type="submit"
           icon="pi pi-check"
+          :disabled="!editable"
         />
         <Button
           class="p-button-outlined mr-2"
@@ -328,7 +370,7 @@ onBeforeMount(async () => {
           icon="pi pi-times"
           @click="
             () => {
-              toTheProject();
+              getProject ? toTheProject() : toTheEnquiry();
             }
           "
         />
@@ -341,6 +383,7 @@ onBeforeMount(async () => {
           class="p-button-outlined p-button-danger mr-2"
           label="Delete"
           icon="pi pi-trash"
+          :disabled="!editable"
           @click="onDelete"
         />
       </div>
