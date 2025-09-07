@@ -6,27 +6,21 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { object, string, mixed } from 'yup';
 
-import Banner from '@/components/common/Banner.vue';
 import Divider from '@/components/common/Divider.vue';
-import { Button, Card, useConfirm, ToggleSwitch, useToast } from '@/lib/primevue';
-import { userService } from '@/services';
-import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
-import { GroupName } from '@/utils/enums/application';
-import { formatDate } from '@/utils/formatters';
-import { projectRouteNameKey } from '@/utils/keys';
+import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
+import { Button, Card, Message, ToggleSwitch, useConfirm, useToast } from '@/lib/primevue';
+import { noteHistoryService, userService } from '@/services';
+import { useAuthZStore, useCodeStore, useEnquiryStore, useProjectStore } from '@/store';
+import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { GroupName, Resource } from '@/utils/enums/application';
+import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
+import { formatDate, formatTime } from '@/utils/formatters';
+import { projectRouteNameKey, resourceKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
 
-import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
-import { noteHistoryService } from '@/services';
-import { useCodeStore } from '@/store';
-import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
-import { formatTime } from '@/utils/formatters';
-
-import type { Ref } from 'vue';
-import type { User } from '@/types';
 import type { SelectChangeEvent } from 'primevue/select';
-import type { NoteHistory } from '@/types';
+import type { Ref } from 'vue';
+import type { NoteHistory, User } from '@/types';
 
 // Props
 const { editable, noteHistory = undefined } = defineProps<{
@@ -34,6 +28,11 @@ const { editable, noteHistory = undefined } = defineProps<{
   noteHistory?: NoteHistory;
 }>();
 
+// Injections
+const projectRouteName = inject(projectRouteNameKey);
+const resource = inject(resourceKey);
+
+// Constants
 const NOTES_TAB_INDEX = {
   ENQUIRY: 1,
   SUBMISSION: 3
@@ -58,10 +57,6 @@ const createdByFullNames: Ref<Record<string, string>> = ref({});
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const shownToProponent: Ref<boolean> = ref(false);
-const visible = defineModel<boolean>('visible');
-
-// Injections
-const projectRouteName = inject(projectRouteNameKey);
 
 // Actions
 const formSchema = object({
@@ -88,7 +83,7 @@ const formSchema = object({
     })
     .label('Note'),
   type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
-  title: string().required().max(255, 'Title too long').label('Title'),
+  title: string().required().max(255, t('note.noteForm.titleLong')).label('Title'),
   escalationType: mixed()
     .when(['escalateToSupervisor', 'escalateToDirector'], {
       is: (escalateToSupervisor: boolean, escalateToDirector: boolean) => escalateToSupervisor || escalateToDirector,
@@ -138,7 +133,7 @@ function onDelete() {
           .deleteNoteHistory(noteHistory?.noteHistoryId as string)
           .then(() => {
             toast.success(t('note.noteForm.noteDeleted'));
-            getProject.value ? toTheProject() : toTheEnquiry();
+            navigateToOrigin();
           })
           .catch((e: any) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
       }
@@ -177,11 +172,9 @@ async function onSubmit(data: any) {
       });
     }
     toast.success(t('note.noteForm.noteSaved'));
-    getProject.value ? toTheProject() : toTheEnquiry();
+    navigateToOrigin();
   } catch (e: any) {
     toast.error(t('note.noteForm.noteSaveFailed'), e.message);
-  } finally {
-    visible.value = false;
   }
 }
 
@@ -200,24 +193,25 @@ async function fetchCreatedBy() {
   });
 }
 
-function toTheProject() {
-  router.push({
-    name: projectRouteName?.value,
-    params: { projectId: getProject.value?.projectId },
-    query: {
-      initialTab: NOTES_TAB_INDEX.SUBMISSION
-    }
-  });
-}
-
-function toTheEnquiry() {
-  router.push({
-    name: projectRouteName?.value,
-    params: { enquiryId: getEnquiry.value?.enquiryId },
-    query: {
-      initialTab: NOTES_TAB_INDEX.ENQUIRY
-    }
-  });
+function navigateToOrigin() {
+  if (!resource?.value) throw new Error('Resource not defined');
+  if (resource.value === Resource.ENQUIRY) {
+    router.push({
+      name: projectRouteName?.value,
+      params: { enquiryId: getEnquiry.value?.enquiryId },
+      query: {
+        initialTab: NOTES_TAB_INDEX.ENQUIRY
+      }
+    });
+  } else {
+    router.push({
+      name: projectRouteName?.value,
+      params: { projectId: getProject.value?.projectId },
+      query: {
+        initialTab: NOTES_TAB_INDEX.SUBMISSION
+      }
+    });
+  }
 }
 
 onBeforeMount(async () => {
@@ -241,11 +235,13 @@ onBeforeMount(async () => {
       <span>{{ formatDate(noteHistory?.updatedAt) }}</span>
     </div>
   </div>
-  <Banner
+  <Message
     v-if="shownToProponent"
-    class="mt-5 mb-8"
-    :content="t('note.noteForm.shownToPropBanner')"
-  />
+    severity="warn"
+    class="text-center mt-5 mb-8"
+  >
+    {{ t('note.noteForm.shownToPropBanner') }}
+  </Message>
   <Form
     ref="formRef"
     v-slot="{ values }"
@@ -368,11 +364,7 @@ onBeforeMount(async () => {
           class="p-button-outlined mr-2"
           label="Cancel"
           icon="pi pi-times"
-          @click="
-            () => {
-              getProject ? toTheProject() : toTheEnquiry();
-            }
-          "
+          @click="navigateToOrigin()"
         />
       </div>
       <div

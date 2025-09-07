@@ -127,7 +127,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
     bodyType: 'html',
     body: body
   };
-  if (!projectService) throw new Error('No service');
+  if (!projectService?.value) throw new Error('No service');
   await projectService.value.emailConfirmation(emailData);
 }
 
