@@ -22,16 +22,16 @@ const routes: Array<RouteRecordRaw> = [
             beforeEnter: accessHandler
           },
           {
-            path: 'enquiry',
+            path: 'enquiry/:enquiryId',
             component: () => import('@/views/GenericView.vue'),
+            meta: { dynamicBreadcrumb: 'enquiry' },
             children: [
               {
-                path: ':enquiryId',
+                path: '',
                 name: RouteName.INT_HOUSING_ENQUIRY,
                 component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
-                props: createProps,
-                meta: { dynamicBreadcrumb: 'enquiry' }
+                props: createProps
               },
               {
                 path: 'note',
@@ -39,7 +39,7 @@ const routes: Array<RouteRecordRaw> = [
                 meta: { dynamicBreadcrumb: 'note' },
                 children: [
                   {
-                    path: ':noteHistoryId?',
+                    path: ':noteHistoryId',
                     name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
                     component: () => import('@/views/internal/note/NoteView.vue'),
                     beforeEnter: accessHandler,

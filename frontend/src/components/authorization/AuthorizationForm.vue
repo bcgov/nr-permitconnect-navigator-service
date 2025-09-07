@@ -86,8 +86,9 @@ async function onSubmit(data: any) {
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
 
+    if (!projectRouteName?.value) throw new Error('No route');
     router.push({
-      name: projectRouteName?.value,
+      name: projectRouteName.value,
       params: { projectId: getProject.value?.projectId },
       query: {
         initialTab: '2'
@@ -140,6 +141,7 @@ function onDelete() {
       try {
         await permitService.deletePermit(authorization?.permitId as string);
         toast.success(t('authorization.authorizationForm.authDeleted'));
+        if (!projectRouteName?.value) throw new Error('No route');
         router.push({
           name: projectRouteName?.value,
           params: { projectId: getProject.value?.projectId },

@@ -85,8 +85,10 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
       }
       case 'note': {
         // Try to determine where to get the note history from
-        let noteHistory = useProjectStore().getNoteHistoryById(route.params.noteHistoryId as string);
-        if (!noteHistory) noteHistory = useEnquiryStore().getNoteHistoryById(route.params.noteHistoryId as string);
+        const noteHistory =
+          useProjectStore().getNoteHistoryById(route.params.noteHistoryId as string) ||
+          useEnquiryStore().getNoteHistoryById(route.params.noteHistoryId as string);
+
         if (noteHistory) {
           return noteHistory.title;
         } else {

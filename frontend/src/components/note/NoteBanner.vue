@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { Button } from '@/lib/primevue';
+import { Button, Message } from '@/lib/primevue';
 import { formatDate } from '@/utils/formatters';
 
 import type { Note } from '@/types';
@@ -19,14 +19,17 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <div
+  <Message
     v-if="note"
-    class="bg-[var(--p-gold-100)] border rounded-sm border-[var(--p-gold-900)] px-4 py-2"
+    severity="warn"
   >
     <div class="grid grid-cols-7 gap-4 items-center">
       <div class="col-span-2">
         <span class="font-bold mr-4">{{ t('note.noteBanner.attnReqd') }}:</span>
-        <span class="font-bold">{{ t('note.noteBanner.updatedOn') }} {{ formatDate(note.createdAt) }}</span>
+        <span class="font-bold">
+          {{ t('note.noteBanner.updatedOn') }}
+          {{ formatDate(note.createdAt) }}
+        </span>
       </div>
       <div class="col-span-4 truncate">{{ note.note }}</div>
       <div class="flex justify-end">
@@ -38,7 +41,7 @@ const { t } = useI18n();
         />
       </div>
     </div>
-  </div>
+  </Message>
 </template>
 
 <style scoped lang="scss">

@@ -149,15 +149,8 @@ function getParamObject(bf: BringForward) {
   }
   if (bf.enquiryId) {
     return {
+      enquiryId: bf.enquiryId,
       noteHistoryId: bf.noteId
-    };
-  }
-}
-
-function getQueryObject(bf: BringForward) {
-  if (bf.enquiryId) {
-    return {
-      enquiryId: bf.enquiryId
     };
   }
 }
@@ -284,8 +277,7 @@ watchEffect(() => {
                     <router-link
                       :to="{
                         name: getNameObject(bf),
-                        params: getParamObject(bf),
-                        query: getQueryObject(bf)
+                        params: getParamObject(bf)
                       }"
                     >
                       {{ bf.title }}, {{ bf.projectName ?? NoteType.BRING_FORWARD }}

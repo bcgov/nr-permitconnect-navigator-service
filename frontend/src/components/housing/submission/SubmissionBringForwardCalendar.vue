@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia';
 import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, ToggleSwitch } from '@/lib/primevue';
-import { useAuthNStore } from '@/store';
-import { RouteName } from '@/utils/enums/application';
+import { useAppStore, useAuthNStore } from '@/store';
+import { Initiative, RouteName } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
@@ -16,12 +16,6 @@ const { bringForward = [], myAssignedTo = new Set<string>() } = defineProps<{
   bringForward?: Array<BringForward>;
   myAssignedTo: Set<string>;
 }>();
-
-// Constants
-const NOTES_TAB_INDEX = {
-  ENQUIRY: 1,
-  SUBMISSION: 3
-};
 
 // Store
 const { getProfile } = storeToRefs(useAuthNStore());
@@ -36,38 +30,37 @@ watchEffect(() => {
 });
 
 function getNameObject(bf: BringForward) {
-  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
-  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT;
-  return RouteName.INT_HOUSING_ENQUIRY;
+  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
+  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
+  if (bf.enquiryId) {
+    switch (useAppStore().getInitiative) {
+      case Initiative.ELECTRIFICATION:
+        return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
+      case Initiative.HOUSING:
+        return RouteName.INT_HOUSING_ENQUIRY_NOTE;
+    }
+  }
 }
 
 function getParamObject(bf: BringForward) {
   if (bf.electrificationProjectId) {
     return {
-      projectId: bf.electrificationProjectId
+      projectId: bf.electrificationProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.housingProjectId) {
     return {
-      projectId: bf.housingProjectId
+      projectId: bf.housingProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.enquiryId) {
     return {
-      enquiryId: bf.enquiryId
+      enquiryId: bf.enquiryId,
+      noteHistoryId: bf.noteId
     };
   }
-}
-
-function getQueryObject(bf: BringForward) {
-  if (bf.housingProjectId || bf.electrificationProjectId) {
-    return {
-      initialTab: NOTES_TAB_INDEX.SUBMISSION
-    };
-  }
-  return {
-    initialTab: NOTES_TAB_INDEX.ENQUIRY
-  };
 }
 
 function filterForMyBringForwards(bf: BringForward): boolean {
@@ -111,7 +104,6 @@ function filterForMyBringForwards(bf: BringForward): boolean {
                 :to="{
                   name: getNameObject(data),
                   params: getParamObject(data),
-                  query: getQueryObject(data),
                   hash: `#${data.noteId}`
                 }"
               >

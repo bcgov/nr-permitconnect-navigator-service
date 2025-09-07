@@ -73,10 +73,8 @@ function toEditNote(noteHistoryId: string) {
   router.push({
     name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
     params: {
+      enquiryId: enquiryId,
       noteHistoryId: noteHistoryId
-    },
-    query: {
-      enquiryId: enquiryId
     }
   });
 }
@@ -189,7 +187,7 @@ onBeforeMount(async () => {
             @click="
               router.push({
                 name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
-                query: {
+                params: {
                   enquiryId: enquiryId
                 }
               })

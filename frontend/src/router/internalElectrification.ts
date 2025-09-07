@@ -22,16 +22,16 @@ const routes: Array<RouteRecordRaw> = [
             beforeEnter: accessHandler
           },
           {
-            path: 'enquiry',
+            path: 'enquiry/:enquiryId',
             component: () => import('@/views/GenericView.vue'),
+            meta: { dynamicBreadcrumb: 'enquiry' },
             children: [
               {
-                path: ':enquiryId',
+                path: '',
                 name: RouteName.INT_ELECTRIFICATION_ENQUIRY,
                 component: () => import('@/views/internal/electrification/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
-                props: createProps,
-                meta: { dynamicBreadcrumb: 'enquiry' }
+                props: createProps
               },
               {
                 path: 'note',
