@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Mutex } from 'async-mutex';
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -39,6 +40,7 @@ const selectedUser: Ref<User | undefined> = ref(undefined);
 const users: Ref<User[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
+const searchMutex = new Mutex();
 let timeoutId: NodeJS.Timeout;
 
 // Actions
@@ -53,27 +55,29 @@ async function searchIdirUsers() {
   if (searchTag.value.length >= MIN_SEARCH_INPUT_LENGTH) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(async () => {
-      try {
-        loading.value = true;
+      await searchMutex.runExclusive(async () => {
+        try {
+          loading.value = true;
 
-        const response = await ssoService.searchIdirUsers({
-          [searchParam]: searchTag.value
-        });
+          const response = await ssoService.searchIdirUsers({
+            [searchParam]: searchTag.value
+          });
 
-        // Map the response data to the required format
-        // Spread the rest of the properties and filter out users without email
-        users.value = response.data
-          .map(({ attributes, username, ...rest }: any) => ({
-            ...rest,
-            sub: username,
-            fullName: attributes?.display_name?.[0] as string
-          }))
-          .filter((user: any) => !!user.email);
-      } catch (error: any) {
-        toast.error(t('userCreateModal.searchError'), error);
-      } finally {
-        loading.value = false;
-      }
+          // Map the response data to the required format
+          // Spread the rest of the properties and filter out users without email
+          users.value = response.data
+            .map(({ attributes, username, ...rest }: any) => ({
+              ...rest,
+              sub: username,
+              fullName: attributes?.display_name?.[0] as string
+            }))
+            .filter((user: any) => !!user.email);
+        } catch (error: any) {
+          toast.error(t('userCreateModal.searchError'), error);
+        } finally {
+          loading.value = false;
+        }
+      });
     }, 500);
   } else {
     users.value = [];
