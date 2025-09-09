@@ -1,4 +1,5 @@
 import type { PrismaTransactionClient } from '../db/dataConnection';
+import { IStamps } from '../interfaces/IStamps';
 import type {
   ElectrificationProject,
   ElectrificationProjectBase,
@@ -31,6 +32,23 @@ export const createElectrificationProject = async (
     }
   });
   return response;
+};
+
+/**
+ * Delete an electrification project
+ * @param tx Prisma transaction client
+ * @param electrificationProjectId Unique electrification project ID
+ * @param deleteStamp Timestamp information of the delete
+ */
+export const deleteElectrificationProject = async (
+  tx: PrismaTransactionClient,
+  electrificationProjectId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  await tx.electrification_project.update({
+    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
+    where: { electrificationProjectId }
+  });
 };
 
 /**

@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import {
   generateCreateStamps,
+  generateDeleteStamps,
+  generateNullDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps,
   jsonToPrismaInputJson
@@ -12,6 +14,7 @@ import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../s
 import { email } from '../services/email';
 import {
   createHousingProject,
+  deleteHousingProject,
   getHousingProject,
   getHousingProjects,
   getHousingProjectStatistics,
@@ -161,7 +164,8 @@ const generateHousingProjectData = async (
         ...generateCreateStamps(currentContext)
       })),
       ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext)
+      ...generateUpdateStamps(currentContext),
+      ...generateNullDeleteStamps()
     }));
   }
 
@@ -178,7 +182,8 @@ const generateHousingProjectData = async (
       submittedDate: null,
       adjudicationDate: null,
       ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext)
+      ...generateUpdateStamps(currentContext),
+      ...generateNullDeleteStamps()
     }));
   }
 
@@ -200,6 +205,8 @@ const generateHousingProjectData = async (
       createdBy: null,
       updatedAt: null,
       updatedBy: null,
+      deletedAt: null,
+      deletedBy: null,
       aaiUpdated: false,
       assignedUserId: null,
       queuePriority: null,
@@ -293,7 +300,8 @@ export const createHousingProjectController = async (
 export const deleteHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const project = await getHousingProject(tx, req.params.housingProjectId);
-    await deleteActivity(tx, project.activityId, generateUpdateStamps(req.currentContext));
+    await deleteHousingProject(tx, req.params.housingProjectId, generateDeleteStamps(req.currentContext));
+    await deleteActivity(tx, project.activityId, generateDeleteStamps(req.currentContext));
   });
 
   res.status(204).end();
@@ -445,7 +453,8 @@ export const updateHousingProjectDraftController = async (req: Request<never, ne
         draftCode: DraftCode.HOUSING_PROJECT,
         data: req.body.data,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
     }
   });

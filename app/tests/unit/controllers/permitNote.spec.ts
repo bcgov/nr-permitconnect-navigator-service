@@ -34,8 +34,7 @@ describe('createPermitNoteController', () => {
     const req = {
       body: {
         permitId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',
-        note: 'This is a permit note',
-        isDeleted: false
+        note: 'This is a permit note'
       },
       currentContext: TEST_CURRENT_CONTEXT
     };

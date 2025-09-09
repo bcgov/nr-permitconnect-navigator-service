@@ -1,7 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateNullUpdateStamps, generateUpdateStamps } from '../db/utils/utils';
+import {
+  generateCreateStamps,
+  generateDeleteStamps,
+  generateNullDeleteStamps,
+  generateNullUpdateStamps,
+  generateUpdateStamps
+} from '../db/utils/utils';
 import { searchElectrificationProjects } from '../services/electrificationProject';
 import { searchEnquiries } from '../services/enquiry';
 import { searchHousingProjects } from '../services/housingProject';
@@ -36,7 +42,6 @@ export const createNoteHistoryController = async (
       const historyRes = await createNoteHistory(tx, {
         ...history,
         noteHistoryId: uuidv4(),
-        isDeleted: false,
         ...generateCreateStamps(req.currentContext)
       });
 
@@ -45,7 +50,8 @@ export const createNoteHistoryController = async (
         noteHistoryId: historyRes.noteHistoryId,
         note: note,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
 
       return { historyRes, noteRes };
@@ -56,11 +62,11 @@ export const createNoteHistoryController = async (
 };
 
 /**
- * Soft delete the given note history
+ * Delete the given note history
  */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deleteNoteHistory(tx, req.params.noteHistoryId, generateUpdateStamps(req.currentContext));
+    await deleteNoteHistory(tx, req.params.noteHistoryId, generateDeleteStamps(req.currentContext));
   });
 
   res.status(204).end();
@@ -166,7 +172,6 @@ export const updateNoteHistoryController = async (
     await updateNoteHistory(tx, {
       ...history,
       noteHistoryId: req.params.noteHistoryId,
-      isDeleted: false,
       ...generateUpdateStamps(req.currentContext)
     });
 
@@ -176,7 +181,8 @@ export const updateNoteHistoryController = async (
         noteId: uuidv4(),
         note: note,
         ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps()
+        ...generateNullUpdateStamps(),
+        ...generateNullDeleteStamps()
       });
     }
 

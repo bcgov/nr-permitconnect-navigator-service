@@ -3,4 +3,6 @@ export interface IStamps {
   createdAt?: string;
   updatedBy?: string;
   updatedAt?: string;
+  deletedBy?: string;
+  deletedAt?: string;
 }

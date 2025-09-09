@@ -7,6 +7,8 @@ export default function (knex: any, table: any) {
   table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
   table.text('updated_by');
   table.timestamp('updated_at', { useTz: true });
+  table.text('deleted_by');
+  table.timestamp('deleted_at', { useTz: true });
 }
 
 export type Stamps = {
@@ -14,4 +16,6 @@ export type Stamps = {
   created_at: string | null;
   updated_by: string | null;
   updated_at: string | null;
+  deleted_by: string | null;
+  deleted_at: string | null;
 };
