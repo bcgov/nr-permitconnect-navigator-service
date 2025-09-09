@@ -36,7 +36,7 @@ export const MANAGED_GROUP_NAME_LIST = [
   { id: GroupName.SUPERVISOR, text: 'groupName.supervisor' }
 ];
 
-export const MIN_SEARCH_INPUT_LENGTH = 3;
+export const MIN_SEARCH_INPUT_LENGTH = 2;
 
 export const SPATIAL_FILE_FORMATS = [
   '.cpg',

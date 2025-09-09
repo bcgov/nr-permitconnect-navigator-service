@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios';
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -7,6 +6,7 @@ import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, IconField, InputIcon, InputText, Select, useToast } from '@/lib/primevue';
 import { ssoService, yarsService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
+import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -21,6 +21,7 @@ const USER_SEARCH_PARAMS: { [key: string]: string } = {
 
 // Composables
 const { t } = useI18n();
+const toast = useToast();
 
 // Emits
 const emit = defineEmits(['userCreate:request']);
@@ -31,18 +32,16 @@ const authzStore = useAuthZStore();
 // State
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const selectableGroups: Ref<Array<Group>> = ref([]);
+const selectableGroups: Ref<Group[]> = ref([]);
 const selectedGroup: Ref<Group | undefined> = ref(undefined);
 const selectedParam: Ref<string | undefined> = ref('Last name');
 const selectedUser: Ref<User | undefined> = ref(undefined);
-const users: Ref<Array<User>> = ref([]);
+const users: Ref<User[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
+let timeoutId: NodeJS.Timeout;
+
 // Actions
-let cancelTokenSource: any = null;
-
-const toast = useToast();
-
 async function searchIdirUsers() {
   selectedUser.value = undefined;
 
@@ -51,46 +50,42 @@ async function searchIdirUsers() {
     Object.keys(USER_SEARCH_PARAMS)[0];
   searchTag.value = searchTag.value.trim();
 
-  if (searchTag.value.length > 2) {
-    if (cancelTokenSource) {
-      cancelTokenSource.cancel('Cancelling the previous request');
-    }
-    cancelTokenSource = axios.CancelToken.source();
+  if (searchTag.value.length >= MIN_SEARCH_INPUT_LENGTH) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(async () => {
+      try {
+        loading.value = true;
 
-    try {
-      loading.value = true;
-
-      const response = await ssoService.searchIdirUsers(
-        {
+        const response = await ssoService.searchIdirUsers({
           [searchParam]: searchTag.value
-        },
-        cancelTokenSource.token
-      );
+        });
 
-      // Map the response data to the required format
-      // Spread the rest of the properties and filter out users without email
-      users.value = response.data
-        .map(({ attributes, username, ...rest }: any) => ({
-          ...rest,
-          sub: username,
-          fullName: attributes?.display_name?.[0] as string
-        }))
-        .filter((user: any) => !!user.email);
-    } catch (error) {
-      if (!axios.isCancel(error)) toast.error('Error searching for users ' + error);
-    } finally {
-      cancelTokenSource = null;
-      loading.value = false;
-    }
+        // Map the response data to the required format
+        // Spread the rest of the properties and filter out users without email
+        users.value = response.data
+          .map(({ attributes, username, ...rest }: any) => ({
+            ...rest,
+            sub: username,
+            fullName: attributes?.display_name?.[0] as string
+          }))
+          .filter((user: any) => !!user.email);
+      } catch (error: any) {
+        toast.error(t('userCreateModal.searchError'), error);
+      } finally {
+        loading.value = false;
+      }
+    }, 500);
   } else {
     users.value = [];
+    clearTimeout(timeoutId);
+    loading.value = false;
   }
 }
 
 watchEffect(async () => {
-  const yarsGroups: Array<Group> = (await yarsService.getGroups(useAppStore().getInitiative)).data;
+  const yarsGroups: Group[] = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
-  const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+  const allowedGroups: GroupName[] = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
