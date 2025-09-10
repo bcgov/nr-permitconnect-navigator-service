@@ -695,6 +695,7 @@
     "headerLastName": "Last Name",
     "lastNamePlaceholder": "Last name",
     "requestApproval": "Request approval",
+    "searchError": "Error searching for users",
     "searchPlaceholder": "Search by first name, last name, or email"
   },
   "userManageModal": {
