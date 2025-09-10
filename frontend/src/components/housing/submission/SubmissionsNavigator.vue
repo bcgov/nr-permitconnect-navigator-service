@@ -21,7 +21,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
-import { Action, BasicResponse, Resource, RouteName, StorageKey } from '@/utils/enums/application';
+import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
@@ -30,11 +30,6 @@ import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
 
 // Constants
-const NOTES_TAB_INDEX = {
-  ENQUIRY: 1,
-  SUBMISSION: 3
-};
-
 const TAB_INDEX = {
   SUBMISSION: 0,
   ENQUIRY: 1
@@ -127,39 +122,37 @@ function getBringForwardStyling(bf: BringForward) {
 }
 
 function getNameObject(bf: BringForward) {
-  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT;
-  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT;
-  if (bf.enquiryId) return RouteName.INT_HOUSING_ENQUIRY;
+  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
+  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
+  if (bf.enquiryId) {
+    switch (useAppStore().getInitiative) {
+      case Initiative.ELECTRIFICATION:
+        return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
+      case Initiative.HOUSING:
+        return RouteName.INT_HOUSING_ENQUIRY_NOTE;
+    }
+  }
 }
 
 function getParamObject(bf: BringForward) {
   if (bf.electrificationProjectId) {
     return {
-      projectId: bf.electrificationProjectId
+      projectId: bf.electrificationProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.housingProjectId) {
     return {
-      projectId: bf.housingProjectId
+      projectId: bf.housingProjectId,
+      noteHistoryId: bf.noteId
     };
   }
   if (bf.enquiryId) {
     return {
-      enquiryId: bf.enquiryId
+      enquiryId: bf.enquiryId,
+      noteHistoryId: bf.noteId
     };
   }
-}
-
-// return the query object for the router link based on the submission type
-function getQueryObject(bf: BringForward) {
-  if (bf.electrificationProjectId || bf.housingProjectId) {
-    return {
-      initialTab: NOTES_TAB_INDEX.SUBMISSION
-    };
-  }
-  return {
-    initialTab: NOTES_TAB_INDEX.ENQUIRY
-  };
 }
 
 function onEnquiryDelete(enquiryId: string, activityId: string) {
@@ -175,7 +168,7 @@ function onSubmissionDelete(projectId: string, activityId: string) {
 }
 
 function refreshStatistics() {
-  projectService
+  projectService?.value
     ?.getStatistics()
     .then((response) => {
       statistics.value = response.data;
@@ -284,9 +277,7 @@ watchEffect(() => {
                     <router-link
                       :to="{
                         name: getNameObject(bf),
-                        params: getParamObject(bf),
-                        query: getQueryObject(bf),
-                        hash: `#${bf.noteId}`
+                        params: getParamObject(bf)
                       }"
                     >
                       {{ bf.title }}, {{ bf.projectName ?? NoteType.BRING_FORWARD }}

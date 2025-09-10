@@ -12,12 +12,12 @@ import type { ComputedRef } from 'vue';
 import type { RouteLocationMatched, RouteRecordNameGeneric, RouteRecordRaw } from 'vue-router';
 
 // Composables
-const route = useRoute();
-
-// Store
 const enquiryStore = useEnquiryStore();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
+const route = useRoute();
+
+// Store
 const { getEnquiry } = storeToRefs(enquiryStore);
 const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
@@ -81,6 +81,18 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
           return permit.value.permitType.name;
         } else {
           return 'Add authorization';
+        }
+      }
+      case 'note': {
+        // Try to determine where to get the note history from
+        const noteHistory =
+          useProjectStore().getNoteHistoryById(route.params.noteHistoryId as string) ||
+          useEnquiryStore().getNoteHistoryById(route.params.noteHistoryId as string);
+
+        if (noteHistory) {
+          return noteHistory.title;
+        } else {
+          return 'Add note';
         }
       }
       default:

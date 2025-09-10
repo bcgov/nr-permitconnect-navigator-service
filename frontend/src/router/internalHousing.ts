@@ -22,16 +22,30 @@ const routes: Array<RouteRecordRaw> = [
             beforeEnter: accessHandler
           },
           {
-            path: 'enquiry',
+            path: 'enquiry/:enquiryId',
             component: () => import('@/views/GenericView.vue'),
+            meta: { dynamicBreadcrumb: 'enquiry' },
             children: [
               {
-                path: ':enquiryId',
+                path: '',
                 name: RouteName.INT_HOUSING_ENQUIRY,
                 component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
                 beforeEnter: accessHandler,
-                props: createProps,
-                meta: { dynamicBreadcrumb: 'enquiry' }
+                props: createProps
+              },
+              {
+                path: 'note',
+                component: () => import('@/views/GenericView.vue'),
+                meta: { dynamicBreadcrumb: 'note' },
+                children: [
+                  {
+                    path: ':noteHistoryId',
+                    name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps
+                  }
+                ]
               }
             ]
           },
@@ -77,6 +91,20 @@ const routes: Array<RouteRecordRaw> = [
                     path: ':permitId',
                     name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
                     component: () => import('@/views/internal/housing/authorization/AuthorizationView.vue'),
+                    beforeEnter: accessHandler,
+                    props: createProps
+                  }
+                ]
+              },
+              {
+                path: 'note',
+                component: () => import('@/views/GenericView.vue'),
+                meta: { dynamicBreadcrumb: 'note' },
+                children: [
+                  {
+                    path: ':noteHistoryId?',
+                    name: RouteName.INT_HOUSING_PROJECT_NOTE,
+                    component: () => import('@/views/internal/note/NoteView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }

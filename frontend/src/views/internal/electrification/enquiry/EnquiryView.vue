@@ -2,9 +2,9 @@
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { electrificationProjectService, enquiryService, noteHistoryService, userService } from '@/services';
@@ -31,6 +31,7 @@ const {
 
 // Composables
 const { t } = useI18n();
+const router = useRouter();
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -42,7 +43,6 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const relatedElectrificationProject: Ref<ElectrificationProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const noteModalVisible: Ref<boolean> = ref(false);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
 const isCompleted = computed(() => {
@@ -52,7 +52,7 @@ const isCompleted = computed(() => {
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.ELECTRIFICATION);
 provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions
 function onEnquiryFormSaved() {
@@ -67,6 +67,16 @@ async function updateRelatedEnquiry() {
       })
     ).data[0];
   } else relatedElectrificationProject.value = undefined;
+}
+
+function toEditNote(noteHistoryId: string) {
+  router.push({
+    name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+    params: {
+      enquiryId: enquiryId,
+      noteHistoryId: noteHistoryId
+    }
+  });
 }
 
 onBeforeMount(async () => {
@@ -174,7 +184,14 @@ onBeforeMount(async () => {
           <Button
             aria-label="Add note"
             :disabled="!isCompleted && !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
-            @click="noteModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+                params: {
+                  enquiryId: enquiryId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
@@ -197,17 +214,12 @@ onBeforeMount(async () => {
                 noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
                   ?.createdByFullname
               "
+              @edit-note-history="(e) => toEditNote(e)"
               @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
               @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
             />
           </div>
         </div>
-        <NoteHistoryModal
-          v-if="noteModalVisible && activityId"
-          v-model:visible="noteModalVisible"
-          :activity-id="activityId"
-          @create-note-history="(e) => enquiryStore.addNoteHistory(e, true)"
-        />
       </TabPanel>
     </TabPanels>
   </Tabs>

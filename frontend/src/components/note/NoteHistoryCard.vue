@@ -2,7 +2,6 @@
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
@@ -25,13 +24,12 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['updateNoteHistory', 'deleteNoteHistory']);
+const emit = defineEmits(['editNoteHistory', 'updateNoteHistory', 'deleteNoteHistory']);
 
 // Store
 const appStore = useAppStore();
 
 // State
-const noteHistoryModalVisible: Ref<boolean> = ref(false);
 const userName: Ref<string | undefined> = ref(createdByFullName);
 
 // Composables
@@ -60,7 +58,7 @@ onBeforeMount(() => {
           <h3
             class="cursor-pointer truncate max-w-[50ch] inline-block hover:underline"
             :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-            @click="noteHistoryModalVisible = true"
+            @click="emit('editNoteHistory', noteHistory.noteHistoryId)"
           >
             {{ noteHistory.title }}
           </h3>
@@ -135,7 +133,7 @@ onBeforeMount(() => {
           class="p-button-outlined"
           aria-label="Edit"
           :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-          @click="noteHistoryModalVisible = true"
+          @click="emit('editNoteHistory', noteHistory.noteHistoryId)"
         >
           <font-awesome-icon
             class="pr-2"
@@ -146,19 +144,6 @@ onBeforeMount(() => {
       </div>
     </template>
   </Card>
-
-  <NoteHistoryModal
-    v-if="noteHistory && noteHistoryModalVisible"
-    v-model:visible="noteHistoryModalVisible"
-    :activity-id="noteHistory.activityId"
-    :note-history="noteHistory"
-    @delete-note-history="
-      (history: NoteHistory) => {
-        emit('deleteNoteHistory', history);
-      }
-    "
-    @update-note-history="(history: NoteHistory) => emit('updateNoteHistory', history)"
-  />
 </template>
 
 <style scoped lang="scss">

@@ -30,9 +30,11 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
 provide(enquiryRouteNameKey, RouteName.INT_HOUSING_ENQUIRY);
-provide(projectRouteNameKey, RouteName.INT_HOUSING_PROJECT);
-provide(projectServiceKey, housingProjectService);
-provide(resourceKey, Resource.HOUSING_PROJECT);
+provide(projectRouteNameKey, ref(RouteName.INT_HOUSING_PROJECT));
+provide(projectServiceKey, ref(housingProjectService));
+
+const provideResource: Ref<Resource> = ref(Resource.HOUSING_PROJECT);
+provide(resourceKey, provideResource);
 
 // Actions
 onBeforeMount(async () => {

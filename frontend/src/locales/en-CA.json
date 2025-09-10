@@ -584,8 +584,26 @@
       "updatedOn": "Updated on",
       "viewAll": "View all"
     },
-    "shownToProponentModal": {
-      "attnReqd": "Attention required"
+    "noteForm": {
+      "bfDateReqd": "Bring forward date is a required field",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "created": "Created",
+      "deleteHeader": "Confirm delete",
+      "deleteMessage": "Please confirm that you want to delete the selected note.",
+      "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
+      "escalateToDirector": "Escalate to Director",
+      "escalateToSupervisor": "Escalate to Supervisor",
+      "escalationTypeReqd": "Escalation type is a required field",
+      "lastUpdated": "Last updated",
+      "noteDeleted": "Note deleted",
+      "noteDeleteFailed": "Failed to delete note",
+      "noteSaved": "Note saved",
+      "noteSaveFailed": "Failed to save note",
+      "noteReqd": "Note is a required field",
+      "showProponent": "Show to Proponent",
+      "shownToPropBanner": "The title, date, and latest note history will get shared with the proponent. You may turn this off anytime.",
+      "titleLong": "Title too long"
     },
     "noteHistoryCard": {
       "author": "Author",
@@ -594,24 +612,13 @@
       "escalated": "Escalated",
       "lastUpdated": "Last updated",
       "shownToProponent": "Shown to Proponent"
+    },
+    "noteView": {
+      "noteLoadError": "Unable to load note or project, please try again later"
+    },
+    "shownToProponentModal": {
+      "attnReqd": "Attention required"
     }
-  },
-  "noteHistoryModal": {
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "created": "Created",
-    "deleteHeader": "Confirm delete",
-    "deleteMessage": "Please confirm that you want to delete the selected note.",
-    "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
-    "escalateToDirector": "Escalate to Director",
-    "escalateToSupervisor": "Escalate to Supervisor",
-    "lastUpdated": "Last updated",
-    "noteDeleted": "Note deleted",
-    "noteDeleteFailed": "Failed to delete note",
-    "noteSaved": "Note saved",
-    "noteSaveFailed": "Failed to save note",
-    "showProponent": "Show to Proponent",
-    "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
   },
   "permitCard": {
     "addUpdates": "Add updates",
