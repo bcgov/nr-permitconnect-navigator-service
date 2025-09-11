@@ -30,7 +30,9 @@ const bringForward: Array<BringForward> = [
     projectName: 'test project name',
     bringForwardDate: currentDate,
     createdByFullName: 'test full name',
-    activityId: 'activityUUID'
+    activityId: 'activityUUID',
+    escalateToSupervisor: false,
+    escalateToDirector: false
   }
 ];
 

@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import { inject, onBeforeMount, ref, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import { Escalation } from '@/components/common/icons';
 import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
 import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
 import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
@@ -21,10 +22,19 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
-import { Action, BasicResponse, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
+import {
+  Action,
+  BasicResponse,
+  GroupName,
+  Initiative,
+  Resource,
+  RouteName,
+  StorageKey
+} from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
+import { deduplicateByKey } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
@@ -59,7 +69,7 @@ const { getProfile } = storeToRefs(authnStore);
 const route = useRoute();
 const accordionIndex: Ref<string | null> = ref(null);
 const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
-const myBringForward: Ref<Array<BringForward>> = ref([]);
+const relevantBringForwards: Ref<Array<BringForward>> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const showToggle: Ref<boolean> = ref(true);
 
@@ -178,6 +188,22 @@ function refreshStatistics() {
     });
 }
 
+function sortRelevantBringForwards() {
+  relevantBringForwards.value.sort((a, b) => {
+    if (isPast(a.bringForwardDate) && isPast(b.bringForwardDate)) {
+      // Both past, sort ascending
+      return new Date(a.bringForwardDate).getTime() - new Date(b.bringForwardDate).getTime();
+    } else if (isPast(a.bringForwardDate)) {
+      return -1; // a is past, b is not, a comes first
+    } else if (isPast(b.bringForwardDate)) {
+      return 1; // b is past, a is not, b comes first
+    } else {
+      // Both future, sort ascending
+      return new Date(a.bringForwardDate).getTime() - new Date(b.bringForwardDate).getTime();
+    }
+  });
+}
+
 onBeforeMount(async () => {
   assignEnquiriesAndFullName();
   assignMultiPermitsNeeded();
@@ -227,7 +253,7 @@ watch(activeTabIndex, (newIndex) => {
 });
 
 watchEffect(() => {
-  myBringForward.value = bringForward.value.filter((x) => {
+  relevantBringForwards.value = bringForward.value.filter((x) => {
     return (
       (x.createdByFullName === getProfile.value?.name ||
         myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
@@ -235,6 +261,15 @@ watchEffect(() => {
       (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
     );
   });
+
+  // Get bring forwards that are escalated to supervisor if user is in supervisor group
+  if (authzStore.isInGroup([GroupName.SUPERVISOR])) {
+    bringForward.value.forEach((bf) => {
+      if (bf.escalateToSupervisor) relevantBringForwards.value.push(bf);
+    });
+  }
+  relevantBringForwards.value = deduplicateByKey(relevantBringForwards.value, 'noteId');
+  sortRelevantBringForwards();
 });
 </script>
 
@@ -265,14 +300,15 @@ watchEffect(() => {
             <AccordionContent>
               <div class="flex flex-col">
                 <div
-                  v-for="(bf, index) of myBringForward"
+                  v-for="(bf, index) of relevantBringForwards"
                   :key="index"
                   class="flex mb-1"
                 >
                   <span
-                    class="text-xl p-1 w-full"
+                    class="text-xl p-1 pl-2 w-full flex items-center gap-2"
                     :class="getBringForwardStyling(bf)"
                   >
+                    <Escalation v-if="bf.escalateToSupervisor || bf.escalateToDirector" />
                     Bring forward {{ formatDate(bf.bringForwardDate) }}:
                     <router-link
                       :to="{
