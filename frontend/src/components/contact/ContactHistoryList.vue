@@ -83,10 +83,8 @@ function updateQueryParams() {
 
 onBeforeMount(() => {
   // If contactsHistory > largest page option a add page display option to include all items
-  if (
-    contactsHistory?.length &&
-    contactsHistory.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]
-  ) {
+  const rows = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
+  if (contactsHistory.length && rows && contactsHistory.length > rows) {
     rowsPerPageOptions.value.push(contactsHistory.length);
   }
 
@@ -100,7 +98,7 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
-    v-model:selection="selection"
+    :selection="selection"
     :loading="loading"
     :value="normalizeContactHistory()"
     data-key="activityId"

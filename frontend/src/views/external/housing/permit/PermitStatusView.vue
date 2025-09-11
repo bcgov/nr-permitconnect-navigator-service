@@ -64,7 +64,7 @@ onBeforeMount(async () => {
 
     if (getPermit.value?.updatedBy) {
       const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
-      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+      if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
     }
   } catch {
     toast.error(t('e.common.permitStatusView.unableToLoad'));
@@ -73,49 +73,51 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div class="permit-status-view">
-    <div class="flex justify-between mb-5 mt-10">
-      <div>
-        <h1 class="mt-0 mb-0">{{ getPermit?.permitType.name }}</h1>
+  <div>
+    <div class="permit-status-view">
+      <div class="flex justify-between mb-5 mt-10">
+        <div>
+          <h1 class="mt-0 mb-0">{{ getPermit?.permitType.name }}</h1>
+        </div>
+        <Button
+          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+          class="p-button-sm max-h-8 mt-3"
+          :label="t('e.common.permitStatusView.askNav')"
+          @click="
+            router.push({
+              name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
+              params: { permitId, projectId }
+            })
+          "
+        >
+          <AskMyNavigator />
+          {{ t('e.common.permitStatusView.askNav') }}
+        </Button>
       </div>
-      <Button
-        v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
-        class="p-button-sm max-h-8 mt-3"
-        :label="t('e.common.permitStatusView.askNav')"
-        @click="
-          router.push({
-            name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-            params: { permitId, projectId }
-          })
-        "
-      >
-        <AskMyNavigator />
-        {{ t('e.common.permitStatusView.askNav') }}
-      </Button>
-    </div>
 
-    <AuthorizationInfoProponent
-      v-if="getPermit"
-      :permit="getPermit"
-    />
-    <h3
-      class="mt-14 mb-8"
-      :aria-hidden="hideTimelineFromScreenReader"
-    >
-      {{ t('e.common.permitStatusView.applicationProgress') }}
-    </h3>
-    <AuthorizationTrackerCard
-      v-if="getPermit"
-      :permit="getPermit"
-    />
-    <h4 class="mb-8 mt-14">{{ t('e.common.permitStatusView.updateHistory') }}</h4>
-    <AuthorizationUpdateHistory
-      v-if="getPermit?.permitNote && getPermit.permitNote.length > 0"
-      :authorization-notes="getPermit.permitNote"
+      <AuthorizationInfoProponent
+        v-if="getPermit"
+        :permit="getPermit"
+      />
+      <h3
+        class="mt-14 mb-8"
+        :aria-hidden="hideTimelineFromScreenReader"
+      >
+        {{ t('e.common.permitStatusView.applicationProgress') }}
+      </h3>
+      <AuthorizationTrackerCard
+        v-if="getPermit"
+        :permit="getPermit"
+      />
+      <h4 class="mb-8 mt-14">{{ t('e.common.permitStatusView.updateHistory') }}</h4>
+      <AuthorizationUpdateHistory
+        v-if="getPermit?.permitNote && getPermit.permitNote.length > 0"
+        :authorization-notes="getPermit.permitNote"
+      />
+    </div>
+    <AuthorizationStatusDescriptionModal
+      :visible="descriptionModalVisible"
+      dismissable-mask
     />
   </div>
-  <AuthorizationStatusDescriptionModal
-    v-model:visible="descriptionModalVisible"
-    dismissable-mask
-  />
 </template>

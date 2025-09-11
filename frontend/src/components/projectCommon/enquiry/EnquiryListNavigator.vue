@@ -47,7 +47,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const FILTER_OPTIONS: Array<FilterOption> = [
+const FILTER_OPTIONS: readonly FilterOption[] = [
   {
     label: 'Active enquiries',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -71,7 +71,7 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const selection: Ref<Enquiry | undefined> = ref(undefined);
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 const filteredEnquiries = computed(() => {
   return enquiries?.filter((element) => {
@@ -154,8 +154,8 @@ function updateQueryParams() {
 
 <template>
   <DataTable
-    v-model:filters="filters"
-    v-model:selection="selection"
+    :filters="filters"
+    :selection="selection"
     :value="filteredEnquiries"
     data-key="enquiryId"
     removable-sort
@@ -206,7 +206,7 @@ function updateQueryParams() {
           <Select
             v-model="selectedFilter"
             class="col-span-1"
-            :options="FILTER_OPTIONS"
+            :options="FILTER_OPTIONS as FilterOption[]"
             option-label="label"
           />
           <IconField

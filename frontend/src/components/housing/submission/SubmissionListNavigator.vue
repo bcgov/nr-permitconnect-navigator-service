@@ -70,7 +70,7 @@ const pagination: Ref<Pagination> = ref({
 });
 const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 /**
  * Filter submissions based on status
@@ -165,7 +165,8 @@ function updateQueryParams() {
 }
 
 onBeforeMount(() => {
-  if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
+  const lastRowsPerPage = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
+  if (submissions && lastRowsPerPage && submissions.length > lastRowsPerPage) {
     rowsPerPageOptions.value.push(submissions.length);
   }
 });

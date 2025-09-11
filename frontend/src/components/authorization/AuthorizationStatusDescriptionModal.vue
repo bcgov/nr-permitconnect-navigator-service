@@ -8,7 +8,7 @@ const visible = defineModel<boolean>('visible');
 
 <template>
   <Dialog
-    v-model:visible="visible"
+    :visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6/12"

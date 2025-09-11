@@ -94,7 +94,7 @@ function generateToObject(record: RouteLocationMatched) {
   let toName: RouteRecordNameGeneric;
 
   // If record has no name then the empty nested child/grandchild will define the route name
-  if (!record.name && record.children) {
+  if (!record.name && record.children[0]) {
     toName = getRouteNameFromFirstChild(record.children[0]);
   } else {
     toName = record.name;
@@ -116,7 +116,7 @@ function generateToObject(record: RouteLocationMatched) {
 function getRouteNameFromFirstChild(record: RouteRecordRaw) {
   if (record.name) {
     return record.name;
-  } else if (record.children) {
+  } else if (record.children?.[0]) {
     return getRouteNameFromFirstChild(record.children[0]);
   } else {
     // Route name not found case

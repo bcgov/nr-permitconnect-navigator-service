@@ -102,7 +102,8 @@ async function emailNotification(data?: any) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = permitNoteNotificationTemplate({
     '{{ contactName }}':
-      getProject.value?.contacts?.[0]?.firstName || getProject.value?.activity?.activityContact?.[0].contact?.firstName,
+      getProject.value?.contacts?.[0]?.firstName ||
+      getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
     '{{ activityId }}': getProject.value?.activityId,
     '{{ permitName }}': data.authorizationType.name,
     '{{ submittedDate }}': formatDate(data.submittedDate?.toISOString() ?? data.createdAt?.toISOString()),
@@ -110,8 +111,8 @@ async function emailNotification(data?: any) {
     '{{ permitId }}': data.permitId
   });
   let applicantEmail =
-    (getProject.value?.contacts?.[0].email as string) ||
-    (getProject.value?.activity?.activityContact?.[0].contact?.email as string);
+    (getProject.value?.contacts?.[0]?.email as string) ||
+    (getProject.value?.activity?.activityContact?.[0]?.contact?.email as string);
   let emailData = {
     from: configCC,
     to: [applicantEmail],

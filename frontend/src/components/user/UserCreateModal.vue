@@ -49,7 +49,7 @@ async function searchIdirUsers() {
 
   const searchParam =
     Object.keys(USER_SEARCH_PARAMS).find((key) => USER_SEARCH_PARAMS[key] === selectedParam.value) ||
-    Object.keys(USER_SEARCH_PARAMS)[0];
+    Object.keys(USER_SEARCH_PARAMS)[0]!;
   searchTag.value = searchTag.value.trim();
 
   if (searchTag.value.length >= MIN_SEARCH_INPUT_LENGTH) {
@@ -100,7 +100,7 @@ watchEffect(async () => {
 
 <template>
   <Dialog
-    v-model:visible="visible"
+    :visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6/12"
@@ -131,7 +131,7 @@ watchEffect(async () => {
       </div>
     </div>
     <DataTable
-      v-model:selection="selectedUser"
+      :selection="selectedUser"
       :row-hover="true"
       :loading="loading"
       class="datatable mt-4 mb-2"
