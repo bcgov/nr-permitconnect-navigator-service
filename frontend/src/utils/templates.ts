@@ -176,3 +176,55 @@ export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: s
     '</div>';
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
+
+export const bringForwardProjectNotificationTemplate = (replaceConfig: {
+  [key: string]: string | string[] | undefined;
+}) => {
+  const baseTemplate =
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'A navigator has escalated <b>{{ projectName }}: {{ activityId }}</b> to your attention.<br> Please login to the ' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a>' +
+    ' and review the matter under your Bring Forward notifications.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+export const bringForwardEnquiryNotificationTemplate = (replaceConfig: {
+  [key: string]: string | string[] | undefined;
+}) => {
+  const baseTemplate =
+    '<div style="width: 880px">' +
+    '<img src="' +
+    BC_EMAIL_BANNER_IMG +
+    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
+    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
+    'A navigator has escalated <b>Enquiry ID: {{ activityId }}</b> to you.<br> Please login to the ' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a>' +
+    ' and review the matter under your Bring Forward notifications.<br><br>' +
+    'Regards,<br><br>' +
+    '<a href="' +
+    PCNS_URL +
+    '">Navigator Service<a><br><br><br>' +
+    '</div>' +
+    '<img src="' +
+    BC_EMAIL_FOOTER_IMG +
+    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
+    '</div>';
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};

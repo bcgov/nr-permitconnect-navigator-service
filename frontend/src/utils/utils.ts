@@ -373,3 +373,20 @@ export function toNumber(input: string): number | undefined {
   const i = parseInt(input);
   return Number.isNaN(i) ? undefined : i;
 }
+
+/**
+ * @function deduplicateByKey
+ * Removes duplicate objects from an array based on a specified key.
+ * Only the last occurrence of each unique key value is kept.
+ * @template T The type of objects in the array
+ * @param {T[]} arr The array of objects to deduplicate
+ * @param {keyof T} key The key to use for identifying duplicates
+ * @returns {T[]} A new array with duplicates removed by the specified key
+ */
+export function deduplicateByKey<T>(arr: T[], key: keyof T): T[] {
+  const unique = new Map<any, T>();
+  arr.forEach((item) => {
+    unique.set(item[key], item);
+  });
+  return Array.from(unique.values());
+}

@@ -48,8 +48,8 @@ onBeforeMount(async () => {
     let service;
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
+        provideProjectServiceKey.value = electrificationProjectService;
         if (projectId) {
-          provideProjectServiceKey.value = electrificationProjectService;
           service = electrificationProjectService;
           provideResource.value = Resource.ELECTRIFICATION_PROJECT;
           provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_PROJECT;
@@ -60,8 +60,8 @@ onBeforeMount(async () => {
         }
         break;
       case Initiative.HOUSING:
+        provideProjectServiceKey.value = housingProjectService;
         if (projectId) {
-          provideProjectServiceKey.value = housingProjectService;
           service = housingProjectService;
           provideResource.value = Resource.HOUSING_PROJECT;
           provideProjectRouteNameKey.value = RouteName.INT_HOUSING_PROJECT;

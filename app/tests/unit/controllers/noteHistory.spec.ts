@@ -171,7 +171,9 @@ describe('listBringForwardController', () => {
         title: 'Title',
         projectName: 'NAME',
         createdByFullName: 'Doe, John',
-        bringForwardDate: NOTE_HISTORY_LIST[0].bringForwardDate?.toISOString()
+        bringForwardDate: NOTE_HISTORY_LIST[0].bringForwardDate?.toISOString(),
+        escalateToDirector: false,
+        escalateToSupervisor: false
       }
     ]);
   });

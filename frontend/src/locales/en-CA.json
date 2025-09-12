@@ -586,6 +586,7 @@
     },
     "noteForm": {
       "bfDateReqd": "Bring forward date is a required field",
+      "bfNoteHint": "Provide a brief, factual summary of what occurred, when it happened, why it’s important, any associated risks, and follow-up actions taken. Please avoid personal opinions or subjective language use.",
       "cancel": "Cancel",
       "confirm": "Confirm",
       "created": "Created",
@@ -594,8 +595,10 @@
       "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
       "escalateToDirector": "Escalate to Director",
       "escalateToSupervisor": "Escalate to Supervisor",
+      "escalationEmailTitle": "New escalation in PCNS",
       "escalationTypeReqd": "Escalation type is a required field",
       "lastUpdated": "Last updated",
+      "note": "Note",
       "noteDeleted": "Note deleted",
       "noteDeleteFailed": "Failed to delete note",
       "noteSaved": "Note saved",

@@ -39,7 +39,7 @@ const routes: Array<RouteRecordRaw> = [
                 meta: { dynamicBreadcrumb: 'note' },
                 children: [
                   {
-                    path: ':noteHistoryId',
+                    path: ':noteHistoryId?',
                     name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
                     component: () => import('@/views/internal/note/NoteView.vue'),
                     beforeEnter: accessHandler,

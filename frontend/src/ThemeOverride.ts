@@ -29,6 +29,7 @@ export const ThemeOverride = definePreset(Material, {
       600: '#7AB8F9',
       700: '#5595D9',
       800: '#3470B1',
+      850: '#1A5A96',
       900: '#1E5189',
       950: '#013366'
     },

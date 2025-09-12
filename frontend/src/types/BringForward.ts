@@ -3,6 +3,8 @@ export type BringForward = {
   enquiryId?: string;
   noteId: string;
   electrificationProjectId?: string;
+  escalateToDirector?: boolean;
+  escalateToSupervisor?: boolean;
   housingProjectId?: string;
   title: string;
   projectName?: string;
