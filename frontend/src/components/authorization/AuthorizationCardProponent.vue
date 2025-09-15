@@ -52,7 +52,7 @@ const { t } = useI18n();
           <div class="label-field">{{ t('authorization.authorizationCardProponent.latestUpdates') }}</div>
           <div class="permit-data">
             {{
-              permit?.permitNote?.length
+              permit?.permitNote[0]
                 ? permit?.permitNote[0].note
                 : t('authorization.authorizationCardProponent.noUpdates')
             }}

@@ -67,8 +67,8 @@ describe('comsService test', () => {
         headers: {
           'Content-Disposition': `attachment; filename="${testObject.name}"`,
           'Content-Type': 'text/html',
-          [testKeys[0].key]: testKeys[0].value,
-          [testKeys[1].key]: testKeys[1].value
+          [testKeys[0]!.key]: testKeys[0]?.value,
+          [testKeys[1]!.key]: testKeys[1]?.value
         },
         params: {
           bucketId: testParams.bucketId,
@@ -96,8 +96,8 @@ describe('comsService test', () => {
         params: {
           bucketId: testParams.bucketId,
           tagset: {
-            [testKeys[0].key]: testKeys[0].value,
-            [testKeys[1].key]: testKeys[1].value
+            [testKeys[0]!.key]: testKeys[0]?.value,
+            [testKeys[1]!.key]: testKeys[1]?.value
           }
         }
       };

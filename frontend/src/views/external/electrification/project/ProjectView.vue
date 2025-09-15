@@ -124,196 +124,198 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div
-    v-if="!loading && getProject"
-    class="app-primary-color"
-  >
-    <div class="mt-10 flex justify-between">
-      <div>
-        <h1 class="mt-0 mb-2">
-          {{ getProject.projectName }}
-        </h1>
-      </div>
-      <Button
-        v-if="
-          canNavigate(NavigationPermission.EXT_ELECTRIFICATION) &&
-          getProject?.submissionType !== SubmissionType.INAPPLICABLE
-        "
-        class="p-button-sm header-btn mt-3"
-        :label="t('e.common.projectView.askMyNavigator')"
-        @click="
-          router.push({
-            name: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY
-          })
-        "
-      >
-        <AskMyNavigator />
-        {{ t('e.common.projectView.askMyNavigator') }}
-      </Button>
-    </div>
-
-    <Tabs
-      :value="activeTab"
-      class="mt-3"
-    >
-      <TabList>
-        <Tab :value="0">
-          <font-awesome-icon
-            class="mr-2 ellipsis-icon"
-            icon="fa-solid fa-file"
-          />
-          {{ t('e.common.projectView.tabAuthorizations') }}
-        </Tab>
-        <Tab :value="1">
-          <font-awesome-icon
-            class="mr-2 ellipsis-icon"
-            icon="fa-solid fa-file-circle-question"
-          />
-          {{ t('i.common.projectView.tabRelatedEnquiries') }}
-        </Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel :value="0">
-          <BasicProjectInfoCard
-            :assignee="assigneeName"
-            :created-by="createdByName"
-            :activity-id="getProject.activityId"
-            @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
-          />
-
-          <div
-            v-if="getNoteHistory.length"
-            class="bg-[var(--p-green-100)] p-4"
-          >
-            <div class="grid grid-cols-6 gap-4 items-center">
-              <div class="font-bold">Please be aware!</div>
-              <div class="font-bold">
-                Updated on {{ formatDate(getNoteHistory[0].updatedAt ?? getNoteHistory[0].createdAt) }}
-              </div>
-              <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0].note[0].note }}</div>
-              <div class="flex justify-end">
-                <Button
-                  class="p-button-sm header-btn"
-                  label="View all"
-                  outlined
-                  @click="noteHistoryVisible = true"
-                />
-              </div>
-            </div>
-          </div>
-
-          <div class="disclaimer-block p-8 mt-8">
-            {{ t('e.common.projectView.disclaimer') }}
-          </div>
-
-          <div>
-            <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
-          </div>
-          <div
-            v-if="!getAuthsNeeded?.length"
-            class="empty-block p-8 mb-2"
-          >
-            {{ t('e.common.projectView.requiredAuthsEmpty') }}
-          </div>
-          <RequiredAuths
-            v-if="getAuthsNeeded?.length"
-            :auths-needed="getAuthsNeeded"
-            :auths-not-needed="getAuthsNotNeeded"
-          />
-          <h3 class="mt-20 mb-8">{{ t('e.common.projectView.ongoingAuths') }}</h3>
-
-          <router-link
-            v-for="permit in getAuthsOnGoing"
-            :id="permit.permitId"
-            :key="permit.permitId"
-            :to="{
-              name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
-                ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
-                : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
-              params: { permitId: permit.permitId }
-            }"
-            @keydown.space.prevent="
-              router.push({
-                name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
-                  ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
-                  : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
-                params: { permitId: permit.permitId }
-              })
-            "
-          >
-            <AuthorizationCardProponent :permit="permit" />
-          </router-link>
-          <div class="empty-block p-8 mb-20">
-            {{ t('e.common.projectView.missingAuth') }}
-          </div>
-          <h3 class="mt-20 mb-8">{{ t('e.common.projectView.completedAuths') }}</h3>
-          <div
-            v-if="!getAuthsCompleted?.length"
-            class="empty-block p-8 mb-2"
-          >
-            {{ t('e.common.projectView.emptyCompletedAuths') }}
-          </div>
-          <router-link
-            v-for="permit in getAuthsCompleted"
-            :id="permit.permitId"
-            :key="permit.permitId"
-            :to="{
-              name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
-                ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
-                : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
-              params: { permitId: permit.permitId }
-            }"
-            @keydown.space.prevent="
-              router.push({
-                name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
-                  ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
-                  : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
-                params: { permitId: permit.permitId }
-              })
-            "
-          >
-            <AuthorizationCardLite :permit="permit" />
-          </router-link>
-        </TabPanel>
-
-        <TabPanel :value="1">
-          <div>
-            <div class="disclaimer-block p-8 mt-4 mb-8">
-              {{ t('e.common.projectView.relatedEnquiriesDesc') }}
-            </div>
-            <RelatedEnquiryListProponent
-              :loading="loading"
-              :enquiries="getRelatedEnquiries"
-              :project-id="projectId"
-            />
-          </div>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
-  </div>
-
-  <Dialog
-    v-model:visible="noteHistoryVisible"
-    :draggable="false"
-    :modal="true"
-    class="app-info-dialog w-6/12"
-  >
-    <template #header>
-      <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
-    </template>
-
+  <div>
     <div
-      v-for="history of getNoteHistory"
-      :key="history.noteHistoryId"
-      class="mb-5"
+      v-if="!loading && getProject"
+      class="app-primary-color"
     >
-      <div class="flex flex-col">
-        <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
-        <div class="font-bold">{{ history.title }}</div>
-        <div>{{ history.note[0].note }}</div>
+      <div class="mt-10 flex justify-between">
+        <div>
+          <h1 class="mt-0 mb-2">
+            {{ getProject.projectName }}
+          </h1>
+        </div>
+        <Button
+          v-if="
+            canNavigate(NavigationPermission.EXT_ELECTRIFICATION) &&
+            getProject?.submissionType !== SubmissionType.INAPPLICABLE
+          "
+          class="p-button-sm header-btn mt-3"
+          :label="t('e.common.projectView.askMyNavigator')"
+          @click="
+            router.push({
+              name: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY
+            })
+          "
+        >
+          <AskMyNavigator />
+          {{ t('e.common.projectView.askMyNavigator') }}
+        </Button>
       </div>
+
+      <Tabs
+        :value="activeTab"
+        class="mt-3"
+      >
+        <TabList>
+          <Tab :value="0">
+            <font-awesome-icon
+              class="mr-2 ellipsis-icon"
+              icon="fa-solid fa-file"
+            />
+            {{ t('e.common.projectView.tabAuthorizations') }}
+          </Tab>
+          <Tab :value="1">
+            <font-awesome-icon
+              class="mr-2 ellipsis-icon"
+              icon="fa-solid fa-file-circle-question"
+            />
+            {{ t('i.common.projectView.tabRelatedEnquiries') }}
+          </Tab>
+        </TabList>
+        <TabPanels>
+          <TabPanel :value="0">
+            <BasicProjectInfoCard
+              :assignee="assigneeName"
+              :created-by="createdByName"
+              :activity-id="getProject.activityId"
+              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+            />
+
+            <div
+              v-if="getNoteHistory.length"
+              class="bg-[var(--p-green-100)] p-4"
+            >
+              <div class="grid grid-cols-6 gap-4 items-center">
+                <div class="font-bold">Please be aware!</div>
+                <div class="font-bold">
+                  Updated on {{ formatDate(getNoteHistory[0]!.updatedAt ?? getNoteHistory[0]!.createdAt) }}
+                </div>
+                <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0]!.note[0]!.note }}</div>
+                <div class="flex justify-end">
+                  <Button
+                    class="p-button-sm header-btn"
+                    label="View all"
+                    outlined
+                    @click="noteHistoryVisible = true"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="disclaimer-block p-8 mt-8">
+              {{ t('e.common.projectView.disclaimer') }}
+            </div>
+
+            <div>
+              <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
+            </div>
+            <div
+              v-if="!getAuthsNeeded?.length"
+              class="empty-block p-8 mb-2"
+            >
+              {{ t('e.common.projectView.requiredAuthsEmpty') }}
+            </div>
+            <RequiredAuths
+              v-if="getAuthsNeeded?.length"
+              :auths-needed="getAuthsNeeded"
+              :auths-not-needed="getAuthsNotNeeded"
+            />
+            <h3 class="mt-20 mb-8">{{ t('e.common.projectView.ongoingAuths') }}</h3>
+
+            <router-link
+              v-for="permit in getAuthsOnGoing"
+              :id="permit.permitId"
+              :key="permit.permitId"
+              :to="{
+                name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
+                  ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
+                  : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
+                params: { permitId: permit.permitId }
+              }"
+              @keydown.space.prevent="
+                router.push({
+                  name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
+                    ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
+                    : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
+                  params: { permitId: permit.permitId }
+                })
+              "
+            >
+              <AuthorizationCardProponent :permit="permit" />
+            </router-link>
+            <div class="empty-block p-8 mb-20">
+              {{ t('e.common.projectView.missingAuth') }}
+            </div>
+            <h3 class="mt-20 mb-8">{{ t('e.common.projectView.completedAuths') }}</h3>
+            <div
+              v-if="!getAuthsCompleted?.length"
+              class="empty-block p-8 mb-2"
+            >
+              {{ t('e.common.projectView.emptyCompletedAuths') }}
+            </div>
+            <router-link
+              v-for="permit in getAuthsCompleted"
+              :id="permit.permitId"
+              :key="permit.permitId"
+              :to="{
+                name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
+                  ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
+                  : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
+                params: { permitId: permit.permitId }
+              }"
+              @keydown.space.prevent="
+                router.push({
+                  name: canNavigate(NavigationPermission.INT_ELECTRIFICATION)
+                    ? RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT
+                    : RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
+                  params: { permitId: permit.permitId }
+                })
+              "
+            >
+              <AuthorizationCardLite :permit="permit" />
+            </router-link>
+          </TabPanel>
+
+          <TabPanel :value="1">
+            <div>
+              <div class="disclaimer-block p-8 mt-4 mb-8">
+                {{ t('e.common.projectView.relatedEnquiriesDesc') }}
+              </div>
+              <RelatedEnquiryListProponent
+                :loading="loading"
+                :enquiries="getRelatedEnquiries"
+                :project-id="projectId"
+              />
+            </div>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
     </div>
-  </Dialog>
+
+    <Dialog
+      :visible="noteHistoryVisible"
+      :draggable="false"
+      :modal="true"
+      class="app-info-dialog w-6/12"
+    >
+      <template #header>
+        <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
+      </template>
+
+      <div
+        v-for="history of getNoteHistory"
+        :key="history.noteHistoryId"
+        class="mb-5"
+      >
+        <div class="flex flex-col">
+          <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
+          <div class="font-bold">{{ history.title }}</div>
+          <div>{{ history.note[0]!.note }}</div>
+        </div>
+      </div>
+    </Dialog>
+  </div>
 </template>
 
 <style scoped lang="scss">

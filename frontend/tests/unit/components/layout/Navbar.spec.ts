@@ -55,8 +55,8 @@ describe('Navbar.vue', () => {
       });
       const linkEle = wrapper.findAll('a');
       expect(linkEle).toHaveLength(2);
-      expect(linkEle[0].text()).toBe('Home');
-      expect(linkEle[1].text()).toBe('Submissions');
+      expect(linkEle[0]!.text()).toBe('Home');
+      expect(linkEle[1]!.text()).toBe('Submissions');
     });
 
     it('shows correct navbar when false', async () => {
@@ -77,7 +77,7 @@ describe('Navbar.vue', () => {
       });
       const linkEle = wrapper.findAll('a');
       expect(linkEle).toHaveLength(1);
-      expect(linkEle[0].text()).toBe('Home');
+      expect(linkEle[0]!.text()).toBe('Home');
     });
   });
 });

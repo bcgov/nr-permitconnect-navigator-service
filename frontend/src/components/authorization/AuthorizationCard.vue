@@ -128,10 +128,8 @@ function toCopy(toCopy: string) {
           v-if="permit.permitNote?.length"
           class="pb-2 mt-2 mr-3"
         >
-          <div>
-            <span>{{ ' ' + formatDateTime(permit.permitNote[0].createdAt) }},</span>
-            {{ permit.permitNote[0].note }}
-          </div>
+          <span>{{ ' ' + formatDateTime(permit.permitNote[0]!.createdAt) }},</span>
+          {{ permit.permitNote[0]!.note }}
         </div>
       </div>
     </template>

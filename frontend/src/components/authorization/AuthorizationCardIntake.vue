@@ -35,12 +35,12 @@ const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 
 // Actions
 const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
-  const srcSysCompare = codeDisplay.SourceSystem[a.sourceSystem].localeCompare(
-    codeDisplay.SourceSystem[b.sourceSystem],
-    locale.value,
-    { sensitivity: 'base' }
-  );
-  if (srcSysCompare !== 0) return srcSysCompare;
+  const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
+  const sourceB = codeDisplay.SourceSystem[b.sourceSystem];
+  if (sourceA && sourceB) {
+    const srcSysCompare = sourceA.localeCompare(sourceB, locale.value, { sensitivity: 'base' });
+    if (srcSysCompare !== 0) return srcSysCompare;
+  }
   return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
 };
 

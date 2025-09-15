@@ -119,7 +119,7 @@ async function onProcessUserAccessRequest() {
       );
 
       // Change status back to approved
-      if (approvedAccess || deniedRevocation) {
+      if (usersAndAccessRequests.value[idx] && (approvedAccess || deniedRevocation)) {
         usersAndAccessRequests.value[idx].accessRequest &&
           (usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
             ? AccessRequestStatus.APPROVED
@@ -168,7 +168,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           // Delete subject group
           response = await yarsService.deleteSubjectGroup(
             userAccessRequest.user.sub,
-            userAccessRequest.user.groups[0].groupId
+            userAccessRequest.user.groups[0]!.groupId
           );
         } else {
           // Create user access request
@@ -176,7 +176,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
             user: omittedUser,
             accessRequest: {
               grant: false,
-              groupId: userAccessRequest.user.groups[0].groupId
+              groupId: userAccessRequest.user.groups[0]!.groupId
             }
           });
         }
@@ -187,8 +187,8 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           if (admin) {
             usersAndAccessRequests.value.splice(idx, 1);
           } else {
-            usersAndAccessRequests.value[idx].accessRequest = response.data;
-            usersAndAccessRequests.value[idx].user.status = PENDING_STATUSES.PENDING_REVOCATION;
+            usersAndAccessRequests.value[idx]!.accessRequest = response.data;
+            usersAndAccessRequests.value[idx]!.user.status = PENDING_STATUSES.PENDING_REVOCATION;
           }
 
           toast.success(successMessage);
@@ -225,7 +225,7 @@ async function onUserGroupChange(group: Group) {
 
       if (response) {
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === user.userId);
-        usersAndAccessRequests.value[idx].user.groups = [group];
+        usersAndAccessRequests.value[idx]!.user.groups = [group];
 
         toast.success(`${t('i.user.userManagementView.updateSuccess')}`);
       }
@@ -346,121 +346,123 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <ProgressLoader v-if="loading" />
+  <div>
+    <ProgressLoader v-if="loading" />
 
-  <ViewHeader :header="t('i.user.userManagementView.header')" />
+    <ViewHeader :header="t('i.user.userManagementView.header')" />
 
-  <UserCreateModal
-    v-if="createUserModalVisible"
-    v-model:visible="createUserModalVisible"
-    @user-create:request="onCreateUserAccessRequest"
-  />
-  <UserManageModal
-    v-if="manageUserModalVisible"
-    v-model:visible="manageUserModalVisible"
-    @user-manage:save="onUserGroupChange"
-  />
-  <UserProcessModal
-    v-if="userProcessModalVisible"
-    v-model:visible="userProcessModalVisible"
-    v-model:action="userProcessModalAction"
-    v-model:request-type="userProcessRequestType"
-    @user-action:process="() => onProcessUserAccessRequest()"
-  />
-  <Tabs
-    v-if="authzStore.isInGroup([GroupName.ADMIN])"
-    :value="activeTab"
-  >
-    <TabList>
-      <Tab :value="0">{{ t('i.user.userManagementView.tab0') }}</Tab>
-      <Tab :value="1">{{ t('i.user.userManagementView.tab1') }}</Tab>
-    </TabList>
-    <TabPanels>
-      <TabPanel :value="0">
-        <div class="flex justify-between">
-          <Button
-            :label="t('i.user.userManagementView.createUser')"
-            type="submit"
-            icon="pi pi-plus"
-            @click="createUserModalVisible = true"
-          />
-          <IconField icon-position="left">
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="filters['global'].value"
-              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
-              class="search-input"
-            />
-          </IconField>
-        </div>
-        <UserTable
-          v-model:filters="filters"
-          :users-and-access-requests="getApprovedUsers"
-          class="mt-6"
-          @user-table:manage="
-            (userAccessRequest: UserAccessRequest) => {
-              selectedUserAccessRequest = userAccessRequest;
-              manageUserModalVisible = true;
-            }
-          "
-          @user-table:revoke="onRevoke"
-        />
-      </TabPanel>
-      <TabPanel :value="1">
-        <div class="flex justify-end">
-          <IconField icon-position="left">
-            <InputIcon class="pi pi-search" />
-            <InputText
-              v-model="filters['global'].value"
-              :placeholder="t('i.user.userManagementView.searchPlaceholder')"
-              class="search-input"
-            />
-          </IconField>
-        </div>
-        <UserTable
-          v-model:filters="filters"
-          :users-and-access-requests="getAccessRequests"
-          class="mt-6"
-          :request-table="true"
-          @user-table:approve-request="
-            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
-          "
-          @user-table:deny-request="
-            (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
-          "
-        />
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
-  <div v-else>
-    <div class="flex justify-between">
-      <Button
-        :label="t('i.user.userManagementView.createUser')"
-        type="submit"
-        icon="pi pi-plus"
-        @click="createUserModalVisible = true"
-      />
-      <IconField icon-position="left">
-        <InputIcon class="pi pi-search" />
-        <InputText
-          v-model="filters['global'].value"
-          :placeholder="t('i.user.userManagementView.searchPlaceholder')"
-          class="search-input"
-        />
-      </IconField>
-    </div>
-    <UserTable
-      v-model:filters="filters"
-      :users-and-access-requests="usersAndAccessRequests"
-      class="mt-6"
-      @user-table:manage="
-        (userAccessRequest: UserAccessRequest) => {
-          selectedUserAccessRequest = userAccessRequest;
-          manageUserModalVisible = true;
-        }
-      "
-      @user-table:revoke="onRevoke"
+    <UserCreateModal
+      v-if="createUserModalVisible"
+      :visible="createUserModalVisible"
+      @user-create:request="onCreateUserAccessRequest"
     />
+    <UserManageModal
+      v-if="manageUserModalVisible"
+      :visible="manageUserModalVisible"
+      @user-manage:save="onUserGroupChange"
+    />
+    <UserProcessModal
+      v-if="userProcessModalVisible"
+      :visible="userProcessModalVisible"
+      :action="userProcessModalAction"
+      :request-type="userProcessRequestType"
+      @user-action:process="() => onProcessUserAccessRequest()"
+    />
+    <Tabs
+      v-if="authzStore.isInGroup([GroupName.ADMIN])"
+      :value="activeTab"
+    >
+      <TabList>
+        <Tab :value="0">{{ t('i.user.userManagementView.tab0') }}</Tab>
+        <Tab :value="1">{{ t('i.user.userManagementView.tab1') }}</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel :value="0">
+          <div class="flex justify-between">
+            <Button
+              :label="t('i.user.userManagementView.createUser')"
+              type="submit"
+              icon="pi pi-plus"
+              @click="createUserModalVisible = true"
+            />
+            <IconField icon-position="left">
+              <InputIcon class="pi pi-search" />
+              <InputText
+                v-model="filters['global'].value"
+                :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+                class="search-input"
+              />
+            </IconField>
+          </div>
+          <UserTable
+            :filters="filters"
+            :users-and-access-requests="getApprovedUsers"
+            class="mt-6"
+            @user-table:manage="
+              (userAccessRequest: UserAccessRequest) => {
+                selectedUserAccessRequest = userAccessRequest;
+                manageUserModalVisible = true;
+              }
+            "
+            @user-table:revoke="onRevoke"
+          />
+        </TabPanel>
+        <TabPanel :value="1">
+          <div class="flex justify-end">
+            <IconField icon-position="left">
+              <InputIcon class="pi pi-search" />
+              <InputText
+                v-model="filters['global'].value"
+                :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+                class="search-input"
+              />
+            </IconField>
+          </div>
+          <UserTable
+            :filters="filters"
+            :users-and-access-requests="getAccessRequests"
+            class="mt-6"
+            :request-table="true"
+            @user-table:approve-request="
+              (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.APPROVE)
+            "
+            @user-table:deny-request="
+              (userAccessRequest: UserAccessRequest) => onAccessRequestAction(userAccessRequest, REQUEST_ACTION.DENY)
+            "
+          />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+    <div v-else>
+      <div class="flex justify-between">
+        <Button
+          :label="t('i.user.userManagementView.createUser')"
+          type="submit"
+          icon="pi pi-plus"
+          @click="createUserModalVisible = true"
+        />
+        <IconField icon-position="left">
+          <InputIcon class="pi pi-search" />
+          <InputText
+            v-model="filters['global'].value"
+            :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+            class="search-input"
+          />
+        </IconField>
+      </div>
+      <UserTable
+        :filters="filters"
+        :users-and-access-requests="usersAndAccessRequests"
+        class="mt-6"
+        @user-table:manage="
+          (userAccessRequest: UserAccessRequest) => {
+            selectedUserAccessRequest = userAccessRequest;
+            manageUserModalVisible = true;
+          }
+        "
+        @user-table:revoke="onRevoke"
+      />
+    </div>
   </div>
 </template>
 

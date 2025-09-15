@@ -40,7 +40,7 @@ const userIdToName: Ref<Record<string, string>> = ref({});
 // Actions
 function getRouteToObject(data: Enquiry) {
   let toObject = {};
-  if (enquiries && enquiries[0].relatedActivityId) {
+  if (enquiries?.[0]?.relatedActivityId) {
     toObject = {
       name: enquiryRouteName,
       params: { enquiryId: data.enquiryId, projectId }
@@ -74,7 +74,7 @@ onBeforeMount(async () => {
 
 <template>
   <DataTable
-    v-model:selection="selection"
+    :selection="selection"
     :loading="loading"
     :value="enquiries"
     data-key="enquiryId"
@@ -132,7 +132,7 @@ onBeforeMount(async () => {
       field="submittedBy"
       :header="t('relatedEnquiryListProponent.submittedBy')"
       :sortable="true"
-      :sort-field="(event) => userIdToName[event.createdBy]"
+      :sort-field="(event) => userIdToName[event.createdBy]!"
     >
       <template #body="{ data }">
         <span class="ml-2">

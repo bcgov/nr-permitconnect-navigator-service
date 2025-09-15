@@ -39,72 +39,74 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <Card :id="noteHistory.noteHistoryId">
-    <template #title>
-      <div class="flex items-center">
-        <div class="grow">
-          <h3 class="mb-0">
-            {{ noteHistory.title }}
-            <span
-              v-if="noteHistory.bringForwardState"
-              data-test="bf-title"
-            >
-              {{ `(${noteHistory.bringForwardState})` }}
-            </span>
-          </h3>
+  <div>
+    <Card :id="noteHistory.noteHistoryId">
+      <template #title>
+        <div class="flex items-center">
+          <div class="grow">
+            <h3 class="mb-0">
+              {{ noteHistory.title }}
+              <span
+                v-if="noteHistory.bringForwardState"
+                data-test="bf-title"
+              >
+                {{ `(${noteHistory.bringForwardState})` }}
+              </span>
+            </h3>
+          </div>
+          <Button
+            class="p-button-outlined"
+            aria-label="Edit"
+            :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
+            @click="noteModalVisible = true"
+          >
+            <font-awesome-icon
+              class="pr-2"
+              icon="fa-solid fa-edit"
+            />
+            Edit
+          </Button>
         </div>
-        <Button
-          class="p-button-outlined"
-          aria-label="Edit"
-          :disabled="!editable || !useAuthZStore().can(appStore.getInitiative, Resource.NOTE, Action.UPDATE)"
-          @click="noteModalVisible = true"
-        >
-          <font-awesome-icon
-            class="pr-2"
-            icon="fa-solid fa-edit"
-          />
-          Edit
-        </Button>
-      </div>
-      <Divider type="solid" />
-    </template>
-    <template #content>
-      <div class="grid grid-cols-4 gap-4">
-        <p>
-          <span class="key font-bold">Date:</span>
-          {{ formatDateShort(noteHistory.createdAt) }}
-        </p>
-        <p>
-          <span class="key font-bold">Author:</span>
-          {{ userName }}
-        </p>
-        <p>
-          <span class="key font-bold">Note type:</span>
-          {{ noteHistory.type }}
-        </p>
-        <div>
-          <p v-if="noteHistory.bringForwardDate">
-            <span class="key font-bold">Bring forward date:</span>
-            {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <div class="grid grid-cols-4 gap-4">
+          <p>
+            <span class="key font-bold">Date:</span>
+            {{ formatDateShort(noteHistory.createdAt) }}
           </p>
+          <p>
+            <span class="key font-bold">Author:</span>
+            {{ userName }}
+          </p>
+          <p>
+            <span class="key font-bold">Note type:</span>
+            {{ noteHistory.type }}
+          </p>
+          <div>
+            <p v-if="noteHistory.bringForwardDate">
+              <span class="key font-bold">Bring forward date:</span>
+              {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
+            </p>
+          </div>
+          <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0]?.note }}</p>
         </div>
-        <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0].note }}</p>
-      </div>
-    </template>
-  </Card>
+      </template>
+    </Card>
 
-  <NoteHistoryModal
-    v-if="noteHistory && noteModalVisible"
-    v-model:visible="noteModalVisible"
-    :activity-id="noteHistory.activityId"
-    :note-history="noteHistory"
-    @delete-note="
-      (note: Note) => {
-        emit('deleteNoteHistory', note);
-      }
-    "
-    @update-note="(history: NoteHistory) => emit('updateNoteHistory', history)"
-  />
+    <NoteHistoryModal
+      v-if="noteHistory && noteModalVisible"
+      :visible="noteModalVisible"
+      :activity-id="noteHistory.activityId"
+      :note-history="noteHistory"
+      @delete-note="
+        (note: Note) => {
+          emit('deleteNoteHistory', note);
+        }
+      "
+      @update-note="(history: NoteHistory) => emit('updateNoteHistory', history)"
+    />
+  </div>
 </template>
 
 <style scoped lang="scss">

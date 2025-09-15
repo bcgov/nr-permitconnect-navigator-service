@@ -98,7 +98,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   // If has permit description convert \n to <br>
   if (enquiryDescription.includes('Tracking ID:')) {
     const descriptionSplit = enquiryDescription.split('\n\n');
-    permitDescription = descriptionSplit[0].replace(/\n/g, '<br>') + '<br><br>';
+    permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
     enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
   }
 
@@ -192,7 +192,7 @@ async function loadEnquiry() {
 }
 
 function onInvalidSubmit(e: any) {
-  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]) : []));
+  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]!) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 

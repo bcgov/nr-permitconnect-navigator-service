@@ -102,7 +102,8 @@ function updateQueryParams() {
 
 onBeforeMount(() => {
   // If contacts > largest page option a add page display option to include all contacts
-  if (contacts?.length && contacts.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
+  const rows = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
+  if (contacts?.length && rows && contacts.length > rows) {
     rowsPerPageOptions.value.push(contacts.length);
   }
 
@@ -125,8 +126,8 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
-    v-model:filters="filters"
-    v-model:selection="selection"
+    :filters="filters"
+    :selection="selection"
     :loading="loading"
     :value="contacts"
     data-key="contactId"
@@ -256,8 +257,8 @@ onBeforeMount(() => {
       </template>
     </Column>
     <UpdateContactModal
-      v-model:visible="updateContactModalVisible"
-      v-model:contact="selection"
+      :visible="updateContactModalVisible"
+      :contact="selection"
     />
   </DataTable>
 </template>

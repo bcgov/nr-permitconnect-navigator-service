@@ -267,7 +267,7 @@ export function partition<T>(
 ): [Array<T>, Array<T>] {
   return arr.reduce(
     (acc, item, index, array) => {
-      acc[+!predicate(item, index, array)].push(item);
+      acc[+!predicate(item, index, array)]!.push(item);
       return acc;
     },
     [[], []] as [Array<T>, Array<T>]

@@ -46,7 +46,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const FILTER_OPTIONS: FilterOption[] = [
+const FILTER_OPTIONS: readonly FilterOption[] = [
   {
     label: 'Active projects',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -70,7 +70,7 @@ const pagination: Ref<Pagination> = ref({
 });
 const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]);
+const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 /**
  * Filter submissions based on status
@@ -165,7 +165,8 @@ function updateQueryParams() {
 }
 
 onBeforeMount(() => {
-  if (submissions?.length && submissions.length > rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1]) {
+  const lastRowsPerPage = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
+  if (submissions && lastRowsPerPage && submissions.length > lastRowsPerPage) {
     rowsPerPageOptions.value.push(submissions.length);
   }
 });
@@ -225,7 +226,7 @@ onBeforeMount(() => {
           <Select
             v-model="selectedFilter"
             class="col-span-1"
-            :options="FILTER_OPTIONS"
+            :options="FILTER_OPTIONS as FilterOption[]"
             option-label="label"
           />
           <IconField

@@ -64,7 +64,7 @@ onBeforeMount(async () => {
 
     if (getPermit.value?.updatedBy) {
       const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
-      updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+      if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
     }
   } catch {
     toast.error(t('e.common.permitStatusView.unableToLoad'));
