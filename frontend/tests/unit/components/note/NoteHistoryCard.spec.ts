@@ -152,10 +152,10 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').exists()).toBe(false);
     expect(pTag.length).toBe(4);
-    expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY.type}`);
-    expect(pTag[3].text()).toBe(TEST_NOTE_HISTORY.note[0].note);
+    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
+    expect(pTag[1]!.text()).toBe('Author:');
+    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY.type}`);
+    expect(pTag[3]!.text()).toBe(TEST_NOTE_HISTORY.note[0]?.note);
   });
 
   it('displays p tags for unresolved notes', async () => {
@@ -164,11 +164,11 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState})`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY_UNRESOLVED.type}`);
-    expect(pTag[3].text()).toBe(`Bring forward date: ${formatDate(tomorrowDate)}`);
-    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0].note);
+    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
+    expect(pTag[1]!.text()).toBe('Author:');
+    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY_UNRESOLVED.type}`);
+    expect(pTag[3]!.text()).toBe(`Bring forward date: ${formatDate(tomorrowDate)}`);
+    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0]?.note);
   });
 
   it('displays p tags for resolved notes', async () => {
@@ -177,10 +177,10 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`(${TEST_NOTE_HISTORY_RESOLVED.bringForwardState})`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0].text()).toBe(`Date: ${formatDateShort(currentDate)}`);
-    expect(pTag[1].text()).toBe('Author:');
-    expect(pTag[2].text()).toBe(`Note type: ${TEST_NOTE_HISTORY_RESOLVED.type}`);
-    expect(pTag[3].text()).toBe(`Bring forward date: ${formatDate(yesterdayDate)}`);
-    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0].note);
+    expect(pTag[0]!.text()).toBe(`Date: ${formatDateShort(currentDate)}`);
+    expect(pTag[1]!.text()).toBe('Author:');
+    expect(pTag[2]!.text()).toBe(`Note type: ${TEST_NOTE_HISTORY_RESOLVED.type}`);
+    expect(pTag[3]!.text()).toBe(`Bring forward date: ${formatDate(yesterdayDate)}`);
+    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0]?.note);
   });
 });

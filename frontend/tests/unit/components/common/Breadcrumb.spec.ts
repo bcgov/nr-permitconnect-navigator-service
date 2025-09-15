@@ -199,8 +199,8 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0].text()).toBe('Static One');
-    expect(currentSpans[0].text()).toBe('Static Two');
+    expect(links[0]!.text()).toBe('Static One');
+    expect(currentSpans[0]!.text()).toBe('Static Two');
   });
 
   test('renders dynamic "project" breadcrumb as link with truncation (not last item)', async () => {
@@ -222,8 +222,8 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0].text()).toBe(testProject.projectName.substring(0, 10) + '...');
-    const tooltipEl = links[0].find('[title]');
+    expect(links[0]!.text()).toBe(testProject.projectName.substring(0, 10) + '...');
+    const tooltipEl = links[0]!.find('[title]');
     expect(tooltipEl.exists()).toBe(true);
     expect(tooltipEl.attributes('title')).toBe(testProject.projectName);
   });
@@ -247,7 +247,7 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(currentSpans[0].text()).toBe(testProject.projectName);
+    expect(currentSpans[0]!.text()).toBe(testProject.projectName);
   });
 
   test('renders "...Loading" when store is not set', () => {
@@ -265,7 +265,7 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0].text()).toBe('...Loading');
+    expect(links[0]!.text()).toBe('...Loading');
   });
 
   test('renders dynamic "enquiry" breadcrumb (last item)', async () => {
@@ -287,7 +287,7 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(currentSpans[0].text()).toBe(`Enquiry ${testEnquiry.activityId}`);
+    expect(currentSpans[0]!.text()).toBe(`Enquiry ${testEnquiry.activityId}`);
   });
 
   test('renders dynamic "enquiry" breadcrumb as link with truncation (not last item)', async () => {
@@ -309,7 +309,7 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0].text()).toBe(`Enquiry ${testEnquiry.activityId}`.substring(0, 10) + '...');
+    expect(links[0]!.text()).toBe(`Enquiry ${testEnquiry.activityId}`.substring(0, 10) + '...');
   });
 
   test('renders dynamic "permit" breadcrumb (last item)', async () => {
@@ -330,7 +330,7 @@ describe('Breadcrumb.vue', () => {
     const currentSpans = wrapper.findAll('span.breadcrumb-current');
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(currentSpans[0].text()).toBe(testPermit.permitType.name);
+    expect(currentSpans[0]!.text()).toBe(testPermit.permitType.name);
   });
 
   test('renders dynamic "permit" breadcrumb as link with truncation (not last item)', async () => {
@@ -351,7 +351,7 @@ describe('Breadcrumb.vue', () => {
     const currentSpans = wrapper.findAll('span.breadcrumb-current');
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0].text()).toBe(testPermit.permitType.name.substring(0, 10) + '...');
+    expect(links[0]!.text()).toBe(testPermit.permitType.name.substring(0, 10) + '...');
   });
 
   test('renders default dynamic breadcrumb with non defined dynamicBreadcrumb type', () => {
@@ -365,7 +365,7 @@ describe('Breadcrumb.vue', () => {
 
     const wrapper = mountComponent();
     const links = wrapper.findAll('a.breadcrumb-link');
-    expect(links[0].text()).toBe('Missing Label');
+    expect(links[0]!.text()).toBe('Missing Label');
   });
 
   test('getRouteNameFromFirstChild returns child name through recursion', () => {

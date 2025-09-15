@@ -89,7 +89,7 @@ onBeforeMount(() => {
               {{ noteHistory.bringForwardDate ? formatDate(noteHistory.bringForwardDate) : '' }}
             </p>
           </div>
-          <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0].note }}</p>
+          <p class="col-span-12 mt-0 mb-0 note-content">{{ noteHistory.note[0]?.note }}</p>
         </div>
       </template>
     </Card>

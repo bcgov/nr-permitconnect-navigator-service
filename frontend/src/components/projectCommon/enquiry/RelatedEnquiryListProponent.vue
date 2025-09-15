@@ -132,7 +132,7 @@ onBeforeMount(async () => {
       field="submittedBy"
       :header="t('relatedEnquiryListProponent.submittedBy')"
       :sortable="true"
-      :sort-field="(event) => userIdToName[event.createdBy]"
+      :sort-field="(event) => userIdToName[event.createdBy]!"
     >
       <template #body="{ data }">
         <span class="ml-2">

@@ -46,7 +46,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const FILTER_OPTIONS: FilterOption[] = [
+const FILTER_OPTIONS: readonly FilterOption[] = [
   {
     label: 'Active projects',
     statuses: [ApplicationStatus.NEW, ApplicationStatus.IN_PROGRESS, ApplicationStatus.DELAYED]
@@ -226,7 +226,7 @@ onBeforeMount(() => {
           <Select
             v-model="selectedFilter"
             class="col-span-1"
-            :options="FILTER_OPTIONS"
+            :options="FILTER_OPTIONS as FilterOption[]"
             option-label="label"
           />
           <IconField
