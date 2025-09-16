@@ -34,7 +34,6 @@ import {
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
-import { deduplicateByKey } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
@@ -57,6 +56,7 @@ const projectService = inject(projectServiceKey);
 
 // Composables
 const toast = useToast();
+const route = useRoute();
 const router = useRouter();
 
 // Store
@@ -66,10 +66,9 @@ const authzStore = useAuthZStore();
 const { getProfile } = storeToRefs(authnStore);
 
 // State
-const route = useRoute();
 const accordionIndex: Ref<string | null> = ref(null);
 const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
-const relevantBringForwards: Ref<Array<BringForward>> = ref([]);
+const relevantBringForwards: Ref<BringForward[]> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 const showToggle: Ref<boolean> = ref(true);
 
@@ -188,18 +187,22 @@ function refreshStatistics() {
     });
 }
 
-function sortRelevantBringForwards() {
-  relevantBringForwards.value.sort((a, b) => {
-    if (isPast(a.bringForwardDate) && isPast(b.bringForwardDate)) {
+function sortRelevantBringForwards(filteredBringForwards: BringForward[]) {
+  return filteredBringForwards.sort((a, b) => {
+    const isPastA = isPast(a.bringForwardDate);
+    const isPastB = isPast(b.bringForwardDate);
+    const timeA = new Date(a.bringForwardDate).getTime();
+    const timeB = new Date(b.bringForwardDate).getTime();
+    if (isPastA && isPastB) {
       // Both past, sort ascending
-      return new Date(a.bringForwardDate).getTime() - new Date(b.bringForwardDate).getTime();
-    } else if (isPast(a.bringForwardDate)) {
+      return timeA - timeB;
+    } else if (isPastA) {
       return -1; // a is past, b is not, a comes first
-    } else if (isPast(b.bringForwardDate)) {
+    } else if (isPastB) {
       return 1; // b is past, a is not, b comes first
     } else {
       // Both future, sort ascending
-      return new Date(a.bringForwardDate).getTime() - new Date(b.bringForwardDate).getTime();
+      return timeA - timeB;
     }
   });
 }
@@ -253,23 +256,17 @@ watch(activeTabIndex, (newIndex) => {
 });
 
 watchEffect(() => {
-  relevantBringForwards.value = bringForward.value.filter((x) => {
-    return (
+  const filteredBringForwards = bringForward.value.filter((x) => {
+    const { pastOrToday, withinMonth } = getBringForwardInterval(x);
+    const assignedAndWithinMonth =
       (x.createdByFullName === getProfile.value?.name ||
         myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
         myAssignedTo.value.has(x.housingProjectId ?? '')) &&
-      (getBringForwardInterval(x).pastOrToday || getBringForwardInterval(x).withinMonth)
-    );
+      (pastOrToday || withinMonth);
+    const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && x.escalateToSupervisor;
+    return assignedAndWithinMonth || escalated;
   });
-
-  // Get bring forwards that are escalated to supervisor if user is in supervisor group
-  if (authzStore.isInGroup([GroupName.SUPERVISOR])) {
-    bringForward.value.forEach((bf) => {
-      if (bf.escalateToSupervisor) relevantBringForwards.value.push(bf);
-    });
-  }
-  relevantBringForwards.value = deduplicateByKey(relevantBringForwards.value, 'noteId');
-  sortRelevantBringForwards();
+  relevantBringForwards.value = sortRelevantBringForwards(filteredBringForwards);
 });
 </script>
 
