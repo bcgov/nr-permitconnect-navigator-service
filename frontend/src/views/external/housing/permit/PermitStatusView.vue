@@ -116,7 +116,7 @@ onBeforeMount(async () => {
       />
     </div>
     <AuthorizationStatusDescriptionModal
-      :visible="descriptionModalVisible"
+      v-model:visible="descriptionModalVisible"
       dismissable-mask
     />
   </div>

@@ -95,8 +95,8 @@ onBeforeMount(() => {
     </Card>
 
     <NoteHistoryModal
-      v-if="noteHistory && noteModalVisible"
-      :visible="noteModalVisible"
+      v-if="noteHistory"
+      v-model:visible="noteModalVisible"
       :activity-id="noteHistory.activityId"
       :note-history="noteHistory"
       @delete-note="

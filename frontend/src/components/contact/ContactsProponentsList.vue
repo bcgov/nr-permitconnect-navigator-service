@@ -257,7 +257,7 @@ onBeforeMount(() => {
       </template>
     </Column>
     <UpdateContactModal
-      :visible="updateContactModalVisible"
+      v-model:visible="updateContactModalVisible"
       :contact="selection"
     />
   </DataTable>

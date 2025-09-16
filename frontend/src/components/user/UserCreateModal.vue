@@ -100,7 +100,7 @@ watchEffect(async () => {
 
 <template>
   <Dialog
-    :visible="visible"
+    v-model:visible="visible"
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-6/12"

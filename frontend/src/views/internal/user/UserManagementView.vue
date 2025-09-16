@@ -353,17 +353,17 @@ onBeforeMount(async () => {
 
     <UserCreateModal
       v-if="createUserModalVisible"
-      :visible="createUserModalVisible"
+      v-model:visible="createUserModalVisible"
       @user-create:request="onCreateUserAccessRequest"
     />
     <UserManageModal
       v-if="manageUserModalVisible"
-      :visible="manageUserModalVisible"
+      v-model:visible="manageUserModalVisible"
       @user-manage:save="onUserGroupChange"
     />
     <UserProcessModal
       v-if="userProcessModalVisible"
-      :visible="userProcessModalVisible"
+      v-model:visible="userProcessModalVisible"
       :action="userProcessModalAction"
       :request-type="userProcessRequestType"
       @user-action:process="() => onProcessUserAccessRequest()"
