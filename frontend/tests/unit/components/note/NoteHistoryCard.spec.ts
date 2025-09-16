@@ -15,6 +15,12 @@ import type { Note, NoteHistory } from '@/types';
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),

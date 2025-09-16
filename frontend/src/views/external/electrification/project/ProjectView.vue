@@ -294,7 +294,7 @@ onBeforeMount(async () => {
     </div>
 
     <Dialog
-      :visible="noteHistoryVisible"
+      v-model:visible="noteHistoryVisible"
       :draggable="false"
       :modal="true"
       class="app-info-dialog w-6/12"

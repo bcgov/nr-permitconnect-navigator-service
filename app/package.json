@@ -60,7 +60,7 @@
   "dependencies": {
     "@prisma/client": "^6.16.1",
     "@types/proj4": "^2.19.0",
-    "axios": "^1.11.0",
+    "axios": "^1.12.2",
     "compression": "^1.8.1",
     "config": "^4.1.1",
     "cors": "^2.8.5",
