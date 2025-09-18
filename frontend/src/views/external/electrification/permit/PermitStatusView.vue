@@ -13,7 +13,7 @@ import { Button, useToast } from '@/lib/primevue';
 import { useProjectStore, usePermitStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/permit';
 
 import { contactService, electrificationProjectService, permitService } from '@/services';
 
@@ -46,9 +46,7 @@ const updatedBy: Ref<string | undefined> = ref(undefined);
 const hideTimelineFromScreenReader = computed(() => {
   return (
     getPermit?.value &&
-    (getPermit.value.authStatus === PermitAuthorizationStatus.ABANDONED ||
-      getPermit.value.authStatus === PermitAuthorizationStatus.CANCELLED ||
-      getPermit.value.authStatus === PermitAuthorizationStatus.WITHDRAWN)
+    (getPermit.value.state === PermitState.CANCELLED || getPermit.value.state === PermitState.WITHDRAWN)
   );
 });
 

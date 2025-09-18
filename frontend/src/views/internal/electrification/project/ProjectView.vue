@@ -536,7 +536,7 @@ onBeforeMount(async () => {
             />
           </div>
         </div>
-        <!--Authorizations when its Status=Approved, Denied, Cancelled, Withdrawn OR Abandoned.-->
+        <!--Authorizations when its state=Approved, Denied, Cancelled, OR Withdrawn.-->
         <div
           v-if="getAuthsCompleted.length > 0"
           class="mb-8 mt-16"

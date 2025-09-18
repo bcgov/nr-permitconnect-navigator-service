@@ -232,8 +232,8 @@ async function onSubmit(values: any) {
         t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
       const trackingId =
         permit.permitTracking?.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
-      const authStatus = t('enquiryIntakeForm.authStatus') + ': ' + permit.authStatus;
-      permitDescription = permitDescription + trackingId + '\n' + authStatus + '\n\n';
+      const authState = t('enquiryIntakeForm.authStatus') + ': ' + permit.state;
+      permitDescription = permitDescription + trackingId + '\n' + authState + '\n\n';
       dataOmitted.basic.enquiryDescription = permitDescription + dataOmitted.basic.enquiryDescription;
       formRef.value?.setFieldValue('basic.enquiryDescription', dataOmitted.basic.enquiryDescription);
     }
@@ -320,7 +320,7 @@ onBeforeMount(async () => {
               <span class="text-primary">
                 {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
                 {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
-                {{ permit?.authStatus ?? 'No authorization status.' }}
+                {{ permit?.state ?? 'No authorization status.' }}
               </span>
             </span>
             <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
