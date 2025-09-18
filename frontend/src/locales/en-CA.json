@@ -592,6 +592,11 @@
       "updateNoteForProponent": "Update note for Proponent",
       "updateToToday": "Update to today"
     },
+    "authorizationTrackerCard": {
+      "byYourNavigator": "by your Navigator",
+      "statusLastVerified": "Status last verified on",
+      "statusNotVerified": "This status has not yet been verified."
+    },
     "requiredAuths": {
       "areNotNeeded": "are not needed. ",
       "isNotNeeded": "is not needed. ",
