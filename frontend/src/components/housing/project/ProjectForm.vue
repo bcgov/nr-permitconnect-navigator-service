@@ -87,7 +87,7 @@ const toast = useToast();
 const projectStore = useProjectStore();
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
@@ -131,7 +131,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-function initilizeFormValues(project: HousingProject) {
+function initializeFormValues(project: HousingProject) {
   const firstContact = project?.activity?.activityContact?.[0]?.contact;
 
   return {
@@ -432,7 +432,7 @@ const onSubmit = async (values: any) => {
     // Reinitialize the form
     formRef.value?.resetForm({
       values: {
-        ...initilizeFormValues(result.data)
+        ...initializeFormValues(result.data)
       }
     });
 
@@ -461,7 +461,7 @@ onBeforeMount(async () => {
   if (project.geoJson) geoJson.value = project.geoJson;
 
   // Default form values
-  initialFormValues.value = initilizeFormValues(project);
+  initialFormValues.value = initializeFormValues(project);
 });
 </script>
 
@@ -993,7 +993,7 @@ onBeforeMount(async () => {
           <Select
             class="col-span-3"
             name="consentToFeedback"
-            label="Research opt-in"
+            :label="t('i.housing.project.projectForm.researchOptin')"
             :disabled="!editable"
             :options="YES_NO_LIST"
           />
@@ -1015,7 +1015,7 @@ onBeforeMount(async () => {
       />
       <Button
         v-if="isCompleted"
-        label="Re-open submission"
+        :label="t('i.housing.project.projectForm.reopenSubmission')"
         icon="pi pi-check"
         @click="onReOpen()"
       />

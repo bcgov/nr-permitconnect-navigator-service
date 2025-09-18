@@ -318,6 +318,8 @@
           "projectNameLabel": "Project name",
           "projectStateLabel": "Project state",
           "relatedEnquiries": "Related enquiries",
+          "reopenSubmission": "Re-open submission",
+          "researchOptin": "Research opt-in",
           "submissionDate": "Submission date",
           "submissionStateHeader": "Submission state",
           "submissionTypeLabel": "Submission type",
