@@ -7,15 +7,17 @@ import { useRouter } from 'vue-router';
 import { object, string, mixed } from 'yup';
 
 import Divider from '@/components/common/Divider.vue';
+import Tooltip from '@/components/common/Tooltip.vue';
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Card, Message, ToggleSwitch, useConfirm, useToast } from '@/lib/primevue';
 import { noteHistoryService, userService } from '@/services';
-import { useAuthZStore, useCodeStore, useEnquiryStore, useProjectStore } from '@/store';
+import { useAuthZStore, useCodeStore, useConfigStore, useEnquiryStore, useProjectStore } from '@/store';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { GroupName, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
-import { projectRouteNameKey, resourceKey } from '@/utils/keys';
+import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
+import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '@/utils/templates';
 import { scrollToFirstError } from '@/utils/utils';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -30,6 +32,7 @@ const { editable, noteHistory = undefined } = defineProps<{
 
 // Injections
 const projectRouteName = inject(projectRouteNameKey);
+const projectService = inject(projectServiceKey);
 const resource = inject(resourceKey);
 
 // Constants
@@ -49,6 +52,7 @@ const toast = useToast();
 const { options } = useCodeStore();
 
 // Store
+const { getConfig } = storeToRefs(useConfigStore());
 const { getProject } = storeToRefs(projectStore);
 const { getEnquiry } = storeToRefs(enquiryStore);
 
@@ -170,6 +174,13 @@ async function onSubmit(data: any) {
         activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
         note: data.note
       });
+      if (
+        body.type === NoteType.BRING_FORWARD &&
+        body.escalateToSupervisor &&
+        !authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])
+      ) {
+        emailNotification();
+      }
     }
     toast.success(t('note.noteForm.noteSaved'));
     navigateToOrigin();
@@ -212,6 +223,37 @@ function navigateToOrigin() {
       }
     });
   }
+}
+
+async function emailNotification() {
+  const supervisors = (await userService.searchUsers({ group: [GroupName.SUPERVISOR] })).data;
+  const supervisorsEmails = supervisors.map((u: User) => u.email);
+
+  if (supervisorsEmails.length === 0) return;
+
+  const configCC = getConfig.value.ches?.submission?.cc;
+  let body: string;
+  if (resource?.value === Resource.ENQUIRY) {
+    body = bringForwardEnquiryNotificationTemplate({
+      '{{ activityId }}': getEnquiry.value?.activityId
+    });
+  } else {
+    body = bringForwardProjectNotificationTemplate({
+      '{{ projectName }}': getProject.value?.projectName,
+      '{{ activityId }}': getProject.value?.activityId
+    });
+  }
+
+  let emailData = {
+    from: configCC,
+    to: supervisorsEmails,
+    subject: t('note.noteForm.escalationEmailTitle'),
+    bodyType: 'html',
+    body: body
+  };
+
+  if (!projectService?.value) throw new Error('No service');
+  await projectService.value.emailConfirmation(emailData);
 }
 
 onBeforeMount(async () => {
@@ -274,11 +316,26 @@ onBeforeMount(async () => {
                 :disabled="!editable"
               />
             </div>
-
+            <div class="flex items-center">
+              <h6 class="font-bold text-[var(--p-bcblue-850)]">{{ t('note.noteForm.note') }}</h6>
+              <Tooltip
+                v-if="
+                  values.type === NoteType.BRING_FORWARD && (values.escalateToDirector || values.escalateToSupervisor)
+                "
+                class="pl-2"
+                right
+                icon="fa-solid fa-circle-question"
+                :text="t('note.noteForm.bfNoteHint')"
+              />
+            </div>
             <TextArea
               name="note"
-              label="Note"
               :disabled="!editable"
+              :placeholder="
+                values.type === NoteType.BRING_FORWARD && (values.escalateToDirector || values.escalateToSupervisor)
+                  ? t('note.noteForm.bfNoteHint')
+                  : ''
+              "
             />
           </div>
 
@@ -305,18 +362,18 @@ onBeforeMount(async () => {
                   class="grid grid-cols-1 gap-y-1"
                 >
                   <Checkbox
-                    v-if="authzStore.isInGroup([GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY])"
                     name="escalateToSupervisor"
                     :label="t('note.noteForm.escalateToSupervisor')"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="
+                      !editable || authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])
+                    "
                   />
                   <Checkbox
-                    v-if="authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])"
                     name="escalateToDirector"
                     :label="t('note.noteForm.escalateToDirector')"
                     :bold="false"
-                    :disabled="!editable"
+                    :disabled="!editable || authzStore.isInGroup([GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY])"
                   />
                   <DatePicker
                     v-if="values.type === NoteType.BRING_FORWARD"

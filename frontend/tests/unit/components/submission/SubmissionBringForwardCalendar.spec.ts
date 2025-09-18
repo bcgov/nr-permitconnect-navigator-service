@@ -24,13 +24,15 @@ const currentDate = new Date().toISOString();
 
 const bringForward: Array<BringForward> = [
   {
-    noteId: 'nodeUUID',
+    noteId: '327eda7d-3d4c-42e9-aa94-3de04cd23d55',
     housingProjectId: '123',
     title: 'test title',
     projectName: 'test project name',
     bringForwardDate: currentDate,
     createdByFullName: 'test full name',
-    activityId: 'activityUUID'
+    activityId: '3223F09C',
+    escalateToSupervisor: false,
+    escalateToDirector: false
   }
 ];
 

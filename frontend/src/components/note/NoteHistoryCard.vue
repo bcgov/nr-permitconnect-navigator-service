@@ -7,6 +7,7 @@ import { Button, Card, Divider } from '@/lib/primevue';
 import { userService } from '@/services';
 import { useAppStore, useCodeStore, useAuthZStore } from '@/store';
 import { Action, Resource } from '@/utils/enums/application';
+import { BringForwardType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
 import type { Ref } from 'vue';
@@ -94,9 +95,15 @@ onBeforeMount(() => {
         <StatusPill
           v-if="noteHistory.escalateToDirector || noteHistory.escalateToSupervisor"
           :status="t('note.noteHistoryCard.escalated')"
-          :bg-color="'var(--p-red-400)'"
+          :bg-color="
+            noteHistory.bringForwardState === BringForwardType.UNRESOLVED
+              ? 'var(--p-red-400)'
+              : 'var(--p-greyscale-600)'
+          "
           :icon="'fa-solid fa-exclamation'"
-          :content-color="'var(--p-red-50)'"
+          :content-color="
+            noteHistory.bringForwardState === BringForwardType.UNRESOLVED ? 'var(--p-red-50)' : 'var(--p-white)'
+          "
         />
       </div>
     </template>
