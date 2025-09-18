@@ -3020,7 +3020,8 @@ components:
         - permitId
         - activityId
         - permitTypeId
-        - status
+        - stage
+        - state
         - needed
         - updatedAt
         - updatedBy
@@ -3046,18 +3047,18 @@ components:
           type: string
           description: ID for tracking permit
           example: H7kidnhd948594
-        authStatus:
+        state:
           type: string
-          description: Status of authentication for the permit
-          example: Pending
+          description: State of the permit
+          example: In progress
         needed:
           type: string
           description: Whether permit is needed, or still uner investigation
           example: Under Investigation
-        status:
+        stage:
           type: string
-          description: Status of the permit
-          example: New
+          description: Stage of the permit
+          example: Application submission
         submittedDate:
           type: string
           description: Date the permit was submitted
@@ -3066,6 +3067,11 @@ components:
         adjudicationDate:
           type: string
           description: Date of the permit's adjudication
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
           format: date-time
           example: '2024-08-14T07:00:00.000Z'
         statusLastVerified:
@@ -3411,7 +3417,8 @@ components:
         - needed
         - permitType
         - permitTypeId
-        - status
+        - stage
+        - state
       properties:
         activityId:
           type: string
@@ -3427,23 +3434,28 @@ components:
           type: number
           description: ID for the associated permit type
           example: 1
-        status:
+        stage:
           type: string
-          description: Status of the permit
+          description: Stage of the permit
           example: New
         adjudicationDate:
           type: string
           description: Date of the permit's adjudication
           format: date-time
           example: '2024-08-14T07:00:00.000Z'
-        authStatus:
+        state:
           type: string
-          description: Status of authentication for the permit
+          description: State of the permit
           example: Pending
         issuedPermitId:
           type: string
           description: ID of the issued permit
           example: '123'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
         statusLastVerified:
           type: string
           description: Date of the last verified status of permit
@@ -4293,17 +4305,17 @@ components:
           type: string
           description: ID for tracking permit
           example: H7kidnhd948594
-        authStatus:
+        state:
           type: string
-          description: Status of authentication for the permit
+          description: State of the permit
           example: Pending
         needed:
           type: string
           description: Whether permit is needed, or still uner investigation
           example: Under Investigation
-        status:
+        stage:
           type: string
-          description: Status of the permit
+          description: Stage of the permit
           example: New
         submittedDate:
           type: string
@@ -4313,6 +4325,11 @@ components:
         adjudicationDate:
           type: string
           description: Date of the permit's adjudication
+          format: date-time
+          example: '2024-08-14T07:00:00.000Z'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
           format: date-time
           example: '2024-08-14T07:00:00.000Z'
         statusLastVerified:
