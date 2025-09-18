@@ -27,7 +27,7 @@ import {
 } from '../../../src/types';
 import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
 import { ProjectType } from '../../../src/utils/enums/electrification';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
+import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 import {
   ApplicationStatus,
   ContactPreference,
@@ -506,11 +506,12 @@ export const TEST_PERMIT_1: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.IN_REVIEW,
+  state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
-  status: PermitStatus.APPLIED,
+  stage: PermitStage.APPLICATION_SUBMISSION,
   submittedDate: new Date(),
   adjudicationDate: null,
+  statusLastChanged: null,
   statusLastVerified: null,
   createdAt: null,
   createdBy: null,
@@ -525,11 +526,12 @@ export const TEST_PERMIT_2: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.IN_REVIEW,
+  state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
-  status: PermitStatus.APPLIED,
+  stage: PermitStage.APPLICATION_SUBMISSION,
   submittedDate: new Date(),
   adjudicationDate: null,
+  statusLastChanged: null,
   statusLastVerified: null,
   createdAt: null,
   createdBy: null,
@@ -544,11 +546,12 @@ export const TEST_PERMIT_3: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.NONE,
+  state: PermitState.NONE,
   needed: PermitNeeded.UNDER_INVESTIGATION,
-  status: PermitStatus.NEW,
+  stage: PermitStage.PRE_SUBMISSION,
   submittedDate: null,
   adjudicationDate: null,
+  statusLastChanged: null,
   statusLastVerified: null,
   createdAt: null,
   createdBy: null,
