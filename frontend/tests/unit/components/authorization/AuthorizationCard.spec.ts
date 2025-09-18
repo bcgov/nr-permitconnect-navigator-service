@@ -1,12 +1,13 @@
 import { createTestingPinia } from '@pinia/testing';
-import { mount } from '@vue/test-utils';
-
-import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
-import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { mount } from '@vue/test-utils';
+
+import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
+import { StorageKey } from '@/utils/enums/application';
+import { PermitStage, PermitState } from '@/utils/enums/permit';
 
 import type { Permit, PermitType } from '@/types';
 
@@ -45,9 +46,9 @@ const testPermit: Permit = {
   permitId: 'permitUUID',
   activityId: 'activityUUID',
   needed: 'yes',
-  status: 'status',
+  stage: PermitStage.APPLICATION_SUBMISSION,
   issuedPermitId: 'issued Permit ID',
-  authStatus: 'test auth status',
+  state: PermitState.IN_PROGRESS,
   submittedDate: currentDate,
   adjudicationDate: currentDate,
   createdBy: 'testCreatedBy',

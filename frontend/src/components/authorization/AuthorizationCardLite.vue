@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/permit';
 
 import type { Permit } from '@/types';
 
@@ -27,11 +27,11 @@ const { t } = useI18n();
         <div class="flex items-center gap-5">
           <AuthorizationStatusPill
             v-if="
-              permit.authStatus !== PermitAuthorizationStatus.NONE &&
-              permit.authStatus !== PermitAuthorizationStatus.IN_REVIEW &&
-              permit.authStatus !== PermitAuthorizationStatus.PENDING
+              permit.state !== PermitState.NONE &&
+              permit.state !== PermitState.IN_PROGRESS &&
+              permit.state !== PermitState.PENDING_CLIENT
             "
-            :auth-status="permit.authStatus"
+            :state="permit.state"
           />
           <Button
             class="p-button-outlined size-fit"

@@ -32,11 +32,11 @@ const { t } = useI18n();
         <div class="col-span-12 flex mb-4">
           <AuthorizationStatusPill
             class="mr-2"
-            :auth-status="permit.authStatus"
+            :state="permit.state"
           />
           <StatusPill
             class="mr-2"
-            :status="permit.status"
+            :stage="permit.stage"
           />
           <div v-if="permit.statusLastVerified">
             <span class="label-verified mr-1">{{ t('authorization.authorizationCardProponent.statusVerified') }}</span>

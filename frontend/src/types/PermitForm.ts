@@ -4,11 +4,11 @@ export type PermitForm = {
   permitId?: string;
   permitType?: PermitType;
   needed?: string;
-  status?: string;
+  stage: string;
   agency?: string;
   trackingId?: string;
   businessDomain?: string;
-  authStatus?: string;
+  state: string;
   statusLastVerified?: Date;
   sourceSystem?: string;
   submittedDate?: Date;
