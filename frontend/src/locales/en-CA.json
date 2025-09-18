@@ -383,12 +383,9 @@
       "uponDecision": "Upon decision"
     },
     "authorizationStatusPill": {
-      "abandonedByClient": "Abandoned by client",
-      "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
-      "withdrawnByClient": "Withdrawn by client"
+      "cancelledByReviewingAuthority": "Cancelled by reviewing authority"
     },
     "authorizationStatusUpdatesCard": {
-      "abandonedByClient": "Abandoned by client",
       "applicationStage": "Application stage",
       "authorizationStatus": "Authorization status",
       "decisionDate": "Decision date",
@@ -398,8 +395,7 @@
       "statusVerifiedDate": "Status verified date",
       "submittedDate": "Submitted date",
       "updateNoteForProponent": "Update note for Proponent",
-      "updateToToday": "Update to today",
-      "withdrawnByClient": "Withdrawn by client"
+      "updateToToday": "Update to today"
     },
     "authorizationTrackerCard": {
       "byYourNavigator": "by your Navigator",

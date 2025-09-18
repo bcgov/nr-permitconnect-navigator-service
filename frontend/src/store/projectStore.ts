@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
 
 import type { Ref } from 'vue';
 import type { Document, ElectrificationProject, Enquiry, HousingProject, NoteHistory, Permit } from '@/types';
@@ -33,9 +33,8 @@ export const useProjectStore = defineStore('project', () => {
       state.permits.value
         .filter(
           (p) =>
-            [PermitAuthorizationStatus.IN_REVIEW, PermitAuthorizationStatus.PENDING].includes(
-              p.authStatus as PermitAuthorizationStatus
-            ) && ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
+            [PermitState.IN_PROGRESS, PermitState.PENDING_CLIENT].includes(p.state as PermitState) &&
+            ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
         )
         .sort(permitNameSortFcn)
     ),
@@ -44,34 +43,26 @@ export const useProjectStore = defineStore('project', () => {
         .filter(
           (p) =>
             p.needed === PermitNeeded.UNDER_INVESTIGATION &&
-            p.status === PermitStatus.NEW &&
-            p.authStatus === PermitAuthorizationStatus.NONE
+            p.stage === PermitStage.PRE_SUBMISSION &&
+            p.state === PermitState.NONE
         )
         .sort(permitNameSortFcn)
         .sort(permitBusinessSortFcn)
     ),
     getAuthsNeeded: computed(() => {
       return state.permits.value
-        .filter((p) => p.needed === PermitNeeded.YES && p.status === PermitStatus.NEW)
+        .filter((p) => p.needed === PermitNeeded.YES && p.stage === PermitStage.PRE_SUBMISSION)
         .sort(permitNameSortFcn)
         .sort(permitBusinessSortFcn);
     }),
     getAuthsCompleted: computed(() => {
       const authsCompleted = state.permits.value.filter(
         (p) =>
-          ![
-            PermitAuthorizationStatus.NONE,
-            PermitAuthorizationStatus.IN_REVIEW,
-            PermitAuthorizationStatus.PENDING
-          ].includes(p.authStatus as PermitAuthorizationStatus) &&
+          ![PermitState.NONE, PermitState.IN_PROGRESS, PermitState.PENDING_CLIENT].includes(p.state as PermitState) &&
           ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
       );
-      const authsIssued = authsCompleted
-        .filter((p) => p.authStatus === PermitAuthorizationStatus.ISSUED)
-        .sort(permitNameSortFcn);
-      const authsNotIssued = authsCompleted
-        .filter((p) => p.authStatus !== PermitAuthorizationStatus.ISSUED)
-        .sort(permitNameSortFcn);
+      const authsIssued = authsCompleted.filter((p) => p.state === PermitState.APPROVED).sort(permitNameSortFcn);
+      const authsNotIssued = authsCompleted.filter((p) => p.state !== PermitState.APPROVED).sort(permitNameSortFcn);
 
       return [...authsIssued, ...authsNotIssued];
     }),
@@ -85,8 +76,8 @@ export const useProjectStore = defineStore('project', () => {
       return state.permits.value
         .filter(
           (p) =>
-            p.authStatus !== PermitAuthorizationStatus.NONE &&
-            p.status !== PermitStatus.NEW &&
+            p.state !== PermitState.NONE &&
+            p.stage !== PermitStage.PRE_SUBMISSION &&
             ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
         )
         .sort(permitNameSortFcn)

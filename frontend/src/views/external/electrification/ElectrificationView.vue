@@ -10,7 +10,7 @@ import { Button, Paginator } from '@/lib/primevue';
 import { electrificationProjectService, permitService } from '@/services';
 import { useContactStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/permit';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
@@ -88,7 +88,7 @@ const displayedProjectsInOrder = computed(() => {
 
 const hasPendingAuth = computed(() => (activityId: string) => {
   return authorizations.value.some(
-    (auth) => auth.activityId === activityId && auth.authStatus === PermitAuthorizationStatus.PENDING
+    (auth) => auth.activityId === activityId && auth.state === PermitState.PENDING_CLIENT
   );
 });
 
@@ -246,7 +246,7 @@ onBeforeMount(async () => {
             <AuthorizationStatusPill
               v-if="hasPendingAuth(project.activityId)"
               class="my-1"
-              :auth-status="PermitAuthorizationStatus.PENDING"
+              :state="PermitState.PENDING_CLIENT"
               :display-text="t('e.electrification.electrificationView.pendingAuths')"
             />
           </div>

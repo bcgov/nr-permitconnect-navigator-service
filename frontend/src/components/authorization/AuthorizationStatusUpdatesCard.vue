@@ -3,8 +3,8 @@ import { useI18n } from 'vue-i18n';
 
 import { DatePicker, Select, TextArea } from '@/components/form';
 import { Panel } from '@/lib/primevue';
-import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
+import { PermitState } from '@/utils/enums/permit';
 
 // Props
 const { editable } = defineProps<{
@@ -17,10 +17,8 @@ const emit = defineEmits(['update:setVerifiedDate']);
 // Composables
 const { t } = useI18n();
 
-const authStatusDisplayText = {
-  [PermitAuthorizationStatus.ABANDONED]: t('authorization.authorizationStatusPill.abandonedByClient'),
-  [PermitAuthorizationStatus.WITHDRAWN]: t('authorization.authorizationStatusPill.withdrawnByClient'),
-  [PermitAuthorizationStatus.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+const stateDisplayText = {
+  [PermitState.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
 };
 </script>
 
@@ -52,10 +50,10 @@ const authStatusDisplayText = {
         </div>
         <div>
           <Select
-            name="authStatus"
+            name="state"
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
-            :options="PERMIT_AUTHORIZATION_STATUS_LIST"
-            :option-label="(option) => authStatusDisplayText[option as keyof typeof authStatusDisplayText] ?? option"
+            :options="PERMIT_STATE_LIST"
+            :option-label="(option) => stateDisplayText[option as keyof typeof stateDisplayText] ?? option"
             :disabled="!editable"
           />
         </div>
@@ -63,7 +61,7 @@ const authStatusDisplayText = {
           <Select
             name="status"
             :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
-            :options="PERMIT_STATUS_LIST"
+            :options="PERMIT_STAGE_LIST"
             :disabled="!editable"
           />
         </div>

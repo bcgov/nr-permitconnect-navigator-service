@@ -10,7 +10,7 @@ import {
 import * as permitService from '../../../src/services/permit';
 import { Initiative } from '../../../src/utils/enums/application';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
+import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 
 import type { Request, Response } from 'express';
 import type { ListPermitsOptions, Permit } from '../../../src/types';
@@ -171,9 +171,9 @@ describe('upsertPermitController', () => {
         activityId: '165E5F7F',
         issuedPermitId: '1',
         trackingId: '2',
-        authStatus: PermitAuthorizationStatus.IN_REVIEW,
+        state: PermitState.IN_PROGRESS,
         needed: PermitNeeded.YES,
-        status: PermitStatus.NEW,
+        stage: PermitStage.PRE_SUBMISSION,
         submittedDate: now,
         adjudicationDate: now
       },

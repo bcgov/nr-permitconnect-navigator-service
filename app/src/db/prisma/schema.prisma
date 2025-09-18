@@ -184,9 +184,9 @@ model permit {
   permitTypeId       Int               @map("permit_type_id")
   activityId         String            @map("activity_id")
   issuedPermitId     String?           @map("issued_permit_id")
-  authStatus         String?           @map("auth_status")
+  state              String
   needed             String?
-  status             String?
+  stage              String
   submittedDate      DateTime?         @map("submitted_date") @db.Timestamptz(6)
   adjudicationDate   DateTime?         @map("adjudication_date") @db.Timestamptz(6)
   createdBy          String?           @default("00000000-0000-0000-0000-000000000000") @map("created_by")
@@ -196,6 +196,7 @@ model permit {
   statusLastVerified DateTime?         @map("status_last_verified") @db.Timestamptz(6)
   deletedBy          String?           @map("deleted_by")
   deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  statusLastChanged  DateTime?         @map("status_last_changed") @db.Timestamptz(6)
   activity           activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   permitType         permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
   permitNote         permit_note[]
