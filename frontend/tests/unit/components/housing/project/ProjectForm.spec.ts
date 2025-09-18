@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { nextTick } from 'vue';
 
-import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
+import ProjectForm from '@/components/housing/project/ProjectForm.vue';
 import { mapService, userService } from '@/services';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { GroupName } from '@/utils/enums/application';
@@ -133,7 +133,7 @@ const testSubmission: HousingProject = {
 
 const wrapperSettings = (testSubmissionProp = testSubmission, editableProp = true) => ({
   props: {
-    housingProject: testSubmissionProp,
+    project: testSubmissionProp,
     editable: editableProp
   },
   global: {
@@ -154,31 +154,31 @@ const wrapperSettings = (testSubmissionProp = testSubmission, editableProp = tru
   }
 });
 
-describe('SubmissionForm.vue', () => {
+describe('ProjectForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     await nextTick();
 
     expect(wrapper).toBeTruthy();
   });
 
   it('renders the correct amount of dropdowns', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     // Note: <Form> component's v-if does not settle until after two nextTick() calls.
     // Both will be required if the DOM querying is required.
     await nextTick();
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(15);
+    expect(elements.length).toBe(16);
   });
 
   it('renders the correct amount of input components', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     await nextTick();
     await nextTick();
 
@@ -187,17 +187,8 @@ describe('SubmissionForm.vue', () => {
     expect(elements.length).toBe(16);
   });
 
-  it('renders the correct amount of datepickers components', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
-    await nextTick();
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-datepicker-input');
-    expect(elements.length).toBe(1);
-  });
-
   it('renders the correct amount of input mask components (phone number)', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     await nextTick();
     await nextTick();
 
@@ -206,17 +197,17 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('renders the correct amount of text area components', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     await nextTick();
     await nextTick();
 
     const elements = wrapper.findAll('textarea');
-    expect(elements.length).toBe(4);
+    expect(elements.length).toBe(3);
   });
 
   it('searches for users onMount', async () => {
     const mountSubmission = { ...testSubmission, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(SubmissionForm, wrapperSettings(mountSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(mountSubmission));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -225,8 +216,7 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('gets PIDs onMount', async () => {
-    // const mountSubmission = { ...testSubmission, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(SubmissionForm, wrapperSettings());
+    const wrapper = mount(ProjectForm, wrapperSettings());
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -235,19 +225,19 @@ describe('SubmissionForm.vue', () => {
   });
 
   it('there are correct numbers of disabled components when editable prop is false', async () => {
-    const wrapper = mount(SubmissionForm, wrapperSettings(undefined, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(undefined, false));
     await nextTick();
     await nextTick();
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(19);
+    expect(elements.length).toBe(20);
   });
 
   it('geojson download btn not visible when no geojson', async () => {
     const modifiedSubmission = { ...testSubmission, geoJson: undefined };
 
-    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
     await nextTick();
 
@@ -257,7 +247,7 @@ describe('SubmissionForm.vue', () => {
   it('geojson download btn visible when geojson is in submission', async () => {
     const modifiedSubmission = { ...testSubmission, geoJson: {} };
 
-    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
     await nextTick();
 
@@ -270,7 +260,7 @@ describe('SubmissionForm.vue', () => {
     const testGeoJson = { feature: 'POINT', data: 'test' };
     const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
 
-    const wrapper = mount(SubmissionForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
     await nextTick();
     await nextTick();
 
