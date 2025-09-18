@@ -1,22 +1,24 @@
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
-
-export const PERMIT_AUTHORIZATION_STATUS_LIST = [
-  PermitAuthorizationStatus.IN_REVIEW,
-  PermitAuthorizationStatus.PENDING,
-  PermitAuthorizationStatus.ISSUED,
-  PermitAuthorizationStatus.DENIED,
-  PermitAuthorizationStatus.CANCELLED,
-  PermitAuthorizationStatus.WITHDRAWN,
-  PermitAuthorizationStatus.ABANDONED,
-  PermitAuthorizationStatus.NONE
-];
+import { PermitState, PermitNeeded, PermitStage } from '@/utils/enums/permit';
 
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 
-export const PERMIT_STATUS_LIST = [
-  PermitStatus.NEW,
-  PermitStatus.APPLIED,
-  PermitStatus.TECHNICAL_REVIEW,
-  PermitStatus.PENDING,
-  PermitStatus.COMPLETED
+export const PERMIT_STAGE_LIST = [
+  PermitStage.PRE_SUBMISSION,
+  PermitStage.APPLICATION_SUBMISSION,
+  PermitStage.TECHNICAL_REVIEW,
+  PermitStage.PENDING_DECISION,
+  PermitStage.POST_DECISION
+];
+
+export const PERMIT_STATE_LIST = [
+  PermitState.INITIAL_REVIEW,
+  PermitState.PENDING_CLIENT,
+  PermitState.IN_PROGRESS,
+  PermitState.APPROVED,
+  PermitState.ISSUED,
+  PermitState.CANCELLED,
+  PermitState.DENIED,
+  PermitState.REJECTED,
+  PermitState.WITHDRAWN,
+  PermitState.NONE
 ];

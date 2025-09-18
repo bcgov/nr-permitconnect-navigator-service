@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
@@ -51,14 +51,14 @@ function toCopy(toCopy: string) {
     </template>
     <template #content>
       <div class="flex gap-2">
-        <span :class="{ 'pb-4': permit.authStatus !== PermitAuthorizationStatus.NONE }">
+        <span :class="permit.state !== PermitState.NONE ? 'pb-4' : ''">
           <AuthorizationStatusPill
-            v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-            :auth-status="permit.authStatus"
+            v-if="permit.state !== PermitState.NONE"
+            :state="permit.state"
           />
         </span>
         <StatusPill
-          :status="permit.status"
+          :stage="permit.stage"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />

@@ -4,14 +4,14 @@ import { computed } from 'vue';
 // Props
 const {
   enlarge = false,
-  status,
+  stage,
   bgColor,
   borderColor,
   icon,
   contentColor = '$app-pill-text'
 } = defineProps<{
   enlarge?: boolean;
-  status?: string;
+  stage?: string;
   bgColor?: string;
   borderColor?: string;
   icon?: string;
@@ -46,7 +46,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
         ...(bgColor ? { backgroundColor: `${bgColor}` } : {}),
         ...(borderColor ? { borderColor: `${borderColor}`, borderWidth: '0.1rem' } : { borderWidth: '0' })
       }"
-      :aria-label="status"
+      :aria-label="stage"
     >
       <font-awesome-icon
         v-if="icon"
@@ -54,7 +54,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
         :style="{ fontSize: dimensions.iconFontSize, color: `${contentColor}` }"
         class="mr-2"
       />
-      <span :style="{ color: `${contentColor}` }">{{ status }}</span>
+      <span :style="{ color: `${contentColor}` }">{{ stage }}</span>
     </div>
   </div>
 </template>

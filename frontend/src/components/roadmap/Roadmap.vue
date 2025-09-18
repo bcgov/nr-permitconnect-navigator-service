@@ -9,7 +9,7 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
-import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { roadmapTemplate } from '@/utils/templates';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
@@ -84,7 +84,7 @@ const confirmSubmit = (data: any) => {
 };
 
 function getPermitTypeNamesByStatus(status: string) {
-  return getPermits.value.filter((p) => p.status === status).map((p) => p.permitType.name);
+  return getPermits.value.filter((p) => p.stage === status).map((p) => p.permitType.name);
 }
 
 function getPermitTypeNamesByNeeded(needed: string) {
@@ -124,14 +124,14 @@ watchEffect(async () => {
   }
 
   // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+  const permitStateNew = getPermitTypeNamesByStatus(PermitStage.PRE_SUBMISSION).filter((value) =>
     getPermitTypeNamesByNeeded(PermitNeeded.YES).includes(value)
   );
-  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PermitStatus.NEW).filter((value) =>
+  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PermitStage.PRE_SUBMISSION).filter((value) =>
     getPermitTypeNamesByNeeded(PermitNeeded.UNDER_INVESTIGATION).includes(value)
   );
-  const permitStateApplied = getPermitTypeNamesByStatus(PermitStatus.APPLIED);
-  const permitStateCompleted = getPermitTypeNamesByStatus(PermitStatus.COMPLETED);
+  const permitStateApplied = getPermitTypeNamesByStatus(PermitStage.APPLICATION_SUBMISSION);
+  const permitStateCompleted = getPermitTypeNamesByStatus(PermitStage.POST_DECISION);
 
   // TODO: Remove nullish coalescing operator when prisma db has mappings for housing projects
   const contact = project?.activity?.activityContact?.[0]?.contact ?? project?.contacts?.[0];

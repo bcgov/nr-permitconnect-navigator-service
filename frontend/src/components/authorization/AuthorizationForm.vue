@@ -13,8 +13,8 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
-import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
+import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
@@ -80,8 +80,8 @@ async function onSubmit(data: any) {
         note: permitNote
       });
 
-      // Send email to the user if permit is needed or if permit status is new
-      if (data.needed === PermitNeeded.YES || data.status !== PermitStatus.NEW) emailNotification(data);
+      // Send email to the user if permit is needed or if permit stage is new
+      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(data);
     }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
@@ -158,12 +158,12 @@ function onDelete() {
 
 const formSchema = object({
   permitNote: string()
-    .when('status', {
-      is: (status: string) => status !== initialFormValues.value?.status,
+    .when('stage', {
+      is: (stage: string) => stage !== initialFormValues.value?.stage,
       then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
     })
-    .when('authStatus', {
-      is: (authStatus: string) => authStatus !== initialFormValues.value?.authStatus,
+    .when('state', {
+      is: (state: string) => state !== initialFormValues.value?.state,
       then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
     }),
   authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
@@ -172,13 +172,13 @@ const formSchema = object({
     .oneOf(PERMIT_NEEDED_LIST)
     .label(t('authorization.authorizationForm.needed'))
     .test('valid-needed', t('authorization.authorizationForm.neededCondition'), function (value) {
-      const { authStatus } = this.parent;
+      const { state } = this.parent;
       return (
-        (value === PermitNeeded.UNDER_INVESTIGATION && authStatus === PermitAuthorizationStatus.NONE) ||
+        (value === PermitNeeded.UNDER_INVESTIGATION && state === PermitState.NONE) ||
         value !== PermitNeeded.UNDER_INVESTIGATION
       );
     }),
-  status: string().required().oneOf(PERMIT_STATUS_LIST).label(t('authorization.authorizationForm.applicationStage')),
+  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
   permitTracking: array().of(
     object({
       sourceSystemKindId: number().required().label(t('authorization.authorizationForm.trackingIdType')),
@@ -189,20 +189,20 @@ const formSchema = object({
         .label(t('authorization.authorizationForm.shownToProponent'))
     })
   ),
-  authStatus: string()
+  state: string()
     .required()
-    .oneOf(PERMIT_AUTHORIZATION_STATUS_LIST)
+    .oneOf(PERMIT_STATE_LIST)
     .label(t('authorization.authorizationForm.authorizationStatus'))
-    .test('valid-auth-status', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
-      const { status } = this.parent;
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
+      const { stage } = this.parent;
       return (
-        (status === PermitStatus.NEW && value === PermitAuthorizationStatus.NONE) ||
-        (status !== PermitStatus.NEW && value !== PermitAuthorizationStatus.NONE)
+        (stage === PermitStage.PRE_SUBMISSION && value === PermitState.NONE) ||
+        (stage !== PermitStage.PRE_SUBMISSION && value !== PermitState.NONE)
       );
     })
-    .test('valid-auth-status', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
-      const { status } = this.parent;
-      return status !== PermitStatus.COMPLETED || value !== PermitAuthorizationStatus.IN_REVIEW;
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
+      const { stage } = this.parent;
+      return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
     }),
   submittedDate: date()
     .max(new Date(), t('authorization.authorizationForm.submittedDateFutureError'))
@@ -226,9 +226,10 @@ function initializeFormValues() {
         return tracking;
       }),
       issuedPermitId: authorization.issuedPermitId,
+      statusLastChanged: authorization.statusLastChanged ? new Date(authorization.statusLastChanged) : null,
       statusLastVerified: authorization.statusLastVerified ? new Date(authorization.statusLastVerified) : null,
-      authStatus: authorization.authStatus,
-      status: authorization.status,
+      stage: authorization.stage,
+      state: authorization.state,
       needed: authorization.needed,
       permitId: authorization?.permitId,
       createdAt: authorization.createdAt,
@@ -239,8 +240,8 @@ function initializeFormValues() {
   } else {
     // Set default values
     initialFormValues.value = {
-      authStatus: PermitAuthorizationStatus.NONE,
-      status: PermitStatus.NEW
+      state: PermitState.NONE,
+      stage: PermitStage.PRE_SUBMISSION
     };
   }
 }
