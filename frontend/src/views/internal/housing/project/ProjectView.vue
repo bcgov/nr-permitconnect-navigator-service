@@ -10,10 +10,10 @@ import AuthorizationCardLite from '@/components/authorization/AuthorizationCardL
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
+import ProjectForm from '@/components/housing/project/ProjectForm.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
-import SubmissionForm from '@/components/housing/submission/SubmissionForm.vue';
 import {
   Button,
   Column,
@@ -88,6 +88,7 @@ const {
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
+const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 const gridView: Ref<boolean> = ref(false);
@@ -158,6 +159,9 @@ function toEditNote(noteHistoryId: string) {
   });
 }
 
+function updateLiveName(name: string) {
+  liveName.value = name;
+}
 onBeforeMount(async () => {
   const project = (await housingProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
@@ -181,6 +185,8 @@ onBeforeMount(async () => {
   projectStore.setNoteHistory(notes);
   projectStore.setPermits(permits);
   projectStore.setRelatedEnquiries(relatedEnquiries);
+
+  liveName.value = project.projectName;
 
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(Initiative.HOUSING)).data;
@@ -213,8 +219,8 @@ onBeforeMount(async () => {
 <template>
   <div class="flex items-center justify-between">
     <h1>
-      <span v-if="getProject?.projectName">
-        <span class="ml-1">{{ getProject.projectName + ': ' }}</span>
+      <span v-if="liveName">
+        <span class="ml-1">{{ liveName + ': ' }}</span>
       </span>
       <span
         v-if="getProject?.activityId"
@@ -257,9 +263,10 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
-          <SubmissionForm
+          <ProjectForm
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
-            :housing-project="getProject as HousingProject"
+            :project="getProject as HousingProject"
+            @input-project-name="updateLiveName"
           />
         </span>
       </TabPanel>
