@@ -5,6 +5,7 @@ import { validate } from '../middleware/validation';
 import { permitTrackingSchema } from './permitTracking';
 import { permitTypeSchema } from './permitType';
 import { createStamps } from './stamps';
+import { PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '../utils/constants/permit';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
@@ -13,10 +14,17 @@ const sharedPermitSchema = {
   activityId: activityId,
   issuedPermitId: Joi.string().allow(null),
   permitTracking: permitTrackingSchema,
-  authStatus: Joi.string().max(255).allow(null),
+  state: Joi.string()
+    .max(255)
+    .required()
+    .valid(...PERMIT_STATE_LIST),
+  statusLastChanged: Joi.date().iso().max('now').allow(null),
   statusLastVerified: Joi.date().iso().max('now').allow(null),
   needed: Joi.string().max(255).required(),
-  status: Joi.string().max(255).required(),
+  stage: Joi.string()
+    .max(255)
+    .required()
+    .valid(...PERMIT_STAGE_LIST),
   submittedDate: Joi.date().iso().max('now'),
   adjudicationDate: Joi.date().iso().max('now'),
   ...createStamps
