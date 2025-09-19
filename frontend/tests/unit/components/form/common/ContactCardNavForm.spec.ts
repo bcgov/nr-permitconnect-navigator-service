@@ -8,7 +8,7 @@ vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: vi.fn() }) }));
 const wrapperSettingsCard = () => ({
   props: {
     editable: true,
-    initialFormValues: {
+    formValues: {
       contact: {
         firstName: 'John',
         lastName: 'Doe',
