@@ -424,7 +424,7 @@ onBeforeMount(async () => {
         </div>
         <ContactCardNavForm
           :editable="editable"
-          :initial-form-values="initialFormValues"
+          :form-values="initialFormValues"
           @contact-card-nav-form:pick="
             (contact: Contact) => {
               setBasicInfo(contact);
